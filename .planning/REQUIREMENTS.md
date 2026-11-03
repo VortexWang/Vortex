@@ -95,20 +95,20 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [ ] **ENG-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (482-482; SHA-256 recorded there).
 - [ ] **ENG-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (490-490; SHA-256 recorded there).
 - [ ] **ENG-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (491-491; SHA-256 recorded there).
-- [ ] **ENG-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (492-492; SHA-256 recorded there).
-- [ ] **ENG-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (493-493; SHA-256 recorded there).
-- [ ] **ENG-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (494-494; SHA-256 recorded there).
-- [ ] **ENG-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (495-495; SHA-256 recorded there).
-- [ ] **ENG-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (496-496; SHA-256 recorded there).
-- [ ] **ENG-017**: See exact original requirement in REQUIREMENTS-SOURCE.md (497-497; SHA-256 recorded there).
-- [ ] **ENG-018**: See exact original requirement in REQUIREMENTS-SOURCE.md (498-498; SHA-256 recorded there).
-- [ ] **ENG-019**: See exact original requirement in REQUIREMENTS-SOURCE.md (499-499; SHA-256 recorded there).
-- [ ] **ENG-020**: See exact original requirement in REQUIREMENTS-SOURCE.md (505-505; SHA-256 recorded there).
-- [ ] **ENG-021**: See exact original requirement in REQUIREMENTS-SOURCE.md (506-506; SHA-256 recorded there).
-- [ ] **ENG-022**: See exact original requirement in REQUIREMENTS-SOURCE.md (507-507; SHA-256 recorded there).
-- [ ] **ENG-023**: See exact original requirement in REQUIREMENTS-SOURCE.md (508-508; SHA-256 recorded there).
-- [ ] **ENG-024**: See exact original requirement in REQUIREMENTS-SOURCE.md (514-514; SHA-256 recorded there).
-- [ ] **ENG-025**: See exact original requirement in REQUIREMENTS-SOURCE.md (515-515; SHA-256 recorded there).
+- [x] **ENG-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (492-492; SHA-256 recorded there).
+- [x] **ENG-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (493-493; SHA-256 recorded there).
+- [x] **ENG-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (494-494; SHA-256 recorded there).
+- [x] **ENG-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (495-495; SHA-256 recorded there).
+- [x] **ENG-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (496-496; SHA-256 recorded there).
+- [x] **ENG-017**: See exact original requirement in REQUIREMENTS-SOURCE.md (497-497; SHA-256 recorded there).
+- [x] **ENG-018**: See exact original requirement in REQUIREMENTS-SOURCE.md (498-498; SHA-256 recorded there).
+- [x] **ENG-019**: See exact original requirement in REQUIREMENTS-SOURCE.md (499-499; SHA-256 recorded there).
+- [x] **ENG-020**: See exact original requirement in REQUIREMENTS-SOURCE.md (505-505; SHA-256 recorded there).
+- [x] **ENG-021**: See exact original requirement in REQUIREMENTS-SOURCE.md (506-506; SHA-256 recorded there).
+- [x] **ENG-022**: See exact original requirement in REQUIREMENTS-SOURCE.md (507-507; SHA-256 recorded there).
+- [x] **ENG-023**: See exact original requirement in REQUIREMENTS-SOURCE.md (508-508; SHA-256 recorded there).
+- [x] **ENG-024**: See exact original requirement in REQUIREMENTS-SOURCE.md (514-514; SHA-256 recorded there).
+- [x] **ENG-025**: See exact original requirement in REQUIREMENTS-SOURCE.md (515-515; SHA-256 recorded there).
 - [ ] **ENG-026**: See exact original requirement in REQUIREMENTS-SOURCE.md (516-516; SHA-256 recorded there).
 - [ ] **ENG-027**: See exact original requirement in REQUIREMENTS-SOURCE.md (517-517; SHA-256 recorded there).
 - [ ] **ENG-049**: See exact original requirement in REQUIREMENTS-SOURCE.md (518-518; SHA-256 recorded there).
@@ -256,12 +256,12 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 ## NFR Requirements
 
 - [ ] **NFR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (848-848; SHA-256 recorded there).
-- [ ] **NFR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (849-849; SHA-256 recorded there).
+- [x] **NFR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (849-849; SHA-256 recorded there).
 - [ ] **NFR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (850-850; SHA-256 recorded there).
-- [ ] **NFR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (851-851; SHA-256 recorded there).
+- [x] **NFR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (851-851; SHA-256 recorded there).
 - [ ] **NFR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (854-854; SHA-256 recorded there).
 - [ ] **NFR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (855-855; SHA-256 recorded there).
-- [ ] **NFR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (856-856; SHA-256 recorded there).
+- [x] **NFR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (856-856; SHA-256 recorded there).
 - [ ] **NFR-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (864-864; SHA-256 recorded there).
 - [ ] **NFR-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (865-865; SHA-256 recorded there).
 - [ ] **NFR-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (866-866; SHA-256 recorded there).
@@ -422,20 +422,20 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | ENG-009 | Phase 2 | Pending |
 | ENG-010 | Phase 2 | Pending |
 | ENG-011 | Phase 2 | Pending |
-| ENG-012 | Phase 3 | Pending |
-| ENG-013 | Phase 3 | Pending |
-| ENG-014 | Phase 3 | Pending |
-| ENG-015 | Phase 3 | Pending |
-| ENG-016 | Phase 3 | Pending |
-| ENG-017 | Phase 3 | Pending |
-| ENG-018 | Phase 3 | Pending |
-| ENG-019 | Phase 3 | Pending |
-| ENG-020 | Phase 3 | Pending |
-| ENG-021 | Phase 3 | Pending |
-| ENG-022 | Phase 3 | Pending |
-| ENG-023 | Phase 3 | Pending |
-| ENG-024 | Phase 3 | Pending |
-| ENG-025 | Phase 3 | Pending |
+| ENG-012 | Phase 3 | Complete |
+| ENG-013 | Phase 3 | Complete |
+| ENG-014 | Phase 3 | Complete |
+| ENG-015 | Phase 3 | Complete |
+| ENG-016 | Phase 3 | Complete |
+| ENG-017 | Phase 3 | Complete |
+| ENG-018 | Phase 3 | Complete |
+| ENG-019 | Phase 3 | Complete |
+| ENG-020 | Phase 3 | Complete |
+| ENG-021 | Phase 3 | Complete |
+| ENG-022 | Phase 3 | Complete |
+| ENG-023 | Phase 3 | Complete |
+| ENG-024 | Phase 3 | Complete |
+| ENG-025 | Phase 3 | Complete |
 | ENG-026 | Phase 4 | Pending |
 | ENG-027 | Phase 4 | Pending |
 | ENG-049 | Phase 4 | Pending |
@@ -556,12 +556,12 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | SEC-009 | Phase 7 | Pending |
 | SEC-010 | Phase 7 | Pending |
 | NFR-001 | Phase 2 | Pending |
-| NFR-002 | Phase 3 | Pending |
+| NFR-002 | Phase 3 | Complete |
 | NFR-003 | Phase 4 | Pending |
-| NFR-004 | Phase 3 | Pending |
+| NFR-004 | Phase 3 | Complete |
 | NFR-005 | Phase 4 | Pending |
 | NFR-006 | Phase 4 | Pending |
-| NFR-007 | Phase 3 | Pending |
+| NFR-007 | Phase 3 | Complete |
 | NFR-008 | Phase 8 | Pending |
 | NFR-009 | Phase 8 | Pending |
 | NFR-010 | Phase 8 | Pending |

@@ -1,0 +1,27 @@
+goos: darwin
+goarch: arm64
+pkg: vortex/engine/vlink
+cpu: Apple M4
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  34542357 ns/op	1942.80 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  43843929 ns/op	1530.63 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  38593262 ns/op	1738.88 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  35788083 ns/op	1875.17 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  34935982 ns/op	1920.91 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  49575125 ns/op	1353.68 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  38929679 ns/op	1723.85 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  32847107 ns/op	2043.07 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  29124976 ns/op	2304.17 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  69204000 ns/op	 969.73 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  80150583 ns/op	 837.28 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  63046310 ns/op	1064.44 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  57796429 ns/op	1161.12 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  53621661 ns/op	1251.53 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  53752220 ns/op	1248.49 MB/s
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     85679 ns/op	        45.00 median-extra-us	        84.00 median-first-byte-us	        38.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     77434 ns/op	        38.00 median-extra-us	        75.00 median-first-byte-us	        37.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     75881 ns/op	        39.00 median-extra-us	        77.00 median-first-byte-us	        37.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     77673 ns/op	        39.00 median-extra-us	        75.00 median-first-byte-us	        36.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     76512 ns/op	        35.00 median-extra-us	        72.00 median-first-byte-us	        36.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     76095 ns/op	        39.00 median-extra-us	        75.00 median-first-byte-us	        36.00 median-rtt-sum-us
+PASS
+ok  	vortex/engine/vlink	6.291s

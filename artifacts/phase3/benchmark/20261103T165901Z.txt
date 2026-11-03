@@ -1,0 +1,57 @@
+status: measured
+qualification: numeric candidate measurements; full system acceptance requires approved path topology and workload
+commit: d9622989cee40331af9c7634f8981027b7ca51b6
+worktree: clean
+architecture: arm64
+docker_os: OrbStack
+kernel: 25.6.0
+virtualization: unknown
+cpu_summary: Apple M4
+cpu_count: 10
+memory_kib: 17179869184
+go_version: go version go1.27.3 darwin/arm64
+topology: loopback TCP pairs; measured path does not include external network hops
+workload: single 64 MiB tracer or Mux transfer per sample; production accounting gate disabled
+benchmark: go test ./vlink -run '^$' -bench '^BenchmarkVLink(TCPThroughput|FirstByte)$' -benchtime=7x -count=3
+NFR-002 forward_mbps: 13911.04
+NFR-002 baseline_mbps: 16344.56
+NFR-002 tunnel_to_baseline_percent: 85.11
+NFR-002 measured_status: candidate-pass
+transfer_direction_delta_percent: 7.84
+NFR-004 forward_established_mbps: 7757.84
+NFR-004 reverse_established_mbps: 9987.92
+NFR-004 direction_delta_percent: 28.75
+NFR-004 measured_status: candidate-fail
+transfer_direction_delta_percent: 7.84 (diagnostic only; one forward-established link)
+NFR-007 mux_median_extra_us: 39.00
+NFR-007 mux_measured_status: candidate-pass
+NFR-007 pool_median_extra_us: 39.00
+NFR-007 pool_measured_status: candidate-pass
+goos: darwin
+goarch: arm64
+pkg: vortex/engine/vlink
+cpu: Apple M4
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  34542357 ns/op	1942.80 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  43843929 ns/op	1530.63 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-10         	       7	  38593262 ns/op	1738.88 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  35788083 ns/op	1875.17 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  34935982 ns/op	1920.91 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-10         	       7	  49575125 ns/op	1353.68 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  38929679 ns/op	1723.85 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  32847107 ns/op	2043.07 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-10                 	       7	  29124976 ns/op	2304.17 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  69204000 ns/op	 969.73 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  80150583 ns/op	 837.28 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-10            	       7	  63046310 ns/op	1064.44 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  57796429 ns/op	1161.12 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  53621661 ns/op	1251.53 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-10         	       7	  53752220 ns/op	1248.49 MB/s
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     85679 ns/op	        45.00 median-extra-us	        84.00 median-first-byte-us	        38.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     77434 ns/op	        38.00 median-extra-us	        75.00 median-first-byte-us	        37.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-10                                       	       7	     75881 ns/op	        39.00 median-extra-us	        77.00 median-first-byte-us	        37.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     77673 ns/op	        39.00 median-extra-us	        75.00 median-first-byte-us	        36.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     76512 ns/op	        35.00 median-extra-us	        72.00 median-first-byte-us	        36.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-10                            	       7	     76095 ns/op	        39.00 median-extra-us	        75.00 median-first-byte-us	        36.00 median-rtt-sum-us
+PASS
+ok  	vortex/engine/vlink	6.291s
+benchmark_status: passed

@@ -64,7 +64,7 @@
 2. TLS 1.3 链路、mux/pool、多路双向隧道和反向建链在自动化拓扑中可运行，链路断开后资源回收且不重复执行授权。
 3. 每条会话执行段许可和目标限制；UDP 开流遵循规格认证流程，不存在绕过 OPEN/许可的 DGRAM 通路。
 4. 正向隧道与反向隧道分别达到 NFR-002、NFR-004；pool 与 mux 的首包额外等待分别测量并满足 NFR-007。
-**Plans**: 6 plans in 5 waves; ready to execute after research, validation strategy, decision coverage, and plan review.
+**Plans**: 6/6 plans complete in 5 waves; ready to execute after research, validation strategy, decision coverage, and plan review.
 **Wave 1**
 - [x] 03-01-PLAN.md — Freeze VLink v1 codec and authenticated TCP tracer
 
@@ -150,7 +150,7 @@
 |-------|----------------|--------|-----------|
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 6/6 | In progress | - |
-| 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 6f02115 |
+| 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
