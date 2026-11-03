@@ -1,0 +1,10 @@
+status: environment-limited
+reason: Docker smoke is not dedicated hardware NFR qualification.
+commit: 7a34cb8fabf485fc93ab72fb7988a63ea2284555
+worktree: dirty
+architecture: aarch64
+docker_os: OrbStack
+forward_throughput_mbps: unmeasured
+reverse_delta_percent: unqualified
+first_packet_pool_ms: unqualified
+first_packet_mux_ms: unqualified
