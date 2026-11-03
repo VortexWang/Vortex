@@ -1,6 +1,6 @@
 ---
 phase: 02-m0-m0-engine-dataplane
-verified: 2026-11-03T17:24:58Z
+verified: 2026-11-03T17:33:44Z
 status: passed
 score: 4/4 must-haves verified
 covered_files:
@@ -150,9 +150,9 @@ None. Phase 2 UAT records 4/4 user-confirmed behaviors with 0 issues. Dedicated 
 
 ### Verification Evidence
 
-- Current HEAD `41ae509e8ed41c982ff03810c9057dc60a396485`: `make phase2-engine-check` passed locally. Native Go race tests passed; the Linux arm64 scratch container ran splice, TCP, UDP, gate, and accounting tests. Phase 1 regression discovery passed 10 tests.
+- Current HEAD `13093755787afe99c719bf1fde5a4f8417e46825`: `make phase2-engine-check` passed locally on OrbStack Linux arm64. Native Go race tests passed; the Linux scratch container ran splice, TCP, UDP, gate, and accounting tests. Phase 1 regression discovery passed 10 tests.
 - GitHub Actions run 41615021796 passed `make phase2-engine-check` and benchmark smoke on `b59565459db046c5f7b709d63bdd9a9c82c2ed08`. Since that run, the only Phase 2 entry-file change is additive Phase 3 target declarations in `Makefile`; the `phase2-engine-check` and `phase2-benchmark-smoke` recipes are unchanged. The current commit has not yet run in Actions; this report does not claim otherwise.
-- After Phase 2 completion was committed, push run [41684319179](https://github.com/VortexWang/Vortex/actions/runs/41684319179) passed both Phase 2 shared checks on SHA `75d66a7823fde6b743745daffb9cf9f607d137df` (Ubuntu 24.04 amd64). Phase 3 run [41684319209](https://github.com/VortexWang/Vortex/actions/runs/41684319209) also passed on that SHA. These runs exercise the same Phase 2 source and Makefile recipes; subsequent changes to this report are documentation-only.
+- Exact same-commit dual-host evidence: local `make phase2-engine-check` passed on OrbStack Linux arm64, and Actions run [41685047049](https://github.com/VortexWang/Vortex/actions/runs/41685047049) passed `make phase2-engine-check` plus benchmark smoke on SHA `13093755787afe99c719bf1fde5a4f8417e46825` (Ubuntu 24.04 amd64). Phase 3 run [41685047145](https://github.com/VortexWang/Vortex/actions/runs/41685047145) was also triggered on that SHA; its completion is not required for Phase 2 verification.
 - `go list -m all` returned only `vortex/engine`.
 - Benchmark evidence: `artifacts/phase2/benchmark/20261103T095609Z.txt`; status `environment-limited`, not qualified throughput acceptance.
 - UAT: 4 passed, 0 issues, 0 pending in `02-UAT.md`.
