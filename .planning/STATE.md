@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 2 (M0 引擎数据面) — EXECUTING
-Plan: 4 of 6 complete; Plan 02-05 implementation complete pending Actions
-Status: Phase 1 passed for M0 entry; initial TCP, Linux splice, UDP, bounded-admission, and injected accounting slices have passed local checks. Phase 2 remains open for Actions confirmation and benchmark evidence.
-Last activity: 2026-11-03 — Plan 02-05 passed local race, vet, and Docker checks; same-commit Actions confirmation is pending.
+Plan: 5 of 6 complete; Plan 02-06 next
+Status: Phase 1 passed for M0 entry; initial TCP, Linux splice, UDP, bounded-admission, and injected accounting slices passed same-commit local Docker and Actions checks. Phase 2 remains open for benchmark and integration evidence.
+Last activity: 2026-11-03 — Plan 02-05 passed local race, vet, Docker, and Actions checks on SHA `213c0d8`.
 
 Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 

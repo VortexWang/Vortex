@@ -1,7 +1,7 @@
 ---
 phase: 02-m0-m0-engine-dataplane
 plan: 05
-status: implementation-complete-pending-actions
+status: complete
 completed: 2026-11-03
 requirements: [ENG-003, ENG-004, ENG-005, ENG-009, ENG-010, ENG-011]
 ---
@@ -22,7 +22,8 @@ requirements: [ENG-003, ENG-004, ENG-005, ENG-009, ENG-010, ENG-011]
 - `cd engine && go test -race ./...` — passed.
 - `cd engine && go vet ./...` — passed.
 - `make phase2-engine-check` — passed locally, including both Linux scratch test binaries.
-- Same-commit Actions result is pending after push.
+- Same-commit `make phase2-engine-check` in GitHub Actions passed on SHA `213c0d83674686cc07eb7dc3b9d6d3db2560a6c8`; [run 41613449912](https://github.com/VortexWang/Vortex/actions/runs/41613449912).
+- Phase 1 regression workflow also passed on that commit; [run 41613449906](https://github.com/VortexWang/Vortex/actions/runs/41613449906).
 
 ## Boundary
 

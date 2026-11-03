@@ -48,7 +48,7 @@ verification_mode: inline-no-subagents
 |---|---|---|---|
 | 1 | Engine is an independently testable Go module with the formal in-process integration boundary and runnable direct-forwarding entry needed by its consumers. | PARTIAL | The standalone `engine` module and relay package build and test. Current work delivers relay primitives; the complete integration boundary and product runnable entry are not verified by the current artifacts. |
 | 2 | TCP forwarding preserves half-close and cancellation semantics, and Linux bare TCP selects the splice path. | VERIFIED | Automated coverage is recorded in `02-VALIDATION.md`; all four user UAT checks passed, including half-close, splice, UDP isolation, and UDP expiry/cancellation. Local and Actions Engine checks passed on SHA `88d59c220c536601ff22b9a5762362c6553e8a14` (Actions run 41604182140). |
-| 3 | UDP sessions, gates, rate/connection limits, and usage batches enforce successful-write accounting and exactly-once commit/return behavior. | NOT VERIFIED | UDP routing, response isolation, timeout, cleanup, and bounded global/per-source-IP admission are tested. Gate/rate/connection controls and reservation/usage-batch semantics remain unimplemented. The former unbounded-session threat is closed by Plan 02-04; see `02-SECURITY.md`. |
+| 3 | UDP sessions, gates, rate/connection limits, and usage batches enforce successful-write accounting and exactly-once commit/return behavior. | PARTIAL | Bounded UDP admission and injected Gate/Session/Batch behavior are covered by race-tested successful-write, short-write, denial, return, and unknown-outcome cases. The Engine intentionally does not provide durable quota/rate policy; authoritative Gate/Resolver adapters remain to be implemented by their owning runtime. The UDP resource threat is closed by Plan 02-04. |
 | 4 | A Linux direct-forwarding benchmark is attempted and its environment, command, raw result, and gap to 700 Mbps are retained. | NOT VERIFIED | The benchmark has not been run. This is an explicit development target; a miss or constrained environment does not alone block continued correctness work. |
 
 ## UAT
@@ -61,14 +61,15 @@ verification_mode: inline-no-subagents
 - Phase 1 regression command `make phase1-release-gate` passed in the current local environment. The worktree was dirty, so this is not recorded as clean same-commit dual-host evidence.
 - User UAT confirmations: 4 passed, 0 issues, recorded in `02-UAT.md`.
 - Plan 02-04 bounded UDP admission passed local `make phase2-engine-check` and the same command on Actions run 41611109213, both on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d`.
+- Plan 02-05 injected gate and usage-batch behavior passed local race, vet, Docker, and same-commit Actions checks on SHA `213c0d83674686cc07eb7dc3b9d6d3db2560a6c8` (run 41613449912).
 - Code review: `02-REVIEW.md`, 1 critical and 1 warning finding.
 - Security review: `02-SECURITY.md`, the high-severity UDP admission threat is closed; accounting boundary warning remains for Plan 02-05.
 - 700 Mbps benchmark: not run; no performance claim is made.
 
 ## Gaps To Close
 
-1. Define and implement gate, rate/connection limit, and usage reservation/batch boundaries; test successful-write accounting, retries, and exactly-once commit or return under failures (Plan 02-05).
-2. Finish and verify the Engine consumer integration contract and runnable entry required by the phase goal.
+1. Finish and verify the Engine consumer integration contract and runnable entry required by the phase goal.
+2. Implement authoritative Gate/Resolver policy adapters when the owning runtime is introduced; the Engine's injected contract and call ordering are tested, but persistence is outside this module.
 3. Run the documented Linux benchmark when a suitable environment is available; retain raw evidence and measured distance from 700 Mbps (Plan 02-06). A missed target alone is not a progress blocker.
 
 ## Requirements Coverage
@@ -77,7 +78,7 @@ verification_mode: inline-no-subagents
 |---|---|---|
 | Direct TCP forwarding, half-close, cancellation, Linux splice | VERIFIED for tested behaviors | See validation strategy and UAT; no throughput claim. |
 | Direct UDP routing, response isolation, idle expiry, cancellation | VERIFIED for tested behaviors | Resource admission is not bounded and remains a security gap. |
-| Gate, rate/connection limits, trusted usage batches | PENDING | Not implemented; no trusted accounting claim. |
+| Injected gate and usage batch boundary | PARTIAL | Call ordering and batch behavior pass tests; authoritative durable policy adapter is not part of the Engine module. |
 | 700 Mbps direct-forwarding target | UNMEASURED | Benchmark not run; record evidence when an appropriate Linux host is available. |
 
 ## Verification Metadata

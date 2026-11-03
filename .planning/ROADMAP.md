@@ -52,7 +52,7 @@
 - [x] 02-02 — Linux splice path
 - [x] 02-03 — UDP sessions and idle expiry
 - [x] 02-04 — Bounded UDP admission (gap closure)
-- [ ] 02-05 — Gates, limits, and usage batches (gap closure)
+- [x] 02-05 — Gates, limits, and usage batches (gap closure)
 - [ ] 02-06 — Linux benchmark evidence (gap closure)
 
 ### Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)
@@ -134,7 +134,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
-| 2. M0 Engine dataplane | 3/6 | In progress | - |
+| 2. M0 Engine dataplane | 5/6 | In progress | - |
 | 3. M1 VLink engine links | 0/TBD | Not started | - |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |
