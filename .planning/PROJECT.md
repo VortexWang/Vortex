@@ -49,7 +49,7 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 - 当前唯一可用需求文件为 V1.11，文档标记冻结日期为 2026-11-01。文中引用的冻结记录、修订决策记录、历史评审附件和 `tools/version_record_check.py` 等脚本未在当前仓库找到；该证据缺口需追踪，不能虚构附件或宣称治理检查已通过。
 - V1.11 声明其规范性语义自包含；历史附件编号不作为隐含实现契约，必须正式交付 ENGR-004 契约。
 - 按规格 14.4 引擎优先推进 M0～M6，并在实现前落实 ENGR-001、ENGR-004 和 ENGR-006 的工程前置要求。GSD 阶段须映射这些交付边界与退出标准。
-- 用户已明确要求持续进行代码开发，并以本机 Docker 与 GitHub Actions 双端测试为主。本次已核验 OrbStack Linux arm64 Docker Engine 29.8.2、Compose 5.5.0 和 GitHub CLI 认证可用；远端仓库可读，尚无 Actions 工作流。进一步核验当前 CLI 账号 `nodeox` 对 origin 权限为 `pull=true, push=false, admin=false`，Actions 策略端点返回 403；远端推送和工作流执行受当前凭据权限阻塞，已告知用户，不能据此宣称 Actions 可执行。项目测试尚未运行。
+- 用户已明确要求持续进行代码开发，并以本机 Docker 与 GitHub Actions 双端测试为主。本次已核验 OrbStack Linux arm64 Docker Engine 29.8.2、Compose 5.5.0 可用。用户指定的 GitHub 应用连接已核实身份为 `VortexWang`，对 origin 为 `push=true, admin=true`；后续连接器调用明确使用该账号。另一本机 GitHub CLI 凭据属于 `nodeox`，仅有读取权限，其403不能用于判断 VortexWang 连接权限。当前远端为空仓库，项目工作流与双端测试尚未运行；本机 Git 推送的凭据链仍须单独验证。
 - 用户已批准 API 压测使用 MIT 许可的 Vegeta 替代 k6；变更与验收影响见 `docs/changes/CR-001-API压测工具替换.md`。原 V1.11 文件不改写，版本与完整依赖许可、门槛等效性仍需工程基线评审。
 
 ## Constraints
@@ -69,7 +69,7 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 |----------|-----------|---------|
 | V1.11 作为需求来源，保留原编号 | 用户明确以 docs 需求文档为准 | 已确认 |
 | 严格遵循 GSD 全流程 | 用户明确要求，阶段须可追踪、可验证 | 已确认 |
-| 沿用现有 GitHub origin | 用户指定已绑定仓库 | remote 已核验；当前 nodeox 无 push 权限，远端执行受阻 |
+| 沿用现有 GitHub origin，并使用 VortexWang 连接 | 用户明确指定账户；连接器身份与仓库权限已核验 | VortexWang 的 push/admin 均为 true；本机 gh 的 nodeox 凭据独立 |
 | 本机 Docker 与 GitHub Actions 双端测试 | 用户明确指定主要验证方式 | 已确认；环境待验证 |
 | 引擎优先，工程基线、契约及安全模型前置 | 规格 14.2、14.4 的强制要求 | 待规划与验证 |
 | 使用规格 D-01～D-07 已定技术决策 | 包括 Cloudflare DNS、路径系数计费、12 小时自治上限及保守负债管理 | 待实现验证 |
