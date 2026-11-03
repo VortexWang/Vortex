@@ -7,7 +7,7 @@
 ## Phases
 
 - [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
-- [ ] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。
+- [x] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。 (completed 2026-11-04)
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
 - [ ] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 完成多跳调度、配额门控、排空和原子配置应用。
 - [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。
@@ -47,7 +47,7 @@
 2. 直接 TCP 转发正确处理半关闭、并发拷贝取消和清理，平台规定路径采用经证明的零拷贝实现；数据面没有数据库或主动控制面依赖。
 3. 直接 UDP 会话、门控、速率/连接限制和计量批次边界具有自动化测试，正常消费按写成功载荷计量，预扣批次仅提交或退回一次。
 4. 在适用的 Linux 环境尝试直接转发基准，保存硬件、命令、配置、原始结果和与 700 Mbps 开发目标的差距；未达目标时继续正确性工作，不单独阻断 Phase 2 进度。
-**Plans**: 6/6 plans executed (TCP relay, Linux splice, UDP sessions, bounded admission, injected gate/usage contract, benchmark harness). The environment-limited benchmark does not claim qualified 700 Mbps acceptance; durable policy adapters remain with their owning runtime.
+**Plans**: 6/6 plans complete (TCP relay, Linux splice, UDP sessions, bounded admission, injected gate/usage contract, benchmark harness). The environment-limited benchmark does not claim qualified 700 Mbps acceptance; durable policy adapters remain with their owning runtime.
 - [x] 02-01 — TCP relay and half-close
 - [x] 02-02 — Linux splice path
 - [x] 02-03 — UDP sessions and idle expiry
@@ -149,7 +149,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
-| 2. M0 Engine dataplane | 6/6 | In progress | - |
+| 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |

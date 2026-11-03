@@ -1,6 +1,8 @@
 ---
 phase: "02"
-status: active
+status: complete
+nyquist_compliant: true
+validated: "2026-11-04"
 ---
 
 # Phase 02 — Validation Strategy
@@ -41,3 +43,11 @@ status: active
 ## Evidence Rules
 
 Docker validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove qualified throughput or complete production behavior. TCP splice and UDP tests executed in the local Linux container. The current Engine and benchmark smoke passed local `make phase2-engine-check` and the same command in GitHub Actions on SHA `b59565459db046c5f7b709d63bdd9a9c82c2ed08`, run 41615021796.
+
+## Validation Sign-Off
+
+- [x] Every Phase 2 automated behavior maps to an existing test.
+- [x] `make phase2-engine-check` passed at current verification HEAD `41ae509e8ed41c982ff03810c9057dc60a396485` on local OrbStack Linux arm64.
+- [x] GitHub Actions evidence for `make phase2-engine-check` is retained at run 41615021796; its Phase 2 test entry and Engine source are unchanged at the current HEAD. No Actions result is claimed for `41ae509`.
+- [x] Environment-limited benchmark evidence is not represented as qualified throughput acceptance.
+- [x] Phase 5/6 runtime authority and Phase 8 dedicated performance gates remain deferred to their owning phases.

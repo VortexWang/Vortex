@@ -1,6 +1,6 @@
 ---
 phase: 02-m0-m0-engine-dataplane
-verified: 2026-11-03T10:28:22Z
+verified: 2026-11-03T17:24:58Z
 status: passed
 score: 4/4 must-haves verified
 covered_files:
@@ -36,7 +36,7 @@ covered_files:
   - tools/engine/docker-test.sh
   - tools/phase2/README.md
   - tools/phase2/benchmark.sh
-covered_digest: "v4:sha256:5eae5fd538ba0d78cecba4892159b77104dff14707502a924f0320385ca08ec2"
+covered_digest: "v4:sha256:1433122e32c2b8096e2b4dace00303fffa3c9de9b1bb8ea078597a29d40736c7"
 behavior_unverified: 0
 deferred:
   - truth: "Production and simulated Agent consumers use the formal in-process Engine contract."
@@ -150,8 +150,8 @@ None. Phase 2 UAT records 4/4 user-confirmed behaviors with 0 issues. Dedicated 
 
 ### Verification Evidence
 
-- Current HEAD `e33d915`: `make phase2-engine-check` passed locally. Native Go race tests passed; the Linux arm64 scratch container ran the splice, TCP, UDP, gate, and accounting tests.
-- Existing Actions run 41615021796 passed `make phase2-engine-check` and benchmark smoke on `b59565459db046c5f7b709d63bdd9a9c82c2ed08`. `git diff b595654 -- engine test/engine tools/engine/docker-test.sh .github/workflows/phase2.yml Makefile` is empty, so the verified Phase 2 source tree is identical. There is no Actions run on the later documentation-only HEAD `e33d915`; this report does not claim one.
+- Current HEAD `41ae509e8ed41c982ff03810c9057dc60a396485`: `make phase2-engine-check` passed locally. Native Go race tests passed; the Linux arm64 scratch container ran splice, TCP, UDP, gate, and accounting tests. Phase 1 regression discovery passed 10 tests.
+- GitHub Actions run 41615021796 passed `make phase2-engine-check` and benchmark smoke on `b59565459db046c5f7b709d63bdd9a9c82c2ed08`. Since that run, the only Phase 2 entry-file change is additive Phase 3 target declarations in `Makefile`; the `phase2-engine-check` and `phase2-benchmark-smoke` recipes are unchanged. The current commit has not yet run in Actions; this report does not claim otherwise.
 - `go list -m all` returned only `vortex/engine`.
 - Benchmark evidence: `artifacts/phase2/benchmark/20261103T095609Z.txt`; status `environment-limited`, not qualified throughput acceptance.
 - UAT: 4 passed, 0 issues, 0 pending in `02-UAT.md`.
