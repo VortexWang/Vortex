@@ -592,8 +592,10 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 	if s.Network != StreamUDP || len(payload) == 0 || len(payload) > MaxPayloadSize {
 		return false, ErrProtocol
 	}
-	snapshot,open:=s.link.dispatch.streams.Snapshot(s.ID)
-	if !open||!snapshot.OpenOK{return false,ErrStreamState}
+	snapshot, open := s.link.dispatch.streams.Snapshot(s.ID)
+	if !open || !snapshot.OpenOK {
+		return false, ErrStreamState
+	}
 	ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload)))
 	if err != nil || !ok {
 		return ok, err

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"net/netip"
 )
 
 type OpenErrorCode uint16
@@ -40,6 +41,7 @@ type RuleSnapshot struct {
 	SegmentAllowed       bool
 	RateShareValid       bool
 	ConnectionShareValid bool
+	BillingAuthorized    bool
 	BillingSnapshotID    string
 	BillingCoefficient   uint64
 	SelfHosted           bool
@@ -85,6 +87,19 @@ func (p OpenPolicy) Authorize(ctx context.Context, peer NodeID, request OpenRequ
 	if request.Network != 1 && request.Network != 2 {
 		return reject(OpenProtocolError)
 	}
+	if !validOriginalClient(request.ClientAddress) || len(request.Visited) > 16 {
+		return reject(OpenProtocolError)
+	}
+	seenVisited := make(map[NodeID]struct{}, len(request.Visited))
+	for _, visited := range request.Visited {
+		if visited == (NodeID{}) {
+			return reject(OpenProtocolError)
+		}
+		if _, duplicate := seenVisited[visited]; duplicate {
+			return reject(OpenProtocolError)
+		}
+		seenVisited[visited] = struct{}{}
+	}
 	snapshot, ok := p.Lookup(ctx, request.RuleID)
 	if !ok || !snapshot.Active {
 		return reject(OpenNoRoute)
@@ -113,7 +128,7 @@ func (p OpenPolicy) Authorize(ctx context.Context, peer NodeID, request OpenRequ
 		if !snapshot.ConnectionShareValid {
 			return reject(OpenConnectionLimited)
 		}
-		if snapshot.BillingSnapshotID == "" || snapshot.BillingSnapshotID != p.SessionBillingSnapshotID || snapshot.BillingCoefficient == 0 || snapshot.BillingCoefficient != p.SessionBillingCoefficient {
+		if !snapshot.BillingAuthorized || snapshot.BillingSnapshotID == "" || snapshot.BillingSnapshotID != p.SessionBillingSnapshotID || snapshot.BillingCoefficient == 0 || snapshot.BillingCoefficient != p.SessionBillingCoefficient {
 			return reject(OpenQuotaExhausted)
 		}
 	}
@@ -133,6 +148,23 @@ func (p OpenPolicy) Authorize(ctx context.Context, peer NodeID, request OpenRequ
 		}
 	}
 	return reject(OpenNoRoute)
+}
+
+func validOriginalClient(raw []byte) bool {
+	var address netip.Addr
+	switch len(raw) {
+	case 4:
+		var bytes [4]byte
+		copy(bytes[:], raw)
+		address = netip.AddrFrom4(bytes)
+	case 16:
+		var bytes [16]byte
+		copy(bytes[:], raw)
+		address = netip.AddrFrom16(bytes)
+	default:
+		return false
+	}
+	return address.IsValid() && !address.IsUnspecified() && !address.IsMulticast()
 }
 
 func OpenErrorPayload(rejection *OpenRejection) ([]byte, error) {

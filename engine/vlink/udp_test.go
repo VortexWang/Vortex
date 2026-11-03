@@ -55,7 +55,8 @@ func TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resource := &UDPResource{Conn: conn}
+	outcomes := make(chan accounting.Outcome, 4)
+	resource := &UDPResource{Conn: conn, Policy: recordingUDPSession{outcomes: outcomes}}
 	if err := server.AuthorizeRemote(ctx, serverStream.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return resource, nil }); err != nil {
 		t.Fatal(err)
 	}
@@ -76,6 +77,19 @@ func TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss(t *testing.T) {
 		}
 		if frame.Type != FrameDgram || string(frame.Payload) != payload {
 			t.Fatalf("echo frame=%+v", frame)
+		}
+		if err := clientStream.Consume(ctx, uint32(len(frame.Payload))); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for i := 0; i < 4; i++ {
+		select {
+		case outcome := <-outcomes:
+			if outcome.Resolution != accounting.Committed || outcome.Used != 4 {
+				t.Fatalf("accounting outcome=%+v", outcome)
+			}
+		case <-ctx.Done():
+			t.Fatalf("missing accounting outcome %d: %v", i+1, ctx.Err())
 		}
 	}
 
@@ -195,3 +209,13 @@ func (udpAdmissionSession) Reserve(context.Context, accounting.Direction, int64)
 	return nil, nil
 }
 func (udpAdmissionSession) Close() error { return nil }
+
+type recordingUDPSession struct{ outcomes chan accounting.Outcome }
+
+func (s recordingUDPSession) Reserve(_ context.Context, _ accounting.Direction, amount int64) (*accounting.Batch, error) {
+	return accounting.NewBatch(amount, func(_ context.Context, outcome accounting.Outcome) error {
+		s.outcomes <- outcome
+		return nil
+	})
+}
+func (recordingUDPSession) Close() error { return nil }

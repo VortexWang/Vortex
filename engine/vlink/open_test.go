@@ -53,8 +53,11 @@ func TestOpenPolicyStableRejectionClassesAndAuditCorrelation(t *testing.T) {
 		{name: "rate share", mutate: func(s *RuleSnapshot, _ *OpenRequest, _ *OpenPolicy) { s.RateShareValid = false }, want: OpenRateLimited},
 		{name: "connection share", mutate: func(s *RuleSnapshot, _ *OpenRequest, _ *OpenPolicy) { s.ConnectionShareValid = false }, want: OpenConnectionLimited},
 		{name: "billing snapshot", mutate: func(_ *RuleSnapshot, _ *OpenRequest, p *OpenPolicy) { p.SessionBillingSnapshotID = "other" }, want: OpenQuotaExhausted},
+		{name: "billing authorization", mutate: func(s *RuleSnapshot, _ *OpenRequest, _ *OpenPolicy) { s.BillingAuthorized = false }, want: OpenQuotaExhausted},
 		{name: "network not configured", mutate: func(s *RuleSnapshot, r *OpenRequest, _ *OpenPolicy) { s.AllowedNetworks[r.Network] = false }, want: OpenUnauthorized},
 		{name: "invalid network", mutate: func(_ *RuleSnapshot, r *OpenRequest, _ *OpenPolicy) { r.Network = 9 }, want: OpenProtocolError},
+		{name: "invalid original client", mutate: func(_ *RuleSnapshot, r *OpenRequest, _ *OpenPolicy) { r.ClientAddress = []byte{0, 0, 0, 0} }, want: OpenProtocolError},
+		{name: "duplicate visited node", mutate: func(_ *RuleSnapshot, r *OpenRequest, _ *OpenPolicy) { r.Visited = []NodeID{{5}, {5}} }, want: OpenProtocolError},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -114,7 +117,7 @@ func TestOpenPolicySelfHostedAndNonExecutionRulesUseCorrectGates(t *testing.T) {
 }
 
 func validRuleSnapshot() RuleSnapshot {
-	return RuleSnapshot{RuleID: [16]byte{9}, Revision: 3, PathGeneration: 4, HopIndex: 1, ExecutionPoint: true, Active: true, AllowedPeers: map[NodeID]bool{{2}: true}, AllowedNetworks: map[uint8]bool{1: true, 2: true}, NextHops: []NodeID{{3}, {4}}, RuntimeAuthorized: true, SegmentAllowed: true, RateShareValid: true, ConnectionShareValid: true, BillingSnapshotID: "bill-1", BillingCoefficient: 7}
+	return RuleSnapshot{RuleID: [16]byte{9}, Revision: 3, PathGeneration: 4, HopIndex: 1, ExecutionPoint: true, Active: true, AllowedPeers: map[NodeID]bool{{2}: true}, AllowedNetworks: map[uint8]bool{1: true, 2: true}, NextHops: []NodeID{{3}, {4}}, RuntimeAuthorized: true, SegmentAllowed: true, RateShareValid: true, ConnectionShareValid: true, BillingAuthorized: true, BillingSnapshotID: "bill-1", BillingCoefficient: 7}
 }
 
 func validOpenRequest() OpenRequest {
