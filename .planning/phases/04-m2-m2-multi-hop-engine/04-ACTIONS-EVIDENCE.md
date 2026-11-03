@@ -1,7 +1,7 @@
 # Phase 4 Actions Evidence
 
-**Run:** `41728267582`
-**Commit:** `7899188e757a83d2ed9ec2c226f2e7ddb460cb02`
+**Run:** `41732933069`
+**Commit:** `930c6303099b97c07ad73467858da6757ecc45ac`
 **Workflow:** `phase4-m2-multi-hop`
 **Date:** 2026-11-04
 
@@ -20,6 +20,6 @@
 - Engine race suite: passed.
 - Targeted Phase 4 state-machine and VLink tests: passed.
 - Docker VLink topology smoke: passed.
-- `make phase4-m2-benchmark`: workflow succeeded, but benchmark metadata is `environment-limited` with `benchmark_exit: 1`; this is not a native performance qualification.
+- `make phase4-m2-benchmark`: workflow succeeded, but benchmark metadata remains `environment-limited`; this is not a native performance qualification.
 
 The benchmark gap remains open until a dedicated native Linux three-relay environment produces the required NFR-003/NFR-005/NFR-007 evidence and D-04 review.
