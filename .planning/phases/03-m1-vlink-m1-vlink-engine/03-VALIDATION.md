@@ -36,7 +36,7 @@ created: "2026-11-03"
 | 03-02-01 | 2 | 2 | ENG-010, ENG-025 | T-03-04 | mTLS identity, conservative time bounds, freshness and stale replay are rejected | unit/integration | `cd engine && go test -race ./vlink -run 'TestIdentity|TestFreshness'` | ✅ | ✅ |
 | 03-02-02 | 2 | 2 | ENG-016 | T-03-05 | stream/link failure isolation and byte windows preserve bounds | unit/race | `cd engine && go test -race ./vlink -run 'Test(Stream|Window)'` | ✅ | ✅ |
 | 03-02-03 | 2 | 2 | ENG-016, ENG-019 | T-03-05 | byte windows and 3/3/12 second liveness bounds hold | unit/race | `cd engine && go test -race ./vlink -run 'Test(Window|Liveness)'` | ✅ | ✅ |
-| 03-03-01 | 3 | 3 | ENG-020, ENG-021, ENG-022, ENG-023, ENG-024 | T-03-06 | OPEN checks local authorization and UDP requires OPEN_OK | integration | `cd engine && go test ./vlink -run 'Test(UDP|Open|Target)'` | ❌ W0 | ⬜ |
+| 03-03-01 | 3 | 3 | ENG-020, ENG-021, ENG-022, ENG-023, ENG-024 | T-03-06 | OPEN checks local authorization and UDP requires OPEN_OK | integration/race | `cd engine && go test -race ./vlink -run 'Test(Open|Target|UDP)'` | ✅ | ✅ |
 | 03-04-01 | 4 | 4 | ENG-017, ENG-018 | T-03-07 | mode selection, reverse links and pool retries are bounded and cleaned up | integration/race | `cd engine && go test -race ./vlink -run 'Test(Pool|Mode|Reverse|Cleanup)'` | ❌ W0 | ⬜ |
 | 03-05-01 | 5 | 4 | — | T-03-08 | abuse controls close sustained offenders and metrics stay low-cardinality | unit | `cd engine && go test ./vlink -run 'Test(Limit|Observability)'` | ❌ W0 | ⬜ |
 | 03-06-01 | 6 | 5 | NFR-002, NFR-004, NFR-007 | T-03-09 | forward/reverse and first-packet measurements are reproducible and honestly reported | Docker/benchmark | `make phase3-vlink-check` | ❌ W0 | ⬜ |
