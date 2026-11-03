@@ -13,7 +13,7 @@ status: active
 | Quick command | `cd engine && go test -race ./...` |
 | Shared local/CI command | `make phase2-engine-check` |
 | Local Linux execution | OrbStack Docker on arm64 for current host |
-| CI execution | GitHub Actions Ubuntu 24.04 amd64, run 41602578116 |
+| CI execution | GitHub Actions Ubuntu 24.04 amd64, latest M0 run 41604182140 |
 
 ## Sampling
 
@@ -30,10 +30,12 @@ status: active
 | Context cancellation closes both directions | `TestTCPContextCancellationClosesBothDirections` | Passed locally and in local Linux scratch container |
 | Meter failure closes both directions | `TestTCPMeterFailureStopsRelay` | Passed locally and in local Linux scratch container |
 | Linux bare-TCP splice | `TestTCPPlatformSelectsSpliceForBareTCP` | Passed in local Linux arm64 scratch container; amd64 cross-compiles |
-| UDP session routing and 60-second idle expiry | Not implemented | Pending |
+| UDP client routing and response isolation | `TestUDPForwardsResponsesToOriginatingClientAndMetersWrites` | Passed locally and in Docker/Actions on SHA `88d59c220c536601ff22b9a5762362c6553e8a14` |
+| UDP 60-second default and idle expiry override | `TestUDPDefaultsIdleTimeoutToSixtySeconds`, `TestUDPExpiresIdleSessionAndReplacesIt` | Passed locally and in Docker/Actions on the same SHA |
+| UDP cancellation and socket cleanup | `TestUDPCancellationClosesListenerAndSessions` | Passed locally and in Docker/Actions on the same SHA |
 | Gate/rate/connection controls and accounting failure behavior | Not implemented | Pending |
 | 700 Mbps benchmark | Not run | Development target; miss is recorded, not a progress blocker |
 
 ## Evidence Rules
 
-An unrun behavior remains pending. Docker smoke validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove throughput, leak, or complete production behavior. The splice-specific test did execute. Current same-commit Actions evidence is run 41602578116 for SHA `7ebc8675b39426181fcd13fe6bf28df6a463f41c`.
+An unrun behavior remains pending. Docker smoke validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove throughput or complete production behavior. TCP splice and UDP session tests executed in the local Linux container. Same-commit validation for the UDP implementation is SHA `88d59c220c536601ff22b9a5762362c6553e8a14`: local `make phase2-engine-check` and GitHub Actions run 41604182140 both passed.

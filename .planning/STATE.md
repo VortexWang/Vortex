@@ -4,11 +4,11 @@ milestone: V1
 current_phase: 2
 current_phase_name: M0 引擎数据面 (M0 Engine Dataplane)
 status: executing
-stopped_at: Plan 02-01 TCP tracer complete; continue M0 plan
+stopped_at: Plan 02-03 UDP sessions complete; continue gates and usage accounting
 last_updated: "2026-11-03T08:06:00.000Z"
 last_activity: 2026-11-03
 last_activity_desc: Initialized GSD project, completed V1.11 research and approved the full requirements scope and roadmap structure.
-state_head: 7ebc8675b39426181fcd13fe6bf28df6a463f41c
+state_head: 88d59c220c536601ff22b9a5762362c6553e8a14
 progress:
   total_phases: 8
   completed_phases: 1
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 2 (M0 引擎数据面) — EXECUTING
-Plan: 2 of TBD complete
-Status: Phase 1 passed for M0 entry; standalone TCP relay and Linux splice slice are implemented and verified locally.
-Last activity: 2026-11-03 — Linux TCP splice passed scratch-container tests; UDP, gates, and metering remain.
+Plan: 3 of TBD complete
+Status: Phase 1 passed for M0 entry; TCP relay, Linux splice, and UDP session slices are implemented and verified on local Docker and GitHub Actions.
+Last activity: 2026-11-03 — UDP routing and 60-second idle expiry passed same-commit local Docker and Actions checks.
 
 Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
@@ -65,12 +65,12 @@ Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
 ### Pending Todos
 
-- Implement UDP sessions, gates and usage accounting; resolve only dependencies actually introduced in this phase.
-- Add UDP session expiry, gate/usage accounting, and a measured benchmark harness in follow-up plans.
+- Implement gates and usage accounting; resolve only dependencies actually introduced in this phase.
+- Add a benchmark harness and record the measured gap against 700 Mbps; the result does not gate correctness work.
 
 ### Blockers/Concerns
 
-- No current M0 code blocker. UDP, Linux `splice`, gate/usage semantics, and benchmark evidence remain future Phase 2 work.
+- No current M0 code blocker. Gate/usage semantics and benchmark evidence remain future Phase 2 work.
 
 ## Deferred Items
 
