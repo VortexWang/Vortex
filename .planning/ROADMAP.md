@@ -27,7 +27,16 @@
 3. TLA+ 或确定性模拟器覆盖 ENGR-006 和 NFR-027～NFR-045 要求的状态、不变量、故障及两两组合，反例和运行结果归档；模型明确不是实现验收替代品。
 4. Docker 与 Actions 有同一提交、可复用的测试入口和结果归档；GitHub Actions 的实际执行能力通过 VortexWang 连接或已配置的仓库通道核验。
 5. V1.11 引用但仓库缺少的冻结/评审材料已找到并核验，或记录为阻塞证据及其对 NFR-038 的影响；不生成虚假评审证据。
-**Plans**: TBD
+**Plans**: 4 plans
+**Wave 1**
+- [ ] 01-01-PLAN.md — Candidate versions, licenses and evidence register
+- [ ] 01-02-PLAN.md — Formal contracts and requirement traceability
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 01-03-PLAN.md — Lease safety model and fault combinations
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 01-04-PLAN.md — Docker and GitHub Actions verification path
 
 ### Phase 2: M0 引擎数据面 (M0 Engine Dataplane)
 **Goal**: 用户可通过独立 Go Engine 建立直接 TCP/UDP 转发；门控与可信计量接口开启时满足 M0 指标。
