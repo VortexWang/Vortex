@@ -13,7 +13,7 @@ status: active
 | Quick command | `cd engine && go test -race ./...` |
 | Shared local/CI command | `make phase2-engine-check` |
 | Local Linux execution | OrbStack Docker on arm64 for current host |
-| CI execution | GitHub Actions Ubuntu 24.04 amd64, latest M0 run 41604182140 |
+| CI execution | GitHub Actions Ubuntu 24.04 amd64, latest M0 run 41611109213 |
 
 ## Sampling
 
@@ -33,9 +33,10 @@ status: active
 | UDP client routing and response isolation | `TestUDPForwardsResponsesToOriginatingClientAndMetersWrites` | Passed locally and in Docker/Actions on SHA `88d59c220c536601ff22b9a5762362c6553e8a14` |
 | UDP 60-second default and idle expiry override | `TestUDPDefaultsIdleTimeoutToSixtySeconds`, `TestUDPExpiresIdleSessionAndReplacesIt` | Passed locally and in Docker/Actions on the same SHA |
 | UDP cancellation and socket cleanup | `TestUDPCancellationClosesListenerAndSessions` | Passed locally and in Docker/Actions on the same SHA |
+| UDP global and per-source-IP admission limits | `TestUDPPerClientSessionLimitDropsBeforeCreatingSession`, `TestUDPGlobalSessionLimitReleasesAfterExpiry` | Passed under race detection locally and in Docker/Actions on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d` |
 | Gate/rate/connection controls and accounting failure behavior | Not implemented | Pending |
 | 700 Mbps benchmark | Not run | Development target; miss is recorded, not a progress blocker |
 
 ## Evidence Rules
 
-An unrun behavior remains pending. Docker smoke validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove throughput or complete production behavior. TCP splice and UDP session tests executed in the local Linux container. Same-commit validation for the UDP implementation is SHA `88d59c220c536601ff22b9a5762362c6553e8a14`: local `make phase2-engine-check` and GitHub Actions run 41604182140 both passed.
+An unrun behavior remains pending. Docker validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove throughput or complete production behavior. TCP splice and UDP tests executed in the local Linux container. The bounded-admission implementation passed local `make phase2-engine-check` and the same command in GitHub Actions on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d`, Actions run 41611109213.

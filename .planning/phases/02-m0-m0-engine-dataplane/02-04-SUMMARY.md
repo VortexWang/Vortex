@@ -20,7 +20,7 @@ requirements: [ENG-006, ENG-007, ENG-008, ENG-009]
 
 - `cd engine && go test -race ./relay` — passed.
 - `make phase2-engine-check` — passed locally, including OrbStack Linux container execution.
-- GitHub Actions for the implementation commit is pending and must be recorded after push.
+- GitHub Actions `make phase2-engine-check` — passed on the same commit `c79c2d1194a66711a68f66c2b5e7a5f474a8381d`; [run 41611109213](https://github.com/VortexWang/Vortex/actions/runs/41611109213).
 
 ## Notes
 

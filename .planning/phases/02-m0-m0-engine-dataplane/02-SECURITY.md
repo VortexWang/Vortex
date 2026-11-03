@@ -40,4 +40,4 @@ No accepted risks.
 - [x] `threats_open: 0` confirmed
 - [x] `status: verified` set in frontmatter
 
-**Approval:** implementation and local Docker race tests verified; same-commit Actions run pending.
+**Approval:** implementation and local Docker race tests verified; same-commit Actions run 41611109213 passed.
