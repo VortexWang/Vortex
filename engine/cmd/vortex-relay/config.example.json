@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "node_id": "00000000-0000-0000-0000-000000000001",
+  "role": "relay",
+  "certificate": "./certs/relay.pem",
+  "private_key": "./certs/relay-key.pem",
+  "trust_bundle": "./certs/ca.pem",
+  "listen": "0.0.0.0:9443",
+  "peer": "relay-2:9443",
+  "rule_id": "qualification-rule",
+  "rule_revision": 1,
+  "path_generation": 1,
+  "hop_index": 1,
+  "target": "destination:8080",
+  "evidence_file": "./artifacts/runtime/events.jsonl"
+}
