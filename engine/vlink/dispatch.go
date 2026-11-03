@@ -11,6 +11,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"vortex/engine/scheduler"
 )
 
 type LinkAction uint8
@@ -139,6 +141,7 @@ type MuxConfig struct {
 	Limits                                   LimitConfig
 	Observer                                 Observer
 	Now                                      func() time.Time
+	DgramScheduler                           *scheduler.Scheduler
 }
 
 type MuxLink struct {
@@ -157,6 +160,7 @@ type MuxLink struct {
 	peerID      NodeID
 	limiter     *FrameLimiter
 	observer    Observer
+	dgrams      *scheduler.Scheduler
 	violations  int
 	linkID      [16]byte
 }
@@ -209,12 +213,33 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer}
+	dgrams := config.DgramScheduler
+	if dgrams == nil {
+		dgrams = scheduler.New(1 << 20)
+	}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams}
 	if _, err := rand.Read(m.linkID[:]); err != nil {
 		return nil, err
 	}
 	go m.readLoop()
+	go m.dgramLoop()
 	return m, nil
+}
+
+func (m *MuxLink) dgramLoop() {
+	for {
+		item, err := m.dgrams.Next(context.Background())
+		if err != nil {
+			return
+		}
+		if item.Kind != scheduler.UDP {
+			continue
+		}
+		if err := m.write(context.Background(), Frame{Type: FrameDgram, StreamID: item.StreamID, Payload: item.Payload}); err != nil {
+			m.Close(err)
+			return
+		}
+	}
 }
 
 func (m *MuxLink) Open(ctx context.Context, request OpenRequest) (*MuxStream, error) {
@@ -386,6 +411,7 @@ func (m *MuxLink) Close(err error) {
 		}
 		m.streams = make(map[uint32]*MuxStream)
 		m.mu.Unlock()
+		m.dgrams.Close()
 		if tlsConn, ok := m.conn.(*tls.Conn); ok {
 			forceCloseTLS(tlsConn)
 		} else {
@@ -651,15 +677,19 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 	if !open || !snapshot.OpenOK {
 		return false, ErrStreamState
 	}
-	ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload)))
-	if err != nil || !ok {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	// Preserve the existing per-stream admission boundary; the scheduler adds
+	// an independent bounded queue after this non-blocking check.
+	if ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload))); err != nil || !ok {
 		return ok, err
 	}
-	err = s.link.write(ctx, Frame{Type: FrameDgram, StreamID: s.ID, Payload: append([]byte(nil), payload...)})
-	if err != nil {
-		s.link.Close(err)
+	ok, reason := s.link.dgrams.Enqueue(scheduler.Item{Kind: scheduler.UDP, StreamID: s.ID, Payload: payload})
+	if !ok {
+		return false, fmt.Errorf("vlink: UDP datagram dropped: %s", reason)
 	}
-	return true, err
+	return true, nil
 }
 func (s *MuxStream) CloseWrite(ctx context.Context) error {
 	if s.Network != StreamTCP {
