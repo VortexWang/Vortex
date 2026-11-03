@@ -644,6 +644,28 @@ func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
 		return Frame{}, s.link.Err()
 	}
 }
+
+// WaitOpen blocks until the remote side authorizes this locally opened stream.
+// DATA and DGRAM must not be written before OPEN_OK has been consumed.
+func (s *MuxStream) WaitOpen(ctx context.Context) error {
+	frame, err := s.Receive(ctx)
+	if err != nil {
+		return err
+	}
+	switch frame.Type {
+	case FrameOpenOK:
+		return nil
+	case FrameOpenErr:
+		if len(frame.Payload) >= 2 {
+			return fmt.Errorf("vlink: remote OPEN rejected (class %d)", binary.BigEndian.Uint16(frame.Payload[:2]))
+		}
+		return fmt.Errorf("vlink: remote OPEN rejected")
+	case FrameRST:
+		return ErrStreamState
+	default:
+		return fmt.Errorf("%w: expected OPEN_OK, got frame type %d", ErrProtocol, frame.Type)
+	}
+}
 func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 	if s.Network != StreamTCP || len(payload) == 0 {
 		return ErrProtocol

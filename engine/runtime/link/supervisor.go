@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"sync"
 
@@ -75,13 +76,16 @@ func (s *Supervisor) Serve(ctx context.Context, handler LinkHandler) error {
 func (s *Supervisor) accept(ctx context.Context, conn net.Conn, handler LinkHandler) {
 	link, peer, err := s.handshake(ctx, tls.Server(conn, s.TLS.Clone()), false)
 	if err != nil {
+		slog.Error("vlink inbound handshake failed", "err", err)
 		_ = conn.Close()
 		return
 	}
 	s.track(link)
 	defer s.untrack(link)
 	if handler != nil {
-		_ = handler(ctx, link, peer)
+		if err := handler(ctx, link, peer); err != nil && ctx.Err() == nil {
+			slog.Error("vlink inbound handler failed", "peer", peer.String(), "err", err)
+		}
 	}
 }
 

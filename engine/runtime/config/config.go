@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -31,6 +32,10 @@ type Config struct {
 	TrustBundle    string `json:"trust_bundle"`
 	Listen         string `json:"listen"`
 	Peer           string `json:"peer,omitempty"`
+	PeerNodeID     string `json:"peer_node_id,omitempty"`
+	NextHopNodeID  string `json:"next_hop_node_id,omitempty"`
+	ServiceListen  string `json:"service_listen,omitempty"`
+	ExecutionPoint bool   `json:"execution_point,omitempty"`
 	RuleID         string `json:"rule_id"`
 	RuleRevision   uint64 `json:"rule_revision"`
 	PathGeneration uint64 `json:"path_generation"`
@@ -77,6 +82,9 @@ func (c Config) Validate() error {
 	if c.Role != RoleDestination && c.Peer == "" {
 		return errors.New("config: peer is required for source and relay roles")
 	}
+	if c.Role == RoleSource && c.ServiceListen == "" {
+		return errors.New("config: service_listen is required for source role")
+	}
 	if c.Role == RoleDestination && c.Target == "" {
 		return errors.New("config: target is required for destination role")
 	}
@@ -99,6 +107,9 @@ func (c Config) TLSConfig(server bool) (*tls.Config, error) {
 	if !pool.AppendCertsFromPEM(data) {
 		return nil, errors.New("config: trust bundle contains no certificates")
 	}
+	// `vortex` is a certificate validation name shared by the qualification
+	// trust domain; the node identity itself is still checked from the URI SAN
+	// by HandshakeHello.
 	result := &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS13, RootCAs: pool, ClientCAs: pool, ServerName: "vortex"}
 	if server {
 		result.ClientAuth = tls.RequireAndVerifyClientCert
@@ -106,4 +117,37 @@ func (c Config) TLSConfig(server bool) (*tls.Config, error) {
 		result.ClientAuth = tls.RequireAndVerifyClientCert
 	}
 	return result, nil
+}
+
+type Identity struct {
+	NodeID vlink.NodeID
+	Signer crypto.Signer
+	TLS    *tls.Config
+}
+
+func (c Config) LoadIdentity(server bool) (Identity, error) {
+	tlsConfig, err := c.TLSConfig(server)
+	if err != nil {
+		return Identity{}, err
+	}
+	if len(tlsConfig.Certificates) != 1 || tlsConfig.Certificates[0].PrivateKey == nil {
+		return Identity{}, errors.New("config: exactly one certificate with private key is required")
+	}
+	cert, err := x509.ParseCertificate(tlsConfig.Certificates[0].Certificate[0])
+	if err != nil {
+		return Identity{}, fmt.Errorf("config: parse local certificate: %w", err)
+	}
+	nodeID, err := vlink.NodeIDFromCertificate(cert)
+	if err != nil {
+		return Identity{}, fmt.Errorf("config: local certificate identity: %w", err)
+	}
+	wanted, err := vlink.ParseNodeID(c.NodeID)
+	if err != nil || nodeID != wanted {
+		return Identity{}, errors.New("config: certificate node_id does not match config")
+	}
+	signer, ok := tlsConfig.Certificates[0].PrivateKey.(crypto.Signer)
+	if !ok {
+		return Identity{}, errors.New("config: certificate private key is not a crypto signer")
+	}
+	return Identity{NodeID: nodeID, Signer: signer, TLS: tlsConfig}, nil
 }

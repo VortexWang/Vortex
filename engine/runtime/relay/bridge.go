@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"log/slog"
 	"net"
 	"sync"
 
@@ -15,7 +16,7 @@ type TargetDialer func(context.Context, vlink.LocalTarget) (net.Conn, error)
 type Service struct {
 	LocalNode vlink.NodeID
 	Policy    vlink.OpenPolicy
-	Next      *vlink.MuxLink
+	Next      func() *vlink.MuxLink
 	Dial      TargetDialer
 }
 
@@ -35,12 +36,15 @@ func (s Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *v
 		if err != nil {
 			return nil, err
 		}
-		if request.Network == 1 && s.Next != nil {
+		if request.Network == 1 && s.Next != nil && s.Next() != nil {
 			next := request
 			next.HopIndex++
 			next.Visited = append(append([]vlink.NodeID(nil), request.Visited...), s.LocalNode)
-			downstream, err := s.Next.Open(ctx, next)
+			downstream, err := s.Next().Open(ctx, next)
 			if err != nil {
+				return nil, err
+			}
+			if err := downstream.WaitOpen(ctx); err != nil {
 				return nil, err
 			}
 			return &streamResource{stream: downstream}, nil
@@ -53,19 +57,27 @@ func (s Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *v
 		}
 		conn, err := s.Dial(ctx, decision.Target)
 		if err != nil {
+			slog.Error("relay target dial failed", "target", decision.Target.Host, "port", decision.Target.Port, "err", err)
 			return nil, err
 		}
+		slog.Info("relay target connected", "target", decision.Target.Host, "port", decision.Target.Port)
 		return &connResource{conn: conn}, nil
 	})
 	if err != nil {
+		slog.Error("relay OPEN handling failed", "stream_id", stream.ID, "err", err)
 		return
 	}
+	slog.Info("relay OPEN authorized", "stream_id", stream.ID, "network", stream.Network)
 	resource := stream.TakeResource()
 	switch typed := resource.(type) {
 	case *streamResource:
-		_ = BridgeStreams(ctx, stream, typed.stream)
+		if err := BridgeStreams(ctx, stream, typed.stream); err != nil && ctx.Err() == nil {
+			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
+		}
 	case *connResource:
-		_ = BridgeConn(ctx, stream, typed.conn)
+		if err := BridgeConn(ctx, stream, typed.conn); err != nil && ctx.Err() == nil {
+			slog.Error("relay target bridge failed", "stream_id", stream.ID, "err", err)
+		}
 	default:
 		stream.CloseWrite(ctx)
 	}
@@ -75,12 +87,15 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 	if left == nil || right == nil {
 		return errors.New("relay: both streams are required")
 	}
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 	errs := make(chan error, 2)
 	go func() { errs <- forwardStream(ctx, left, right) }()
 	go func() { errs <- forwardStream(ctx, right, left) }()
-	return <-errs
+	first := <-errs
+	second := <-errs
+	if first != nil && !errors.Is(first, vlink.ErrStreamState) {
+		return first
+	}
+	return second
 }
 
 func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) error {
@@ -98,7 +113,10 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 				return err
 			}
 		case vlink.FrameFIN:
-			return destination.CloseWrite(ctx)
+			if err := destination.CloseWrite(ctx); err != nil {
+				return err
+			}
+			return nil
 		case vlink.FrameRST:
 			return errors.New("relay: stream reset")
 		default:

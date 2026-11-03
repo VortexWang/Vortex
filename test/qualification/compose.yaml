@@ -1,0 +1,39 @@
+services:
+  source:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    command: ["--config", "/config/source.json"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    networks: [vortex]
+  relay-1:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    command: ["--config", "/config/relay-1.json"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    networks: [vortex]
+  relay-2:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    command: ["--config", "/config/relay-2.json"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    networks: [vortex]
+  relay-3:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    command: ["--config", "/config/relay-3.json"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    networks: [vortex]
+  destination:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    command: ["--config", "/config/destination.json"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    networks: [vortex]
+networks:
+  vortex:
+    driver: bridge
