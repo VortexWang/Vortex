@@ -35,7 +35,7 @@ The decoder reads and validates the complete header before allocating payload me
 | Code | Name | Stream | Payload |
 |---:|---|---|---|
 | 0x01 | HELLO | 0 | phase u8; protocol_version u16 (0x0100); role u8 (0 client, 1 server); local_node_id 16 bytes; local_boot_id 16 bytes; local_generation u64; local_nonce 32 bytes; peer_node_id 16 bytes; peer_boot_id 16 bytes; peer_generation u64; peer_nonce 32 bytes; local_capability_count u16 (0..64); local capabilities as u16 codes; peer_capability_count u16 (0..64); peer capabilities as u16 codes; signature_length u16 (1..512); signature bytes |
-| 0x02 | OPEN | nonzero | rule_id 16 bytes; rule_revision u64; path_generation u64; hop_index u16; network u8 (1 TCP, 2 UDP); visited_count u8 (0..16); visited node IDs (16 bytes each); client_family u8 (4 or 6); client_length u8 (4 or 16); original client address bytes |
+| 0x02 | OPEN | nonzero | rule_id 16 bytes; rule_revision u64; path_generation u64; hop_index u16; network u8 (1 TCP, 2 UDP); visited_count u8 (0..16); visited node IDs (16 bytes each); client_family u8 (4 or 6); client_length u8 (4 or 16); original client address bytes; total payload 42..310 bytes |
 | 0x03 | OPEN_OK | nonzero | Empty |
 | 0x04 | OPEN_ERR | nonzero | error_code u16; correlation_id 16 bytes |
 | 0x05 | DATA | nonzero | TCP bytes; empty payload is invalid |

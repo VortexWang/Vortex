@@ -113,8 +113,8 @@ func validateFrameHeader(frame Frame, length uint16) error {
 			return fmt.Errorf("%w: HELLO payload length is outside 155..922", ErrProtocol)
 		}
 	case FrameOpen:
-		if length < 42 || length > 298 {
-			return fmt.Errorf("%w: OPEN payload length is outside 42..298", ErrProtocol)
+		if length < 42 || length > 310 {
+			return fmt.Errorf("%w: OPEN payload length is outside 42..310", ErrProtocol)
 		}
 	case FrameOpenErr:
 		if length != 18 {

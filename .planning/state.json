@@ -1,0 +1,53 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "V1",
+  "phases": [
+    {
+      "number": "1",
+      "name": "Engineering foundation",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "M0 Engine dataplane",
+      "status": "in_progress"
+    },
+    {
+      "number": "3",
+      "name": "M1 VLink engine links",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "M2 Multi-hop engine",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "M3 Agent and Edge Hub",
+      "status": "pending"
+    },
+    {
+      "number": "6",
+      "name": "M4 Backend",
+      "status": "pending"
+    },
+    {
+      "number": "7",
+      "name": "M5 Frontend and operations",
+      "status": "pending"
+    },
+    {
+      "number": "8",
+      "name": "M6 Full acceptance",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "$gsd-progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 3 of 8 · executing"
+  },
+  "updated_at": "2026-11-03T11:38:11.344Z"
+}
