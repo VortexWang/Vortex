@@ -4,11 +4,11 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 RESULTS="$ROOT/artifacts/phase1"
 mkdir -p "$RESULTS"
-rm -rf "$RESULTS"/*
-START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 COMMIT=$(git -C "$ROOT" rev-parse HEAD)
 DIRTY=false
 [ -n "$(git -C "$ROOT" status --porcelain)" ] && DIRTY=true
+rm -rf "$RESULTS"/*
+START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 HOST=$(uname -s)
 HOST_ARCH=$(uname -m)
 DOCKER_OS=$(docker info --format '{{.OperatingSystem}}' 2>/dev/null || printf 'unavailable')
