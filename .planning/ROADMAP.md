@@ -8,7 +8,7 @@
 
 - [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
 - [ ] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。
-- [ ] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。
+- [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
 - [ ] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 完成多跳调度、配额门控、排空和原子配置应用。
 - [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。
 - [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
@@ -66,20 +66,20 @@
 4. 正向隧道与反向隧道分别达到 NFR-002、NFR-004；pool 与 mux 的首包额外等待分别测量并满足 NFR-007。
 **Plans**: 6 plans in 5 waves; ready to execute after research, validation strategy, decision coverage, and plan review.
 **Wave 1**
-- [ ] 03-01-PLAN.md — Freeze VLink v1 codec and authenticated TCP tracer
+- [x] 03-01-PLAN.md — Freeze VLink v1 codec and authenticated TCP tracer
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — TLS identity, mux state, windows, and liveness
+- [x] 03-02-PLAN.md — TLS identity, mux state, windows, and liveness
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-03-PLAN.md — Local OPEN authorization and UDP admission
+- [x] 03-03-PLAN.md — Local OPEN authorization and UDP admission
 
 **Wave 4** *(blocked on Wave 3 completion; plans 03-04 and 03-05 may run in parallel)*
-- [ ] 03-04-PLAN.md — Pool modes and reverse link establishment
-- [ ] 03-05-PLAN.md — Abuse limits and privacy-preserving observability
+- [x] 03-04-PLAN.md — Pool modes and reverse link establishment
+- [x] 03-05-PLAN.md — Abuse limits and privacy-preserving observability
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 03-06-PLAN.md — Docker/Actions verification and NFR evidence
+- [x] 03-06-PLAN.md — Docker/Actions verification and NFR evidence (environment-limited; native qualification pending)
 
 ### Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 **Goal**: 多跳 TCP/UDP 路径可正确调度和排空，份额、计费快照与两阶段应用门控在并发和失败中保持安全。
@@ -150,7 +150,7 @@
 |-------|----------------|--------|-----------|
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 6/6 | In progress | - |
-| 3. M1 VLink engine links | 0/TBD | Not started | - |
+| 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 6f02115 |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
