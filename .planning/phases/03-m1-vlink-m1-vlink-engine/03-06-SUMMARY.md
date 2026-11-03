@@ -26,3 +26,9 @@ The local benchmark artifact records commit, dirty state, architecture and OrbSt
 
 - This phase now has a reproducible local/Actions command, but no GitHub Actions run has been executed in this environment.
 - Functional Phase 3 checks pass; dedicated performance NFR qualification is explicitly pending and must not be inferred from the OrbStack smoke.
+
+## Self-Check
+
+- [x] Summary reflects the implemented files and verification commands.
+- [x] Commit hash is recorded in frontmatter.
+- [x] Residual native-host performance qualification is stated explicitly.
