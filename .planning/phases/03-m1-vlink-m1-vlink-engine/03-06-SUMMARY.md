@@ -29,6 +29,8 @@ The local benchmark artifact records commit, dirty state, architecture and OrbSt
 
 ## Self-Check
 
+**Self-Check: PASSED**
+
 - [x] Summary reflects the implemented files and verification commands.
 - [x] Commit hash is recorded in frontmatter.
 - [x] Residual native-host performance qualification is stated explicitly.
