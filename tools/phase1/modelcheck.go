@@ -45,7 +45,9 @@ func Run(modelPath, resultDir string) (Report, error) {
 		return Report{}, fmt.Errorf("commit metadata: %w", err)
 	}
 	r := model.Explore()
+	violations := append([]string{}, r.Violations...)
 	report := Report{Status: "passed", CommitSHA: commit, GoToolchain: runtime.Version(), Bounds: r.Bounds, VisitedStates: r.Visited, Invariants: r.Invariants, Violations: r.Violations, ImplementationStatus: "not-yet-implemented"}
+	report.Violations = violations
 	h := sha256.Sum256(data)
 	report.ModelSHA256 = hex.EncodeToString(h[:])
 	if len(r.Violations) > 0 {
