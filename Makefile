@@ -1,4 +1,10 @@
-.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate
+.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check
+
+phase2-engine-quick:
+	cd engine && go test -race ./...
+
+phase2-engine-check: phase2-engine-quick
+	tools/engine/docker-test.sh
 
 phase1-quick:
 	python3 -m unittest discover -s tests/phase1 -p 'test_*.py'
@@ -11,4 +17,6 @@ phase1-check:
 	tools/phase1/check.sh
 
 phase1-release-gate: phase1-check
-	@test "$$(python3 -c 'import json; print(json.load(open("artifacts/phase1/evidence.json"))["requirements"]["NFR-038"])')" = passed || { echo 'release gate blocked: NFR-038 is not passed'; exit 1; }
+	@set -eu; evidence="$$(find artifacts/phase1/runs -type f -name evidence.json -print | sort | tail -n 1)"; \
+	test -n "$$evidence" || { echo 'phase1 evidence manifest is missing'; exit 1; }; \
+	test "$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["requirements"]["NFR-038"])' "$$evidence")" = out-of-scope || { echo 'project restart disposition missing: NFR-038 must remain out-of-scope'; exit 1; }

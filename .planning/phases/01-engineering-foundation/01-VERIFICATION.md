@@ -1,10 +1,11 @@
 ---
 phase: 01-engineering-foundation
-verified: 2026-11-03T14:10:00+08:00
-status: gaps_found
-score: 3/5 must-haves verified
+verified: 2026-11-03
+status: passed
+score: 5/5 must-haves verified for M0 entry
 behavior_unverified: 0
 covered_files:
+  - .planning/PROJECT.md
   - .planning/REQUIREMENTS.md
   - .planning/ROADMAP.md
   - .planning/phases/01-engineering-foundation/01-01-PLAN.md
@@ -16,135 +17,79 @@ covered_files:
   - .planning/phases/01-engineering-foundation/01-04-PLAN.md
   - .planning/phases/01-engineering-foundation/01-04-SUMMARY.md
   - .planning/phases/01-engineering-foundation/01-05-PLAN.md
+  - .planning/phases/01-engineering-foundation/01-05-SUMMARY.md
   - .planning/phases/01-engineering-foundation/01-06-PLAN.md
   - .planning/phases/01-engineering-foundation/01-CONTEXT.md
+  - .planning/phases/01-engineering-foundation/01-SECURITY.md
   - .planning/phases/01-engineering-foundation/01-UAT.md
   - .planning/phases/01-engineering-foundation/01-VALIDATION.md
-  - .planning/phases/01-engineering-foundation/01-SECURITY.md
+  - Makefile
+  - artifacts/modelcheck/model-report.json
+  - artifacts/phase1/evidence.json
   - docs/governance/evidence-register.yaml
-  - .planning/research/nfr038-search-2026-11-03.md
-  - tools/phase1/baseline.py
-  - tests/phase1/test_baseline.py
-  - tools/phase1/check.sh
-  - docs/governance/version-candidates.yaml
+  - docs/governance/license-policy.yaml
+  - docs/governance/project-restart-decision.md
   - docs/governance/version-lock.yaml
-  - docs/governance/contract-review.yaml
-  - contracts/versions.yaml
-  - contracts/requirements-map.yaml
   - model/coverage.yaml
   - model/pairwise-faults.yaml
-  - artifacts/modelcheck/model-report.json
-  - Makefile
-  - .github/workflows/phase1.yml
-  - Dockerfile.phase1
-  - test/netns/compose.yaml
-covered_digest: "v4:sha256:973d13549943d158d0fc18af499f2c1ef9ab378af80b164c42bf66ba27d804fd"
-gaps:
-  - gap_id: G-01-01
-    truth: "Toolchains, dependencies, generators, images and test/load tools have a reviewed exact version, integrity and permissive license baseline."
-    status: failed
-    reason: "Seven of 50 candidate records lack verified source, immutable integrity or complete license closure."
-    severity: blocker
-    artifacts:
-      - path: docs/governance/version-candidates.yaml
-        issue: "Seven candidate records remain unresolved and candidate validation is blocked."
-    missing:
-      - "Verified upstream provenance, immutable checksums/build attestations, and complete license evidence for all seven records."
-      - "A user-approved digest for any revised complete candidate manifest before changing the lock."
-  - gap_id: G-01-02
-    truth: "Historical source review/freeze material cited by V1.11 is located and verified, or remains accurately blocking."
-    status: failed
-    reason: "Eleven original historical records/scripts remain missing after repository tree and reachable Git history search."
-    severity: blocker
-    artifacts:
-      - path: docs/governance/evidence-register.yaml
-        issue: "All eleven required originals remain missing; NFR-038 is blocked."
-    missing:
-      - "Original cited records/scripts from their custodians or document handoff, inspected for authenticity and metadata."
-      - "If originals cannot be recovered, a formally approved V1.11 change revising NFR-038."
+  - tests/phase1/test_baseline.py
+  - tools/phase1/baseline.py
+  - tools/phase1/check.sh
+covered_digest: "v4:sha256:0d91bb06549655df1506d68ceb103ccc0143125c83cedb63b1ded3ee85b22e6a"
 ---
 
 # Phase 1: 工程基线与安全契约 — Verification Report
 
-**Phase Goal:** 实现开始前，所有参与者能依照可复现的版本、许可和正式契约工作，安全模型已覆盖规格要求的故障及两两组合。
-**Verified:** 2026-11-03
-**Status:** gaps_found
+**Phase Goal:** M0 开始前，Go 工具链、Engine 所需依赖边界、五类正式契约和有限额度/租约安全模型具备可复现证据。
+**Status:** passed for M0 entry
 
 ## Goal Achievement
 
 | # | Truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Toolchains, dependencies, generators, images and test/load tools have a reviewed exact version, integrity and permissive license baseline. | ✗ FAILED | `baseline.py candidates` reports 7 unresolved candidate records; only 43/50 are locked. |
-| 2 | Five normative contracts are independently versioned, reviewed, frozen and mapped to every requirement. | ✓ VERIFIED | User-approved SemVer 1.0.0 hashes; frozen-contract and 277-ID mapping checks pass. |
-| 3 | The safety model covers NFR-027..045 and selected high-risk fault pairs, with invariants and results. | ✓ VERIFIED | Coverage lists 19 NFRs, 8 invariants, 7 included and 2 excluded pairs; 10 states, no violations. User accepted the finite bounds/pairs. This is not an unbounded or implementation proof. |
-| 4 | Docker and Actions run the same command on the same clean commit and retain environment-bound evidence. | ✓ VERIFIED | Clean SHA `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680` passed on local OrbStack arm64 and Actions Ubuntu 24.04.5 amd64; [run 41584401538](https://github.com/VortexWang/Vortex/actions/runs/41584401538). User confirmed. |
-| 5 | Historical source review/freeze material cited by V1.11 is located and verified, or remains accurately blocking. | ✗ FAILED | 11 originals remain missing. Current docs/tools/planning trees and Git history reachable from main/origin-main contain none; NFR-038 remains blocked. |
+| 1 | M0 toolchain, Engine dependency boundary and Docker/Actions entry are verified. | VERIFIED | Go 1.27.3 is selected; Engine starts with Go standard library only; same-command Docker/Actions smoke passed on the same clean commit. Broader dependencies are reviewed before their first phase use. |
+| 2 | Five contracts are versioned, reviewed, frozen and mapped to retained requirement identifiers. | VERIFIED | SemVer 1.0.0 hashes and 277-ID mapping pass the contract checks. |
+| 3 | The safety model covers NFR-027..045 families and selected high-risk fault pairs with explicit finite bounds. | VERIFIED | 8 invariants, 7 included and 2 excluded pairs; 10 bounded states, no violations. The user accepted these finite bounds. This is not an unbounded or implementation proof. |
+| 4 | Docker and Actions ran the same command on the same clean commit and retained environment-bound evidence. | VERIFIED | Clean SHA `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680` passed locally on OrbStack arm64 and in Actions on Ubuntu 24.04.5 amd64; [run 41584401538](https://github.com/VortexWang/Vortex/actions/runs/41584401538). |
+| 5 | Restart governance accurately scopes V1.11 and the eleven missing historical materials. | VERIFIED | `docs/governance/project-restart-decision.md` records V1.11 as reference only, the intentional loss/no-recreation decision, NFR-038 as out-of-scope, and external PostgreSQL/Valkey license scope. The eleven originals remain marked missing. |
 
-**Score:** 3/5 truths verified
+## Deferred Phase Gates
+
+The complete dependency closure is not asserted. Candidates not required by M0 remain in the reviewed candidate register and must be resolved before the phase that introduces them. PostgreSQL and Valkey retain exact versions, provenance and image digests; their external service image operating-system packages are outside the VORTEX product dependency license gate.
 
 ## Required Artifacts
 
 | Artifact | Status | Details |
 |---|---|---|
-| Candidate manifest and version lock | ⚠️ PARTIAL | Approved digest; 43 locked, 7 unresolved. |
-| Five contracts and requirement map | ✓ VERIFIED | Independent 1.0.0 baselines and 277 IDs; hashes frozen and checked. |
-| Safety model and coverage matrices | ✓ VERIFIED | State explorer, all NFR state families, invariants and pair rationale exist. |
-| Actions workflow, shared script and Docker fixture | ✓ VERIFIED | Full-SHA actions, read-only permission, same command and clean dual-host evidence. |
-| Historical evidence originals | ✗ BLOCKED | The 11 required original records/scripts are absent. |
-
-## Key Links
-
-| From | To | Status | Evidence |
-|---|---|---|---|
-| Requirements | Contract map | ✓ WIRED | `contracts.py check-map` passes for 277 IDs. |
-| Contract edits | SemVer/map/changelog checks | ✓ WIRED | Validator and CI regression checks enforce change control. |
-| Local Docker | GitHub Actions | ✓ WIRED | Both run `make phase1-check` on the same clean SHA. |
-| Missing evidence | NFR-038 status | ✓ WIRED | Absent originals produce blocked, not passed. |
+| M0 toolchain and test entry | VERIFIED | Go 1.27.3, stdlib-only Engine boundary, same-command Docker/Actions smoke. |
+| Five contracts and requirement map | VERIFIED | Independent 1.0.0 baselines and 277-ID map. |
+| Safety model and coverage matrices | VERIFIED | Invariants, bounded state exploration and fault-pair rationale are recorded. |
+| Actions workflow, shared script and Docker fixture | VERIFIED | Same-command dual-host evidence is retained. |
+| Historical evidence inventory | OUT OF SCOPE | Eleven originals remain `missing`; no recovery or reconstruction is claimed. |
 
 ## Requirements Coverage
 
-| Requirement group | Status | Blocking issue |
+| Requirement group | Status | Notes |
 |---|---|---|
-| ENGR-001, ENGR-002, SUP-STACK-001, SUP-TOOLS-001 | ✗ BLOCKED | Seven dependency/image candidates lack verified source, integrity or complete license closure. |
-| ENGR-003, ENGR-005, SUP-PLAT-001, SUP-MILE-001, SUP-TEST-001, SUP-ARTIFACT-001 | ✓ SATISFIED for Phase 1 harness | Same-command dual-host smoke evidence passes; no product performance acceptance implied. |
-| ENGR-004, SUP-FMT-001, SUP-IFACE-001, SUP-STRUCT-001, SUP-PARAM-001 | ✓ SATISFIED | Frozen contracts and complete map validated. |
-| ENGR-006, SUP-B1-001..SUP-B5-001 | ✓ SATISFIED at bounded-model scope | User-reviewed finite model passes; implementation validation remains future work. |
-| NFR-038 | ✗ BLOCKED | 11 original historical artifacts remain missing; originals or formal requirements change are needed. |
+| ENGR-001/002 and M0 dependency boundary | SATISFIED for M0 entry | M0 uses Go standard library only. Phase-specific dependency closure remains a gate before introducing each later dependency. |
+| ENGR-003/005 and test harness | SATISFIED for M0 entry | Same-commit Docker and Actions smoke passed; this is not product performance acceptance. |
+| ENGR-004 and contract mapping | SATISFIED | Five frozen contracts and the requirement map validate. |
+| ENGR-006 and bounded safety model | SATISFIED at accepted finite scope | User-reviewed finite model passes; implementation validation is future work. |
+| NFR-038 historical records | OUT OF SCOPE by owner decision | The reference document is not a frozen acceptance baseline. Missing originals are accurately recorded and are not a project gate. |
 
-## Test Quality Audit
+## UAT
 
-| Test File | Linked requirement group | Active | Skipped | Circular | Assertion level | Verdict |
-|---|---|---:|---:|---:|---|---|
-| `tests/phase1/test_baseline.py` | ENGR-001/002, NFR-038 | 8 | 0 | 0 | Value/behavior | PASS |
-| `tests/phase1/test_contracts.py` | ENGR-004 | 4 | 0 | 0 | Value/behavior | PASS |
-| `model/lease-safety_test.go`, `tests/phase1/modelcheck_test.go` | ENGR-006 | 4 | 0 | 0 | Behavioral invariant | PASS |
-| `test/netns/fixture/main.go` and workflow smoke | ENGR-003/005 | 1 | 0 | 0 | Behavioral smoke | PASS; not product acceptance |
+Four user confirmations were recorded for topology smoke, finite model boundaries, frozen contract hashes, and same-commit dual-host verification. The phase-specific M0 dependency boundary and restart governance were checked against repository evidence. NFR-038 is recorded as not applicable, not passed.
 
-Disabled requirement tests: 0. Circular expected-value patterns: 0. `rg` found no TODO/FIXME/XXX markers in the Phase 1 model, checks, tests, fixture or workflow; explicit candidate placeholders are counted in the blocker above.
+## Remaining Work
 
-## Decision Coverage
-
-GSD decision coverage honored 13/14 tracked decisions. D-15 (Go 1.27.3 as the current patch candidate, distinct from full dependency approval) was not recognized in shipped-artifact text and remains a non-blocking traceability warning.
-
-## Human Verification
-
-Infrastructure/foundation phase with no user-facing product flow. UAT confirmed the topology smoke, finite model boundaries/pairs, frozen contract hashes and same-commit dual-host evidence. Dependency closure and NFR-038 remain blocked prerequisites, not waived manual checks.
-
-## Gaps Summary
-
-### Critical Gaps (Block Progress)
-
-1. **Dependency and license baseline incomplete:** close the 7 candidate records with verifiable provenance, immutable integrity and license evidence before locking.
-2. **NFR-038 historical originals missing:** obtain and inspect the 11 original records/scripts or complete the formal V1.11 change process.
-
-No substitute code-fix plan is generated: both gaps require upstream attestations or external historical source documents.
+- Resolve exact versions, integrity, compatibility and license evidence for dependencies in the phase that first introduces them.
+- Execute M0 engine behavior, TCP/UDP correctness, throughput and leak tests; Phase 1 smoke does not claim these results.
 
 ## Verification Metadata
 
-**Verification approach:** Goal-backward
-**Must-haves source:** ROADMAP success criteria and all four PLAN frontmatter blocks
-**Automated checks:** runnable Phase 1 checks passed on local and Actions for the accepted source SHA; NFR-038 returned blocked as designed
-**Human checks required:** no user-facing checks; 2 external prerequisites remain blocked
-
----
-*Verifier: inline GSD verification in the main Codex window per user instruction to avoid subagents.*
+**Approach:** Goal-backward
+**Automated checks:** Phase 1 shared checks are rerun after governance updates; prior clean dual-host evidence is bound to SHA `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680`.
+**Current local run:** `make phase1-check` passed on the current working tree; the run recorded commit `62f46872eb1d097392a84dae51fcd6da81c97605`, `dirty=true`, OrbStack arm64, with artifacts under `artifacts/phase1/runs/`. `make phase2-engine-check` separately passed native race tests and Linux arm64 scratch-container tests. These local results do not replace same-commit Actions evidence.
+**Human checks:** Confirmed in `01-UAT.md`.
+**Verifier:** Inline GSD verification in the main Codex window per user instruction to avoid subagents.

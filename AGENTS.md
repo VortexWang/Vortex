@@ -6,19 +6,19 @@
 
 VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 TCP / UDP 流量转发与管理平台，服务于平台运营者及使用转发服务的租户。自研转发引擎是核心，Agent、Edge Hub、后端及中文管理界面共同提供节点部署、规则编排、套餐权益、可信计量及故障恢复的业务闭环。
 
-本项目以 `docs/VORTEX 需求规格说明书 V1_11.md` 正文、规范性表格与附录 B 为需求来源，保留原需求编号及验收编号，不自行裁剪首版范围。执行严格遵循 GSD 的初始化、阶段讨论与规划、实施、验证和里程碑审计流程。
+本项目重启后以当前项目决策和阶段验收为准。`docs/VORTEX 需求规格说明书 V1_11.md` 仅作需求参考，不是冻结验收依据；保留有用的需求编号与语义，按 GSD 阶段讨论、规划、实施、验证和里程碑审计持续开发。
 
 **Core Value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
 
 ### Constraints
 
-- **需求基线**: V1.11 是需求与验收依据；变更必须按规格 0.3～0.4 升版、记录影响并重新评审，初始化不改写冻结需求。
+- **需求基线**: V1.11 仅供参考，不是冻结验收依据；重启后要求或验收边界的调整记录于项目决策与 GSD 阶段文档。
 - **架构边界**: 后端与 Edge Hub 不承载业务流量；Engine 独立 Go 模块，不访问数据库或主动调用控制面；Agent 与 Engine 仅通过规定的进程内接口交互。
 - **技术栈**: 按规格 3.3 使用 Go、Gin、pgx/v5、sqlc、Goose、PostgreSQL、Valkey、SQLite WAL、gRPC / Protobuf、TLS 1.3；前端使用 React、严格 TypeScript、Vite、Ant Design、CSS Modules、React Router、TanStack Query、Zustand、Zod；精确版本待工程基线锁定。
 - **持久化**: PostgreSQL 是业务与期望配置唯一事实来源；Valkey 只作非权威缓存等用途；可靠任务使用 PostgreSQL 任务表和 Transactional Outbox。
 - **安全与记账**: mTLS、租户隔离、保守时间边界、不可变计费快照、逐来源额度守恒及未知负债冻结遵循正文与附录 B；未确认执行不能视为停止或未激活。
 - **部署与兼容**: Linux amd64 / arm64，标准验收系统 Ubuntu 24.04 LTS；后端和前端使用 Docker Compose，节点与 Hub 提供二进制、systemd 和容器镜像。
-- **版本与许可**: 工具链、依赖和镜像锁定版本，不用浮动 latest；闭源商业发布，只交付二进制和镜像；第三方依赖限定宽松许可，禁止 GPL / AGPL。
+- **版本与许可**: 产品源码、链接依赖及随 VORTEX 分发的镜像/工具锁定版本并审查许可；PG 与 Valkey 作为外部数据服务，不纳入产品依赖许可门禁，但记录版本、来源与镜像摘要。
 - **验证证据**: 相同提交的本机 Docker 与 GitHub Actions 结果分别记录；未运行、受资源限制或失败的检查保持未通过，不将有限模型算例当作完整模型验证或系统验收。
 
 <!-- GSD:project-end -->
@@ -37,7 +37,7 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 | --- | --- | --- | --- |
 | Go | **1.27.3** | Engine、Node、Hub、后端统一工具链；标准库提供 net、tls、x509、slog、pprof，避免额外数据面框架；该补丁包含 x509 安全修复 | [官方发布历史](https://go.dev/doc/devel/release#go1.27.0)；仅确认发布，不证明 VORTEX 性能 |
 | Gin | **v1.12.0** | 仅 HTTP 接入、认证上下文、请求解析、REST / SSE；业务规则放领域服务 | [官方发布](https://github.com/gin-gonic/gin/releases/tag/v1.12.0)；不启用其 HTTP/3 能力作为 VLink |
-| pgx/v5 | **v5.12.0** | PostgreSQL 原生驱动、连接池和事务；避免从过期教程复制旧驱动版本 | [官方 CHANGELOG](https://github.com/jackc/pgx/blob/master/CHANGELOG.md) 2026-10-30 记录安全修复；[精确 go.mod](https://proxy.golang.org/github.com/jackc/pgx/v5/@v/v5.12.0.mod) 要求 Go ≥1.25 |
+| pgx/v5 | **v5.11.0** | PostgreSQL 原生驱动、连接池和事务；2026-11-03 复核时 GitHub 正式 release 与 Go module proxy 均未发现 v5.12.0，采用 v5.11.0 作为最新已发布稳定候选 | [官方 latest release](https://api.github.com/repos/jackc/pgx/releases/latest)；[精确 Go module sum](https://sum.golang.org/lookup/github.com/jackc/pgx/v5@v5.11.0) |
 | sqlc | **v1.31.1** | 从显式 SQL 生成类型安全数据访问，配置 `sql_package: pgx/v5`；生成代码仍须经 tenantscope 封装 | [官方发布](https://github.com/sqlc-dev/sqlc/releases/tag/v1.31.1)、[pgx 指南](https://docs.sqlc.dev/en/stable/guides/using-go-and-pgx.html) |
 | Goose | **v3.29.0** | 纳入版本控制的 PostgreSQL / SQLite SQL 迁移；迁移工具与应用进程分开执行，防止多实例并发迁移 | [官方发布](https://github.com/pressly/goose/releases/tag/v3.29.0)；使用所需驱动裁剪构建，避免 CLI 全驱动依赖膨胀 |
 | PostgreSQL | **18.6** | 事务、唯一约束、任务表、Outbox、计费账本和期望状态唯一事实来源；支持外置部署 | [官方支持表](https://www.postgresql.org/support/versioning/) 列出 18.6、支持至 2030-11；研究时 19 仍显示 RC，不采用 RC |
@@ -53,11 +53,11 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 
 | 技术 | 精确候选 | 职责与理由 | 来源 |
 | --- | --- | --- | --- |
-| Node.js | **24.22.2 LTS** | 构建、类型检查、测试的统一运行时；锁定附带 npm 的版本 | [官方发布](https://nodejs.org/en/blog/release) |
-| React / react-dom | **19.3.0 / 19.3.0** | SPA 渲染；两者精确版本保持相同 | [官方版本说明](https://react.dev/versions)、[react-dom 包元数据](https://registry.npmjs.org/react-dom/19.3.0) |
-| TypeScript | **6.0.3** | `strict: true`，单独执行类型检查；建议同时启用 noUncheckedIndexedAccess | [官方发布](https://github.com/microsoft/TypeScript/releases)；7.0.2 已存在，本建议先固定 6.0.3，避免初始基线同时引入 native 编译器迁移；不声称 7 不兼容 |
+| Node.js | **26.13.0 LTS** | 构建、类型检查、测试的统一运行时；锁定附带 npm 的版本 | [官方 release index](https://nodejs.org/dist/index.json)；Linux amd64/arm64 SHA-256 见 version-candidates |
+| React / react-dom | **19.3.1 / 19.3.1** | SPA 渲染；两者精确版本保持相同 | [React package metadata](https://registry.npmjs.org/react/19.3.1)、[react-dom package metadata](https://registry.npmjs.org/react-dom/19.3.1) |
+| TypeScript | **7.0.2** | 最新稳定编译器候选；是否与 Vite/Vitest 插件、配置及类型包兼容须构建验证后再批准 | [官方发布](https://github.com/microsoft/TypeScript/releases)、[精确包 integrity/license](https://registry.npmjs.org/typescript/7.0.2) |
 | Vite / React 插件 | **8.3.5 / @vitejs/plugin-react 6.2.1** | 构建、开发和 CSS Modules；采用匹配 Vite 8 的插件 | [Vite 发布](https://github.com/vitejs/vite/releases)、[插件元数据](https://registry.npmjs.org/@vitejs/plugin-react/6.2.1) |
-| Ant Design / icons | **antd 6.6.6 / @ant-design/icons 6.3.4** | 中文管理界面、主题 Token、Form；不套用额外后台框架 | [官方入门](https://ant.design/docs/react/getting-started/)、[迁移兼容说明](https://ant.design/docs/react/migration-v6/)、[antd 元数据](https://registry.npmjs.org/antd/6.6.6) |
+| Ant Design / icons | **antd 6.6.8 / @ant-design/icons 6.3.4** | 中文管理界面、主题 Token、Form；不套用额外后台框架 | [官方入门](https://ant.design/docs/react/getting-started/)、[迁移兼容说明](https://ant.design/docs/react/migration-v6/)、[antd 元数据](https://registry.npmjs.org/antd/6.6.8) |
 | React Router | **8.5.1** | 按角色组织 SPA 路由；后端仍独立执行权限 | [官方发布](https://github.com/remix-run/react-router/releases)、[精确元数据](https://registry.npmjs.org/react-router/8.5.1) |
 | TanStack Query | **@tanstack/react-query 5.105.3** | API 读取、mutation、缓存失效、SSE 触发重取；不把账本真实状态只留在浏览器缓存 | [官方发布](https://github.com/TanStack/query/releases)、[精确元数据](https://registry.npmjs.org/@tanstack/react-query/5.105.3)；不要误用同仓其他框架 6.x 版本 |
 | Zustand | **5.0.16** | 本地交互状态，如编辑器草稿、侧栏、筛选偏好；不复制 Query 中的服务器实体 | [官方发布](https://github.com/pmndrs/zustand/releases) |
@@ -73,7 +73,7 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 | golang.org/x/sys | **v0.49.0 候选** | 与 SQLite v1.61.1 go.mod 对齐；Engine 如需 Linux syscall、splice 才引入并再次审查依赖边界 |
 | Go testing / race / pprof | **随 Go 1.27.3** | 独立 Engine、集成、竞态和性能分析；race 产物与正式压测产物分开 |
 | go.uber.org/goleak | **v1.3.0** | [官方发布](https://github.com/uber-go/goleak/releases)；会话、链路和监听关闭后检测 goroutine 泄漏，结合 FD/连接实际计数 |
-| Vitest | **5.1.0** | [官方发布](https://github.com/vitest-dev/vitest/releases)、[engines/peer 元数据](https://registry.npmjs.org/vitest/5.1.0)；支持 Vite 8、Node 24；coverage 插件保持同版本 |
+| Vitest | **5.1.0** | [官方发布](https://github.com/vitest-dev/vitest/releases)、[engines/peer 元数据](https://registry.npmjs.org/vitest/5.1.0)；支持 Vite 8；Node 26 支持仍须实测，coverage 插件保持同版本 |
 | React Testing Library | **16.3.3** | [官方发布](https://github.com/testing-library/react-testing-library/releases)；验证用户可见行为；DOM / user-event 等直接依赖仍须精确锁定 |
 | Playwright | **1.64.1** | [官方发布](https://github.com/microsoft/playwright/releases)；锁定对应浏览器下载与测试镜像；Chromium / Firefox / WebKit 回归不等同于真实 Safari / Edge 全部验收 |
 | Vegeta | **v12.13.0 候选；用户已批准替代 k6** | API 定速负载、吞吐/延迟与状态码结果；[官方发布](https://github.com/tsenart/vegeta/releases/tag/v12.13.0)、[MIT LICENSE](https://github.com/tsenart/vegeta/blob/master/LICENSE)。身份令牌准备、业务串联和幂等断言由测试脚本配合，不假定它直接执行 k6 脚本 |
@@ -115,7 +115,7 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 | --- | --- |
 | Go / Gin / pgx / sqlc / Goose / gRPC / Protobuf | 核心项目采用 BSD / MIT / Apache 等宽松许可证的候选路线；正式放行仍检查精确版本 LICENSE / NOTICE 和完整传递图，不把根项目许可证当全图结论 |
 | 前端直接依赖 | 查询的 React、Ant Design、Vite、Router、Query、Zustand、Zod、Vitest npm 元数据标 MIT；Playwright 标 Apache-2.0。类型包、原生 bundler、浏览器及其他传递依赖另外审查 |
-| PostgreSQL / Valkey / SQLite | [PostgreSQL License](https://www.postgresql.org/about/licence/)、[Valkey BSD 许可说明](https://valkey.io/topics/license/)、[SQLite public domain](https://sqlite.org/copyright.html)；驱动和扩展分别保留许可证。public domain 等归类在允许清单中显式定义，不能让扫描器默认为未知而静默放行 |
+| PostgreSQL / Valkey / SQLite | PostgreSQL 与 Valkey 按项目所有者决定作为外部数据服务，服务镜像 OS 包许可不纳入 VORTEX 产品依赖门禁；仍记录版本、来源、镜像摘要与集成兼容性。SQLite 驱动及扩展作为 VORTEX 链接依赖单独审查许可证 |
 | k6 → Vegeta 已获用户批准 | [上游 k6](https://github.com/grafana/k6) 明确 AGPL-3.0，与原 §14.3 / ENGR-002 的组合形成冲突；用户已明确批准采用 [MIT Vegeta](https://github.com/tsenart/vegeta/blob/master/LICENSE) 替代。研究据此采用 Vegeta，保持全部 API 压测目标；原 V1.11 不覆写，主流程补充需求变更记录。Vegeta 精确版本、传递依赖与镜像仍须工程基线审查 |
 | 系统与镜像 | Ubuntu、Debian、Alpine 镜像和网络测试工具可能含 GPL/LGPL 系统组件；只检查 go.mod / npm 不足以证明镜像合规。分别盘点构建环境、内部测试、运行制品和分发镜像，按最终明确的政策判定，禁止将“非链接工具”自动当合规 |
 | OrbStack | [官方条款](https://docs.orbstack.dev/legal/terms) 对商业/专业使用要求购买相应许可；它是开发宿主工具，不随 VORTEX 发布；当前是否已持有授权未核实 |
@@ -125,9 +125,9 @@ VORTEX 是商业级、多租户、多节点、支持多跳且可私有部署的 
 
 | 组合 | 已检查的条件 | 锁定前必须执行 |
 | --- | --- | --- |
-| Go 1.27.3 + SQLite v1.61.1 + pgx v5.12.0 | SQLite go.mod 要求 1.26、pgx 要求 1.25，工具链满足下限；SQLite libc 固定 v1.79.0 | 双架构 `go mod graph`、构建、数据库事务与崩溃测试；检查 MVS 是否改写 libc 或其他关键依赖 |
-| Node 24.22.2 + Vite 8.3.5 + React 插件 6.2.1 + Vitest 5.1.0 | npm engines/peer 范围允许；插件需 Vite 8，Vitest 允许 Vite 8 / Node 24 | 精确安装、peer 冲突检查、类型检查、测试与 production build；插件可选 peer 按实际使用精确锁定 |
-| React/DOM 19.3.0 + Router 8.5.1 + antd 6.6.6 | Router 要求 Node ≥22.22、React ≥19.2.7；antd 要求 React ≥18；候选满足 | 真实页面渲染、Form、Modal、中文 locale、SSE 重连、路由权限与浏览器回归 |
+| Go 1.27.3 + SQLite v1.61.1 + pgx v5.11.0 | Go 官方 release 与 Go checksum database 已验证版本摘要；SQLite/pgx module sums 已查询 | 双架构 `go mod graph`、构建、数据库事务与崩溃测试；检查 MVS 是否改写 libc 或其他关键依赖 |
+| Node 26.13.0 + Vite 8.3.5 + React 插件 6.2.1 + Vitest 5.1.0 | 最新 Node LTS 已确认；Node 26 与工具 peer/engine 组合仍待验证 | 锁定后执行精确安装、peer 冲突检查、类型检查、测试与 production build；未经用户批准不安装 |
+| React/DOM 19.3.1 + Router 8.5.1 + antd 6.6.8 + TypeScript 7.0.2 | npm 官方 registry 已给出精确 versions、integrity 和 license；TypeScript 7 兼容性未验证 | 真实页面渲染、Form、Modal、中文 locale、SSE 重连、路由权限和完整 TS 构建回归 |
 | protobuf runtime、两个生成器、protoc | 所选均为正式版，版本号体系互不等同 | 生成后无差异校验、后端/Hub/Agent 编译、双向流兼容与升级/降级测试 |
 | PG 18.6 + sqlc + Goose + pgx | 推荐 SQL 优先组合；未验证全部 DDL/SQL 特性支持 | 真实 PG 建库、迁移、sqlc generate、并发计费事务与物理恢复演练 |
 | Playwright 1.64.1 + 浏览器 | 测试库版本已确认 | 对应浏览器和镜像精确匹配；规格要求真实 Chrome/Edge/Safari 当前及前一主版本的覆盖另列证据 |

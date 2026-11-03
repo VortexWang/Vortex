@@ -26,6 +26,21 @@ class EvidenceChecks(unittest.TestCase):
             register = {"items":[{"artifact":"original.md", "status":"missing", "evidence_link":None}]}
             self.assertEqual("blocked", check_evidence(register, Path(temp))[0])
 
+    def test_owner_restart_disposition_is_nonblocking_but_not_passed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            decision = root / "decision.md"
+            decision.write_text("owner decision", encoding="utf-8")
+            register = {"status":"out-of-scope", "decision":"decision.md", "items":[{"artifact":"original.md", "status":"missing", "evidence_link":None}]}
+            self.assertEqual(("out-of-scope", []), check_evidence(register, root))
+
+    def test_out_of_scope_requires_decision_and_preserves_missing_rows(self):
+        with tempfile.TemporaryDirectory() as temp:
+            register = {"status":"out-of-scope", "decision":"missing.md", "items":[{"artifact":"original.md", "status":"verified", "evidence_link":"x"}]}
+            status, errors = check_evidence(register, Path(temp))
+            self.assertEqual("blocked", status)
+            self.assertEqual(3, len(errors))
+
     def test_verified_requires_authentic_record_metadata(self):
         with tempfile.TemporaryDirectory() as temp:
             Path(temp, "original.md").write_text("source", encoding="utf-8")

@@ -2,13 +2,13 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-RESULTS="$ROOT/artifacts/phase1"
-mkdir -p "$RESULTS"
 COMMIT=$(git -C "$ROOT" rev-parse HEAD)
 DIRTY=false
 [ -n "$(git -C "$ROOT" status --porcelain)" ] && DIRTY=true
-rm -rf "$RESULTS"/*
 START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+RUN_ID=$(date -u +%Y%m%dT%H%M%SZ)-$$
+RESULTS="$ROOT/artifacts/phase1/runs/$RUN_ID"
+mkdir -p "$RESULTS"
 HOST=$(uname -s)
 HOST_ARCH=$(uname -m)
 DOCKER_OS=$(docker info --format '{{.OperatingSystem}}' 2>/dev/null || printf 'unavailable')
@@ -47,7 +47,7 @@ run_required contract-check python3 tools/phase1/contracts.py check-frozen
 run_required requirement-map python3 tools/phase1/contracts.py check-map
 run_required go-tests go test ./model ./tools/phase1 ./tests/phase1 ./cmd/modelcheck
 run_required model-report go run ./cmd/modelcheck -model model/lease-safety.go -results "$RESULTS/modelcheck"
-run_expected_blocked evidence-check python3 tools/phase1/baseline.py evidence
+run_required evidence-disposition python3 tools/phase1/baseline.py evidence
 
 if [ "$DOCKER_OS" = "unavailable" ]; then
   echo 'Docker is unavailable' >"$RESULTS/docker.log"
@@ -74,7 +74,7 @@ data={
   'schema_version':1, 'commit_sha':commit, 'dirty':dirty=='true',
   'command':'make phase1-check', 'started_at':start, 'ended_at':end,
   'environment':{'host_os':host,'host_arch':host_arch,'docker_os':docker_os,'docker_arch':docker_arch},
-  'image_digest':digest or None, 'checks':statuses, 'requirements':{'NFR-038':'blocked'},
+  'image_digest':digest or None, 'checks':statuses, 'requirements':{'NFR-038':'out-of-scope'},
   'artifacts':sorted(artifacts), 'status':'passed' if fail=='0' else 'failed',
   'note':'Network fixture is smoke coverage only; Engine throughput, UDP correctness and leak acceptance remain Phase 2.'
 }

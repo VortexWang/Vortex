@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "status": "partial-approved-blocked",
+  "status": "partial-approved-phase-scoped",
   "source_baseline": "V1.11",
   "candidate_manifest_sha256": "3444057c66ea80de0eb94517c51119f737707237b10b1bbd1d586513f5164060",
   "approved_at": "2026-11-03T04:10:44Z",
   "user_decision": "approve-candidates",
-  "approval_note": "User approved the exact candidate snapshot digest. Open gaps remain explicitly blocked and are not promoted to approved lock entries.",
+  "approval_note": "User approved the exact candidate version snapshot. The remaining seven not-locked entries are deferred until first use; they do not block the current standard-library-only M0 TCP slice. NFR-038 and PostgreSQL/Valkey service-image package licenses are outside active development gates.",
+  "scope_note": "Only dependencies used by the active phase must be locked before implementation. PostgreSQL and Valkey versions, provenance, image digests, and integration compatibility remain tracked; their server-image package licenses are not a VORTEX product gate.",
   "license_policy": "docs/governance/license-policy.yaml",
   "license_policy_sha256": "334582883d6759177ff484a21177a91421ae627e157a58fb1614ead7ecd5fa58",
   "reproducibility": {
@@ -490,13 +491,13 @@
     {
       "name": "PostgreSQL",
       "version": "18.6-bookworm",
-      "reason": "image digest verified; Debian base package license/SBOM closure remains pending",
+      "reason": "External PostgreSQL service image is not part of VORTEX product distribution; exact version, source and platform digests remain tracked; integration compatibility is checked before backend use",
       "status": "not-locked"
     },
     {
       "name": "Valkey",
       "version": "9.1.3",
-      "reason": "image digest verified; image OS/package license closure remains pending",
+      "reason": "External Valkey service image is not part of VORTEX product distribution; exact version, source and platform digests remain tracked; integration compatibility is checked before backend use",
       "status": "not-locked"
     },
     {
@@ -531,7 +532,6 @@
     }
   ],
   "blocking_conditions": [
-    "NFR-038 historical evidence remains blocked.",
-    "Open dependency license and image OS/package closure gaps remain blocked; this partial lock cannot authorize release."
+    "Open product dependency license and integrity gaps remain for dependencies not yet approved; resolve them before their first use and before release."
   ]
 }

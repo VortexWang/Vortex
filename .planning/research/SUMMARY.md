@@ -1,5 +1,7 @@
 # Project Research Summary
 
+> Governance update (2026-11-03): This research predates the project restart clarification. V1.11 is reference only; the eleven historical records were cleared and are not to be recreated; NFR-038 is out of scope. PostgreSQL and Valkey are external services outside the product dependency license gate. See `docs/governance/project-restart-decision.md`.
+
 **Project:** VORTEX  
 **Domain:** 商业闭源、多租户 TCP / UDP 多跳转发与可信计量平台  
 **Researched:** 2026-11-02  

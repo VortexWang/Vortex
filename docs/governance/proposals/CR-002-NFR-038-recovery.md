@@ -1,6 +1,6 @@
 # CR-002: NFR-038 Historical Evidence Recovery
 
-Status: draft; pending user review and formal approval
+Status: superseded by project restart decision; do not execute
 Source baseline: V1.11
 Proposed target baseline: V1.12
 Date prepared: 2026-11-03
@@ -37,4 +37,4 @@ V1.12 may become effective only after the change is reviewed and approved under 
 | User / specification owner | pending | pending | pending |
 | Independent technical reviewer | pending | pending | pending |
 
-This proposal is not an approved specification change. No original evidence row may be changed to `verified` on the basis of this proposal.
+On 2026-11-03 the project owner clarified that V1.11 is reference only, the eleven originals were cleared during project restart, and they must not block development or be recreated. This proposal is retained as historical context only. See `docs/governance/project-restart-decision.md`; original evidence rows remain `missing`.

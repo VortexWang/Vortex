@@ -9,6 +9,8 @@ created: "2026-11-03"
 
 # Phase 01 — Validation Strategy
 
+> Current owner decision supersedes validation rows below that require NFR-038 historical evidence recovery. The 11 originals remain missing; recovery is not a gate. See `docs/governance/project-restart-decision.md`.
+
 > Per-phase validation contract for feedback sampling during execution.
 
 ---

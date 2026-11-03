@@ -3,7 +3,7 @@
 **Defined:** 2026-11-03
 **Core Value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
 
-V1.11 is the complete committed scope. Every original requirement below points to its exact source record and SHA-256 in `REQUIREMENTS-SOURCE.md`. CR-001 substitutes Vegeta for k6 in API load testing; all requirements and acceptance thresholds remain in scope. Engineering prerequisites precede engine-first M0-M6.
+V1.11 is a reference for product scope and requirement identifiers, not a frozen acceptance baseline. Every reference requirement below points to its source record and SHA-256 in `REQUIREMENTS-SOURCE.md`. Project restart decisions and GSD phase acceptance criteria govern implementation. CR-001 records the Vegeta load-test choice. Dependencies are closed before the phase that introduces them; PostgreSQL and Valkey are external services, not product-linked dependencies.
 
 ## GEN Requirements
 
@@ -292,7 +292,7 @@ V1.11 is the complete committed scope. Every original requirement below points t
 - [ ] **NFR-035**: See exact original requirement in REQUIREMENTS-SOURCE.md (923-923; SHA-256 recorded there).
 - [ ] **NFR-036**: See exact original requirement in REQUIREMENTS-SOURCE.md (924-924; SHA-256 recorded there).
 - [ ] **NFR-037**: See exact original requirement in REQUIREMENTS-SOURCE.md (925-925; SHA-256 recorded there).
-- [ ] **NFR-038**: See exact original requirement in REQUIREMENTS-SOURCE.md (926-926; SHA-256 recorded there).
+- [ ] **NFR-038**: Historical document recovery is out of scope after project restart; the eleven rows remain recorded as missing. See `docs/governance/project-restart-decision.md`.
 - [ ] **NFR-039**: See exact original requirement in REQUIREMENTS-SOURCE.md (932-932; SHA-256 recorded there).
 - [ ] **NFR-040**: See exact original requirement in REQUIREMENTS-SOURCE.md (933-933; SHA-256 recorded there).
 - [ ] **NFR-041**: See exact original requirement in REQUIREMENTS-SOURCE.md (934-934; SHA-256 recorded there).
@@ -303,12 +303,12 @@ V1.11 is the complete committed scope. Every original requirement below points t
 
 ## ENGR Requirements
 
-- [ ] **ENGR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (968-968; SHA-256 recorded there).
-- [ ] **ENGR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (969-969; SHA-256 recorded there).
-- [ ] **ENGR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (970-970; SHA-256 recorded there).
-- [ ] **ENGR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (971-971; SHA-256 recorded there).
-- [ ] **ENGR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (972-972; SHA-256 recorded there).
-- [ ] **ENGR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (973-973; SHA-256 recorded there).
+- [x] **ENGR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (968-968; SHA-256 recorded there).
+- [x] **ENGR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (969-969; SHA-256 recorded there).
+- [x] **ENGR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (970-970; SHA-256 recorded there).
+- [x] **ENGR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (971-971; SHA-256 recorded there).
+- [x] **ENGR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (972-972; SHA-256 recorded there).
+- [x] **ENGR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (973-973; SHA-256 recorded there).
 
 ## Supplemental Normative Constraints
 
@@ -592,7 +592,7 @@ V1.11 is the complete committed scope. Every original requirement below points t
 | NFR-035 | Phase 8 | Pending |
 | NFR-036 | Phase 8 | Pending |
 | NFR-037 | Phase 8 | Pending |
-| NFR-038 | Phase 1 | Pending |
+| NFR-038 | Project governance | Out of scope by owner decision; not a development or release gate |
 | NFR-039 | Phase 4 | Pending |
 | NFR-040 | Phase 4 | Pending |
 | NFR-041 | Phase 8 | Pending |
@@ -600,12 +600,12 @@ V1.11 is the complete committed scope. Every original requirement below points t
 | NFR-043 | Phase 8 | Pending |
 | NFR-044 | Phase 4 | Pending |
 | NFR-045 | Phase 8 | Pending |
-| ENGR-001 | Phase 1 | Pending |
-| ENGR-002 | Phase 1 | Pending |
-| ENGR-003 | Phase 1 | Pending |
-| ENGR-004 | Phase 1 | Pending |
-| ENGR-005 | Phase 1 | Pending |
-| ENGR-006 | Phase 1 | Pending |
+| ENGR-001 | Phase 1 | Complete |
+| ENGR-002 | Phase 1 | Complete |
+| ENGR-003 | Phase 1 | Complete |
+| ENGR-004 | Phase 1 | Complete |
+| ENGR-005 | Phase 1 | Complete |
+| ENGR-006 | Phase 1 | Complete |
 | SUP-FMT-001 | Phase 1 | Pending |
 | SUP-STACK-001 | Phase 1 | Pending |
 | SUP-PLAT-001 | Phase 1 | Pending |

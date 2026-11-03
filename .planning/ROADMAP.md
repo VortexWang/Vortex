@@ -2,11 +2,11 @@
 
 ## Overview
 
-先完成可审查的工程版本基线、五类正式契约和 ENGR-006 安全模型，再依 V1.11 的引擎优先顺序交付 M0～M6。共八阶段，所有原始 257 项及 20 项补充约束在 REQUIREMENTS.md 中各映射到唯一阶段。API 压测工具按用户批准的 CR-001 使用 Vegeta；冻结规格原件保持不变。Docker 和 GitHub Actions 对同一提交执行适用验证，系统验收仍须满足规格的真实 Linux、资源与时长条件。
+先完成 M0 所需的工程基线、五类契约和安全模型，再按引擎优先顺序交付 M0～M6。V1.11 是需求参考，不是冻结验收依据；阶段验收由当前项目决策定义。依赖在首次使用的阶段前锁定。PostgreSQL 与 Valkey 是外部服务，不纳入产品依赖许可门禁。Docker 和 GitHub Actions 对同一提交执行适用验证。
 
 ## Phases
 
-- [ ] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 锁定并评审工程版本、许可、契约和安全模型。
+- [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
 - [ ] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。
 - [ ] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。
 - [ ] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 完成多跳调度、配额门控、排空和原子配置应用。
@@ -18,36 +18,36 @@
 ## Phase Details
 
 ### Phase 1: 工程基线与安全契约 (Engineering Foundation)
-**Goal**: 实现开始前，所有参与者能依照可复现的版本、许可和正式契约工作，安全模型已覆盖规格要求的故障及两两组合。
+**Goal**: M0 开始前，Go 工具链、Engine 所需依赖边界、五类正式契约和有限额度/租约安全模型具备可复现证据。
 **Depends on**: Nothing
-**Requirements**: NFR-038, ENGR-001, ENGR-002, ENGR-003, ENGR-004, ENGR-005, ENGR-006, SUP-FMT-001, SUP-STACK-001, SUP-PLAT-001, SUP-IFACE-001, SUP-STRUCT-001, SUP-TOOLS-001, SUP-MILE-001, SUP-PARAM-001
+**Requirements**: ENGR-001, ENGR-002, ENGR-003, ENGR-004, ENGR-005, ENGR-006, SUP-FMT-001, SUP-STACK-001, SUP-PLAT-001, SUP-IFACE-001, SUP-STRUCT-001, SUP-TOOLS-001, SUP-MILE-001, SUP-PARAM-001
 **Success Criteria** (what must be TRUE):
-1. Go/Node、直接与传递依赖、生成器、容器镜像和 API 压测工具均有精确锁定版本、校验值与完整许可清单；Go/Node 等许可、SQLite 嵌入版本及 CR-001 的 Vegeta 选择通过评审。
-2. 数据库、OpenAPI、Protobuf、运行配置和 VLink 编码五类契约已交付，逐条映射 V1.11 需求与验收编号，评审结论和证据可定位。
+1. M0 使用 Go 1.27.3 与标准库，不引入第三方 Engine 依赖；M0 构建、测试、网络 fixture 和 Docker/Actions 入口已验证。后续阶段依赖在首次使用前完成版本、来源、完整性与许可审查。
+2. 数据库、OpenAPI、Protobuf、运行配置和 VLink 编码五类契约已交付，逐条映射保留的需求编号，评审结论和证据可定位。
 3. TLA+ 或确定性模拟器覆盖 ENGR-006 和 NFR-027～NFR-045 要求的状态、不变量、故障及两两组合，反例和运行结果归档；模型明确不是实现验收替代品。
 4. Docker 与 Actions 有同一提交、可复用的测试入口和结果归档；GitHub Actions 的实际执行能力通过 VortexWang 连接或已配置的仓库通道核验。
-5. V1.11 引用但仓库缺少的冻结/评审材料已找到并核验，或记录为阻塞证据及其对 NFR-038 的影响；不生成虚假评审证据。
-**Plans**: 4 plans
+5. V1.11 所引的 11 份历史材料已按项目重启决定登记为缺失；不重建材料，NFR-038 不作为本项目开发或验收门槛。
+**Plans**: 5/5 plans complete; Phase 1 M0-entry criteria complete. Plans 01-05 retain remaining just-in-time dependency review; 01-06 is superseded by the owner restart decision.
 **Wave 1**
-- [ ] 01-01-PLAN.md — Candidate versions, licenses and evidence register
-- [ ] 01-02-PLAN.md — Formal contracts and requirement traceability
+- [x] 01-01-PLAN.md — Candidate versions, licenses and evidence register
+- [x] 01-02-PLAN.md — Formal contracts and requirement traceability
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-03-PLAN.md — Lease safety model and fault combinations
+- [x] 01-03-PLAN.md — Lease safety model and fault combinations
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-04-PLAN.md — Docker and GitHub Actions verification path
+- [x] 01-04-PLAN.md — Docker and GitHub Actions verification path
 
 ### Phase 2: M0 引擎数据面 (M0 Engine Dataplane)
 **Goal**: 用户可通过独立 Go Engine 建立直接 TCP/UDP 转发；门控与可信计量接口开启时满足 M0 指标。
-**Depends on**: Phase 1
+**Depends on**: Phase 1 M0 foundation criteria (Go toolchain, contracts, safety model, and same-commit Docker/Actions smoke)
 **Requirements**: GEN-001, GEN-002, GEN-003, GEN-004, GEN-005, GEN-006, GEN-007, ENG-001, ENG-002, ENG-003, ENG-004, ENG-005, ENG-006, ENG-007, ENG-008, ENG-009, ENG-010, ENG-011, NFR-001
 **Success Criteria** (what must be TRUE):
 1. Engine 是可独立构建、运行、测试和压测的 Go 模块，生产 Agent 和模拟 Agent 只通过正式进程内契约接入；后端与 Hub 不承载转发流量。
 2. 直接 TCP 转发正确处理半关闭、并发拷贝取消和清理，平台规定路径采用经证明的零拷贝实现；数据面没有数据库或主动控制面依赖。
 3. 直接 UDP 会话、门控、速率/连接限制和计量批次边界具有自动化测试，正常消费按写成功载荷计量，预扣批次仅提交或退回一次。
 4. 在规格指定 Linux 测试环境、正式门控和计量开启时，直接转发吞吐达到 NFR-001；保存硬件、命令、配置和原始基准结果。
-**Plans**: TBD
+**Plans**: 1/1 initial tracer plan complete; additional plans required for splice, UDP, gates/metering, and benchmark evidence.
 
 ### Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)
 **Goal**: 节点可在已授权路径上通过受认证加密 VLink 建立正向和反向隧道，链路身份与授权不可伪造或重放。
@@ -109,11 +109,11 @@
 **Plans**: TBD
 
 ### Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)
-**Goal**: V1.11 第 13 节和 ENGR 全量门槛以真实可复现证据通过，源码、镜像及运维材料可交付。
+**Goal**: 当前项目范围和 owner 确认的验收项以真实可复现证据通过，源码、镜像及运维材料可交付。V1.11 第 13 节仅作参考输入，不自动构成冻结验收门槛。
 **Depends on**: Phase 7
 **Requirements**: NFR-008, NFR-009, NFR-010, NFR-011, NFR-012, NFR-013, NFR-014, NFR-015, NFR-016, NFR-017, NFR-018, NFR-019, NFR-020, NFR-021, NFR-022, NFR-023, NFR-024, NFR-026, NFR-025, NFR-027, NFR-028, NFR-029, NFR-030, NFR-031, NFR-032, NFR-033, NFR-034, NFR-035, NFR-036, NFR-037, NFR-041, NFR-042, NFR-043, NFR-045, SUP-SCALE-001, SUP-TEST-001, SUP-METHOD-001, SUP-ARTIFACT-001
 **Success Criteria** (what must be TRUE):
-1. 全部 NFR-025 业务与恢复场景、NFR-027～NFR-045 修订专项和第 13 节其余验收逐项有结果、环境、原始数据和复核记录；缺少来源证据的 NFR-038 不得伪报通过。
+1. 全部纳入当前项目范围的业务与恢复场景、性能、稳定性和交付验收逐项有结果、环境、原始数据和复核记录；NFR-038 历史原件要求按项目重启决定保持 out-of-scope，不宣称历史材料已恢复。
 2. 在规格规模与独享 Linux 硬件条件下完成吞吐、UDP、200 节点/1,000 规则控制面和 24 小时稳定性验收，记录资源、配置、命令、误差和复测结论。
 3. 同一 Git commit 在本机 Docker 与 GitHub Actions 各运行适用的静态检查、许可检查、构建、单测、集成、race、泄漏、网络拓扑和 Vegeta API 压测；原始日志与制品可追溯，未执行项目标保持未验证。
 4. ENGR-006 模型与真实 Engine、Agent、Hub、PostgreSQL 实现状态映射完成，规定不变量、故障及两两组合通过模型与系统证据复核。
@@ -127,7 +127,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engineering foundation | 0/TBD | Not started | - |
+| 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 0/TBD | Not started | - |
 | 3. M1 VLink engine links | 0/TBD | Not started | - |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |

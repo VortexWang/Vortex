@@ -8,6 +8,8 @@ gap_ids: [G-01-01]
 
 # Plan 01-05 Summary: Candidate Closure Review
 
+> Scope update (2026-11-03): this review's broad closure gate is now applied just before each dependency's first phase use. PostgreSQL and Valkey are external services, so their OS package license closure is not a product gate; keep their versions and digests recorded. This partial review does not block M0.
+
 Reviewed all seven unresolved candidate categories and recorded evidence in `docs/governance/dependency-closure-review.json`.
 
 Verified evidence:

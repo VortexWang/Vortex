@@ -1,5 +1,7 @@
 # Phase 1: 工程基线与安全契约 (Engineering Foundation) - Context
 
+> Current owner decision supersedes earlier discussion: V1.11 is reference only; the eleven historical files were cleared at restart and must not be recreated; NFR-038 does not block the project. PostgreSQL and Valkey are external services outside the product dependency license gate. See `docs/governance/project-restart-decision.md`.
+
 **Gathered:** 2026-11-03
 **Status:** Ready for planning
 

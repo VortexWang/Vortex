@@ -57,6 +57,13 @@ def check_evidence(register, root=ROOT):
                 errors.append(f"{item.get('artifact')}: verified requires reviewer, review_date and review_result")
         elif status not in {"missing", "found-unverified"}:
             errors.append(f"{item.get('artifact')}: invalid evidence status {status!r}")
+    if register.get("status") == "out-of-scope":
+        decision = register.get("decision")
+        if not decision or not (root / decision).is_file():
+            errors.append("out-of-scope disposition requires a project decision record")
+        if any(item.get("status") != "missing" for item in register.get("items", [])):
+            errors.append("out-of-scope disposition must preserve all unrecovered original rows as missing")
+        return ("out-of-scope" if not errors else "blocked"), errors
     if errors or any(item.get("status") != "verified" for item in register.get("items", [])):
         return "blocked", errors
     return "passed", errors
@@ -136,7 +143,7 @@ def main():
             errors = check_lock(lock, manifest, policy)
             result = {"status": "passed" if not errors else "blocked", "locked_count": len(lock.get("locked_candidates", [])), "not_locked_count": len(lock.get("not_locked", [])), "errors": errors}
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        expected = "passed" if args.command in {"evidence", "check-lock"} else "ready-for-review"
+        expected = "ready-for-review" if args.command == "candidates" else ("out-of-scope" if args.command == "evidence" and result["status"] == "out-of-scope" else "passed")
         return 0 if result["status"] == expected else 1
     except (OSError, json.JSONDecodeError, TypeError) as exc:
         print(json.dumps({"status": "error", "error": str(exc)}, ensure_ascii=False), file=sys.stderr)

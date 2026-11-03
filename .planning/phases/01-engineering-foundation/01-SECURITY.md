@@ -9,6 +9,8 @@ asvs_level: 1
 
 # Phase 1 Security Review
 
+> Historical NFR-038 treatment below described the earlier gate. The owner restart decision now makes historical recovery out of scope; originals remain missing, and CI checks the current disposition without claiming recovery.
+
 This L1 review checks the threats listed in the four phase plans. It is not a product-wide security audit.
 
 | Threat | Severity | Status | Evidence |

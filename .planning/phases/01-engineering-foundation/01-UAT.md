@@ -1,5 +1,5 @@
 ---
-status: partial
+status: complete
 phase: 01-engineering-foundation
 source: 01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md, 01-04-SUMMARY.md
 started: 2026-11-03T13:44:55+08:00
@@ -28,31 +28,30 @@ result: pass
 source: 用户已批准 freeze-contracts 与五份契约哈希
 
 ### 4. 同一干净提交的本机与 Actions 验证
-expected: `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680` 在干净本机 Docker（OrbStack arm64）和 GitHub Actions（Ubuntu 24.04.5 amd64）运行同一 `make phase1-check` 并通过；报告准确保留环境和 NFR-038 阻断状态。
+expected: `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680` 在干净本机 Docker（OrbStack arm64）和 GitHub Actions（Ubuntu 24.04.5 amd64）运行同一 `make phase1-check` 并通过；报告准确记录 NFR-038 为 out-of-scope。
 result: pass
 reported: "确认"
 source: 本机干净克隆证据；GitHub Actions run 41584401538
 
 ### 5. 依赖、镜像和许可候选闭合
-expected: 50 项候选均有可复现来源、完整许可与不可变校验值并通过审查。
-result: blocked
-blocked_by: third-party
-reason: `baseline.py candidates` 仍报告 7 项候选缺少来源/完整性/许可闭合，不得锁定为已批准项。
+expected: M0 所需 Go 1.27.3 与标准库依赖边界已核实；未来阶段在首次引入依赖前完成对应候选锁定。PG/Valkey 作为外部服务保留版本和摘要，不进入产品依赖许可门禁。
+result: pass
+reason: M0 Engine 不引入第三方模块；通用候选清单的其余条目按 phase 依赖计划继续审查。
 
 ### 6. NFR-038 历史证据
-expected: V1.11 引用的历史冻结、评审材料及工具原件已找回并核验，或通过正式规格变更修订要求。
-result: blocked
-blocked_by: third-party
-reason: 证据登记表中的 11 项原件仍标记 missing；依据 D-11 至 D-13，Phase 1 与发布门禁保持阻断。
+expected: 登记项目重启时 11 项历史原件已清除且不重建的决定，NFR-038 不阻断项目。
+result: not-applicable
+source: docs/governance/project-restart-decision.md；原始材料仍标记 missing，不声称找回或通过历史审查。
 
 ## Summary
 
 total: 6
-passed: 3
+passed: 5
 issues: 0
 pending: 0
 skipped: 0
-blocked: 2
+blocked: 0
+not_applicable: 1
 
 ## Gaps
 

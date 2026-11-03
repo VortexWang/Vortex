@@ -1,19 +1,20 @@
 ---
 gsd_state_version: "1.0"
-milestone: V1.11
-current_phase: 1
-current_phase_name: 工程基线与安全契约 (Engineering Foundation)
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-11-03T02:37:10.274Z"
+milestone: V1
+current_phase: 2
+current_phase_name: M0 引擎数据面 (M0 Engine Dataplane)
+status: executing
+stopped_at: Plan 02-01 TCP tracer complete; continue M0 plan
+last_updated: "2026-11-03T07:57:54.128Z"
 last_activity: 2026-11-03
 last_activity_desc: Initialized GSD project, completed V1.11 research and approved the full requirements scope and roadmap structure.
-state_head: 0d2c80c79db980197a3d77dbf930f5abfb568b69
+state_head: 62f46872eb1d097392a84dae51fcd6da81c97605
 progress:
   total_phases: 8
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 6
+  percent: 13
 ---
 
 # Project State
@@ -23,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-03)
 
 **Core value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
-**Current focus:** Phase 1 - 工程基线与安全契约
+**Current focus:** Phase 2 - M0 引擎数据面
 
 ## Current Position
 
-Phase: 1 (工程基线与安全契约 (Engineering Foundation)) — READY TO EXECUTE
-Plan: 0 of TBD
-Status: Ready to discuss and plan
-Last activity: 2026-11-03 — Initialized GSD project, completed V1.11 research and approved the full requirements scope and roadmap structure.
+Phase: 2 (M0 引擎数据面) — EXECUTING
+Plan: 1 of TBD complete
+Status: Phase 1 passed for M0 entry; first independent TCP relay slice is implemented and verified locally.
+Last activity: 2026-11-03 — Implemented the first standalone TCP relay slice; local race and Linux Docker tests pass.
 
-Progress: ░░░░░░░░░░ 0%
+Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
 ## Performance Metrics
 
@@ -55,31 +56,38 @@ Progress: ░░░░░░░░░░ 0%
 
 ### Decisions
 
-- V1.11 remains the normative baseline; source hash and per-requirement provenance are recorded.
+- V1.11 is a product reference, not a frozen acceptance baseline; current owner decisions govern.
 - The user approved Vegeta in place of k6; CR-001 records the tooling and acceptance impact without altering the frozen source.
-- The roadmap follows engineering prerequisites, then M0 through M6 in order.
-- Local Docker is available. The VortexWang GitHub app connection has repository write/admin permission; local `gh` uses a separate read-only `nodeox` credential. No project Actions run has been verified.
+- The roadmap follows engineering prerequisites, then M0 through M6 in order; dependencies are reviewed just before the phase that introduces them.
+- NFR-038 historical recovery is out of scope after project restart. The eleven original register rows remain `missing`; this is not a claim of recovery or verification.
+- PostgreSQL and Valkey are external data services. Their image package licenses are excluded from the product dependency gate; versions, provenance, and image digests remain tracked.
+- Local Docker is available. `gh auth status` confirms VortexWang is the active GitHub account with repo/workflow scopes. Prior same-commit Actions evidence exists for Phase 1; current governance changes still need CI evidence.
 
 ### Pending Todos
 
-- Locate and verify the frozen review records and check scripts referenced by V1.11; do not fabricate missing evidence.
-- Verify the local Git push credential identity or push through the explicitly selected VortexWang connection.
-- Phase 1 must deliver reviewed ENGR-001/004/006 artifacts before implementation work starts.
+- Plan and implement the M0 direct TCP/UDP Engine slice; resolve only dependencies actually introduced in this phase.
+- Add Linux `splice`, UDP session expiry, gate/usage accounting, and a measured benchmark harness in follow-up plans.
 
 ### Blockers/Concerns
 
-- The repository currently lacks the historical freeze/review attachments and validation scripts cited by the specification; NFR-038 cannot be claimed passed without the required evidence.
-- Local Git HTTPS currently resolves to `nodeox` and cannot push. The separate VortexWang app connection is verified with push/admin rights.
-- Project tests and GitHub Actions workflows have not run yet.
+- Current changes have not yet been pushed; same-commit Actions evidence will follow after a scoped commit using the active VortexWang identity.
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
-| Product scope | Online payment, team invitations, complete VTP camouflage, QUIC and other explicit post-v1 items | Deferred by V1.11 | Initialization | V1 |
+| Product scope | Online payment, team invitations, complete VTP camouflage, QUIC and other deferred items | Deferred by project scope decisions | Initialization | V1 |
+
+## Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 261103-l7e | Project restart governance clarified; Phase 1 complete for M0 entry | 2026-11-03 | 62f4687 | complete | [261103-l7e-project-restart-governance](./quick/261103-l7e-project-restart-governance/) |
+| 261103-lt9 | Restart governance aligned; M0 TCP relay tracer implemented | 2026-11-03 | 62f4687 | complete | [261103-lt9-align-restart-governance-and-enter-m0-im](./quick/261103-lt9-align-restart-governance-and-enter-m0-im/) |
+
 
 ## Session Continuity
 
-Last session: 2026-11-03T02:16:26.202Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-engineering-foundation/01-CONTEXT.md
+Last session: 2026-11-03T16:02:00+08:00
+Stopped at: Plan 02-01 TCP relay tracer locally verified; Actions evidence pending
+Resume file: .planning/phases/02-m0-m0-engine-dataplane/02-01-PLAN.md

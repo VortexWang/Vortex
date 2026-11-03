@@ -1,7 +1,9 @@
 {
   "schema_version": 1,
   "requirement": "NFR-038",
-  "status": "blocked",
+  "status": "out-of-scope",
+  "disposition": "Historical recovery is out of scope for the restarted project by owner decision. This is not a claim that any original was recovered or verified.",
+  "decision": "docs/governance/project-restart-decision.md",
   "search_scope": ["repository docs/", "repository tools/", "V1.11 Appendix C referenced paths", "Git history reachable from main and origin/main"],
   "items": [
     {"artifact":"docs/VORTEX 需求规格说明书 V1_8 审查报告.md","source":"V1.11 §0.4, Appendix C","owner":"original specification custodian","action":"Search bound repository and original document handoff","evidence_link":null,"status":"missing"},
@@ -26,10 +28,10 @@
     {
       "at": "2026-11-03",
       "scope": "User confirmation about original delivery materials",
-      "result": "User reports all eleven listed originals are unavailable and should be treated as lost; user requests that the evidence set be replenished. This is not itself historical review evidence.",
-      "evidence_link": "docs/governance/proposals/CR-002-NFR-038-recovery.md",
-      "next_action": "Prepare a V1.11 change proposal for a transparent present-day re-review and replacement evidence; keep all original rows missing until the proposal is approved and new review is complete."
+      "result": "User confirms all eleven originals were cleared during project restart, are lost, and should not be recreated. V1.11 is reference only and NFR-038 must not block development.",
+      "evidence_link": "docs/governance/project-restart-decision.md",
+      "next_action": "No retrieval or reconstruction. Preserve missing rows as historical facts and exclude this recovery condition from current project acceptance."
     }
   ],
-  "verification_rule": "A status can become verified only after the original artifact is present, the review/freeze record is inspected for reviewer, date, result and evidence, and the linked original evidence files are verified."
+  "verification_rule": "Original rows remain missing unless authentic originals are found. Project acceptance follows the owner restart decision; missing originals do not block it."
 }

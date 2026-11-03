@@ -1,5 +1,7 @@
 # Phase 1 Plan 04 Summary
 
+> Historical status note: this summary accurately describes the former NFR-038 gate at the time of its run. The 2026-11-03 project restart decision supersedes that gate; NFR-038 is now out of scope and does not block development.
+
 ## Outcome
 
 Created the shared Phase 1 verification path used by local Docker and GitHub Actions. Both invoke the exact command `make phase1-check`. The final test image is `FROM scratch` and contains only the statically linked network fixture executable.
