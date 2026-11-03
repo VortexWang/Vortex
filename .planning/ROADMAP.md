@@ -64,7 +64,22 @@
 2. TLS 1.3 链路、mux/pool、多路双向隧道和反向建链在自动化拓扑中可运行，链路断开后资源回收且不重复执行授权。
 3. 每条会话执行段许可和目标限制；UDP 开流遵循规格认证流程，不存在绕过 OPEN/许可的 DGRAM 通路。
 4. 正向隧道与反向隧道分别达到 NFR-002、NFR-004；pool 与 mux 的首包额外等待分别测量并满足 NFR-007。
-**Plans**: TBD
+**Plans**: 6 plans in 5 waves; ready to execute after research, validation strategy, decision coverage, and plan review.
+**Wave 1**
+- [ ] 03-01-PLAN.md — Freeze VLink v1 codec and authenticated TCP tracer
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — TLS identity, mux state, windows, and liveness
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03-03-PLAN.md — Local OPEN authorization and UDP admission
+
+**Wave 4** *(blocked on Wave 3 completion; plans 03-04 and 03-05 may run in parallel)*
+- [ ] 03-04-PLAN.md — Pool modes and reverse link establishment
+- [ ] 03-05-PLAN.md — Abuse limits and privacy-preserving observability
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 03-06-PLAN.md — Docker/Actions verification and NFR evidence
 
 ### Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 **Goal**: 多跳 TCP/UDP 路径可正确调度和排空，份额、计费快照与两阶段应用门控在并发和失败中保持安全。
