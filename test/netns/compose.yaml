@@ -1,0 +1,9 @@
+services:
+  fixture:
+    image: vortex-phase1:local
+    networks: [isolated]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+networks:
+  isolated:
+    driver: bridge

@@ -1,0 +1,14 @@
+services:
+  fixture:
+    image: vortex-phase1:local
+    build:
+      context: .
+      dockerfile: Dockerfile.phase1
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [phase1]
+networks:
+  phase1:
+    name: vortex-phase1
+    driver: bridge

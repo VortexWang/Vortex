@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vortex.invalid/governance/verification-evidence/1.0.0",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "dirty", "command", "environment", "checks", "requirements", "artifacts", "status"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "dirty": {"type": "boolean"},
+    "command": {"const": "make phase1-check"},
+    "image_digest": {"type": ["string", "null"]},
+    "environment": {"type": "object", "required": ["host_os", "host_arch", "docker_os", "docker_arch"]},
+    "checks": {"type": "object"},
+    "requirements": {"type": "object", "required": ["NFR-038"]},
+    "artifacts": {"type": "array", "items": {"type": "string"}},
+    "status": {"enum": ["passed", "failed"]}
+  }
+}

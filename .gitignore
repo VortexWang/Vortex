@@ -1,0 +1,4 @@
+artifacts/phase1/*.log
+artifacts/phase1/status.env
+artifacts/phase1/modelcheck/
+test/netns/fixture/bin/

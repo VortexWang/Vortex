@@ -1,0 +1,3 @@
+FROM scratch
+COPY test/netns/fixture/bin/fixture /fixture
+ENTRYPOINT ["/fixture"]
