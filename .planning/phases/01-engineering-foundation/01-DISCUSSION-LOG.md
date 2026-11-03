@@ -162,6 +162,10 @@
 
 用户没有将已讨论决策交由代理自行决定的事项。后续计划可在上述边界内选择具体模型工具和数据结构。
 
+## Implementation refinement (2026-11-03)
+
+Inline review of the candidate set found license-boundary conflicts in the proposed Java/TLC runtime, Ubuntu test image and `iproute2/tc` / `strace` tools. Applying the user's D-09 rule (replace candidates that cannot satisfy the license policy), Phase 1 uses a standard-library Go finite-state explorer and a `scratch` image containing only a static repository fixture. This fits ENGR-006's deterministic-simulator allowance and does not change V1.11 requirements. The implementation refinement is recorded as I-01..I-03 in `01-CONTEXT.md`; it is not an additional user decision. Any later packet-shaping tool needs its own version, checksum, license and compatibility review.
+
 ## Deferred Ideas
 
 None.

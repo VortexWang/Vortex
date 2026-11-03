@@ -34,8 +34,14 @@
 - **D-12:** 对缺失材料逐项登记名称、来源/责任方、追查动作和证据链接；找到后核验原件，不生成替代或虚构的历史证据。
 - **D-13:** 只有找回并核验原件，或通过正式规格变更修订 NFR-038，才能解除阻断。
 
+### Implementation refinement within approved constraints
+- **I-01:** Phase 1's finite lease/quota model uses a deterministic state explorer written with the Go toolchain candidate (subject to D-08 approval) and standard library. It does not add a Java runtime solely for TLC.
+- **I-02:** The Docker smoke image is built `FROM scratch` and contains only the statically linked repository fixture. GPL/AGPL operating-system utilities are not added to the image.
+- **I-03:** Phase 1 does not depend on `iproute2/tc` or `strace`. Any later network impairment tooling requires separate license and integrity review. The Phase 1 fixture is a smoke test, not packet-shaping or Engine acceptance.
+- **Basis:** These choices satisfy D-09's replacement rule and fit ENGR-006's allowance for a TLA+ model or deterministic simulator. The earlier Java/TLC and Ubuntu/system-tool proposal did not meet the chosen full-scope license boundary without additional review. These are implementation choices, not changes to V1.11 or additional user decisions.
+
 ### the agent's Discretion
-用户没有将以上决策交由代理自行决定的事项。具体建模工具与数据结构可由计划阶段在这些约束内选择，并须满足可复现、可审查和安全不变量要求。
+用户没有将其他事项交由代理自行决定。后续计划可在上述边界内选择具体数据结构和实现细节，并须满足可复现、可审查和安全不变量要求。
 
 </decisions>
 
