@@ -75,6 +75,10 @@ func TestNodeIDFromCertificateRequiresCanonicalSAN(t *testing.T) {
 	if _, err := NodeIDFromCertificate(&x509.Certificate{}); err == nil {
 		t.Fatal("accepted missing node SAN")
 	}
+	badURI, _ := url.Parse("urn:vortex:node:AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")
+	if _, err := NodeIDFromCertificate(&x509.Certificate{URIs: []*url.URL{badURI}}); err == nil {
+		t.Fatal("accepted non-canonical node SAN")
+	}
 }
 
 func TestHandshakeHelloTLS13MutualIdentity(t *testing.T) {

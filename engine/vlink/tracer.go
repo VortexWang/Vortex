@@ -28,7 +28,7 @@ type AuthorizeTCP func(context.Context, NodeID, OpenRequest) (net.Conn, uint16)
 type TrafficMeter func(accounting.Direction, int64) error
 
 func MarshalOpen(request OpenRequest) ([]byte, error) {
-	if request.RuleID == ([16]byte{}) || request.RuleRevision == 0 || request.PathGeneration == 0 || request.Network != 1 || len(request.Visited) > 16 || (len(request.ClientAddress) != 4 && len(request.ClientAddress) != 16) {
+	if request.RuleID == ([16]byte{}) || request.RuleRevision == 0 || request.PathGeneration == 0 || (request.Network != 1 && request.Network != 2) || len(request.Visited) > 16 || (len(request.ClientAddress) != 4 && len(request.ClientAddress) != 16) {
 		return nil, fmt.Errorf("%w: invalid TCP OPEN fields", ErrProtocol)
 	}
 	addressFamily := byte(6)
@@ -81,7 +81,7 @@ func ParseOpen(payload []byte) (OpenRequest, error) {
 		return OpenRequest{}, fmt.Errorf("%w: invalid OPEN client address", ErrProtocol)
 	}
 	request.ClientAddress = append([]byte(nil), payload[addressOffset+2:]...)
-	if request.RuleID == ([16]byte{}) || request.RuleRevision == 0 || request.PathGeneration == 0 || request.Network != 1 {
+	if request.RuleID == ([16]byte{}) || request.RuleRevision == 0 || request.PathGeneration == 0 || (request.Network != 1 && request.Network != 2) {
 		return OpenRequest{}, fmt.Errorf("%w: invalid OPEN fields", ErrProtocol)
 	}
 	return request, nil
@@ -92,6 +92,11 @@ func ParseOpen(payload []byte) (OpenRequest, error) {
 func TraceTCP(ctx context.Context, link *tls.Conn, local net.Conn, hello HelloConfig, request OpenRequest) error {
 	if link == nil || local == nil {
 		return errors.New("vlink: TLS link and local TCP connection are required")
+	}
+	if request.Network != 1 {
+		_ = local.Close()
+		forceCloseTLS(link)
+		return fmt.Errorf("%w: TCP tracer requires a TCP OPEN", ErrProtocol)
 	}
 	peer, err := HandshakeHello(ctx, link, hello)
 	if err != nil {
@@ -242,6 +247,10 @@ func ServeTCPWithGate(ctx context.Context, link *tls.Conn, hello HelloConfig, au
 	if err != nil {
 		forceCloseTLS(link)
 		return err
+	}
+	if request.Network != 1 {
+		forceCloseTLS(link)
+		return fmt.Errorf("%w: TCP handler received a non-TCP OPEN", ErrProtocol)
 	}
 	target, errorCode := authorize(ctx, peer, request)
 	if errorCode != 0 || target == nil {
