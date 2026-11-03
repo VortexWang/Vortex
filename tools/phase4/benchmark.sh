@@ -20,4 +20,6 @@ set -e
 cat "$OUT/raw.txt"
 echo "benchmark_exit: $status" >> "$OUT/metadata.txt"
 echo "qualification: environment-limited" >> "$OUT/metadata.txt"
+go run "$ROOT/tools/phase4/udp_loss.go" -count 20000 > "$OUT/udp-loss.txt"
+cat "$OUT/udp-loss.txt"
 exit 0

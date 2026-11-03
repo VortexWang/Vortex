@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"sort"
@@ -87,23 +88,23 @@ func BenchmarkVLinkFirstByte(b *testing.B) {
 					accepted <- conn
 				}
 			}()
-			client, server := benchmarkMuxPair(b, ctx, clientTLS, serverTLS, clientSigner, serverSigner, clientID, serverID, peerVerifier)
-			startMuxResponder(ctx, server)
-			var pool *LinkPool
-			if mode == "pool-prewarmed" {
-				var err error
-				pool, err = NewLinkPool(PoolConfig{MinLinks: 1, MaxLinks: 1, HardCap: 1}, func(context.Context) (PooledLink, error) {
-					return benchmarkPooledLink{mux: client}, nil
-				})
-				if err != nil {
-					b.Fatal(err)
-				}
-				if err = pool.Scale(ctx, 0, true); err != nil {
-					b.Fatal(err)
-				}
-			}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
+				client, server := benchmarkMuxPair(b, ctx, clientTLS, serverTLS, clientSigner, serverSigner, clientID, serverID, peerVerifier)
+				startMuxResponder(ctx, server)
+				var pool *LinkPool
+				if mode == "pool-prewarmed" {
+					var err error
+					pool, err = NewLinkPool(PoolConfig{MinLinks: 1, MaxLinks: 1, HardCap: 1}, func(context.Context) (PooledLink, error) {
+						return benchmarkPooledLink{mux: client}, nil
+					})
+					if err != nil {
+						b.Fatal(err)
+					}
+					if err = pool.Scale(ctx, 0, true); err != nil {
+						b.Fatal(err)
+					}
+				}
 				started := time.Now()
 				link := client
 				var release func()
@@ -136,14 +137,14 @@ func BenchmarkVLinkFirstByte(b *testing.B) {
 				if release != nil {
 					release()
 				}
+				if pool != nil {
+					_ = pool.Close()
+				}
+				client.Close(ErrProtocol)
+				server.Close(ErrProtocol)
 				samples = append(samples, time.Since(started))
 			}
 			b.StopTimer()
-			if pool != nil {
-				_ = pool.Close()
-			}
-			client.Close(ErrProtocol)
-			server.Close(ErrProtocol)
 			sort.Slice(samples, func(i, j int) bool { return samples[i] < samples[j] })
 			median := samples[len(samples)/2]
 			baselineRTT := rtts.link + rtts.target
@@ -388,7 +389,7 @@ func measureMuxFirstByte(ctx context.Context, client *MuxLink) (time.Duration, e
 		return 0, err
 	}
 	if frame.Type != FrameOpenOK {
-		return 0, errors.New("vlink: expected OPEN_OK before first byte")
+		return 0, fmt.Errorf("vlink: expected OPEN_OK before first byte, got type=%d stream=%d", frame.Type, frame.StreamID)
 	}
 	frame, err = stream.Receive(ctx)
 	if err != nil {
