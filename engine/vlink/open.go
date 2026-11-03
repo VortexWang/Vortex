@@ -56,6 +56,7 @@ type OpenPolicy struct {
 	Audit                     OpenAuditor
 	SessionBillingSnapshotID  string
 	SessionBillingCoefficient uint64
+	GenerationAdmission       func(context.Context, OpenRequest) error
 }
 
 type OpenDecision struct {
@@ -106,6 +107,11 @@ func (p OpenPolicy) Authorize(ctx context.Context, peer NodeID, request OpenRequ
 	}
 	if snapshot.RuleID != request.RuleID || request.RuleRevision != snapshot.Revision || request.PathGeneration != snapshot.PathGeneration {
 		return reject(OpenStaleRevision)
+	}
+	if p.GenerationAdmission != nil {
+		if err := p.GenerationAdmission(ctx, request); err != nil {
+			return reject(OpenStaleRevision)
+		}
 	}
 	if request.HopIndex != snapshot.HopIndex {
 		return reject(OpenNoRoute)
