@@ -3,12 +3,12 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 restart research
+current_plan: Phase 4 restart context complete; research next
 status: planning
 stopped_at: Previous Phase 4 invalidated by owner decision; legacy artifacts archived
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Phase 4 reopened; runtime and three-relay topology must precede qualification
+last_activity_desc: Phase 4 restart context locked; runtime and topology research next
 state_head: 82894e3
 progress:
   total_phases: 8
