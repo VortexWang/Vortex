@@ -50,7 +50,7 @@ covered_digest: "v4:sha256:0d91bb06549655df1506d68ceb103ccc0143125c83cedb63b1ded
 | 1 | M0 toolchain, Engine dependency boundary and Docker/Actions entry are verified. | VERIFIED | Go 1.27.3 is selected; Engine starts with Go standard library only; same-command Docker/Actions smoke passed on the same clean commit. Broader dependencies are reviewed before their first phase use. |
 | 2 | Five contracts are versioned, reviewed, frozen and mapped to retained requirement identifiers. | VERIFIED | SemVer 1.0.0 hashes and 277-ID mapping pass the contract checks. |
 | 3 | The safety model covers NFR-027..045 families and selected high-risk fault pairs with explicit finite bounds. | VERIFIED | 8 invariants, 7 included and 2 excluded pairs; 10 bounded states, no violations. The user accepted these finite bounds. This is not an unbounded or implementation proof. |
-| 4 | Docker and Actions ran the same command on the same clean commit and retained environment-bound evidence. | VERIFIED | Clean SHA `a9b79f11b7d9b9b3a32bbf2a47b745ee856b9e0e` passed locally on OrbStack Linux arm64 and in Actions on Ubuntu 24.04 amd64; [run 41600596078](https://github.com/VortexWang/Vortex/actions/runs/41600596078). Local evidence is in `artifacts/phase1/runs/20261103T080308Z-95490/evidence.json`. |
+| 4 | Docker and Actions ran the same command on the same clean commit and retained environment-bound evidence. | VERIFIED | Clean SHA `7ebc8675b39426181fcd13fe6bf28df6a463f41c` passed locally on OrbStack Linux arm64 and in Actions on Ubuntu 24.04 amd64; [run 41602578100](https://github.com/VortexWang/Vortex/actions/runs/41602578100). Local evidence is in `artifacts/phase1/runs/20261103T081947Z-98776/evidence.json`. |
 | 5 | Restart governance accurately scopes V1.11 and the eleven missing historical materials. | VERIFIED | `docs/governance/project-restart-decision.md` records V1.11 as reference only, the intentional loss/no-recreation decision, NFR-038 as out-of-scope, and external PostgreSQL/Valkey license scope. The eleven originals remain marked missing. |
 
 ## Deferred Phase Gates
@@ -89,7 +89,7 @@ Four user confirmations were recorded for topology smoke, finite model boundarie
 ## Verification Metadata
 
 **Approach:** Goal-backward
-**Automated checks:** Phase 1 shared checks passed locally and in Actions on clean SHA `a9b79f11b7d9b9b3a32bbf2a47b745ee856b9e0e`.
-**Current local run:** `make phase1-release-gate` passed on the clean commit in OrbStack Linux arm64; evidence records `dirty=false` at `artifacts/phase1/runs/20261103T080308Z-95490/evidence.json`. Phase 2 Engine checks also passed locally and in Actions on the same SHA; [run 41600595927](https://github.com/VortexWang/Vortex/actions/runs/41600595927).
+**Automated checks:** Phase 1 shared checks passed locally and in Actions on clean SHA `7ebc8675b39426181fcd13fe6bf28df6a463f41c`.
+**Current local run:** `make phase1-release-gate` passed on the clean commit in OrbStack Linux arm64; evidence records `dirty=false` at `artifacts/phase1/runs/20261103T081947Z-98776/evidence.json`. Phase 2 Engine checks also passed locally and in Actions on the same SHA; [run 41602578116](https://github.com/VortexWang/Vortex/actions/runs/41602578116).
 **Human checks:** Confirmed in `01-UAT.md`.
 **Verifier:** Inline GSD verification in the main Codex window per user instruction to avoid subagents.

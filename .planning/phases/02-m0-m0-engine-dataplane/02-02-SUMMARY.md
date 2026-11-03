@@ -19,6 +19,7 @@ The Linux-specific loopback test sends data through `copyTCPPlatform`; it passes
 - `make phase2-engine-check` — passed native race tests and Linux arm64 scratch-container tests.
 - Linux scratch-container tests — 4 passed, including `TestTCPPlatformSelectsSpliceForBareTCP`.
 - Linux amd64 and arm64 test binaries cross-compiled successfully.
+- Clean SHA `7ebc8675b39426181fcd13fe6bf28df6a463f41c` passed `make phase2-engine-check` in GitHub Actions Ubuntu 24.04 amd64; [run 41602578116](https://github.com/VortexWang/Vortex/actions/runs/41602578116).
 - Throughput benchmark not run; this plan establishes correctness of the syscall path, not the 700 Mbps target.
 
 ## Limitations
