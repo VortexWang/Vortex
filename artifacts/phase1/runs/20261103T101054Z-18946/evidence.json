@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "commit_sha": "1aa536471d5499ca6d1e59a52e90bec0771e1553",
+  "dirty": true,
+  "command": "make phase1-check",
+  "started_at": "2026-11-03T10:10:54Z",
+  "ended_at": "2026-11-03T10:10:58Z",
+  "environment": {
+    "host_os": "Darwin",
+    "host_arch": "arm64",
+    "docker_os": "OrbStack",
+    "docker_arch": "arm64"
+  },
+  "image_digest": "vortex-phase1@sha256:d0a1d50d79a3d5136e13075edae09ddd125d5d83c7f2fc3ef555546edd2be9c3",
+  "checks": {
+    "python-tests": 0,
+    "lock-check": 0,
+    "contract-check": 0,
+    "requirement-map": 0,
+    "go-tests": 0,
+    "model-report": 0,
+    "evidence-disposition": 0,
+    "docker-build": 0,
+    "network-smoke": 0
+  },
+  "requirements": {
+    "NFR-038": "out-of-scope"
+  },
+  "artifacts": [
+    "runs/20261103T101054Z-18946/contract-check.log",
+    "runs/20261103T101054Z-18946/docker-build.log",
+    "runs/20261103T101054Z-18946/evidence-disposition.log",
+    "runs/20261103T101054Z-18946/go-tests.log",
+    "runs/20261103T101054Z-18946/lock-check.log",
+    "runs/20261103T101054Z-18946/model-report.log",
+    "runs/20261103T101054Z-18946/modelcheck/model-report.json",
+    "runs/20261103T101054Z-18946/network-smoke.log",
+    "runs/20261103T101054Z-18946/python-tests.log",
+    "runs/20261103T101054Z-18946/requirement-map.log",
+    "runs/20261103T101054Z-18946/status.env"
+  ],
+  "status": "passed",
+  "note": "Network fixture is smoke coverage only; Engine throughput, UDP correctness and leak acceptance remain Phase 2."
+}

@@ -1,0 +1,4 @@
+ok  	vortex/model	0.540s
+?   	vortex/tools/phase1	[no test files]
+ok  	vortex/tests/phase1	0.978s
+?   	vortex/cmd/modelcheck	[no test files]

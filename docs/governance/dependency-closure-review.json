@@ -10,15 +10,15 @@
     "candidates": [
       {
         "name": "PostgreSQL",
-        "status": "rejected-current-image-license-closure",
+        "status": "external-service-license-out-of-scope",
         "evidence": "Candidate OCI digest sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8 resolved to linux/arm64 and manifest children include linux/amd64 sha256:41a369edc91d9bdd7a58be6bc71ea0f8f7a3f49e82818a9f0829021ea7840b7c and linux/arm64 sha256:a1ece8fa15f7b526a51ef47a22fb1f373d33de794dc26bf7bff99e61dcb52690. Syft 1.52.0 identified 147 Debian packages and GPL/LGPL/GFDL packages including bash, coreutils, grep, libc6, gnupg, and others. A local PostgreSQL 18.6 Alpine alternative also contained GPL/LGPL packages and is not an approved replacement.",
-        "next_action": "Find a redistributable image/build composition meeting the approved license policy, scan both target architectures with the lock-pinned scanner, and review the complete package/license closure."
+        "next_action": "No product license remediation required. Retain the external service version, provenance, and per-platform image digests; verify service compatibility when integrating PostgreSQL."
       },
       {
         "name": "Valkey",
-        "status": "rejected-current-image-license-closure",
+        "status": "external-service-license-out-of-scope",
         "evidence": "Candidate OCI digest sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7 resolved to linux/arm64. Syft 1.52.0 identified 79 Debian packages and GPL/LGPL/GFDL packages including bash, coreutils, grep, libc6, libc-bin, and others.",
-        "next_action": "Find a redistributable image/build composition meeting the approved license policy, scan both target architectures with the lock-pinned scanner, and review the complete package/license closure."
+        "next_action": "No product license remediation required. Retain the external service version, provenance, and per-platform image digests; verify service compatibility when integrating Valkey."
       },
       {
         "name": "SQLite embedded",
@@ -51,7 +51,7 @@
         "next_action": "Bind source/build procedure and architecture hashes to the candidate record after candidate snapshot review."
       }
     ],
-    "decision": "The seven-row gap is not closed. PostgreSQL and Valkey current images conflict with the permissive-only policy; SWC compound license classification and host-tool provenance need resolution; SQLite, scratch image and the repository fixture now have reproducible supporting evidence. No version lock is changed."
+    "decision": "The seven-row review is narrowed by the project restart decision: PostgreSQL and Valkey are external data services, so their image OS-package licenses are outside the VORTEX product license gate; retain their exact digests and compatibility checks. The remaining rows still need phase-appropriate provenance, integrity, license, or compatibility work. No product dependency lock is changed."
   },
   "go": {
     "toolchain": "go1.27.3",

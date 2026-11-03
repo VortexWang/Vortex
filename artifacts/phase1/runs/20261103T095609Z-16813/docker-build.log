@@ -1,0 +1,35 @@
+ Image vortex-phase1:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 554B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.phase1
+#2 transferring dockerfile: 126B done
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 2.16MB 0.0s done
+#4 DONE 0.0s
+
+#5 [1/1] COPY test/netns/fixture/bin/fixture /fixture
+#5 DONE 0.0s
+
+#6 exporting to image
+#6 exporting layers
+#6 exporting layers 0.2s done
+#6 exporting manifest sha256:051eac242d6f59b5b28b7b2f5227fc5c7c33f2e82b713ac400658d26a63e73b3
+#6 exporting manifest sha256:051eac242d6f59b5b28b7b2f5227fc5c7c33f2e82b713ac400658d26a63e73b3 0.0s done
+#6 exporting config sha256:416831643b05aba9a6b8ba71d69fcf7bd878ad1b8eef139cc0424accb0c294c1 0.0s done
+#6 exporting attestation manifest sha256:3e08f9edd05c91fa42de3470e54a6010a7613991e3a312979ef280ca0e811588 0.0s done
+#6 exporting manifest list sha256:cb7ce9935020b41e022dc1945163ef58af3660a24519bac25eab8f82b7c2f38d 0.0s done
+#6 naming to docker.io/library/vortex-phase1:local done
+#6 unpacking to docker.io/library/vortex-phase1:local 0.0s done
+#6 DONE 0.3s
+
+#7 resolving provenance for metadata file
+#7 DONE 0.0s
+ Image vortex-phase1:local Built 

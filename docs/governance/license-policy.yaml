@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "draft",
+  "source_requirement": "ENGR-002 / V1.11 D-02",
+  "allowed_spdx": ["MIT", "BSD-2-Clause", "BSD-3-Clause", "BSD-4-Clause", "Apache-2.0", "ISC", "PostgreSQL", "Public-Domain"],
+  "denied_spdx": ["GPL-1.0-only", "GPL-1.0-or-later", "GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "AGPL-1.0-only", "AGPL-1.0-or-later", "AGPL-3.0-only", "AGPL-3.0-or-later"],
+  "unknown_or_missing": "reject",
+  "repository_owned_artifacts": "Permitted when the image contains only a statically linked repository executable and no third-party packages; still require a reproducible image digest.",
+  "coverage": ["application", "direct and transitive dependencies", "generators", "VORTEX-distributed runtime and test images", "CI actions", "tests", "load and network tools shipped with VORTEX"],
+  "external_services": {
+    "PostgreSQL": "External data service. Its server image and operating-system package license closure are outside the VORTEX product dependency gate; keep exact version, source, and image digest recorded.",
+    "Valkey": "External data service. Its server image and operating-system package license closure are outside the VORTEX product dependency gate; keep exact version, source, and image digest recorded."
+  },
+  "review_note": "Review code, linked dependencies and artifacts distributed as VORTEX. PostgreSQL and Valkey are external services, not bundled product artifacts. Public domain is an explicit classification, not a scanner default."
+}
