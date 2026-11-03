@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "requirement": "NFR-038",
+  "status": "blocked",
+  "search_scope": ["repository docs/", "repository tools/", "V1.11 Appendix C referenced paths", "Git history reachable from main and origin/main"],
+  "items": [
+    {"artifact":"docs/VORTEX 需求规格说明书 V1_8 审查报告.md","source":"V1.11 §0.4, Appendix C","owner":"original specification custodian","action":"Search bound repository and original document handoff","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX 需求规格说明书 V1_11 冻结记录.md","source":"V1.11 §0.4","owner":"V1.11 review/freeze participants","action":"Request original freeze snapshot, hash and diff boundary","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX V1_11 修订决策记录.md","source":"V1.11 §0.4 and Appendix C","owner":"V1.11 review participants","action":"Request original decision log and review evidence list","evidence_link":null,"status":"missing"},
+    {"artifact":"tools/version_record_check.py","source":"V1.11 §0.4 and Appendix C","owner":"original specification/tooling custodian","action":"Search repository history and original delivery bundle","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX 需求规格说明书 V1_8.md","source":"V1.11 Appendix C","owner":"original specification custodian","action":"Search historical release archive and bound repository","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX V1_9 修订决策记录.md","source":"V1.11 Appendix C","owner":"V1.9 review participants","action":"Search historical release archive and bound repository","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX 需求规格说明书 V1_9 评审报告.md","source":"V1.11 Appendix C","owner":"V1.9 review participants","action":"Search historical release archive and bound repository","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX V1_10 修订决策记录.md","source":"V1.11 Appendix C","owner":"V1.10 review participants","action":"Search historical release archive and bound repository","evidence_link":null,"status":"missing"},
+    {"artifact":"docs/VORTEX 需求规格说明书 V1_10 评审报告.md","source":"V1.11 Appendix C","owner":"V1.10 review participants","action":"Search historical release archive and bound repository","evidence_link":null,"status":"missing"},
+    {"artifact":"tools/revision_scenarios.py","source":"V1.11 §0.4 and Appendix C","owner":"original specification/tooling custodian","action":"Search repository history and original delivery bundle","evidence_link":null,"status":"missing"},
+    {"artifact":"tools/revision_boundaries.py","source":"V1.11 Appendix C","owner":"original specification/tooling custodian","action":"Search repository history and original delivery bundle","evidence_link":null,"status":"missing"}
+  ],
+  "search_log": [
+    {
+      "at": "2026-11-03T13:59:37+08:00",
+      "scope": "Git history reachable from main and origin/main, plus current docs/, tools/ and .planning/ trees",
+      "result": "No matching original historical review/freeze artifacts or referenced scripts found.",
+      "evidence_link": ".planning/research/nfr038-search-2026-11-03.md"
+    }
+  ],
+  "verification_rule": "A status can become verified only after the original artifact is present, the review/freeze record is inspected for reviewer, date, result and evidence, and the linked original evidence files are verified."
+}
