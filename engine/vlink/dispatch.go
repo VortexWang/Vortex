@@ -136,6 +136,8 @@ type MuxConfig struct {
 	MaxPendingOpenBytes                      int
 	StreamWindow, AggregateWindow, MaxWindow uint32
 	StreamQueueFrames                        int
+	Limits                                   LimitConfig
+	Observer                                 Observer
 	Now                                      func() time.Time
 }
 
@@ -153,6 +155,10 @@ type MuxLink struct {
 	done        chan struct{}
 	closeOnce   sync.Once
 	peerID      NodeID
+	limiter     *FrameLimiter
+	observer    Observer
+	violations  int
+	linkID      [16]byte
 }
 
 type MuxStream struct {
@@ -199,7 +205,14 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if config.StreamQueueFrames < 1 {
 		config.StreamQueueFrames = 32
 	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{})}
+	limiter, err := NewFrameLimiter(config.Limits, config.Now)
+	if err != nil {
+		return nil, err
+	}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer}
+	if _, err := rand.Read(m.linkID[:]); err != nil {
+		return nil, err
+	}
 	go m.readLoop()
 	return m, nil
 }
@@ -362,6 +375,7 @@ func (m *MuxLink) Close(err error) {
 		err = ErrProtocol
 	}
 	m.closeOnce.Do(func() {
+		m.observeClose(err)
 		m.dispatch.Close(err)
 		m.windows.Close()
 		close(m.done)
@@ -386,6 +400,26 @@ func (m *MuxLink) readLoop() {
 		if err != nil {
 			m.Close(err)
 			return
+		}
+		if m.observer != nil {
+			m.observer.Frame(m.peerRole(), frame.Type, 1, len(frame.Payload))
+		}
+		allowed, overLimit, limitErr := m.limiter.Allow(frame.Type)
+		if limitErr != nil {
+			m.Close(limitErr)
+			return
+		}
+		if !allowed {
+			if overLimit {
+				if m.recordViolation(ErrorClassRateLimited) {
+					return
+				}
+			}
+			if frame.Type == FrameOpen && frame.StreamID != 0 {
+				m.reset(frame.StreamID, uint16(OpenRateLimited))
+				continue
+			}
+			continue
 		}
 		switch frame.Type {
 		case FrameWindow:
@@ -428,6 +462,9 @@ func (m *MuxLink) readLoop() {
 		if applyErr != nil {
 			var streamErr *StreamViolation
 			if errors.As(applyErr, &streamErr) {
+				if m.recordViolation(ErrorClassStreamViolation) {
+					return
+				}
 				m.reset(streamErr.StreamID, 8)
 				continue
 			}
@@ -495,7 +532,11 @@ func (m *MuxLink) newStream(id uint32, network StreamNetwork) *MuxStream {
 	default:
 	}
 	m.streams[id] = stream
+	count := len(m.streams)
 	m.mu.Unlock()
+	if m.observer != nil {
+		m.observer.ActiveStreams(count)
+	}
 	return stream
 }
 func (m *MuxLink) getStream(id uint32) *MuxStream {
@@ -507,6 +548,7 @@ func (m *MuxLink) removeStream(id uint32) {
 	m.mu.Lock()
 	stream := m.streams[id]
 	delete(m.streams, id)
+	count := len(m.streams)
 	m.mu.Unlock()
 	if stream != nil {
 		stream.stop()
@@ -514,6 +556,9 @@ func (m *MuxLink) removeStream(id uint32) {
 	}
 	m.dispatch.streams.Drop(id)
 	m.windows.RemoveStream(id)
+	if m.observer != nil {
+		m.observer.ActiveStreams(count)
+	}
 }
 func (m *MuxLink) write(ctx context.Context, frame Frame) error {
 	m.writeMu.Lock()
@@ -521,7 +566,13 @@ func (m *MuxLink) write(ctx context.Context, frame Frame) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return WriteFrame(m.conn, frame)
+	if err := WriteFrame(m.conn, frame); err != nil {
+		return err
+	}
+	if m.observer != nil {
+		m.observer.Frame(m.peerRole(), frame.Type, 2, len(frame.Payload))
+	}
+	return nil
 }
 func (m *MuxLink) reset(id uint32, code uint16) {
 	var payload [2]byte
@@ -576,8 +627,12 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 		if size > MaxPayloadSize {
 			size = MaxPayloadSize
 		}
+		waitStarted := time.Now()
 		if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
 			return err
+		}
+		if s.link.observer != nil {
+			s.link.observer.WindowWait(time.Since(waitStarted))
 		}
 		chunk := append([]byte(nil), payload[:size]...)
 		if err := s.link.write(ctx, Frame{Type: FrameData, StreamID: s.ID, Payload: chunk}); err != nil {
@@ -649,4 +704,43 @@ func (s *MuxStream) enqueue(frame Frame) error {
 	default:
 		return fmt.Errorf("%w: stream receive queue is full", ErrStreamState)
 	}
+}
+
+func (m *MuxLink) peerRole() PeerRole {
+	if m.config.LocalClient {
+		return PeerRoleServer
+	}
+	return PeerRoleClient
+}
+
+func (m *MuxLink) recordViolation(class ErrorClass) bool {
+	m.mu.Lock()
+	m.violations++
+	thresholdReached := m.violations >= m.limiter.Threshold()
+	m.mu.Unlock()
+	if m.observer != nil {
+		role := m.peerRole()
+		m.observer.Rejected(role, class)
+		m.observer.Event(VLinkEvent{At: time.Now(), Kind: "security_rejection", LinkID: m.linkID, PeerRole: role, ErrorClass: class})
+	}
+	if thresholdReached {
+		m.Close(ErrRateLimited)
+		return true
+	}
+	return false
+}
+
+func (m *MuxLink) observeClose(err error) {
+	if m.observer == nil {
+		return
+	}
+	class := ErrorClassTransport
+	if errors.Is(err, ErrRateLimited) {
+		class = ErrorClassRateLimited
+	} else if errors.Is(err, ErrProtocol) {
+		class = ErrorClassProtocol
+	}
+	role := m.peerRole()
+	m.observer.Closed(role, class)
+	m.observer.Event(VLinkEvent{At: time.Now(), Kind: "link_close", LinkID: m.linkID, PeerRole: role, ErrorClass: class})
 }
