@@ -22,3 +22,5 @@ jobs:
           cache: false
       - name: Run shared Engine checks
         run: make phase2-engine-check
+      - name: Run Linux benchmark smoke (not performance acceptance)
+        run: make phase2-benchmark-smoke

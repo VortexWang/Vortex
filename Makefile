@@ -1,10 +1,16 @@
-.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check
+.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check phase2-benchmark-smoke phase2-benchmark
 
 phase2-engine-quick:
 	cd engine && go test -race ./...
 
 phase2-engine-check: phase2-engine-quick
 	tools/engine/docker-test.sh
+
+phase2-benchmark-smoke:
+	cd engine && go test ./relay -run '^$$' -bench '^BenchmarkTCPRelayBareTCP$$' -benchtime=1s -count=1
+
+phase2-benchmark:
+	sh tools/phase2/benchmark.sh
 
 phase1-quick:
 	python3 -m unittest discover -s tests/phase1 -p 'test_*.py'

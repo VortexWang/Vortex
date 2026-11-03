@@ -20,7 +20,9 @@ covered_files:
   - .planning/phases/02-m0-m0-engine-dataplane/02-04-PLAN.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-04-SUMMARY.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-05-PLAN.md
+  - .planning/phases/02-m0-m0-engine-dataplane/02-05-SUMMARY.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-06-PLAN.md
+  - .planning/phases/02-m0-m0-engine-dataplane/02-RESEARCH-BENCHMARK.md
   - .planning/phases/02-m0-m0-engine-dataplane/CHECK-PLANS.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-UAT.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-VALIDATION.md
@@ -62,6 +64,7 @@ verification_mode: inline-no-subagents
 - User UAT confirmations: 4 passed, 0 issues, recorded in `02-UAT.md`.
 - Plan 02-04 bounded UDP admission passed local `make phase2-engine-check` and the same command on Actions run 41611109213, both on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d`.
 - Plan 02-05 injected gate and usage-batch behavior passed local race, vet, Docker, and same-commit Actions checks on SHA `213c0d83674686cc07eb7dc3b9d6d3db2560a6c8` (run 41613449912).
+- Plan 02-06 benchmark implementation is in progress; preliminary OrbStack loopback measurements are retained as environment-limited raw evidence and do not qualify as Linux hardware acceptance.
 - Code review: `02-REVIEW.md`, 1 critical and 1 warning finding.
 - Security review: `02-SECURITY.md`, the high-severity UDP admission threat is closed; accounting boundary warning remains for Plan 02-05.
 - 700 Mbps benchmark: not run; no performance claim is made.
