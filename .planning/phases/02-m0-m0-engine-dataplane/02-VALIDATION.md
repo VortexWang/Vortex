@@ -13,7 +13,7 @@ status: active
 | Quick command | `cd engine && go test -race ./...` |
 | Shared local/CI command | `make phase2-engine-check` |
 | Local Linux execution | OrbStack Docker on arm64 for current host |
-| CI execution | GitHub Actions Ubuntu 24.04 amd64 |
+| CI execution | GitHub Actions Ubuntu 24.04 amd64, run 41600595927 |
 
 ## Sampling
 
@@ -36,4 +36,4 @@ status: active
 
 ## Evidence Rules
 
-An unrun behavior remains pending. Docker smoke validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove `splice`, throughput, leak, or production behavior. Actions evidence is separate and must be captured from the workflow run for the same commit.
+An unrun behavior remains pending. Docker smoke validates that the Linux-targeted test binary runs in the local Linux VM; it does not prove `splice`, throughput, leak, or production behavior. Current same-commit Actions evidence is run 41600595927 for SHA `a9b79f11b7d9b9b3a32bbf2a47b745ee856b9e0e`.

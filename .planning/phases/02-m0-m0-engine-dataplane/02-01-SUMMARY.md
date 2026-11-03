@@ -22,6 +22,7 @@ Added real TCP loopback tests proving a request half-close still permits a full 
 - `make phase2-engine-check` — passed on macOS arm64 with OrbStack Linux arm64 Docker.
 - Native `go test -race ./...` — passed.
 - Linux scratch-container tests — 3 passed.
+- Clean commit `a9b79f11b7d9b9b3a32bbf2a47b745ee856b9e0e` passed the same command in GitHub Actions Ubuntu 24.04 amd64; [run 41600595927](https://github.com/VortexWang/Vortex/actions/runs/41600595927).
 - `splice`, UDP sessions, gates/rate limits, and performance target remain unimplemented and are not claimed by this plan.
 
 ## Deviations
