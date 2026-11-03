@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"sync"
 	"time"
@@ -151,16 +152,21 @@ type MuxLink struct {
 	incoming    chan *MuxStream
 	done        chan struct{}
 	closeOnce   sync.Once
+	peerID      NodeID
 }
 
 type MuxStream struct {
-	link      *MuxLink
-	ID        uint32
-	Network   StreamNetwork
-	receive   chan Frame
-	done      chan struct{}
-	closeOnce sync.Once
+	link       *MuxLink
+	ID         uint32
+	Network    StreamNetwork
+	receive    chan Frame
+	done       chan struct{}
+	closeOnce  sync.Once
+	resourceMu sync.Mutex
+	resource   io.Closer
 }
+
+type RemoteOpenAuthorizer func(context.Context, NodeID, OpenRequest) (io.Closer, error)
 
 func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloConfig, config MuxConfig) (*MuxLink, NodeID, error) {
 	peer, err := HandshakeHello(ctx, conn, hello)
@@ -173,6 +179,7 @@ func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloCon
 		forceCloseTLS(conn)
 		return nil, NodeID{}, err
 	}
+	mux.peerID = peer
 	return mux, peer, nil
 }
 
@@ -239,7 +246,62 @@ func (m *MuxLink) Accept(ctx context.Context) (*MuxStream, error) {
 	}
 }
 
-func (m *MuxLink) AcceptRemote(ctx context.Context, id uint32) error {
+func (m *MuxLink) AuthorizeRemote(ctx context.Context, id uint32, authorize RemoteOpenAuthorizer) error {
+	request, ok := m.dispatch.streams.RemoteOpenRequest(id)
+	if !ok {
+		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
+	}
+	var resource io.Closer
+	var err error
+	if authorize == nil {
+		rejection := &OpenRejection{Code: OpenUnauthorized}
+		_, _ = rand.Read(rejection.CorrelationID[:])
+		err = rejection
+	} else {
+		resource, err = authorize(ctx, m.peerID, request)
+	}
+	if err != nil {
+		if resource != nil {
+			_ = resource.Close()
+		}
+		var rejection *OpenRejection
+		if !errors.As(err, &rejection) {
+			rejection = &OpenRejection{Code: OpenUnauthorized}
+			_, _ = rand.Read(rejection.CorrelationID[:])
+		}
+		if rejection.CorrelationID == ([16]byte{}) {
+			_, _ = rand.Read(rejection.CorrelationID[:])
+		}
+		payload, payloadErr := OpenErrorPayload(rejection)
+		if payloadErr != nil {
+			return payloadErr
+		}
+		writeErr := m.write(ctx, Frame{Type: FrameOpenErr, StreamID: id, Payload: payload})
+		m.removeStream(id)
+		if writeErr != nil {
+			m.Close(writeErr)
+			return writeErr
+		}
+		return err
+	}
+	stream := m.getStream(id)
+	if stream == nil {
+		if resource != nil {
+			_ = resource.Close()
+		}
+		return ErrUnknownStream
+	}
+	stream.resourceMu.Lock()
+	stream.resource = resource
+	stream.resourceMu.Unlock()
+	if acceptErr := m.acceptRemote(ctx, id); acceptErr != nil {
+		stream.closeResource()
+		return acceptErr
+	}
+	return nil
+}
+
+func (m *MuxLink) acceptRemote(ctx context.Context, id uint32) error {
 	if err := m.dispatch.streams.AcceptRemote(id); err != nil {
 		return err
 	}
@@ -306,6 +368,7 @@ func (m *MuxLink) Close(err error) {
 		m.mu.Lock()
 		for _, stream := range m.streams {
 			stream.stop()
+			stream.closeResource()
 		}
 		m.streams = make(map[uint32]*MuxStream)
 		m.mu.Unlock()
@@ -447,6 +510,7 @@ func (m *MuxLink) removeStream(id uint32) {
 	m.mu.Unlock()
 	if stream != nil {
 		stream.stop()
+		stream.closeResource()
 	}
 	m.dispatch.streams.Drop(id)
 	m.windows.RemoveStream(id)
@@ -470,6 +534,22 @@ func (m *MuxLink) reset(id uint32, code uint16) {
 }
 
 func (s *MuxStream) stop() { s.closeOnce.Do(func() { close(s.done) }) }
+func (s *MuxStream) closeResource() {
+	s.resourceMu.Lock()
+	resource := s.resource
+	s.resource = nil
+	s.resourceMu.Unlock()
+	if resource != nil {
+		_ = resource.Close()
+	}
+}
+func (s *MuxStream) TakeResource() io.Closer {
+	s.resourceMu.Lock()
+	defer s.resourceMu.Unlock()
+	resource := s.resource
+	s.resource = nil
+	return resource
+}
 func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
 	select {
 	case frame := <-s.receive:
@@ -512,6 +592,8 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 	if s.Network != StreamUDP || len(payload) == 0 || len(payload) > MaxPayloadSize {
 		return false, ErrProtocol
 	}
+	snapshot,open:=s.link.dispatch.streams.Snapshot(s.ID)
+	if !open||!snapshot.OpenOK{return false,ErrStreamState}
 	ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload)))
 	if err != nil || !ok {
 		return ok, err

@@ -50,6 +50,7 @@ type StreamSnapshot struct {
 type streamRecord struct {
 	StreamSnapshot
 	pendingFrames []Frame
+	openRequest   OpenRequest
 }
 
 type StreamTable struct {
@@ -106,7 +107,7 @@ func (t *StreamTable) Apply(frame Frame) (Frame, error) {
 			return Frame{}, fmt.Errorf("%w: reused stream ID", ErrProtocol)
 		}
 		network := StreamNetwork(request.Network)
-		t.streams[frame.StreamID] = &streamRecord{StreamSnapshot: StreamSnapshot{ID: frame.StreamID, Network: network, Lifecycle: StreamOpening}}
+		t.streams[frame.StreamID] = &streamRecord{StreamSnapshot: StreamSnapshot{ID: frame.StreamID, Network: network, Lifecycle: StreamOpening}, openRequest: request}
 		return frame, nil
 	}
 	stream := t.streams[frame.StreamID]
@@ -194,6 +195,16 @@ func (t *StreamTable) AcceptRemote(id uint32) error {
 		stream.Lifecycle = StreamOpen
 	}
 	return nil
+}
+
+func (t *StreamTable) RemoteOpenRequest(id uint32) (OpenRequest, bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	stream := t.streams[id]
+	if stream == nil || stream.InitiatedLocal {
+		return OpenRequest{}, false
+	}
+	return stream.openRequest, true
 }
 
 func (t *StreamTable) DrainPendingOpenFrames(id uint32) ([]Frame, error) {

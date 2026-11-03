@@ -3,6 +3,7 @@ package vlink
 import (
 	"context"
 	"errors"
+	"io"
 	"net"
 	"testing"
 	"time"
@@ -55,10 +56,10 @@ func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := server.AcceptRemote(ctx, serverA.ID); err != nil {
+	if err := server.AuthorizeRemote(ctx, serverA.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
 		t.Fatal(err)
 	}
-	if err := server.AcceptRemote(ctx, serverB.ID); err != nil {
+	if err := server.AuthorizeRemote(ctx, serverB.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
 		t.Fatal(err)
 	}
 	if frame, err := clientA.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
@@ -105,6 +106,61 @@ func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	client.Close(nil)
 	server.Close(nil)
 }
+
+func TestMuxRemoteOpenRequiresAuthorizationAndClosesResources(t *testing.T) {
+	left, right := net.Pipe()
+	config := MuxConfig{LocalClient: true}
+	client, _ := newMuxLink(left, config)
+	config.LocalClient = false
+	server, _ := newMuxLink(right, config)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	request := OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}}
+	stream, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	remote, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rejection := &OpenRejection{Code: OpenNoRoute, CorrelationID: [16]byte{7}}
+	if err := server.AuthorizeRemote(ctx, remote.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, rejection }); err == nil {
+		t.Fatal("accepted rejected OPEN")
+	}
+	frame, err := stream.Receive(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if frame.Type != FrameOpenErr || OpenErrorCode(frame.Payload[1]) != OpenNoRoute {
+		t.Fatalf("OPEN rejection frame=%+v", frame)
+	}
+
+	stream2, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	remote2, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resource := &testCloser{}
+	if err := server.AuthorizeRemote(ctx, remote2.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return resource, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if frame, err := stream2.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
+		t.Fatalf("OPEN_OK=%+v err=%v", frame, err)
+	}
+	server.Close(nil)
+	if !resource.closed {
+		t.Fatal("link close did not release authorized stream resource")
+	}
+	client.Close(nil)
+}
+
+type testCloser struct{ closed bool }
+
+func (c *testCloser) Close() error { c.closed = true; return nil }
 
 func TestStreamIDsParityAndNoReuse(t *testing.T) {
 	client, server := NewStreamTable(true, 1024), NewStreamTable(false, 1024)
