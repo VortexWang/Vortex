@@ -47,7 +47,13 @@
 2. 直接 TCP 转发正确处理半关闭、并发拷贝取消和清理，平台规定路径采用经证明的零拷贝实现；数据面没有数据库或主动控制面依赖。
 3. 直接 UDP 会话、门控、速率/连接限制和计量批次边界具有自动化测试，正常消费按写成功载荷计量，预扣批次仅提交或退回一次。
 4. 在适用的 Linux 环境尝试直接转发基准，保存硬件、命令、配置、原始结果和与 700 Mbps 开发目标的差距；未达目标时继续正确性工作，不单独阻断 Phase 2 进度。
-**Plans**: 3 plans complete (TCP relay, Linux splice, UDP sessions); gates/usage accounting and benchmark evidence remain.
+**Plans**: 6 plans total; 3 complete (TCP relay, Linux splice, UDP sessions), with 3 gap-closure plans in progress/planned. The follow-up sequence closes bounded UDP admission, gate/usage accounting, and benchmark evidence.
+- [x] 02-01 — TCP relay and half-close
+- [x] 02-02 — Linux splice path
+- [x] 02-03 — UDP sessions and idle expiry
+- [ ] 02-04 — Bounded UDP admission (gap closure)
+- [ ] 02-05 — Gates, limits, and usage batches (gap closure)
+- [ ] 02-06 — Linux benchmark evidence (gap closure)
 
 ### Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)
 **Goal**: 节点可在已授权路径上通过受认证加密 VLink 建立正向和反向隧道，链路身份与授权不可伪造或重放。
@@ -128,7 +134,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
-| 2. M0 Engine dataplane | 3/TBD | In progress | - |
+| 2. M0 Engine dataplane | 3/6 | In progress | - |
 | 3. M1 VLink engine links | 0/TBD | Not started | - |
 | 4. M2 Multi-hop engine | 0/TBD | Not started | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |

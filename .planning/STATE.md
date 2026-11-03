@@ -4,7 +4,7 @@ milestone: V1
 current_phase: 2
 current_phase_name: M0 引擎数据面 (M0 Engine Dataplane)
 status: executing
-stopped_at: Plan 02-03 UDP sessions complete; continue gates and usage accounting
+stopped_at: Phase 2 verification found gaps; discussion, research addendum, and gap-closure plans 02-04..02-06 are recorded; executing 02-04
 last_updated: "2026-11-03T08:06:00.000Z"
 last_activity: 2026-11-03
 last_activity_desc: Initialized GSD project, completed V1.11 research and approved the full requirements scope and roadmap structure.
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 2 (M0 引擎数据面) — EXECUTING
-Plan: 3 of TBD complete
-Status: Phase 1 passed for M0 entry; TCP relay, Linux splice, and UDP session slices are implemented and verified on local Docker and GitHub Actions.
-Last activity: 2026-11-03 — UDP routing and 60-second idle expiry passed same-commit local Docker and Actions checks.
+Plan: 3 of 6 complete; Plan 02-04 executing
+Status: Phase 1 passed for M0 entry; initial TCP, Linux splice, and UDP slices passed their recorded checks. Phase 2 verification found bounded-admission, accounting, and benchmark gaps; the phase remains open.
+Last activity: 2026-11-03 — Reopened Phase 2 through discussion, gap research, planning, and inline plan check before continuing implementation.
 
 Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
@@ -65,12 +65,13 @@ Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
 ### Pending Todos
 
-- Implement gates and usage accounting; resolve only dependencies actually introduced in this phase.
-- Add a benchmark harness and record the measured gap against 700 Mbps; the result does not gate correctness work.
+- Complete Plan 02-04 bounded UDP admission and close the open denial-of-service threat.
+- Execute Plan 02-05 gates and usage accounting.
+- Execute Plan 02-06 benchmark harness and preserve measured or unmeasured status against 700 Mbps.
 
 ### Blockers/Concerns
 
-- No current M0 code blocker. Gate/usage semantics and benchmark evidence remain future Phase 2 work.
+- Phase 2 remains incomplete until gap-closure plans pass; benchmark misses or constrained hardware do not alone block correctness progress.
 
 ## Deferred Items
 
