@@ -20,6 +20,7 @@ const (
 	RightToLeft Direction = "right_to_left"
 )
 
+// Meter may be called concurrently and receives bytes accepted by a destination write.
 type Meter func(Direction, int64) error
 
 type Stats struct {
@@ -61,7 +62,7 @@ func TCP(ctx context.Context, left, right net.Conn, meter Meter) (Stats, error) 
 
 	results := make(chan copyResult, 2)
 	copyDirection := func(src, dst net.Conn, direction Direction) {
-		n, err := copyTCP(src, dst, direction, meter)
+		n, err := copyTCPPlatform(src, dst, direction, meter)
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			closeBoth()
 		}

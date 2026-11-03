@@ -47,7 +47,7 @@
 2. 直接 TCP 转发正确处理半关闭、并发拷贝取消和清理，平台规定路径采用经证明的零拷贝实现；数据面没有数据库或主动控制面依赖。
 3. 直接 UDP 会话、门控、速率/连接限制和计量批次边界具有自动化测试，正常消费按写成功载荷计量，预扣批次仅提交或退回一次。
 4. 在适用的 Linux 环境尝试直接转发基准，保存硬件、命令、配置、原始结果和与 700 Mbps 开发目标的差距；未达目标时继续正确性工作，不单独阻断 Phase 2 进度。
-**Plans**: 1/1 initial tracer plan complete; additional plans required for splice, UDP, gates/metering, and benchmark evidence.
+**Plans**: 2 initial TCP plans complete; additional plans required for UDP, gates/metering, and benchmark evidence.
 
 ### Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)
 **Goal**: 节点可在已授权路径上通过受认证加密 VLink 建立正向和反向隧道，链路身份与授权不可伪造或重放。

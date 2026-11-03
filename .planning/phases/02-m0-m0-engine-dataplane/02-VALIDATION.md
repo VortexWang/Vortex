@@ -29,7 +29,7 @@ status: active
 | Directional successful-write metering | Same test | Passed |
 | Context cancellation closes both directions | `TestTCPContextCancellationClosesBothDirections` | Passed locally and in local Linux scratch container |
 | Meter failure closes both directions | `TestTCPMeterFailureStopsRelay` | Passed locally and in local Linux scratch container |
-| Linux bare-TCP splice | Not implemented | Pending |
+| Linux bare-TCP splice | `TestTCPPlatformSelectsSpliceForBareTCP` | Passed in local Linux arm64 scratch container; amd64 cross-compiles |
 | UDP session routing and 60-second idle expiry | Not implemented | Pending |
 | Gate/rate/connection controls and accounting failure behavior | Not implemented | Pending |
 | 700 Mbps benchmark | Not run | Development target; miss is recorded, not a progress blocker |

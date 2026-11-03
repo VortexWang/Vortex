@@ -12,8 +12,8 @@ state_head: a9b79f11b7d9b9b3a32bbf2a47b745ee856b9e0e
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 13
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 2 (M0 引擎数据面) — EXECUTING
-Plan: 1 of TBD complete
-Status: Phase 1 passed for M0 entry; first independent TCP relay slice is implemented and verified locally.
-Last activity: 2026-11-03 — Implemented the first standalone TCP relay slice; local race and Linux Docker tests pass.
+Plan: 2 of TBD complete
+Status: Phase 1 passed for M0 entry; standalone TCP relay and Linux splice slice are implemented and verified locally.
+Last activity: 2026-11-03 — Linux TCP splice passed scratch-container tests; UDP, gates, and metering remain.
 
 Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
@@ -65,8 +65,8 @@ Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
 ### Pending Todos
 
-- Plan and implement the M0 direct TCP/UDP Engine slice; resolve only dependencies actually introduced in this phase.
-- Add Linux `splice`, UDP session expiry, gate/usage accounting, and a measured benchmark harness in follow-up plans.
+- Implement UDP sessions, gates and usage accounting; resolve only dependencies actually introduced in this phase.
+- Add UDP session expiry, gate/usage accounting, and a measured benchmark harness in follow-up plans.
 
 ### Blockers/Concerns
 
