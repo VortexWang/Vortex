@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "commit_sha": "3ce26f8d0fad3b5a899fd0ef8c32f23f3c8f5970",
+  "model_sha256": "e2b771f1ed1ccbe8c37e36a6f27c8f94a4e997454e3bdeb270b054972cf8d780",
+  "go_toolchain": "go1.27.3",
+  "bounds": {
+    "max_depth": 4,
+    "max_generations": 2,
+    "max_sources": 2
+  },
+  "visited_states": 10,
+  "invariants": [
+    "quota-conservation",
+    "single-active-generation",
+    "share-chain-max",
+    "exactly-once-R-transfer",
+    "idempotent-persisted-usage",
+    "unknown-liability-not-released",
+    "immutable-snapshot-isolation",
+    "activation-unknown-retains-occupancy"
+  ],
+  "violations": [],
+  "implementation_status": "not-yet-implemented"
+}
