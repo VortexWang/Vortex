@@ -162,7 +162,21 @@ type MuxStream struct {
 	closeOnce sync.Once
 }
 
-func NewMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
+func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloConfig, config MuxConfig) (*MuxLink, NodeID, error) {
+	peer, err := HandshakeHello(ctx, conn, hello)
+	if err != nil {
+		forceCloseTLS(conn)
+		return nil, NodeID{}, err
+	}
+	mux, err := newMuxLink(conn, config)
+	if err != nil {
+		forceCloseTLS(conn)
+		return nil, NodeID{}, err
+	}
+	return mux, peer, nil
+}
+
+func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if conn == nil {
 		return nil, errors.New("vlink: mux connection is required")
 	}

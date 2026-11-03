@@ -209,7 +209,7 @@ func TestMuxPollSendsNonceBoundPingAndAcceptsPong(t *testing.T) {
 	start := time.Now()
 	current := start
 	var clockMu sync.Mutex
-	mux, err := NewMuxLink(left, MuxConfig{Now: func() time.Time { clockMu.Lock(); defer clockMu.Unlock(); return current }})
+	mux, err := newMuxLink(left, MuxConfig{Now: func() time.Time { clockMu.Lock(); defer clockMu.Unlock(); return current }})
 	if err != nil {
 		t.Fatal(err)
 	}

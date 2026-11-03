@@ -27,12 +27,12 @@ func BenchmarkStreamOpenToFirstData(b *testing.B) {
 func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	clientConn, serverConn := net.Pipe()
 	config := MuxConfig{LocalClient: true, StreamWindow: 3, AggregateWindow: 6, MaxWindow: 32}
-	client, err := NewMuxLink(clientConn, config)
+	client, err := newMuxLink(clientConn, config)
 	if err != nil {
 		t.Fatal(err)
 	}
 	config.LocalClient = false
-	server, err := NewMuxLink(serverConn, config)
+	server, err := newMuxLink(serverConn, config)
 	if err != nil {
 		t.Fatal(err)
 	}
