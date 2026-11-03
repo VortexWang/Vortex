@@ -1,0 +1,40 @@
+run_id: 20261103-0143cdd-ubuntu-kvm
+commit: 0143cdd88a60b489af6b15e3c41fb004c8bb1438
+worktree: clean (engine source snapshot exported from this commit)
+host_os: Ubuntu 24.04.5 LTS
+kernel: 6.8.0-142-generic
+virtualization: KVM virtual machine
+architecture: amd64
+cpu: AMD EPYC 7713, 4 vCPU
+memory: 7.7 GiB
+go: go1.27.3 linux/amd64
+container_runtime: unavailable; benchmark ran directly on Linux host
+source_archive_sha256: eb3c98a5203ef3ef139823db88efb9cc6b23ee76f7423a6d1df05378447916e5
+raw_results: 20261103-0143cdd-ubuntu-kvm.raw.txt
+raw_results_sha256: 98b54e6781a00df5d3b785b446261332fec93e9e7ca8147894340eebdb76d634
+benchmark_command: go test ./vlink -run '^$' -bench '^BenchmarkVLink(TCPThroughput|FirstByte)$' -benchtime=10x -count=3
+verification: go test -race ./... passed; go vet ./... passed
+topology: loopback TCP pairs; no external network hops; no production accounting gate
+samples: 3 benchmark repetitions x 10 transfers per throughput case; 3 x 10 first-byte samples per mux/pool case
+
+NFR-002:
+  forward_tracer_median_MBps: 761.67
+  direct_TLS_baseline_median_MBps: 1087.97
+  forward_median_Mbps: 6093.36
+  baseline_median_Mbps: 8703.76
+  relative_to_baseline_percent: 70.01
+  numeric_candidate_result: pass (>=600 Mbps and >=70%)
+
+NFR-004:
+  forward_established_mux_median_MBps: 428.67
+  reverse_established_mux_median_MBps: 412.65
+  absolute_delta_percent_of_forward: 3.74
+  numeric_candidate_result: pass (<=5%)
+
+NFR-007:
+  mux_median_extra_us: 198
+  prewarmed_pool_median_extra_us: 195
+  numeric_candidate_result: pass (<=5000 us)
+  rtt_subtraction: median local TCP connect/loopback link RTT/loopback target RTT samples; not a production multi-hop path
+
+qualification_scope: numeric candidate results for this Ubuntu KVM host and loopback harness only. This does not qualify the full production path, 16-concurrent-flow workload, formal accounting gate, external segment RTT, or sustained-duration requirements.

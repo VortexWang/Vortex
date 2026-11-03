@@ -1,0 +1,27 @@
+goos: linux
+goarch: amd64
+pkg: vortex/engine/vlink
+cpu: AMD EPYC 7713 64-Core Processor                
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	      10	  88107146 ns/op	 761.67 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	      10	  87412896 ns/op	 767.72 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	      10	  88533572 ns/op	 758.00 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	      10	  83773846 ns/op	 801.07 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	      10	  70522144 ns/op	 951.60 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	      10	  82496556 ns/op	 813.47 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	      10	  64896562 ns/op	1034.09 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	      10	  61682492 ns/op	1087.97 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	      10	  55292135 ns/op	1213.71 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	      10	 156550199 ns/op	 428.67 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	      10	 149463604 ns/op	 449.00 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	      10	 174599050 ns/op	 384.36 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	      10	 161127310 ns/op	 416.50 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	      10	 165080745 ns/op	 406.52 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	      10	 162629722 ns/op	 412.65 MB/s
+BenchmarkVLinkFirstByte/mux-4                                       	      10	    375958 ns/op	       281.0 median-extra-us	       364.0 median-first-byte-us	        83.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-4                                       	      10	    281694 ns/op	       191.0 median-extra-us	       274.0 median-first-byte-us	        83.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-4                                       	      10	    297740 ns/op	       198.0 median-extra-us	       307.0 median-first-byte-us	       109.0 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	      10	    283961 ns/op	       219.0 median-extra-us	       304.0 median-first-byte-us	        85.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	      10	    293781 ns/op	       194.0 median-extra-us	       289.0 median-first-byte-us	        94.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	      10	    279419 ns/op	       195.0 median-extra-us	       285.0 median-first-byte-us	        90.00 median-rtt-sum-us
+PASS
+ok  	vortex/engine/vlink	18.306s
