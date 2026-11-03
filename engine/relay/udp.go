@@ -8,6 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"vortex/engine/accounting"
 )
 
 const DefaultUDPIdleTimeout = 60 * time.Second
@@ -27,12 +29,16 @@ type UDPOptions struct {
 	MaxSessionsPerClient int
 	// OnSessionLimit observes dropped datagrams and runs outside the session lock.
 	OnSessionLimit func(client *net.UDPAddr)
+	Gate           accounting.Gate
+	// OnGateDenied may be called concurrently for request and response drops.
+	OnGateDenied func(client *net.UDPAddr)
 }
 
 type udpSession struct {
 	client     *net.UDPAddr
 	key        string
 	conn       *net.UDPConn
+	policy     accounting.Session
 	lastActive atomic.Int64
 	closeOnce  sync.Once
 }
@@ -42,7 +48,12 @@ func (s *udpSession) touch(now time.Time) {
 }
 
 func (s *udpSession) close() {
-	s.closeOnce.Do(func() { _ = s.conn.Close() })
+	s.closeOnce.Do(func() {
+		_ = s.conn.Close()
+		if s.policy != nil {
+			_ = s.policy.Close()
+		}
+	})
 }
 
 // UDP forwards datagrams between clients and target, retaining one connected
@@ -122,16 +133,33 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 
 	readBuffer := make([]byte, 64*1024)
 
-	newSession := func(client *net.UDPAddr, key string) (*udpSession, bool, error) {
+	newSession := func(client *net.UDPAddr, key string) (*udpSession, bool, bool, error) {
 		clientKey := client.IP.String()
 		if len(sessions) >= maxSessions || clientSessions[clientKey] >= maxSessionsPerClient {
-			return nil, true, nil
+			return nil, true, false, nil
+		}
+		var policy accounting.Session
+		if options.Gate != nil {
+			var err error
+			policy, err = options.Gate.Open(ctx, accounting.Flow{Key: key})
+			if errors.Is(err, accounting.ErrDenied) {
+				return nil, false, true, nil
+			}
+			if err != nil {
+				return nil, false, false, fmt.Errorf("relay: open UDP gate: %w", err)
+			}
+			if policy == nil {
+				return nil, false, false, errors.New("relay: UDP gate returned a nil session")
+			}
 		}
 		upstream, err := net.DialUDP("udp", nil, target)
 		if err != nil {
-			return nil, false, fmt.Errorf("relay: dial UDP target: %w", err)
+			if policy != nil {
+				_ = policy.Close()
+			}
+			return nil, false, false, fmt.Errorf("relay: dial UDP target: %w", err)
 		}
-		session := &udpSession{client: cloneUDPAddr(client), key: key, conn: upstream}
+		session := &udpSession{client: cloneUDPAddr(client), key: key, conn: upstream, policy: policy}
 		session.touch(time.Now())
 		sessions[key] = session
 		clientSessions[clientKey]++
@@ -151,8 +179,44 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 					sessionsMu.Unlock()
 					continue
 				}
+				sessionsMu.Unlock()
+				var batch *accounting.Batch
+				if session.policy != nil {
+					batch, err = session.policy.Reserve(ctx, accounting.RightToLeft, int64(n))
+					if errors.Is(err, accounting.ErrDenied) {
+						if options.OnGateDenied != nil {
+							options.OnGateDenied(cloneUDPAddr(session.client))
+						}
+						continue
+					}
+					if err != nil {
+						fail(fmt.Errorf("relay: reserve UDP response: %w", err))
+						return
+					}
+					if batch == nil || batch.Reserved() < int64(n) {
+						if batch != nil {
+							_ = batch.MarkUnknown(ctx)
+						}
+						fail(errors.New("relay: gate returned an undersized UDP response reservation"))
+						return
+					}
+				}
+				sessionsMu.Lock()
+				if sessions[session.key] != session {
+					sessionsMu.Unlock()
+					if batch != nil {
+						_ = batch.Return(ctx)
+					}
+					continue
+				}
 				written, writeErr := listener.WriteToUDP(responseBuffer[:n], session.client)
 				sessionsMu.Unlock()
+				if batch != nil {
+					if settleErr := settleUDPBatch(ctx, batch, written); settleErr != nil {
+						fail(fmt.Errorf("relay: settle UDP response usage: %w", settleErr))
+						return
+					}
+				}
 				if written > 0 && meter != nil {
 					if meter(RightToLeft, int64(written)) != nil {
 						fail(errors.New("relay: UDP response metering failed"))
@@ -171,7 +235,7 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 				}
 			}
 		}()
-		return session, false, nil
+		return session, false, false, nil
 	}
 
 	janitorEvery := idleTimeout / 4
@@ -235,8 +299,9 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 			session = nil
 		}
 		limited := false
+		gateDenied := false
 		if session == nil {
-			session, limited, err = newSession(client, key)
+			session, limited, gateDenied, err = newSession(client, key)
 		}
 		if session != nil {
 			session.touch(time.Now())
@@ -248,10 +313,40 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 			}
 			continue
 		}
+		if gateDenied {
+			if options.OnGateDenied != nil {
+				options.OnGateDenied(cloneUDPAddr(client))
+			}
+			continue
+		}
 		if err != nil {
 			return fmt.Errorf("relay: create UDP session: %w", err)
 		}
+		var batch *accounting.Batch
+		if session.policy != nil {
+			batch, err = session.policy.Reserve(ctx, accounting.LeftToRight, int64(n))
+			if errors.Is(err, accounting.ErrDenied) {
+				if options.OnGateDenied != nil {
+					options.OnGateDenied(cloneUDPAddr(client))
+				}
+				continue
+			}
+			if err != nil {
+				return fmt.Errorf("relay: reserve UDP request: %w", err)
+			}
+			if batch == nil || batch.Reserved() < int64(n) {
+				if batch != nil {
+					_ = batch.MarkUnknown(ctx)
+				}
+				return errors.New("relay: gate returned an undersized UDP request reservation")
+			}
+		}
 		written, err := session.conn.Write(readBuffer[:n])
+		if batch != nil {
+			if settleErr := settleUDPBatch(ctx, batch, written); settleErr != nil {
+				return fmt.Errorf("relay: settle UDP request usage: %w", settleErr)
+			}
+		}
 		if written > 0 && meter != nil {
 			if meter(LeftToRight, int64(written)) != nil {
 				return errors.New("relay: UDP request metering failed")
@@ -266,6 +361,13 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 			return ErrShortWrite
 		}
 	}
+}
+
+func settleUDPBatch(ctx context.Context, batch *accounting.Batch, written int) error {
+	if written == 0 {
+		return batch.Return(ctx)
+	}
+	return batch.Commit(ctx, int64(written))
 }
 
 func deleteSessionLocked(sessions map[string]*udpSession, clientSessions map[string]int, session *udpSession) bool {

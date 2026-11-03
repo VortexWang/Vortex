@@ -47,6 +47,8 @@ Inline review found an unbounded UDP session allocation path and a usage-account
 **Issue:** The target accepts a datagram before the meter callback runs. If metering fails, the relay stops, but the delivered payload cannot be withdrawn and this API has no durable reservation/unknown-debt contract. The same general boundary applies to successful TCP writes.
 **Fix:** Define the gate and reservation/usage-batch contract before claiming trusted billing; preserve an upper bound when acknowledgement is unknown and test meter failure after destination acceptance.
 
+**Resolution update (2026-11-03):** Plan 02-05 defines an injected Gate/Session/Batch contract, reserves before TCP/UDP writes, commits only accepted bytes, and makes resolver failure locally unknown without retry. The contract explicitly requires authoritative implementations to retain reservations and unknown upper bounds. Local race, vet, and Docker checks passed; same-commit Actions confirmation is pending. No durable production quota resolver is claimed by the standalone Engine.
+
 ---
 
 _Reviewed: 2026-11-03T09:03:11.837Z_

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"vortex/engine/accounting"
 )
 
 func TestUDPForwardsResponsesToOriginatingClientAndMetersWrites(t *testing.T) {
@@ -112,6 +114,94 @@ func TestUDPPerClientSessionLimitDropsBeforeCreatingSession(t *testing.T) {
 	}
 	if _, _, err := target.ReadFromUDP(make([]byte, 16)); err == nil {
 		t.Fatal("limited client created an upstream session")
+	}
+}
+
+func TestUDPWithGateAccountsRequestAndResponseWrites(t *testing.T) {
+	target, targetAddr := udpSocket(t)
+	listener, listenAddr := udpSocket(t)
+	client, _ := udpSocket(t)
+	policySession := &testPolicySession{}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := runUDP(ctx, listener, targetAddr, UDPOptions{Gate: &testGate{session: policySession}}, nil)
+	stopped := false
+	t.Cleanup(func() {
+		cancel()
+		if stopped {
+			return
+		}
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Error("gated UDP relay did not stop during cleanup")
+		}
+	})
+
+	writeUDP(t, client, listenAddr, "request")
+	_, targetClient := readUDP(t, target)
+	writeUDP(t, target, targetClient, "response")
+	if got := readUDPFrom(t, client); string(got) != "response" {
+		t.Fatalf("client response = %q", got)
+	}
+	waitFor(t, time.Second, func() bool {
+		outcomes, _ := policySession.snapshot()
+		return len(outcomes) == 2
+	})
+	outcomes, _ := policySession.snapshot()
+	var leftToRight, rightToLeft int64
+	for _, record := range outcomes {
+		if record.outcome.Resolution != accounting.Committed || record.outcome.Used != record.outcome.Reserved {
+			t.Fatalf("unexpected UDP policy outcome: %#v", record)
+		}
+		switch record.direction {
+		case accounting.LeftToRight:
+			leftToRight += record.outcome.Used
+		case accounting.RightToLeft:
+			rightToLeft += record.outcome.Used
+		}
+	}
+	if leftToRight != int64(len("request")) || rightToLeft != int64(len("response")) {
+		t.Fatalf("gated usage = L2R %d, R2L %d", leftToRight, rightToLeft)
+	}
+	cancel()
+	<-done
+	stopped = true
+	_, closed := policySession.snapshot()
+	if !closed {
+		t.Fatal("UDP policy session was not closed")
+	}
+}
+
+func TestUDPWithGateDenialDropsBeforeTargetWrite(t *testing.T) {
+	target, targetAddr := udpSocket(t)
+	listener, listenAddr := udpSocket(t)
+	client, _ := udpSocket(t)
+	denied := make(chan struct{}, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := runUDP(ctx, listener, targetAddr, UDPOptions{
+		Gate:         &testGate{err: accounting.ErrDenied},
+		OnGateDenied: func(*net.UDPAddr) { denied <- struct{}{} },
+	}, nil)
+	t.Cleanup(func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Error("UDP relay did not stop during cleanup")
+		}
+	})
+
+	writeUDP(t, client, listenAddr, "denied")
+	select {
+	case <-denied:
+	case <-time.After(time.Second):
+		t.Fatal("gate denial was not reported")
+	}
+	if err := target.SetReadDeadline(time.Now().Add(80 * time.Millisecond)); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := target.ReadFromUDP(make([]byte, 16)); err == nil {
+		t.Fatal("denied datagram reached target")
 	}
 }
 

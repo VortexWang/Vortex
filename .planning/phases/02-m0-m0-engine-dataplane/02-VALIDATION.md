@@ -34,7 +34,8 @@ status: active
 | UDP 60-second default and idle expiry override | `TestUDPDefaultsIdleTimeoutToSixtySeconds`, `TestUDPExpiresIdleSessionAndReplacesIt` | Passed locally and in Docker/Actions on the same SHA |
 | UDP cancellation and socket cleanup | `TestUDPCancellationClosesListenerAndSessions` | Passed locally and in Docker/Actions on the same SHA |
 | UDP global and per-source-IP admission limits | `TestUDPPerClientSessionLimitDropsBeforeCreatingSession`, `TestUDPGlobalSessionLimitReleasesAfterExpiry` | Passed under race detection locally and in Docker/Actions on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d` |
-| Gate/rate/connection controls and accounting failure behavior | Not implemented | Pending |
+| Gate admission, usage resolution, accounting failure, short writes, unknown outcomes | `engine/accounting`, `TestTCPWithGate*`, `TestUDPWithGate*` | Passed locally in race tests and both Linux scratch binaries; same-commit Actions pending |
+| Concrete production quota/rate policy and durable resolver | Owned by future Agent/Hub integration | Not implemented in the independent Engine module; the injected policy contract is tested |
 | 700 Mbps benchmark | Not run | Development target; miss is recorded, not a progress blocker |
 
 ## Evidence Rules

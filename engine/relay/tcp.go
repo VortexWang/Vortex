@@ -7,6 +7,8 @@ import (
 	"io"
 	"net"
 	"sync"
+
+	"vortex/engine/accounting"
 )
 
 const bufferSize = 32 * 1024
@@ -37,6 +39,36 @@ type copyResult struct {
 // TCP forwards both directions. EOF closes only the corresponding write side;
 // cancellation and other I/O errors close both connections.
 func TCP(ctx context.Context, left, right net.Conn, meter Meter) (Stats, error) {
+	return tcp(ctx, left, right, meter, nil)
+}
+
+// TCPWithGate opens an in-process policy session before relaying. Policy
+// sessions reserve each read chunk before destination writes and resolve usage
+// using the bytes accepted by those writes. Linux splice is intentionally not
+// selected for gated traffic because reservations must precede socket writes.
+func TCPWithGate(ctx context.Context, left, right net.Conn, gate accounting.Gate, meter Meter) (Stats, error) {
+	if gate == nil {
+		return Stats{}, errors.New("relay: TCP gate is required")
+	}
+	session, err := gate.Open(ctx, accounting.Flow{Key: left.RemoteAddr().String() + "->" + right.RemoteAddr().String()})
+	if err != nil {
+		_ = left.Close()
+		_ = right.Close()
+		return Stats{}, fmt.Errorf("relay: open TCP gate: %w", err)
+	}
+	if session == nil {
+		_ = left.Close()
+		_ = right.Close()
+		return Stats{}, errors.New("relay: TCP gate returned a nil session")
+	}
+	stats, relayErr := tcp(ctx, left, right, meter, session)
+	if closeErr := session.Close(); closeErr != nil {
+		relayErr = errors.Join(relayErr, fmt.Errorf("relay: close TCP gate: %w", closeErr))
+	}
+	return stats, relayErr
+}
+
+func tcp(ctx context.Context, left, right net.Conn, meter Meter, gate accounting.Session) (Stats, error) {
 	var stats Stats
 	var closeOnce sync.Once
 	closeBoth := func() {
@@ -62,7 +94,13 @@ func TCP(ctx context.Context, left, right net.Conn, meter Meter) (Stats, error) 
 
 	results := make(chan copyResult, 2)
 	copyDirection := func(src, dst net.Conn, direction Direction) {
-		n, err := copyTCPPlatform(src, dst, direction, meter)
+		var n int64
+		var err error
+		if gate != nil {
+			n, err = copyTCPGated(ctx, src, dst, direction, meter, gate)
+		} else {
+			n, err = copyTCPPlatform(src, dst, direction, meter)
+		}
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			closeBoth()
 		}
@@ -88,6 +126,67 @@ func TCP(ctx context.Context, left, right net.Conn, meter Meter) (Stats, error) 
 		firstErr = ctx.Err()
 	}
 	return stats, firstErr
+}
+
+func copyTCPGated(ctx context.Context, src, dst net.Conn, direction Direction, meter Meter, session accounting.Session) (int64, error) {
+	buf := make([]byte, bufferSize)
+	var total int64
+	for {
+		nr, readErr := src.Read(buf)
+		if nr > 0 {
+			batch, err := session.Reserve(ctx, accounting.Direction(direction), int64(nr))
+			if err != nil {
+				return total, fmt.Errorf("reserve %s: %w", direction, err)
+			}
+			if batch == nil || batch.Reserved() < int64(nr) {
+				if batch != nil {
+					_ = batch.MarkUnknown(ctx)
+				}
+				return total, errors.New("relay: gate returned an undersized TCP reservation")
+			}
+			written := 0
+			for written < nr {
+				nw, writeErr := dst.Write(buf[written:nr])
+				if nw > 0 {
+					written += nw
+					total += int64(nw)
+				}
+				if writeErr != nil {
+					return total, errors.Join(writeErr, resolveBatch(ctx, batch, written))
+				}
+				if nw == 0 {
+					return total, errors.Join(ErrShortWrite, resolveBatch(ctx, batch, written))
+				}
+			}
+			if err := resolveBatch(ctx, batch, written); err != nil {
+				return total, fmt.Errorf("resolve %s usage: %w", direction, err)
+			}
+			if meter != nil && written > 0 {
+				if err := meter(direction, int64(written)); err != nil {
+					return total, fmt.Errorf("meter %s: %w", direction, err)
+				}
+			}
+		}
+		if readErr != nil {
+			if errors.Is(readErr, net.ErrClosed) {
+				return total, readErr
+			}
+			if errors.Is(readErr, io.EOF) {
+				if closer, ok := dst.(interface{ CloseWrite() error }); ok {
+					return total, closer.CloseWrite()
+				}
+				return total, errors.New("relay: destination does not support half-close")
+			}
+			return total, readErr
+		}
+	}
+}
+
+func resolveBatch(ctx context.Context, batch *accounting.Batch, used int) error {
+	if used == 0 {
+		return batch.Return(ctx)
+	}
+	return batch.Commit(ctx, int64(used))
 }
 
 func copyTCP(src, dst net.Conn, direction Direction, meter Meter) (int64, error) {

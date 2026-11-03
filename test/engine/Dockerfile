@@ -1,3 +1,3 @@
 FROM scratch
 COPY relay.test /relay.test
-ENTRYPOINT ["/relay.test"]
+COPY accounting.test /accounting.test
