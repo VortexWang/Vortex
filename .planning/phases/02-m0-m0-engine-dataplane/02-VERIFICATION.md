@@ -2,7 +2,7 @@
 phase: 02-m0-m0-engine-dataplane
 verified: 2026-11-03
 status: gaps_found
-score: 1/4 must-haves verified
+score: 2/4 must-haves verified
 behavior_unverified: 0
 covered_files:
   - .planning/PROJECT.md
@@ -22,8 +22,9 @@ covered_files:
   - .planning/phases/02-m0-m0-engine-dataplane/02-05-PLAN.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-05-SUMMARY.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-06-PLAN.md
+  - .planning/phases/02-m0-m0-engine-dataplane/02-06-SUMMARY.md
+  - .planning/phases/02-m0-m0-engine-dataplane/02-CHECK.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-RESEARCH-BENCHMARK.md
-  - .planning/phases/02-m0-m0-engine-dataplane/CHECK-PLANS.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-UAT.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-VALIDATION.md
   - .planning/phases/02-m0-m0-engine-dataplane/02-REVIEW.md
@@ -33,9 +34,19 @@ covered_files:
   - engine/relay/tcp_portable.go
   - engine/relay/udp.go
   - engine/relay/udp_test.go
+  - engine/relay/gate_test.go
+  - engine/relay/tcp_benchmark_test.go
+  - engine/accounting/accounting.go
+  - engine/accounting/accounting_test.go
   - Makefile
   - .github/workflows/phase2.yml
-covered_digest: "v4:sha256:9ca743844e1485c9ce04f978a5396355442a803399c1280c44c8b5990769c738"
+  - test/engine/Dockerfile
+  - test/engine/benchmark.Dockerfile
+  - tools/engine/docker-test.sh
+  - tools/phase2/benchmark.sh
+  - tools/phase2/README.md
+  - artifacts/phase2/benchmark/20261103T095609Z.txt
+covered_digest: "v4:sha256:762157c238b97f3f2aaac59211c4099befd713397178363b3b5e6d840dcd93c9"
 verification_mode: inline-no-subagents
 ---
 
@@ -48,10 +59,10 @@ verification_mode: inline-no-subagents
 
 | # | Truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Engine is an independently testable Go module with the formal in-process integration boundary and runnable direct-forwarding entry needed by its consumers. | PARTIAL | The standalone `engine` module and relay package build and test. Current work delivers relay primitives; the complete integration boundary and product runnable entry are not verified by the current artifacts. |
+| 1 | Engine is an independently testable Go module with the formal in-process integration boundary and runnable direct-forwarding entry needed by its consumers. | VERIFIED FOR M0 MODULE | The standalone module builds, runs race tests, exposes in-process relay and injected Gate contracts, and runs the direct-forwarding benchmark. No database or active control-plane dependency is present. Production and simulated Agent consumers are later-phase work. |
 | 2 | TCP forwarding preserves half-close and cancellation semantics, and Linux bare TCP selects the splice path. | VERIFIED | Automated coverage is recorded in `02-VALIDATION.md`; all four user UAT checks passed, including half-close, splice, UDP isolation, and UDP expiry/cancellation. Local and Actions Engine checks passed on SHA `88d59c220c536601ff22b9a5762362c6553e8a14` (Actions run 41604182140). |
 | 3 | UDP sessions, gates, rate/connection limits, and usage batches enforce successful-write accounting and exactly-once commit/return behavior. | PARTIAL | Bounded UDP admission and injected Gate/Session/Batch behavior are covered by race-tested successful-write, short-write, denial, return, and unknown-outcome cases. The Engine intentionally does not provide durable quota/rate policy; authoritative Gate/Resolver adapters remain to be implemented by their owning runtime. The UDP resource threat is closed by Plan 02-04. |
-| 4 | A Linux direct-forwarding benchmark is attempted and its environment, command, raw result, and gap to 700 Mbps are retained. | NOT VERIFIED | The benchmark has not been run. This is an explicit development target; a miss or constrained environment does not alone block continued correctness work. |
+| 4 | A Linux direct-forwarding benchmark is attempted and its environment, command, raw result, and gap to 700 Mbps are retained. | PARTIAL | A 15-second Linux/arm64 Docker run is retained with command, environment, raw result, and computed gap. OrbStack and host-local loopback are environment-limited and do not establish qualified hardware/NIC performance. |
 
 ## UAT
 
@@ -64,28 +75,28 @@ verification_mode: inline-no-subagents
 - User UAT confirmations: 4 passed, 0 issues, recorded in `02-UAT.md`.
 - Plan 02-04 bounded UDP admission passed local `make phase2-engine-check` and the same command on Actions run 41611109213, both on SHA `c79c2d1194a66711a68f66c2b5e7a5f474a8381d`.
 - Plan 02-05 injected gate and usage-batch behavior passed local race, vet, Docker, and same-commit Actions checks on SHA `213c0d83674686cc07eb7dc3b9d6d3db2560a6c8` (run 41613449912).
-- Plan 02-06 benchmark implementation is in progress; preliminary OrbStack loopback measurements are retained as environment-limited raw evidence and do not qualify as Linux hardware acceptance.
+- Plan 02-06 benchmark harness passed local smoke and same-commit Actions on SHA `b59565459db046c5f7b709d63bdd9a9c82c2ed08` (phase2 run 41615021796; phase1 regression run 41615021837).
+- A 15-second OrbStack Linux/arm64 loopback result is retained in `artifacts/phase2/benchmark/20261103T095609Z.txt`: 37,986.24 Mbps, +37,286.24 Mbps over the 700 Mbps development target. It is environment-limited, not qualified acceptance.
 - Code review: `02-REVIEW.md`, 1 critical and 1 warning finding.
 - Security review: `02-SECURITY.md`, the high-severity UDP admission threat is closed; accounting boundary warning remains for Plan 02-05.
 - 700 Mbps benchmark: not run; no performance claim is made.
 
 ## Gaps To Close
 
-1. Finish and verify the Engine consumer integration contract and runnable entry required by the phase goal.
-2. Implement authoritative Gate/Resolver policy adapters when the owning runtime is introduced; the Engine's injected contract and call ordering are tested, but persistence is outside this module.
-3. Run the documented Linux benchmark when a suitable environment is available; retain raw evidence and measured distance from 700 Mbps (Plan 02-06). A missed target alone is not a progress blocker.
+1. Implement authoritative Gate/Resolver policy adapters when the owning runtime is introduced; the Engine's injected contract and call ordering are tested, but persistence is outside this module.
+2. Run the benchmark on qualified dedicated Linux hardware if/when available; the current loopback result cannot establish link throughput. A missed target alone is not a progress blocker.
 
 ## Requirements Coverage
 
 | Requirement area | Status | Notes |
 |---|---|---|
 | Direct TCP forwarding, half-close, cancellation, Linux splice | VERIFIED for tested behaviors | See validation strategy and UAT; no throughput claim. |
-| Direct UDP routing, response isolation, idle expiry, cancellation | VERIFIED for tested behaviors | Resource admission is not bounded and remains a security gap. |
+| Direct UDP routing, response isolation, idle expiry, cancellation | VERIFIED for tested behaviors | Global and per-source-IP resource admission is bounded and tested. |
 | Injected gate and usage batch boundary | PARTIAL | Call ordering and batch behavior pass tests; authoritative durable policy adapter is not part of the Engine module. |
-| 700 Mbps direct-forwarding target | UNMEASURED | Benchmark not run; record evidence when an appropriate Linux host is available. |
+| 700 Mbps direct-forwarding target | PARTIAL / ENVIRONMENT-LIMITED | OrbStack loopback measured above target; dedicated hardware/NIC qualification remains outstanding. |
 
 ## Verification Metadata
 
 **Approach:** Goal-backward against Phase 2 roadmap success criteria.
 **Verifier:** Inline in the main Codex window, honoring the user's instruction not to use agents.
-**Phase disposition:** Continue Phase 2 correctness work. Do not mark the phase complete while the implementation and security gaps above remain open.
+**Phase disposition:** Keep `gaps_found`. Continue with the owning runtime's durable policy integration and qualified performance evidence; do not claim full production acceptance from the Engine contract or OrbStack loopback result.

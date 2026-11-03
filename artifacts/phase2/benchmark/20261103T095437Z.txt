@@ -1,0 +1,24 @@
+status: environment-limited
+reason: OrbStack virtualization is not qualified performance hardware. Docker host is below the 4-vCPU/8-GiB reference capacity.
+commit: daf21f7c7e763f6603b111d743643ea7b74accd6
+worktree: dirty
+benchmark_sources: dirty
+source_digest_sha256: a4bff06e6cadb66fcad15f9d81c29b7d429df3806f1ba7803cfe2e7e2bb6bdec
+topology: host-local TCP loopback client-to-relay-to-sink
+docker_os: OrbStack
+architecture: arm64
+kernel: 7.2.12-orbstack-00394-gbecdd6130068
+cpus: 10
+memory_bytes: 8392671232
+duration: 2s
+command: docker run --rm --platform linux/arm64 vortex-engine-benchmark:local-16174 -test.run=^$ -test.bench=^BenchmarkTCPRelayBareTCP$ -test.benchtime=2s -test.count=1
+
+--- raw benchmark output ---
+goos: linux
+goarch: arm64
+pkg: vortex/engine/relay
+BenchmarkTCPRelayBareTCP-10    	  151100	     13804 ns/op	4747.71 MB/s
+PASS
+measurement: measured
+throughput_mbps: 37981.68
+difference_from_700_mbps: +37281.68
