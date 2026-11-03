@@ -1,0 +1,38 @@
+name: phase4-m2-multi-hop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  phase4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Run shared Phase 4 check
+        run: make phase4-m2-check
+      - name: Run benchmark smoke
+        if: always()
+        run: make phase4-m2-benchmark
+      - name: Record host metadata
+        if: always()
+        run: |
+          mkdir -p artifacts/phase4/actions
+          { echo "commit: $GITHUB_SHA"; echo "arch: $(uname -m)"; echo "runner: $RUNNER_OS"; go version; docker version --format '{{.Server.Version}}'; } > artifacts/phase4/actions/run.txt
+      - name: Upload Phase 4 evidence
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v6.0.0
+        with:
+          name: phase4-evidence
+          path: artifacts/phase4
