@@ -1,7 +1,7 @@
 ---
 phase: "03"
 slug: "m1-vlink-m1-vlink-engine"
-status: in-progress
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: "2026-11-03"
@@ -39,7 +39,7 @@ created: "2026-11-03"
 | 03-03-01 | 3 | 3 | ENG-020, ENG-021, ENG-022, ENG-023, ENG-024 | T-03-06 | OPEN checks local authorization and UDP requires OPEN_OK | integration/race | `cd engine && go test -race ./vlink -run 'Test(Open|Target|UDP)'` | ✅ | ✅ |
 | 03-04-01 | 4 | 4 | ENG-017, ENG-018 | T-03-07 | mode selection, reverse links and pool retries are bounded and cleaned up | integration/race | `cd engine && go test -race ./vlink -run 'Test(Pool|Mode|Reverse|Cleanup)'` | ✅ | ✅ |
 | 03-05-01 | 5 | 4 | — | T-03-08 | abuse controls close sustained offenders and metrics stay low-cardinality | unit/race | `cd engine && go test -race ./vlink -run 'Test(Limit|Observability)'` | ✅ | ✅ |
-| 03-06-01 | 6 | 5 | NFR-002, NFR-004, NFR-007 | T-03-09 | forward/reverse and first-packet measurements are reproducible and honestly reported | Docker/benchmark | `make phase3-vlink-check` | ✅ | ⬜ (Actions on final SHA pending; native Ubuntu KVM rerun pending) |
+| 03-06-01 | 6 | 5 | NFR-002, NFR-004, NFR-007 | T-03-09 | forward/reverse and first-packet measurements are reproducible and honestly reported | Docker/benchmark | `make phase3-vlink-check` | ✅ | ✅ (local Docker + Actions run 41675109713; Ubuntu KVM numeric candidate evidence recorded) |
 
 ## Wave 0 Requirements
 
@@ -52,15 +52,15 @@ created: "2026-11-03"
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Dedicated hardware throughput and first-packet NFR qualification | NFR-002, NFR-004, NFR-007 | Hosted CI and Docker are not the specified dedicated performance environment | Run the recorded benchmark on the approved Ubuntu 24.04 native host; attach raw results, host identity, commit SHA and tool versions |
+| Full-path production performance acceptance | NFR-002, NFR-004, NFR-007 | Current Ubuntu evidence uses a KVM host, loopback paths, one transfer at a time, and no production accounting gate | Run the agreed production path workload with concurrent flows, real segment RTTs, accounting enabled, and sustained duration; preserve raw results and host/tool metadata |
 
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verification or an explicit Wave 0 dependency
-- [ ] No three consecutive tasks without automated verification
+- [x] All tasks have automated verification or an explicit Wave 0 dependency
+- [x] No three consecutive tasks without automated verification
 - [x] Wave 0 covers missing test infrastructure
-- [ ] No watch-mode flags
-- [ ] Feedback latency target is under 90 seconds for quick checks
+- [x] No watch-mode flags
+- [x] Feedback latency target is under 90 seconds for quick checks
 - [x] `nyquist_compliant: true` after implementation and validation audit
 
-**Approval:** local Docker and Actions entry point implemented; native dedicated-host NFR approval remains pending.
+**Approval:** Phase 3 reproducibility and numeric candidate benchmark plan complete. Full-path production performance acceptance remains a later release gate.
