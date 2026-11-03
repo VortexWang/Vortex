@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 restart context complete; research next
-status: planning
-stopped_at: Previous Phase 4 invalidated by owner decision; legacy artifacts archived
+current_plan: Phase 4 restart plans complete; ready to execute Wave 1
+status: executing
+stopped_at: Phase 4 restart planning complete; runtime tracer is next
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Phase 4 restart context locked; runtime and topology research next
-state_head: 82894e3
+last_activity_desc: Phase 4 restart research and five-plan decomposition complete
+state_head: bd59b74
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 17
+  total_plans: 22
   completed_plans: 17
   percent: 38
 ---
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 restart research
-Total Plans in Phase: TBD
-Status: Reopened; research required
-Last activity: 2026-11-04 — Previous Phase 4 invalidated and archived
+Current Plan: Phase 4 restart plans complete; Wave 1
+Total Plans in Phase: 5
+Status: Ready to execute
+Last activity: 2026-11-04 — Runtime tracer plans generated after fresh research
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 

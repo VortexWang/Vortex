@@ -91,7 +91,12 @@
 3. 同节点/boot 的份额修改通过 prepare、关闭旧续租权、CAS 和执行回执切换，速率/连接降额在规定排空条件满足前保留旧占用。
 4. 两阶段配置应用具有幂等 Prepare/Commit/Abort，失败和丢失回执不产生双活代次、重复资源释放或未授权会话。
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
-**Plans**: Superseded. Phase 4 is reopened for research and replanning; prior plans are archived under `legacy-v1/`.
+**Plans**: 5 plans ready after restart research and planning; execution must begin with the startable runtime tracer and topology health gate.
+- [ ] 04-01 — Startable runtime config and accounting adapter
+- [ ] 04-02 — Supervised VLink relay and stream bridge
+- [ ] 04-03 — Five-process Docker/native topology
+- [ ] 04-04 — Mixed TCP/UDP workload and evidence gate
+- [ ] 04-05 — Native/Actions qualification and report
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。
@@ -151,7 +156,7 @@
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
-| 4. M2 Multi-hop engine | 0/TBD | Reopened; research required | - |
+| 4. M2 Multi-hop engine | 0/5 | Planned; restart ready to execute | - |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
