@@ -65,6 +65,91 @@ func TestUDPDefaultsIdleTimeoutToSixtySeconds(t *testing.T) {
 	if DefaultUDPIdleTimeout != 60*time.Second {
 		t.Fatalf("default UDP idle timeout = %s", DefaultUDPIdleTimeout)
 	}
+	if DefaultUDPMaxSessions <= 0 || DefaultUDPMaxSessionsPerClient <= 0 {
+		t.Fatalf("UDP session limits must be bounded: global=%d per-client=%d", DefaultUDPMaxSessions, DefaultUDPMaxSessionsPerClient)
+	}
+}
+
+func TestUDPPerClientSessionLimitDropsBeforeCreatingSession(t *testing.T) {
+	target, targetAddr := udpSocket(t)
+	listener, listenAddr := udpSocket(t)
+	client1, _ := udpSocket(t)
+	client2, _ := udpSocket(t)
+	limited := make(chan string, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := runUDP(ctx, listener, targetAddr, UDPOptions{
+		IdleTimeout:          time.Second,
+		MaxSessions:          4,
+		MaxSessionsPerClient: 1,
+		OnSessionLimit: func(client *net.UDPAddr) {
+			limited <- client.String()
+		},
+	}, nil)
+	t.Cleanup(func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Error("UDP relay did not stop during cleanup")
+		}
+	})
+
+	writeUDP(t, client1, listenAddr, "accepted")
+	if got, _ := readUDP(t, target); string(got) != "accepted" {
+		t.Fatalf("first client payload = %q", got)
+	}
+	writeUDP(t, client2, listenAddr, "dropped")
+	select {
+	case got := <-limited:
+		if got != client2.LocalAddr().String() {
+			t.Fatalf("limited client = %q, want %q", got, client2.LocalAddr())
+		}
+	case <-time.After(time.Second):
+		t.Fatal("per-client session limit was not reported")
+	}
+	if err := target.SetReadDeadline(time.Now().Add(80 * time.Millisecond)); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := target.ReadFromUDP(make([]byte, 16)); err == nil {
+		t.Fatal("limited client created an upstream session")
+	}
+}
+
+func TestUDPGlobalSessionLimitReleasesAfterExpiry(t *testing.T) {
+	target, targetAddr := udpSocket(t)
+	listener, listenAddr := udpSocket(t)
+	client1, _ := udpSocket(t)
+	client2, _ := udpSocket(t)
+	limited := make(chan struct{}, 2)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := runUDP(ctx, listener, targetAddr, UDPOptions{
+		IdleTimeout:          120 * time.Millisecond,
+		MaxSessions:          1,
+		MaxSessionsPerClient: 4,
+		OnSessionLimit:       func(*net.UDPAddr) { limited <- struct{}{} },
+	}, nil)
+	t.Cleanup(func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Error("UDP relay did not stop during cleanup")
+		}
+	})
+
+	writeUDP(t, client1, listenAddr, "first")
+	readUDP(t, target)
+	writeUDP(t, client2, listenAddr, "blocked")
+	select {
+	case <-limited:
+	case <-time.After(time.Second):
+		t.Fatal("global session limit was not reported")
+	}
+	time.Sleep(200 * time.Millisecond)
+	writeUDP(t, client2, listenAddr, "after-expiry")
+	if got, addr := readUDP(t, target); string(got) != "after-expiry" || !addr.IP.IsLoopback() {
+		t.Fatalf("post-expiry packet = %q from %v", got, addr)
+	}
 }
 
 func TestUDPExpiresIdleSessionAndReplacesIt(t *testing.T) {
@@ -143,6 +228,16 @@ func TestUDPRejectsNegativeIdleTimeout(t *testing.T) {
 	}
 }
 
+func TestUDPRejectsNegativeSessionLimits(t *testing.T) {
+	listener, addr := udpSocket(t)
+	defer listener.Close()
+	for _, options := range []UDPOptions{{MaxSessions: -1}, {MaxSessionsPerClient: -1}} {
+		if err := UDP(context.Background(), listener, addr, options, nil); err == nil {
+			t.Fatal("negative UDP session limit was accepted")
+		}
+	}
+}
+
 func runUDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, options UDPOptions, meter Meter) <-chan error {
 	done := make(chan error, 1)
 	go func() { done <- UDP(ctx, listener, target, options, meter) }()
@@ -150,8 +245,12 @@ func runUDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, opt
 }
 
 func udpSocket(t *testing.T) (*net.UDPConn, *net.UDPAddr) {
+	return udpSocketOnIP(t, net.IPv4(127, 0, 0, 1))
+}
+
+func udpSocketOnIP(t *testing.T, ip net.IP) (*net.UDPConn, *net.UDPAddr) {
 	t.Helper()
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: ip})
 	if err != nil {
 		t.Fatal(err)
 	}

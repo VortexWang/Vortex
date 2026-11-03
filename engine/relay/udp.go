@@ -12,8 +12,21 @@ import (
 
 const DefaultUDPIdleTimeout = 60 * time.Second
 
+const (
+	// DefaultUDPMaxSessions bounds all upstream sessions owned by one relay.
+	DefaultUDPMaxSessions = 4096
+	// DefaultUDPMaxSessionsPerClient bounds sessions sharing one source IP.
+	DefaultUDPMaxSessionsPerClient = 64
+)
+
 type UDPOptions struct {
 	IdleTimeout time.Duration
+	// Zero limits select the finite defaults above. Excess new-client datagrams
+	// are dropped before session resources are allocated.
+	MaxSessions          int
+	MaxSessionsPerClient int
+	// OnSessionLimit observes dropped datagrams and runs outside the session lock.
+	OnSessionLimit func(client *net.UDPAddr)
 }
 
 type udpSession struct {
@@ -42,12 +55,24 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 	if options.IdleTimeout < 0 {
 		return errors.New("relay: UDP idle timeout cannot be negative")
 	}
+	if options.MaxSessions < 0 || options.MaxSessionsPerClient < 0 {
+		return errors.New("relay: UDP session limits cannot be negative")
+	}
 	idleTimeout := options.IdleTimeout
 	if idleTimeout == 0 {
 		idleTimeout = DefaultUDPIdleTimeout
 	}
+	maxSessions := options.MaxSessions
+	if maxSessions == 0 {
+		maxSessions = DefaultUDPMaxSessions
+	}
+	maxSessionsPerClient := options.MaxSessionsPerClient
+	if maxSessionsPerClient == 0 {
+		maxSessionsPerClient = DefaultUDPMaxSessionsPerClient
+	}
 
 	sessions := make(map[string]*udpSession)
+	clientSessions := make(map[string]int)
 	var sessionsMu sync.Mutex
 	var readers sync.WaitGroup
 	closeSessions := func() {
@@ -56,6 +81,7 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 			delete(sessions, key)
 			session.close()
 		}
+		clear(clientSessions)
 		sessionsMu.Unlock()
 	}
 
@@ -89,23 +115,26 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 
 	removeSession := func(session *udpSession) {
 		sessionsMu.Lock()
-		if sessions[session.key] == session {
-			delete(sessions, session.key)
-		}
+		deleteSessionLocked(sessions, clientSessions, session)
 		sessionsMu.Unlock()
 		session.close()
 	}
 
 	readBuffer := make([]byte, 64*1024)
 
-	newSession := func(client *net.UDPAddr, key string) (*udpSession, error) {
+	newSession := func(client *net.UDPAddr, key string) (*udpSession, bool, error) {
+		clientKey := client.IP.String()
+		if len(sessions) >= maxSessions || clientSessions[clientKey] >= maxSessionsPerClient {
+			return nil, true, nil
+		}
 		upstream, err := net.DialUDP("udp", nil, target)
 		if err != nil {
-			return nil, fmt.Errorf("relay: dial UDP target: %w", err)
+			return nil, false, fmt.Errorf("relay: dial UDP target: %w", err)
 		}
 		session := &udpSession{client: cloneUDPAddr(client), key: key, conn: upstream}
 		session.touch(time.Now())
 		sessions[key] = session
+		clientSessions[clientKey]++
 		readers.Add(1)
 		go func() {
 			defer readers.Done()
@@ -142,7 +171,7 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 				}
 			}
 		}()
-		return session, nil
+		return session, false, nil
 	}
 
 	janitorEvery := idleTimeout / 4
@@ -166,6 +195,10 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 					lastActive := time.Unix(0, session.lastActive.Load())
 					if now.Sub(lastActive) >= idleTimeout {
 						delete(sessions, key)
+						clientSessions[session.client.IP.String()]--
+						if clientSessions[session.client.IP.String()] == 0 {
+							delete(clientSessions, session.client.IP.String())
+						}
 						session.close()
 					}
 				}
@@ -197,17 +230,24 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 		sessionsMu.Lock()
 		session := sessions[key]
 		if session != nil && time.Since(time.Unix(0, session.lastActive.Load())) >= idleTimeout {
-			delete(sessions, key)
+			deleteSessionLocked(sessions, clientSessions, session)
 			session.close()
 			session = nil
 		}
+		limited := false
 		if session == nil {
-			session, err = newSession(client, key)
+			session, limited, err = newSession(client, key)
 		}
 		if session != nil {
 			session.touch(time.Now())
 		}
 		sessionsMu.Unlock()
+		if limited {
+			if options.OnSessionLimit != nil {
+				options.OnSessionLimit(cloneUDPAddr(client))
+			}
+			continue
+		}
 		if err != nil {
 			return fmt.Errorf("relay: create UDP session: %w", err)
 		}
@@ -226,6 +266,19 @@ func UDP(ctx context.Context, listener *net.UDPConn, target *net.UDPAddr, option
 			return ErrShortWrite
 		}
 	}
+}
+
+func deleteSessionLocked(sessions map[string]*udpSession, clientSessions map[string]int, session *udpSession) bool {
+	if sessions[session.key] != session {
+		return false
+	}
+	delete(sessions, session.key)
+	clientKey := session.client.IP.String()
+	clientSessions[clientKey]--
+	if clientSessions[clientKey] == 0 {
+		delete(clientSessions, clientKey)
+	}
+	return true
 }
 
 func cloneUDPAddr(addr *net.UDPAddr) *net.UDPAddr {

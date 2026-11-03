@@ -1,8 +1,8 @@
 ---
 phase: "02"
 slug: "m0-m0-engine-dataplane"
-status: open_threats
-threats_open: 1
+status: verified
+threats_open: 0
 asvs_level: 1
 created: "2026-11-03"
 ---
@@ -22,7 +22,7 @@ created: "2026-11-03"
 
 | Threat ID | Category | Component | Severity | Disposition | Mitigation | Status |
 |-----------|----------|-----------|----------|-------------|------------|--------|
-| T-02-01 | Denial of Service | UDP session manager | high | mitigate | Add bounded global/per-client session admission and deterministic rejection or drop behavior; verify limits and cleanup under concurrent unique-client load. | open |
+| T-02-01 | Denial of Service | UDP session manager | high | mitigate | Global and per-source-IP session admission runs before socket/goroutine allocation; limit drops are observable through `OnSessionLimit`; expiry/cancel release capacity. | closed |
 
 ## Accepted Risks Log
 
@@ -32,12 +32,12 @@ No accepted risks.
 
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
-| 2026-11-03 | 1 | 0 | 1 | Codex inline review |
+| 2026-11-03 | 1 | 1 | 0 | Codex inline review and Plan 02-04 verification |
 
 ## Sign-Off
 
-- [ ] All threats have a resolved disposition
-- [ ] `threats_open: 0` confirmed
-- [ ] `status: verified` set in frontmatter
+- [x] All threats have a resolved disposition
+- [x] `threats_open: 0` confirmed
+- [x] `status: verified` set in frontmatter
 
-**Approval:** pending
+**Approval:** implementation and local Docker race tests verified; same-commit Actions run pending.

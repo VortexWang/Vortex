@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 2 (M0 引擎数据面) — EXECUTING
-Plan: 3 of 6 complete; Plan 02-04 executing
-Status: Phase 1 passed for M0 entry; initial TCP, Linux splice, and UDP slices passed their recorded checks. Phase 2 verification found bounded-admission, accounting, and benchmark gaps; the phase remains open.
-Last activity: 2026-11-03 — Reopened Phase 2 through discussion, gap research, planning, and inline plan check before continuing implementation.
+Plan: 4 of 6 complete; Plan 02-05 next
+Status: Phase 1 passed for M0 entry; initial TCP, Linux splice, UDP, and bounded-admission slices have passed local checks. Phase 2 remains open for accounting and benchmark gaps.
+Last activity: 2026-11-03 — Plan 02-04 bounded UDP admission passed local race and Docker checks; Actions confirmation is pending.
 
 Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
@@ -65,7 +65,6 @@ Progress: ░░░░░░░░░░ [█░░░░░░░░░] 13%
 
 ### Pending Todos
 
-- Complete Plan 02-04 bounded UDP admission and close the open denial-of-service threat.
 - Execute Plan 02-05 gates and usage accounting.
 - Execute Plan 02-06 benchmark harness and preserve measured or unmeasured status against 700 Mbps.
 

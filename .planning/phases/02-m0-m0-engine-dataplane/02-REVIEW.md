@@ -37,6 +37,8 @@ Inline review found an unbounded UDP session allocation path and a usage-account
 **Issue:** Every new client address allocates a connected socket, a map entry, a response buffer, and a reader goroutine. Idle expiry eventually reclaims inactive sessions, but there is no global or per-client cap, so a sustained stream of unique clients can exhaust file descriptors and goroutines before sessions expire.
 **Fix:** Add a bounded session admission control with explicit saturation behavior, then test concurrent unique-client load, rejection behavior, and cleanup after cancellation/expiry.
 
+**Resolution update (2026-11-03):** Plan 02-04 added global and per-source-IP session limits checked before socket/goroutine allocation. Saturation drops the incoming datagram and calls the optional `OnSessionLimit` callback. Race tests and the local Docker Engine check passed. Same-commit Actions confirmation is pending.
+
 ## Warnings
 
 ### WR-01: Meter Failure Happens After Datagram Delivery

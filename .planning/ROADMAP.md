@@ -51,7 +51,7 @@
 - [x] 02-01 — TCP relay and half-close
 - [x] 02-02 — Linux splice path
 - [x] 02-03 — UDP sessions and idle expiry
-- [ ] 02-04 — Bounded UDP admission (gap closure)
+- [x] 02-04 — Bounded UDP admission (gap closure)
 - [ ] 02-05 — Gates, limits, and usage batches (gap closure)
 - [ ] 02-06 — Linux benchmark evidence (gap closure)
 
