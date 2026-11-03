@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "model": "bounded deterministic lease/quota safety explorer",
+  "source_decisions": ["D-04", "D-05", "D-06", "D-07"],
+  "bounds": {"max_depth": 4, "max_sources": 2, "max_generations": 2, "max_share_chain": 2},
+  "invariants": ["quota-conservation", "single-active-generation", "share-chain-max", "exactly-once-R-transfer", "idempotent-persisted-usage", "unknown-liability-not-released", "immutable-snapshot-isolation", "activation-unknown-retains-occupancy"],
+  "reachable_states": ["prepared", "activation-unknown", "committed", "draining", "released-with-funded-proof"],
+  "forbidden_states": ["double-active-generation", "released-unknown-liability", "ack-before-persist", "old-generation-resurrection", "cross-snapshot-grant-reuse"],
+  "requirements": [
+    {"id":"NFR-027","state_family":"quota and lease conservation","actions":["reserve","consume","release"],"invariants":["quota-conservation"]},
+    {"id":"NFR-028","state_family":"lease expiry and clock uncertainty","actions":["renew","expire-at-boundary"],"invariants":["unknown-liability-not-released"]},
+    {"id":"NFR-029","state_family":"activation lifecycle","actions":["prepare","commit","abort","restart"],"invariants":["activation-unknown-retains-occupancy"]},
+    {"id":"NFR-030","state_family":"generation and epoch fencing","actions":["promote-generation","reject-old-generation"],"invariants":["single-active-generation","old-generation-resurrection"]},
+    {"id":"NFR-031","state_family":"share chain occupancy","actions":["prepare-share","close-old-share","commit-share"],"invariants":["share-chain-max"]},
+    {"id":"NFR-032","state_family":"rate and connection allocation","actions":["allocate","deallocate"],"invariants":["quota-conservation"]},
+    {"id":"NFR-033","state_family":"usage durability","actions":["persist-usage","ack-usage","retry-usage"],"invariants":["idempotent-persisted-usage"]},
+    {"id":"NFR-034","state_family":"billing snapshot immutability","actions":["open-snapshot","close-snapshot"],"invariants":["immutable-snapshot-isolation"]},
+    {"id":"NFR-035","state_family":"grant and batch identity","actions":["issue-grant","reuse-batch"],"invariants":["idempotent-persisted-usage","immutable-snapshot-isolation"]},
+    {"id":"NFR-036","state_family":"unknown liability upper bound","actions":["mark-unknown","fund-risk","release"],"invariants":["unknown-liability-not-released"]},
+    {"id":"NFR-037","state_family":"recovery handoff R","actions":["transfer-R","retry-transfer"],"invariants":["exactly-once-R-transfer"]},
+    {"id":"NFR-038","state_family":"historical evidence status","actions":["register-missing-evidence"],"scenarios":["evidence-gap-remains-blocked"]},
+    {"id":"NFR-039","state_family":"two-phase configuration apply","actions":["prepare","commit","abort"],"invariants":["single-active-generation"]},
+    {"id":"NFR-040","state_family":"drain and release","actions":["drain","release-after-proof"],"invariants":["unknown-liability-not-released"]},
+    {"id":"NFR-041","state_family":"restart and new boot","actions":["restart","fence-old-boot"],"invariants":["single-active-generation"]},
+    {"id":"NFR-042","state_family":"delayed and lost acknowledgement","actions":["delay-ack","lose-ack","retry"],"invariants":["idempotent-persisted-usage"]},
+    {"id":"NFR-043","state_family":"clock boundary behavior","actions":["advance-clock","renew-at-boundary"],"invariants":["unknown-liability-not-released"]},
+    {"id":"NFR-044","state_family":"immutable grant source","actions":["change-snapshot","reject-cross-snapshot"],"invariants":["immutable-snapshot-isolation"]},
+    {"id":"NFR-045","state_family":"fault recovery closure","actions":["recover","reconcile","release"],"invariants":["exactly-once-R-transfer","unknown-liability-not-released"]}
+  ]
+}

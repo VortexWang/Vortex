@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "selection_rule": "Include pairs that can duplicate rights or release unfunded unknown liability; exclude pairs with no distinct safety interaction and record rationale.",
+  "included": [
+    {"id":"P-01","faults":["duplicate-commit","delayed-ack"],"invariants":["single-active-generation","idempotent-persisted-usage"],"reason":"Can issue a second generation or acknowledge usage twice."},
+    {"id":"P-02","faults":["activation-unknown","restart-new-boot"],"invariants":["activation-unknown-retains-occupancy","unknown-liability-not-released"],"reason":"Unknown execution plus restart must retain rights and liability."},
+    {"id":"P-03","faults":["old-generation-resurrection","lost-abort"],"invariants":["single-active-generation"],"reason":"Tests stale rights after failed two-phase transition."},
+    {"id":"P-04","faults":["duplicate-R-transfer","hub-restart"],"invariants":["exactly-once-R-transfer"],"reason":"Recovery handoff must not duplicate the reserved source."},
+    {"id":"P-05","faults":["commit-abort-race","delayed-ack"],"invariants":["single-active-generation","unknown-liability-not-released"],"reason":"Late responses must not release an unresolved activation."},
+    {"id":"P-06","faults":["clock-error","lease-expiry"],"invariants":["unknown-liability-not-released"],"reason":"Boundary uncertainty must be conservative."},
+    {"id":"P-07","faults":["snapshot-change","usage-retry"],"invariants":["immutable-snapshot-isolation","idempotent-persisted-usage"],"reason":"Retry cannot attach usage to a different billing snapshot."}
+  ],
+  "excluded": [
+    {"faults":["network-packet-reordering","metrics-scrape-delay"],"reason":"Observability delay does not itself issue rights or release liability; covered in implementation/system phases."},
+    {"faults":["disk-latency","ui-refresh"],"reason":"No direct state transition interaction in the finite safety model; covered by persistence and frontend tests later."}
+  ]
+}
