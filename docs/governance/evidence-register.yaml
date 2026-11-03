@@ -22,6 +22,13 @@
       "scope": "Git history reachable from main and origin/main, plus current docs/, tools/ and .planning/ trees",
       "result": "No matching original historical review/freeze artifacts or referenced scripts found.",
       "evidence_link": ".planning/research/nfr038-search-2026-11-03.md"
+    },
+    {
+      "at": "2026-11-03",
+      "scope": "User confirmation about original delivery materials",
+      "result": "User reports all eleven listed originals are unavailable and should be treated as lost; user requests that the evidence set be replenished. This is not itself historical review evidence.",
+      "evidence_link": "docs/governance/proposals/CR-002-NFR-038-recovery.md",
+      "next_action": "Prepare a V1.11 change proposal for a transparent present-day re-review and replacement evidence; keep all original rows missing until the proposal is approved and new review is complete."
     }
   ],
   "verification_rule": "A status can become verified only after the original artifact is present, the review/freeze record is inspected for reviewer, date, result and evidence, and the linked original evidence files are verified."

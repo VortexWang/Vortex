@@ -2,6 +2,57 @@
   "schema_version": 1,
   "review_date": "2026-11-03",
   "purpose": "Candidate dependency closure evidence; not an approved project lockfile.",
+  "gap_closure_review": {
+    "reviewed_at": "2026-11-03",
+    "review_commit": "e2eaf25608eec84f88217529e52a339ab6b4450c",
+    "method": "Direct checks against official npm/Git/Go registries, reproducible clean-archive Go builds, deterministic scratch-image rebuilds, and image SBOM inspection. This records evidence only and does not alter the user-approved candidate snapshot or lock.",
+    "toolchain": "go1.27.3 darwin/arm64; Docker Engine 29.8.2 OrbStack linux/arm64; Syft 1.52.0 Homebrew for exploratory image scan; official Syft 1.56.0 Darwin arm64 archive checksum independently matched candidate metadata, but that binary was not successfully installed for this review.",
+    "candidates": [
+      {
+        "name": "PostgreSQL",
+        "status": "rejected-current-image-license-closure",
+        "evidence": "Candidate OCI digest sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8 resolved to linux/arm64 and manifest children include linux/amd64 sha256:41a369edc91d9bdd7a58be6bc71ea0f8f7a3f49e82818a9f0829021ea7840b7c and linux/arm64 sha256:a1ece8fa15f7b526a51ef47a22fb1f373d33de794dc26bf7bff99e61dcb52690. Syft 1.52.0 identified 147 Debian packages and GPL/LGPL/GFDL packages including bash, coreutils, grep, libc6, gnupg, and others. A local PostgreSQL 18.6 Alpine alternative also contained GPL/LGPL packages and is not an approved replacement.",
+        "next_action": "Find a redistributable image/build composition meeting the approved license policy, scan both target architectures with the lock-pinned scanner, and review the complete package/license closure."
+      },
+      {
+        "name": "Valkey",
+        "status": "rejected-current-image-license-closure",
+        "evidence": "Candidate OCI digest sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7 resolved to linux/arm64. Syft 1.52.0 identified 79 Debian packages and GPL/LGPL/GFDL packages including bash, coreutils, grep, libc6, libc-bin, and others.",
+        "next_action": "Find a redistributable image/build composition meeting the approved license policy, scan both target architectures with the lock-pinned scanner, and review the complete package/license closure."
+      },
+      {
+        "name": "SQLite embedded",
+        "status": "verified-candidate-evidence",
+        "evidence": "Go 1.27.3 downloaded modernc.org/sqlite v1.61.1 from the Go proxy with Sum h1:TBEE49wz7VlxS+qXRXMQiPUZYOXHJ4ku83daYv1fe04=, GoModSum h1:f4gr5tbpx2umklaT/QVtbi/50hNdM+4ng+2zMo8KXJ0=, VCS tag v1.61.1 at commit 014351f110f66c8f485cff948fea608d7dcfafb1, and module zip SHA-256 237eb215ed62c4a3ba65ddc8fd35a3f9b229ea2c7a49b3053c17e45b11496711. Runtime query returned sqlite_version()=3.54.1. Upstream SBOM records SQLite public domain and production dependency licenses; MPL-2.0 golang-lru is module-graph-only and not compiled into the driver. Full application production/test dependency closure still requires separate review.",
+        "next_action": "Carry the verified embedded version and attestation records into the exact locked module closure; review full project module licenses before marking the broader candidate set complete."
+      },
+      {
+        "name": "@vitejs/plugin-react-swc",
+        "status": "partial-source-integrity-evidence",
+        "evidence": "npm registry reports plugin 4.3.3 MIT with SRI sha512-bti8ZAcvz4Lh6/e4Uk2k3aa1TiUXbbMsahuqOHvd3MveFTkKDZOA6wQVkpj7J/+tepX/wGfe+lsGh/t24HTXMQ==; dependencies are @swc/core ^1.15.46 and @rolldown/pluginutils ^1.0.1. Resolved @swc/core 1.16.21 and linux amd64/arm64 binaries report Apache-2.0 or Apache-2.0 AND MIT with registry SRI metadata. The latter expression is not explicitly allowlisted by the current draft policy and needs a policy decision or replacement.",
+        "next_action": "Record exact lock-resolved packages/platform artifacts and license texts; update policy only through reviewed candidate-manifest revision."
+      },
+      {
+        "name": "Docker CLI / Compose / Buildx host tooling",
+        "status": "partial-upstream-integrity-evidence",
+        "evidence": "Go checksum database confirms github.com/docker/cli v29.8.2+incompatible Sum h1:2zgdFuoFst2T80oS42vhKGxkd0JRo305eIEKTsxR7pQ= and GoModSum h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=. Standalone go install at that tag failed with ambiguous imports for split google.golang.org/genproto modules, so no reproducible binary was produced. Compose 5.5.0 upstream LICENSE SHA-256 is 58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd; Buildx v0.37.2 upstream LICENSE SHA-256 is cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30. Official Buildx release metadata gives Darwin arm64 binary digest sha256:149e6a006edaa430f297b2bdcf65baaa6d7ee5ccfc7aa67dd50ce1c2b1db47e2. Installed OrbStack docker-tools is signed by Orbital Labs and hashes to 927c58aed356a37f08f2586a90df4c6d8c5e890060de95ac3d11301d03959463; this proves publisher signature, not Docker upstream provenance. Docker official macOS static archive for 29.8.2 has no detached checksum at the queried path.",
+        "next_action": "Use official release artifacts and attestations/checksums per component, or explicitly scope host tooling as operator-provided infrastructure with its own verified publisher evidence; verify CI runner versions separately."
+      },
+      {
+        "name": "Static Phase 1 topology fixture image",
+        "status": "verified-reproducible-for-two-architectures",
+        "evidence": "From clean Git archive of commit e2eaf25608eec84f88217529e52a339ab6b4450c and Go 1.27.3, linux/amd64 binary SHA-256 was 42541aea0fed0ced50b8aea23e9225b93592519ca5b3c8c4d7c7885cfb334763 on two builds; linux/arm64 binary SHA-256 was bba5a773e78e212df3286c21d514341aab20e0104b836570bdbb8ff30a2a33c3 on two builds. Two clean no-cache FROM scratch image builds with SOURCE_DATE_EPOCH=0 matched for each platform: amd64 sha256:e7410a7699ed394488b1825be2822a7ca8e8fa450960abef23b88cdbc2e87553; arm64 sha256:bad03cb61787171606982e92efa153ce841ffaf209765c7433b431771eb4c987. Syft found only Go stdlib BSD-3-Clause and repository-owned executable with no third-party packages; the source/image are tied to the stated tree and build method.",
+        "next_action": "Store the reproducible build procedure and per-platform digests in the candidate record after the revised manifest is presented for approval."
+      },
+      {
+        "name": "Network test utilities",
+        "status": "verified-source-build-evidence",
+        "evidence": "The reviewed fixture source is test/netns/fixture/main.go at blob bd983de41fe4d1f7ac2b4d37b6eeef401f7771fe and imports only Go standard library. Clean Go 1.27.3 builds reproduced linux/amd64 SHA-256 42541aea0fed0ced50b8aea23e9225b93592519ca5b3c8c4d7c7885cfb334763 and linux/arm64 SHA-256 bba5a773e78e212df3286c21d514341aab20e0104b836570bdbb8ff30a2a33c3. This covers the repository fixture only, not independent iperf3/netlink or future performance tools.",
+        "next_action": "Bind source/build procedure and architecture hashes to the candidate record after candidate snapshot review."
+      }
+    ],
+    "decision": "The seven-row gap is not closed. PostgreSQL and Valkey current images conflict with the permissive-only policy; SWC compound license classification and host-tool provenance need resolution; SQLite, scratch image and the repository fixture now have reproducible supporting evidence. No version lock is changed."
+  },
   "go": {
     "toolchain": "go1.27.3",
     "module_graph_count": 202,
