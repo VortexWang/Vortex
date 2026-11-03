@@ -22,7 +22,7 @@ behavior_unverified: 1
 
 - `cd engine && go test -race ./...` passed locally.
 - `make phase4-m2-check` passed locally, including targeted state-machine tests and Docker topology smoke.
-- GitHub Actions run `41728267582` passed on SHA `7899188e757a83d2ed9ec2c226f2e7ddb460cb02`, Ubuntu 24.04.5 amd64, `dirty=false`.
+- GitHub Actions run `41733901592` passed on SHA `34773295d18a1d308310ccc03cb9e66f9772e85f`, Ubuntu 24.04.5 amd64, `dirty=false`.
 - `make phase4-m2-benchmark` records `status: environment-limited`; the native run at `930c630` passed the benchmark command and retained its qualification gaps in `04-NATIVE-EVIDENCE.md`.
 - UAT `04-UAT.md` has 4/4 tests passed with no issues.
 
