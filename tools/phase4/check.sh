@@ -19,6 +19,8 @@ os=$(docker info --format '{{.OperatingSystem}}' 2>/dev/null || echo unavailable
 cd "$ROOT/engine"
 go test -race ./... > "$OUT/engine-race.txt" 2>&1
 cat "$OUT/engine-race.txt"
+go test -race ./path ./share ./apply ./scheduler ./vlink -run 'Test(Generation|Select|Fencing|Idempotent|Billing|OpenPolicy|UDP|Fair|Queue|Dgram)' > "$OUT/phase4-targeted.txt" 2>&1
+cat "$OUT/phase4-targeted.txt"
 cd "$ROOT"
 tools/vlink/docker-test.sh > "$OUT/vlink-docker.txt" 2>&1
 cat "$OUT/vlink-docker.txt"
