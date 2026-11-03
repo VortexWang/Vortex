@@ -17,8 +17,7 @@ func TestTracerTCPHalfCloseCarriesResponse(t *testing.T) {
 	clientID, serverID := NodeID{11}, NodeID{22}
 	clientTLS, clientSigner := testTLSIdentity(t, clientID)
 	serverTLS, serverSigner := testTLSIdentity(t, serverID)
-	clientTLS.ClientAuth = tls.RequireAnyClientCert
-	serverTLS.ClientAuth = tls.RequireAnyClientCert
+	trustTLS13Peers(t, clientTLS, serverTLS)
 	clientRaw, serverRaw := net.Pipe()
 	clientLink := tls.Client(clientRaw, clientTLS)
 	serverLink := tls.Server(serverRaw, serverTLS)

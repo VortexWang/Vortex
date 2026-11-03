@@ -142,7 +142,7 @@ func (t *StreamTable) Apply(frame Frame) (Frame, error) {
 			if stream.InitiatedLocal {
 				return violation()
 			}
-			if stream.PendingOpenBytes+len(frame.Payload) > t.maxPending {
+			if len(frame.Payload) > t.maxPending-stream.PendingOpenBytes {
 				return violation()
 			}
 			stream.PendingOpenBytes += len(frame.Payload)
@@ -158,6 +158,7 @@ func (t *StreamTable) Apply(frame Frame) (Frame, error) {
 			return violation()
 		}
 		if stream.Lifecycle == StreamOpening {
+			stream.RemoteFIN = true
 			stream.pendingFrames = append(stream.pendingFrames, frame)
 			return Frame{}, nil
 		}
@@ -187,7 +188,11 @@ func (t *StreamTable) AcceptRemote(id uint32) error {
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}
 	stream.OpenOK = true
-	stream.Lifecycle = StreamOpen
+	if stream.RemoteFIN {
+		stream.Lifecycle = StreamRemoteHalfClosed
+	} else {
+		stream.Lifecycle = StreamOpen
+	}
 	return nil
 }
 
@@ -198,7 +203,11 @@ func (t *StreamTable) DrainPendingOpenFrames(id uint32) ([]Frame, error) {
 	if stream == nil || stream.InitiatedLocal || !stream.OpenOK {
 		return nil, &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}
-	frames := stream.pendingFrames
+	frames := make([]Frame, len(stream.pendingFrames))
+	for i, frame := range stream.pendingFrames {
+		frames[i] = frame
+		frames[i].Payload = append([]byte(nil), frame.Payload...)
+	}
 	stream.pendingFrames = nil
 	stream.PendingOpenBytes = 0
 	return frames, nil
@@ -225,7 +234,7 @@ func (t *StreamTable) MarkLocalData(id uint32, bytes int) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	stream := t.streams[id]
-	if stream == nil || !stream.InitiatedLocal || stream.Network != StreamTCP || stream.Lifecycle != StreamOpening || bytes < 1 || stream.LocalOpenBytes+bytes > t.maxPending {
+	if stream == nil || !stream.InitiatedLocal || stream.Network != StreamTCP || stream.Lifecycle != StreamOpening || bytes < 1 || bytes > t.maxPending-stream.LocalOpenBytes {
 		delete(t.streams, id)
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}
@@ -242,7 +251,8 @@ func (t *StreamTable) Snapshot(id uint32) (StreamSnapshot, bool) {
 	}
 	return stream.StreamSnapshot, true
 }
-func (t *StreamTable) Count() int { t.mu.Lock(); defer t.mu.Unlock(); return len(t.streams) }
+func (t *StreamTable) Count() int     { t.mu.Lock(); defer t.mu.Unlock(); return len(t.streams) }
+func (t *StreamTable) Drop(id uint32) { t.mu.Lock(); delete(t.streams, id); t.mu.Unlock() }
 func (t *StreamTable) CloseAll() []uint32 {
 	t.mu.Lock()
 	defer t.mu.Unlock()

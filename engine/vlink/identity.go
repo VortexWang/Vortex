@@ -1,6 +1,7 @@
 package vlink
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -26,7 +27,7 @@ type PeerPolicy func(context.Context, *x509.Certificate, NodeID) error
 type PeerCertificatePolicy struct{ Authorize PeerPolicy }
 
 func (p PeerCertificatePolicy) Verify(ctx context.Context, certificates []*x509.Certificate, verifiedChains [][]*x509.Certificate) error {
-	if len(certificates) == 0 || len(verifiedChains) == 0 || len(verifiedChains[0]) == 0 || certificates[0] == nil {
+	if len(certificates) == 0 || len(verifiedChains) == 0 || len(verifiedChains[0]) == 0 || certificates[0] == nil || !bytes.Equal(certificates[0].Raw, verifiedChains[0][0].Raw) {
 		return fmt.Errorf("%w: verified peer certificate chain is required", ErrProtocol)
 	}
 	id, err := NodeIDFromCertificate(certificates[0])

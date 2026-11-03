@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"net"
 	"sync"
 	"testing"
 	"time"
@@ -201,4 +202,42 @@ func TestDispatcherValidFrameRefreshesLiveness(t *testing.T) {
 	if got := d.PollLiveness(); got != LinkNoAction {
 		t.Fatalf("valid frame did not refresh idle clock: %v", got)
 	}
+}
+
+func TestMuxPollSendsNonceBoundPingAndAcceptsPong(t *testing.T) {
+	left, right := net.Pipe()
+	start := time.Now()
+	current := start
+	var clockMu sync.Mutex
+	mux, err := NewMuxLink(left, MuxConfig{Now: func() time.Time { clockMu.Lock(); defer clockMu.Unlock(); return current }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	peerDone := make(chan error, 1)
+	go func() {
+		frame, err := ReadFrame(right)
+		if err == nil && frame.Type != FramePing {
+			err = errors.New("expected PING")
+		}
+		if err == nil {
+			err = WriteFrame(right, Frame{Type: FramePong, Payload: frame.Payload})
+		}
+		peerDone <- err
+	}()
+	clockMu.Lock()
+	current = start.Add(3 * time.Second)
+	clockMu.Unlock()
+	if action, err := mux.Poll(context.Background()); err != nil || action != LinkSendPing {
+		t.Fatalf("poll=%v err=%v", action, err)
+	}
+	select {
+	case err := <-peerDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("PONG exchange timed out")
+	}
+	mux.Close(nil)
+	_ = right.Close()
 }

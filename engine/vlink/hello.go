@@ -276,7 +276,7 @@ func HandshakeHello(ctx context.Context, conn *tls.Conn, config HelloConfig) (No
 		return NodeID{}, err
 	}
 	state := conn.ConnectionState()
-	if state.Version != tls.VersionTLS13 || !state.HandshakeComplete || len(state.PeerCertificates) == 0 {
+	if state.Version != tls.VersionTLS13 || !state.HandshakeComplete || len(state.PeerCertificates) == 0 || len(state.VerifiedChains) == 0 {
 		return NodeID{}, fmt.Errorf("%w: TLS 1.3 mutual authentication is required", ErrProtocol)
 	}
 	peerCert := state.PeerCertificates[0]

@@ -1,8 +1,11 @@
 package vlink
 
 import (
+	"context"
 	"errors"
+	"net"
 	"testing"
+	"time"
 )
 
 func BenchmarkStreamOpenToFirstData(b *testing.B) {
@@ -19,6 +22,88 @@ func BenchmarkStreamOpenToFirstData(b *testing.B) {
 			b.Fatal(err)
 		}
 	}
+}
+
+func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	config := MuxConfig{LocalClient: true, StreamWindow: 3, AggregateWindow: 6, MaxWindow: 32}
+	client, err := NewMuxLink(clientConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.LocalClient = false
+	server, err := NewMuxLink(serverConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	request := OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}}
+	clientA, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientB, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverA, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverB, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AcceptRemote(ctx, serverA.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AcceptRemote(ctx, serverB.ID); err != nil {
+		t.Fatal(err)
+	}
+	if frame, err := clientA.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
+		t.Fatalf("stream A open: %+v %v", frame, err)
+	}
+	if frame, err := clientB.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
+		t.Fatalf("stream B open: %+v %v", frame, err)
+	}
+	if err := clientA.WriteData(ctx, []byte("abc")); err != nil {
+		t.Fatal(err)
+	}
+	if err := clientB.WriteData(ctx, []byte("xyz")); err != nil {
+		t.Fatal(err)
+	}
+	frameA, err := serverA.Receive(ctx)
+	if err != nil || string(frameA.Payload) != "abc" {
+		t.Fatalf("stream A data: %q %v", frameA.Payload, err)
+	}
+	frameB, err := serverB.Receive(ctx)
+	if err != nil || string(frameB.Payload) != "xyz" {
+		t.Fatalf("stream B data: %q %v", frameB.Payload, err)
+	}
+	blocked := make(chan error, 1)
+	go func() { blocked <- clientA.WriteData(ctx, []byte("d")) }()
+	select {
+	case err := <-blocked:
+		t.Fatalf("writer was not flow-controlled: %v", err)
+	case <-time.After(20 * time.Millisecond):
+	}
+	if err := serverA.Consume(ctx, 3); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case err := <-blocked:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	}
+	if frame, err := serverA.Receive(ctx); err != nil || string(frame.Payload) != "d" {
+		t.Fatalf("windowed data: %q %v", frame.Payload, err)
+	}
+	client.Close(nil)
+	server.Close(nil)
 }
 
 func TestStreamIDsParityAndNoReuse(t *testing.T) {

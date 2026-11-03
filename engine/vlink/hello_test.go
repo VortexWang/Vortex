@@ -86,8 +86,7 @@ func TestHandshakeHelloTLS13MutualIdentity(t *testing.T) {
 	serverID := NodeID{2}
 	clientTLS, clientSigner := testTLSIdentity(t, clientID)
 	serverTLS, serverSigner := testTLSIdentity(t, serverID)
-	clientTLS.ClientAuth = tls.RequireAnyClientCert
-	serverTLS.ClientAuth = tls.RequireAnyClientCert
+	trustTLS13Peers(t, clientTLS, serverTLS)
 	clientConn, serverConn := net.Pipe()
 	client := tls.Client(clientConn, clientTLS)
 	server := tls.Server(serverConn, serverTLS)
@@ -128,7 +127,7 @@ func TestHandshakeHelloPeerVerifierRejectsStaleGenerationAndReplay(t *testing.T)
 			clientID, serverID := NodeID{31}, NodeID{32}
 			clientTLS, clientSigner := testTLSIdentity(t, clientID)
 			serverTLS, serverSigner := testTLSIdentity(t, serverID)
-			clientTLS.ClientAuth, serverTLS.ClientAuth = tls.RequireAnyClientCert, tls.RequireAnyClientCert
+			trustTLS13Peers(t, clientTLS, serverTLS)
 			clientRaw, serverRaw := net.Pipe()
 			client, server := tls.Client(clientRaw, clientTLS), tls.Server(serverRaw, serverTLS)
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -179,10 +178,29 @@ func testTLSIdentity(t *testing.T, id NodeID) (*tls.Config, *ecdsa.PrivateKey) {
 	}
 	serial, _ := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 120))
 	uri, _ := url.Parse("urn:vortex:node:" + id.String())
-	der, err := x509.CreateCertificate(rand.Reader, &x509.Certificate{SerialNumber: serial, Subject: pkix.Name{CommonName: id.String()}, NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}, URIs: []*url.URL{uri}}, &x509.Certificate{SerialNumber: serial, Subject: pkix.Name{CommonName: id.String()}, NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}, URIs: []*url.URL{uri}}, &key.PublicKey, key)
+	template := &x509.Certificate{SerialNumber: serial, Subject: pkix.Name{CommonName: id.String()}, NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}, BasicConstraintsValid: true, IsCA: true, URIs: []*url.URL{uri}, DNSNames: []string{"node.vortex.test"}}
+	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cert := tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
-	return &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}, InsecureSkipVerify: true}, key
+	return &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}}, key
+}
+
+func trustTLS13Peers(t *testing.T, client, server *tls.Config) {
+	t.Helper()
+	clientCert, err := x509.ParseCertificate(server.Certificates[0].Certificate[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverCert, err := x509.ParseCertificate(client.Certificates[0].Certificate[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.RootCAs = x509.NewCertPool()
+	client.RootCAs.AddCert(clientCert)
+	client.ServerName = "node.vortex.test"
+	server.ClientCAs = x509.NewCertPool()
+	server.ClientCAs.AddCert(serverCert)
+	server.ClientAuth = tls.RequireAndVerifyClientCert
 }
