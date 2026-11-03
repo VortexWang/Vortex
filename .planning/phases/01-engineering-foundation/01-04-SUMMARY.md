@@ -16,10 +16,10 @@ Created the shared Phase 1 verification path used by local Docker and GitHub Act
 
 ## Local Verification
 
-On commit `15657564239ad1b3f103a04ea3fb667e5f4b83c9`, `make phase1-check` passed. The evidence records OrbStack Docker Linux/arm64, image digest `vortex-phase1@sha256:795c0cf9ede48b97e4b54e98e986e345b0dfa7898b527a08f102d38587aea716`, all required runnable checks, and the network fixture exchange/cleanup.
+On clean commit `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680`, `make phase1-check` passed in a clean local clone using OrbStack Docker on arm64. The evidence records image digest `vortex-phase1@sha256:538155af9b3855f1cf2e088ef5a0b47f301dd2cc1539655d573b5fb178eac75d`, all required runnable checks, and the network fixture exchange/cleanup. NFR-038 remains explicitly blocked.
 
 `make phase1-release-gate` remains non-zero because NFR-038 is blocked. The network fixture is smoke coverage only and does not claim Engine throughput, UDP correctness, leak, or production-scale acceptance.
 
 ## CI Status
 
-The workflow is ready for a real GitHub Actions run. A workflow file and local pass are not evidence of a remote run; the first Actions execution and artifact URL must be added when the repository connection is available.
+GitHub Actions run [41584401538](https://github.com/VortexWang/Vortex/actions/runs/41584401538) passed on the same clean commit `d09cdc47ff2d8e6b61ff4b41ecf48620eb6a0680` using Ubuntu 24.04.5 amd64. The archived evidence records Docker image digest `sha256:dde6b31c927f126fdd19bfb0dcb83608ac4de26076e3d3f399f9e3a7015d2b4d`, `dirty: false`, and all runnable checks passing. The evidence-register check correctly records NFR-038 as blocked. Follow-up fixes `3503713` and `d09cdc4` made missing governance inputs fail/report explicitly and captured the initial worktree state before refreshing tracked evidence.
