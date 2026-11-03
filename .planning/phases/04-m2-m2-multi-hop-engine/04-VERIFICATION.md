@@ -16,14 +16,14 @@ behavior_unverified: 1
 | 2 | Immutable billing snapshots, coefficient isolation, reserve/unknown upper-bound behavior | VERIFIED at injected Engine boundary | `engine/accounting` snapshot tests, existing `Batch` unknown semantics, VLink admission tests and UAT tests 2-3 passed. Durable runtime reconciliation is later-phase scope. |
 | 3 | Share fencing/CAS and idempotent Prepare/Commit/Abort without dual active generations or unsafe release | VERIFIED | `engine/share`, `engine/apply`, race tests, UAT tests 2-3 passed. |
 | 4 | Independent bounded TCP/UDP scheduling and classified DGRAM drops | VERIFIED at transport boundary | `engine/scheduler`, VLink write-loop integration, race tests and Docker/Actions targeted tests passed. |
-| 5 | NFR-003/NFR-005/NFR-006 and D-04 parameter review under qualifying topology | HUMAN NEEDED / ENVIRONMENT-LIMITED | NFR-006 correctness smoke passed. NFR-003/NFR-005/NFR-007 native performance and D-04 review require a dedicated native Linux three-relay environment; current benchmark exit is recorded as environment-limited. |
+| 5 | NFR-003/NFR-005/NFR-006 and D-04 parameter review under qualifying topology | NOT QUALIFIED | Native amd64 evidence is now available, but mux forward measured 394.99 MB/s versus the 400 Mbps target and 70% baseline criterion, first-byte mux/pool benchmarks failed, and no NFR-005 UDP loss run was produced. See `04-NATIVE-EVIDENCE.md`; D-04 remains unapproved. |
 
 ## Automated Verification
 
 - `cd engine && go test -race ./...` passed locally.
 - `make phase4-m2-check` passed locally, including targeted state-machine tests and Docker topology smoke.
 - GitHub Actions run `41728267582` passed on SHA `7899188e757a83d2ed9ec2c226f2e7ddb460cb02`, Ubuntu 24.04.5 amd64, `dirty=false`.
-- `make phase4-m2-benchmark` records `status: environment-limited` and `benchmark_exit: 1`; this is retained evidence, not a qualification pass.
+- `make phase4-m2-benchmark` records `status: environment-limited` and `benchmark_exit: 1`; native evidence is retained in `04-NATIVE-EVIDENCE.md`, but it does not meet all performance gates.
 - UAT `04-UAT.md` has 4/4 tests passed with no issues.
 
 ## Requirements Coverage
@@ -38,4 +38,4 @@ behavior_unverified: 1
 
 ## Human Verification / Open Gate
 
-Run the agreed native Ubuntu 24.04 three-relay workload with production accounting enabled, same-path baseline, concurrent TCP/UDP flows, sustained duration, raw loss/throughput/first-byte data, and a D-04 review decision. Until then the phase remains `human_needed` for performance qualification even though correctness UAT passed.
+Re-run after fixing the first-byte benchmark and adding the native three-relay UDP loss workload with production accounting, concurrent TCP/UDP flows, sustained duration and a D-04 review decision. Until then the phase remains `human_needed` for performance qualification even though correctness UAT passed.
