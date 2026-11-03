@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 verification and performance qualification review
-status: review
-stopped_at: Phase 4 execution complete; performance qualification remains human-needed
+current_plan: Phase 4 restart research
+status: planning
+stopped_at: Previous Phase 4 invalidated by owner decision; legacy artifacts archived
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Phase 4 native amd64 rerun recorded at 930c630; correctness passed, performance gates remain open
-state_head: 345ffa9
+last_activity_desc: Phase 4 reopened; runtime and three-relay topology must precede qualification
+state_head: 82894e3
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 17
+  completed_plans: 17
   percent: 38
 ---
 
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Verification and performance qualification review
-Total Plans in Phase: 5
-Status: Needs review
-Last activity: 2026-11-04 — Phase 4 execution and native amd64 rerun recorded
+Current Plan: Phase 4 restart research
+Total Plans in Phase: TBD
+Status: Reopened; research required
+Last activity: 2026-11-04 — Previous Phase 4 invalidated and archived
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,11 +68,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Complete Phase 4 human performance review: three-relay mixed-load UDP with production accounting, same-path ratio disposition, and D-04 parameter decision.
+- Re-run Phase 4 research, discussion, planning, execution and verification with a startable relay runtime and three-relay topology as prerequisites.
 
 ### Blockers/Concerns
 
-- Phase 4 performance qualification remains open: same-path ratio is below the 70% criterion, and the required three-relay mixed-load UDP workload with production accounting has not yet run.
+- Phase 4 has been deliberately reopened. A startable relay runtime, three-relay topology and production accounting workload are prerequisites for the new plan.
 
 ## Deferred Items
 
@@ -91,5 +91,5 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-03T10:56:12.944Z
-Stopped at: Phase 02 complete, ready to plan Phase 4
+Stopped at: Phase 4 restart decision, ready for fresh research
 Resume file: .planning/phases/03-m1-vlink-m1-vlink-engine/03-CONTEXT.md
