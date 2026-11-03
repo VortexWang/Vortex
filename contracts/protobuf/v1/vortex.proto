@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package vortex.control.v1;
+
+option go_package = "vortex/contracts/protobuf/v1;controlv1";
+
+// DRAFT 1.0.0. Source: V1.11 §3.4, §7, AGT-006, HUB-003 and HUB-012.
+// Message field numbers and lifecycle semantics require contract review.
+
+service NodeControl {
+  // Bidirectional control stream. Business forwarding traffic must never use it.
+  rpc Connect(stream NodeMessage) returns (stream ControlMessage);
+}
+
+message NodeMessage {
+  string node_id = 1;
+  string boot_id = 2;
+  uint64 sequence = 3;
+  oneof body {
+    Heartbeat heartbeat = 10;
+    UsageBatch usage_batch = 11;
+    ApplyResult apply_result = 12;
+    NodeEvent event = 13;
+  }
+}
+
+message ControlMessage {
+  string message_id = 1;
+  uint64 sequence = 2;
+  oneof body {
+    RuntimeConfigUpdate config_update = 10;
+    UsageAcknowledgement usage_ack = 11;
+    AuthorizationUpdate authorization_update = 12;
+  }
+}
+
+message Heartbeat {
+  uint64 applied_config_version = 1;
+  string observed_at = 2;
+}
+
+message UsageBatch {
+  string batch_id = 1;
+  string billing_snapshot_id = 2;
+  repeated UsageDelta deltas = 3;
+}
+
+message UsageDelta {
+  string rule_id = 1;
+  string role = 2;
+  string direction = 3;
+  uint64 bytes = 4;
+  string grant_id = 5;
+}
+
+message UsageAcknowledgement { repeated string batch_ids = 1; }
+message ApplyResult { uint64 version = 1; string state = 2; repeated ObjectResult objects = 3; }
+message ObjectResult { string object_id = 1; string state = 2; string reason = 3; }
+message RuntimeConfigUpdate { uint64 version = 1; bytes payload = 2; }
+message AuthorizationUpdate { uint64 generation = 1; bytes payload = 2; }
+message NodeEvent { string event_id = 1; string kind = 2; bytes payload = 3; }
+
+// DRAFT GAP: payload encoding, canonical timestamps, signing, retry/idempotency,
+// all state-specific messages, expiry boundaries and compatibility rules are
+// not fully enumerated in the normative source and must be reviewed before freeze.

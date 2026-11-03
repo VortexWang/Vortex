@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "pending",
+  "reviewer": null,
+  "decision": "pending",
+  "review_date": null,
+  "contracts": [
+    {"id":"vortex.database","path":"contracts/database/schema.sql","sha256":"11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2","decision":"pending"},
+    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","sha256":"b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191","decision":"pending"},
+    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","sha256":"4aedc57c1433102d36ab861ea4deee6d063707010f69e70dadf3d433abb4117a","decision":"pending"},
+    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","sha256":"43261cd1e9b115cddadee08b52ecabddf82f7e69c1f47690424568af91435ef8","decision":"pending"},
+    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","sha256":"dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52","decision":"pending"}
+  ],
+  "note": "Do not mark any contract frozen until a human reviewer approves the exact content hashes."
+}

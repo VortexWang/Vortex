@@ -1,0 +1,2328 @@
+{
+  "schema_version": 1,
+  "source": "V1.11",
+  "requirement_count": 277,
+  "requirements": [
+    {
+      "id": "GEN-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-002",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-003",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-004",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-005",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-006",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "GEN-007",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "TEN-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-012",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-013",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NOD-014",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-016",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-012",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-013",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-014",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PRT-015",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-012",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-013",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-014",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-015",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "RUL-016",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-002",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-003",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-004",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-005",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-006",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-007",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-008",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-009",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-010",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-011",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-012",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-013",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-014",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-015",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-016",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-017",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-018",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-019",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-020",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-021",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-022",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-023",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-024",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-025",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-026",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-027",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-049",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-028",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-029",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-030",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-031",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-032",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-033",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-034",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-035",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-036",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-037",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-038",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-039",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-050",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-040",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-041",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-047",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-048",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-042",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-043",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-044",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-045",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENG-046",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.vlink.v1",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-001",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-002",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-003",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-004",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-005",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-006",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-007",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-008",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-012",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-009",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-010",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "AGT-011",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-001",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-002",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-003",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-004",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-005",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-006",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-007",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-008",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-009",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-010",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-011",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-012",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-013",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-014",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-015",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-016",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-017",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "HUB-018",
+      "contracts": [
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.database"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "BE-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "PLN-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-013",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-014",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-015",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "MTR-016",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "LIM-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "FE-012",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-011",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-012",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-013",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-007",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-008",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-009",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SEC-010",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-002",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-003",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-004",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-005",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-006",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-007",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-008",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-009",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-010",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-011",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-012",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-013",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-014",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-015",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-016",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-017",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-018",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-019",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-020",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-021",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-022",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-023",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-024",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-026",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-025",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-027",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-028",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-029",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-030",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-031",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-032",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-033",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-034",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-035",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-036",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-037",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-038",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-039",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-040",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-041",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-042",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-043",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-044",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "NFR-045",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-001",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-002",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-003",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-004",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-005",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "ENGR-006",
+      "contracts": [
+        "vortex.database",
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config",
+        "vortex.vlink.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-FMT-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-STACK-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-PLAT-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-IFACE-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-AGENT-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-PAGES-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-RECOVERY-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-SCALE-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-TEST-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-METHOD-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-STRUCT-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-TOOLS-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-MILE-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-ARTIFACT-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-PARAM-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-B1-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-B2-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-B3-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-B4-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    },
+    {
+      "id": "SUP-B5-001",
+      "contracts": [
+        "vortex.runtime-config",
+        "vortex.control.v1"
+      ],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+    }
+  ]
+}
