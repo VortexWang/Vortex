@@ -17,7 +17,7 @@ The local benchmark artifact records commit, dirty state, architecture and OrbSt
 ## Verification
 
 - `make phase3-vlink-check` passed locally: two-second fuzz smoke, `go test -race ./...`, and Ubuntu Linux Docker integration tests passed.
-- Fuzz smoke executed 288,557 cases in two seconds without a failure.
+- Fuzz smoke executed 288,557 cases in two seconds and completed successfully.
 - `cd engine && go vet ./...` passed.
 - `git diff --check` passed.
 - Benchmark evidence: `artifacts/phase3/benchmark/20261103T132835Z.txt` with `status: environment-limited`.
