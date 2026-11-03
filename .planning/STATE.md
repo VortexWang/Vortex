@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Not started
-status: planning
-stopped_at: Phase 02 complete, ready to plan Phase 4
-last_updated: "2026-11-03T17:26:17.842Z"
+current_plan: Phase 4 verification and performance qualification review
+status: review
+stopped_at: Phase 4 execution complete; performance qualification remains human-needed
+last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Phase 02 complete, transitioned to Phase 4
-state_head: 41ae509e8ed41c982ff03810c9057dc60a396485
+last_activity_desc: Phase 4 native amd64 rerun recorded at 930c630; correctness passed, performance gates remain open
+state_head: 3b52dda
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 22
+  completed_plans: 22
   percent: 38
 ---
 
@@ -25,15 +25,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-03)
 
 **Core value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
-**Current focus:** Phase 03 — M1 VLink 引擎链路 (M1 VLink Engine)
+**Current focus:** Phase 04 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Not started
-Total Plans in Phase: 6
-Status: Ready to plan
-Last activity: 2026-11-04 — Phase 02 complete, transitioned to Phase 4
+Current Plan: Verification and performance qualification review
+Total Plans in Phase: 5
+Status: Needs review
+Last activity: 2026-11-04 — Phase 4 execution and native amd64 rerun recorded
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,11 +68,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Execute Phase 3 plans 03-01 through 03-06; retain Phase 2 verification gaps as historical residuals until their owning runtime work is planned.
+- Complete Phase 4 human performance review: three-relay mixed-load UDP with production accounting, same-path ratio disposition, and D-04 parameter decision.
 
 ### Blockers/Concerns
 
-- Phase 2 retains gaps for authoritative runtime policy integration and qualified performance evidence; this does not block planning or correctness work in Phase 3.
+- Phase 4 performance qualification remains open: same-path ratio is below the 70% criterion, and the required three-relay mixed-load UDP workload with production accounting has not yet run.
 
 ## Deferred Items
 

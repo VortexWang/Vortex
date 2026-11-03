@@ -91,7 +91,12 @@
 3. 同节点/boot 的份额修改通过 prepare、关闭旧续租权、CAS 和执行回执切换，速率/连接降额在规定排空条件满足前保留旧占用。
 4. 两阶段配置应用具有幂等 Prepare/Commit/Abort，失败和丢失回执不产生双活代次、重复资源释放或未授权会话。
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
-**Plans**: TBD
+**Plans**: 5/5 plans executed; correctness criteria verified, performance qualification remains human-needed because the same-path ratio and three-relay mixed-load evidence are still open.
+- [x] 04-01 — Authorized candidate paths and generation draining
+- [x] 04-02 — Immutable billing snapshots and reservation safety
+- [x] 04-03 — Share fencing and two-phase configuration apply
+- [x] 04-04 — Fair bounded TCP/UDP scheduling
+- [x] 04-05 — Docker/Actions and native qualification evidence
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。
@@ -151,7 +156,7 @@
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
-| 4. M2 Multi-hop engine | 0/TBD | Not started | - |
+| 4. M2 Multi-hop engine | 5/5 | Needs review (performance qualification) | 2026-11-04 |
 | 5. M3 Agent and Edge Hub | 0/TBD | Not started | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
