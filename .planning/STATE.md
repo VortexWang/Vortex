@@ -9,7 +9,7 @@ stopped_at: Phase 4 execution complete; performance qualification remains human-
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
 last_activity_desc: Phase 4 native amd64 rerun recorded at 930c630; correctness passed, performance gates remain open
-state_head: 3b52dda
+state_head: 345ffa9
 progress:
   total_phases: 8
   completed_phases: 3
