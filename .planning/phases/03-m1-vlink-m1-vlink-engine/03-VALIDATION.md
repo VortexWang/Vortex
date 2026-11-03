@@ -30,9 +30,9 @@ created: "2026-11-03"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 01 | 1 | ENG-012, ENG-013 | T-03-01 | bounded fixed codec rejects malformed frames before allocation | unit/fuzz | `cd engine && go test ./vlink -run 'Test(Frame|Codec)'` | ❌ W0 | ⬜ |
-| 03-01-02 | 01 | 1 | ENG-011, ENG-015 | T-03-02 | HELLO canonical bytes and exporter binding are deterministic | unit | `cd engine && go test ./vlink -run 'TestHello'` | ❌ W0 | ⬜ |
-| 03-01-03 | 01 | 1 | ENG-012, ENG-013, ENG-014 | T-03-03 | one authorized TCP OPEN/DATA/FIN tracer succeeds | integration | `cd engine && go test ./vlink -run 'TestTracer'` | ❌ W0 | ⬜ |
+| 03-01-01 | 01 | 1 | ENG-012, ENG-013 | T-03-01 | bounded fixed codec rejects malformed frames before allocation | unit/fuzz | `cd engine && go test ./vlink -run 'Test(Frame|Codec)'` | ✅ | ✅ |
+| 03-01-02 | 01 | 1 | ENG-011, ENG-015 | T-03-02 | HELLO canonical bytes and exporter binding are deterministic | unit | `cd engine && go test ./vlink -run 'TestHello'` | ✅ | ✅ |
+| 03-01-03 | 01 | 1 | ENG-012, ENG-013, ENG-014 | T-03-03 | one authorized TCP OPEN/DATA/FIN tracer succeeds | integration | `cd engine && go test -race ./vlink -run 'TestTracer'` | ✅ | ✅ |
 | 03-02-01 | 2 | 2 | ENG-010, ENG-025 | T-03-04 | mTLS identity, conservative time bounds, freshness and stale replay are rejected | unit/integration | `cd engine && go test ./vlink -run 'TestIdentity|TestFreshness'` | ❌ W0 | ⬜ |
 | 03-02-02 | 2 | 2 | ENG-016 | T-03-05 | stream/link failure isolation and byte windows preserve bounds | unit/race | `cd engine && go test -race ./vlink -run 'Test(Stream|Window)'` | ❌ W0 | ⬜ |
 | 03-02-03 | 2 | 2 | ENG-016, ENG-019 | T-03-05 | byte windows and 3/3/12 second liveness bounds hold | unit/race | `cd engine && go test -race ./vlink -run 'Test(Window|Liveness)'` | ❌ W0 | ⬜ |
