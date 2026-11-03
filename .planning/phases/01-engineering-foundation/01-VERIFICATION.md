@@ -15,6 +15,8 @@ covered_files:
   - .planning/phases/01-engineering-foundation/01-03-SUMMARY.md
   - .planning/phases/01-engineering-foundation/01-04-PLAN.md
   - .planning/phases/01-engineering-foundation/01-04-SUMMARY.md
+  - .planning/phases/01-engineering-foundation/01-05-PLAN.md
+  - .planning/phases/01-engineering-foundation/01-06-PLAN.md
   - .planning/phases/01-engineering-foundation/01-CONTEXT.md
   - .planning/phases/01-engineering-foundation/01-UAT.md
   - .planning/phases/01-engineering-foundation/01-VALIDATION.md
@@ -36,7 +38,30 @@ covered_files:
   - .github/workflows/phase1.yml
   - Dockerfile.phase1
   - test/netns/compose.yaml
-covered_digest: "v4:sha256:220c2a61b491fff262526190b9a481d4078a459670ffc4601f012bc119826f72"
+covered_digest: "v4:sha256:973d13549943d158d0fc18af499f2c1ef9ab378af80b164c42bf66ba27d804fd"
+gaps:
+  - gap_id: G-01-01
+    truth: "Toolchains, dependencies, generators, images and test/load tools have a reviewed exact version, integrity and permissive license baseline."
+    status: failed
+    reason: "Seven of 50 candidate records lack verified source, immutable integrity or complete license closure."
+    severity: blocker
+    artifacts:
+      - path: docs/governance/version-candidates.yaml
+        issue: "Seven candidate records remain unresolved and candidate validation is blocked."
+    missing:
+      - "Verified upstream provenance, immutable checksums/build attestations, and complete license evidence for all seven records."
+      - "A user-approved digest for any revised complete candidate manifest before changing the lock."
+  - gap_id: G-01-02
+    truth: "Historical source review/freeze material cited by V1.11 is located and verified, or remains accurately blocking."
+    status: failed
+    reason: "Eleven original historical records/scripts remain missing after repository tree and reachable Git history search."
+    severity: blocker
+    artifacts:
+      - path: docs/governance/evidence-register.yaml
+        issue: "All eleven required originals remain missing; NFR-038 is blocked."
+    missing:
+      - "Original cited records/scripts from their custodians or document handoff, inspected for authenticity and metadata."
+      - "If originals cannot be recovered, a formally approved V1.11 change revising NFR-038."
 ---
 
 # Phase 1: 工程基线与安全契约 — Verification Report
