@@ -97,9 +97,35 @@ def check_drafts(versions, review, root=ROOT):
     return errors
 
 
+def check_frozen(versions, review, root=ROOT):
+    """Validate approved frozen contracts and their content hashes."""
+    errors = []
+    contracts = versions.get("contracts", [])
+    if {c.get("id") for c in contracts} != CONTRACT_IDS or len(contracts) != len(CONTRACT_IDS):
+        errors.append("contract catalog must contain each of the five unique contract IDs")
+    if review.get("status") != "approved" or review.get("decision") != "freeze-contracts":
+        errors.append("contract review is not approved for freeze-contracts")
+    reviews = {c.get("id"): c for c in review.get("contracts", [])}
+    for contract in contracts:
+        contract_id = contract.get("id")
+        path = root / contract.get("path", "")
+        if contract.get("status") != "frozen" or contract.get("version") != "1.0.0":
+            errors.append(f"{contract_id}: frozen baseline must be version 1.0.0 with status frozen")
+        if not path.is_file():
+            errors.append(f"missing contract artifact: {contract.get('path')}")
+            continue
+        expected = reviews.get(contract_id, {}).get("sha256")
+        actual = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
+        if not expected or expected != actual:
+            errors.append(f"{contract_id}: approved review hash is missing or stale")
+        if reviews.get(contract_id, {}).get("decision") != "approved":
+            errors.append(f"{contract_id}: individual contract decision is not approved")
+    return errors
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("check-drafts", "check-map", "check-change"))
+    parser.add_argument("command", choices=("check-drafts", "check-frozen", "check-map", "check-change"))
     parser.add_argument("--versions", default=ROOT / "contracts/versions.yaml")
     parser.add_argument("--review", default=ROOT / "docs/governance/contract-review.yaml")
     parser.add_argument("--requirements", default=ROOT / ".planning/REQUIREMENTS.md")
@@ -109,6 +135,8 @@ def main():
     try:
         if args.command == "check-drafts":
             errors = check_drafts(load(args.versions), load(args.review))
+        elif args.command == "check-frozen":
+            errors = check_frozen(load(args.versions), load(args.review))
         elif args.command == "check-map":
             errors = check_map(Path(args.requirements).read_text(encoding="utf-8"), load(args.mapping))
         else:

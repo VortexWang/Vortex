@@ -2,10 +2,10 @@
   "schema_version": 1,
   "compatibility": "SemVer; breaking changes increment major, compatible extensions increment minor, fixes increment patch",
   "contracts": [
-    {"id":"vortex.database","path":"contracts/database/schema.sql","version":"1.0.0","status":"draft","sources":["V1.11 §0.2", "BE-001..006", "TEN-001..009", "NOD-001..014", "AGT-003", "HUB-003", "HUB-012", "Appendix B"]},
-    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","version":"1.0.0","status":"draft","sources":["GEN-007", "BE-005", "Appendix A"]},
-    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","version":"1.0.0","status":"draft","sources":["§3.4", "§7", "§9", "AGT-006", "HUB-003"]},
-    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","version":"1.0.0","status":"draft","sources":["ENG-024..034", "ENG-040..050", "Appendix A", "Appendix B"]},
-    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","version":"1.0.0","status":"draft","sources":["ENG-010..023", "Appendix A"]}
+    {"id":"vortex.database","path":"contracts/database/schema.sql","version":"1.0.0","status":"frozen","sources":["V1.11 §0.2", "BE-001..006", "TEN-001..009", "NOD-001..014", "AGT-003", "HUB-003", "HUB-012", "Appendix B"]},
+    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","version":"1.0.0","status":"frozen","sources":["GEN-007", "BE-005", "Appendix A"]},
+    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","version":"1.0.0","status":"frozen","sources":["§3.4", "§7", "§9", "AGT-006", "HUB-003"]},
+    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","version":"1.0.0","status":"frozen","sources":["ENG-024..034", "ENG-040..050", "Appendix A", "Appendix B"]},
+    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","version":"1.0.0","status":"frozen","sources":["ENG-010..023", "Appendix A"]}
   ]
 }

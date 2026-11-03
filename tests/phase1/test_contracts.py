@@ -1,6 +1,6 @@
 import unittest
 
-from tools.phase1.contracts import check_change, check_map
+from tools.phase1.contracts import check_change, check_frozen, check_map
 
 
 class RequirementMapTests(unittest.TestCase):
@@ -28,6 +28,12 @@ class ChangeControlTests(unittest.TestCase):
         self.assertFalse(check_change({"vortex.database"}, before, after, {"changes":[{"contract_id":"vortex.database", "version":"1.1.0", "kind":"compatible"}]}))
         self.assertTrue(check_change({"vortex.database"}, before, after, {"changes":[]}))
         self.assertTrue(check_change({"vortex.database"}, before, {"vortex.database":"1.0.1"}, {"changes":[{"contract_id":"vortex.database", "version":"1.0.1", "kind":"breaking"}]}))
+
+
+class FrozenContractTests(unittest.TestCase):
+    def test_rejects_unapproved_freeze(self):
+        versions = {"contracts":[{"id":cid,"path":"missing","version":"1.0.0","status":"frozen"} for cid in ["vortex.database","vortex.public-api","vortex.control.v1","vortex.runtime-config","vortex.vlink.v1"]]}
+        self.assertTrue(check_frozen(versions, {"status":"pending","decision":"pending"}))
 
 
 if __name__ == "__main__":
