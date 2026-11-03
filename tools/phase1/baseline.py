@@ -124,12 +124,15 @@ def main():
             errors = check_candidates(data)
             result = {"status": "ready-for-review" if not errors else "blocked", "candidate_count": len(data.get("candidates", [])), "errors": errors}
         elif args.command == "evidence":
-            status, errors = check_evidence(load(args.register))
+            if Path(args.register).is_file():
+                status, errors = check_evidence(load(args.register))
+            else:
+                status, errors = "blocked", [f"evidence register is missing: {args.register}"]
             result = {"requirement": "NFR-038", "status": status, "errors": errors}
         else:
             manifest = load(args.manifest)
             lock = load(args.lock)
-            policy = load(args.policy)
+            policy = load(args.policy) if Path(args.policy).is_file() else None
             errors = check_lock(lock, manifest, policy)
             result = {"status": "passed" if not errors else "blocked", "locked_count": len(lock.get("locked_candidates", [])), "not_locked_count": len(lock.get("not_locked", [])), "errors": errors}
         print(json.dumps(result, ensure_ascii=False, indent=2))
