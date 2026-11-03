@@ -16,7 +16,7 @@ behavior_unverified: 1
 | 2 | Immutable billing snapshots, coefficient isolation, reserve/unknown upper-bound behavior | VERIFIED at injected Engine boundary | `engine/accounting` snapshot tests, existing `Batch` unknown semantics, VLink admission tests and UAT tests 2-3 passed. Durable runtime reconciliation is later-phase scope. |
 | 3 | Share fencing/CAS and idempotent Prepare/Commit/Abort without dual active generations or unsafe release | VERIFIED | `engine/share`, `engine/apply`, race tests, UAT tests 2-3 passed. |
 | 4 | Independent bounded TCP/UDP scheduling and classified DGRAM drops | VERIFIED at transport boundary | `engine/scheduler`, VLink write-loop integration, race tests and Docker/Actions targeted tests passed. |
-| 5 | NFR-003/NFR-005/NFR-006 and D-04 parameter review under qualifying topology | NOT QUALIFIED | Native amd64 evidence is now available. Mux forward reached 525.04 MB/s (absolute target met) but is about 49.1% of the 1068.46 MB/s TLS baseline, below the 70% criterion. First-byte mux/pool are below 5 ms and the loopback UDP fixture measured 0% loss, but neither substitutes for three-relay mixed-load production-accounting qualification. See `04-NATIVE-EVIDENCE.md`; D-04 remains unapproved. |
+| 5 | NFR-003/NFR-005/NFR-006 and D-04 parameter review under qualifying topology | NOT QUALIFIED | The native runbook attempt reached 497.94 MB/s mux forward (absolute target met) but only about 41.1% of the 1210.17 MB/s TLS baseline, below the 70% criterion. First-byte mux/pool are below 5 ms and the loopback UDP fixture measured 0% loss, but the repository has no executable three-relay runtime or production-accounting workload. See `04-NATIVE-EVIDENCE.md`; D-04 remains unapproved. |
 
 ## Automated Verification
 
