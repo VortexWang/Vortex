@@ -107,6 +107,51 @@ func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	server.Close(nil)
 }
 
+func TestMuxTCPDataFramesFitOneTLSRecord(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	window := uint32(MaxTLSRecordPayload * 2)
+	config := MuxConfig{LocalClient: true, StreamWindow: window, AggregateWindow: window, MaxWindow: window}
+	client, err := newMuxLink(clientConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.LocalClient = false
+	server, err := newMuxLink(serverConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(ErrProtocol)
+	defer server.Close(ErrProtocol)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	request := OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}}
+	sender, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	receiver, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, receiver.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if frame, err := sender.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
+		t.Fatalf("OPEN response: frame=%+v err=%v", frame, err)
+	}
+	if err := sender.WriteData(ctx, make([]byte, MaxTLSRecordPayload+1)); err != nil {
+		t.Fatal(err)
+	}
+	first, err := receiver.Receive(ctx)
+	if err != nil || first.Type != FrameData || len(first.Payload) != MaxTLSRecordPayload {
+		t.Fatalf("first DATA frame: type=%v bytes=%d err=%v", first.Type, len(first.Payload), err)
+	}
+	second, err := receiver.Receive(ctx)
+	if err != nil || second.Type != FrameData || len(second.Payload) != 1 {
+		t.Fatalf("second DATA frame: type=%v bytes=%d err=%v", second.Type, len(second.Payload), err)
+	}
+}
+
 func TestMuxRemoteOpenRequiresAuthorizationAndClosesResources(t *testing.T) {
 	left, right := net.Pipe()
 	config := MuxConfig{LocalClient: true}

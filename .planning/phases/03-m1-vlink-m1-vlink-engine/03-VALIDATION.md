@@ -1,7 +1,7 @@
 ---
 phase: "03"
 slug: "m1-vlink-m1-vlink-engine"
-status: complete
+status: in-progress
 nyquist_compliant: true
 wave_0_complete: true
 created: "2026-11-03"
@@ -39,7 +39,7 @@ created: "2026-11-03"
 | 03-03-01 | 3 | 3 | ENG-020, ENG-021, ENG-022, ENG-023, ENG-024 | T-03-06 | OPEN checks local authorization and UDP requires OPEN_OK | integration/race | `cd engine && go test -race ./vlink -run 'Test(Open|Target|UDP)'` | ✅ | ✅ |
 | 03-04-01 | 4 | 4 | ENG-017, ENG-018 | T-03-07 | mode selection, reverse links and pool retries are bounded and cleaned up | integration/race | `cd engine && go test -race ./vlink -run 'Test(Pool|Mode|Reverse|Cleanup)'` | ✅ | ✅ |
 | 03-05-01 | 5 | 4 | — | T-03-08 | abuse controls close sustained offenders and metrics stay low-cardinality | unit/race | `cd engine && go test -race ./vlink -run 'Test(Limit|Observability)'` | ✅ | ✅ |
-| 03-06-01 | 6 | 5 | NFR-002, NFR-004, NFR-007 | T-03-09 | forward/reverse and first-packet measurements are reproducible and honestly reported | Docker/benchmark | `make phase3-vlink-check` | ✅ | ✅ (NFR qualification pending native host) |
+| 03-06-01 | 6 | 5 | NFR-002, NFR-004, NFR-007 | T-03-09 | forward/reverse and first-packet measurements are reproducible and honestly reported | Docker/benchmark | `make phase3-vlink-check` | ✅ | ⬜ (Actions on final SHA pending; native Ubuntu KVM rerun pending) |
 
 ## Wave 0 Requirements
 

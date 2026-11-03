@@ -146,6 +146,17 @@ func TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit(t *testing.T) {
 	if err := serverStream.Consume(ctx, 4); err != nil {
 		t.Fatal(err)
 	}
+	deadline := time.Now().Add(time.Second)
+	for {
+		snapshot := client.windows.Snapshot()
+		if snapshot.StreamAvailable[clientStream.ID] == 4 && snapshot.AggregateAvailable == 4 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("window credit was not applied: %+v", snapshot)
+		}
+		time.Sleep(time.Millisecond)
+	}
 	if accepted, err := clientStream.WriteDgram(ctx, []byte("x")); err != nil || !accepted {
 		t.Fatalf("datagram after credit accepted=%v err=%v", accepted, err)
 	}

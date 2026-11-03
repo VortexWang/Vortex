@@ -170,7 +170,7 @@ func helloPair() (HelloMessage, HelloMessage) {
 	return client, server
 }
 
-func testTLSIdentity(t *testing.T, id NodeID) (*tls.Config, *ecdsa.PrivateKey) {
+func testTLSIdentity(t testing.TB, id NodeID) (*tls.Config, *ecdsa.PrivateKey) {
 	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -187,7 +187,7 @@ func testTLSIdentity(t *testing.T, id NodeID) (*tls.Config, *ecdsa.PrivateKey) {
 	return &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}}, key
 }
 
-func trustTLS13Peers(t *testing.T, client, server *tls.Config) {
+func trustTLS13Peers(t testing.TB, client, server *tls.Config) {
 	t.Helper()
 	clientCert, err := x509.ParseCertificate(server.Certificates[0].Certificate[0])
 	if err != nil {

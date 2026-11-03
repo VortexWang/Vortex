@@ -116,7 +116,7 @@ func TestOpenRoundTripAndBounds(t *testing.T) {
 	}
 }
 
-func tcpPair(t *testing.T) (*net.TCPConn, *net.TCPConn) {
+func tcpPair(t testing.TB) (*net.TCPConn, *net.TCPConn) {
 	t.Helper()
 	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1)})
 	if err != nil {

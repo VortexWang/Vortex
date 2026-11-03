@@ -624,8 +624,8 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 	}
 	for len(payload) > 0 {
 		size := len(payload)
-		if size > MaxPayloadSize {
-			size = MaxPayloadSize
+		if size > MaxTLSRecordPayload {
+			size = MaxTLSRecordPayload
 		}
 		waitStarted := time.Now()
 		if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {

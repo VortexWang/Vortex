@@ -115,8 +115,8 @@ func TraceTCP(ctx context.Context, link *tls.Conn, local net.Conn, hello HelloCo
 	if err != nil {
 		return err
 	}
-	var writeMu sync.Mutex
-	writeFrame := func(frame Frame) error { writeMu.Lock(); defer writeMu.Unlock(); return WriteFrame(link, frame) }
+	frameWriteBuffer := make([]byte, HeaderSize+MaxPayloadSize)
+	writeFrame := func(frame Frame) error { return writeFrameWithBuffer(link, frame, frameWriteBuffer) }
 	if err = writeFrame(Frame{Type: FrameOpen, StreamID: streamID, Payload: payload}); err != nil {
 		return err
 	}
@@ -124,11 +124,11 @@ func TraceTCP(ctx context.Context, link *tls.Conn, local net.Conn, hello HelloCo
 	defer stopOnCancel()
 	results := make(chan error, 2)
 	go func() {
-		buffer := make([]byte, 16*1024)
+		buffer := make([]byte, MaxTLSRecordPayload)
 		for {
 			n, readErr := local.Read(buffer)
 			if n > 0 {
-				if writeErr := writeFrame(Frame{Type: FrameData, StreamID: streamID, Payload: append([]byte(nil), buffer[:n]...)}); writeErr != nil {
+				if writeErr := writeFrame(Frame{Type: FrameData, StreamID: streamID, Payload: buffer[:n]}); writeErr != nil {
 					results <- writeErr
 					return
 				}
@@ -145,8 +145,9 @@ func TraceTCP(ctx context.Context, link *tls.Conn, local net.Conn, hello HelloCo
 	}()
 	go func() {
 		opened := false
+		frameBuffer := make([]byte, MaxPayloadSize)
 		for {
-			frame, readErr := ReadFrame(link)
+			frame, readErr := ReadFrameWithBuffer(link, frameBuffer)
 			if readErr != nil {
 				results <- readErr
 				return
@@ -295,8 +296,9 @@ func ServeTCPWithGate(ctx context.Context, link *tls.Conn, hello HelloConfig, au
 	defer stopOnCancel()
 	results := make(chan error, 2)
 	go func() {
+		frameBuffer := make([]byte, MaxPayloadSize)
 		for {
-			incoming, readErr := ReadFrame(link)
+			incoming, readErr := ReadFrameWithBuffer(link, frameBuffer)
 			if readErr != nil {
 				results <- readErr
 				return
@@ -338,11 +340,11 @@ func ServeTCPWithGate(ctx context.Context, link *tls.Conn, hello HelloConfig, au
 		}
 	}()
 	go func() {
-		buffer := make([]byte, 16*1024)
+		buffer := make([]byte, MaxTLSRecordPayload)
 		for {
 			n, readErr := target.Read(buffer)
 			if n > 0 {
-				chunk := append([]byte(nil), buffer[:n]...)
+				chunk := buffer[:n]
 				var writeErr error
 				if session != nil {
 					writeErr = writeReservedFrame(ctx, session, accounting.RightToLeft, writeFrame, Frame{Type: FrameData, StreamID: frame.StreamID, Payload: chunk}, n, meter)

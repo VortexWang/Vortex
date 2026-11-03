@@ -5,11 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 )
 
 const (
 	HeaderSize     = 8
 	MaxPayloadSize = 16 * 1024
+	// MaxTLSRecordPayload keeps the complete VLink frame within one TLS 1.3
+	// plaintext record when used for TCP DATA frames.
+	MaxTLSRecordPayload = MaxPayloadSize - HeaderSize
 )
 
 var (
@@ -17,6 +21,11 @@ var (
 	ErrFrameTooLarge      = errors.New("vlink: frame payload too large")
 	ErrStreamIDsExhausted = errors.New("vlink: stream IDs exhausted")
 )
+
+var frameWriteBuffers = sync.Pool{New: func() any {
+	buffer := new([HeaderSize + MaxPayloadSize]byte)
+	return buffer
+}}
 
 type FrameType uint8
 
@@ -44,6 +53,16 @@ type Frame struct {
 }
 
 func ReadFrame(r io.Reader) (Frame, error) {
+	return readFrame(r, nil)
+}
+
+// ReadFrameWithBuffer decodes a frame into caller-owned storage. The returned
+// payload aliases buffer and remains valid until the caller reuses that buffer.
+func ReadFrameWithBuffer(r io.Reader, buffer []byte) (Frame, error) {
+	return readFrame(r, buffer)
+}
+
+func readFrame(r io.Reader, buffer []byte) (Frame, error) {
 	var header [HeaderSize]byte
 	if _, err := io.ReadFull(r, header[:]); err != nil {
 		return Frame{}, fmt.Errorf("vlink: read frame header: %w", err)
@@ -60,7 +79,12 @@ func ReadFrame(r io.Reader) (Frame, error) {
 	if length == 0 {
 		return frame, nil
 	}
-	frame.Payload = make([]byte, int(length))
+	if buffer == nil {
+		buffer = make([]byte, int(length))
+	} else if int(length) > len(buffer) {
+		return Frame{}, ErrFrameTooLarge
+	}
+	frame.Payload = buffer[:int(length)]
 	if _, err := io.ReadFull(r, frame.Payload); err != nil {
 		return Frame{}, fmt.Errorf("vlink: read frame payload: %w", err)
 	}
@@ -68,24 +92,28 @@ func ReadFrame(r io.Reader) (Frame, error) {
 }
 
 func WriteFrame(w io.Writer, frame Frame) error {
+	encoded := frameWriteBuffers.Get().(*[HeaderSize + MaxPayloadSize]byte)
+	defer frameWriteBuffers.Put(encoded)
+	return writeFrameWithBuffer(w, frame, encoded[:])
+}
+
+func writeFrameWithBuffer(w io.Writer, frame Frame, encoded []byte) error {
 	if len(frame.Payload) > MaxPayloadSize {
+		return ErrFrameTooLarge
+	}
+	if len(encoded) < HeaderSize+len(frame.Payload) {
 		return ErrFrameTooLarge
 	}
 	if err := validateFrameHeader(frame, uint16(len(frame.Payload))); err != nil {
 		return err
 	}
-	var header [HeaderSize]byte
-	header[0] = byte(frame.Type)
-	header[1] = frame.Flags
-	binary.BigEndian.PutUint16(header[2:4], uint16(len(frame.Payload)))
-	binary.BigEndian.PutUint32(header[4:8], frame.StreamID)
-	if err := writeFull(w, header[:]); err != nil {
-		return fmt.Errorf("vlink: write frame header: %w", err)
-	}
-	if len(frame.Payload) != 0 {
-		if err := writeFull(w, frame.Payload); err != nil {
-			return fmt.Errorf("vlink: write frame payload: %w", err)
-		}
+	encoded[0] = byte(frame.Type)
+	encoded[1] = frame.Flags
+	binary.BigEndian.PutUint16(encoded[2:4], uint16(len(frame.Payload)))
+	binary.BigEndian.PutUint32(encoded[4:8], frame.StreamID)
+	copy(encoded[HeaderSize:], frame.Payload)
+	if err := writeFull(w, encoded[:HeaderSize+len(frame.Payload)]); err != nil {
+		return fmt.Errorf("vlink: write frame: %w", err)
 	}
 	return nil
 }
