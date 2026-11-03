@@ -15,7 +15,7 @@ validated: "2026-11-04"
 | Quick command | `cd engine && go test -race ./...` |
 | Shared local/CI command | `make phase2-engine-check` |
 | Local Linux execution | OrbStack Docker on arm64 for current host |
-| CI execution | GitHub Actions Ubuntu 24.04 amd64, latest M0 run 41615021796 |
+| CI execution | GitHub Actions Ubuntu 24.04 amd64, run 41684319179 on SHA `75d66a7823fde6b743745daffb9cf9f607d137df` |
 
 ## Sampling
 
@@ -48,6 +48,6 @@ Docker validates that the Linux-targeted test binary runs in the local Linux VM;
 
 - [x] Every Phase 2 automated behavior maps to an existing test.
 - [x] `make phase2-engine-check` passed at current verification HEAD `41ae509e8ed41c982ff03810c9057dc60a396485` on local OrbStack Linux arm64.
-- [x] GitHub Actions evidence for `make phase2-engine-check` is retained at run 41615021796; its Phase 2 test entry and Engine source are unchanged at the current HEAD. No Actions result is claimed for `41ae509`.
+- [x] GitHub Actions run [41684319179](https://github.com/VortexWang/Vortex/actions/runs/41684319179) passed `make phase2-engine-check` and benchmark smoke on SHA `75d66a7823fde6b743745daffb9cf9f607d137df` (Ubuntu 24.04 amd64).
 - [x] Environment-limited benchmark evidence is not represented as qualified throughput acceptance.
 - [x] Phase 5/6 runtime authority and Phase 8 dedicated performance gates remain deferred to their owning phases.
