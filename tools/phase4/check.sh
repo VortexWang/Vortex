@@ -17,6 +17,8 @@ os=$(docker info --format '{{.OperatingSystem}}' 2>/dev/null || echo unavailable
   echo "performance_qualification: environment-limited"
 } > "$OUT/metadata.txt"
 cd "$ROOT/engine"
-go test -race ./... | tee "$OUT/engine-race.txt"
+go test -race ./... > "$OUT/engine-race.txt" 2>&1
+cat "$OUT/engine-race.txt"
 cd "$ROOT"
-tools/vlink/docker-test.sh | tee "$OUT/vlink-docker.txt"
+tools/vlink/docker-test.sh > "$OUT/vlink-docker.txt" 2>&1
+cat "$OUT/vlink-docker.txt"
