@@ -10,6 +10,8 @@ import (
 	"io"
 	"net"
 	"sync"
+
+	"vortex/engine/accounting"
 )
 
 type OpenRequest struct {
@@ -23,6 +25,7 @@ type OpenRequest struct {
 }
 
 type AuthorizeTCP func(context.Context, NodeID, OpenRequest) (net.Conn, uint16)
+type TrafficMeter func(accounting.Direction, int64) error
 
 func MarshalOpen(request OpenRequest) ([]byte, error) {
 	if request.RuleID == ([16]byte{}) || request.RuleRevision == 0 || request.PathGeneration == 0 || request.Network != 1 || len(request.Visited) > 16 || (len(request.ClientAddress) != 4 && len(request.ClientAddress) != 16) {
@@ -211,6 +214,13 @@ func TraceTCP(ctx context.Context, link *tls.Conn, local net.Conn, hello HelloCo
 // ServeTCP accepts one TCP stream. The authorizer selects and dials the target
 // from local policy; the wire request deliberately contains no target address.
 func ServeTCP(ctx context.Context, link *tls.Conn, hello HelloConfig, authorize AuthorizeTCP) error {
+	return ServeTCPWithGate(ctx, link, hello, authorize, nil, nil)
+}
+
+// ServeTCPWithGate applies the existing in-process accounting boundary to
+// bytes accepted by each destination write. An unresolved write keeps its
+// reservation unknown through accounting.Batch semantics.
+func ServeTCPWithGate(ctx context.Context, link *tls.Conn, hello HelloConfig, authorize AuthorizeTCP, gate accounting.Gate, meter TrafficMeter) (returnErr error) {
 	if link == nil || authorize == nil {
 		return errors.New("vlink: TLS link and TCP authorizer are required")
 	}
@@ -245,6 +255,27 @@ func ServeTCP(ctx context.Context, link *tls.Conn, hello HelloConfig, authorize 
 		forceCloseTLS(link)
 		return nil
 	}
+	var session accounting.Session
+	if gate != nil {
+		session, err = gate.Open(ctx, accounting.Flow{Key: peer.String() + "/" + fmt.Sprintf("%x", request.RuleID)})
+		if err != nil || session == nil {
+			_ = target.Close()
+			if session != nil {
+				_ = session.Close()
+			}
+			if err != nil {
+				return fmt.Errorf("vlink: open accounting session: %w", err)
+			}
+			return errors.New("vlink: accounting gate returned a nil session")
+		}
+	}
+	if session != nil {
+		defer func() {
+			if closeErr := session.Close(); closeErr != nil {
+				returnErr = errors.Join(returnErr, fmt.Errorf("vlink: close accounting session: %w", closeErr))
+			}
+		}()
+	}
 	var writeMu sync.Mutex
 	writeFrame := func(value Frame) error { writeMu.Lock(); defer writeMu.Unlock(); return WriteFrame(link, value) }
 	if err := writeFrame(Frame{Type: FrameOpenOK, StreamID: frame.StreamID}); err != nil {
@@ -267,7 +298,12 @@ func ServeTCP(ctx context.Context, link *tls.Conn, hello HelloConfig, authorize 
 			}
 			switch incoming.Type {
 			case FrameData:
-				if err := writeAllConn(target, incoming.Payload); err != nil {
+				if session != nil {
+					if err := writeReserved(ctx, session, accounting.LeftToRight, target, incoming.Payload, meter); err != nil {
+						results <- err
+						return
+					}
+				} else if err := writeAllConn(target, incoming.Payload); err != nil {
 					results <- err
 					return
 				}
@@ -297,8 +333,15 @@ func ServeTCP(ctx context.Context, link *tls.Conn, hello HelloConfig, authorize 
 		for {
 			n, readErr := target.Read(buffer)
 			if n > 0 {
-				if err := writeFrame(Frame{Type: FrameData, StreamID: frame.StreamID, Payload: append([]byte(nil), buffer[:n]...)}); err != nil {
-					results <- err
+				chunk := append([]byte(nil), buffer[:n]...)
+				var writeErr error
+				if session != nil {
+					writeErr = writeReservedFrame(ctx, session, accounting.RightToLeft, writeFrame, Frame{Type: FrameData, StreamID: frame.StreamID, Payload: chunk}, n, meter)
+				} else {
+					writeErr = writeFrame(Frame{Type: FrameData, StreamID: frame.StreamID, Payload: chunk})
+				}
+				if writeErr != nil {
+					results <- writeErr
 					return
 				}
 			}
@@ -346,4 +389,60 @@ func forceCloseTLS(conn *tls.Conn) {
 	if conn != nil {
 		_ = conn.NetConn().Close()
 	}
+}
+
+func writeReserved(ctx context.Context, session accounting.Session, direction accounting.Direction, conn net.Conn, payload []byte, meter TrafficMeter) error {
+	batch, err := session.Reserve(ctx, direction, int64(len(payload)))
+	if err != nil {
+		return fmt.Errorf("vlink: reserve %s usage: %w", direction, err)
+	}
+	if batch == nil || batch.Reserved() < int64(len(payload)) {
+		if batch != nil {
+			_ = batch.MarkUnknown(ctx)
+		}
+		return errors.New("vlink: accounting gate returned an undersized reservation")
+	}
+	written := 0
+	for written < len(payload) {
+		n, writeErr := conn.Write(payload[written:])
+		if n > 0 {
+			written += n
+		}
+		if writeErr != nil {
+			return errors.Join(writeErr, batch.Commit(ctx, int64(written)))
+		}
+		if n == 0 {
+			return errors.Join(io.ErrShortWrite, batch.Commit(ctx, int64(written)))
+		}
+	}
+	if err := batch.Commit(ctx, int64(written)); err != nil {
+		return err
+	}
+	if meter != nil {
+		return meter(direction, int64(written))
+	}
+	return nil
+}
+
+func writeReservedFrame(ctx context.Context, session accounting.Session, direction accounting.Direction, writeFrame func(Frame) error, frame Frame, bytes int, meter TrafficMeter) error {
+	batch, err := session.Reserve(ctx, direction, int64(bytes))
+	if err != nil {
+		return fmt.Errorf("vlink: reserve %s usage: %w", direction, err)
+	}
+	if batch == nil || batch.Reserved() < int64(bytes) {
+		if batch != nil {
+			_ = batch.MarkUnknown(ctx)
+		}
+		return errors.New("vlink: accounting gate returned an undersized reservation")
+	}
+	if err := writeFrame(frame); err != nil {
+		return errors.Join(err, batch.MarkUnknown(ctx))
+	}
+	if err := batch.Commit(ctx, int64(bytes)); err != nil {
+		return err
+	}
+	if meter != nil {
+		return meter(direction, int64(bytes))
+	}
+	return nil
 }

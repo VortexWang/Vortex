@@ -6,9 +6,11 @@ import (
 	"crypto/x509"
 	"io"
 	"net"
-	"runtime"
+	"sync"
 	"testing"
 	"time"
+
+	"vortex/engine/accounting"
 )
 
 func TestTracerTCPHalfCloseCarriesResponse(t *testing.T) {
@@ -25,14 +27,16 @@ func TestTracerTCPHalfCloseCarriesResponse(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	defer cancel()
 	peerVerifier := func(context.Context, *x509.Certificate, HelloMessage) error { return nil }
+	gate := &tracerTestGate{outcomes: make(chan accounting.Outcome, 2)}
+	metered := make(chan accounting.Direction, 2)
 	serverDone := make(chan error, 1)
 	go func() {
-		serverDone <- ServeTCP(ctx, serverLink, HelloConfig{NodeID: serverID, BootID: BootID{2}, Generation: 1, Signer: serverSigner, VerifyPeer: peerVerifier}, func(_ context.Context, peer NodeID, request OpenRequest) (net.Conn, uint16) {
+		serverDone <- ServeTCPWithGate(ctx, serverLink, HelloConfig{NodeID: serverID, BootID: BootID{2}, Generation: 1, Signer: serverSigner, VerifyPeer: peerVerifier}, func(_ context.Context, peer NodeID, request OpenRequest) (net.Conn, uint16) {
 			if peer != clientID || request.RuleRevision != 9 {
 				return nil, 2
 			}
 			return target, 0
-		})
+		}, gate, func(direction accounting.Direction, _ int64) error { metered <- direction; return nil })
 	}()
 	clientDone := make(chan error, 1)
 	go func() {
@@ -83,14 +87,15 @@ func TestTracerTCPHalfCloseCarriesResponse(t *testing.T) {
 	select {
 	case <-clientDone:
 	case <-time.After(time.Second):
-		buf := make([]byte, 1<<16)
-		n := runtime.Stack(buf, true)
-		t.Fatalf("client tracer did not clean up: %s", buf[:n])
+		t.Fatal("client tracer did not clean up")
 	}
 	select {
 	case <-serverDone:
 	case <-time.After(time.Second):
 		t.Fatal("server tracer did not clean up")
+	}
+	if len(gate.outcomes) != 2 || len(metered) != 2 {
+		t.Fatalf("accounting outcomes=%d meter events=%d", len(gate.outcomes), len(metered))
 	}
 }
 
@@ -143,3 +148,23 @@ func tcpPair(t *testing.T) (*net.TCPConn, *net.TCPConn) {
 	}
 	return nil, nil
 }
+
+type tracerTestGate struct {
+	outcomes chan accounting.Outcome
+	mu       sync.Mutex
+	opens    int
+}
+
+func (g *tracerTestGate) Open(context.Context, accounting.Flow) (accounting.Session, error) {
+	g.mu.Lock()
+	g.opens++
+	g.mu.Unlock()
+	return tracerTestSession{outcomes: g.outcomes}, nil
+}
+
+type tracerTestSession struct{ outcomes chan accounting.Outcome }
+
+func (s tracerTestSession) Reserve(_ context.Context, _ accounting.Direction, amount int64) (*accounting.Batch, error) {
+	return accounting.NewBatch(amount, func(_ context.Context, outcome accounting.Outcome) error { s.outcomes <- outcome; return nil })
+}
+func (tracerTestSession) Close() error { return nil }
