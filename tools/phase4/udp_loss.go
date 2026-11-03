@@ -23,7 +23,11 @@ func main() {
 	go func() {
 		buf := make([]byte, size)
 		seen := 0
-		_ = conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+		// Go's timer granularity can stretch the nominal 100 Mbps pacing on
+		// small hosts. Keep the receiver alive for the whole send window plus
+		// a bounded drain period so late packets are not counted as loss.
+		readWindow := time.Duration(*count)*time.Millisecond + 10*time.Second
+		_ = conn.SetReadDeadline(time.Now().Add(readWindow))
 		for seen < *count {
 			n, _, err := conn.ReadFromUDP(buf)
 			if err != nil {
