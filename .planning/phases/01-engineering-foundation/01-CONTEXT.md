@@ -33,6 +33,7 @@
 - **D-11:** 允许继续不依赖缺失历史证据的工作，但 NFR-038 标记未通过并阻断 Phase 1 完成及发布验收。
 - **D-12:** 对缺失材料逐项登记名称、来源/责任方、追查动作和证据链接；找到后核验原件，不生成替代或虚构的历史证据。
 - **D-13:** 只有找回并核验原件，或通过正式规格变更修订 NFR-038，才能解除阻断。
+- **D-15:** 用户确认采用 Go 1.27 版本线。按 2026-11-03 官方发布索引，`go1.27.3` 是该版本线当前最新稳定补丁候选；此选择不等同于完整工具链/依赖清单批准或版本锁定。
 
 ### Implementation refinement within approved constraints
 - **I-01:** Phase 1's finite lease/quota model uses a deterministic state explorer written with the Go toolchain candidate (subject to D-08 approval) and standard library. It does not add a Java runtime solely for TLC.
