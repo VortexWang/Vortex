@@ -17,6 +17,7 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close()
+	_ = conn.SetReadBuffer(64 << 20)
 	target := conn.LocalAddr().(*net.UDPAddr)
 	received := make(chan int, 1)
 	go func() {
@@ -39,6 +40,7 @@ func main() {
 		panic(err)
 	}
 	defer client.Close()
+	_ = client.SetWriteBuffer(64 << 20)
 	payload := make([]byte, size)
 	start := time.Now()
 	interval := time.Duration(float64(time.Second) * float64(size*8) / 100_000_000)
