@@ -6,18 +6,18 @@
 
 ## Phases
 
-- [ ] **Phase 1: 工程基线与安全契约** - 锁定并评审工程版本、许可、契约和安全模型。
-- [ ] **Phase 2: M0 引擎数据面** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。
-- [ ] **Phase 3: M1 VLink 引擎链路** - 实现加密隧道、连接复用、建链方向和段许可。
-- [ ] **Phase 4: M2 多跳与引擎完备** - 完成多跳调度、配额门控、排空和原子配置应用。
-- [ ] **Phase 5: M3 节点 Agent 与 Edge Hub** - 交付节点运行时、授权、自治账本和安全恢复交接。
-- [ ] **Phase 6: M4 后端业务闭环** - 交付租户、资源、规则、套餐、计量结算及权威账本。
-- [ ] **Phase 7: M5 前端与运营能力** - 交付中文管理体验、DNS、审计、通知与恢复运维。
-- [ ] **Phase 8: M6 全量验收与发布交付** - 完成规格全量性能、稳定性、故障恢复和交付物验收。
+- [ ] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 锁定并评审工程版本、许可、契约和安全模型。
+- [ ] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。
+- [ ] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。
+- [ ] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 完成多跳调度、配额门控、排空和原子配置应用。
+- [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。
+- [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
+- [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。
+- [ ] **Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)** - 完成规格全量性能、稳定性、故障恢复和交付物验收。
 
 ## Phase Details
 
-### Phase 1: 工程基线与安全契约
+### Phase 1: 工程基线与安全契约 (Engineering Foundation)
 **Goal**: 实现开始前，所有参与者能依照可复现的版本、许可和正式契约工作，安全模型已覆盖规格要求的故障及两两组合。
 **Depends on**: Nothing
 **Requirements**: NFR-038, ENGR-001, ENGR-002, ENGR-003, ENGR-004, ENGR-005, ENGR-006, SUP-FMT-001, SUP-STACK-001, SUP-PLAT-001, SUP-IFACE-001, SUP-STRUCT-001, SUP-TOOLS-001, SUP-MILE-001, SUP-PARAM-001
@@ -29,7 +29,7 @@
 5. V1.11 引用但仓库缺少的冻结/评审材料已找到并核验，或记录为阻塞证据及其对 NFR-038 的影响；不生成虚假评审证据。
 **Plans**: TBD
 
-### Phase 2: M0 引擎数据面
+### Phase 2: M0 引擎数据面 (M0 Engine Dataplane)
 **Goal**: 用户可通过独立 Go Engine 建立直接 TCP/UDP 转发；门控与可信计量接口开启时满足 M0 指标。
 **Depends on**: Phase 1
 **Requirements**: GEN-001, GEN-002, GEN-003, GEN-004, GEN-005, GEN-006, GEN-007, ENG-001, ENG-002, ENG-003, ENG-004, ENG-005, ENG-006, ENG-007, ENG-008, ENG-009, ENG-010, ENG-011, NFR-001
@@ -40,7 +40,7 @@
 4. 在规格指定 Linux 测试环境、正式门控和计量开启时，直接转发吞吐达到 NFR-001；保存硬件、命令、配置和原始基准结果。
 **Plans**: TBD
 
-### Phase 3: M1 VLink 引擎链路
+### Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)
 **Goal**: 节点可在已授权路径上通过受认证加密 VLink 建立正向和反向隧道，链路身份与授权不可伪造或重放。
 **Depends on**: Phase 2
 **Requirements**: ENG-012, ENG-013, ENG-014, ENG-015, ENG-016, ENG-017, ENG-018, ENG-019, ENG-020, ENG-021, ENG-022, ENG-023, ENG-024, ENG-025, NFR-002, NFR-004, NFR-007
@@ -51,7 +51,7 @@
 4. 正向隧道与反向隧道分别达到 NFR-002、NFR-004；pool 与 mux 的首包额外等待分别测量并满足 NFR-007。
 **Plans**: TBD
 
-### Phase 4: M2 多跳与引擎完备
+### Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 **Goal**: 多跳 TCP/UDP 路径可正确调度和排空，份额、计费快照与两阶段应用门控在并发和失败中保持安全。
 **Depends on**: Phase 3
 **Requirements**: ENG-026, ENG-027, ENG-049, ENG-028, ENG-029, ENG-030, ENG-031, ENG-032, ENG-033, ENG-034, ENG-035, ENG-036, ENG-037, ENG-038, ENG-039, ENG-050, ENG-040, ENG-041, ENG-047, ENG-048, ENG-042, ENG-043, ENG-044, ENG-045, ENG-046, NFR-003, NFR-005, NFR-006, NFR-039, NFR-040, NFR-044
@@ -63,7 +63,7 @@
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
 **Plans**: TBD
 
-### Phase 5: M3 节点 Agent 与 Edge Hub
+### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。
 **Depends on**: Phase 4
 **Requirements**: AGT-001, AGT-002, AGT-003, AGT-004, AGT-005, AGT-006, AGT-007, AGT-008, AGT-012, AGT-009, AGT-010, AGT-011, HUB-001, HUB-002, HUB-003, HUB-004, HUB-005, HUB-006, HUB-007, HUB-008, HUB-009, HUB-010, HUB-011, HUB-012, HUB-013, HUB-014, HUB-015, HUB-016, HUB-017, HUB-018, SUP-AGENT-001, SUP-B1-001, SUP-B3-001, SUP-B4-001
@@ -75,7 +75,7 @@
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
 **Plans**: TBD
 
-### Phase 6: M4 后端业务闭环
+### Phase 6: M4 后端业务闭环 (M4 Backend)
 **Goal**: 用户和管理员可通过权威后端管理租户、节点、规则和权益；授权、额度、份额及结算由事务性业务事实控制。
 **Depends on**: Phase 5
 **Requirements**: TEN-001, TEN-002, TEN-003, TEN-004, TEN-005, TEN-006, TEN-007, TEN-008, TEN-009, NOD-001, NOD-002, NOD-003, NOD-004, NOD-005, NOD-006, NOD-007, NOD-008, NOD-009, NOD-010, NOD-011, NOD-012, NOD-013, NOD-014, PRT-001, PRT-002, PRT-003, PRT-004, PRT-005, PRT-006, PRT-007, PRT-016, PRT-008, PRT-009, PRT-010, PRT-011, PRT-012, PRT-013, PRT-014, PRT-015, RUL-001, RUL-002, RUL-003, RUL-004, RUL-005, RUL-006, RUL-007, RUL-008, RUL-009, RUL-010, RUL-011, RUL-012, RUL-013, RUL-014, RUL-015, RUL-016, BE-001, BE-002, BE-003, BE-004, BE-005, BE-006, PLN-001, PLN-002, PLN-006, PLN-007, PLN-008, PLN-003, PLN-004, PLN-005, MTR-001, MTR-002, MTR-003, MTR-004, MTR-005, MTR-006, MTR-007, MTR-008, MTR-009, MTR-010, MTR-011, MTR-013, MTR-014, MTR-015, MTR-016, LIM-001, LIM-002, LIM-003, LIM-004, LIM-005, LIM-006, LIM-007, LIM-008, LIM-009, LIM-010, SUP-B2-001, SUP-B5-001
@@ -87,7 +87,7 @@
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 **Plans**: TBD
 
-### Phase 7: M5 前端与运营能力
+### Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)
 **Goal**: 中文用户和运营人员可理解并管理授权业务状态，DNS、审计、通知和恢复操作反映系统真实执行事实。
 **Depends on**: Phase 6
 **Requirements**: FE-001, FE-002, FE-003, FE-004, FE-005, FE-006, FE-007, FE-008, FE-009, FE-010, FE-011, FE-012, SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-011, SEC-012, SEC-013, SEC-006, SEC-007, SEC-008, SEC-009, SEC-010, SUP-PAGES-001, SUP-RECOVERY-001
@@ -99,7 +99,7 @@
 5. PostgreSQL 基础备份与 WAL 恢复演练、Hub/Agent 恢复对账、RPO/RTO 和密钥恢复资料完成并可审阅。
 **Plans**: TBD
 
-### Phase 8: M6 全量验收与发布交付
+### Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)
 **Goal**: V1.11 第 13 节和 ENGR 全量门槛以真实可复现证据通过，源码、镜像及运维材料可交付。
 **Depends on**: Phase 7
 **Requirements**: NFR-008, NFR-009, NFR-010, NFR-011, NFR-012, NFR-013, NFR-014, NFR-015, NFR-016, NFR-017, NFR-018, NFR-019, NFR-020, NFR-021, NFR-022, NFR-023, NFR-024, NFR-026, NFR-025, NFR-027, NFR-028, NFR-029, NFR-030, NFR-031, NFR-032, NFR-033, NFR-034, NFR-035, NFR-036, NFR-037, NFR-041, NFR-042, NFR-043, NFR-045, SUP-SCALE-001, SUP-TEST-001, SUP-METHOD-001, SUP-ARTIFACT-001
