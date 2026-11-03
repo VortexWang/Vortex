@@ -1,0 +1,537 @@
+{
+  "schema_version": 1,
+  "status": "partial-approved-blocked",
+  "source_baseline": "V1.11",
+  "candidate_manifest_sha256": "3444057c66ea80de0eb94517c51119f737707237b10b1bbd1d586513f5164060",
+  "approved_at": "2026-11-03T04:10:44Z",
+  "user_decision": "approve-candidates",
+  "approval_note": "User approved the exact candidate snapshot digest. Open gaps remain explicitly blocked and are not promoted to approved lock entries.",
+  "license_policy": "docs/governance/license-policy.yaml",
+  "license_policy_sha256": "334582883d6759177ff484a21177a91421ae627e157a58fb1614ead7ecd5fa58",
+  "reproducibility": {
+    "go": "Use exact module versions and sums from go.sum; run GOTOOLCHAIN=local go mod verify and go version -m.",
+    "frontend": "Use pnpm 12.16.1 with the reviewed pnpm lock resolution; generate project lock after approval and run pnpm install --frozen-lockfile.",
+    "images": "Use immutable multi-architecture image digests and generate per-platform Syft SBOMs.",
+    "ci": "Pin every GitHub Action to the recorded full commit SHA.",
+    "scanners": "Run Syft v1.56.0 and govulncheck v1.9.0; unresolved license findings fail release."
+  },
+  "locked_candidates": [
+    {
+      "name": "Go",
+      "version": "1.27.3",
+      "class": "runtime/build",
+      "source": "https://go.dev/dl/?mode=json&include=all",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://go.dev/LICENSE",
+      "integrity": "sha256:65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+      "integrity_by_platform": {
+        "linux-amd64": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+        "linux-arm64": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49"
+      },
+      "status": "locked",
+      "user_selection": "Go 1.27 series confirmed; 1.27.3 is the latest stable patch listed by the official Go release index on 2026-11-03. This does not approve the full candidate manifest or lock the toolchain."
+    },
+    {
+      "name": "Gin",
+      "version": "v1.12.0",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/github.com/gin-gonic/gin@v1.12.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/gin-gonic/gin/blob/v1.12.0/LICENSE",
+      "integrity": "h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=",
+      "status": "locked"
+    },
+    {
+      "name": "pgx/v5",
+      "version": "v5.11.0",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/github.com/jackc/pgx/v5@v5.11.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/jackc/pgx/blob/v5.11.0/LICENSE",
+      "integrity": "h1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=",
+      "status": "locked",
+      "compatibility_review": "v5.11.0 is the latest published stable module selected by the temporary Go closure; still requires real PostgreSQL build and transaction tests"
+    },
+    {
+      "name": "sqlc",
+      "version": "v1.31.1",
+      "class": "generator",
+      "source": "https://github.com/sqlc-dev/sqlc/releases/tag/v1.31.1",
+      "license": "MIT",
+      "license_evidence": "https://github.com/sqlc-dev/sqlc/blob/v1.31.1/LICENSE",
+      "integrity": "sha256:21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e",
+      "integrity_by_platform": {
+        "darwin-arm64": "21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e",
+        "linux-amd64": "497ae4fcdfa64c5b0c311ffe4c2bd991e43991e82e5367792ed78bc2dca27354",
+        "linux-arm64": "b7cae247740d0c51a1e657479e5b2d21e6fef428f596682a01bc55bf4ab8a23d"
+      },
+      "status": "locked"
+    },
+    {
+      "name": "Goose",
+      "version": "v3.29.0",
+      "class": "migration-tool",
+      "source": "https://sum.golang.org/lookup/github.com/pressly/goose/v3@v3.29.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/pressly/goose/blob/v3.29.0/LICENSE",
+      "integrity": "h1:dtEnBCT7CqkHIUCdgrXsrmeisaN8gFkRU4Y5OEwif4o=",
+      "status": "locked"
+    },
+    {
+      "name": "modernc.org/sqlite",
+      "version": "v1.61.1",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/modernc.org/sqlite@v1.61.1",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://gitlab.com/cznic/sqlite/-/blob/v1.61.1/LICENSE",
+      "integrity": "h1:TBEE49wz7VlxS+qXRXMQiPUZYOXHJ4ku83daYv1fe04=",
+      "status": "locked"
+    },
+    {
+      "name": "grpc-go",
+      "version": "v1.85.0",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/google.golang.org/grpc@v1.85.0",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/grpc/grpc-go/blob/v1.85.0/LICENSE",
+      "integrity": "h1:BPBCfuVRQ1qvBhKDOq9uvQllMvO59rKsYhXpp7Dd8vw=",
+      "status": "locked"
+    },
+    {
+      "name": "google.golang.org/protobuf",
+      "version": "v1.36.12",
+      "class": "direct-go/generator-runtime",
+      "source": "https://sum.golang.org/lookup/google.golang.org/protobuf@v1.36.12",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://github.com/protocolbuffers/protobuf-go/blob/v1.36.12/LICENSE",
+      "integrity": "h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=",
+      "status": "locked"
+    },
+    {
+      "name": "protoc",
+      "version": "36.2",
+      "class": "generator",
+      "source": "https://github.com/protocolbuffers/protobuf/releases/tag/v36.2",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://github.com/protocolbuffers/protobuf/blob/v36.2/LICENSE",
+      "integrity": "sha256:9cd98a532c5c5e0c4161314de0225de27e4c8a323917b6ea7b1b714d3ae23466",
+      "integrity_by_platform": {
+        "darwin-arm64": "9cd98a532c5c5e0c4161314de0225de27e4c8a323917b6ea7b1b714d3ae23466",
+        "linux-amd64": "121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278",
+        "linux-arm64": "8b8f18bd2b30346efbc698dd5a73dd7c805f3ef8380f6dfc95c768f3f1852f6a"
+      },
+      "status": "locked"
+    },
+    {
+      "name": "protoc-gen-go-grpc",
+      "version": "v1.6.2",
+      "class": "generator",
+      "source": "https://github.com/grpc/grpc-go/releases/tag/cmd/protoc-gen-go-grpc/v1.6.2",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/grpc/grpc-go/blob/cmd/protoc-gen-go-grpc/v1.6.2/LICENSE",
+      "integrity": "h1:rgSNvqscFZ1JgV/4wH5GOsZFSFkR2Eua9As3KIr2LlM=",
+      "status": "locked"
+    },
+    {
+      "name": "Node.js",
+      "version": "26.13.0",
+      "class": "build/test-runtime",
+      "source": "https://nodejs.org/dist/index.json",
+      "license": "MIT",
+      "license_evidence": "https://github.com/nodejs/node/blob/v26.13.0/LICENSE",
+      "integrity": "sha256:d28a96af6c38596f6d9d97c0ee531c13d238d757742387d1928de822d959e997",
+      "integrity_by_platform": {
+        "linux-amd64": "d28a96af6c38596f6d9d97c0ee531c13d238d757742387d1928de822d959e997",
+        "linux-arm64": "406fe3fbde1c054adff8b297c16fdb5af6659db327c1ac8acd46b56ef1af9a92"
+      },
+      "status": "locked"
+    },
+    {
+      "name": "React",
+      "version": "19.3.1",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/react/19.3.1",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/react/19.3.1",
+      "integrity": "sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==",
+      "status": "locked"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.3.1",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/react-dom/19.3.1",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/react-dom/19.3.1",
+      "integrity": "sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==",
+      "status": "locked"
+    },
+    {
+      "name": "TypeScript",
+      "version": "7.0.2",
+      "class": "direct-npm/generator",
+      "source": "https://registry.npmjs.org/typescript/7.0.2",
+      "license": "Apache-2.0",
+      "license_evidence": "https://registry.npmjs.org/typescript/7.0.2",
+      "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+      "status": "locked",
+      "compatibility_review": "candidate checked against Vite 7.3.7 and Vitest 5.1.0 metadata; project typecheck remains a lock-time check"
+    },
+    {
+      "name": "Vite",
+      "version": "7.3.7",
+      "class": "direct-npm/build",
+      "source": "https://registry.npmjs.org/vite/7.3.7",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/vite/7.3.7",
+      "integrity": "sha512-AHEzTORMbi7/7aXp7w7KZ5+DCUdSeLsJz0grY8xHpc9DHdYb0vQu6DqJfm2tOw3gDExNgPgnJTXxM6syYFHaCA==",
+      "status": "locked",
+      "compatibility_review": "Vite 8 candidate rejected because its direct lightningcss dependency is MPL-2.0; Vite 7 still requires transitive license closure review"
+    },
+    {
+      "name": "TypeScript type packages",
+      "version": "@types/node 26.6.6; @types/react 19.3.0; @types/react-dom 19.3.0",
+      "class": "direct-npm/types",
+      "source": "https://registry.npmjs.org/",
+      "license": "MIT",
+      "license_evidence": "registry package metadata recorded in dependency-closure-review.json",
+      "integrity": "sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==",
+      "integrity_by_package": {
+        "@types/react": "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==",
+        "@types/react-dom": "sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q=="
+      },
+      "status": "locked"
+    },
+    {
+      "name": "@testing-library/user-event",
+      "version": "14.6.1",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/@testing-library/user-event/14.6.1",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/@testing-library/user-event/14.6.1",
+      "integrity": "sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==",
+      "status": "locked"
+    },
+    {
+      "name": "jsdom",
+      "version": "30.1.3",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/jsdom/30.1.3",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/jsdom/30.1.3",
+      "integrity": "sha512-hQMUPvRgN7KxsfIytDQji7bimuJeRQa6Qo5+iuiZQk5CafeRxLIA10/cG5YCBFNpD9RO3oqIiN4CO1Y44kxqXg==",
+      "status": "locked",
+      "compatibility_review": "requires Node ^22.22.2 || ^24.15.0 || >=26.0.0"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.64.1",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/@playwright/test/1.64.1",
+      "license": "Apache-2.0",
+      "license_evidence": "https://registry.npmjs.org/@playwright/test/1.64.1",
+      "integrity": "sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==",
+      "status": "locked"
+    },
+    {
+      "name": "antd",
+      "version": "6.6.8",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/antd/6.6.8",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/antd/6.6.8",
+      "integrity": "sha512-e+hDj/0myqbLBn8UGS0dYhPROAENruNscWe4gzyTnwx7yTip7D72wJUNxtsTplPXwRM1Mo4tXNSgaSb3UmV3RQ==",
+      "status": "locked"
+    },
+    {
+      "name": "@ant-design/icons",
+      "version": "6.3.4",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/@ant-design/icons/6.3.4",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/@ant-design/icons/6.3.4",
+      "integrity": "sha512-kDoUlppczVyCUTFthF6cHmPzMBYqNZQhu9j6EyIX/YIdM9j9CZNZoJUjzVw7/1v1VO8WwVMmPp15r/uwIAS0AQ==",
+      "status": "locked"
+    },
+    {
+      "name": "react-router",
+      "version": "8.5.1",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/react-router/8.5.1",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/react-router/8.5.1",
+      "integrity": "sha512-5u1eQ46QjuXjNfEnLwzrnou1Bm5dquO3xjVYkkMYCudtkicD2AQHtx+fvXzPATtPJx8TW6DR1x1TDRqsfHyZBw==",
+      "status": "locked"
+    },
+    {
+      "name": "@tanstack/react-query",
+      "version": "5.105.3",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/@tanstack/react-query/5.105.3",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/@tanstack/react-query/5.105.3",
+      "integrity": "sha512-dj5hGWZmwoc9NG4enoXuYbiYwb5FxgJYPVv06eUgicMTfEMTRXn08Xv9D/r1V8TfjAv+BpxdvZFzJ1h3hSWZcQ==",
+      "status": "locked"
+    },
+    {
+      "name": "Zustand",
+      "version": "5.0.16",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/zustand/5.0.16",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/zustand/5.0.16",
+      "integrity": "sha512-Uv7e327ihlCfayfja3hDc0M64Upev1LWBKpRobdK4NyovDDPeeX4imWXc/wzC1yc6fkYPoAY/ncKVPAs2jrtQw==",
+      "status": "locked"
+    },
+    {
+      "name": "Zod",
+      "version": "4.6.7",
+      "class": "direct-npm",
+      "source": "https://registry.npmjs.org/zod/4.6.7",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/zod/4.6.7",
+      "integrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==",
+      "status": "locked"
+    },
+    {
+      "name": "pnpm",
+      "version": "12.16.1",
+      "class": "package-manager",
+      "source": "https://registry.npmjs.org/pnpm/12.16.1",
+      "license": "MIT",
+      "license_evidence": "https://github.com/pnpm/pnpm/blob/v12.16.1/LICENSE",
+      "integrity": "sha512-CR0d7nknV1Zhsl2rPCrjHK/BxU1rce1qZgDPDByxBDSkR+rhQBXxsj4ua+3u1535SpMuIWTSgyKA3OP7MvZW0Q==",
+      "integrity_by_platform": {
+        "darwin-arm64": "6661212a6ec725634b0d3268e5bc9408e3152506dab5997891e38fa1ef22bf9c",
+        "linux-arm64": "f5847699e5d528f8f8e9bcfb385e58cb9fba7482af1b1aa7b70737be42277f81",
+        "linux-amd64": "565ff81174a14f6f7bd5d84c1b17e51031a80230d370a1fe24be5d16bd02a825"
+      },
+      "status": "locked",
+      "compatibility_review": "temporary pnpm 12.16.1 lock generation succeeded with 255 package entries and SRI values"
+    },
+    {
+      "name": "Prometheus Go client",
+      "version": "v1.25.0",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/github.com/prometheus/client_golang@v1.25.0",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/prometheus/client_golang/blob/v1.25.0/LICENSE",
+      "integrity": "h1:cDtW1TcFsMi1RJc8khwCKB4VhzwV04aKqbYtNOXuiK0=",
+      "status": "locked"
+    },
+    {
+      "name": "OpenTelemetry Go",
+      "version": "v1.47.0",
+      "class": "direct-go",
+      "source": "https://sum.golang.org/lookup/go.opentelemetry.io/otel@v1.47.0",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/open-telemetry/opentelemetry-go/blob/v1.47.0/LICENSE",
+      "integrity": "h1:j7ALJ/zgkS7Z6aeJW09p8VC9804bC+PpeTfCD4XPnOM=",
+      "status": "locked"
+    },
+    {
+      "name": "golang.org/x/sys",
+      "version": "v0.49.0",
+      "class": "transitive-go",
+      "source": "https://sum.golang.org/lookup/golang.org/x/sys@v0.49.0",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://go.googlesource.com/sys/+/refs/tags/v0.49.0/LICENSE",
+      "integrity": "h1:XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=",
+      "status": "locked"
+    },
+    {
+      "name": "goleak",
+      "version": "v1.3.0",
+      "class": "test-go",
+      "source": "https://sum.golang.org/lookup/go.uber.org/goleak@v1.3.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/uber-go/goleak/blob/v1.3.0/LICENSE",
+      "integrity": "h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=",
+      "status": "locked"
+    },
+    {
+      "name": "Vitest",
+      "version": "5.1.0",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/vitest/5.1.0",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/vitest/5.1.0",
+      "integrity": "sha512-MzmNFnrwa8v8lF1bLxw3UJ4EREwVOVb75VqJZmUDRjJ6EluK/x9th7qTbaeDk41WxE1GxWqmTXcdsfobfH5sOA==",
+      "status": "locked"
+    },
+    {
+      "name": "React Testing Library",
+      "version": "16.3.3",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/@testing-library/react/16.3.3",
+      "license": "MIT",
+      "license_evidence": "https://registry.npmjs.org/@testing-library/react/16.3.3",
+      "integrity": "sha512-Uo193NgQbPMz6lrrhtRQQFcMC6Re/ELLFbbuVL30WDlZxlpZf9/lMHTAVxPRLw1q1iu9OJmR1c2BLiENRstdBg==",
+      "status": "locked"
+    },
+    {
+      "name": "Playwright",
+      "version": "1.64.1",
+      "class": "test-npm",
+      "source": "https://registry.npmjs.org/playwright/1.64.1",
+      "license": "Apache-2.0",
+      "license_evidence": "https://registry.npmjs.org/playwright/1.64.1",
+      "integrity": "sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==",
+      "status": "locked"
+    },
+    {
+      "name": "Vegeta",
+      "version": "v12.13.0",
+      "class": "load-test-go",
+      "source": "https://sum.golang.org/lookup/github.com/tsenart/vegeta/v12@v12.13.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/tsenart/vegeta/blob/v12.13.0/LICENSE",
+      "integrity": "h1:J/UiNS3f69MkL0tsRLVUUV8uXXQZxdRUchtS+GYiSFc=",
+      "status": "locked"
+    },
+    {
+      "name": "Go deterministic model checker",
+      "version": "1.27.3",
+      "class": "model-checker",
+      "source": "https://go.dev/dl/?mode=json&include=all",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://go.dev/LICENSE",
+      "integrity": "sha256:65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+      "status": "locked"
+    },
+    {
+      "name": "actions/checkout",
+      "version": "v7.0.1",
+      "class": "CI-action",
+      "source": "https://github.com/actions/checkout/releases/tag/v7.0.1",
+      "license": "MIT",
+      "license_evidence": "https://github.com/actions/checkout/blob/v7.0.1/LICENSE",
+      "integrity": "git:3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "status": "locked"
+    },
+    {
+      "name": "actions/upload-artifact",
+      "version": "v7.0.2",
+      "class": "CI-action",
+      "source": "https://github.com/actions/upload-artifact/releases/tag/v7.0.2",
+      "license": "MIT",
+      "license_evidence": "https://github.com/actions/upload-artifact/blob/v7.0.2/LICENSE",
+      "integrity": "git:cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+      "status": "locked"
+    },
+    {
+      "name": "actions/setup-go",
+      "version": "v7.0.0",
+      "class": "CI-action",
+      "source": "https://github.com/actions/setup-go/releases/tag/v7.0.0",
+      "license": "MIT",
+      "license_evidence": "https://github.com/actions/setup-go/blob/v7.0.0/LICENSE",
+      "integrity": "git:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+      "status": "locked"
+    },
+    {
+      "name": "iperf3",
+      "version": "3.22",
+      "class": "network-test-tool",
+      "source": "https://github.com/esnet/iperf/releases/tag/3.22",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://github.com/esnet/iperf/blob/3.22/LICENSE",
+      "integrity": "sha256:1c0d0fb02c52626111d6e132db80edfbf27bbaff8bd9245df2a371dcb0b35a92",
+      "status": "locked"
+    },
+    {
+      "name": "github.com/vishvananda/netlink",
+      "version": "v1.3.1",
+      "class": "network-test-library",
+      "source": "https://sum.golang.org/lookup/github.com/vishvananda/netlink@v1.3.1",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/vishvananda/netlink/blob/v1.3.1/LICENSE",
+      "integrity": "h1:3AEMt62VKqz90r0tmNhog0r/PpWKmrEShJU0wJW6bV0=",
+      "status": "locked",
+      "replacement_for": "iproute2/tc GPL executable; qdisc configuration will use the reviewed Go netlink library"
+    },
+    {
+      "name": "govulncheck",
+      "version": "v1.9.0",
+      "class": "supply-chain-tool",
+      "source": "https://go.googlesource.com/vuln/+/refs/tags/v1.9.0",
+      "license": "BSD-3-Clause",
+      "license_evidence": "https://go.googlesource.com/vuln/+/refs/tags/v1.9.0/LICENSE",
+      "integrity": "h1:12VaqnI9kJfqwRoPptxoqsUhQtdfrSbdksT7X/KY/sc=",
+      "status": "locked"
+    },
+    {
+      "name": "Syft",
+      "version": "v1.56.0",
+      "class": "supply-chain-tool",
+      "source": "https://github.com/anchore/syft/releases/tag/v1.56.0",
+      "license": "Apache-2.0",
+      "license_evidence": "https://github.com/anchore/syft/blob/v1.56.0/LICENSE",
+      "integrity": "sha256:1c2493cfcf52d3367d6cb25780d9190c111c2219c34c820574c43e8bae15c528",
+      "integrity_by_platform": {
+        "linux-amd64": "1c2493cfcf52d3367d6cb25780d9190c111c2219c34c820574c43e8bae15c528",
+        "linux-arm64": "ace61b9397ae28189c674ae332d67a8074dafd71e87724dfb8b22412d8253bb5"
+      },
+      "status": "locked"
+    },
+    {
+      "name": "Go and npm dependency closure review",
+      "version": "schema 1 / 2026-11-03",
+      "class": "evidence-report",
+      "source": "docs/governance/dependency-closure-review.json",
+      "license": "Public-Domain",
+      "license_evidence": "repository-owned evidence artifact",
+      "integrity": "sha256:031be7be8b5d22b4dff0a03be2e3b0a09703820e0df73d3c32286440b34dfd4a",
+      "status": "locked",
+      "compatibility_review": "202 Go module records and 256 npm package records; report is review evidence, not an approved lockfile"
+    }
+  ],
+  "not_locked": [
+    {
+      "name": "PostgreSQL",
+      "version": "18.6-bookworm",
+      "reason": "image digest verified; Debian base package license/SBOM closure remains pending",
+      "status": "not-locked"
+    },
+    {
+      "name": "Valkey",
+      "version": "9.1.3",
+      "reason": "image digest verified; image OS/package license closure remains pending",
+      "status": "not-locked"
+    },
+    {
+      "name": "SQLite embedded",
+      "version": "3.54.1",
+      "reason": "Candidate remains unverified or has an open license/integrity/image closure gap.",
+      "status": "not-locked"
+    },
+    {
+      "name": "@vitejs/plugin-react-swc",
+      "version": "4.3.3",
+      "reason": "selected as the Vite 7 React adapter; optional @swc/core platform packages report Apache-2.0 AND MIT and require explicit policy classification",
+      "status": "not-locked"
+    },
+    {
+      "name": "Docker CLI / Compose / Buildx host tooling",
+      "version": "Docker 29.8.2; Compose 5.5.0; Buildx v0.37.2",
+      "reason": "Candidate remains unverified or has an open license/integrity/image closure gap.",
+      "status": "not-locked"
+    },
+    {
+      "name": "Static Phase 1 topology fixture image",
+      "version": "source-built scratch image",
+      "reason": "Candidate remains unverified or has an open license/integrity/image closure gap.",
+      "status": "not-locked"
+    },
+    {
+      "name": "Network test utilities",
+      "version": "repository Go standard-library fixture",
+      "reason": "Candidate remains unverified or has an open license/integrity/image closure gap.",
+      "status": "not-locked"
+    }
+  ],
+  "blocking_conditions": [
+    "NFR-038 historical evidence remains blocked.",
+    "Open dependency license and image OS/package closure gaps remain blocked; this partial lock cannot authorize release."
+  ]
+}
