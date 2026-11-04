@@ -17,3 +17,12 @@ Earlier run `41744803772` on `86f06b3` failed in the unauthorized OPEN
 integration test because a closed stream could mask a queued OPEN_ERR. Commit
 `b4b484e` fixed that receive ordering race.
 
+
+## Current mixed-runtime and Compose evidence
+
+- Application SHA: `b71a9d0c9997b2237e151d3b4a08176b3db49cd1`, clean on both backends.
+- [Run 41768502985](https://github.com/VortexWang/Vortex/actions/runs/41768502985): **success**, including full shared check, native benchmark/mixed load, Compose mixed load and `phase4-evidence` upload.
+- Native mixed TCP: 561.01 Mbps; contention retention 57.10%; UDP loss 2,192 / 52,038 (4.212%). Compose mixed TCP: 343.70 Mbps; retention 43.59%; UDP loss 10,430 / 52,049 (20.039%). All drops classify; accounting reconciles on both backends.
+- Green workflow means diagnostic correctness and complete evidence; performance NFRs remain `not-qualified` in both reports.
+- Earlier run 41766416814 passed native checks but failed Compose reconciliation during final worker shutdown. It is not accepted as current pass evidence. Later worker-drain, kernel-loss classification and readiness/cleanup fixes are included in the tested SHA above.
+- All host comparisons, bounds and remaining work are in [04-06-PROGRESS.md](04-06-PROGRESS.md).

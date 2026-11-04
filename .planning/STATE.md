@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 mixed runtime implemented; clean-SHA Linux and Actions validation pending
-last_updated: "2026-11-04T00:00:00.000Z"
+stopped_at: Plan 04-06 runtime and same-SHA evidence complete; measured performance and baseline gaps remain
+last_updated: "2026-11-04T03:47:30.284716+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Implemented mixed runtime workload and flow-control fixes; local race and diagnostic accounting pass
-state_head: b4b484e
+last_activity_desc: Clean b71a9d0 passed local Docker, Ubuntu and Actions mixed runtime/accounting; NFR and D-04 remain unqualified
+state_head: b71a9d0
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — Native topology/Actions smoke passed; identified and planned runtime UDP/mixed-load gap
+Last activity: 2026-11-04 — b71a9d0 passed local Compose, Ubuntu native and Actions native/Compose; measured performance gaps remain
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -64,16 +64,16 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 - The roadmap follows engineering prerequisites, then M0 through M6 in order; dependencies are reviewed just before the phase that introduces them.
 - NFR-038 historical recovery is out of scope after project restart. The eleven original register rows remain `missing`; this is not a claim of recovery or verification.
 - PostgreSQL and Valkey are external data services. Their image package licenses are excluded from the product dependency gate; versions, provenance, and image digests remain tracked.
-- Local OrbStack Docker daemon is currently unavailable; Compose execution remains pending. `gh auth status` confirms VortexWang is the active GitHub account with repo/workflow scopes. Prior same-commit Actions evidence exists for Phase 1; current governance changes still need CI evidence.
+- OrbStack is running; local Compose and Phase 4 Docker protocol checks passed on b71a9d0. `gh auth status` confirms VortexWang is the active GitHub account with repo/workflow scopes. Prior same-commit Actions evidence exists for Phase 1; current governance changes still need CI evidence.
 
 ### Pending Todos
 
-- Continue Plan 04-06: validate current implementation on clean SHA in Ubuntu and Actions; complete independent TLS/latency baseline and D-04/NFR review.
+- Continue Plan 04-06 performance diagnosis, independent TLS/latency baselines, runtime fault/per-flow coverage and D-04/NFR review; see 04-06-PROGRESS.md.
 
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Plan 04-06 closes the missing runtime UDP path, sustained mixed TCP/UDP qualification, same-path ratio and accounting reconciliation. Native topology smoke and Actions pass are prerequisite evidence only.
+- Plan 04-06 now has short mixed-runtime and accounting evidence on the same clean SHA across hosts. Ubuntu mixed TCP 366.22 Mbps and UDP loss 14.818% remain below target; independent TLS/latency and runtime fault/per-flow coverage remain open. No NFR or Phase 4 completion is claimed.
 
 ## Deferred Items
 
@@ -91,6 +91,6 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-03T10:56:12.944Z
-Stopped at: Plan 04-06 executing; mixed runtime implemented, cross-host evidence pending
+Last session: 2026-11-04T03:47:30.284716+00:00
+Stopped at: Plan 04-06 executing; cross-host runtime evidence passed, performance/baseline and fault coverage remain
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md

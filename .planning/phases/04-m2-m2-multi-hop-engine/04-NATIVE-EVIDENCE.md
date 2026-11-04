@@ -46,3 +46,7 @@
 - Fix: `MuxStream.Receive` now drains an already queued frame when the stream is closed. Local verification passed the focused test 100 times under race detection and `cd engine && go test -race ./...`.
 - A new Actions run on the fix commit is required before accepting CI evidence.
 
+
+## Current runtime mixed-load evidence (supersedes smoke-only scope)
+
+Clean application SHA `b71a9d0c9997b2237e151d3b4a08176b3db49cd1` passed the shared five-second runtime/accounting workload on Ubuntu 24.04.5 amd64 (4 vCPU / 7894 MiB). Full Engine race and artifact checksum verification also passed. Measured mixed TCP is 366.22 Mbps, TCP-only retention 58.37%, UDP loss 7,711 / 52,037 (14.818%); all losses classify as 7,202 receive-queue and 509 source-queue drops. Both accounting directions commit exactly 680,604,036 bytes. This proves diagnostic execution/reconciliation, not NFR qualification. Current local Compose and Actions evidence and all open gates are consolidated in [04-06-PROGRESS.md](04-06-PROGRESS.md).
