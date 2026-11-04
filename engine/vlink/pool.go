@@ -259,9 +259,12 @@ func (p *LinkPool) Reconcile(demand int, healthy bool) {
 			}
 		}
 		sort.Slice(idle, func(i, j int) bool { return p.entries[idle[i]].lastUsed.Before(p.entries[idle[j]].lastUsed) })
-		removeCount := len(p.entries) - target
-		for i := 0; i < removeCount && i < len(idle); i++ {
-			index := idle[i] - i
+		removeCount := min(len(p.entries)-target, len(idle))
+		// Choose the oldest idle entries, then delete in descending storage
+		// order so removals cannot shift the remaining selected indices.
+		idle = idle[:removeCount]
+		sort.Sort(sort.Reverse(sort.IntSlice(idle)))
+		for _, index := range idle {
 			entry := p.entries[index]
 			p.entries = append(p.entries[:index], p.entries[index+1:]...)
 			_ = entry.link.Close()

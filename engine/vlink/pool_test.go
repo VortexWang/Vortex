@@ -167,3 +167,28 @@ func (l *fakePooledLink) Close() error  { l.closed.Store(true); return nil }
 type fakeRegistryLink struct{ closed atomic.Bool }
 
 func (l *fakeRegistryLink) Close(error) { l.closed.Store(true) }
+
+func TestReconcileEvictsOldestIdleLinksAfterReorderedUse(t *testing.T) {
+	links := []*fakePooledLink{{}, {}, {}, {}}
+	now := time.Unix(100, 0)
+	pool, err := NewLinkPool(PoolConfig{MinLinks: 1, MaxLinks: 4, HardCap: 4}, func(context.Context) (PooledLink, error) { return nil, nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	// Oldest-first order differs from storage order. The final entry is active
+	// and must survive even though its last-use timestamp is oldest.
+	for i, age := range []int{2, 3, 1, 0} {
+		pool.entries = append(pool.entries, &poolEntry{link: links[i], lastUsed: now.Add(time.Duration(age) * time.Second)})
+	}
+	pool.entries[3].active = 1
+	pool.Reconcile(0, true)
+	if len(pool.entries) != 1 || pool.entries[0].link != links[3] || links[3].closed.Load() {
+		t.Fatal("reconcile removed active lease or retained idle links")
+	}
+	for _, l := range links[:3] {
+		if !l.closed.Load() {
+			t.Fatal("idle link was not closed")
+		}
+	}
+}
