@@ -252,7 +252,11 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 	}()
 	go func() {
 		defer wg.Done()
-		buffer := make([]byte, vlink.MaxPayloadSize)
+		bufferSize := 4 * vlink.MaxTLSRecordPayload
+		if stream.Network == vlink.StreamUDP {
+			bufferSize = vlink.MaxPayloadSize
+		}
+		buffer := make([]byte, bufferSize)
 		for {
 			n, err := conn.Read(buffer)
 			if n > 0 {

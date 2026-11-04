@@ -15,8 +15,16 @@ type frameWrite struct {
 // write keeps DATA synchronous at the accounting execution boundary. Both
 // application queues are bounded; UDP admission remains nonblocking.
 func (m *MuxLink) write(ctx context.Context, frame Frame) error {
-	if err := ctx.Err(); err != nil {
+	request, err := m.enqueueWrite(ctx, frame)
+	if err != nil {
 		return err
+	}
+	return m.waitWrite(request)
+}
+
+func (m *MuxLink) enqueueWrite(ctx context.Context, frame Frame) (frameWrite, error) {
+	if err := ctx.Err(); err != nil {
+		return frameWrite{}, err
 	}
 	request := frameWrite{ctx: ctx, frame: frame, done: make(chan error, 1)}
 	queue := m.controlWrites
@@ -26,13 +34,14 @@ func (m *MuxLink) write(ctx context.Context, frame Frame) error {
 	select {
 	case queue <- request:
 	case <-ctx.Done():
-		return ctx.Err()
+		return frameWrite{}, ctx.Err()
 	case <-m.done:
-		return m.Err()
+		return frameWrite{}, m.Err()
 	}
 	m.wakeWriter()
-	// After admission the writer owns the request until it resolves. A partial
-	// transport failure is propagated to the caller's unknown-outcome handling.
+	return request, nil
+}
+func (m *MuxLink) waitWrite(request frameWrite) error {
 	select {
 	case err := <-request.done:
 		return err
@@ -102,7 +111,7 @@ func (m *MuxLink) dgramLoop() {
 // affected reservation as unknown through the caller's error path.
 func (m *MuxLink) sendDataBatch(first frameWrite, encoded *bytes.Buffer) bool {
 	encoded.Reset()
-	requests := [32]frameWrite{first}
+	requests := [8]frameWrite{first}
 	count := 1
 	for count < len(requests) {
 		select {
@@ -110,11 +119,20 @@ func (m *MuxLink) sendDataBatch(first frameWrite, encoded *bytes.Buffer) bool {
 			requests[count] = request
 			count++
 		default:
-			count = count
 			goto ready
 		}
 	}
 ready:
+	var deadline time.Time
+	for i := 0; i < count; i++ {
+		if d, ok := requests[i].ctx.Deadline(); ok && (deadline.IsZero() || d.Before(deadline)) {
+			deadline = d
+		}
+	}
+	if !deadline.IsZero() {
+		_ = m.conn.SetWriteDeadline(deadline)
+		defer m.conn.SetWriteDeadline(time.Time{})
+	}
 	for i := 0; i < count; i++ {
 		if err := requests[i].ctx.Err(); err != nil {
 			for j := 0; j < count; j++ {
@@ -122,12 +140,22 @@ ready:
 			}
 			return true
 		}
-		if err := WriteFrame(encoded, requests[i].frame); err != nil {
-			for j := 0; j < count; j++ {
-				requests[j].done <- err
+		payload := requests[i].frame.Payload
+		for len(payload) > 0 {
+			size := len(payload)
+			if size > MaxTLSRecordPayload {
+				size = MaxTLSRecordPayload
 			}
-			m.Close(err)
-			return false
+			frame := requests[i].frame
+			frame.Payload = payload[:size]
+			if err := WriteFrame(encoded, frame); err != nil {
+				for j := 0; j < count; j++ {
+					requests[j].done <- err
+				}
+				m.Close(err)
+				return false
+			}
+			payload = payload[size:]
 		}
 	}
 	if err := writeFull(m.conn, encoded.Bytes()); err != nil {
@@ -140,7 +168,15 @@ ready:
 	for i := 0; i < count; i++ {
 		requests[i].done <- nil
 		if m.observer != nil {
-			m.observer.Frame(m.peerRole(), requests[i].frame.Type, 2, len(requests[i].frame.Payload))
+			size := len(requests[i].frame.Payload)
+			for size > 0 {
+				chunk := size
+				if chunk > MaxTLSRecordPayload {
+					chunk = MaxTLSRecordPayload
+				}
+				m.observer.Frame(m.peerRole(), FrameData, 2, chunk)
+				size -= chunk
+			}
 		}
 	}
 	return true

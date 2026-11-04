@@ -700,26 +700,44 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 		return ErrProtocol
 	}
 	for len(payload) > 0 {
-		size := len(payload)
-		if size > MaxTLSRecordPayload {
-			size = MaxTLSRecordPayload
+		groupSize := len(payload)
+		if groupSize > 4*MaxTLSRecordPayload {
+			groupSize = 4 * MaxTLSRecordPayload
 		}
-		waitStarted := time.Now()
-		if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
-			return err
+		// Own at most four frames per call iteration. Queue all independently
+		// windowed frames before waiting, allowing the writer to batch one stream.
+		owned := append([]byte(nil), payload[:groupSize]...)
+		var pending [4]frameWrite
+		count := 0
+		for len(owned) > 0 {
+			size := len(owned)
+			if size > MaxTLSRecordPayload {
+				size = MaxTLSRecordPayload
+			}
+			waitStarted := time.Now()
+			if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
+				s.link.Close(err)
+				return err
+			}
+			if s.link.observer != nil {
+				s.link.observer.WindowWait(time.Since(waitStarted))
+			}
+			request, err := s.link.enqueueWrite(ctx, Frame{Type: FrameData, StreamID: s.ID, Payload: owned[:size]})
+			if err != nil {
+				s.link.Close(err)
+				return err
+			}
+			pending[count] = request
+			count++
+			owned = owned[size:]
 		}
-		if s.link.observer != nil {
-			s.link.observer.WindowWait(time.Since(waitStarted))
+		for i := 0; i < count; i++ {
+			if err := s.link.waitWrite(pending[i]); err != nil {
+				s.link.Close(err)
+				return err
+			}
 		}
-		// The received frame owns this immutable byte slice until the queued
-		// writer resolves the request. writer.go encodes it once into its batch
-		// buffer, so an intermediate 16 KiB copy is unnecessary.
-		chunk := payload[:size]
-		if err := s.link.write(ctx, Frame{Type: FrameData, StreamID: s.ID, Payload: chunk}); err != nil {
-			s.link.Close(err)
-			return err
-		}
-		payload = payload[size:]
+		payload = payload[groupSize:]
 	}
 	return nil
 }
