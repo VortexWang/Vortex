@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 verification review after restart execution
-status: review
-stopped_at: Native topology qualification passed; mixed-load performance and Actions rerun remain
+current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
+status: executing
+stopped_at: Plan 04-06 gap closure planned after native topology and Actions smoke pass
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Native Ubuntu runtime qualification passed; Actions uncovered and local fix verified for queued OPEN_ERR receive race
-state_head: 86f06b3
+last_activity_desc: Native qualification and Actions pass; researched missing runtime UDP path and planned mixed-load gap closure
+state_head: b4b484e
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 22
+  total_plans: 23
   completed_plans: 22
   percent: 38
 ---
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 verification review after restart execution
-Total Plans in Phase: 5
-Status: Needs review
-Last activity: 2026-11-04 — Runtime-backed three-relay qualification gate passed
+Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
+Total Plans in Phase: 6
+Status: In progress
+Last activity: 2026-11-04 — Native topology/Actions smoke passed; identified and planned runtime UDP/mixed-load gap
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,12 +68,12 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Re-run Phase 4 research, discussion, planning, execution and verification with a startable relay runtime and three-relay topology as prerequisites.
+- Execute Plan 04-06 to add runtime UDP, mixed TCP/UDP qualification and accounting reconciliation.
 
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Remaining Phase 4 gates: sustained runtime-backed mixed TCP/UDP workload, same-path performance ratio, production accounting reconciliation, D-04 review, and passing Actions after the queued OPEN_ERR race fix.
+- Plan 04-06 closes the missing runtime UDP path, sustained mixed TCP/UDP qualification, same-path ratio and accounting reconciliation. Native topology smoke and Actions pass are prerequisite evidence only.
 
 ## Deferred Items
 
