@@ -7,6 +7,7 @@ qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 bin=${VORTEX_RELAY_BIN:-$root/artifacts/phase4/vortex-relay}
 target_pid=
 mkdir -p "$root/artifacts/phase4" "$qual"
+rm -f "$qual/topology-ready"
 
 if [ "$mode" = native ]; then
   if [ -z "${VORTEX_RELAY_BIN:-}" ]; then
@@ -65,9 +66,16 @@ if [ "$mode" = native ]; then
   sleep 1
 fi
 python3 - "$qual/target-start.json" <<'PY'
-import json, sys, urllib.request
-with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
-    stats = json.load(response)
+import json, sys, time, urllib.request
+for attempt in range(60):
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
+            stats = json.load(response)
+        break
+    except (OSError, ValueError):
+        if attempt == 59:
+            raise
+        time.sleep(0.5)
 with open(sys.argv[1], "w", encoding="utf-8") as output:
     json.dump(stats, output, sort_keys=True)
     output.write("\n")
