@@ -43,7 +43,7 @@ def fresh(data):
  with socket.create_connection(('127.0.0.1',18080),timeout=3) as s:echo(s,data)
 def probe():
  try:fresh(b'readiness');return True
- except OSError:return False
+ except (OSError, RuntimeError):return False
 
 def udp_echo(s,data):
  s.sendto(data,('127.0.0.1',18082))
