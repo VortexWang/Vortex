@@ -40,7 +40,7 @@ json() {
   if [ "$role" = source ]; then udp_service=",\"udp_service_listen\":\"$host:18082\""; fi
   : > "$out/events-$name.jsonl"
   cat > "config/$name.json" <<EOF
-{"version":1,"node_id":"$node_id","role":"$role","certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service"$udp_service,"rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( [ "$role" = destination ] && echo true || echo false )$transport}
+{"version":1,"node_id":"$node_id","role":"$role","qualification_only":true,"certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service"$udp_service,"rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( [ "$role" = destination ] && echo true || echo false )$transport}
 EOF
 }
 

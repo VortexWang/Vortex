@@ -33,32 +33,33 @@ type Route struct {
 }
 
 type Config struct {
-	SourceCreditBook *runtimeaccounting.BookConfig   `json:"source_credit_book,omitempty"`
-	SourceCredit     *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
-	Routes           map[string]Route                `json:"routes,omitempty"`
-	ActiveRoute      string                          `json:"active_route,omitempty"`
-	Version          uint64                          `json:"version"`
-	NodeID           string                          `json:"node_id"`
-	Role             Role                            `json:"role"`
-	Certificate      string                          `json:"certificate"`
-	PrivateKey       string                          `json:"private_key"`
-	TrustBundle      string                          `json:"trust_bundle"`
-	Listen           string                          `json:"listen"`
-	Peer             string                          `json:"peer,omitempty"`
-	PeerNodeID       string                          `json:"peer_node_id,omitempty"`
-	NextHopNodeID    string                          `json:"next_hop_node_id,omitempty"`
-	ServiceListen    string                          `json:"service_listen,omitempty"`
-	UDPServiceListen string                          `json:"udp_service_listen,omitempty"`
-	ExecutionPoint   bool                            `json:"execution_point,omitempty"`
-	RuleID           string                          `json:"rule_id"`
-	RuleRevision     uint64                          `json:"rule_revision"`
-	PathGeneration   uint64                          `json:"path_generation"`
-	HopIndex         uint16                          `json:"hop_index"`
-	Target           string                          `json:"target,omitempty"`
-	EvidenceFile     string                          `json:"evidence_file,omitempty"`
-	TransportMode    vlink.TransportMode             `json:"transport_mode,omitempty"`
-	PoolMinLinks     int                             `json:"pool_min_links,omitempty"`
-	PoolMaxLinks     int                             `json:"pool_max_links,omitempty"`
+	SourceCreditBook  *runtimeaccounting.BookConfig   `json:"source_credit_book,omitempty"`
+	SourceCredit      *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
+	QualificationOnly bool                            `json:"qualification_only,omitempty"`
+	Routes            map[string]Route                `json:"routes,omitempty"`
+	ActiveRoute       string                          `json:"active_route,omitempty"`
+	Version           uint64                          `json:"version"`
+	NodeID            string                          `json:"node_id"`
+	Role              Role                            `json:"role"`
+	Certificate       string                          `json:"certificate"`
+	PrivateKey        string                          `json:"private_key"`
+	TrustBundle       string                          `json:"trust_bundle"`
+	Listen            string                          `json:"listen"`
+	Peer              string                          `json:"peer,omitempty"`
+	PeerNodeID        string                          `json:"peer_node_id,omitempty"`
+	NextHopNodeID     string                          `json:"next_hop_node_id,omitempty"`
+	ServiceListen     string                          `json:"service_listen,omitempty"`
+	UDPServiceListen  string                          `json:"udp_service_listen,omitempty"`
+	ExecutionPoint    bool                            `json:"execution_point,omitempty"`
+	RuleID            string                          `json:"rule_id"`
+	RuleRevision      uint64                          `json:"rule_revision"`
+	PathGeneration    uint64                          `json:"path_generation"`
+	HopIndex          uint16                          `json:"hop_index"`
+	Target            string                          `json:"target,omitempty"`
+	EvidenceFile      string                          `json:"evidence_file,omitempty"`
+	TransportMode     vlink.TransportMode             `json:"transport_mode,omitempty"`
+	PoolMinLinks      int                             `json:"pool_min_links,omitempty"`
+	PoolMaxLinks      int                             `json:"pool_max_links,omitempty"`
 }
 
 func LoadFile(path string) (Config, error) {
@@ -79,9 +80,18 @@ func LoadFile(path string) (Config, error) {
 }
 
 func (c Config) Validate() error {
+	if c.Role == RoleSource && c.SourceCreditBook == nil && c.SourceCredit == nil && !c.QualificationOnly {
+		return errors.New("config: source role requires a funded source credit gate")
+	}
+	if c.QualificationOnly && c.EvidenceFile == "" {
+		return errors.New("config: qualification_only requires evidence_file")
+	}
 	if c.SourceCreditBook != nil {
 		if err := c.SourceCreditBook.Validate(); err != nil {
 			return err
+		}
+		if c.SourceCreditBook.Snapshots[c.SourceCreditBook.Active].Credit.Budget == 0 {
+			return errors.New("config: active source credit snapshot must have a funded budget")
 		}
 		if c.SourceCredit != nil || c.Role != RoleSource || !c.ExecutionPoint || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" {
 			return errors.New("config: credit book requires exclusive static source authority")
@@ -96,6 +106,9 @@ func (c Config) Validate() error {
 	if c.SourceCredit != nil {
 		if err := c.SourceCredit.Validate(); err != nil {
 			return err
+		}
+		if c.SourceCredit.Budget == 0 {
+			return errors.New("config: source_credit budget must be funded")
 		}
 		if c.Role != RoleSource || !c.ExecutionPoint || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" || c.SourceCredit.MaxBlock < 64*1024 {
 			return errors.New("config: source_credit requires static source execution point, explicit transport, max block >= 64 KiB and evidence_file")

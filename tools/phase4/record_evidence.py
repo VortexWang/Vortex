@@ -35,6 +35,7 @@ metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command
             "backend": sys.argv[2], "driver_placement": "dedicated-linux-client-container" if sys.argv[2] == "docker" else "native-host", "system": platform.system(), "release": platform.release(),
             "machine": platform.machine(), "cpu_count": os.cpu_count(), "go": command("go", "version"),
             "semantic_manifest_sha256": digest(manifest), "exact_generated_config_sha256": digest(configs),
+            "authorization_mode": "qualification-only" if all(config.get("qualification_only") for config in configs.values()) else "runtime-authority",
             "qualification": "not-qualified",
             "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")}}
 if Path("/proc/meminfo").exists():

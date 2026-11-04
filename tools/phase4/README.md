@@ -23,7 +23,9 @@ TCP traffic runs in a separate process from UDP generation. Payloads are checked
 and TCP responses must drain completely. The fixture stops and awaits its
 processes/containers before reading accounting evidence.
 
-The fixture uses TCP ports 18080/18083 and UDP port 18082 on the host. Port 18083
+The fixture uses TCP ports 18080/18083 and UDP port 18082 on the host by default. Set
+`QUALIFICATION_TCP_HOST_PORT` or `QUALIFICATION_UDP_HOST_PORT` to avoid host port
+conflicts; container-side service ports remain unchanged. Port 18083
 is the echo target's test-only counter endpoint. The in-process accounting
 adapter is bounded to one million events and is not a durable authority ledger.
 Increasing `MIXED_DURATION_SECONDS` can exhaust that bound; an exhausted or
@@ -215,4 +217,6 @@ Both UDP directions reserve before write; explicit VLink queue refusal returns
 the reservation, ambiguous network writes retain it as unknown. The UDP worker
 is joined before its credit session closes. It does not implement full
 billing-snapshot switching or lock D-04. Existing
-tracer configurations without `source_credit` retain their diagnostic scope.
+qualification fixtures set `qualification_only` explicitly and use the bounded
+in-process evidence Gate; ordinary source configs require a positive funded
+`source_credit` or active `source_credit_book` snapshot.

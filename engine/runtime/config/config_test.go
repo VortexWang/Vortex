@@ -33,6 +33,7 @@ func TestValidateRoleAndRequiredPeer(t *testing.T) {
 
 func TestUDPServiceListenIsOptionalAndSourceOnly(t *testing.T) {
 	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000001", Role: RoleSource, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1", Peer: "127.0.0.1:2", ServiceListen: "127.0.0.1:3", RuleID: "r", RuleRevision: 1, PathGeneration: 1}
+	cfg.QualificationOnly, cfg.EvidenceFile = true, "evidence.jsonl"
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("TCP-only source config rejected: %v", err)
 	}
@@ -44,6 +45,26 @@ func TestUDPServiceListenIsOptionalAndSourceOnly(t *testing.T) {
 	cfg.Role = RoleRelay
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("relay config accepted source UDP listener")
+	}
+}
+
+func TestSourceRequiresFundedGateOutsideQualificationMode(t *testing.T) {
+	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000001", Role: RoleSource, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1", Peer: "127.0.0.1:2", ServiceListen: "127.0.0.1:3", RuleID: "r", RuleRevision: 1, PathGeneration: 1}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "funded source credit gate") {
+		t.Fatalf("ungated source config should fail closed, got %v", err)
+	}
+	cfg.QualificationOnly = true
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "requires evidence_file") {
+		t.Fatalf("qualification-only mode without evidence file should fail, got %v", err)
+	}
+	cfg.EvidenceFile = "events.jsonl"
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("explicit bounded qualification mode rejected: %v", err)
+	}
+	cfg.QualificationOnly = false
+	cfg.SourceCredit = &runtimeaccounting.CreditConfig{SnapshotID: "empty", Budget: 0, InitialBlock: 1, MaxBlock: 65536, GrantTarget: 65536, RenewPercent: 30}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "budget must be funded") {
+		t.Fatalf("zero-budget source Gate should not count as funded, got %v", err)
 	}
 }
 
@@ -61,8 +82,10 @@ func TestSourceCreditRejectsUngatedCombinations(t *testing.T) {
 	if err := c.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	for _, mutate := range []func(*Config){func(v *Config) { v.Role = RoleRelay }, func(v *Config) { v.ExecutionPoint = false }, func(v *Config) { v.EvidenceFile = "" }, func(v *Config) { v.Routes = map[string]Route{"a": {}} }} {
+	for _, mutate := range []func(*Config){func(v *Config) { v.Role = RoleRelay }, func(v *Config) { v.ExecutionPoint = false }, func(v *Config) { v.EvidenceFile = "" }, func(v *Config) { v.Routes = map[string]Route{"a": {}} }, func(v *Config) { v.SourceCredit.Budget = 0 }} {
 		bad := c
+		credit := *c.SourceCredit
+		bad.SourceCredit = &credit
 		mutate(&bad)
 		if err := bad.Validate(); err == nil {
 			t.Fatalf("accepted %+v", bad)
@@ -94,6 +117,11 @@ func TestSourceCreditBookPinsExecutionAndBillingBindings(t *testing.T) {
 			x := v.SourceCreditBook.Snapshots["new"]
 			x.Binding.RuleID = "other"
 			v.SourceCreditBook.Snapshots["new"] = x
+		},
+		func(v *Config) {
+			x := v.SourceCreditBook.Snapshots["old"]
+			x.Credit.Budget = 0
+			v.SourceCreditBook.Snapshots["old"] = x
 		},
 		func(v *Config) {
 			x := v.SourceCreditBook.Snapshots["new"]

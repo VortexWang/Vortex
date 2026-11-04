@@ -20,21 +20,23 @@ func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
 	digest := sha256.Sum256([]byte(cfg.RuleID))
 	copy(ruleID[:], digest[:16])
 	snapshot := vlink.RuleSnapshot{
-		RuleID:               ruleID,
-		Revision:             cfg.RuleRevision,
-		PathGeneration:       cfg.PathGeneration,
-		HopIndex:             cfg.HopIndex,
-		ExecutionPoint:       cfg.ExecutionPoint,
-		Active:               true,
-		AllowedNetworks:      map[uint8]bool{1: true, 2: true},
-		RuntimeAuthorized:    true,
-		SegmentAllowed:       true,
-		RateShareValid:       true,
-		ConnectionShareValid: true,
-		BillingAuthorized:    true,
-		BillingSnapshotID:    "qualification",
-		BillingCoefficient:   1,
-		SelfHosted:           cfg.ExecutionPoint,
+		RuleID:          ruleID,
+		Revision:        cfg.RuleRevision,
+		PathGeneration:  cfg.PathGeneration,
+		HopIndex:        cfg.HopIndex,
+		ExecutionPoint:  cfg.ExecutionPoint,
+		Active:          true,
+		AllowedNetworks: map[uint8]bool{1: true, 2: true},
+		SelfHosted:      cfg.ExecutionPoint,
+	}
+	if cfg.QualificationOnly {
+		snapshot.RuntimeAuthorized = true
+		snapshot.SegmentAllowed = true
+		snapshot.RateShareValid = true
+		snapshot.ConnectionShareValid = true
+		snapshot.BillingAuthorized = true
+		snapshot.BillingSnapshotID = "qualification"
+		snapshot.BillingCoefficient = 1
 	}
 	if cfg.NextHopNodeID != "" {
 		next, parseErr := vlink.ParseNodeID(cfg.NextHopNodeID)
@@ -76,5 +78,5 @@ func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
 		slog.Warn("vlink OPEN rejected", "node_id", local.String(), "peer_id", event.PeerID.String(), "code", event.Code, "correlation_id", fmt.Sprintf("%x", event.CorrelationID))
 	}, Lookup: func(context.Context, [16]byte) (vlink.RuleSnapshot, bool) {
 		return snapshot, true
-	}, SessionBillingSnapshotID: "qualification", SessionBillingCoefficient: 1}, nil
+	}, SessionBillingSnapshotID: snapshot.BillingSnapshotID, SessionBillingCoefficient: snapshot.BillingCoefficient}, nil
 }

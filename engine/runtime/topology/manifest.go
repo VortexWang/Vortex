@@ -11,16 +11,18 @@ import (
 )
 
 type Node struct {
-	Name           string      `json:"name"`
-	ID             string      `json:"node_id"`
-	Role           config.Role `json:"role"`
-	Listen         string      `json:"listen"`
-	Peer           string      `json:"peer,omitempty"`
-	PeerNodeID     string      `json:"peer_node_id,omitempty"`
-	NextHopNodeID  string      `json:"next_hop_node_id,omitempty"`
-	ServiceListen  string      `json:"service_listen,omitempty"`
-	Target         string      `json:"target,omitempty"`
-	ExecutionPoint bool        `json:"execution_point,omitempty"`
+	Name              string      `json:"name"`
+	ID                string      `json:"node_id"`
+	Role              config.Role `json:"role"`
+	Listen            string      `json:"listen"`
+	Peer              string      `json:"peer,omitempty"`
+	PeerNodeID        string      `json:"peer_node_id,omitempty"`
+	NextHopNodeID     string      `json:"next_hop_node_id,omitempty"`
+	ServiceListen     string      `json:"service_listen,omitempty"`
+	Target            string      `json:"target,omitempty"`
+	ExecutionPoint    bool        `json:"execution_point,omitempty"`
+	QualificationOnly bool        `json:"qualification_only,omitempty"`
+	EvidenceFile      string      `json:"evidence_file,omitempty"`
 }
 
 type Manifest struct {
@@ -44,7 +46,7 @@ func (m Manifest) Validate() error {
 		if node.Name == "" || node.ID == "" || node.Listen == "" {
 			return errors.New("topology: node name, id and listen are required")
 		}
-		candidate := config.Config{Version: 1, NodeID: node.ID, Role: node.Role, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: node.Listen, Peer: node.Peer, ServiceListen: node.ServiceListen, Target: node.Target, RuleID: m.RuleID, RuleRevision: m.RuleRevision, PathGeneration: m.PathGeneration}
+		candidate := config.Config{Version: 1, NodeID: node.ID, Role: node.Role, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: node.Listen, Peer: node.Peer, ServiceListen: node.ServiceListen, Target: node.Target, RuleID: m.RuleID, RuleRevision: m.RuleRevision, PathGeneration: m.PathGeneration, QualificationOnly: node.QualificationOnly, EvidenceFile: node.EvidenceFile}
 		if err := candidate.Validate(); err != nil && node.Role != config.RoleDestination {
 			return fmt.Errorf("topology: node %s: %w", node.Name, err)
 		}

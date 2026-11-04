@@ -202,9 +202,13 @@ func TestSourceFirstTargetByteObserverIgnoresClientRequest(t *testing.T) {
 	local, application := net.Pipe()
 	defer application.Close()
 	_ = application.SetDeadline(time.Now().Add(4 * time.Second))
+	gate, err := memory.NewGate(8)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var observed atomic.Int32
 	done := make(chan error, 1)
-	go func() { done <- BridgeConnWithGateObserver(ctx, out, local, nil, func() { observed.Add(1) }) }()
+	go func() { done <- BridgeConnWithGateObserver(ctx, out, local, gate, func() { observed.Add(1) }) }()
 	if _, err := application.Write([]byte("request")); err != nil {
 		t.Fatal(err)
 	}
@@ -234,6 +238,40 @@ func TestSourceFirstTargetByteObserverIgnoresClientRequest(t *testing.T) {
 	case <-done:
 	case <-ctx.Done():
 		t.Fatal("bridge did not stop")
+	}
+}
+
+func TestBridgeConnWithoutGateRejectsBeforeTargetWrite(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	client, server := authenticatedPair(t, ctx)
+	defer client.Close(nil)
+	defer server.Close(nil)
+	out, err := client.Open(ctx, vlink.OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: uint8(vlink.StreamTCP), ClientAddress: []byte{127, 0, 0, 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	in, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, in.ID, func(context.Context, vlink.NodeID, vlink.OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := out.WaitOpen(ctx); err != nil {
+		t.Fatal(err)
+	}
+	target := &countedShortTarget{shortTarget: shortTarget{done: make(chan struct{}), err: io.ErrUnexpectedEOF}}
+	if err := BridgeConnWithGate(ctx, in, target, nil); err == nil {
+		t.Fatal("bridge accepted a missing source authorization gate")
+	}
+	if target.calls.Load() != 0 {
+		t.Fatalf("target received writes without authorization: %d", target.calls.Load())
+	}
+	select {
+	case <-target.done:
+	default:
+		t.Fatal("target connection leaked after missing-gate rejection")
 	}
 }
 

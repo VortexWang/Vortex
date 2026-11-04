@@ -109,6 +109,13 @@ func main() {
 			}
 		}()
 	}
+	if cfg.Role == config.RoleSource && sourceGate == nil {
+		if !cfg.QualificationOnly {
+			fatal("source role requires a funded source credit gate")
+		}
+		// This bounded in-memory adapter is permitted only for explicit test topology runs.
+		sourceGate = gate
+	}
 	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
 	if cfg.TransportMode != "" && cfg.Role != config.RoleDestination {
 		supervisor.Transport, err = link.NewTransport(ctx, supervisor, cfg.TransportMode, cfg.PoolBounds())

@@ -321,15 +321,16 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 		return errors.New("relay: stream and connection are required")
 	}
 	defer conn.Close()
-	var session engineaccounting.Session
-	if gate != nil {
-		var err error
-		session, err = gate.Open(ctx, engineaccounting.Flow{Key: stream.FlowKey()})
-		if err != nil {
-			return err
-		}
-		defer session.Close()
+	if gate == nil {
+		return errors.New("relay: source authorization gate is required")
 	}
+	var session engineaccounting.Session
+	var err error
+	session, err = gate.Open(ctx, engineaccounting.Flow{Key: stream.FlowKey()})
+	if err != nil {
+		return err
+	}
+	defer session.Close()
 	bridgeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	if stream.Network == vlink.StreamUDP {
