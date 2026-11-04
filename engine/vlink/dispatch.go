@@ -637,7 +637,12 @@ func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
 	case frame := <-s.receive:
 		return frame, nil
 	case <-s.done:
-		return Frame{}, ErrStreamState
+		select {
+		case frame := <-s.receive:
+			return frame, nil
+		default:
+			return Frame{}, ErrStreamState
+		}
 	case <-ctx.Done():
 		return Frame{}, ctx.Err()
 	case <-s.link.done:

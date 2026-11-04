@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 verification review after restart execution
 status: review
-stopped_at: Restart plans executed; runtime topology/accounting pass, native performance review remains
+stopped_at: Native topology qualification passed; mixed-load performance and Actions rerun remain
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Restart runtime, three-relay topology and qualification gate executed successfully
-state_head: 4a4bc03
+last_activity_desc: Native Ubuntu runtime qualification passed; Actions uncovered and local fix verified for queued OPEN_ERR receive race
+state_head: 86f06b3
 progress:
   total_phases: 8
   completed_phases: 3
@@ -72,7 +72,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Blockers/Concerns
 
-- Phase 4 has been deliberately reopened. A startable relay runtime, three-relay topology and production accounting workload are prerequisites for the new plan.
+- Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
+- Remaining Phase 4 gates: sustained runtime-backed mixed TCP/UDP workload, same-path performance ratio, production accounting reconciliation, D-04 review, and passing Actions after the queued OPEN_ERR race fix.
 
 ## Deferred Items
 
