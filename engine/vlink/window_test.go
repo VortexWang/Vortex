@@ -26,6 +26,49 @@ func TestWindowAcquiresStreamAndAggregateCredit(t *testing.T) {
 	}
 }
 
+func TestUDPWindowRejectionAttributesCreditAtAdmission(t *testing.T) {
+	w := NewWindowManager(8, 16)
+	if err := w.AddStream(1, 8); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.AddStream(3, 8); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Acquire(context.Background(), 1, 8); err != nil {
+		t.Fatal(err)
+	}
+	if ok, why, err := w.tryAcquire(3, 1); err != nil || ok || why.stream || !why.aggregate {
+		t.Fatalf("aggregate-only rejection: accepted=%v why=%+v err=%v", ok, why, err)
+	}
+	if err := w.Grant(0, 8); err != nil {
+		t.Fatal(err)
+	}
+	if ok, why, err := w.tryAcquire(1, 1); err != nil || ok || !why.stream || why.aggregate {
+		t.Fatalf("stream-only rejection: accepted=%v why=%+v err=%v", ok, why, err)
+	}
+	if ok, why, err := w.tryAcquire(3, 1); err != nil || !ok || why.stream || why.aggregate {
+		t.Fatalf("available credit: accepted=%v why=%+v err=%v", ok, why, err)
+	}
+}
+
+func TestTCPAcquirePreservesAggregateUDPReserve(t *testing.T) {
+	w := NewWindowManagerWithReserve(8, 16, 2)
+	if err := w.AddStream(1, 8); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Acquire(context.Background(), 1, 6); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	if err := w.Acquire(ctx, 1, 1); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("TCP consumed reserved aggregate credit: %v", err)
+	}
+	if ok, err := w.TryAcquire(1, 2); err != nil || !ok {
+		t.Fatalf("reserved credit unavailable to UDP admission: ok=%v err=%v", ok, err)
+	}
+}
+
 func TestWindowBlockedWriterWakesOnGrant(t *testing.T) {
 	w := NewWindowManager(4, 16)
 	if err := w.AddStream(1, 4); err != nil {

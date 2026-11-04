@@ -20,22 +20,30 @@ type WindowSnapshot struct {
 type byteCredit struct{ available uint32 }
 
 type WindowManager struct {
-	mu        sync.Mutex
-	aggregate uint32
-	max       uint32
-	streams   map[uint32]*byteCredit
-	changed   chan struct{}
-	closed    bool
+	mu               sync.Mutex
+	aggregate        uint32
+	aggregateReserve uint32
+	max              uint32
+	streams          map[uint32]*byteCredit
+	changed          chan struct{}
+	closed           bool
 }
 
 func NewWindowManager(aggregateInitial, maxCredit uint32) *WindowManager {
+	return NewWindowManagerWithReserve(aggregateInitial, maxCredit, 0)
+}
+
+func NewWindowManagerWithReserve(aggregateInitial, maxCredit, aggregateReserve uint32) *WindowManager {
 	if maxCredit == 0 {
 		maxCredit = math.MaxUint32
 	}
 	if aggregateInitial > maxCredit {
 		aggregateInitial = maxCredit
 	}
-	return &WindowManager{aggregate: aggregateInitial, max: maxCredit, streams: make(map[uint32]*byteCredit), changed: make(chan struct{})}
+	if aggregateReserve > aggregateInitial {
+		aggregateReserve = aggregateInitial
+	}
+	return &WindowManager{aggregate: aggregateInitial, aggregateReserve: aggregateReserve, max: maxCredit, streams: make(map[uint32]*byteCredit), changed: make(chan struct{})}
 }
 
 func (w *WindowManager) AddStream(id, initial uint32) error {
@@ -73,7 +81,7 @@ func (w *WindowManager) Acquire(ctx context.Context, id, amount uint32) error {
 			w.mu.Unlock()
 			return ErrUnknownStream
 		}
-		if stream.available >= amount && w.aggregate >= amount {
+		if stream.available >= amount && w.aggregate >= amount && w.aggregate-amount >= w.aggregateReserve {
 			stream.available -= amount
 			w.aggregate -= amount
 			w.mu.Unlock()
@@ -92,27 +100,36 @@ func (w *WindowManager) Acquire(ctx context.Context, id, amount uint32) error {
 // TryAcquire is the non-blocking path used by UDP; lack of credit is a drop,
 // while a closed or unknown window remains a caller-visible state error.
 func (w *WindowManager) TryAcquire(id, amount uint32) (bool, error) {
+	ok, _, err := w.tryAcquire(id, amount)
+	return ok, err
+}
+
+// windowRejection attributes an admission failure under the same lock as the
+// credit check. Both can be true; these are diagnostic subsets, not extra drops.
+type windowRejection struct{ stream, aggregate bool }
+
+func (w *WindowManager) tryAcquire(id, amount uint32) (bool, windowRejection, error) {
 	if amount == 0 {
-		return true, nil
+		return true, windowRejection{}, nil
 	}
 	if amount > w.max {
-		return false, fmt.Errorf("%w: requested credit exceeds hard bound", ErrProtocol)
+		return false, windowRejection{}, fmt.Errorf("%w: requested credit exceeds hard bound", ErrProtocol)
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.closed {
-		return false, ErrWindowClosed
+		return false, windowRejection{}, ErrWindowClosed
 	}
 	stream := w.streams[id]
 	if stream == nil {
-		return false, ErrUnknownStream
+		return false, windowRejection{}, ErrUnknownStream
 	}
 	if stream.available < amount || w.aggregate < amount {
-		return false, nil
+		return false, windowRejection{stream: stream.available < amount, aggregate: w.aggregate < amount}, nil
 	}
 	stream.available -= amount
 	w.aggregate -= amount
-	return true, nil
+	return true, windowRejection{}, nil
 }
 
 func (w *WindowManager) Grant(streamID, delta uint32) error {

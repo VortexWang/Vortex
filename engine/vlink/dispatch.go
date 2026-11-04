@@ -139,6 +139,7 @@ type MuxConfig struct {
 	LocalClient                              bool
 	MaxPendingOpenBytes                      int
 	StreamWindow, AggregateWindow, MaxWindow uint32
+	UDPWindowReserve                         uint32
 	StreamQueueFrames                        int
 	UDPQueueFrames                           int
 	UDPQueueBytes                            int64
@@ -149,34 +150,36 @@ type MuxConfig struct {
 }
 
 type MuxLink struct {
-	conn            net.Conn
-	dispatch        *Dispatcher
-	windows         *WindowManager
-	config          MuxConfig
-	controlWrites   chan frameWrite
-	dataWrites      chan frameWrite
-	writeWake       chan struct{}
-	writerStopped   chan struct{}
-	mu              sync.Mutex
-	streams         map[uint32]*MuxStream
-	pingNonce       [8]byte
-	pingPending     bool
-	incoming        chan *MuxStream
-	done            chan struct{}
-	closeOnce       sync.Once
-	peerID          NodeID
-	limiter         *FrameLimiter
-	observer        Observer
-	dgrams          *scheduler.Scheduler
-	violations      int
-	linkID          [16]byte
-	udpWindowDrops  atomic.Uint64
-	udpReceiveDrops atomic.Uint64
-	windowMu        sync.Mutex
-	pendingStream   map[uint32]uint64
-	pendingTotal    uint64
-	streamGrant     uint32
-	aggregateGrant  uint32
+	conn                    net.Conn
+	dispatch                *Dispatcher
+	windows                 *WindowManager
+	config                  MuxConfig
+	controlWrites           chan frameWrite
+	dataWrites              chan frameWrite
+	writeWake               chan struct{}
+	writerStopped           chan struct{}
+	mu                      sync.Mutex
+	streams                 map[uint32]*MuxStream
+	pingNonce               [8]byte
+	pingPending             bool
+	incoming                chan *MuxStream
+	done                    chan struct{}
+	closeOnce               sync.Once
+	peerID                  NodeID
+	limiter                 *FrameLimiter
+	observer                Observer
+	dgrams                  *scheduler.Scheduler
+	violations              int
+	linkID                  [16]byte
+	udpWindowDrops          atomic.Uint64
+	udpStreamWindowDrops    atomic.Uint64
+	udpAggregateWindowDrops atomic.Uint64
+	udpReceiveDrops         atomic.Uint64
+	windowMu                sync.Mutex
+	pendingStream           map[uint32]uint64
+	pendingTotal            uint64
+	streamGrant             uint32
+	aggregateGrant          uint32
 }
 
 type MuxStream struct {
@@ -234,7 +237,7 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 		dgrams = scheduler.New(1 << 20)
 	}
 	aggregateGrant := config.AggregateWindow / 2
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: uint32(uint64(config.StreamWindow) * 3 / 4), aggregateGrant: aggregateGrant}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManagerWithReserve(config.AggregateWindow, config.MaxWindow, config.UDPWindowReserve), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: uint32(uint64(config.StreamWindow) * 3 / 4), aggregateGrant: aggregateGrant}
 	if m.streamGrant == 0 {
 		m.streamGrant = 1
 	}
@@ -411,7 +414,7 @@ func (m *MuxLink) Close(err error) {
 	}
 	m.closeOnce.Do(func() {
 		defer func() {
-			slog.Info("udp link drop summary", "link_id", fmt.Sprintf("%x", m.linkID), "window_drops", m.udpWindowDrops.Load(), "queue_drops", m.dgrams.Drops(scheduler.DropQueueFull), "receive_queue_drops", m.udpReceiveDrops.Load())
+			slog.Info("udp link drop summary", "link_id", fmt.Sprintf("%x", m.linkID), "window_drops", m.udpWindowDrops.Load(), "queue_drops", m.dgrams.Drops(scheduler.DropQueueFull), "receive_queue_drops", m.udpReceiveDrops.Load(), "stream_credit_drops", m.udpStreamWindowDrops.Load(), "aggregate_credit_drops", m.udpAggregateWindowDrops.Load())
 		}()
 		m.observeClose(err)
 		m.dispatch.Close(err)
@@ -767,9 +770,15 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 	}
 	// Preserve the existing per-stream admission boundary; the scheduler adds
 	// an independent bounded queue after this non-blocking check.
-	if ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload))); err != nil || !ok {
+	if ok, rejected, err := s.link.windows.tryAcquire(s.ID, uint32(len(payload))); err != nil || !ok {
 		if err == nil && !ok {
 			s.link.udpWindowDrops.Add(1)
+			if rejected.stream {
+				s.link.udpStreamWindowDrops.Add(1)
+			}
+			if rejected.aggregate {
+				s.link.udpAggregateWindowDrops.Add(1)
+			}
 		}
 		return ok, err
 	}
