@@ -1,4 +1,4 @@
-# Phase 4 剩余资格化核对（2026-11-04）
+# Phase 4 剩余资格化核对（2026-11-05）
 
 审查基线 `6bfe976`；状态 **gaps_found / executing**。矩阵区分有限已验证行为、实现缺口及环境/测量缺口；不将参考规格变成新冻结基线。以下沿用路线图与当前 Plan 04-06 的目标。未重跑的历史证据保留原始 SHA，不视作本提交的新实测。
 
@@ -10,7 +10,7 @@
 | NFR-007 pool/mux 首字节（跨 Phase 3） | cba1bef 分模式、50 个原始样本，原生 pool 1.0703 ms / mux 1.3188 ms；链路复用已证实 | source 在 WaitOpen 后才桥接客户端 TCP，relay 在 downstream.WaitOpen 后才接通桥；存在依赖 OPEN_OK 的数据等待，不能以低 RTT 的数值通过证明无额外往返。须设计有界早期 DATA，并保持授权前不向目标写入；UDP 仍必须 OPEN_OK 后发送 | 当前各段 RTT 是独立 TLS 用户态 echo 诊断，不足以验证 VLink 额外等待；需受控逐段 RTT 扫描、时间线或抓包、复用/新建链路分别记录；pool/mux 分开，计费等待例外单列 | 实现与测量均有缺口 |
 | NFR-039 政策 T / 保护带 | Phase 1 有限时间模型；当前 Engine Batch/配置 generation 不是政策租约时钟实现 | 缺真实会话双政策预发、保守时间区间、T 附近暂停/恢复、200 ms 无新版申请、硬截止；先在进程内测试 issuer + 可控时钟实现 Engine 行为，持久化留给 Agent/Hub | 需 q=T−60 / ttl=300、准确时钟与 ≤10 秒不确定区间、≤12 秒恢复等场景记录。有限模型不能替代 | 尚未运行时验证；不属于硬件限制 |
 | NFR-040 share CAS / 排空 | share 单测拒绝旧 Prepare 的 Commit；apply 有 unknown/fencing 有限单测；d0c1cb2 验证的是路径 TCP 排空 | `share.Prepare` 覆盖 current，未表达 prepared/active 同存、连接降额 drain 和占用 max；runtime 未接该 Manager。需同 node/boot 50→60→40、延期、丢回执/重投、跨 boot 拒绝、旧签发权关闭证明。路径 generation 切换不能代替份额 CAS | 需要真实门控消费/连接计数的有限注入场景；未来持久化再在 Agent/Hub 资格化 | 库级片段通过；Engine 集成未通过 |
-| NFR-044 快照与路径系数 | Snapshot.ValidateGrant 的 ID/系数不匹配单测，Batch 一次性 resolve；路径 generation 切换有限证据 | runtime Event/Flow 无完整计费快照/来源/授权绑定；没有 1→3 资金预留、不同路径同系数隔离、迟到授权、跨政策 T、grant/batch/final 篡改及按来源守恒的运行时闭环。当前 UDP 切路终止是用户已选策略，按该策略验证旧 UDP 未结算负债，不新增“必须保留旧 UDP”要求 | 同一 Engine 实现先用有限 issuer 验证；持久化权威账本是后续阶段，不要求 Engine 连数据库 | 库级片段通过；Engine 集成未通过 |
+| NFR-044 快照与路径系数 | c8c2a37 runtime `CreditBook` 在原生/Docker/Actions 验证 1→2 快照选择、固定旧会话、不同系数、迟到授权隔离、预留资金和零泄漏 | 仍缺完整 Event/Flow 来源绑定、跨路径 1→3 守恒、跨政策 T、grant/batch/final 篡改及完整按来源守恒闭环。当前 UDP 切路终止是用户已选策略，按该策略验证旧 UDP 未结算负债，不新增“必须保留旧 UDP”要求 | 持久化权威账本是后续阶段，不要求 Engine 连数据库 | 有限 runtime slice 通过；完整 NFR 未通过 |
 | D-04 参数评审 | 本轮逐项审查见 04-06-D04-REVIEW.md；VLink 窗口调优、计量和混合负载结果已有 | 缺真正可扫的授权块/水位/续申/闲置实现及执行点接线 | 缺候选参数对照、资金占用/申请等待等原始观测及最终评审确认 | 评审完成；候选未锁定 |
 
 ## 环境核对

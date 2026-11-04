@@ -1,6 +1,6 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-verified: 2026-11-04
+verified: 2026-11-05
 status: gaps_found
 score: tracer runtime and finite recovery verified; D-04 and seven NFR rows remain unqualified
 behavior_unverified: 7
@@ -19,6 +19,7 @@ Review source: `6bfe97624cf807824d8df91fa7519b5a108e2d04` (documentation success
 | Explicit pool/mux/auto, real lease reuse, mode-specific first-target-byte samples | Verified finite mode integration | clean cba1bef Docker/native and Actions 41830048180; 04-06-AUTO-EVIDENCE.md |
 | Authorized route selection, monotonic generation, old TCP drain, UDP reopen, middle-hop failure/restart | Verified eight finite process scenarios | clean d0c1cb2 Docker/native and Actions 41836183498; 04-06-RECOVERY-EVIDENCE.md |
 | Harness rejects missing runtime/accounting and protects complete JSONL shutdown | Verified regression boundary | baa0a02 local/Actions scale checks, exact accounting, nonzero relay exit/evidence-write checks |
+| Immutable billing snapshot selection and session affinity | Verified finite runtime slice | clean c8c2a37 native/Docker `tools/phase4/snapshots.py`; Actions [41862303853](https://github.com/VortexWang/Vortex/actions/runs/41862303853) |
 
 ## Qualification findings
 
@@ -27,7 +28,7 @@ The previous verification referenced early five-second trials and missing mode/f
 - **NFR-003/005:** baa0a02 native scale trials reached 1086–1200 Mbps TCP and <0.1% UDP loss at approximately 100 Mbps actual offered UDP. The one same-load independent TLS comparison reached 82.64%. These diagnostic numeric targets were met. Formal per-node resource/link, 60-second warmup / 300-second three-trial evidence and actual authorization gating are absent. Actions scale offered only 24.21 Mbps, separately recorded.
 - **NFR-006:** integrity, forged OPEN, bypass and process-recovery tests pass for their enumerated finite cases. Full attack/path/configuration coverage has not been demonstrated. Dedicated hardware is not the blocker for closing these functional gaps.
 - **NFR-007:** pool/mux samples now exist, but runtime TCP waits for OPEN_OK before bridging, including downstream relay confirmation. Controlled RTT/timeline evidence and bounded authorized early-DATA behavior are missing. Small loopback medians do not prove no extra network round trip.
-- **NFR-039/040/044:** finite model/library tests do not establish runtime policy-boundary leases, share-CAS/drain, or funded immutable billing-snapshot isolation. In-process injected authority can verify Engine behavior before later Agent/Hub persistence; Engine must not connect to a database.
+- **NFR-039/040/044:** c8c2a37 verifies funded immutable snapshot selection, old-session affinity, new-session admission, coefficient binding, late-grant isolation, and zero held/session leakage. It still does not establish policy-boundary leases, share-CAS/drain, or full per-source conservation. In-process injected authority remains non-authoritative; Engine must not connect to a database.
 - **D-04:** parameter review is complete in 04-06-D04-REVIEW.md. Keep 256 KiB→4 MiB / 8 MiB minimum / 30-second target / 30% waterline as unapproved candidates; no adaptive grant/block/renewal experiment has yet run. VLink windows are distinct parameters.
 
 ## Checks this review
@@ -41,6 +42,10 @@ Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307
 First design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point, preserving Engine process-local injection and non-authoritative tracer scope. Then cover NFR-039/040/044 runtime behavior, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
 
 No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.
+
+## c8c2a37 verification increment
+
+The same immutable snapshot fixture passed on the native local five-process topology, Docker Compose, and GitHub Actions run 41862303853. An existing TCP connection exchanged bytes before and after a SIGHUP selection change and remained bound to `old`; a new connection after revision 2 used `new`. Final evidence retained old and new usage in separate gates with zero sessions and held bytes. This closes the finite snapshot-selection slice only; it does not qualify D-04 or NFR-039/040/044 in full.
 
 
 ## Incremental verification: finite source credit — 6a1faf2

@@ -6,10 +6,10 @@ current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
 stopped_at: Plan 04-06 grant-result identity and static UDP source gate pass clean d2f21f8 Docker/native; Actions 41856742608 passed
-last_updated: "2026-11-04T15:33:37.417556+00:00"
+last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-04
 last_activity_desc: Grant identity/outcome injection and TCP-UDP shared-budget exhaustion pass Docker/native; CI passed; no NFR qualification
-state_head: d2f21f8
+state_head: c8c2a37
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — clean d2f21f8 grant-result identity and TCP/UDP shared-budget cases passed Docker/native; Actions passed
+Last activity: 2026-11-05 — clean c8c2a37 immutable snapshot selection passed native/Docker; Actions 41862303853 passed
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -91,8 +91,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-04T15:29:19.332951+00:00
-Stopped at: Plan 04-06 executing; d2f21f8 grant identity and static UDP source gate passed Docker/native; Actions 41856742608 passed
+Last session: 2026-11-05T00:00:00.000000+00:00
+Stopped at: Plan 04-06 executing; c8c2a37 immutable snapshot selection passed native/Docker; Actions 41862303853 passed
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
 
 ### Latest qualification review
