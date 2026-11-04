@@ -30,9 +30,6 @@ cleanup() {
     QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
   fi
   if [ -n "${target_pid:-}" ]; then kill "$target_pid" 2>/dev/null || true; fi
-  for name in source relay-1 relay-2 relay-3 destination; do
-    if [ -f "$qual/$name.pid" ]; then kill "$(sed -n '1p' "$qual/$name.pid")" 2>/dev/null || true; fi
-  done
   wait "$topology_pid" 2>/dev/null || true
 }
 trap cleanup INT TERM EXIT

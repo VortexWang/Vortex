@@ -38,7 +38,16 @@ for name in source relay-1 relay-2 relay-3 destination; do
   "$bin" --config "$out/config/$name.json" >"$out/logs/$name.log" 2>&1 &
   echo $! >"$out/$name.pid"
 done
-trap 'for name in source relay-1 relay-2 relay-3 destination; do test -f "$out/$name.pid" && kill "$(cat "$out/$name.pid")" 2>/dev/null || true; done' INT TERM EXIT
+cleanup() {
+  trap - INT TERM EXIT
+  for name in source relay-1 relay-2 relay-3 destination; do
+    test -f "$out/$name.pid" && kill "$(cat "$out/$name.pid")" 2>/dev/null || true
+  done
+  for name in source relay-1 relay-2 relay-3 destination; do
+    test -f "$out/$name.pid" && wait "$(cat "$out/$name.pid")" 2>/dev/null || true
+  done
+}
+trap cleanup INT TERM EXIT
 for attempt in $(seq 1 30); do
 	ready=1
 	for name in source relay-1 relay-2 relay-3 destination; do
