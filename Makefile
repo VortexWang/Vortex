@@ -1,8 +1,14 @@
 .PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check phase2-benchmark-smoke phase2-benchmark
-.PHONY: phase3-vlink-check phase3-vlink-fuzz phase3-vlink-benchmark phase4-m2-check phase4-m2-benchmark
+.PHONY: phase3-vlink-check phase3-vlink-fuzz phase3-vlink-benchmark phase4-m2-check phase4-runtime-smoke phase4-runtime-mixed phase4-m2-benchmark
 
 phase4-m2-check:
 	tools/phase4/check.sh
+
+phase4-runtime-smoke:
+	tools/phase4/topology-smoke.sh
+
+phase4-runtime-mixed:
+	tools/phase4/qualification.sh
 
 phase4-m2-benchmark:
 	tools/phase4/benchmark.sh
