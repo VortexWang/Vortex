@@ -133,7 +133,13 @@ try:
  try:fresh(b'must-not-fallback');raise RuntimeError('new TCP bypassed failed active path')
  except (OSError,RuntimeError) as e:
   if str(e)=='new TCP bypassed failed active path':raise
- report['cases']['active_fault']='established TCP terminated; no fallback without activation'
+ udp.settimeout(.5);udp.sendto(b'fault-datagram-must-not-replay',('127.0.0.1',18082))
+ try:
+  if udp.recv(1024):raise RuntimeError('UDP bypassed failed active middle')
+ except socket.timeout:pass
+ udp.settimeout(3)
+ report['cases']['active_fault']='established TCP terminated; TCP/UDP cannot bypass or silently fall back'
+
  # Restart same authorized endpoint; reconnect new streams, never replay old payload.
  start('relay-2b');waitfor(probe);fresh(b'new-after-restart');time.sleep(.2);udp_echo(udp,b'new-udp-after-restart');udp.close()
  report['cases']['restart']='fresh TCP/UDP recovered on authorized generation 2; old TCP not replayed'
