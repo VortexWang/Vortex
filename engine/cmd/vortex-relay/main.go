@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/link"
 	"vortex/engine/runtime/relay"
@@ -45,7 +46,21 @@ func main() {
 	if err != nil {
 		fatal(err.Error())
 	}
-	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget}
+	gate, err := runtimeaccounting.NewGate(100000)
+	if err != nil {
+		fatal(err.Error())
+	}
+	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
+	defer func() {
+		if cfg.EvidenceFile == "" {
+			return
+		}
+		file, openErr := os.OpenFile(cfg.EvidenceFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+		if openErr == nil {
+			defer file.Close()
+			_ = gate.WriteJSONL(file)
+		}
+	}()
 	fmt.Printf("vortex-relay ready node_id=%s role=%s listen=%s\n", cfg.NodeID, cfg.Role, cfg.Listen)
 	switch cfg.Role {
 	case config.RoleSource:

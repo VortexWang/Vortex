@@ -8,6 +8,7 @@ import (
 	"net"
 	"sync"
 
+	engineaccounting "vortex/engine/accounting"
 	"vortex/engine/vlink"
 )
 
@@ -18,6 +19,7 @@ type Service struct {
 	Policy    vlink.OpenPolicy
 	Next      func() *vlink.MuxLink
 	Dial      TargetDialer
+	Gate      engineaccounting.Gate
 }
 
 func (s Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
@@ -75,7 +77,7 @@ func (s Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *v
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	case *connResource:
-		if err := BridgeConn(ctx, stream, typed.conn); err != nil && ctx.Err() == nil {
+		if err := BridgeConnWithGate(ctx, stream, typed.conn, s.Gate); err != nil && ctx.Err() == nil {
 			slog.Error("relay target bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	default:
@@ -126,6 +128,10 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 }
 
 func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) error {
+	return BridgeConnWithGate(ctx, stream, conn, nil)
+}
+
+func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate) error {
 	if stream == nil || conn == nil {
 		return errors.New("relay: stream and connection are required")
 	}
@@ -143,9 +149,27 @@ func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) err
 			}
 			switch frame.Type {
 			case vlink.FrameData:
-				if _, err := conn.Write(frame.Payload); err != nil {
+				batch, err := reserve(ctx, gate, engineaccounting.LeftToRight, len(frame.Payload))
+				if err != nil {
 					errCh <- err
 					return
+				}
+				n, err := conn.Write(frame.Payload)
+				if err != nil || n != len(frame.Payload) {
+					if batch != nil {
+						_ = batch.MarkUnknown(ctx)
+					}
+					if err == nil {
+						err = io.ErrShortWrite
+					}
+					errCh <- err
+					return
+				}
+				if batch != nil {
+					if err := batch.Commit(ctx, int64(n)); err != nil {
+						errCh <- err
+						return
+					}
 				}
 				if err := stream.Consume(ctx, uint32(len(frame.Payload))); err != nil {
 					errCh <- err
@@ -171,9 +195,23 @@ func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) err
 		for {
 			n, err := conn.Read(buffer)
 			if n > 0 {
+				batch, reserveErr := reserve(ctx, gate, engineaccounting.RightToLeft, n)
+				if reserveErr != nil {
+					errCh <- reserveErr
+					return
+				}
 				if writeErr := stream.WriteData(ctx, buffer[:n]); writeErr != nil {
+					if batch != nil {
+						_ = batch.MarkUnknown(ctx)
+					}
 					errCh <- writeErr
 					return
+				}
+				if batch != nil {
+					if commitErr := batch.Commit(ctx, int64(n)); commitErr != nil {
+						errCh <- commitErr
+						return
+					}
 				}
 			}
 			if err != nil {
@@ -189,6 +227,17 @@ func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) err
 	first := <-errCh
 	wg.Wait()
 	return first
+}
+
+func reserve(ctx context.Context, gate engineaccounting.Gate, direction engineaccounting.Direction, size int) (*engineaccounting.Batch, error) {
+	if gate == nil {
+		return nil, nil
+	}
+	session, err := gate.Open(ctx, engineaccounting.Flow{Key: "qualification"})
+	if err != nil {
+		return nil, err
+	}
+	return session.Reserve(ctx, direction, int64(size))
 }
 
 type streamResource struct{ stream *vlink.MuxStream }

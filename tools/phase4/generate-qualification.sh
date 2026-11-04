@@ -27,7 +27,7 @@ done
 json() {
   name=$1 role=$2 node_id=$3 listen=$4 peer=$5 peer_id=$6 next_id=$7 hop=$8 service=$9 target=${10}
   cat > "config/$name.json" <<EOF
-{"version":1,"node_id":"$node_id","role":"$role","certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service","rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","execution_point":$( [ "$role" = destination ] && echo true || echo false )}
+{"version":1,"node_id":"$node_id","role":"$role","certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service","rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( [ "$role" = destination ] && echo true || echo false )}
 EOF
 }
 
