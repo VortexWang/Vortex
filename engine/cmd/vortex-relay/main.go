@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -47,7 +48,7 @@ func main() {
 	if err != nil {
 		fatal(err.Error())
 	}
-	gate, err := runtimeaccounting.NewGate(100000)
+	gate, err := runtimeaccounting.NewGate(1000000)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -188,6 +189,10 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 	}
 	defer packet.Close()
 	go func() { <-ctx.Done(); _ = packet.Close(); supervisor.Close() }()
+	var queueDrops, oversizedDrops, capacityDrops atomic.Uint64
+	defer func() {
+		slog.Info("udp source drop summary", "queue_drops", queueDrops.Load(), "oversized_drops", oversizedDrops.Load(), "capacity_drops", capacityDrops.Load())
+	}()
 	type flow struct {
 		out  chan []byte
 		done chan struct{}
@@ -222,7 +227,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 		}
 		if current == nil {
 			if len(flows) >= maxFlows {
-				slog.Warn("udp session capacity reached", "limit", maxFlows)
+				capacityDrops.Add(1)
 				continue
 			}
 			current = &flow{out: make(chan []byte, 64), done: make(chan struct{})}
@@ -231,13 +236,13 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 		}
 		payload := append([]byte(nil), buffer[:n]...)
 		if len(payload) > vlink.MaxPayloadSize {
-			slog.Warn("udp source queue dropped datagram", "reason", "payload_too_large")
+			oversizedDrops.Add(1)
 			continue
 		}
 		select {
 		case current.out <- payload:
 		default:
-			slog.Warn("udp source queue dropped datagram", "reason", "queue_full")
+			queueDrops.Add(1)
 		}
 	}
 }
@@ -289,7 +294,7 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 					return err
 				}
 				if !accepted {
-					slog.Warn("udp source queue dropped datagram", "reason", "window_full")
+					continue
 				} else {
 					if !idle.Stop() {
 						select {

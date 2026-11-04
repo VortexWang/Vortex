@@ -25,6 +25,8 @@ jobs:
       - name: Run benchmark smoke
         if: always()
         run: make phase4-m2-benchmark
+      - name: Run same mixed workload in Compose
+        run: BACKEND=docker make phase4-runtime-mixed
       - name: Record host metadata
         if: always()
         run: |

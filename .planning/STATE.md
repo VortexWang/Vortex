@@ -5,10 +5,10 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 gap closure planned after native topology and Actions smoke pass
+stopped_at: Plan 04-06 mixed runtime implemented; clean-SHA Linux and Actions validation pending
 last_updated: "2026-11-04T00:00:00.000Z"
 last_activity: 2026-11-04
-last_activity_desc: Native qualification and Actions pass; researched missing runtime UDP path and planned mixed-load gap closure
+last_activity_desc: Implemented mixed runtime workload and flow-control fixes; local race and diagnostic accounting pass
 state_head: b4b484e
 progress:
   total_phases: 8
@@ -64,11 +64,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 - The roadmap follows engineering prerequisites, then M0 through M6 in order; dependencies are reviewed just before the phase that introduces them.
 - NFR-038 historical recovery is out of scope after project restart. The eleven original register rows remain `missing`; this is not a claim of recovery or verification.
 - PostgreSQL and Valkey are external data services. Their image package licenses are excluded from the product dependency gate; versions, provenance, and image digests remain tracked.
-- Local Docker is available. `gh auth status` confirms VortexWang is the active GitHub account with repo/workflow scopes. Prior same-commit Actions evidence exists for Phase 1; current governance changes still need CI evidence.
+- Local OrbStack Docker daemon is currently unavailable; Compose execution remains pending. `gh auth status` confirms VortexWang is the active GitHub account with repo/workflow scopes. Prior same-commit Actions evidence exists for Phase 1; current governance changes still need CI evidence.
 
 ### Pending Todos
 
-- Execute Plan 04-06 to add runtime UDP, mixed TCP/UDP qualification and accounting reconciliation.
+- Continue Plan 04-06: validate current implementation on clean SHA in Ubuntu and Actions; complete independent TLS/latency baseline and D-04/NFR review.
 
 ### Blockers/Concerns
 
@@ -92,5 +92,5 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-03T10:56:12.944Z
-Stopped at: Phase 4 restart decision, ready for fresh research
-Resume file: .planning/phases/03-m1-vlink-m1-vlink-engine/03-CONTEXT.md
+Stopped at: Plan 04-06 executing; mixed runtime implemented, cross-host evidence pending
+Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md

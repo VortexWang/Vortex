@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"vortex/engine/scheduler"
@@ -146,35 +147,43 @@ type MuxConfig struct {
 }
 
 type MuxLink struct {
-	conn        net.Conn
-	dispatch    *Dispatcher
-	windows     *WindowManager
-	config      MuxConfig
-	writeMu     sync.Mutex
-	mu          sync.Mutex
-	streams     map[uint32]*MuxStream
-	pingNonce   [8]byte
-	pingPending bool
-	incoming    chan *MuxStream
-	done        chan struct{}
-	closeOnce   sync.Once
-	peerID      NodeID
-	limiter     *FrameLimiter
-	observer    Observer
-	dgrams      *scheduler.Scheduler
-	violations  int
-	linkID      [16]byte
+	conn            net.Conn
+	dispatch        *Dispatcher
+	windows         *WindowManager
+	config          MuxConfig
+	writeMu         sync.Mutex
+	mu              sync.Mutex
+	streams         map[uint32]*MuxStream
+	pingNonce       [8]byte
+	pingPending     bool
+	incoming        chan *MuxStream
+	done            chan struct{}
+	closeOnce       sync.Once
+	peerID          NodeID
+	limiter         *FrameLimiter
+	observer        Observer
+	dgrams          *scheduler.Scheduler
+	violations      int
+	linkID          [16]byte
+	udpWindowDrops  atomic.Uint64
+	udpReceiveDrops atomic.Uint64
+	windowMu        sync.Mutex
+	pendingStream   map[uint32]uint64
+	pendingTotal    uint64
+	streamGrant     uint32
+	aggregateGrant  uint32
 }
 
 type MuxStream struct {
-	link       *MuxLink
-	ID         uint32
-	Network    StreamNetwork
-	receive    chan Frame
-	done       chan struct{}
-	closeOnce  sync.Once
-	resourceMu sync.Mutex
-	resource   io.Closer
+	link        *MuxLink
+	ID          uint32
+	Network     StreamNetwork
+	receive     chan Frame
+	done        chan struct{}
+	closeOnce   sync.Once
+	writeClosed atomic.Bool
+	resourceMu  sync.Mutex
+	resource    io.Closer
 }
 
 type RemoteOpenAuthorizer func(context.Context, NodeID, OpenRequest) (io.Closer, error)
@@ -218,7 +227,17 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if dgrams == nil {
 		dgrams = scheduler.New(1 << 20)
 	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams}
+	aggregateGrant := config.AggregateWindow / 2
+	if aggregateGrant > config.StreamWindow {
+		aggregateGrant = config.StreamWindow / 2
+	}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
+	if m.streamGrant == 0 {
+		m.streamGrant = 1
+	}
+	if m.aggregateGrant == 0 {
+		m.aggregateGrant = 1
+	}
 	if _, err := rand.Read(m.linkID[:]); err != nil {
 		return nil, err
 	}
@@ -404,6 +423,9 @@ func (m *MuxLink) Close(err error) {
 		slog.Warn("vlink link closed after repeated violations", "reason", err)
 	}
 	m.closeOnce.Do(func() {
+		defer func() {
+			slog.Info("udp link drop summary", "link_id", fmt.Sprintf("%x", m.linkID), "window_drops", m.udpWindowDrops.Load(), "queue_drops", m.dgrams.Drops(scheduler.DropQueueFull), "receive_queue_drops", m.udpReceiveDrops.Load())
+		}()
 		m.observeClose(err)
 		m.dispatch.Close(err)
 		m.windows.Close()
@@ -499,6 +521,7 @@ func (m *MuxLink) readLoop() {
 		if applyErr != nil {
 			var streamErr *StreamViolation
 			if errors.As(applyErr, &streamErr) {
+				slog.Warn("vlink stream violation", "stream_id", streamErr.StreamID, "frame_type", frame.Type, "cause", streamErr.Cause)
 				if m.recordViolation(ErrorClassStreamViolation) {
 					return
 				}
@@ -538,6 +561,13 @@ func (m *MuxLink) readLoop() {
 		}
 		if accepted.Type != 0 {
 			if err := stream.enqueue(accepted); err != nil {
+				if accepted.Type == FrameDgram {
+					m.udpReceiveDrops.Add(1)
+					if err := stream.Consume(context.Background(), uint32(len(accepted.Payload))); err != nil {
+						return
+					}
+					continue
+				}
 				m.reset(frame.StreamID, 8)
 				continue
 			}
@@ -582,6 +612,9 @@ func (m *MuxLink) getStream(id uint32) *MuxStream {
 	return m.streams[id]
 }
 func (m *MuxLink) removeStream(id uint32) {
+	m.windowMu.Lock()
+	delete(m.pendingStream, id)
+	m.windowMu.Unlock()
 	m.mu.Lock()
 	stream := m.streams[id]
 	delete(m.streams, id)
@@ -721,19 +754,56 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 	// Preserve the existing per-stream admission boundary; the scheduler adds
 	// an independent bounded queue after this non-blocking check.
 	if ok, err := s.link.windows.TryAcquire(s.ID, uint32(len(payload))); err != nil || !ok {
+		if err == nil && !ok {
+			s.link.udpWindowDrops.Add(1)
+		}
 		return ok, err
 	}
 	ok, reason := s.link.dgrams.Enqueue(scheduler.Item{Kind: scheduler.UDP, StreamID: s.ID, Payload: payload})
 	if !ok {
-		return false, fmt.Errorf("vlink: UDP datagram dropped: %s", reason)
+		_ = s.link.windows.Grant(s.ID, uint32(len(payload)))
+		_ = s.link.windows.Grant(0, uint32(len(payload)))
+		if reason == scheduler.DropQueueFull {
+			return false, nil
+		}
+		return false, fmt.Errorf("vlink: UDP datagram rejected: %s", reason)
 	}
 	return true, nil
+}
+
+func (m *MuxLink) UDPWindowDrops() uint64 {
+	if m == nil {
+		return 0
+	}
+	return m.udpWindowDrops.Load()
+}
+
+func (m *MuxLink) UDPQueueDrops() uint64 {
+	if m == nil {
+		return 0
+	}
+	return m.dgrams.Drops(scheduler.DropQueueFull) + m.udpReceiveDrops.Load()
+}
+
+func (s *MuxStream) UDPDropCounts() (window, queue uint64) {
+	if s == nil || s.link == nil {
+		return 0, 0
+	}
+	return s.link.UDPWindowDrops(), s.link.UDPQueueDrops()
 }
 func (s *MuxStream) CloseWrite(ctx context.Context) error {
 	if s.Network != StreamTCP {
 		return ErrProtocol
 	}
+	if !s.writeClosed.CompareAndSwap(false, true) {
+		return nil
+	}
+	if err := s.link.flushWindows(ctx, s.ID); err != nil {
+		s.writeClosed.Store(false)
+		return err
+	}
 	if err := s.link.dispatch.streams.MarkLocalFIN(s.ID); err != nil {
+		s.writeClosed.Store(false)
 		return err
 	}
 	err := s.link.write(ctx, Frame{Type: FrameFIN, StreamID: s.ID})
@@ -763,14 +833,51 @@ func (s *MuxStream) Consume(ctx context.Context, bytes uint32) error {
 	if bytes == 0 {
 		return nil
 	}
-	var payload [4]byte
-	binary.BigEndian.PutUint32(payload[:], bytes)
-	if err := s.link.write(ctx, Frame{Type: FrameWindow, StreamID: s.ID, Payload: payload[:]}); err != nil {
-		s.link.Close(err)
+	return s.link.consume(ctx, s.ID, bytes)
+}
+
+func (m *MuxLink) consume(ctx context.Context, streamID, bytes uint32) error {
+	m.windowMu.Lock()
+	m.pendingStream[streamID] += uint64(bytes)
+	m.pendingTotal += uint64(bytes)
+	var streamDelta, aggregateDelta uint32
+	if m.pendingStream[streamID] >= uint64(m.streamGrant) {
+		streamDelta = uint32(m.pendingStream[streamID])
+		m.pendingStream[streamID] = 0
+	}
+	if m.pendingTotal >= uint64(m.aggregateGrant) {
+		aggregateDelta = uint32(m.pendingTotal)
+		m.pendingTotal = 0
+	}
+	m.windowMu.Unlock()
+	return m.writeWindows(ctx, streamID, streamDelta, aggregateDelta)
+}
+
+func (m *MuxLink) flushWindows(ctx context.Context, streamID uint32) error {
+	m.windowMu.Lock()
+	streamDelta := uint32(m.pendingStream[streamID])
+	m.pendingStream[streamID] = 0
+	aggregateDelta := uint32(m.pendingTotal)
+	m.pendingTotal = 0
+	m.windowMu.Unlock()
+	return m.writeWindows(ctx, streamID, streamDelta, aggregateDelta)
+}
+
+func (m *MuxLink) writeWindows(ctx context.Context, streamID, streamDelta, aggregateDelta uint32) error {
+	write := func(id, delta uint32) error {
+		if delta == 0 {
+			return nil
+		}
+		var payload [4]byte
+		binary.BigEndian.PutUint32(payload[:], delta)
+		return m.write(ctx, Frame{Type: FrameWindow, StreamID: id, Payload: payload[:]})
+	}
+	if err := write(streamID, streamDelta); err != nil {
+		m.Close(err)
 		return err
 	}
-	if err := s.link.write(ctx, Frame{Type: FrameWindow, StreamID: 0, Payload: payload[:]}); err != nil {
-		s.link.Close(err)
+	if err := write(0, aggregateDelta); err != nil {
+		m.Close(err)
 		return err
 	}
 	return nil

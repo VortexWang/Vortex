@@ -12,10 +12,10 @@ arch=$(docker info --format '{{.Architecture}}' 2>/dev/null || uname -m)
   echo "architecture: $arch"
 	 echo "runtime_qualification: pending"
 	 echo "performance_qualification: not-qualified"
-	 echo "scope: library benchmark and loopback UDP smoke; not three-relay sustained mixed load"
+	 echo "scope: three-relay TCP baseline and mixed TCP/UDP runtime load, accounting, library benchmark"
 } > "$OUT/metadata.txt"
 BACKEND="$BACKEND" QUALIFICATION_DIR="$QUALIFICATION_DIR" tools/phase4/qualification.sh
-echo "runtime_qualification: tcp-udp-topology-and-accounting-pass" >> "$OUT/metadata.txt"
+echo "runtime_qualification: tcp-udp-mixed-runtime-and-accounting-pass" >> "$OUT/metadata.txt"
 cd "$ROOT/engine"
 set +e
 go test ./scheduler ./vlink -run '^$' -bench 'Benchmark' -benchtime=1s -count=1 > "$OUT/raw.txt" 2>&1
@@ -27,4 +27,4 @@ echo "library_benchmark: completed" >> "$OUT/metadata.txt"
 echo "performance_qualification: not-qualified" >> "$OUT/metadata.txt"
 go run "$ROOT/tools/phase4/udp_loss.go" -count 20000 > "$OUT/udp-loss.txt"
 cat "$OUT/udp-loss.txt"
-exit 0
+exit "$status"

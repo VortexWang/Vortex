@@ -103,6 +103,15 @@ func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	if frame, err := serverA.Receive(ctx); err != nil || string(frame.Payload) != "d" {
 		t.Fatalf("windowed data: %q %v", frame.Payload, err)
 	}
+	if err := clientA.CloseWrite(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := clientA.CloseWrite(ctx); err != nil {
+		t.Fatalf("duplicate half-close was not idempotent: %v", err)
+	}
+	if frame, err := serverA.Receive(ctx); err != nil || frame.Type != FrameFIN {
+		t.Fatalf("half-close frame=%+v err=%v", frame, err)
+	}
 	client.Close(nil)
 	server.Close(nil)
 }

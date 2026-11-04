@@ -108,7 +108,9 @@ func (s *Supervisor) Dial(ctx context.Context, handler LinkHandler) error {
 }
 
 func (s *Supervisor) handshake(ctx context.Context, conn *tls.Conn, client bool) (*vlink.MuxLink, vlink.NodeID, error) {
-	link, peer, err := vlink.NewAuthenticatedMuxLink(ctx, conn, s.hello(client), vlink.MuxConfig{LocalClient: client, StreamWindow: 256 * 1024, AggregateWindow: 1024 * 1024, MaxWindow: 4 * 1024 * 1024})
+	// Bound receive storage above the 1 MiB stream credit. Half-window credit
+	// updates keep normal bulk transfers within the control-frame rate budget.
+	link, peer, err := vlink.NewAuthenticatedMuxLink(ctx, conn, s.hello(client), vlink.MuxConfig{LocalClient: client, StreamWindow: 1024 * 1024, AggregateWindow: 4 * 1024 * 1024, MaxWindow: 8 * 1024 * 1024, StreamQueueFrames: 128})
 	if err != nil {
 		return nil, vlink.NodeID{}, err
 	}

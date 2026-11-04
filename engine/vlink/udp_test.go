@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"vortex/engine/accounting"
+	"vortex/engine/scheduler"
 )
 
 func TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss(t *testing.T) {
@@ -140,6 +141,10 @@ func TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit(t *testing.T) {
 	if accepted, err := clientStream.WriteDgram(ctx, []byte("x")); err != nil || accepted {
 		t.Fatalf("over-window datagram accepted=%v err=%v", accepted, err)
 	}
+	windowDrops, queueDrops := clientStream.UDPDropCounts()
+	if windowDrops != 1 || queueDrops != 0 {
+		t.Fatalf("drop counters window=%d queue=%d", windowDrops, queueDrops)
+	}
 	if frame, err := serverStream.Receive(ctx); err != nil || string(frame.Payload) != "four" {
 		t.Fatalf("first datagram=%+v err=%v", frame, err)
 	}
@@ -162,6 +167,53 @@ func TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit(t *testing.T) {
 	}
 	if frame, err := serverStream.Receive(ctx); err != nil || string(frame.Payload) != "x" {
 		t.Fatalf("resumed datagram=%+v err=%v", frame, err)
+	}
+}
+
+func TestUDPQueueDropReturnsCreditAndPreservesStream(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	client, err := newMuxLink(clientConn, MuxConfig{LocalClient: true, StreamWindow: 4, AggregateWindow: 4, MaxWindow: 16, DgramScheduler: scheduler.New(1)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(nil)
+	server, err := newMuxLink(serverConn, MuxConfig{StreamWindow: 4, AggregateWindow: 4, MaxWindow: 16})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close(nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	stream, err := client.Open(ctx, OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 2, ClientAddress: []byte{192, 0, 2, 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	remote, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, remote.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := stream.WaitOpen(ctx); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		accepted, err := stream.WriteDgram(ctx, []byte("four"))
+		if accepted || err != nil {
+			t.Fatalf("queue drop accepted=%v err=%v", accepted, err)
+		}
+		window := client.windows.Snapshot()
+		if window.AggregateAvailable != 4 || window.StreamAvailable[stream.ID] != 4 {
+			t.Fatalf("drop leaked credit: %+v", window)
+		}
+	}
+	if _, open := client.dispatch.streams.Snapshot(stream.ID); !open {
+		t.Fatal("queue drop reset authorized stream")
+	}
+	windowDrops, queueDrops := stream.UDPDropCounts()
+	if windowDrops != 0 || queueDrops != 3 {
+		t.Fatalf("window=%d queue=%d", windowDrops, queueDrops)
 	}
 }
 

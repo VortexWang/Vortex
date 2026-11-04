@@ -1,9 +1,11 @@
 #!/bin/sh
 set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 mode=${1:-native}
 out=${2:-"$(pwd)/artifacts/phase4/qualification/$mode"}
 mkdir -p "$out/config" "$out/certs"
+rm -f "$out/topology-ready" "$out/qualification.txt" "$out/result.txt" "$out/mixed-workload.json"
 
 case "$mode" in
   native) host=127.0.0.1; cert_root="$out/certs"; cert_ref="$cert_root"; ;;
@@ -48,3 +50,4 @@ else
   json destination destination 00000000-0000-0000-0000-000000000005 "$host:9445" "" 00000000-0000-0000-0000-000000000004 "" 3 "" "172.30.0.10:18081"
 fi
 printf '%s\n' "$mode" > mode
+python3 "$script_dir/record_evidence.py" "$out" "$mode"

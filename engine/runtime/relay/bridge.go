@@ -117,12 +117,9 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 				return err
 			}
 		case vlink.FrameDgram:
-			accepted, err := destination.WriteDgram(ctx, frame.Payload)
+			_, err := destination.WriteDgram(ctx, frame.Payload)
 			if err != nil {
 				return err
-			}
-			if !accepted {
-				slog.Warn("vlink UDP forwarding dropped datagram", "reason", "downstream_window_or_queue_full")
 			}
 			if err := source.Consume(ctx, uint32(len(frame.Payload))); err != nil {
 				return err
@@ -241,7 +238,6 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 						if batch != nil {
 							_ = batch.Return(bridgeCtx)
 						}
-						slog.Warn("udp target response dropped", "reason", "window_or_queue_full")
 						continue
 					}
 				} else {

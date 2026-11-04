@@ -4,7 +4,7 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/source.json"]
-    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     ports: ["18080:18080/tcp", "18082:18082/udp"]
     networks: [vortex]
   relay-1:
@@ -12,34 +12,35 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/relay-1.json"]
-    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   relay-2:
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/relay-2.json"]
-    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   relay-3:
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/relay-3.json"]
-    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   destination:
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/destination.json"]
-    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   target:
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["python3", "/usr/local/bin/echo_target.py", "--host", "0.0.0.0"]
+    ports: ["18083:18083/tcp"]
     networks:
       vortex:
         ipv4_address: 172.30.0.10

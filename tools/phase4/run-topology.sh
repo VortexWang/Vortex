@@ -29,7 +29,8 @@ if [ -n "${VORTEX_RELAY_BIN:-}" ]; then
 		exit 1
 	fi
 else
-	bin=$root/engine/vortex-relay
+	bin=$root/artifacts/phase4/vortex-relay
+  mkdir -p "$root/artifacts/phase4"
   (cd "$root/engine" && go build -o "$bin" ./cmd/vortex-relay)
 fi
 mkdir -p "$out/logs"

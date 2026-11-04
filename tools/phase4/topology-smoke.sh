@@ -4,11 +4,12 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
 qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
-bin=${VORTEX_RELAY_BIN:-$root/engine/vortex-relay}
+bin=${VORTEX_RELAY_BIN:-$root/artifacts/phase4/vortex-relay}
+target_pid=
 mkdir -p "$root/artifacts/phase4" "$qual"
 
 if [ "$mode" = native ]; then
-  if [ ! -x "$bin" ]; then
+  if [ -z "${VORTEX_RELAY_BIN:-}" ]; then
     (cd "$root/engine" && go build -o "$bin" ./cmd/vortex-relay)
   fi
   QUALIFICATION_DIR="$qual" BACKEND=native "$root/tools/phase4/run-topology.sh" >"$qual/topology.log" 2>&1 &
@@ -21,12 +22,18 @@ fi
 cleanup() {
   kill "$topology_pid" 2>/dev/null || true
   if [ "$mode" = docker ]; then
+    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || true
+    mkdir -p "$qual/logs"
+    for name in source relay-1 relay-2 relay-3 destination; do
+      QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" logs --no-color "$name" >"$qual/logs/$name.log" 2>&1 || true
+    done
     QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
   fi
   if [ -n "${target_pid:-}" ]; then kill "$target_pid" 2>/dev/null || true; fi
   for name in source relay-1 relay-2 relay-3 destination; do
     if [ -f "$qual/$name.pid" ]; then kill "$(sed -n '1p' "$qual/$name.pid")" 2>/dev/null || true; fi
   done
+  wait "$topology_pid" 2>/dev/null || true
 }
 trap cleanup INT TERM EXIT
 
@@ -46,6 +53,14 @@ if [ "$mode" = native ]; then
   target_pid=$!
   sleep 1
 fi
+python3 - "$qual/target-start.json" <<'PY'
+import json, sys, urllib.request
+with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
+    stats = json.load(response)
+with open(sys.argv[1], "w", encoding="utf-8") as output:
+    json.dump(stats, output, sort_keys=True)
+    output.write("\n")
+PY
 python3 - "$qual/client.out" "$qual/udp-client.out" <<'PY'
 import socket, sys
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
@@ -63,8 +78,22 @@ open(sys.argv[1], "wb").write(data)
 if data != b"vortex-three-relay-smoke":
     raise SystemExit("echo payload mismatch")
 PY
-kill "$target_pid" 2>/dev/null || true
+python3 "$root/tools/phase4/mixed_workload.py" \
+  --duration "${MIXED_DURATION_SECONDS:-5}" \
+  --tcp-streams "${MIXED_TCP_STREAMS:-4}" \
+  --udp-mbps "${MIXED_UDP_MBPS:-100}" \
+  --output "$qual/mixed-workload.json"
+python3 - "$qual/target-final.json" <<'PY'
+import json, sys, urllib.request
+with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
+    stats = json.load(response)
+with open(sys.argv[1], "w", encoding="utf-8") as output:
+    json.dump(stats, output, sort_keys=True)
+    output.write("\n")
+PY
+cleanup
+trap - INT TERM EXIT
 for name in source relay-1 relay-2 relay-3 destination; do
   grep -q 'OPEN authorized' "$qual/logs/$name.log"
 done
-printf 'status=pass\nmode=%s\npayload=vortex-three-relay-smoke\n' "$mode" >"$qual/result.txt"
+printf 'status=pass\nmode=%s\npayload=vortex-three-relay-smoke\nmixed_workload=mixed-workload.json\n' "$mode" >"$qual/result.txt"
