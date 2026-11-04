@@ -134,8 +134,12 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 }
 
 func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) error {
+	var owned vlink.Frame
+	defer func() { owned.Release() }()
 	for {
+		owned.Release()
 		frame, err := source.Receive(ctx)
+		owned = frame
 		if err != nil {
 			return err
 		}
@@ -199,8 +203,12 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
+		var owned vlink.Frame
+		defer func() { owned.Release() }()
 		for {
+			owned.Release()
 			frame, err := stream.Receive(bridgeCtx)
+			owned = frame
 			if err != nil {
 				errCh <- err
 				return

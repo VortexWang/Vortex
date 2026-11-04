@@ -156,6 +156,7 @@ type MuxLink struct {
 	controlWrites   chan frameWrite
 	dataWrites      chan frameWrite
 	writeWake       chan struct{}
+	writerStopped   chan struct{}
 	mu              sync.Mutex
 	streams         map[uint32]*MuxStream
 	pingNonce       [8]byte
@@ -236,7 +237,7 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if aggregateGrant > config.StreamWindow {
 		aggregateGrant = config.StreamWindow / 2
 	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
 	if m.streamGrant == 0 {
 		m.streamGrant = 1
 	}
@@ -436,8 +437,12 @@ func (m *MuxLink) Close(err error) {
 }
 
 func (m *MuxLink) readLoop() {
+	var owned Frame
+	defer func() { owned.Release() }()
 	for {
-		frame, err := ReadFrame(m.conn)
+		owned.Release()
+		frame, err := readMuxFrame(m.conn)
+		owned = frame
 		if err != nil {
 			m.Close(err)
 			return
@@ -560,6 +565,7 @@ func (m *MuxLink) readLoop() {
 				m.reset(frame.StreamID, 8)
 				continue
 			}
+			owned = Frame{} // receive queue now owns the lease
 		}
 		if frame.Type == FrameOpenErr || frame.Type == FrameRST {
 			m.removeStream(frame.StreamID)
@@ -704,9 +710,10 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 		if groupSize > 4*MaxTLSRecordPayload {
 			groupSize = 4 * MaxTLSRecordPayload
 		}
-		// Own at most four frames per call iteration. Queue all independently
-		// windowed frames before waiting, allowing the writer to batch one stream.
-		owned := append([]byte(nil), payload[:groupSize]...)
+		// Queue at most four independently windowed frames before waiting.
+		// waitWrite resolves ownership before this method returns, including
+		// transport closure, so the caller may safely reuse its input then.
+		owned := payload[:groupSize]
 		var pending [4]frameWrite
 		count := 0
 		for len(owned) > 0 {
@@ -717,6 +724,7 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			waitStarted := time.Now()
 			if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
 				s.link.Close(err)
+				<-s.link.writerStopped
 				return err
 			}
 			if s.link.observer != nil {
@@ -725,6 +733,7 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			request, err := s.link.enqueueWrite(ctx, Frame{Type: FrameData, StreamID: s.ID, Payload: owned[:size]})
 			if err != nil {
 				s.link.Close(err)
+				<-s.link.writerStopped
 				return err
 			}
 			pending[count] = request
@@ -734,6 +743,7 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 		for i := 0; i < count; i++ {
 			if err := s.link.waitWrite(pending[i]); err != nil {
 				s.link.Close(err)
+				<-s.link.writerStopped
 				return err
 			}
 		}

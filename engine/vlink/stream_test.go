@@ -313,7 +313,7 @@ func TestStreamRemoteOpenAndHalfCloseIsolation(t *testing.T) {
 		t.Fatal(err)
 	}
 	if pending, err := table.DrainPendingOpenFrames(remoteID); err != nil || len(pending) != 1 || string(pending[0].Payload) != "early" {
-		t.Fatalf("pending bytes=%d err=%v", pending, err)
+		t.Fatalf("pending bytes=%v err=%v", pending, err)
 	}
 	if err := table.MarkLocalFIN(remoteID); err != nil {
 		t.Fatal(err)

@@ -45,7 +45,7 @@ func (m *MuxLink) waitWrite(request frameWrite) error {
 	select {
 	case err := <-request.done:
 		return err
-	case <-m.done:
+	case <-m.writerStopped:
 		return m.Err()
 	}
 }
@@ -61,6 +61,7 @@ func (m *MuxLink) wakeWriter() {
 // and DGRAM alternate bounded turns. Only datagrams already queued are batched,
 // so an idle UDP flow incurs no batching timer or artificial latency.
 func (m *MuxLink) dgramLoop() {
+	defer close(m.writerStopped)
 	udpTurn := true
 	var encoded bytes.Buffer
 	encoded.Grow(MaxPayloadSize + HeaderSize)

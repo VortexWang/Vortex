@@ -22,6 +22,36 @@ func TestFrameRoundTrip(t *testing.T) {
 	}
 }
 
+func TestMuxFrameLeaseIsIndependentAndReleasedOnce(t *testing.T) {
+	var wire bytes.Buffer
+	for _, payload := range []string{"first", "second"} {
+		if err := WriteFrame(&wire, Frame{Type: FrameData, StreamID: 1, Payload: []byte(payload)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, err := readMuxFrame(&wire)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := readMuxFrame(&wire)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer second.Release()
+	if first.lease.storage == second.lease.storage || string(first.Payload) != "first" || string(second.Payload) != "second" {
+		t.Fatal("live frame storage aliased")
+	}
+	copyOfFirst := first
+	first.Release()
+	copyOfFirst.Release()
+	if !first.lease.released.Load() {
+		t.Fatal("payload not returned")
+	}
+	if second.lease.released.Load() || string(second.Payload) != "second" {
+		t.Fatal("unrelated live frame released")
+	}
+}
+
 func TestReadFrameRejectsMalformedHeadersBeforePayload(t *testing.T) {
 	tests := []struct {
 		name   string

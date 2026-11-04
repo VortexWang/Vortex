@@ -300,8 +300,12 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 		recvErr := make(chan error, 1)
 		activity := make(chan struct{}, 1)
 		go func() {
+			var owned vlink.Frame
+			defer func() { owned.Release() }()
 			for {
+				owned.Release()
 				frame, err := stream.Receive(ctx)
+				owned = frame
 				if err != nil {
 					recvErr <- err
 					return

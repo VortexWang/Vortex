@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"sync/atomic"
 )
 
 const (
@@ -50,6 +51,7 @@ type Frame struct {
 	Flags    uint8
 	StreamID uint32
 	Payload  []byte
+	lease    *framePayloadLease
 }
 
 func ReadFrame(r io.Reader) (Frame, error) {
@@ -225,4 +227,36 @@ func (a *StreamIDAllocator) Next() (uint32, error) {
 		a.next += 2
 	}
 	return id, nil
+}
+
+// Release returns an owned mux payload to its pool. Copies of a Frame share the
+// lease; after any copy is released, no copy may inspect its payload again.
+// Frames decoded with ReadFrame or caller-owned buffers have no lease.
+func (f Frame) Release() {
+	if f.lease != nil && f.lease.released.CompareAndSwap(false, true) {
+		muxReadBuffers.Put(f.lease.storage)
+	}
+}
+
+type framePayloadLease struct {
+	storage  *[MaxPayloadSize]byte
+	released atomic.Bool
+}
+
+var muxReadBuffers = sync.Pool{New: func() any { return new([MaxPayloadSize]byte) }}
+
+func readMuxFrame(r io.Reader) (Frame, error) {
+	storage := muxReadBuffers.Get().(*[MaxPayloadSize]byte)
+	frame, err := ReadFrameWithBuffer(r, storage[:])
+	if err != nil {
+		muxReadBuffers.Put(storage)
+		return Frame{}, err
+	}
+	if frame.Type == FrameData || frame.Type == FrameDgram {
+		frame.lease = &framePayloadLease{storage: storage}
+	} else {
+		frame.Payload = append([]byte(nil), frame.Payload...)
+		muxReadBuffers.Put(storage)
+	}
+	return frame, nil
 }

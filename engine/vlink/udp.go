@@ -90,8 +90,12 @@ func (r *UDPResource) Run(ctx context.Context, stream *MuxStream, onDrop func())
 	defer stop()
 	results := make(chan error, 2)
 	go func() {
+		var owned Frame
+		defer func() { owned.Release() }()
 		for {
+			owned.Release()
 			frame, err := stream.Receive(ctx)
+			owned = frame
 			if err != nil {
 				if errors.Is(err, ErrStreamState) {
 					results <- nil
