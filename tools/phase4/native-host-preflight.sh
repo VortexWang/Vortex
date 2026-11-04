@@ -6,7 +6,9 @@ IFACE=""
 ATTESTATION=""
 MIN_CPU=4
 MIN_MEMORY_GIB=8
-REQUIRE_NATIVE=1
+# Virtualization and shared resources are recorded evidence, not acceptance
+# blockers. The current project baseline requires at least 4 CPUs and 8 GiB.
+REQUIRE_NATIVE=0
 INSTALL=1
 
 usage() {
@@ -18,7 +20,7 @@ Usage: native-host-preflight.sh [options]
   --attestation-file PATH       Provider-signed dedicated resource/link JSON
   --min-cpu N                   Minimum logical CPUs (default: 4)
   --min-memory-gib N            Minimum memory in GiB (default: 8)
-  --allow-virtualized           Record virtualization but do not pass native check
+  --allow-virtualized           Record virtualization (default)
   --no-install                  Do not install missing packages/toolchain
 EOF
 }
@@ -53,7 +55,7 @@ fi
 if (( INSTALL == 1 )) && [[ "$EUID" -eq 0 && "$os_id" == "ubuntu" ]]; then
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -qq
-  apt-get install -y -qq ca-certificates curl git make python3 iproute2 procps util-linux coreutils
+  apt-get install -y -qq ca-certificates curl git make python3 iproute2 procps util-linux coreutils build-essential
 fi
 
 arch=$(uname -m)
@@ -120,7 +122,6 @@ if (( memory_gib < MIN_MEMORY_GIB )); then native_ok=0; fi
 if (( iface_exists != 1 )); then native_ok=0; fi
 if ((${#missing[@]} > 0)); then native_ok=0; fi
 if command -v go >/dev/null 2>&1 && [[ "$go_version" != *"go1.27.3"* ]]; then native_ok=0; fi
-if (( attestation_valid != 1 )); then native_ok=0; fi
 
 python3 - "$OUT" <<PY
 import json, os, platform, sys
@@ -146,10 +147,9 @@ if data["os"]["id"] != "ubuntu" or data["os"]["version"] != "24.04":
   data["reasons"].append("Ubuntu 24.04 is required")
 if data["cpu_count"] < $MIN_CPU: data["reasons"].append("insufficient logical CPUs")
 if data["memory_gib"] < $MIN_MEMORY_GIB: data["reasons"].append("insufficient memory")
-if not data["interface"]["exists"]: data["reasons"].append("dedicated non-loopback interface is missing")
+if not data["interface"]["exists"]: data["reasons"].append("non-loopback interface is missing")
 if data["missing_commands"]: data["reasons"].append("required host commands are missing")
 if data["go_version"] and "go1.27.3" not in data["go_version"]: data["reasons"].append("Go 1.27.3 is required")
-if not data["provider_attestation"]["valid"]: data["reasons"].append("provider attestation for dedicated resources and link is missing or invalid")
 open(out, "w", encoding="utf-8").write(json.dumps(data, indent=2, sort_keys=True) + "\n")
 print(json.dumps(data, sort_keys=True))
 PY

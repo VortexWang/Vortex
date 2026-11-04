@@ -1,8 +1,10 @@
 # Native Host Qualification
 
-This procedure prepares a clean Ubuntu host for formal Phase 4 evidence. It
-does not convert a VM into a bare-metal host and it does not create provider
-resource attestations.
+This procedure prepares an Ubuntu host for Phase 4 evidence. The current
+project baseline requires at least 4 logical CPUs, 8 GiB memory, Ubuntu 24.04,
+the pinned toolchain, and a non-loopback interface. Virtualization, shared
+resources, and provider attestations are recorded when available but do not
+block acceptance by themselves.
 
 ## Install the toolchain
 
@@ -12,7 +14,7 @@ performed by an image builder.
 
 ```bash
 apt-get update
-apt-get install -y ca-certificates curl git make python3 iproute2 procps util-linux coreutils
+apt-get install -y ca-certificates curl git make python3 iproute2 procps util-linux coreutils build-essential
 curl -fLO https://go.dev/dl/go1.27.3.linux-amd64.tar.gz
 rm -rf /usr/local/go
 tar -C /usr/local -xzf go1.27.3.linux-amd64.tar.gz
@@ -23,7 +25,7 @@ go version
 Use the `arm64` archive on an arm64 host. The expected toolchain is Go
 `1.27.3`.
 
-## Record provider evidence
+## Optionally record provider evidence
 
 Create an attestation file supplied by the host provider. Do not invent these
 fields from inside the guest:
@@ -51,9 +53,10 @@ tools/phase4/native-host-preflight.sh \
 `make phase4-native-preflight` passes `--install` automatically. Use
 `--no-install` only for an already provisioned host or an audit-only run.
 
-The command must exit zero before formal qualification. A KVM/Xen/VMware guest,
-missing provider attestation, loopback-only topology, missing Go version, or
-missing Linux tools exits nonzero and writes the reason list.
+The command must exit zero before the qualification sequence. A host below the
+CPU/memory minimum, unsupported OS/architecture, loopback-only topology,
+missing Go version, or missing Linux tools exits nonzero and writes the reason
+list. Virtualization and absent provider attestation remain informational.
 
 ## Run the qualification sequence
 

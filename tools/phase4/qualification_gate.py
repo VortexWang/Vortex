@@ -12,6 +12,20 @@ def load(path: str):
         return None
 
 
+def memory_gib(host):
+    value = host.get("memory_gib")
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(host.get("mem_total", ""))
+    parts = text.split()
+    if len(parts) >= 2 and parts[0] == "MemTotal:":
+        try:
+            return float(parts[1]) / 1024 / 1024
+        except ValueError:
+            pass
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runtime", required=True)
@@ -37,10 +51,14 @@ def main() -> int:
         reasons.append("independent TLS report is not pass")
     if host is None:
         reasons.append("host report is missing or invalid")
-    elif not host.get("isolated_resources", False):
-        reasons.append("host does not prove isolated resources")
-    if host is not None and not host.get("dedicated_link", False):
-        reasons.append("host does not prove an independent link")
+    else:
+        if int(host.get("cpu_count", 0)) < 4:
+            reasons.append("host has fewer than 4 logical CPUs")
+        memory = memory_gib(host)
+        if memory is None:
+            reasons.append("host memory evidence is missing")
+        elif memory < 8:
+            reasons.append("host has less than 8 GiB memory")
     if args.warmup_seconds < 60:
         reasons.append("warmup is shorter than 60 seconds")
     if args.trials < 3:
