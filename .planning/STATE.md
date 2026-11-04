@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 clean d0c1cb2 authorized route switch, TCP drain and UDP restart passed Docker, native Ubuntu and Actions; D-04 and qualification review remain
-last_updated: "2026-11-04T13:27:12.326684+00:00"
+stopped_at: Plan 04-06 D-04 review and seven-row NFR matrix completed; source authorization, snapshot/CAS/time-boundary and early-DATA runtime gaps remain
+last_updated: "2026-11-04T13:39:13.122327+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean d0c1cb2 passed eight real process recovery and authorized route cases on Docker/native Ubuntu and Actions; CI fixture restart and evidence ownership failures repaired
-state_head: d0c1cb2
+last_activity_desc: D-04 candidate review and remaining NFR matrix complete; clean 6bfe976 local regression and Actions 41838307562 passed; no parameter freeze or qualification pass
+state_head: 6bfe976
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — clean d0c1cb2 authorized switching and fault recovery validated on Docker, native Ubuntu and Actions
+Last activity: 2026-11-04 — D-04 review and NFR matrix completed; clean 6bfe976 local regression and Actions 41838307562 passed
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 with D-04 parameter review and a concrete remaining-NFR eligibility/coverage matrix; finite runtime switching/recovery now passes. See 04-06-RECOVERY-EVIDENCE.md.
+- Continue Plan 04-06: design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point; implement block/renewal/exhaustion and unknown freeze before D-04 sweeps. Then close NFR-039/040/044 runtime coverage and NFR-007 early-DATA/controlled-RTT gaps. See 04-06-D04-REVIEW.md and 04-06-QUALIFICATION-MATRIX.md.
 
 ### Blockers/Concerns
 
@@ -91,6 +91,14 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-04T13:27:12.326684+00:00
-Stopped at: Plan 04-06 executing; clean d0c1cb2 finite route switch/recovery passed Docker, native Ubuntu and Actions; D-04/NFR qualification review remains
+Last session: 2026-11-04T13:39:13.122327+00:00
+Stopped at: Plan 04-06 executing; D-04 review and remaining NFR matrix complete; next is source authorization adapter design/integration, not another ungated performance run
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
+
+### Latest qualification review
+
+D-04 review completed, candidates not locked. Source has no real authorization
+Gate; memory accounting is not funded credit; NFR-039/040/044 runtime behavior
+and NFR-007 early TCP DATA remain missing. These gaps are actionable without
+exclusive performance hardware. Updated 04-VERIFICATION.md points to the exact
+matrix; diagnostic numeric improvements do not mark formal NFRs passed.

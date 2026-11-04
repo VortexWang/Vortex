@@ -2,33 +2,42 @@
 phase: 04-m2-m2-multi-hop-engine
 verified: 2026-11-04
 status: gaps_found
-score: 4/5 narrow phase criteria verified; relative performance and formal qualification remain open
-behavior_unverified: 1
+score: tracer runtime and finite recovery verified; D-04 and seven NFR rows remain unqualified
+behavior_unverified: 7
 ---
 
-# Phase 4 Verification: Restarted Runtime-Backed Flow
+# Phase 4 Verification — current qualification review
 
-## Goal Achievement
+Review source: `6bfe97624cf807824d8df91fa7519b5a108e2d04` (documentation successor of recovery source `d0c1cb2`). Phase 4 stays **executing**; Plan 04-06 has no completion SUMMARY. V1.11 is reference only. No old restart documents are required to continue implementation.
 
-| # | Criterion | Status | Evidence |
-|---|---|---|---|
-| 1 | A single role-configured binary starts source, relay and destination processes | VERIFIED | `engine/cmd/vortex-relay`, strict config/TLS identity tests and native five-process readiness |
-| 2 | Authorized TCP crosses exactly three relays with OPEN/OPEN_OK and half-close response | VERIFIED | `tools/phase4/topology-smoke.sh`, all five `OPEN authorized` logs, exact echo payload |
-| 3 | Accounting reserves before writes and records successful/unknown outcomes | VERIFIED at tracer boundary | `runtime/accounting` race tests, destination JSONL evidence, qualification gate |
-| 4 | Compose/native qualification entry refuses missing topology or accounting evidence | VERIFIED for five-second diagnostic | Clean `b71a9d0` passed local Compose, Ubuntu native and Actions native/Compose; full directional accounting and classified loss match. See 04-06-PROGRESS.md |
-| 5 | NFR-003/NFR-005/NFR-006/NFR-007 and D-04 final qualification | NOT QUALIFIED | On clean `3b9a04c`, same-workload runtime/TLS ratios exceeded 70% in local Docker and Actions native/Compose; three native Ubuntu repeats on application SHA `349b70d` also exceeded 70%, all with `GOMAXPROCS=1`. Two of three Ubuntu repeats and Actions native exceed the 0.1% UDP-loss target. Runs are five-second diagnostics; formal host/duration, NFR-006/NFR-007 and D-04 gates remain open |
+## Verified boundaries
 
-## Current Automated Evidence
+| Behavior | Result | Evidence |
+| --- | --- | --- |
+| Single role-configured binary, authenticated five-process three-relay TCP/UDP topology | Verified tracer behavior | runtime command/config/link/relay; 04-01..05 summaries and mixed-load reports |
+| Reserve before target write, successful-write commits, ambiguous-write upper bounds | Verified at in-memory tracer boundary only | runtime bridge/accounting tests and byte reconciliation; no authoritative credit balance or durable ledger claim |
+| Explicit pool/mux/auto, real lease reuse, mode-specific first-target-byte samples | Verified finite mode integration | clean cba1bef Docker/native and Actions 41830048180; 04-06-AUTO-EVIDENCE.md |
+| Authorized route selection, monotonic generation, old TCP drain, UDP reopen, middle-hop failure/restart | Verified eight finite process scenarios | clean d0c1cb2 Docker/native and Actions 41836183498; 04-06-RECOVERY-EVIDENCE.md |
+| Harness rejects missing runtime/accounting and protects complete JSONL shutdown | Verified regression boundary | baa0a02 local/Actions scale checks, exact accounting, nonzero relay exit/evidence-write checks |
 
-- Latest tested comparison SHA: `3b9a04ce28de4b935b1f668cae4db5e88aec296b`; local Docker and Actions evidence records `dirty=false`. Native Ubuntu's three-run application evidence is on `349b70d145a707aaa083ed60d06b057edc0860e4`, also clean.
-- Local `make phase4-m2-check`, including full Engine race, targeted cases and Linux Docker protocol regressions: passed.
-- Ubuntu native full Engine race and artifact SHA-256 verification: passed.
-- Same workload and semantic manifest passed runtime/accounting checks in local Compose, Ubuntu native and Actions native/Compose. Exact config hashes differ across environments and were not asserted equal.
-- [Actions 41768502985](https://github.com/VortexWang/Vortex/actions/runs/41768502985): success with both backends and artifact upload.
-- [Actions 41788441381](https://github.com/VortexWang/Vortex/actions/runs/41788441381): success on `3b9a04c`; native and Compose same-load TLS comparison plus artifacts passed. Diagnostic same-load ratios were 115.24% and 90.76% respectively.
-- Native Ubuntu three-run same-load ratios were 77.49%, 87.96%, and 91.86%; the legacy cross-load ratios remained below 70%. Two runs exceeded 0.1% UDP loss. Exact run evidence is retained on the authorized host at `/root/Vortex/artifacts/phase4/native-349b70d`.
-- Full measured results and boundaries: [04-06-PROGRESS.md](04-06-PROGRESS.md). Latest clean-SHA results and comparison scope: 04-06-PROGRESS.md. Earlier smoke results remain historical evidence only.
+## Qualification findings
 
-## Open Gate
+The previous verification referenced early five-second trials and missing mode/fault coverage. Those observations are historical; the authoritative current coverage and remaining work are in **04-06-QUALIFICATION-MATRIX.md**, covering NFR-003/005/006/007/039/040/044 and D-04.
 
-Plan 04-06 remains in progress. The same-load relative throughput gate is met in short diagnostics with the current fixture settings; improve UDP loss stability, complete formal-duration and dedicated-host testing, add pool/mux latency coverage, complete runtime per-flow/unknown-outcome coverage, and review D-04 and host eligibility. These runs do not qualify NFRs or durable accounting. Phase 4 has gaps and Phase 5 must not start.
+- **NFR-003/005:** baa0a02 native scale trials reached 1086–1200 Mbps TCP and <0.1% UDP loss at approximately 100 Mbps actual offered UDP. The one same-load independent TLS comparison reached 82.64%. These diagnostic numeric targets were met. Formal per-node resource/link, 60-second warmup / 300-second three-trial evidence and actual authorization gating are absent. Actions scale offered only 24.21 Mbps, separately recorded.
+- **NFR-006:** integrity, forged OPEN, bypass and process-recovery tests pass for their enumerated finite cases. Full attack/path/configuration coverage has not been demonstrated. Dedicated hardware is not the blocker for closing these functional gaps.
+- **NFR-007:** pool/mux samples now exist, but runtime TCP waits for OPEN_OK before bridging, including downstream relay confirmation. Controlled RTT/timeline evidence and bounded authorized early-DATA behavior are missing. Small loopback medians do not prove no extra network round trip.
+- **NFR-039/040/044:** finite model/library tests do not establish runtime policy-boundary leases, share-CAS/drain, or funded immutable billing-snapshot isolation. In-process injected authority can verify Engine behavior before later Agent/Hub persistence; Engine must not connect to a database.
+- **D-04:** parameter review is complete in 04-06-D04-REVIEW.md. Keep 256 KiB→4 MiB / 8 MiB minimum / 30-second target / 30% waterline as unapproved candidates; no adaptive grant/block/renewal experiment has yet run. VLink windows are distinct parameters.
+
+## Checks this review
+
+`DOCKER_CONTEXT=orbstack make phase4-m2-check` passed on clean 6bfe976 before documentation edits. It runs full Engine race, targeted Engine checks and Linux Docker protocol regression checks; the host portion runs on Darwin and must not be described as a new Ubuntu full-race run. Log: `artifacts/phase4/review/6bfe976-phase4-m2-check.log`. No new performance run or formal qualification was performed in this review.
+
+Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307562) was queried and confirmed successful for the same clean 6bfe976 as the local regression. The preceding recovery run 41836183498 succeeded for d0c1cb2. Historical performance results keep their original SHAs. Any newer documentation commit is not automatically assigned the measured performance values of an older commit.
+
+## Next execution slice
+
+First design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point, preserving Engine process-local injection and non-authoritative tracer scope. Then cover NFR-039/040/044 runtime behavior, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
+
+No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.

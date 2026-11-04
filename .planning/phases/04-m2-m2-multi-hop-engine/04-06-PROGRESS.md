@@ -160,3 +160,18 @@ evidence; both fixture defects are fixed and documented. See
 tracer activation and finite recovery coverage, not durable Agent/Hub authority
 or automatic health scheduling. D-04 and remaining NFR review are next; Phase 4
 remains executing.
+
+
+## D-04 review and remaining-NFR reconciliation — 2026-11-04
+
+Completed 04-06-D04-REVIEW.md and 04-06-QUALIFICATION-MATRIX.md. Reviewed real
+source wiring: source TCP uses nil Gate, destination memory accounting has no
+funded credit balance, and TCP forwarding waits for OPEN_OK. Current Batch,
+Snapshot/share/apply unit cases are narrower than NFR-039/040/044. These are
+implementation/integration gaps, not all environment limitations. Retained
+candidate D-04 values without freezing; defined a measured sweep and next
+finite-issuer/source-gate slice. Updated stale 04-VERIFICATION.md and validation
+commands/hash expectations. Clean 6bfe976 phase4-m2-check passed; log retained
+under artifacts/phase4/review. Actions 41838307562 also succeeded on that same
+6bfe976. No new benchmark, native Ubuntu run, parameter
+lock, Phase 4 completion or Phase 5 transition is claimed.
