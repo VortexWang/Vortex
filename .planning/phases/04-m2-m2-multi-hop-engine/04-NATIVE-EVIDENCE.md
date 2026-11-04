@@ -19,6 +19,17 @@
 - Scope: one TCP flow and one UDP datagram are a functional smoke only. It is not sustained mixed load, queue/fairness measurement, same-path performance ratio, or NFR qualification.
 - Docker Compose was not run on the local host because the OrbStack Docker socket was unavailable. The same Compose target still needs a live Docker run.
 
+## Stream reset cleanup follow-up
+
+- Commit: `eb2737e43efe16ce09f60a5af6bd5e27b777ac8f` (clean worktree)
+- Native Ubuntu qualification repeated with the new binary and again returned
+  `tcp-udp-topology-and-accounting-pass`, with four exact committed events
+  (28/28 UDP bytes and 24/24 TCP bytes across both directions).
+- Explicit local stream reset releases the local mux record after bridge errors
+  and idle timeout. The reset lifecycle test passed 100 times under race
+  detection, and the complete Engine race suite passed.
+- This remains a single-flow smoke, not sustained mixed-load or NFR evidence.
+
 ## Benchmark smoke on the same host
 
 - Command: `BACKEND=native VORTEX_RELAY_BIN=/tmp/vortex-relay-86f06b3 make phase4-m2-benchmark`
