@@ -32,6 +32,21 @@ Semantic manifest SHA-256: `67446928a9e4d639179d344041ff864e9ed2daa2bdb0579e9e93
 - [Actions run 41768502985](https://github.com/VortexWang/Vortex/actions/runs/41768502985): success; shared check, native benchmark/mixed runtime, Compose mixed runtime and evidence upload. Raw artifact `phase4-evidence` is downloaded at `artifacts/phase4/actions-41768502985`.
 - Dedicated native evidence is at `/root/Vortex/artifacts/phase4/qualification/native` on the authorized Ubuntu host; its JSON/checksum copies are at `artifacts/phase4/ubuntu-b71a9d0`. Local Compose evidence is at `artifacts/phase4/qualification/docker`.
 
+## Latest clean-SHA validation
+
+The latest tested application commit is `0b9615eef1541aca30b280a929adf7726f9e7ba6`; native and Actions hosts were clean. Compose now runs the workload and independent baseline from a Linux client container on the fixture bridge, so host port-forwarding is not part of the measured UDP path. `GOMAXPROCS=1` is explicit in this comparison batch and is recorded as a fixture candidate, not a product default.
+
+| Environment | Mixed TCP Mbps | UDP loss | Independent TLS Mbps | Runtime / TLS ratio | Binary / fault / per-flow checks |
+|---|---:|---:|---:|---:|---|
+| Local OrbStack Compose | 1731.79 | 0.000% | 3452.90 | 50.15% | pass |
+| Ubuntu native | 555.72 | 0.000% | 1659.81 | 33.48% | pass |
+| Actions native | 533.14 | 0.000% | 1783.68 | 29.89% | pass |
+| Actions Compose | 449.38 | 0.000% | 1462.24 | 30.73% | pass |
+
+Actions run [41773089707](https://github.com/VortexWang/Vortex/actions/runs/41773089707) succeeded. The runtime probe rejected forged revisions/generations, duplicate visited nodes, skipped hops and direct bypasses; a 64 MiB deterministic file matched SHA-256 before fault injection; terminating relay-2 stopped established TCP/UDP forwarding and did not permit new TCP bypass. These are finite runtime checks, not exhaustive NFR-006 or failover qualification. Fresh first-byte samples and five segment RTT probes were recorded; NFR-007 remains not-qualified because pool/mux modes and the exact formal segment-RTT method are not both covered.
+
+The absolute NFR-003 threshold is met in this short fixture run, but the relative same-path minimum-TLS threshold is not (all ratios are below 70%). The run is also five seconds with four TCP flows, not the specification's long-duration dedicated-host protocol. NFR-003/NFR-005/NFR-006/NFR-007 and D-04 therefore remain unqualified.
+
 ## Remaining work in 04-06
 
 1. Diagnose and improve native/CI mixed-load scheduling and receive-queue behavior. The Ubuntu run is below 400 Mbps, TCP retention is below 70%, and every environment exceeds 0.1% UDP loss in this recorded run. These are measured gaps, not waived thresholds.

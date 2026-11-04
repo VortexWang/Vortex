@@ -8,8 +8,8 @@ status: executing
 stopped_at: Plan 04-06 runtime and same-SHA evidence complete; measured performance and baseline gaps remain
 last_updated: "2026-11-04T03:47:30.284716+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean b71a9d0 passed local Docker, Ubuntu and Actions mixed runtime/accounting; NFR and D-04 remain unqualified
-state_head: b71a9d0
+last_activity_desc: Clean 0b9615e passed Linux-driver Docker, Ubuntu and Actions mixed runtime/accounting plus finite TLS/latency/fault probes; relative NFR and D-04 remain unqualified
+state_head: 0b9615e
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — b71a9d0 passed local Compose, Ubuntu native and Actions native/Compose; measured performance gaps remain
+Last activity: 2026-11-04 — 0b9615e passed Linux-driver Compose, Ubuntu native and Actions native/Compose; absolute throughput and UDP loss improved, relative baseline gap remains
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,12 +68,12 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 performance diagnosis, independent TLS/latency baselines, runtime fault/per-flow coverage and D-04/NFR review; see 04-06-PROGRESS.md.
+- Continue Plan 04-06 relative throughput optimization, long-duration/dedicated-host qualification, pool/mux latency coverage and D-04/NFR review; see 04-06-PROGRESS.md.
 
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Plan 04-06 now has short mixed-runtime and accounting evidence on the same clean SHA across hosts. Ubuntu mixed TCP 366.22 Mbps and UDP loss 14.818% remain below target; independent TLS/latency and runtime fault/per-flow coverage remain open. No NFR or Phase 4 completion is claimed.
+- Plan 04-06 now has short mixed-runtime and accounting evidence on the same clean SHA across hosts. Ubuntu mixed TCP 555.72 Mbps and UDP loss 0% pass the short diagnostic shape, but 33.48% runtime/TLS ratio is below 70%; finite TLS/latency/fault probes pass while formal NFR and D-04 remain open. No Phase 4 completion is claimed.
 
 ## Deferred Items
 
