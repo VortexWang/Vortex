@@ -2,13 +2,13 @@
 phase: 04-m2-m2-multi-hop-engine
 verified: 2026-11-05
 status: gaps_found
-score: tracer runtime and finite recovery verified; D-04 and seven NFR rows remain unqualified
-behavior_unverified: 7
+score: runtime gap slices verified; formal qualification and durable authority remain unqualified
+behavior_unverified: 5
 ---
 
 # Phase 4 Verification — current qualification review
 
-Review source: `a7a7432b11b5c3c7801e7fcfe3fe1664fe6c5b4e` (Plan 04-07 code and evidence successor). Phase 4 stays **executing** because formal qualification and runtime integration gaps remain. V1.11 is reference only. No old restart documents are required to continue implementation.
+Review source: `5bd384a` (Plans 04-08 through 04-11 code and evidence successor). Phase 4 stays **executing** because formal qualification and durable authority gaps remain. V1.11 is reference only. No old restart documents are required to continue implementation.
 
 ## Verified boundaries
 
@@ -151,3 +151,28 @@ above and map directly to the queued plans:
   status: failed
   severity: major
   planned_by: "04-11-PLAN.md"
+
+## 2026-11-05 Gap Reconciliation
+
+Plans 04-08 through 04-11 executed on clean commits `9385d42`, `ccb3065`,
+`d068de0` and `fc9013e`, with documentation finalized at `5bd384a`.
+
+- **G-04-039:** process-local policy-window validation is verified by 04-08;
+  full runtime clock/issuer authority remains failed.
+- **G-04-044:** source snapshot wiring is verified by 04-08; durable per-source
+  conservation remains failed.
+- **G-04-040:** node/boot/revision fencing and ShareGate lease drain are wired
+  and race/Docker tested by 04-09; durable Agent/Hub receipt reconciliation
+  remains failed.
+- **G-04-006:** finite identity/path/revision/hop/visited/bypass matrix and
+  rejection cleanup are verified by 04-10; no exhaustive proof is claimed.
+- **G-04-007:** bounded early TCP DATA and strict UDP OPEN_OK gating are
+  verified by 04-10; dedicated per-mode authorization timelines remain failed.
+- **G-04-003 / G-04-005 / G-D04:** 04-11 adds the 27-case candidate matrix and
+  fail-closed gate, but no eligible isolated native host, runtime-authority
+  report, 60-second warmup or three 300-second trials were available. These
+  remain failed and candidates remain unlocked.
+
+The verification route is therefore **not** Phase 5. Correctness slices are
+implemented, while formal performance qualification and durable authority must
+be completed before Phase 4 can transition.
