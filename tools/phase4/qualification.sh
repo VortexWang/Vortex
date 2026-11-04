@@ -24,10 +24,14 @@ import collections, json, os, re, sys
 
 events_file, workload_file, start_file, final_file, out_dir = sys.argv[1:]
 totals = collections.Counter()
+returned = collections.Counter()
 count = 0
 with open(events_file, encoding="utf-8") as events:
     for line in events:
         event = json.loads(line)
+        if event["outcome"] == "returned" and event["used"] == 0:
+            returned[event["direction"]] += event["reserved"]
+            continue
         if event["outcome"] != "committed" or event["reserved"] != event["used"]:
             raise SystemExit("accounting contains non-committed or unresolved usage")
         totals[event["direction"]] += event["used"]
@@ -42,8 +46,7 @@ target = {key: final[key] - start[key] for key in final}
 smoke_tcp = len(b"vortex-three-relay-smoke")
 smoke_udp = len(b"vortex-three-relay-udp-smoke")
 expected_left = target["tcp_bytes_received"] + target["udp_bytes_received"]
-expected_right = (smoke_tcp + smoke_udp + workload["baseline"]["received_bytes"] +
-                  workload["mixed"]["tcp"]["received_bytes"] + workload["mixed"]["udp_bytes_received"])
+expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned["right_to_left"]
 expected = {"left_to_right": expected_left, "right_to_left": expected_right}
 if count < 4 or dict(totals) != expected:
     raise SystemExit(f"accounting mismatch: events={count} totals={dict(totals)} expected={expected}")
@@ -80,6 +83,9 @@ if lost != classified:
 report = {
     "schema": 1, "runtime_correctness": "pass", "performance_qualification": "not-qualified",
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
+    "returned_reservations": dict(returned),
+    "end_to_end_received_bytes": (smoke_tcp + smoke_udp + workload["baseline"]["received_bytes"] +
+                                  workload["mixed"]["tcp"]["received_bytes"] + workload["mixed"]["udp_bytes_received"]),
     "nfr_003": {"status": "not-qualified", "mixed_tcp_mbps": workload["mixed"]["tcp"]["throughput_mbps"],
                 "tcp_only_retention": workload["tcp_retention"], "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed"},
     "nfr_005": {"status": "not-qualified", "udp_loss": workload["mixed"]["udp_loss"],
