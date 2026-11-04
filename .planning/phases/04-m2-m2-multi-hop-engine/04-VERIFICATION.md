@@ -51,6 +51,10 @@ The same immutable snapshot fixture passed on the native local five-process topo
 
 The deterministic `PolicyBoundary` Engine adapter passed package race tests, full `go test ./...`, `go vet ./...`, clean-SHA `DOCKER_CONTEXT=orbstack make phase4-m2-check`, and Actions 41870988836 on `1e378406b82cc23bede79cb68a2119f9a1e5d266`. It validates pre-issue/TTL and lease coverage, exact-T snapshot selection, conservative interval pause and recovery, a hard cutoff, and retaining unknown usage on the old snapshot. It is not wired into the relay: production clock-health input and a dynamic pre-issue provider are not available. Therefore NFR-039 remains unqualified; see `04-06-POLICY-CLOCK-EVIDENCE.md`.
 
+## d7ca856 share CAS increment
+
+Finite share revision coexistence, CAS fencing, connection overlap occupancy, boot rejection, drain and injectable Gate lease lifecycle passed race, full Engine tests/vet and clean-SHA Docker regression. Actions 41875373595 caught a partial-state mutation on a rejected third-generation Commit; d7ca856 fixes it by separating validation and mutation. Every step in Actions 41876404597 reports success on d7ca856, but the run aggregate is still `in_progress` with no terminal conclusion, so CI is pending. ShareGate is not wired into relay configuration and NFR-040 remains unqualified. See `04-06-SHARE-EVIDENCE.md`.
+
 
 ## Incremental verification: finite source credit — 6a1faf2
 
