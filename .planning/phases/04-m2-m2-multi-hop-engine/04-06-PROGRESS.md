@@ -71,4 +71,12 @@ The same-load ratio cleared 70% in each recorded comparison, including all three
 5. Complete runtime fault/forged OPEN coverage for NFR-006 and per-flow reconciliation/unknown-outcome integration coverage. The in-process accounting adapter is not a durable production ledger.
 6. Review D-04 after the above measurements and host eligibility checks. Do not promote these diagnostics to production accounting or performance acceptance.
 
+## Ordered Follow-up: UDP Stability and Scale
+
+The first follow-up added a bounded `UDPWindowReserve` of 512 KiB to each aggregate VLink window so TCP admission cannot consume the entire initial aggregate credit. Admission telemetry distinguishes per-stream and aggregate credit rejection; unit tests and `go test -race ./...` pass. This has not yet resolved UDP stability: a 10-second, four-stream OrbStack run on `9c35c78` lost 131 of 104,134 datagrams (0.126%), classified as window drops with no kernel receive-buffer errors.
+
+The first formal-size attempt (16 TCP streams, 60 seconds, 100 Mbps UDP) on `41278c4` exposed fixture and runtime gaps. At the default one-million-event cap, accounting capacity exhausted and caused subsequent stream resets. A bounded test-only override was added (default unchanged; hard cap 10 million per execution process). With the cap set to 10 million, TCP completed without workload errors, but qualification failed: UDP loss was 1.699%; target counters recorded 49.89 GB while destination accounting committed 30.89 GB (left/right accounting totals were close to each other but did not reconcile with target totals). Logs also show a UDP idle timeout and stream reset. This is a failed run, not qualification evidence. Raw files are retained under `artifacts/phase4/qualification/docker` but are overwritten by the next local Docker run; archive them before rerunning.
+
+The ordered follow-up is paused at item 2 until the high-concurrency accounting discrepancy, UDP timeout/reset, and packet loss are understood and corrected. Do not proceed to the independent latency item until the 16-stream/60-second runtime workload and accounting checks pass.
+
 No 04-06 SUMMARY or Phase 4 completion has been written. Existing Phase 4 legacy-v1 completion remains invalidated.
