@@ -29,6 +29,11 @@ adapter is bounded to one million events and is not a durable authority ledger.
 Increasing `MIXED_DURATION_SECONDS` can exhaust that bound; an exhausted or
 unresolved accounting run must fail.
 
+Long-duration qualification can set `VORTEX_QUALIFICATION_EVENT_LIMIT` for the
+fixture only (maximum 10,000,000 events per execution process). The default
+remains 1,000,000, and the selected value is included in host/semantic evidence.
+The override is ignored by runtime configs without an evidence file.
+
 Evidence is written below `artifacts/phase4/qualification/{native,docker}`:
 
 - `host.json`: clean/dirty SHA, host facts, exact generated-config hash and

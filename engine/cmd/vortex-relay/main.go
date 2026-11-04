@@ -61,7 +61,11 @@ func main() {
 	if err != nil {
 		fatal(err.Error())
 	}
-	gate, err := runtimeaccounting.NewGate(1000000)
+	maxEvents, err := accountingEventLimit(cfg.EvidenceFile, os.Getenv("VORTEX_QUALIFICATION_EVENT_LIMIT"))
+	if err != nil {
+		fatal(err.Error())
+	}
+	gate, err := runtimeaccounting.NewGate(maxEvents)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -143,6 +147,18 @@ func main() {
 			fatal(err.Error())
 		}
 	}
+}
+
+func accountingEventLimit(evidenceFile, configured string) (int, error) {
+	const defaultLimit = 1000000
+	if evidenceFile == "" || configured == "" {
+		return defaultLimit, nil
+	}
+	parsed, err := strconv.Atoi(configured)
+	if err != nil || parsed < 1 || parsed > 10000000 {
+		return 0, errors.New("VORTEX_QUALIFICATION_EVENT_LIMIT must be between 1 and 10000000")
+	}
+	return parsed, nil
 }
 
 func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor) error {
