@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Live middle-hop termination: established and new flows cannot bypass it."""
+import hashlib
+import random
+import threading
 import json
 import socket
 import sys
@@ -7,6 +10,37 @@ import time
 from pathlib import Path
 
 out = Path(sys.argv[1])
+# Binary integrity over the actual route before fault injection. Randomized
+# chunks make reordering, duplication and truncation visible to SHA-256.
+file_bytes = 64 * 1024 * 1024
+expected_hash, received_hash = hashlib.sha256(), hashlib.sha256()
+errors = []
+with socket.create_connection(("127.0.0.1", 18080), timeout=30) as transfer:
+    def send_file():
+        try:
+            random_bytes = random.Random(0x564f5254)
+            for _ in range(file_bytes // 65536):
+                block = random_bytes.randbytes(65536)
+                expected_hash.update(block)
+                transfer.sendall(block)
+            transfer.shutdown(socket.SHUT_WR)
+        except OSError as error:
+            errors.append(str(error))
+    sender = threading.Thread(target=send_file)
+    sender.start()
+    received_bytes = 0
+    while True:
+        data = transfer.recv(65536)
+        if not data:
+            break
+        received_bytes += len(data)
+        received_hash.update(data)
+    sender.join(timeout=30)
+    if sender.is_alive() or errors or received_bytes != file_bytes or expected_hash.digest() != received_hash.digest():
+        raise SystemExit("64 MiB binary integrity/half-close failed")
+(out / "binary-integrity.json").write_text(json.dumps({"status": "pass", "bytes": received_bytes,
+    "sha256": received_hash.hexdigest(), "pattern": "deterministic pseudorandom 64 MiB"}, indent=2) + "\n")
+
 tcp = socket.create_connection(("127.0.0.1", 18080), timeout=5)
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.settimeout(5)

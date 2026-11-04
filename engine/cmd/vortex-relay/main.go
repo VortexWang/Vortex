@@ -109,6 +109,7 @@ func main() {
 					nextMu.Lock()
 					next = link
 					nextMu.Unlock()
+					slog.Info("vlink next-hop ready")
 					<-link.Closed()
 					nextMu.Lock()
 					if next == link {
@@ -122,8 +123,6 @@ func main() {
 				})
 				if err != nil && ctx.Err() == nil {
 					slog.Error("vlink next-hop dial failed", "err", err)
-				} else if err == nil {
-					slog.Info("vlink next-hop established")
 				}
 				select {
 				case <-ctx.Done():

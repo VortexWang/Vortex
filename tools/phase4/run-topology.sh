@@ -30,7 +30,21 @@ if [ "$mode" = docker ]; then
 		docker compose -f "$root/test/qualification/compose.yaml" logs >&2
 		exit 1
 	fi
-	: > "$out/topology-ready"
+	ready=0
+ for attempt in $(seq 1 180); do
+  ready=1
+  for name in source relay-1 relay-2 relay-3 destination; do
+   logs=$(QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" logs --no-color "$name")
+   printf '%s\n' "$logs" | grep -q "${QUALIFICATION_READY_MESSAGE:-vortex-relay ready}" || ready=0
+   if [ "${QUALIFICATION_READY_MESSAGE:-}" = "" ] && [ "$name" != source ] && [ "$name" != destination ]; then
+    printf '%s\n' "$logs" | grep -q 'vlink next-hop ready' || ready=0
+   fi
+  done
+  if [ "$ready" = 1 ]; then break; fi
+  sleep 1
+ done
+ if [ "$ready" != 1 ]; then echo "topology role/link readiness failed" >&2; exit 1; fi
+ : > "$out/topology-ready"
 	while :; do sleep 3600 & wait_pid=$!; wait "$wait_pid"; done
 fi
 
@@ -67,7 +81,10 @@ trap cleanup INT TERM EXIT
 for attempt in $(seq 1 30); do
 	ready=1
 	for name in source relay-1 relay-2 relay-3 destination; do
-		grep -q "${QUALIFICATION_READY_MESSAGE:-vortex-relay ready}" "$out/logs/$name.log" || ready=0
+  grep -q "${QUALIFICATION_READY_MESSAGE:-vortex-relay ready}" "$out/logs/$name.log" || ready=0
+  if [ "${QUALIFICATION_READY_MESSAGE:-}" = "" ] && [ "$name" != source ] && [ "$name" != destination ]; then
+   grep -q 'vlink next-hop ready' "$out/logs/$name.log" || ready=0
+  fi
 	done
 	if [ "$ready" -eq 1 ]; then break; fi
 	sleep 1

@@ -10,8 +10,9 @@ mkdir -p "$out" "$root/artifacts/phase4"
 out=$(CDPATH= cd -- "$out" && pwd)
 rm -f "$out"/fault-ready "$out"/fault-injected "$out"/forged-open.json "$out"/middle-hop-fault.json "$out"/comparison.json "$out"/rtt-*.json
 export BACKEND="$mode"
-topology_pid= target_pid=
+topology_pid= target_pid= fault_pid=
 cleanup() {
+  if [ -n "$fault_pid" ]; then kill "$fault_pid" 2>/dev/null || true; wait "$fault_pid" 2>/dev/null || true; fault_pid=; fi
   if [ -n "$topology_pid" ]; then kill "$topology_pid" 2>/dev/null || true; wait "$topology_pid" 2>/dev/null || true; topology_pid=; fi
   if [ "$mode" = docker ]; then
     QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || true
@@ -64,7 +65,7 @@ done
 rm -f "$out/fault-ready" "$out/fault-injected"
 python3 "$root/tools/phase4/fault_workload.py" "$out" >"$out/fault-driver.log" 2>&1 &
 fault_pid=$!
-for attempt in $(seq 1 20); do
+for attempt in $(seq 1 90); do
   test -f "$out/fault-ready" && break
   kill -0 "$fault_pid" 2>/dev/null || { cat "$out/fault-driver.log" >&2; exit 1; }
   sleep 1
@@ -75,6 +76,7 @@ if [ "$mode" = native ]; then kill "$(cat "$out/relay-2.pid")"; else
 fi
 : > "$out/fault-injected"
 wait "$fault_pid" || { cat "$out/fault-driver.log" >&2; exit 1; }
+fault_pid=
 cleanup
 mkdir -p "$out/runtime-logs"
 cp "$out"/logs/*.log "$out/runtime-logs/"

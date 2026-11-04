@@ -19,6 +19,8 @@ actual = load(runtime / "mixed-workload.json")
 latency = load(out / "runtime-latency.json")
 tls_latency = load(out / "tls-latency.json")
 faults = load(out / "forged-open.json")
+integrity = load(out / "binary-integrity.json")
+if integrity["status"] != "pass": raise SystemExit("binary integrity failed")
 middle = load(out / "middle-hop-fault.json")
 bypass = {name: load(out / ("bypass-" + name + ".json")) for name in ("relay-2", "destination")}
 if any(v["status"] != "pass" for v in bypass.values()): raise SystemExit("bypass probe failed")
@@ -41,7 +43,7 @@ report = {
         "segments": segments, "median_difference_ms": latency["median_ms"] - tls_latency["median_ms"],
         "measurement": "client connect to first byte; raw samples retained",
         "nfr_007": "not-qualified: five userspace segment RTT samples and fresh-runtime first-byte samples recorded; pool and mux not separately covered"},
-    "direct_bypass": bypass, "forged_open": faults, "middle_hop_failure": middle,
+    "binary_integrity": integrity, "direct_bypass": bypass, "forged_open": faults, "middle_hop_failure": middle,
     "qualification": "not-qualified: short shared-host diagnostic; host/duration, segment RTT, mode coverage and D-04 review remain",
 }
 (out / "comparison.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
