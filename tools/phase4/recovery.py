@@ -19,7 +19,7 @@ def write(path,value):
  temp=path.with_suffix('.tmp');temp.write_text(json.dumps(value));temp.replace(path)
 def compose(*cmd):return ['docker','compose','-f',str(root/'test/qualification/compose.yaml'),'-f',str(out/'compose-extra.json'),*cmd]
 def start(role):
- if backend=='docker':run(compose('up','-d',role),stdout=subprocess.DEVNULL)
+ if backend=='docker':run(compose('start',role),stdout=subprocess.DEVNULL)
  else:
   log=(out/'logs'/f'{role}.log').open('ab');handles.append(log)
   procs[role]=subprocess.Popen([str(root/'artifacts/phase4/vortex-relay'),'--config',str(out/'config'/f'{role}.json')],stdout=log,stderr=log,env=env)
@@ -59,7 +59,7 @@ try:
  run(['openssl','req','-new','-key',str(key),'-out',str(certs/'spare.csr'),'-subj','/CN=relay-2b'],stderr=subprocess.DEVNULL)
  (certs/'spare.ext').write_text('subjectAltName=DNS:vortex,URI:urn:vortex:node:'+spare_id+'\nextendedKeyUsage=clientAuth,serverAuth\n')
  run(['openssl','x509','-req','-in',str(certs/'spare.csr'),'-CA',str(certs/'ca.pem'),'-CAkey',str(certs/'ca-key.pem'),'-CAcreateserial','-out',str(cert),'-days','2','-extfile',str(certs/'spare.ext')],stderr=subprocess.DEVNULL)
- cfg['relay-2b']=copy.deepcopy(cfg['relay-2']);c=cfg['relay-2b'];c['node_id']=spare_id;c['listen']='127.0.0.1:19446' if backend=='native' else '0.0.0.0:9446';c['certificate']=str(cert) if backend=='native' else '/certs/relay-2b.pem';c['private_key']=str(key) if backend=='native' else '/certs/relay-2b-key.pem';c['evidence_file']=str(out/'events-relay-2b.jsonl')
+ cfg['relay-2b']=copy.deepcopy(cfg['relay-2']);c=cfg['relay-2b'];c['node_id']=spare_id;c['listen']='127.0.0.1:19446' if backend=='native' else '0.0.0.0:9446';c['certificate']=str(cert) if backend=='native' else '/certs/relay-2b.pem';c['private_key']=str(key) if backend=='native' else '/certs/relay-2b-key.pem';c['evidence_file']=str(out/'events-relay-2b.jsonl');(out/'events-relay-2b.jsonl').write_text('')
  startup_hashes={}
  for r,c in cfg.items():
   segment={k:c.get(k,'') for k in ('peer','peer_node_id','next_hop_node_id','hop_index')}
@@ -144,6 +144,12 @@ try:
  start('relay-2b');waitfor(probe);fresh(b'new-after-restart');time.sleep(.2);udp_echo(udp,b'new-udp-after-restart');udp.close()
  report['cases']['restart']='fresh TCP/UDP recovered on authorized generation 2; old TCP not replayed'
  report['status']='pass'
+except Exception:
+ report['status']='fail'
+ for r in roles:
+  try:print('RECOVERY FAILURE LOG '+r+'\n'+logs(r)[-10000:],flush=True)
+  except Exception:pass
+ raise
 finally:
  for r in roles:
   try:(out/'logs').mkdir(exist_ok=True);(out/'logs'/f'{r}.log').write_text(logs(r)) if backend=='docker' else None
