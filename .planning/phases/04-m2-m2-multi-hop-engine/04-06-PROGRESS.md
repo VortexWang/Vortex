@@ -123,3 +123,20 @@ unknown upper bounds after stream/session shutdown; full Engine race passed
 locally and natively. Actions 41822272112 succeeded, including scale and mode regression. See
 [04-06-MODES-EVIDENCE.md](04-06-MODES-EVIDENCE.md) for scope and remaining gates.
 No formal NFR or Phase 4 completion is claimed.
+
+
+## Automatic runtime mode follow-up
+
+Clean `cba1bef` integrates bounded ten-minute TCP first-response history into
+source and relay transport selection. UDP always stays mux and is excluded
+from TCP history. A direction-specific regression proves requests do not emit
+a source response sample and multiple target chunks emit only one. Full race
+and same-SHA Docker/native/Actions matrices pass; every auto role selected
+both mux and pool, with accounting reconciliation and finite fault probes.
+Auto first-byte medians were 0.5250 ms Docker and 1.0947 ms native; same-load
+TLS ratios were 83.51% and 95.01%, with actual UDP approximately 100 Mbps and
+zero loss in both local/native five-second diagnostics.
+[Actions run 41830048180](https://github.com/VortexWang/Vortex/actions/runs/41830048180)
+succeeded. See [04-06-AUTO-EVIDENCE.md](04-06-AUTO-EVIDENCE.md). Broader recovery,
+authorized-path failover, eligible-host duration and D-04/NFR review remain
+open. Phase 4 is executing; no completion is claimed.
