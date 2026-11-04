@@ -27,6 +27,8 @@ type Supervisor struct {
 	Local      bool
 	mu         sync.Mutex
 	links      map[*vlink.MuxLink]struct{}
+	closed     bool
+	Transport  *Transport
 }
 
 type LinkHandler func(context.Context, *vlink.MuxLink, vlink.NodeID) error
@@ -80,7 +82,10 @@ func (s *Supervisor) accept(ctx context.Context, conn net.Conn, handler LinkHand
 		_ = conn.Close()
 		return
 	}
-	s.track(link)
+	if !s.track(link) {
+		link.Close(context.Canceled)
+		return
+	}
 	defer s.untrack(link)
 	if handler != nil {
 		if err := handler(ctx, link, peer); err != nil && ctx.Err() == nil {
@@ -99,7 +104,10 @@ func (s *Supervisor) Dial(ctx context.Context, handler LinkHandler) error {
 	if err != nil {
 		return err
 	}
-	s.track(link)
+	if !s.track(link) {
+		link.Close(context.Canceled)
+		return context.Canceled
+	}
 	defer s.untrack(link)
 	if handler != nil {
 		return handler(ctx, link, peer)
@@ -121,10 +129,14 @@ func (s *Supervisor) handshake(ctx context.Context, conn *tls.Conn, client bool)
 	return link, peer, nil
 }
 
-func (s *Supervisor) track(link *vlink.MuxLink) {
+func (s *Supervisor) track(link *vlink.MuxLink) bool {
 	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return false
+	}
 	s.links[link] = struct{}{}
-	s.mu.Unlock()
+	return true
 }
 
 func (s *Supervisor) untrack(link *vlink.MuxLink) {
@@ -136,6 +148,7 @@ func (s *Supervisor) untrack(link *vlink.MuxLink) {
 
 func (s *Supervisor) Close() {
 	s.mu.Lock()
+	s.closed = true
 	links := make([]*vlink.MuxLink, 0, len(s.links))
 	for link := range s.links {
 		links = append(links, link)

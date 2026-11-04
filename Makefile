@@ -13,6 +13,10 @@ phase4-runtime-comparison:
 phase4-runtime-mixed:
 	tools/phase4/qualification.sh
 
+.PHONY: phase4-runtime-modes
+phase4-runtime-modes:
+	sh tools/phase4/modes.sh
+
 phase4-m2-benchmark:
 	tools/phase4/benchmark.sh
 

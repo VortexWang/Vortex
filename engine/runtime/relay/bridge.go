@@ -16,14 +16,15 @@ import (
 type TargetDialer func(context.Context, uint8, vlink.LocalTarget) (net.Conn, error)
 
 type Service struct {
-	LocalNode vlink.NodeID
-	Policy    vlink.OpenPolicy
-	Next      func() *vlink.MuxLink
-	Dial      TargetDialer
-	Gate      engineaccounting.Gate
-	mu        sync.Mutex
-	closing   bool
-	workers   sync.WaitGroup
+	LocalNode   vlink.NodeID
+	Policy      vlink.OpenPolicy
+	Next        func() *vlink.MuxLink
+	AcquireNext func(context.Context, vlink.StreamNetwork) (*vlink.MuxLink, func(), error)
+	Dial        TargetDialer
+	Gate        engineaccounting.Gate
+	mu          sync.Mutex
+	closing     bool
+	workers     sync.WaitGroup
 }
 
 func (s *Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
@@ -61,8 +62,24 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 		if err != nil {
 			return nil, err
 		}
-		if s.Next != nil {
-			nextLink := s.Next()
+		if s.Next != nil || s.AcquireNext != nil {
+			var nextLink *vlink.MuxLink
+			release := func() {}
+			if s.AcquireNext != nil {
+				var err error
+				nextLink, release, err = s.AcquireNext(ctx, stream.Network)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				nextLink = s.Next()
+			}
+			transferred := false
+			defer func() {
+				if !transferred {
+					release()
+				}
+			}()
 			if nextLink == nil {
 				return nil, errors.New("relay: next hop is unavailable")
 			}
@@ -74,9 +91,11 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 				return nil, err
 			}
 			if err := downstream.WaitOpen(ctx); err != nil {
+				_ = downstream.Reset(ctx, 8)
 				return nil, err
 			}
-			return &streamResource{stream: downstream}, nil
+			transferred = true
+			return &streamResource{stream: downstream, release: release}, nil
 		}
 		if s.Dial == nil {
 			return nil, errors.New("relay: target dialer is not configured")
@@ -97,6 +116,14 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 	resource := stream.TakeResource()
 	switch typed := resource.(type) {
 	case *streamResource:
+		defer func() {
+			if s.AcquireNext != nil {
+				resetCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				_ = typed.stream.Reset(resetCtx, 0)
+			}
+			typed.releaseLease()
+		}()
 		if err := BridgeStreams(ctx, stream, typed.stream); err != nil && ctx.Err() == nil {
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
@@ -386,9 +413,24 @@ func reserve(ctx context.Context, session engineaccounting.Session, direction en
 	return session.Reserve(ctx, direction, int64(size))
 }
 
-type streamResource struct{ stream *vlink.MuxStream }
+type streamResource struct {
+	stream  *vlink.MuxStream
+	release func()
+	once    sync.Once
+}
+
+func (r *streamResource) releaseLease() {
+	r.once.Do(func() {
+		if r.release != nil {
+			r.release()
+		}
+	})
+}
 
 func (r *streamResource) Close() error {
+	if r != nil {
+		defer r.releaseLease()
+	}
 	if r == nil || r.stream == nil {
 		return nil
 	}

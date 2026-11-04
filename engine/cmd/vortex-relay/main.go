@@ -70,6 +70,18 @@ func main() {
 		fatal(err.Error())
 	}
 	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
+	if cfg.TransportMode != "" && cfg.Role != config.RoleDestination {
+		supervisor.Transport, err = link.NewTransport(ctx, supervisor, cfg.TransportMode, cfg.PoolBounds())
+		if err != nil {
+			fatal(err.Error())
+		}
+		defer supervisor.Transport.Close()
+		if cfg.Role == config.RoleSource {
+			if err := warmTransport(ctx, supervisor.Transport); err != nil {
+				return
+			}
+		}
+	}
 	defer func() {
 		if cfg.EvidenceFile == "" {
 			return
@@ -108,37 +120,46 @@ func main() {
 			<-udpDone
 		}
 	case config.RoleRelay:
-		var nextMu sync.Mutex
-		var next *vlink.MuxLink
-		service.Next = func() *vlink.MuxLink { nextMu.Lock(); defer nextMu.Unlock(); return next }
-		go func() {
-			for ctx.Err() == nil {
-				err := supervisor.Dial(ctx, func(ctx context.Context, link *vlink.MuxLink, _ vlink.NodeID) error {
-					nextMu.Lock()
-					next = link
-					nextMu.Unlock()
-					slog.Info("vlink next-hop ready")
-					<-link.Closed()
-					nextMu.Lock()
-					if next == link {
-						next = nil
-					}
-					nextMu.Unlock()
-					if err := link.Err(); err != nil && !errors.Is(err, vlink.ErrProtocol) {
-						return err
-					}
-					return nil
-				})
-				if err != nil && ctx.Err() == nil {
-					slog.Error("vlink next-hop dial failed", "err", err)
+		if supervisor.Transport != nil {
+			service.AcquireNext = supervisor.Transport.Acquire
+			go func() {
+				if warmTransport(ctx, supervisor.Transport) == nil {
+					slog.Info("vlink next-hop ready", "mode", cfg.TransportMode)
 				}
-				select {
-				case <-ctx.Done():
-					return
-				case <-time.After(500 * time.Millisecond):
+			}()
+		} else {
+			var nextMu sync.Mutex
+			var next *vlink.MuxLink
+			service.Next = func() *vlink.MuxLink { nextMu.Lock(); defer nextMu.Unlock(); return next }
+			go func() {
+				for ctx.Err() == nil {
+					err := supervisor.Dial(ctx, func(ctx context.Context, link *vlink.MuxLink, _ vlink.NodeID) error {
+						nextMu.Lock()
+						next = link
+						nextMu.Unlock()
+						slog.Info("vlink next-hop ready")
+						<-link.Closed()
+						nextMu.Lock()
+						if next == link {
+							next = nil
+						}
+						nextMu.Unlock()
+						if err := link.Err(); err != nil && !errors.Is(err, vlink.ErrProtocol) {
+							return err
+						}
+						return nil
+					})
+					if err != nil && ctx.Err() == nil {
+						slog.Error("vlink next-hop dial failed", "err", err)
+					}
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.After(500 * time.Millisecond):
+					}
 				}
-			}
-		}()
+			}()
+		}
 		if err := supervisor.Serve(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 			return service.ServeLink(ctx, mux)
 		}); err != nil && ctx.Err() == nil {
@@ -151,6 +172,26 @@ func main() {
 			fatal(err.Error())
 		}
 	}
+}
+
+func warmTransport(ctx context.Context, transport *link.Transport) error {
+	backoff := vlink.Backoff{Initial: 250 * time.Millisecond, Maximum: 3 * time.Second}
+	for {
+		if err := transport.Warm(ctx); err == nil {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(backoff.Next()):
+		}
+	}
+}
+
+func resetStream(stream *vlink.MuxStream) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_ = stream.Reset(ctx, 0)
 }
 
 func accountingEventLimit(evidenceFile, configured string) (int, error) {
@@ -182,16 +223,19 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 		}
 		go func(local net.Conn) {
 			defer local.Close()
-			if err := supervisor.Dial(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+			if err := supervisor.Use(ctx, vlink.StreamTCP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 				request := openRequest(cfg, local)
 				stream, err := mux.Open(ctx, request)
 				if err != nil {
 					return err
 				}
+				if supervisor.Transport != nil {
+					defer resetStream(stream)
+				}
 				if err := stream.WaitOpen(ctx); err != nil {
 					return err
 				}
-				slog.Info("vlink source OPEN authorized")
+				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
 				return relay.BridgeConn(ctx, stream, local)
 			}); err != nil && ctx.Err() == nil {
 				slog.Error("vlink source dial failed", "err", err)
@@ -309,10 +353,13 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 
 func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}, queued *atomic.Int64) {
 	defer close(done)
-	if err := supervisor.Dial(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+	if err := supervisor.Use(ctx, vlink.StreamUDP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 		stream, err := mux.Open(ctx, makeOpenRequest(cfg, peer, 2))
 		if err != nil {
 			return err
+		}
+		if supervisor.Transport != nil {
+			defer resetStream(stream)
 		}
 		if err := stream.WaitOpen(ctx); err != nil {
 			return err

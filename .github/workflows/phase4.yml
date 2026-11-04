@@ -44,6 +44,9 @@ jobs:
           VORTEX_QUALIFICATION_EVENT_LIMIT: "10000000"
           QUALIFICATION_DIR: ${{ github.workspace }}/artifacts/phase4/qualification/docker-scale
         run: make phase4-runtime-mixed
+      - name: Explicit pool and mux runtime mode regression
+        env: {GOMAXPROCS: "1", BACKEND: docker}
+        run: make phase4-runtime-modes
       - name: Record host metadata
         if: always()
         run: |

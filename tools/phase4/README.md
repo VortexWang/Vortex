@@ -40,6 +40,27 @@ and the relay reports evidence open/write/close errors as failures.
 
 Evidence is written below `artifacts/phase4/qualification/{native,docker}`:
 
+`make phase4-runtime-modes BACKEND=docker` exercises explicit `pool` and `mux`
+configs on the real five-process route, with per-mode latency raw samples,
+link-reuse evidence, finite fault probes, TLS comparison and byte reconciliation.
+The native backend uses the same command without `BACKEND=docker`. Reports go
+to `artifacts/phase4/modes/{backend}`. The tracer's optional `transport_mode`
+selects a real authenticated outgoing link pool; omitted mode retains its
+legacy connection strategy. `pool_min_links` defaults to 1, `pool_max_links`
+to 4, with a maximum of 16 links per TCP or UDP peer pool. TCP `pool` leases
+are exclusive for a stream's lifetime; `mux` shares links, and UDP always uses
+a separate shared mux pool. Initial TCP links are prewarmed with bounded retry
+backoff. Healthy idle links are reused; unhealthy ones are replaced on demand.
+Automatic duration-based switching and full adaptive scaling remain outside
+this explicit-mode tracer. These config fields extend the tracer config,
+not the separate Agent runtime configuration contract.
+
+The mode summary keeps fresh client-connect-to-first-byte separate from the
+userspace segment echo RTT sum. Their subtraction is diagnostic; this alone
+does not qualify NFR-007 or prove that OPEN confirmation adds no network RTT.
+
+Evidence files:
+
 - `host.json`: clean/dirty SHA, host facts, exact generated-config hash and
   semantic manifest hash. The semantic hash excludes deployment addresses and
   ephemeral certificate paths; it must agree across backends. Exact hashes
