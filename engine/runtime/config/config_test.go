@@ -161,3 +161,23 @@ func TestPolicyWindowRequiresExplicitBookAndBoundedIssuer(t *testing.T) {
 		t.Fatalf("policy window without a book should fail closed, got %v", err)
 	}
 }
+
+func TestShareRequiresFencingAndLeaseInputs(t *testing.T) {
+	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000001", Role: RoleSource, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1", Peer: "127.0.0.1:2", ServiceListen: "127.0.0.1:3", RuleID: "r", RuleRevision: 1, PathGeneration: 1, ExecutionPoint: true, TransportMode: "mux", EvidenceFile: "events.jsonl", QualificationOnly: true}
+	cfg.Share = &ShareConfig{BootID: "00000000-0000-0000-0000-000000000002", TransactionID: "00000000-0000-0000-0000-000000000003", Rate: 1, Connections: 1, LeaseUntil: time.Now().Add(time.Minute)}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "funded source execution point") {
+		t.Fatalf("share without funded authority should fail closed, got %v", err)
+	}
+	cfg.QualificationOnly = false
+	cfg.SourceCredit = &runtimeaccounting.CreditConfig{SnapshotID: "snapshot", Budget: 4096, InitialBlock: 256, MaxBlock: 65536, GrantTarget: 65536, RenewPercent: 30}
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("valid share authority rejected: %v", err)
+	}
+	bad := cfg
+	copyShare := *cfg.Share
+	bad.Share = &copyShare
+	bad.Share.LeaseUntil = time.Time{}
+	if err := bad.Validate(); err == nil || !strings.Contains(err.Error(), "lease_until") {
+		t.Fatalf("missing share lease accepted: %v", err)
+	}
+}

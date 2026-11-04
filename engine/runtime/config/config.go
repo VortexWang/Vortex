@@ -50,10 +50,24 @@ type PolicyWindowConfig struct {
 	IssuerTimeoutMS   int64     `json:"issuer_timeout_ms"`
 }
 
+// ShareConfig describes an injected, process-local connection-share lease.
+// The authoritative Prepare/Commit record remains outside Engine; this
+// payload only permits a runtime to prove the boot and transaction it was
+// started with before admitting flows.
+type ShareConfig struct {
+	BootID        string    `json:"boot_id"`
+	TransactionID string    `json:"transaction_id"`
+	Revision      uint64    `json:"revision,omitempty"`
+	Rate          int64     `json:"rate"`
+	Connections   int64     `json:"connections"`
+	LeaseUntil    time.Time `json:"lease_until"`
+}
+
 type Config struct {
 	SourceCreditBook  *runtimeaccounting.BookConfig   `json:"source_credit_book,omitempty"`
 	SourceCredit      *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
 	PolicyWindow      *PolicyWindowConfig             `json:"policy_window,omitempty"`
+	Share             *ShareConfig                    `json:"share,omitempty"`
 	QualificationOnly bool                            `json:"qualification_only,omitempty"`
 	Routes            map[string]Route                `json:"routes,omitempty"`
 	ActiveRoute       string                          `json:"active_route,omitempty"`
@@ -104,6 +118,26 @@ func (c Config) Validate() error {
 	}
 	if c.QualificationOnly && c.EvidenceFile == "" {
 		return errors.New("config: qualification_only requires evidence_file")
+	}
+	if c.Share != nil {
+		if c.Role != RoleSource || !c.ExecutionPoint || c.SourceCreditBook == nil && c.SourceCredit == nil {
+			return errors.New("config: share requires a funded source execution point")
+		}
+		if _, err := vlink.ParseNodeID(c.Share.BootID); err != nil {
+			return fmt.Errorf("config: share boot_id: %w", err)
+		}
+		if _, err := vlink.ParseNodeID(c.Share.TransactionID); err != nil {
+			return fmt.Errorf("config: share transaction_id: %w", err)
+		}
+		if c.Share.Rate <= 0 || c.Share.Connections <= 0 {
+			return errors.New("config: share rate and connections must be positive")
+		}
+		if c.Share.Revision > 0 && c.Share.Revision != 1 {
+			return errors.New("config: share revision must match the first process-local fencing revision")
+		}
+		if c.Share.LeaseUntil.IsZero() {
+			return errors.New("config: share lease_until is required")
+		}
 	}
 	if c.SourceCreditBook != nil {
 		if err := c.SourceCreditBook.Validate(); err != nil {

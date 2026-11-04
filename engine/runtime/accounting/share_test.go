@@ -3,6 +3,7 @@ package accounting
 import (
 	"context"
 	"testing"
+	"time"
 
 	core "vortex/engine/accounting"
 	"vortex/engine/share"
@@ -61,6 +62,29 @@ func TestShareGateRollsBackShareIfInnerOpenFails(t *testing.T) {
 	state, _ := manager.Get(key)
 	if state.InUse != 0 {
 		t.Fatalf("failed Open leaked share lease: %+v", state)
+	}
+}
+
+func TestShareGateRejectsExpiredLeaseBeforeAcquiring(t *testing.T) {
+	manager := share.NewManager()
+	key := share.Key{}
+	key.Node[0] = 4
+	key.Boot[0] = 4
+	revision, err := manager.Prepare(key, 1, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = manager.Commit(key, revision.Generation); err != nil {
+		t.Fatal(err)
+	}
+	inner, _ := NewCreditGate(CreditConfig{SnapshotID: "s", Budget: 1, InitialBlock: 1, MaxBlock: 1, GrantTarget: 1, RenewPercent: 30})
+	gate := ShareGate{Manager: manager, Key: key, Inner: inner, LeaseUntil: time.Now().Add(-time.Second)}
+	if _, err := gate.Open(context.Background(), core.Flow{Key: "expired"}); err == nil {
+		t.Fatal("expired share lease admitted a flow")
+	}
+	state, _ := manager.Get(key)
+	if state.InUse != 0 {
+		t.Fatalf("expired admission consumed share capacity: %+v", state)
 	}
 }
 

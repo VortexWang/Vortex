@@ -3,6 +3,7 @@ package accounting
 import (
 	"context"
 	"sync"
+	"time"
 
 	core "vortex/engine/accounting"
 	"vortex/engine/share"
@@ -14,10 +15,17 @@ type ShareGate struct {
 	Manager *share.Manager
 	Key     share.Key
 	Inner   core.Gate
+	// LeaseUntil is an optional conservative deadline. A zero value preserves
+	// the process-local test adapter behavior; configured runtime shares must
+	// provide a future deadline before they can admit a new flow.
+	LeaseUntil time.Time
 }
 
 func (g *ShareGate) Open(ctx context.Context, flow core.Flow) (core.Session, error) {
 	if g == nil || g.Manager == nil || g.Inner == nil {
+		return nil, core.ErrDenied
+	}
+	if !g.LeaseUntil.IsZero() && !time.Now().Before(g.LeaseUntil) {
 		return nil, core.ErrDenied
 	}
 	lease, err := g.Manager.Acquire(g.Key)

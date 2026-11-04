@@ -24,6 +24,7 @@ import (
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/link"
 	"vortex/engine/runtime/relay"
+	"vortex/engine/share"
 	"vortex/engine/vlink"
 )
 
@@ -132,6 +133,14 @@ func main() {
 		}
 		// This bounded in-memory adapter is permitted only for explicit test topology runs.
 		sourceGate = gate
+	}
+	if cfg.Share != nil {
+		wrapped, err := configureShareGate(cfg, sourceGate)
+		if err != nil {
+			fatal(err.Error())
+		}
+		sourceGate = wrapped
+		slog.Info("source share lease active", "generation", cfg.Share.Revision, "lease_until", cfg.Share.LeaseUntil)
 	}
 	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
 	if cfg.TransportMode != "" && cfg.Role != config.RoleDestination {
@@ -295,6 +304,40 @@ func main() {
 			fatal(err.Error())
 		}
 	}
+}
+
+func configureShareGate(cfg config.Config, inner coreaccounting.Gate) (coreaccounting.Gate, error) {
+	if cfg.Share == nil || inner == nil {
+		return nil, errors.New("share: configured source gate is required")
+	}
+	nodeID, err := vlink.ParseNodeID(cfg.NodeID)
+	if err != nil {
+		return nil, fmt.Errorf("share: node_id: %w", err)
+	}
+	bootID, err := vlink.ParseNodeID(cfg.Share.BootID)
+	if err != nil {
+		return nil, fmt.Errorf("share: boot_id: %w", err)
+	}
+	transactionID, err := vlink.ParseNodeID(cfg.Share.TransactionID)
+	if err != nil {
+		return nil, fmt.Errorf("share: transaction_id: %w", err)
+	}
+	key := share.Key{Node: [16]byte(nodeID), Boot: [16]byte(bootID)}
+	manager := share.NewManager()
+	if err := manager.BeginBoot(key); err != nil {
+		return nil, fmt.Errorf("share: begin boot: %w", err)
+	}
+	revision, err := manager.PrepareWithID(key, [16]byte(transactionID), cfg.Share.Rate, cfg.Share.Connections)
+	if err != nil {
+		return nil, fmt.Errorf("share: prepare: %w", err)
+	}
+	if cfg.Share.Revision != 0 && cfg.Share.Revision != revision.Generation {
+		return nil, fmt.Errorf("share: stale revision %d, prepared %d", cfg.Share.Revision, revision.Generation)
+	}
+	if _, err := manager.Commit(key, revision.Generation); err != nil {
+		return nil, fmt.Errorf("share: commit: %w", err)
+	}
+	return &runtimeaccounting.ShareGate{Manager: manager, Key: key, Inner: inner, LeaseUntil: cfg.Share.LeaseUntil}, nil
 }
 
 func warmTransport(ctx context.Context, transport *link.Transport) error {

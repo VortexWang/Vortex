@@ -3,12 +3,12 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 Plan 04-09; 04-08 policy/snapshot runtime slice verified
+current_plan: Phase 4 Plan 04-10; 04-09 share CAS/lease drain runtime slice verified
 status: executing
 stopped_at: Plan 04-07 verified on clean a7a7432; Phase 4 remains executing with formal NFR/D-04 gaps
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-05
-last_activity_desc: Verified 04-08 policy/snapshot runtime wiring; 04-09 share CAS/lease drain is next
+last_activity_desc: Verified 04-09 share CAS/lease drain runtime wiring; 04-10 early TCP DATA and attack matrix is next
 state_head: 9385d42
 progress:
   total_phases: 8
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 Plan 04-09; 04-08 policy/snapshot runtime slice verified
+Current Plan: Phase 4 Plan 04-10; 04-09 share CAS/lease drain runtime slice verified
 Total Plans in Phase: 7
 Status: In progress
-Last activity: 2026-11-05 — Plan 04-08 policy/snapshot runtime slice verified; Plan 04-09 is next; NFRs remain unqualified
+Last activity: 2026-11-05 — Plan 04-09 share CAS/lease drain runtime wiring verified; Plan 04-10 is next; NFRs remain unqualified
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Execute Phase 4 gap-closure plans 04-09 through 04-11 in order. Keep NFR-003/005/006/007/039/040/044 and D-04 open until complete criteria are met; durable production authorization/accounting remains a later Agent/Hub integration concern.
+- Execute Phase 4 gap-closure plans 04-10 through 04-11 in order. Keep NFR-003/005/006/007/039/040/044 and D-04 open until complete criteria are met; durable production authorization/accounting remains a later Agent/Hub integration concern.
 
 ### Blockers/Concerns
 
@@ -92,8 +92,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-08 policy/snapshot runtime slice verified; Phase 4 remains executing and formal NFRs/D-04 are unqualified.
-Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-09-PLAN.md
+Stopped at: Plan 04-09 share CAS/lease drain runtime slice verified; Phase 4 remains executing and formal NFRs/D-04 are unqualified.
+Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-10-PLAN.md
 
 ### Latest qualification review
 
