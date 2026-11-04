@@ -711,7 +711,10 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 		if s.link.observer != nil {
 			s.link.observer.WindowWait(time.Since(waitStarted))
 		}
-		chunk := append([]byte(nil), payload[:size]...)
+		// The received frame owns this immutable byte slice until the queued
+		// writer resolves the request. writer.go encodes it once into its batch
+		// buffer, so an intermediate 16 KiB copy is unnecessary.
+		chunk := payload[:size]
 		if err := s.link.write(ctx, Frame{Type: FrameData, StreamID: s.ID, Payload: chunk}); err != nil {
 			s.link.Close(err)
 			return err
