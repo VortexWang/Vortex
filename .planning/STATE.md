@@ -87,6 +87,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 |---|-------------|------|--------|--------|-----------|
 | 261103-l7e | Project restart governance clarified; Phase 1 complete for M0 entry | 2026-11-03 | 62f4687 | complete | [261103-l7e-project-restart-governance](./quick/261103-l7e-project-restart-governance/) |
 | 261103-lt9 | Restart governance aligned; M0 TCP relay tracer implemented | 2026-11-03 | a9b79f1 | complete | [261103-lt9-align-restart-governance-and-enter-m0-im](./quick/261103-lt9-align-restart-governance-and-enter-m0-im/) |
+| 261105-9j7 | Native host preflight and formal qualification runbook | 2026-11-05 | pending | complete | [20261105-native-host-preflight](./quick/20261105-native-host-preflight/) |
 
 
 ## Session Continuity

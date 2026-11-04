@@ -75,6 +75,13 @@ phase4-qualification-gate:
 		--warmup-seconds "$${QUALIFICATION_WARMUP_SECONDS:-0}" \
 		--output "$${GATE_OUTPUT:-artifacts/phase4/qualification-gate.json}"
 
+.PHONY: phase4-native-preflight
+phase4-native-preflight:
+	tools/phase4/native-host-preflight.sh \
+		--interface "$${QUALIFICATION_INTERFACE:?QUALIFICATION_INTERFACE is required}" \
+		--attestation-file "$${HOST_ATTESTATION:?HOST_ATTESTATION is required}" \
+		--output "$${PREFLIGHT_OUTPUT:-artifacts/phase4/native-host-preflight.json}"
+
 .PHONY: phase4-runtime-credit
 phase4-runtime-credit:
 	python3 tools/phase4/credit.py --backend $${BACKEND:-native}

@@ -1,0 +1,70 @@
+# Native Host Qualification
+
+This procedure prepares a clean Ubuntu host for formal Phase 4 evidence. It
+does not convert a VM into a bare-metal host and it does not create provider
+resource attestations.
+
+## Install the toolchain
+
+```bash
+apt-get update
+apt-get install -y ca-certificates curl git make python3 iproute2 procps util-linux coreutils
+curl -fLO https://go.dev/dl/go1.27.3.linux-amd64.tar.gz
+rm -rf /usr/local/go
+tar -C /usr/local -xzf go1.27.3.linux-amd64.tar.gz
+export PATH=/usr/local/go/bin:/root/go/bin:$PATH
+go version
+```
+
+Use the `arm64` archive on an arm64 host. The expected toolchain is Go
+`1.27.3`.
+
+## Record provider evidence
+
+Create an attestation file supplied by the host provider. Do not invent these
+fields from inside the guest:
+
+```json
+{
+  "provider": "example-provider",
+  "host_id": "provider-dedicated-host-id",
+  "dedicated_resources": true,
+  "dedicated_link": true,
+  "issued_at": "2026-11-05T00:00:00Z"
+}
+```
+
+## Run the fail-closed preflight
+
+```bash
+cd /path/to/Vortex
+tools/phase4/native-host-preflight.sh \
+  --interface ens17 \
+  --attestation-file /etc/vortex/host-attestation.json \
+  --output artifacts/phase4/native-host-preflight.json
+```
+
+The command must exit zero before formal qualification. A KVM/Xen/VMware guest,
+missing provider attestation, loopback-only topology, missing Go version, or
+missing Linux tools exits nonzero and writes the reason list.
+
+## Run the qualification sequence
+
+Only after preflight passes, use one clean SHA and preserve all raw evidence:
+
+```bash
+make phase4-d04-scan
+BACKEND=native make phase4-runtime-mixed
+BACKEND=native make phase4-runtime-comparison
+make phase4-qualification-gate \
+  RUNTIME_REPORT=artifacts/phase4/qualification/native/report.json \
+  TLS_REPORT=artifacts/phase4/comparison/native/comparison.json \
+  HOST_REPORT=artifacts/phase4/qualification/native/host.json \
+  QUALIFICATION_TRIALS=3 \
+  QUALIFICATION_WARMUP_SECONDS=60
+```
+
+The existing short workload remains diagnostic. Formal NFR qualification still
+requires the runtime-authority workload, 60-second warmup, three 300-second
+trials, independent TLS comparison, complete accounting evidence and the same
+clean commit across all artifacts.
