@@ -7,7 +7,19 @@ out=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 "$root/tools/phase4/generate-qualification.sh" "$mode" "$out"
 
 if [ "$mode" = docker ]; then
-	docker compose -f "$root/test/qualification/compose.yaml" up --build -d
+	compose_pid=
+	wait_pid=
+	stop_launcher() {
+		trap - INT TERM
+		if [ -n "$compose_pid" ]; then kill "$compose_pid" 2>/dev/null || true; wait "$compose_pid" 2>/dev/null || true; fi
+		if [ -n "$wait_pid" ]; then kill "$wait_pid" 2>/dev/null || true; wait "$wait_pid" 2>/dev/null || true; fi
+		exit 0
+	}
+	trap stop_launcher INT TERM
+	docker compose -f "$root/test/qualification/compose.yaml" up --build -d &
+	compose_pid=$!
+	wait "$compose_pid"
+	compose_pid=
 	for attempt in $(seq 1 180); do
 		running=$(QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" ps --status running --services | wc -l | tr -d ' ')
 		if [ "$running" -ge 6 ]; then break; fi
@@ -19,7 +31,7 @@ if [ "$mode" = docker ]; then
 		exit 1
 	fi
 	: > "$out/topology-ready"
-	while :; do sleep 3600; done
+	while :; do sleep 3600 & wait_pid=$!; wait "$wait_pid"; done
 fi
 
 if [ -n "${VORTEX_RELAY_BIN:-}" ]; then

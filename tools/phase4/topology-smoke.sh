@@ -22,6 +22,7 @@ fi
 
 cleanup() {
   kill "$topology_pid" 2>/dev/null || true
+  wait "$topology_pid" 2>/dev/null || true
   if [ "$mode" = docker ]; then
     QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || true
     mkdir -p "$qual/logs"
@@ -31,7 +32,6 @@ cleanup() {
     QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
   fi
   if [ -n "${target_pid:-}" ]; then kill "$target_pid" 2>/dev/null || true; fi
-  wait "$topology_pid" 2>/dev/null || true
 }
 trap cleanup INT TERM EXIT
 
