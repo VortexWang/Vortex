@@ -102,7 +102,7 @@ func (m *MuxLink) dgramLoop() {
 // affected reservation as unknown through the caller's error path.
 func (m *MuxLink) sendDataBatch(first frameWrite, encoded *bytes.Buffer) bool {
 	encoded.Reset()
-	requests := [8]frameWrite{first}
+	requests := [32]frameWrite{first}
 	count := 1
 	for count < len(requests) {
 		select {
