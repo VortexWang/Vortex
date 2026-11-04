@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"sync"
 	"time"
@@ -399,6 +400,9 @@ func (m *MuxLink) Close(err error) {
 	if err == nil {
 		err = ErrProtocol
 	}
+	if errors.Is(err, ErrRateLimited) {
+		slog.Warn("vlink link closed after repeated violations", "reason", err)
+	}
 	m.closeOnce.Do(func() {
 		m.observeClose(err)
 		m.dispatch.Close(err)
@@ -450,9 +454,16 @@ func (m *MuxLink) readLoop() {
 		switch frame.Type {
 		case FrameWindow:
 			delta := binary.BigEndian.Uint32(frame.Payload)
+			if frame.StreamID != 0 {
+				if _, ok := m.dispatch.streams.Snapshot(frame.StreamID); !ok {
+					continue
+				}
+			}
 			if err := m.windows.Grant(frame.StreamID, delta); err != nil {
 				if frame.StreamID != 0 && errors.Is(err, ErrUnknownStream) {
-					m.reset(frame.StreamID, 8)
+					// Credit for a stream removed after a concurrent close is stale.
+					// It cannot create capacity, and replying with RST would create a
+					// reset loop with the peer.
 					continue
 				}
 				m.Close(err)
@@ -781,7 +792,8 @@ func (m *MuxLink) recordViolation(class ErrorClass) bool {
 		m.observer.Event(VLinkEvent{At: time.Now(), Kind: "security_rejection", LinkID: m.linkID, PeerRole: role, ErrorClass: class})
 	}
 	if thresholdReached {
-		m.Close(ErrRateLimited)
+		slog.Warn("vlink link closed after repeated violations", "class", class, "count", m.violations)
+		m.Close(fmt.Errorf("%w: repeated %s violations", ErrRateLimited, class))
 		return true
 	}
 	return false

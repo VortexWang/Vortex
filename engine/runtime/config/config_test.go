@@ -28,3 +28,19 @@ func TestValidateRoleAndRequiredPeer(t *testing.T) {
 		t.Fatal("expected source peer requirement")
 	}
 }
+
+func TestUDPServiceListenIsOptionalAndSourceOnly(t *testing.T) {
+	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000001", Role: RoleSource, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1", Peer: "127.0.0.1:2", ServiceListen: "127.0.0.1:3", RuleID: "r", RuleRevision: 1, PathGeneration: 1}
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("TCP-only source config rejected: %v", err)
+	}
+	cfg.UDPServiceListen = "not-a-host-port"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("malformed UDP service address accepted")
+	}
+	cfg.UDPServiceListen = "127.0.0.1:4"
+	cfg.Role = RoleRelay
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("relay config accepted source UDP listener")
+	}
+}

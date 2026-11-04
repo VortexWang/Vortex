@@ -15,7 +15,7 @@ arch=$(docker info --format '{{.Architecture}}' 2>/dev/null || uname -m)
 	 echo "scope: library benchmark and loopback UDP smoke; not three-relay sustained mixed load"
 } > "$OUT/metadata.txt"
 BACKEND="$BACKEND" QUALIFICATION_DIR="$QUALIFICATION_DIR" tools/phase4/qualification.sh
-echo "runtime_qualification: topology-and-accounting-pass" >> "$OUT/metadata.txt"
+echo "runtime_qualification: tcp-udp-topology-and-accounting-pass" >> "$OUT/metadata.txt"
 cd "$ROOT/engine"
 set +e
 go test ./scheduler ./vlink -run '^$' -bench 'Benchmark' -benchtime=1s -count=1 > "$OUT/raw.txt" 2>&1

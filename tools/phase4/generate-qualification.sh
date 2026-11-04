@@ -26,8 +26,11 @@ done
 
 json() {
   name=$1 role=$2 node_id=$3 listen=$4 peer=$5 peer_id=$6 next_id=$7 hop=$8 service=$9 target=${10}
+  udp_service=
+  if [ "$role" = source ]; then udp_service=",\"udp_service_listen\":\"$host:18082\""; fi
+  : > "$out/events-$name.jsonl"
   cat > "config/$name.json" <<EOF
-{"version":1,"node_id":"$node_id","role":"$role","certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service","rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( [ "$role" = destination ] && echo true || echo false )}
+{"version":1,"node_id":"$node_id","role":"$role","certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service"$udp_service,"rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( [ "$role" = destination ] && echo true || echo false )}
 EOF
 }
 
@@ -42,6 +45,6 @@ else
   json relay-1 relay 00000000-0000-0000-0000-000000000002 "$host:9442" relay-2:9443 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000003 0 "" ""
   json relay-2 relay 00000000-0000-0000-0000-000000000003 "$host:9443" relay-3:9444 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000004 1 "" ""
   json relay-3 relay 00000000-0000-0000-0000-000000000004 "$host:9444" destination:9445 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000005 2 "" ""
-  json destination destination 00000000-0000-0000-0000-000000000005 "$host:9445" "" 00000000-0000-0000-0000-000000000004 "" 3 "" "127.0.0.1:18081"
+  json destination destination 00000000-0000-0000-0000-000000000005 "$host:9445" "" 00000000-0000-0000-0000-000000000004 "" 3 "" "172.30.0.10:18081"
 fi
 printf '%s\n' "$mode" > mode

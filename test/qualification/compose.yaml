@@ -5,6 +5,7 @@ services:
       dockerfile: test/qualification/Dockerfile
     command: ["--config", "/config/source.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
+    ports: ["18080:18080/tcp", "18082:18082/udp"]
     networks: [vortex]
   relay-1:
     build:
@@ -34,6 +35,17 @@ services:
     command: ["--config", "/config/destination.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro"]
     networks: [vortex]
+  target:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    entrypoint: ["python3", "/usr/local/bin/echo_target.py", "--host", "0.0.0.0"]
+    networks:
+      vortex:
+        ipv4_address: 172.30.0.10
 networks:
   vortex:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

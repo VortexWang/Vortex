@@ -20,29 +20,41 @@ fi
 
 cleanup() {
   kill "$topology_pid" 2>/dev/null || true
+  if [ "$mode" = docker ]; then
+    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
+  fi
+  if [ -n "${target_pid:-}" ]; then kill "$target_pid" 2>/dev/null || true; fi
   for name in source relay-1 relay-2 relay-3 destination; do
     if [ -f "$qual/$name.pid" ]; then kill "$(sed -n '1p' "$qual/$name.pid")" 2>/dev/null || true; fi
   done
 }
 trap cleanup INT TERM EXIT
 
-sleep 5
-python3 - "$qual/echo-target.log" <<'PY' &
-import socket, sys
-with socket.socket() as server:
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("127.0.0.1", 18081))
-    server.listen(1)
-    conn, _ = server.accept()
-    with conn:
-        payload = conn.recv(4096)
-        conn.sendall(payload)
-        open(sys.argv[1], "wb").write(payload)
-PY
-target_pid=$!
+for attempt in $(seq 1 180); do
+  test -f "$qual/topology-ready" && break
+  if ! kill -0 "$topology_pid" 2>/dev/null; then
+    cat "$qual/topology.log" >&2
+    echo "qualification topology exited before readiness" >&2
+    exit 1
+  fi
+  sleep 1
+done
+test -f "$qual/topology-ready" || { echo "qualification topology readiness timed out" >&2; exit 1; }
 sleep 1
-python3 - "$qual/client.out" <<'PY'
+if [ "$mode" = native ]; then
+  python3 "$root/tools/phase4/echo_target.py" --host 127.0.0.1 >"$qual/echo-target.log" 2>&1 &
+  target_pid=$!
+  sleep 1
+fi
+python3 - "$qual/client.out" "$qual/udp-client.out" <<'PY'
 import socket, sys
+with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
+    client.settimeout(10)
+    client.sendto(b"vortex-three-relay-udp-smoke", ("127.0.0.1", 18082))
+    response, _ = client.recvfrom(4096)
+if response != b"vortex-three-relay-udp-smoke":
+    raise SystemExit("udp echo payload mismatch")
+open(sys.argv[2], "wb").write(response)
 with socket.create_connection(("127.0.0.1", 18080), 10) as client:
     client.sendall(b"vortex-three-relay-smoke")
     client.shutdown(socket.SHUT_WR)

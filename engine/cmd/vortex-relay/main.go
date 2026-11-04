@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -64,6 +65,13 @@ func main() {
 	fmt.Printf("vortex-relay ready node_id=%s role=%s listen=%s\n", cfg.NodeID, cfg.Role, cfg.Listen)
 	switch cfg.Role {
 	case config.RoleSource:
+		if cfg.UDPServiceListen != "" {
+			go func() {
+				if err := serveUDPSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
+					fatal(err.Error())
+				}
+			}()
+		}
 		if err := serveSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
 			fatal(err.Error())
 		}
@@ -78,6 +86,14 @@ func main() {
 					next = link
 					nextMu.Unlock()
 					<-link.Closed()
+					nextMu.Lock()
+					if next == link {
+						next = nil
+					}
+					nextMu.Unlock()
+					if err := link.Err(); err != nil && !errors.Is(err, vlink.ErrProtocol) {
+						return err
+					}
 					return nil
 				})
 				if err != nil && ctx.Err() == nil {
@@ -142,22 +158,175 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 }
 
 func openRequest(cfg config.Config, conn net.Conn) vlink.OpenRequest {
+	return makeOpenRequest(cfg, conn.RemoteAddr(), 1)
+}
+
+func makeOpenRequest(cfg config.Config, addr net.Addr, network uint8) vlink.OpenRequest {
 	digest := sha256.Sum256([]byte(cfg.RuleID))
-	request := vlink.OpenRequest{RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, HopIndex: cfg.HopIndex, Network: 1}
+	request := vlink.OpenRequest{RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, HopIndex: cfg.HopIndex, Network: network}
 	copy(request.RuleID[:], digest[:16])
-	if tcp, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
+	if tcp, ok := addr.(*net.TCPAddr); ok {
 		if ip := tcp.IP.To4(); ip != nil {
 			request.ClientAddress = append([]byte(nil), ip...)
 		} else {
 			request.ClientAddress = append([]byte(nil), tcp.IP.To16()...)
 		}
+	} else if udp, ok := addr.(*net.UDPAddr); ok {
+		if ip := udp.IP.To4(); ip != nil {
+			request.ClientAddress = append([]byte(nil), ip...)
+		} else {
+			request.ClientAddress = append([]byte(nil), udp.IP.To16()...)
+		}
 	}
 	return request
 }
 
-func dialTarget(_ context.Context, target vlink.LocalTarget) (net.Conn, error) {
+func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor) error {
+	packet, err := net.ListenPacket("udp", cfg.UDPServiceListen)
+	if err != nil {
+		return err
+	}
+	defer packet.Close()
+	go func() { <-ctx.Done(); _ = packet.Close(); supervisor.Close() }()
+	type flow struct {
+		out  chan []byte
+		done chan struct{}
+	}
+	flows := make(map[string]*flow)
+	const maxFlows = 1024
+	buffer := make([]byte, 65535)
+	for {
+		n, peer, err := packet.ReadFrom(buffer)
+		if err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			return err
+		}
+		for key, stale := range flows {
+			select {
+			case <-stale.done:
+				delete(flows, key)
+			default:
+			}
+		}
+		key := peer.String()
+		current := flows[key]
+		if current != nil {
+			select {
+			case <-current.done:
+				delete(flows, key)
+				current = nil
+			default:
+			}
+		}
+		if current == nil {
+			if len(flows) >= maxFlows {
+				slog.Warn("udp session capacity reached", "limit", maxFlows)
+				continue
+			}
+			current = &flow{out: make(chan []byte, 64), done: make(chan struct{})}
+			flows[key] = current
+			go runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done)
+		}
+		payload := append([]byte(nil), buffer[:n]...)
+		if len(payload) > vlink.MaxPayloadSize {
+			slog.Warn("udp source queue dropped datagram", "reason", "payload_too_large")
+			continue
+		}
+		select {
+		case current.out <- payload:
+		default:
+			slog.Warn("udp source queue dropped datagram", "reason", "queue_full")
+		}
+	}
+}
+
+func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}) {
+	defer close(done)
+	if err := supervisor.Dial(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+		stream, err := mux.Open(ctx, makeOpenRequest(cfg, peer, 2))
+		if err != nil {
+			return err
+		}
+		if err := stream.WaitOpen(ctx); err != nil {
+			return err
+		}
+		recvErr := make(chan error, 1)
+		activity := make(chan struct{}, 1)
+		go func() {
+			for {
+				frame, err := stream.Receive(ctx)
+				if err != nil {
+					recvErr <- err
+					return
+				}
+				if frame.Type != vlink.FrameDgram {
+					recvErr <- vlink.ErrProtocol
+					return
+				}
+				if _, err := packet.WriteTo(frame.Payload, peer); err != nil {
+					recvErr <- err
+					return
+				}
+				select {
+				case activity <- struct{}{}:
+				default:
+				}
+				if err := stream.Consume(ctx, uint32(len(frame.Payload))); err != nil {
+					recvErr <- err
+					return
+				}
+			}
+		}()
+		idle := time.NewTimer(60 * time.Second)
+		defer idle.Stop()
+		for {
+			select {
+			case payload := <-outgoing:
+				accepted, err := stream.WriteDgram(ctx, payload)
+				if err != nil {
+					return err
+				}
+				if !accepted {
+					slog.Warn("udp source queue dropped datagram", "reason", "window_full")
+				} else {
+					if !idle.Stop() {
+						select {
+						case <-idle.C:
+						default:
+						}
+					}
+					idle.Reset(60 * time.Second)
+				}
+			case <-activity:
+				if !idle.Stop() {
+					select {
+					case <-idle.C:
+					default:
+					}
+				}
+				idle.Reset(60 * time.Second)
+			case err := <-recvErr:
+				return err
+			case <-idle.C:
+				return nil
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+	}); err != nil && ctx.Err() == nil {
+		slog.Warn("udp source session ended", "err", err)
+	}
+}
+
+func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net.Conn, error) {
 	port := strconv.Itoa(int(target.Port))
-	return net.Dial("tcp", net.JoinHostPort(strings.Trim(target.Host, "[]"), port))
+	protocol := "tcp"
+	if network == 2 {
+		protocol = "udp"
+	}
+	return net.Dial(protocol, net.JoinHostPort(strings.Trim(target.Host, "[]"), port))
 }
 
 func fatal(message string) {

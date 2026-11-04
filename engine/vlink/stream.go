@@ -110,6 +110,17 @@ func (t *StreamTable) Apply(frame Frame) (Frame, error) {
 		t.streams[frame.StreamID] = &streamRecord{StreamSnapshot: StreamSnapshot{ID: frame.StreamID, Network: network, Lifecycle: StreamOpening}, openRequest: request}
 		return frame, nil
 	}
+	if frame.Type == FrameWindow {
+		// WINDOW may be in flight when the peer removes a completed stream.
+		// Its credit cannot be applied after removal, but it is not a stream
+		// operation and must not create a stream violation or RST loop.
+		return frame, nil
+	}
+	if frame.Type == FrameRST {
+		// RST is terminal and may cross a concurrent local teardown. Treating a
+		// duplicate/late reset as a violation would make peers reset each other.
+		return frame, nil
+	}
 	stream := t.streams[frame.StreamID]
 	if stream == nil {
 		return Frame{}, &StreamViolation{StreamID: frame.StreamID, Cause: ErrStreamState}

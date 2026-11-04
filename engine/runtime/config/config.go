@@ -24,24 +24,25 @@ const (
 )
 
 type Config struct {
-	Version        uint64 `json:"version"`
-	NodeID         string `json:"node_id"`
-	Role           Role   `json:"role"`
-	Certificate    string `json:"certificate"`
-	PrivateKey     string `json:"private_key"`
-	TrustBundle    string `json:"trust_bundle"`
-	Listen         string `json:"listen"`
-	Peer           string `json:"peer,omitempty"`
-	PeerNodeID     string `json:"peer_node_id,omitempty"`
-	NextHopNodeID  string `json:"next_hop_node_id,omitempty"`
-	ServiceListen  string `json:"service_listen,omitempty"`
-	ExecutionPoint bool   `json:"execution_point,omitempty"`
-	RuleID         string `json:"rule_id"`
-	RuleRevision   uint64 `json:"rule_revision"`
-	PathGeneration uint64 `json:"path_generation"`
-	HopIndex       uint16 `json:"hop_index"`
-	Target         string `json:"target,omitempty"`
-	EvidenceFile   string `json:"evidence_file,omitempty"`
+	Version          uint64 `json:"version"`
+	NodeID           string `json:"node_id"`
+	Role             Role   `json:"role"`
+	Certificate      string `json:"certificate"`
+	PrivateKey       string `json:"private_key"`
+	TrustBundle      string `json:"trust_bundle"`
+	Listen           string `json:"listen"`
+	Peer             string `json:"peer,omitempty"`
+	PeerNodeID       string `json:"peer_node_id,omitempty"`
+	NextHopNodeID    string `json:"next_hop_node_id,omitempty"`
+	ServiceListen    string `json:"service_listen,omitempty"`
+	UDPServiceListen string `json:"udp_service_listen,omitempty"`
+	ExecutionPoint   bool   `json:"execution_point,omitempty"`
+	RuleID           string `json:"rule_id"`
+	RuleRevision     uint64 `json:"rule_revision"`
+	PathGeneration   uint64 `json:"path_generation"`
+	HopIndex         uint16 `json:"hop_index"`
+	Target           string `json:"target,omitempty"`
+	EvidenceFile     string `json:"evidence_file,omitempty"`
 }
 
 func LoadFile(path string) (Config, error) {
@@ -84,6 +85,14 @@ func (c Config) Validate() error {
 	}
 	if c.Role == RoleSource && c.ServiceListen == "" {
 		return errors.New("config: service_listen is required for source role")
+	}
+	if c.UDPServiceListen != "" {
+		if c.Role != RoleSource {
+			return errors.New("config: udp_service_listen is only valid for source role")
+		}
+		if _, _, err := net.SplitHostPort(c.UDPServiceListen); err != nil {
+			return fmt.Errorf("config: udp_service_listen: %w", err)
+		}
 	}
 	if c.Role == RoleDestination && c.Target == "" {
 		return errors.New("config: target is required for destination role")
