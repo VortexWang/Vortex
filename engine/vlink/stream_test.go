@@ -326,6 +326,51 @@ func TestStreamRemoteOpenAndHalfCloseIsolation(t *testing.T) {
 	}
 }
 
+func TestStreamLocalEarlyTCPDataIsBoundedUntilOpenOK(t *testing.T) {
+	table := NewStreamTable(true, 8)
+	id, err := table.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := table.MarkLocalData(id, 8); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := table.Apply(Frame{Type: FrameOpenOK, StreamID: id}); err != nil {
+		t.Fatal(err)
+	}
+	if err := table.MarkLocalData(id, 1); err == nil {
+		t.Fatal("local early-data accounting accepted bytes after OPEN_OK")
+	}
+	over, err := table.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := table.MarkLocalData(over, 9); err == nil {
+		t.Fatal("early TCP DATA exceeded the bounded OPEN prefix")
+	}
+	if _, ok := table.Snapshot(over); ok {
+		t.Fatal("over-limit early-data stream was not removed")
+	}
+}
+
+func TestRejectedRemoteOpenDropsBufferedTCPData(t *testing.T) {
+	table := NewStreamTable(true, 8)
+	request, _ := MarshalOpen(OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}})
+	const remoteID = uint32(2)
+	if _, err := table.Apply(Frame{Type: FrameOpen, StreamID: remoteID, Payload: request}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := table.Apply(Frame{Type: FrameData, StreamID: remoteID, Payload: []byte("secret")}); err != nil {
+		t.Fatal(err)
+	}
+	// The authorizer's rejection path removes the stream after sending
+	// OPEN_ERR; removal must discard every buffered prefix.
+	table.Drop(remoteID)
+	if table.Count() != 0 {
+		t.Fatal("rejected OPEN retained buffered TCP DATA")
+	}
+}
+
 func TestStreamDuplicateIDIsLinkError(t *testing.T) {
 	table := NewStreamTable(true, 8)
 	request, _ := MarshalOpen(OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}})

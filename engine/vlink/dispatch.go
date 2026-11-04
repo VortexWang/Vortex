@@ -731,6 +731,15 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			if size > MaxTLSRecordPayload {
 				size = MaxTLSRecordPayload
 			}
+			// A TCP sender may pipeline a bounded prefix while OPEN is in
+			// flight. The peer buffers that prefix until authorization; the
+			// local check prevents an unbounded pre-authorization queue.
+			if err := s.reserveEarlyData(size); err != nil {
+				resetCtx, cancel := context.WithTimeout(ctx, time.Second)
+				_ = s.Reset(resetCtx, 8)
+				cancel()
+				return err
+			}
 			waitStarted := time.Now()
 			if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
 				s.link.Close(err)
@@ -758,6 +767,25 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			}
 		}
 		payload = payload[groupSize:]
+	}
+	return nil
+}
+
+func (s *MuxStream) reserveEarlyData(bytes int) error {
+	snapshot, open := s.link.dispatch.streams.Snapshot(s.ID)
+	if !open {
+		return ErrStreamState
+	}
+	if snapshot.Lifecycle != StreamOpening {
+		return nil
+	}
+	if err := s.link.dispatch.streams.MarkLocalData(s.ID, bytes); err != nil {
+		// OPEN_OK may have raced the snapshot. Re-check before rejecting a
+		// legitimate post-authorization write.
+		if current, stillOpen := s.link.dispatch.streams.Snapshot(s.ID); stillOpen && current.OpenOK {
+			return nil
+		}
+		return err
 	}
 	return nil
 }
