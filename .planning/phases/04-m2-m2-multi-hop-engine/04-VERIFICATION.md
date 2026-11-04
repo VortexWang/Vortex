@@ -47,6 +47,10 @@ No Phase 4 completion or Phase 5 start is recorded. Correctness work continues w
 
 The same immutable snapshot fixture passed on the native local five-process topology, Docker Compose, and GitHub Actions run 41862303853. An existing TCP connection exchanged bytes before and after a SIGHUP selection change and remained bound to `old`; a new connection after revision 2 used `new`. Final evidence retained old and new usage in separate gates with zero sessions and held bytes. This closes the finite snapshot-selection slice only; it does not qualify D-04 or NFR-039/040/044 in full.
 
+## 90353ac policy-time increment
+
+The deterministic `PolicyBoundary` Engine adapter passed package race tests, full `go test ./...`, `go vet ./...`, and `DOCKER_CONTEXT=orbstack make phase4-m2-check`. It validates pre-issue/TTL and lease coverage, exact-T snapshot selection, conservative interval pause and recovery, a hard cutoff, and retaining unknown usage on the old snapshot. It is not wired into the relay: production clock-health input and a dynamic pre-issue provider are not available. Therefore NFR-039 remains unqualified; see `04-06-POLICY-CLOCK-EVIDENCE.md`.
+
 
 ## Incremental verification: finite source credit — 6a1faf2
 
