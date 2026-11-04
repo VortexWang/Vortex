@@ -134,6 +134,9 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 }
 
 func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) error {
+	if source.Network == vlink.StreamTCP {
+		return forwardTCP(ctx, source, destination)
+	}
 	var owned vlink.Frame
 	defer func() { owned.Release() }()
 	for {
@@ -171,6 +174,59 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 			return errors.New("relay: unexpected stream frame")
 		}
 	}
+}
+
+func forwardTCP(ctx context.Context, source, destination *vlink.MuxStream) error {
+	var frames [4]vlink.Frame
+	for {
+		n, err := source.ReceiveBatch(ctx, frames[:])
+		if err != nil {
+			return err
+		}
+		finished, err := forwardTCPBatch(ctx, source, destination, frames[:n])
+		for i := 0; i < n; i++ {
+			frames[i] = vlink.Frame{}
+		}
+		if err != nil || finished {
+			return err
+		}
+	}
+}
+
+func forwardTCPBatch(ctx context.Context, source, destination *vlink.MuxStream, frames []vlink.Frame) (bool, error) {
+	defer func() {
+		for _, frame := range frames {
+			frame.Release()
+		}
+	}()
+	dataCount := 0
+	var size uint32
+	for _, frame := range frames {
+		if frame.Type != vlink.FrameData {
+			break
+		}
+		dataCount++
+		size += uint32(len(frame.Payload))
+	}
+	if dataCount > 0 {
+		if err := destination.WriteDataFrames(ctx, frames[:dataCount]); err != nil {
+			return false, err
+		}
+		if err := source.Consume(ctx, size); err != nil {
+			return false, err
+		}
+	}
+	for _, frame := range frames[dataCount:] {
+		switch frame.Type {
+		case vlink.FrameFIN:
+			return true, destination.CloseWrite(ctx)
+		case vlink.FrameRST:
+			return true, errors.New("relay: stream reset")
+		default:
+			return true, errors.New("relay: unexpected stream frame")
+		}
+	}
+	return false, nil
 }
 
 func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) error {
