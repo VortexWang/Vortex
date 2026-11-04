@@ -3,7 +3,7 @@ phase: 04-m2-m2-multi-hop-engine
 plan: 08
 status: complete
 completed: 2026-11-05
-source_sha: pending-code-commit
+source_sha: 9385d42
 ---
 
 # Plan 04-08 Summary — Policy-Time and Snapshot Runtime Slice

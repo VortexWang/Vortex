@@ -2,7 +2,7 @@
 phase: 04-m2-m2-multi-hop-engine
 plan: 08
 status: partial-slice-verified
-source_sha: 0000000
+source_sha: 9385d42
 ---
 
 # Plan 04-08 Evidence — Policy-Time and Snapshot Runtime Slice
@@ -20,7 +20,7 @@ deny behavior.
 
 ## Verification
 
-Source SHA: local implementation commit recorded with the follow-up summary.
+Source SHA: `9385d42`.
 
 - `cd engine && go test -race ./runtime/accounting ./runtime/config ./runtime/relay ./cmd/vortex-relay` passed.
 - `cd engine && go vet ./runtime/accounting ./runtime/config ./runtime/relay ./cmd/vortex-relay` passed.

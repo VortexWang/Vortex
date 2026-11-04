@@ -9,7 +9,7 @@ stopped_at: Plan 04-07 verified on clean a7a7432; Phase 4 remains executing with
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-05
 last_activity_desc: Verified 04-08 policy/snapshot runtime wiring; 04-09 share CAS/lease drain is next
-state_head: b6a49ca
+state_head: 9385d42
 progress:
   total_phases: 8
   completed_phases: 3
