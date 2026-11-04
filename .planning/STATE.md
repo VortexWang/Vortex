@@ -9,7 +9,7 @@ stopped_at: Plan 04-06 grant-result identity and static UDP source gate pass cle
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-04
 last_activity_desc: Grant identity/outcome injection and TCP-UDP shared-budget exhaustion pass Docker/native; CI passed; no NFR qualification
-state_head: 90353ac
+state_head: 1e37840
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-05 — 90353ac conservative policy-time Engine adapter tests passed; NFR-039 remains unqualified pending trusted runtime clock/issuer integration
+Last activity: 2026-11-05 — 90353ac policy-time Engine adapter passed clean-SHA Docker and Actions 41870988836; NFR-039 remains unqualified pending runtime clock/issuer integration
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -92,7 +92,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-06 executing; 90353ac policy-time adapter verified in Engine unit/race and Docker regression; native runtime/Actions evidence pending
+Stopped at: Plan 04-06 executing; 90353ac policy-time adapter verified on clean 1e37840 Docker and Actions 41870988836; no native runtime clock injection claim
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
 
 ### Latest qualification review

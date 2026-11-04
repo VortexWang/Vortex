@@ -6,11 +6,12 @@ Implemented an injectable process-local policy boundary in `engine/runtime/accou
 
 The adapter is not wired into `vortex-relay` yet because the runtime has no trusted clock-health input or dynamic pre-issue provider. A missing next snapshot is denied at construction in this slice. The 200 ms one-shot issuer request remains open for a later injected issuer adapter. This is deterministic Engine behavior coverage, not NFR-039 qualification or a claim that wall clock uncertainty is known in production.
 
-Validation on the current worktree:
+Validation on clean commit `1e378406b82cc23bede79cb68a2119f9a1e5d266` (implementation `90353ac`):
 
 - `go test -race ./runtime/accounting`
 - `go test ./...`
 - `go vet ./...`
 - `DOCKER_CONTEXT=orbstack make phase4-m2-check`
+- GitHub Actions Phase 4 run [41870988836](https://github.com/VortexWang/Vortex/actions/runs/41870988836), success on the same SHA
 
-Tests cover pre-issue/lease validation, exact `T`, old/new selection, admission rejection during uncertainty, <=10-second straddle and recovery, hard cutoff, too-wide uncertainty, and unknown usage remaining in the original snapshot. Native/Docker process-topology testing for this injectable clock is not claimed because no runtime clock injection endpoint is configured.
+Tests cover pre-issue/lease validation, exact `T`, old/new selection, admission rejection during uncertainty, <=10-second straddle and recovery, hard cutoff, too-wide uncertainty, and unknown usage remaining in the original snapshot. Docker Engine regression and Actions run pass on the same clean SHA. Native process-topology testing for this injectable clock is not claimed because no runtime clock injection endpoint is configured.

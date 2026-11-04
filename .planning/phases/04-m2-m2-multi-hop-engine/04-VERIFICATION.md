@@ -49,7 +49,7 @@ The same immutable snapshot fixture passed on the native local five-process topo
 
 ## 90353ac policy-time increment
 
-The deterministic `PolicyBoundary` Engine adapter passed package race tests, full `go test ./...`, `go vet ./...`, and `DOCKER_CONTEXT=orbstack make phase4-m2-check`. It validates pre-issue/TTL and lease coverage, exact-T snapshot selection, conservative interval pause and recovery, a hard cutoff, and retaining unknown usage on the old snapshot. It is not wired into the relay: production clock-health input and a dynamic pre-issue provider are not available. Therefore NFR-039 remains unqualified; see `04-06-POLICY-CLOCK-EVIDENCE.md`.
+The deterministic `PolicyBoundary` Engine adapter passed package race tests, full `go test ./...`, `go vet ./...`, clean-SHA `DOCKER_CONTEXT=orbstack make phase4-m2-check`, and Actions 41870988836 on `1e378406b82cc23bede79cb68a2119f9a1e5d266`. It validates pre-issue/TTL and lease coverage, exact-T snapshot selection, conservative interval pause and recovery, a hard cutoff, and retaining unknown usage on the old snapshot. It is not wired into the relay: production clock-health input and a dynamic pre-issue provider are not available. Therefore NFR-039 remains unqualified; see `04-06-POLICY-CLOCK-EVIDENCE.md`.
 
 
 ## Incremental verification: finite source credit — 6a1faf2
