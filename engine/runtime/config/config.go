@@ -66,8 +66,8 @@ func LoadFile(path string) (Config, error) {
 }
 
 func (c Config) Validate() error {
-	if c.TransportMode != "" && c.TransportMode != vlink.ModePool && c.TransportMode != vlink.ModeMux {
-		return errors.New("config: transport_mode must be pool or mux")
+	if c.TransportMode != "" && c.TransportMode != vlink.ModePool && c.TransportMode != vlink.ModeMux && c.TransportMode != vlink.ModeAuto {
+		return errors.New("config: transport_mode must be pool, mux, or auto")
 	}
 	if c.PoolMinLinks < 0 || c.PoolMaxLinks < 0 || c.PoolMaxLinks > 16 || c.PoolMinLinks > c.PoolBounds().MaxLinks {
 		return errors.New("config: invalid pool bounds (maximum 16 links)")

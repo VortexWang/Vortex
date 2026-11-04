@@ -40,8 +40,8 @@ and the relay reports evidence open/write/close errors as failures.
 
 Evidence is written below `artifacts/phase4/qualification/{native,docker}`:
 
-`make phase4-runtime-modes BACKEND=docker` exercises explicit `pool` and `mux`
-configs on the real five-process route, with per-mode latency raw samples,
+`make phase4-runtime-modes BACKEND=docker` exercises explicit `pool`, `mux`,
+and adaptive `auto` configs on the real five-process route, with per-mode latency raw samples,
 link-reuse evidence, finite fault probes, TLS comparison and byte reconciliation.
 The native backend uses the same command without `BACKEND=docker`. Reports go
 to `artifacts/phase4/modes/{backend}`. The tracer's optional `transport_mode`
@@ -51,8 +51,9 @@ to 4, with a maximum of 16 links per TCP or UDP peer pool. TCP `pool` leases
 are exclusive for a stream's lifetime; `mux` shares links, and UDP always uses
 a separate shared mux pool. Initial TCP links are prewarmed with bounded retry
 backoff. Healthy idle links are reused; unhealthy ones are replaced on demand.
-Automatic duration-based switching and full adaptive scaling remain outside
-this explicit-mode tracer. These config fields extend the tracer config,
+In `auto`, TCP begins in mux without samples, then uses the bounded ten-minute
+first-target-byte median policy: under ten seconds selects pool, otherwise mux.
+Full adaptive scaling remains outside this tracer. These config fields extend the tracer config,
 not the separate Agent runtime configuration contract.
 
 The mode summary keeps fresh client-connect-to-first-byte separate from the

@@ -34,7 +34,7 @@ json() {
   udp_service=
 	transport=
 	if [ -n "${TRANSPORT_MODE:-}" ]; then
-		case "$TRANSPORT_MODE" in pool|mux) ;; *) echo "invalid TRANSPORT_MODE" >&2; exit 1 ;; esac
+		case "$TRANSPORT_MODE" in pool|mux|auto) ;; *) echo "invalid TRANSPORT_MODE" >&2; exit 1 ;; esac
 		transport=",\"transport_mode\":\"$TRANSPORT_MODE\",\"pool_min_links\":1,\"pool_max_links\":4"
 	fi
   if [ "$role" = source ]; then udp_service=",\"udp_service_listen\":\"$host:18082\""; fi

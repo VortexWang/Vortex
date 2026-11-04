@@ -12,7 +12,7 @@ func TestTransportBoundsRejectUnsupportedAndUnboundedModes(t *testing.T) {
 		min, max int
 		valid    bool
 	}{
-		{"", 0, 0, true}, {"", 1, 4, false}, {"auto", 1, 4, false}, {"mux", 1, 4, true},
+		{"", 0, 0, true}, {"", 1, 4, false}, {"auto", 1, 4, true}, {"mux", 1, 4, true},
 		{"pool", 0, 0, true}, {"pool", 5, 4, false}, {"pool", 1, 17, false}, {"pool", -1, 4, false},
 	} {
 		var cfg Config

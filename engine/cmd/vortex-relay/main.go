@@ -76,6 +76,13 @@ func main() {
 			fatal(err.Error())
 		}
 		defer supervisor.Transport.Close()
+		if cfg.TransportMode == vlink.ModeAuto && cfg.Role == config.RoleRelay {
+			service.ObserveFirstTargetByte = func(latency time.Duration) {
+				if err := supervisor.Transport.ObserveFirstPacket(latency); err != nil {
+					slog.Warn("vlink auto-mode sample rejected", "err", err)
+				}
+			}
+		}
 		if cfg.Role == config.RoleSource {
 			if err := warmTransport(ctx, supervisor.Transport); err != nil {
 				return
@@ -223,6 +230,7 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 		}
 		go func(local net.Conn) {
 			defer local.Close()
+			openedAt := time.Now()
 			if err := supervisor.Use(ctx, vlink.StreamTCP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 				request := openRequest(cfg, local)
 				stream, err := mux.Open(ctx, request)
@@ -236,7 +244,13 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 					return err
 				}
 				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
-				return relay.BridgeConn(ctx, stream, local)
+				return relay.BridgeConnWithGateObserver(ctx, stream, local, nil, func() {
+					if supervisor.Transport != nil && cfg.TransportMode == vlink.ModeAuto {
+						if err := supervisor.Transport.ObserveFirstPacket(time.Since(openedAt)); err != nil {
+							slog.Warn("vlink auto-mode sample rejected", "err", err)
+						}
+					}
+				})
 			}); err != nil && ctx.Err() == nil {
 				slog.Error("vlink source dial failed", "err", err)
 			}

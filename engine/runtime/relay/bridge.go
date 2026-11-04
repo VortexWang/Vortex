@@ -16,15 +16,16 @@ import (
 type TargetDialer func(context.Context, uint8, vlink.LocalTarget) (net.Conn, error)
 
 type Service struct {
-	LocalNode   vlink.NodeID
-	Policy      vlink.OpenPolicy
-	Next        func() *vlink.MuxLink
-	AcquireNext func(context.Context, vlink.StreamNetwork) (*vlink.MuxLink, func(), error)
-	Dial        TargetDialer
-	Gate        engineaccounting.Gate
-	mu          sync.Mutex
-	closing     bool
-	workers     sync.WaitGroup
+	LocalNode              vlink.NodeID
+	Policy                 vlink.OpenPolicy
+	Next                   func() *vlink.MuxLink
+	AcquireNext            func(context.Context, vlink.StreamNetwork) (*vlink.MuxLink, func(), error)
+	Dial                   TargetDialer
+	Gate                   engineaccounting.Gate
+	ObserveFirstTargetByte func(time.Duration)
+	mu                     sync.Mutex
+	closing                bool
+	workers                sync.WaitGroup
 }
 
 func (s *Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
@@ -57,6 +58,7 @@ func (s *Service) Shutdown() {
 }
 
 func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *vlink.MuxStream) {
+	openedAt := time.Now()
 	err := link.AuthorizeRemote(ctx, stream.ID, func(ctx context.Context, peer vlink.NodeID, request vlink.OpenRequest) (io.Closer, error) {
 		decision, err := s.Policy.Authorize(ctx, peer, request)
 		if err != nil {
@@ -124,7 +126,11 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 			}
 			typed.releaseLease()
 		}()
-		if err := BridgeStreams(ctx, stream, typed.stream); err != nil && ctx.Err() == nil {
+		var observe func()
+		if stream.Network == vlink.StreamTCP && s.ObserveFirstTargetByte != nil {
+			observe = func() { s.ObserveFirstTargetByte(time.Since(openedAt)) }
+		}
+		if err := BridgeStreamsObserved(ctx, stream, typed.stream, observe); err != nil && ctx.Err() == nil {
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	case *connResource:
@@ -137,14 +143,18 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 }
 
 func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
+	return BridgeStreamsObserved(ctx, left, right, nil)
+}
+
+func BridgeStreamsObserved(ctx context.Context, left, right *vlink.MuxStream, onFirstTargetByte func()) error {
 	if left == nil || right == nil {
 		return errors.New("relay: both streams are required")
 	}
 	bridgeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	errs := make(chan error, 2)
-	go func() { errs <- forwardStream(bridgeCtx, left, right) }()
-	go func() { errs <- forwardStream(bridgeCtx, right, left) }()
+	go func() { errs <- forwardStream(bridgeCtx, left, right, nil) }()
+	go func() { errs <- forwardStream(bridgeCtx, right, left, onFirstTargetByte) }()
 	first := <-errs
 	if first != nil {
 		cancel()
@@ -160,12 +170,13 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 	return second
 }
 
-func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) error {
+func forwardStream(ctx context.Context, source, destination *vlink.MuxStream, onFirstTargetByte func()) error {
 	if source.Network == vlink.StreamTCP {
-		return forwardTCP(ctx, source, destination)
+		return forwardTCP(ctx, source, destination, onFirstTargetByte)
 	}
 	var owned vlink.Frame
 	defer func() { owned.Release() }()
+	firstTargetByte := true
 	for {
 		owned.Release()
 		frame, err := source.Receive(ctx)
@@ -175,6 +186,12 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 		}
 		switch frame.Type {
 		case vlink.FrameData:
+			if firstTargetByte {
+				firstTargetByte = false
+				if onFirstTargetByte != nil {
+					onFirstTargetByte()
+				}
+			}
 			if err := destination.WriteData(ctx, frame.Payload); err != nil {
 				return err
 			}
@@ -182,6 +199,12 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 				return err
 			}
 		case vlink.FrameDgram:
+			if firstTargetByte {
+				firstTargetByte = false
+				if onFirstTargetByte != nil {
+					onFirstTargetByte()
+				}
+			}
 			_, err := destination.WriteDgram(ctx, frame.Payload)
 			if err != nil {
 				return err
@@ -203,12 +226,22 @@ func forwardStream(ctx context.Context, source, destination *vlink.MuxStream) er
 	}
 }
 
-func forwardTCP(ctx context.Context, source, destination *vlink.MuxStream) error {
+func forwardTCP(ctx context.Context, source, destination *vlink.MuxStream, onFirstTargetByte func()) error {
 	var frames [4]vlink.Frame
+	firstTargetByte := true
 	for {
 		n, err := source.ReceiveBatch(ctx, frames[:])
 		if err != nil {
 			return err
+		}
+		for _, frame := range frames[:n] {
+			if frame.Type == vlink.FrameData && firstTargetByte {
+				firstTargetByte = false
+				if onFirstTargetByte != nil {
+					onFirstTargetByte()
+				}
+				break
+			}
 		}
 		finished, err := forwardTCPBatch(ctx, source, destination, frames[:n])
 		for i := 0; i < n; i++ {
@@ -261,6 +294,10 @@ func BridgeConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn) err
 }
 
 func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate) error {
+	return BridgeConnWithGateObserver(ctx, stream, conn, gate, nil)
+}
+
+func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate, onFirstTargetByte func()) error {
 	if stream == nil || conn == nil {
 		return errors.New("relay: stream and connection are required")
 	}
@@ -348,9 +385,16 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 			bufferSize = vlink.MaxPayloadSize
 		}
 		buffer := make([]byte, bufferSize)
+		firstTargetByte := true
 		for {
 			n, err := conn.Read(buffer)
 			if n > 0 {
+				if firstTargetByte {
+					firstTargetByte = false
+					if onFirstTargetByte != nil {
+						onFirstTargetByte()
+					}
+				}
 				batch, reserveErr := reserve(bridgeCtx, session, engineaccounting.RightToLeft, n)
 				if reserveErr != nil {
 					errCh <- reserveErr

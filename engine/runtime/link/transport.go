@@ -16,6 +16,7 @@ import (
 type Transport struct {
 	mode     vlink.TransportMode
 	tcp, udp *vlink.LinkPool
+	history  *vlink.FirstPacketHistory
 	closed   chan struct{}
 	once     sync.Once
 }
@@ -38,10 +39,14 @@ func (p *pooledLink) Healthy() bool {
 func (p *pooledLink) Close() error { p.once.Do(func() { p.owner.untrack(p.mux) }); return nil }
 
 func NewTransport(ctx context.Context, owner *Supervisor, mode vlink.TransportMode, bounds vlink.PoolConfig) (*Transport, error) {
-	if owner == nil || (mode != vlink.ModePool && mode != vlink.ModeMux) {
-		return nil, errors.New("link: explicit pool or mux mode required")
+	if owner == nil || (mode != vlink.ModePool && mode != vlink.ModeMux && mode != vlink.ModeAuto) {
+		return nil, errors.New("link: pool, mux, or auto mode required")
 	}
-	t := &Transport{mode: mode, closed: make(chan struct{})}
+	history, err := vlink.NewFirstPacketHistory(1024, nil)
+	if err != nil {
+		return nil, err
+	}
+	t := &Transport{mode: mode, history: history, closed: make(chan struct{})}
 	dial := func(ctx context.Context) (vlink.PooledLink, error) {
 		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -59,7 +64,6 @@ func NewTransport(ctx context.Context, owner *Supervisor, mode vlink.TransportMo
 		}
 		return &pooledLink{mux: mux, peer: peer, owner: owner}, nil
 	}
-	var err error
 	t.tcp, err = vlink.NewLinkPool(bounds, dial)
 	if err != nil {
 		return nil, err
@@ -92,6 +96,8 @@ func (t *Transport) acquire(ctx context.Context, network vlink.StreamNetwork) (*
 	p, mode := t.tcp, t.mode
 	if network == vlink.StreamUDP {
 		p, mode = t.udp, vlink.ModeMux
+	} else if mode == vlink.ModeAuto {
+		mode = t.history.Mode(vlink.ModeAuto, network)
 	}
 	item, release, err := p.Acquire(ctx, mode)
 	if err != nil {
@@ -101,6 +107,14 @@ func (t *Transport) acquire(ctx context.Context, network vlink.StreamNetwork) (*
 	slog.Info("vlink outgoing lease", "mode", mode, "network", network, "pool_total", p.Snapshot().Total)
 	return link, release, nil
 }
+
+func (t *Transport) ObserveFirstPacket(latency time.Duration) error {
+	if latency < 0 {
+		return errors.New("link: first-packet latency cannot be negative")
+	}
+	return t.history.Observe(latency)
+}
+
 func (t *Transport) Close() {
 	t.once.Do(func() { close(t.closed); _ = t.tcp.Close(); _ = t.udp.Close() })
 }

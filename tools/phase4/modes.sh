@@ -4,7 +4,7 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 backend=${BACKEND:-native}
 base=${MODE_EVIDENCE_DIR:-$root/artifacts/phase4/modes/$backend}
-for mode in pool mux; do
+for mode in pool mux auto; do
   export TRANSPORT_MODE="$mode" BACKEND="$backend"
   export QUALIFICATION_DIR="$base/$mode/runtime" COMPARISON_DIR="$base/$mode/comparison"
   "$root/tools/phase4/qualification.sh"
@@ -15,7 +15,7 @@ import collections, hashlib, json, re, sys
 from pathlib import Path
 base = Path(sys.argv[1])
 result = {}
-for mode in ('pool', 'mux'):
+for mode in ('pool', 'mux', 'auto'):
     out = base / mode / 'comparison'
     cfg = json.loads((out/'config/source.json').read_text())
     report = json.loads((out/'comparison.json').read_text())
@@ -42,15 +42,25 @@ for mode in ('pool', 'mux'):
         raise SystemExit('unexpected concurrent TCP pool size for '+mode)
     if mode == 'pool' and max(tcp_sizes) < 2:
         raise SystemExit('pool test did not exercise concurrent exclusive leases')
+    role_modes = {}
+    for role in ('source', 'relay-1', 'relay-2', 'relay-3'):
+        role_log = (base/mode/'runtime/logs'/(role+'.log')).read_text()
+        selected = set(re.findall(r'vlink outgoing lease.*mode=(pool|mux) network=1', role_log))
+        if mode == 'auto' and selected != {'pool', 'mux'}:
+            raise SystemExit('auto mode did not observe both modes on '+role)
+        if mode != 'auto' and selected != {mode}:
+            raise SystemExit('explicit mode selected an unexpected transport on '+role)
+        role_modes[role] = sorted(selected)
     result[mode] = {'commit': report['commit'], 'dirty':report['dirty'],
         'median_ms':samples['median_ms'], 'samples_ms':samples['samples_ms'],
         'segment_median_sum_ms':report['latency']['segment_median_sum_ms'],
         'diagnostic_difference_ms':report['latency']['runtime_minus_segment_sum_ms'],
         'link_reuse_streams':dict(counts), 'observed_max_pool_links':pools,
         'workload_tcp_pool_max':max(tcp_sizes),
+        'observed_tcp_modes':role_modes,
         'faults':'finite integrity/forged OPEN/bypass/middle-hop failure passed',
         'scope':'explicit bounded runtime mode, actual TCP connect to first-byte; not NFR qualification'}
-if result['pool']['commit'] != result['mux']['commit']:
+if len({x['commit'] for x in result.values()}) != 1 or any(x['dirty'] for x in result.values()):
     raise SystemExit('mode SHA mismatch')
 (base/'summary.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
 with (base/'checksums.sha256').open('w') as output:
