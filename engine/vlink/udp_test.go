@@ -103,6 +103,56 @@ func TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss(t *testing.T) {
 	server.Close(ErrProtocol)
 }
 
+func TestUDPReturnsStreamCreditBeforeWindowNearExhaustion(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	cfg := MuxConfig{LocalClient: true, StreamWindow: 64, AggregateWindow: 1024, MaxWindow: 2048}
+	client, err := newMuxLink(clientConn, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(nil)
+	cfg.LocalClient = false
+	server, err := newMuxLink(serverConn, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close(nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	sender, err := client.Open(ctx, OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 2, ClientAddress: []byte{192, 0, 2, 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	receiver, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, receiver.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if frame, err := sender.Receive(ctx); err != nil || frame.Type != FrameOpenOK {
+		t.Fatalf("OPEN: %+v %v", frame, err)
+	}
+	if accepted, err := sender.WriteDgram(ctx, make([]byte, 16)); err != nil || !accepted {
+		t.Fatalf("DGRAM: %v %v", accepted, err)
+	}
+	frame, err := receiver.Receive(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer frame.Release()
+	if err := receiver.Consume(ctx, 16); err != nil {
+		t.Fatal(err)
+	}
+	for client.windows.Snapshot().StreamAvailable[sender.ID] != 64 {
+		select {
+		case <-ctx.Done():
+			t.Fatal("UDP stream credit was not returned after consuming one quarter window")
+		case <-time.After(time.Millisecond):
+		}
+	}
+}
+
 func TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit(t *testing.T) {
 	clientConn, serverConn := net.Pipe()
 	config := MuxConfig{LocalClient: true, StreamWindow: 4, AggregateWindow: 4, MaxWindow: 16}

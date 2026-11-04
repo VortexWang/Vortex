@@ -234,7 +234,11 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	}
 	dgrams := config.DgramScheduler
 	if dgrams == nil {
-		dgrams = scheduler.New(1 << 20)
+		queueBytes := config.UDPQueueBytes
+		if queueBytes <= 0 {
+			queueBytes = 1 << 20
+		}
+		dgrams = scheduler.New(uint64(queueBytes))
 	}
 	aggregateGrant := config.AggregateWindow / 2
 	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManagerWithReserve(config.AggregateWindow, config.MaxWindow, config.UDPWindowReserve), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: uint32(uint64(config.StreamWindow) * 3 / 4), aggregateGrant: aggregateGrant}
@@ -857,15 +861,24 @@ func (s *MuxStream) Consume(ctx context.Context, bytes uint32) error {
 	if bytes == 0 {
 		return nil
 	}
-	return s.link.consume(ctx, s.ID, bytes)
+	grant := s.link.streamGrant
+	if s.Network == StreamUDP {
+		// UDP cannot wait for credit: return it before a scheduling pause can
+		// exhaust the remaining stream window. TCP retains larger batches.
+		grant = s.link.config.StreamWindow / 4
+		if grant == 0 {
+			grant = 1
+		}
+	}
+	return s.link.consume(ctx, s.ID, bytes, grant)
 }
 
-func (m *MuxLink) consume(ctx context.Context, streamID, bytes uint32) error {
+func (m *MuxLink) consume(ctx context.Context, streamID, bytes, streamGrant uint32) error {
 	m.windowMu.Lock()
 	m.pendingStream[streamID] += uint64(bytes)
 	m.pendingTotal += uint64(bytes)
 	var streamDelta, aggregateDelta uint32
-	if m.pendingStream[streamID] >= uint64(m.streamGrant) {
+	if m.pendingStream[streamID] >= uint64(streamGrant) {
 		streamDelta = uint32(m.pendingStream[streamID])
 		m.pendingStream[streamID] = 0
 	}

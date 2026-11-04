@@ -1,5 +1,6 @@
 services:
   source:
+    stop_grace_period: 2m
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
@@ -12,6 +13,7 @@ services:
     ports: ["18080:18080/tcp", "18082:18082/udp"]
     networks: [vortex]
   relay-1:
+    stop_grace_period: 2m
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
@@ -23,6 +25,7 @@ services:
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   relay-2:
+    stop_grace_period: 2m
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
@@ -34,6 +37,7 @@ services:
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   relay-3:
+    stop_grace_period: 2m
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile
@@ -45,6 +49,7 @@ services:
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
   destination:
+    stop_grace_period: 2m
     build:
       context: ../..
       dockerfile: test/qualification/Dockerfile

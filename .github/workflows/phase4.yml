@@ -35,6 +35,15 @@ jobs:
       - name: Compare TLS and faults in Compose
         env: {GOMAXPROCS: "1"}
         run: BACKEND=docker make phase4-runtime-comparison
+      - name: Run 16-stream 60-second Compose accounting regression
+        env:
+          GOMAXPROCS: "1"
+          BACKEND: docker
+          MIXED_DURATION_SECONDS: "60"
+          MIXED_TCP_STREAMS: "16"
+          VORTEX_QUALIFICATION_EVENT_LIMIT: "10000000"
+          QUALIFICATION_DIR: ${{ github.workspace }}/artifacts/phase4/qualification/docker-scale
+        run: make phase4-runtime-mixed
       - name: Record host metadata
         if: always()
         run: |

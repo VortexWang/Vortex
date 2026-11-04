@@ -33,6 +33,10 @@ Long-duration qualification can set `VORTEX_QUALIFICATION_EVENT_LIMIT` for the
 fixture only (maximum 10,000,000 events per execution process). The default
 remains 1,000,000, and the selected value is included in host/semantic evidence.
 The override is ignored by runtime configs without an evidence file.
+Events are retained in bounded 4,096-entry chunks to avoid large contiguous
+slice copies stalling forwarding. Relay containers have a two-minute stop
+grace to finish JSONL output. The fixture rejects nonzero relay exit codes,
+and the relay reports evidence open/write/close errors as failures.
 
 Evidence is written below `artifacts/phase4/qualification/{native,docker}`:
 

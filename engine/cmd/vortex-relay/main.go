@@ -75,9 +75,13 @@ func main() {
 			return
 		}
 		file, openErr := os.OpenFile(cfg.EvidenceFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-		if openErr == nil {
-			defer file.Close()
-			_ = gate.WriteJSONL(file)
+		if openErr != nil {
+			fatal(fmt.Sprintf("open accounting evidence: %v", openErr))
+		}
+		writeErr := gate.WriteJSONL(file)
+		closeErr := file.Close()
+		if err := errors.Join(writeErr, closeErr); err != nil {
+			fatal(fmt.Sprintf("write accounting evidence: %v", err))
 		}
 	}()
 	defer func() {

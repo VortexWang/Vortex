@@ -22,17 +22,25 @@ else
 fi
 
 cleanup() {
+  cleanup_status=0
   kill "$topology_pid" 2>/dev/null || true
   wait "$topology_pid" 2>/dev/null || true
   if [ "$mode" = docker ]; then
-    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || true
+    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || cleanup_status=1
     mkdir -p "$qual/logs"
     for name in source relay-1 relay-2 relay-3 destination; do
       QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" logs --no-color "$name" >"$qual/logs/$name.log" 2>&1 || true
+      container=$(QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" ps -a -q "$name")
+      exit_code=$(docker inspect --format '{{.State.ExitCode}}' "$container" 2>/dev/null) || exit_code=missing
+      if [ "$exit_code" != 0 ]; then
+        echo "qualification blocked: $name exited with status $exit_code; accounting evidence may be incomplete" >&2
+        cleanup_status=1
+      fi
     done
     QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
   fi
   if [ -n "${target_pid:-}" ]; then kill "$target_pid" 2>/dev/null || true; fi
+  return "$cleanup_status"
 }
 trap cleanup INT TERM EXIT
 

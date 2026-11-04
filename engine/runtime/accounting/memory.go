@@ -24,9 +24,14 @@ type Event struct {
 type Gate struct {
 	mu       sync.Mutex
 	sequence atomic.Uint64
-	events   []Event
+	chunks   [][]Event
+	count    int
 	max      int
 }
+
+// Fixed-sized chunks avoid copying millions of live events during append.
+// A large slice growth can otherwise stall forwarding and WINDOW updates.
+const eventChunkSize = 4096
 
 func NewGate(maxEvents int) (*Gate, error) {
 	if maxEvents < 1 {
@@ -45,14 +50,25 @@ func (g *Gate) Open(_ context.Context, flow engineaccounting.Flow) (engineaccoun
 func (g *Gate) Events() []Event {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	return append([]Event(nil), g.events...)
+	events := make([]Event, 0, g.count)
+	for _, chunk := range g.chunks {
+		events = append(events, chunk...)
+	}
+	return events
 }
 
 func (g *Gate) WriteJSONL(w io.Writer) error {
+	g.mu.Lock()
+	// Copy only slice headers. Appended event values are immutable; capturing
+	// each length gives a consistent snapshot without a full event copy.
+	chunks := append([][]Event(nil), g.chunks...)
+	g.mu.Unlock()
 	encoder := json.NewEncoder(w)
-	for _, event := range g.Events() {
-		if err := encoder.Encode(event); err != nil {
-			return fmt.Errorf("memory accounting: write event: %w", err)
+	for _, chunk := range chunks {
+		for _, event := range chunk {
+			if err := encoder.Encode(event); err != nil {
+				return fmt.Errorf("memory accounting: write event: %w", err)
+			}
 		}
 	}
 	return nil
@@ -72,10 +88,17 @@ func (s *session) Reserve(_ context.Context, direction engineaccounting.Directio
 	return engineaccounting.NewBatch(amount, func(_ context.Context, outcome engineaccounting.Outcome) error {
 		s.gate.mu.Lock()
 		defer s.gate.mu.Unlock()
-		if len(s.gate.events) >= s.gate.max {
+		if s.gate.count >= s.gate.max {
 			return errors.New("memory accounting: event capacity exhausted")
 		}
-		s.gate.events = append(s.gate.events, Event{BatchID: id, Flow: s.flow, Direction: direction, Outcome: outcome.Resolution, Reserved: outcome.Reserved, Used: outcome.Used})
+		last := len(s.gate.chunks) - 1
+		if last < 0 || len(s.gate.chunks[last]) == cap(s.gate.chunks[last]) {
+			size := min(eventChunkSize, s.gate.max-s.gate.count)
+			s.gate.chunks = append(s.gate.chunks, make([]Event, 0, size))
+			last++
+		}
+		s.gate.chunks[last] = append(s.gate.chunks[last], Event{BatchID: id, Flow: s.flow, Direction: direction, Outcome: outcome.Resolution, Reserved: outcome.Reserved, Used: outcome.Used})
+		s.gate.count++
 		return nil
 	})
 }

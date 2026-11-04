@@ -5,10 +5,10 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 runtime and same-SHA evidence complete; measured performance and baseline gaps remain
+stopped_at: Plan 04-06 accounting flush and UDP stalls fixed locally; clean-SHA Docker and Actions validation pending
 last_updated: "2026-11-04T03:47:30.284716+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean 0b9615e passed Linux-driver Docker, Ubuntu and Actions mixed runtime/accounting plus finite TLS/latency/fault probes; relative NFR and D-04 remain unqualified
+last_activity_desc: 16-stream 60-second dirty-worktree Docker diagnostic passed with zero UDP loss and exact accounting after chunked event storage and bounded window tuning; clean-SHA validation pending
 state_head: 0b9615e
 progress:
   total_phases: 8
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — 0b9615e passed Linux-driver Compose, Ubuntu native and Actions native/Compose; absolute throughput and UDP loss improved, relative baseline gap remains
+Last activity: 2026-11-04 — accounting flush and append stalls repaired; 16-stream/60-second Docker diagnostic has zero UDP loss; clean-SHA dual-host validation pending
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -73,7 +73,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. Ordered follow-up is paused at scale testing: a 16-stream/60-second Docker run with a 10-million bounded event cap showed 1.699% UDP loss and target/accounting byte mismatch (49.89 GB versus 30.89 GB). Resolve runtime/accounting correctness before proceeding to latency. No Phase 4 completion is claimed.
+- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies, and bounded UDP credit/queue tuning produced zero loss on a 16-stream/60-second Docker diagnostic with exact accounting. Clean-SHA Docker/Actions confirmation and native qualification remain pending. No Phase 4 completion is claimed.
 
 ## Deferred Items
 
