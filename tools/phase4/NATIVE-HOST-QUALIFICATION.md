@@ -6,6 +6,10 @@ resource attestations.
 
 ## Install the toolchain
 
+The preflight script installs the Ubuntu packages and Go toolchain by default.
+The manual commands below are equivalent and are useful when provisioning is
+performed by an image builder.
+
 ```bash
 apt-get update
 apt-get install -y ca-certificates curl git make python3 iproute2 procps util-linux coreutils
@@ -43,6 +47,9 @@ tools/phase4/native-host-preflight.sh \
   --attestation-file /etc/vortex/host-attestation.json \
   --output artifacts/phase4/native-host-preflight.json
 ```
+
+`make phase4-native-preflight` passes `--install` automatically. Use
+`--no-install` only for an already provisioned host or an audit-only run.
 
 The command must exit zero before formal qualification. A KVM/Xen/VMware guest,
 missing provider attestation, loopback-only topology, missing Go version, or

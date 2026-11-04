@@ -77,7 +77,7 @@ phase4-qualification-gate:
 
 .PHONY: phase4-native-preflight
 phase4-native-preflight:
-	tools/phase4/native-host-preflight.sh \
+	tools/phase4/native-host-preflight.sh --install \
 		--interface "$${QUALIFICATION_INTERFACE:?QUALIFICATION_INTERFACE is required}" \
 		--attestation-file "$${HOST_ATTESTATION:?HOST_ATTESTATION is required}" \
 		--output "$${PREFLIGHT_OUTPUT:-artifacts/phase4/native-host-preflight.json}"

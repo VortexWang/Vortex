@@ -7,6 +7,7 @@ ATTESTATION=""
 MIN_CPU=4
 MIN_MEMORY_GIB=8
 REQUIRE_NATIVE=1
+INSTALL=1
 
 usage() {
   cat <<'EOF'
@@ -18,6 +19,7 @@ Usage: native-host-preflight.sh [options]
   --min-cpu N                   Minimum logical CPUs (default: 4)
   --min-memory-gib N            Minimum memory in GiB (default: 8)
   --allow-virtualized           Record virtualization but do not pass native check
+  --no-install                  Do not install missing packages/toolchain
 EOF
 }
 
@@ -29,6 +31,8 @@ while [[ $# -gt 0 ]]; do
     --min-cpu) MIN_CPU=$2; shift 2 ;;
     --min-memory-gib) MIN_MEMORY_GIB=$2; shift 2 ;;
     --allow-virtualized) REQUIRE_NATIVE=0; shift ;;
+    --install) INSTALL=1; shift ;;
+    --no-install) INSTALL=0; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -44,6 +48,12 @@ if [[ -r /etc/os-release ]]; then
   . /etc/os-release
   os_id=${ID:-unknown}
   os_version=${VERSION_ID:-unknown}
+fi
+
+if (( INSTALL == 1 )) && [[ "$EUID" -eq 0 && "$os_id" == "ubuntu" ]]; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  apt-get install -y -qq ca-certificates curl git make python3 iproute2 procps util-linux coreutils
 fi
 
 arch=$(uname -m)
@@ -62,6 +72,21 @@ iface_exists=0
 [[ -n "$IFACE" && -d "/sys/class/net/$IFACE" && "$IFACE" != "lo" ]] && iface_exists=1
 
 commands=(go make python3 ip ss tc taskset sha256sum git)
+
+if (( INSTALL == 1 )) && [[ "$EUID" -eq 0 && "$os_id" == "ubuntu" ]]; then
+  go_arch=""
+  case "$arch" in
+    x86_64) go_arch=amd64 ;;
+    aarch64) go_arch=arm64 ;;
+  esac
+  if [[ -n "$go_arch" ]] && { ! command -v go >/dev/null 2>&1 || "$(go version 2>/dev/null || true)" != *"go1.27.3"*; }; then
+    curl -fsSLo /tmp/go1.27.3.linux-${go_arch}.tar.gz "https://go.dev/dl/go1.27.3.linux-${go_arch}.tar.gz"
+    rm -rf /usr/local/go
+    tar -C /usr/local -xzf /tmp/go1.27.3.linux-${go_arch}.tar.gz
+  fi
+  export PATH=/usr/local/go/bin:/root/go/bin:$PATH
+fi
+
 missing=()
 for command_name in "${commands[@]}"; do
   command -v "$command_name" >/dev/null 2>&1 || missing+=("$command_name")
