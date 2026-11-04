@@ -34,7 +34,7 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-for attempt in $(seq 1 180); do
+for attempt in $(seq 1 "${TOPOLOGY_READY_TIMEOUT_SECONDS:-900}"); do
   test -f "$qual/topology-ready" && break
   if ! kill -0 "$topology_pid" 2>/dev/null; then
     cat "$qual/topology.log" >&2

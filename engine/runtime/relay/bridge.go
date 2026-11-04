@@ -21,19 +21,41 @@ type Service struct {
 	Next      func() *vlink.MuxLink
 	Dial      TargetDialer
 	Gate      engineaccounting.Gate
+	mu        sync.Mutex
+	closing   bool
+	workers   sync.WaitGroup
 }
 
-func (s Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
+func (s *Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
 	for {
 		stream, err := link.Accept(ctx)
 		if err != nil {
 			return err
 		}
-		go s.serveStream(ctx, link, stream)
+		s.mu.Lock()
+		if s.closing {
+			s.mu.Unlock()
+			return context.Canceled
+		}
+		s.workers.Add(1)
+		s.mu.Unlock()
+		go func() {
+			defer s.workers.Done()
+			s.serveStream(ctx, link, stream)
+		}()
 	}
 }
 
-func (s Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *vlink.MuxStream) {
+// Shutdown waits for accepted workers after their context and links are closed.
+// The admission lock prevents Add racing with a zero-counter Wait.
+func (s *Service) Shutdown() {
+	s.mu.Lock()
+	s.closing = true
+	s.mu.Unlock()
+	s.workers.Wait()
+}
+
+func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *vlink.MuxStream) {
 	err := link.AuthorizeRemote(ctx, stream.ID, func(ctx context.Context, peer vlink.NodeID, request vlink.OpenRequest) (io.Closer, error) {
 		decision, err := s.Policy.Authorize(ctx, peer, request)
 		if err != nil {

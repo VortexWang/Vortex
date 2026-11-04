@@ -63,7 +63,10 @@ func main() {
 			_ = gate.WriteJSONL(file)
 		}
 	}()
-	defer supervisor.Close()
+	defer func() {
+		supervisor.Close()
+		service.Shutdown()
+	}()
 	fmt.Printf("vortex-relay ready node_id=%s role=%s listen=%s\n", cfg.NodeID, cfg.Role, cfg.Listen)
 	switch cfg.Role {
 	case config.RoleSource:
