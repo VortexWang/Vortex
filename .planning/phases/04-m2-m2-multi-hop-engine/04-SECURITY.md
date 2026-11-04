@@ -26,9 +26,10 @@ created: "2026-11-05"
 | Threat ID | Category | Component | Severity | Disposition | Mitigation | Status |
 |-----------|----------|-----------|----------|-------------|------------|--------|
 | T-04-01 | Spoofing | VLink peer identity | high | mitigate | TLS 1.3 mTLS, canonical node URI SAN, HELLO signature bound to exporter, peer policy | closed |
-| T-04-02 | Elevation of privilege / repudiation | Source runtime authorization and accounting | high | mitigate | Require funded source authorization and reject traffic when the Gate is absent; do not treat tracer authorization flags as production grants | open |
+| T-04-02 | Elevation of privilege / repudiation | Authoritative source accounting | high | mitigate | Default source execution now fails closed without an explicit test mode or Gate; production grant authority, durable settlement, and complete source conservation remain unimplemented | open |
 | T-04-03 | Tampering | OPEN path authorization | high | mitigate | Check local rule revision, path generation, hop index, visited nodes, peer membership, network and local target | closed for finite tracer cases |
 | T-04-04 | Denial of service | VLink parser, windows and transport pools | medium | mitigate | Bound frame sizes, windows, queues, pool links and stream violations | closed for implemented finite limits |
+| T-04-11 | Elevation of privilege | Source startup and qualification mode | high | mitigate | Reject missing source authorization by default; qualification-only must be explicit and visible in test metadata; missing Gate never forwards payload | closed for default runtime boundary |
 
 ### Evidence
 
@@ -40,15 +41,20 @@ created: "2026-11-05"
 - `engine/vlink/open.go:76-156` rejects stale rule/path revisions, invalid
   hops, unlisted peers, invalid networks, repeated/local visited nodes and
   missing local authorization fields.
-- `engine/runtime/relay/policy.go:22-37` currently sets runtime, segment,
-  rate-share, connection-share and billing authorization fields to `true` for
-  the local tracer snapshot.
-- `engine/cmd/vortex-relay/main.go:76-111` only constructs `sourceGate` when
-  `source_credit_book` or `source_credit` is configured.
-- `engine/runtime/relay/bridge.go:319-332` treats a nil Gate as no session
-  accounting and continues bridging. Therefore an unconfigured relay can pass
-  traffic without funded authorization; this is not closed by finite test
-  issuer evidence.
+- `engine/runtime/config/config.go` requires an explicit qualification-only
+  mode or source authorization configuration and rejects qualification mode
+  without its evidence file.
+- `engine/runtime/relay/policy.go` no longer asserts runtime, segment,
+  rate-share, connection-share or billing authorization by default.
+- `engine/runtime/relay/bridge.go` rejects a nil Gate; regression tests prove
+  that the missing-Gate path does not write payload to the target.
+- `engine/cmd/vortex-relay/main.go` keeps qualification-only behavior explicit;
+  Phase 4 generated test fixtures opt in and record the mode in metadata.
+- Same-clean-SHA local Docker and Actions evidence is recorded in
+  `04-07-EVIDENCE.md`; Actions run 41887199379 completed successfully.
+- The in-process authorization adapter is not an authoritative or durable
+  Agent/Hub ledger. This residual keeps T-04-02 open and prevents production
+  accounting sign-off.
 
 ## Accepted Risks Log
 
@@ -58,7 +64,7 @@ No accepted risks.
 
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
-| 2026-11-05 | 4 | 3 | 1 | Codex in-window review |
+| 2026-11-05 | 5 | 4 | 1 | Codex in-window review and Plan 04-07 evidence |
 
 ## Sign-Off
 
@@ -67,4 +73,4 @@ No accepted risks.
 - [ ] `threats_open: 0` confirmed
 - [ ] `status: verified` set in frontmatter
 
-**Approval:** blocked — T-04-02 requires a fail-closed production authorization boundary before phase advancement.
+**Approval:** blocked — default unmetered forwarding is closed, but T-04-02 still requires authoritative, durable production accounting before Phase 4 advancement.

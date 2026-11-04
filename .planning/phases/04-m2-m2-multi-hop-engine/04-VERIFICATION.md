@@ -8,7 +8,7 @@ behavior_unverified: 7
 
 # Phase 4 Verification — current qualification review
 
-Review source: `6bfe97624cf807824d8df91fa7519b5a108e2d04` (documentation successor of recovery source `d0c1cb2`). Phase 4 stays **executing**; Plan 04-06 has no completion SUMMARY. V1.11 is reference only. No old restart documents are required to continue implementation.
+Review source: `a7a7432b11b5c3c7801e7fcfe3fe1664fe6c5b4e` (Plan 04-07 code and evidence successor). Phase 4 stays **executing** because formal qualification and runtime integration gaps remain. V1.11 is reference only. No old restart documents are required to continue implementation.
 
 ## Verified boundaries
 
@@ -39,7 +39,7 @@ Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307
 
 ## Next execution slice
 
-First design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point, preserving Engine process-local injection and non-authoritative tracer scope. Then cover NFR-039/040/044 runtime behavior, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
+Continue with NFR-039/040/044 runtime integration, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
 
 No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.
 
@@ -80,18 +80,28 @@ ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详�
 
 - gap_id: G-04-01
   truth: "A runtime without an explicitly selected qualification-only mode must not forward traffic unless its source authorization Gate is funded and present; runtime policy must not synthesize billing or share authorization as true."
-  status: failed
-  reason: "`vortex-relay` starts with a nil sourceGate when source credit is absent, `BridgeConnWithGateObserver` treats nil as unmetered forwarding, and `StaticPolicy` hardcodes runtime, segment, rate-share, connection-share and billing authorization to true."
-  severity: blocker
+  status: closed
+  resolved_by: "Plan 04-07, source SHA a7a7432b11b5c3c7801e7fcfe3fe1664fe6c5b4e"
+  resolution: "Default configuration requires explicit qualification-only test mode or source authorization; absent Gate is rejected before forwarding; policy defaults do not synthesize authorization; fixtures identify qualification-only mode. Same-SHA local Docker and Actions passed."
+  severity: resolved
   artifacts:
     - path: "engine/cmd/vortex-relay/main.go"
-      issue: "sourceGate is optional and source listeners can serve without a funded Gate"
+      issue: "Original gap: sourceGate was optional and source listeners could serve without a funded Gate"
     - path: "engine/runtime/relay/bridge.go"
-      issue: "nil accounting Gate skips session creation and still forwards payload"
+      issue: "Original gap: nil accounting Gate skipped session creation and still forwarded payload"
     - path: "engine/runtime/relay/policy.go"
-      issue: "static tracer snapshot asserts runtime, share and billing authorization"
-  missing:
-    - "Default runtime configuration fails closed when source authorization is absent"
-    - "Qualification-only authorization is explicit, isolated from production defaults, and used only by qualification fixtures"
-    - "Production/default StaticPolicy does not synthesize runtime, billing, segment or share authorization"
-    - "Tests prove unauthorized/default source and OPEN paths transmit no target payload"
+      issue: "Original gap: static tracer snapshot asserted runtime, share and billing authorization"
+  evidence: ".planning/phases/04-m2-m2-multi-hop-engine/04-07-EVIDENCE.md"
+
+## Plan 04-07 Verification — a7a7432
+
+`G-04-01` is closed for the default runtime boundary. On the same clean SHA,
+OrbStack arm64 passed `DOCKER_CONTEXT=orbstack make phase4-m2-check` and the
+five-role Docker TCP/UDP smoke; GitHub Actions run 41887199379 passed all steps,
+including pool/mux/auto runtime and authorized route-switch/restart regressions.
+Full results and scope limits are in `04-07-EVIDENCE.md`.
+
+Verification remains `gaps_found`: NFR-003/005/006/007/039/040/044 and D-04
+are not qualified. Qualification-only in-process evidence is not durable
+production authority. Phase 4 remains executing; this update does not authorize
+Phase 5 advancement.
