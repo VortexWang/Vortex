@@ -7,6 +7,9 @@ phase4-m2-check:
 phase4-runtime-smoke:
 	tools/phase4/topology-smoke.sh
 
+phase4-runtime-comparison:
+	tools/phase4/comparison.sh
+
 phase4-runtime-mixed:
 	tools/phase4/qualification.sh
 

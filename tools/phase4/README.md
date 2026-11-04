@@ -53,3 +53,39 @@ baseline, not an independent minimum TLS implementation. Dedicated host/path
 eligibility, longer performance tests, independent TLS and latency baselines,
 fault coverage and D-04 review are still required.
 
+
+## Independent TLS, latency and runtime faults
+
+After `make phase4-runtime-mixed`, run `make phase4-runtime-comparison` with the
+same BACKEND and clean application SHA. Compose uses the same target, container
+network and role configuration as the runtime. Native uses the same loopback
+endpoints. The separate `tls-baseline` binary forwards with Go TLS 1.3 and
+`io.Copy`; it does not execute VLink, mux or accounting. Each baseline TCP flow
+has four TLS segments. Both implementations record the negotiated TLS cipher.
+
+The comparison saves four-flow TLS throughput, 50 client-connect-to-first-byte
+samples per implementation (five warmups excluded), and 50 established-data RTT
+samples per segment. The RTT probes use test-only ALPN on the independent
+baseline, including the same four network segments and destination-target leg;
+they include userspace overhead and are not kernel TCP RTT measurements.
+
+Runtime probes reject six forged OPEN variants with stable codes/correlation
+IDs, reject direct source-to-relay-2/destination bypass, terminate an authorized
+UDP stream after link loss, and stop relay-2 while established TCP/UDP flows are
+active. Existing TCP must terminate; UDP and new TCP must not bypass the failed
+hop. The fixture has no alternate authorized path, so it does not establish
+failover availability. Raw runtime logs and JSON results remain under
+`artifacts/phase4/comparison/{native,docker}` with checksums.
+
+Runtime receive candidates now use 1024 UDP frame slots with a separate 1 MiB
+byte cap (TCP remains 128 frame slots); queued byte capacity returns on dequeue.
+This prevents a tiny-packet burst from consuming the full TCP frame-size budget.
+It remains a bounded tuning candidate, not D-04 approval. Optional native
+`CPU_PROFILE=1` writes per-role CPU profiles; profiling runs are diagnostic and
+must not be compared as unprofiled performance evidence.
+
+The comparison does not qualify NFR-007: actual pool/mux modes are not separately
+measured. Performance ratios and latency differences are reported even when
+thresholds fail. `flow-accounting.json` contains opaque link/stream/network keys;
+TCP echo totals must match per flow, and aggregate execution totals still match
+target counters. The in-process adapter remains non-durable.

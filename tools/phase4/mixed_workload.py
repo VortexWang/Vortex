@@ -21,6 +21,7 @@ parser.add_argument("--duration", type=float, default=5)
 parser.add_argument("--tcp-streams", type=int, default=4)
 parser.add_argument("--udp-mbps", type=float, default=100)
 parser.add_argument("--output", required=True)
+parser.add_argument("--tcp-only", action="store_true")
 args = parser.parse_args()
 
 
@@ -216,6 +217,13 @@ def mixed_phase(seconds):
     totals["udp_payload_mbps"] = totals["udp_bytes_received"] * 8 / seconds / 1_000_000
     return totals
 
+
+if args.tcp_only:
+    result = tcp_phase(args.duration)
+    Path(args.output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    if result["errors"] or result["sent_bytes"] != result["received_bytes"] or result["connections"] != args.tcp_streams:
+        raise SystemExit("independent TLS workload failed")
+    raise SystemExit(0)
 
 kernel_before = kernel_udp_stats()
 before_baseline = target_stats()

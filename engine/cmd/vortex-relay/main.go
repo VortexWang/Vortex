@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,7 +28,19 @@ import (
 func main() {
 	configPath := flag.String("config", "", "runtime JSON configuration")
 	role := flag.String("role", "", "optional role override")
+	cpuProfile := flag.String("cpu-profile", "", "optional diagnostic CPU profile file")
 	flag.Parse()
+	if *cpuProfile != "" {
+		file, err := os.Create(*cpuProfile)
+		if err != nil {
+			fatal(err.Error())
+		}
+		if err := pprof.StartCPUProfile(file); err != nil {
+			fatal(err.Error())
+		}
+		defer file.Close()
+		defer pprof.StopCPUProfile()
+	}
 	if *configPath == "" {
 		fatal("--config is required")
 	}

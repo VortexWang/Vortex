@@ -113,10 +113,19 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 	if left == nil || right == nil {
 		return errors.New("relay: both streams are required")
 	}
+	bridgeCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	errs := make(chan error, 2)
-	go func() { errs <- forwardStream(ctx, left, right) }()
-	go func() { errs <- forwardStream(ctx, right, left) }()
+	go func() { errs <- forwardStream(bridgeCtx, left, right) }()
+	go func() { errs <- forwardStream(bridgeCtx, right, left) }()
 	first := <-errs
+	if first != nil {
+		cancel()
+		resetCtx, resetCancel := context.WithTimeout(context.Background(), time.Second)
+		defer resetCancel()
+		_ = left.Reset(resetCtx, 8)
+		_ = right.Reset(resetCtx, 8)
+	}
 	second := <-errs
 	if first != nil && !errors.Is(first, vlink.ErrStreamState) {
 		return first
@@ -172,7 +181,7 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 	var session engineaccounting.Session
 	if gate != nil {
 		var err error
-		session, err = gate.Open(ctx, engineaccounting.Flow{Key: "qualification"})
+		session, err = gate.Open(ctx, engineaccounting.Flow{Key: stream.FlowKey()})
 		if err != nil {
 			return err
 		}

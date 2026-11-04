@@ -27,6 +27,7 @@ events_file, workload_file, start_file, final_file, out_dir = sys.argv[1:]
 totals = collections.Counter()
 returned = collections.Counter()
 count = 0
+flows = collections.defaultdict(collections.Counter)
 with open(events_file, encoding="utf-8") as events:
     for line in events:
         event = json.loads(line)
@@ -36,6 +37,10 @@ with open(events_file, encoding="utf-8") as events:
         if event["outcome"] != "committed" or event["reserved"] != event["used"]:
             raise SystemExit("accounting contains non-committed or unresolved usage")
         totals[event["direction"]] += event["used"]
+        key = event["flow"]["Key"]
+        if not re.fullmatch(r"[0-9a-f]{32}/[1-9][0-9]*/[12]", key):
+            raise SystemExit("missing unique link/stream/network accounting key")
+        flows[key][event["direction"]] += event["used"]
         count += 1
 with open(workload_file, encoding="utf-8") as source:
     workload = json.load(source)
@@ -61,6 +66,15 @@ expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned[
 expected = {"left_to_right": expected_left, "right_to_left": expected_right}
 if count < 4 or dict(totals) != expected:
     raise SystemExit(f"accounting mismatch: events={count} totals={dict(totals)} expected={expected}")
+
+tcp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/1")}
+udp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/2")}
+if len(tcp_flows) != 1 + 2 * workload["tcp_streams"] or len(udp_flows) != 2:
+    raise SystemExit("unexpected or colliding per-flow accounting identities")
+for key, flow in tcp_flows.items():
+    if flow.get("left_to_right", 0) != flow.get("right_to_left", 0):
+        raise SystemExit("TCP per-flow echo accounting mismatch: " + key)
+Path(out_dir, "flow-accounting.json").write_text(json.dumps({"tcp": tcp_flows, "udp": udp_flows}, indent=2, sort_keys=True) + "\n")
 
 drop_counts = collections.Counter()
 drop_line = re.compile(r"udp (?:source queue dropped datagram|source datagram dropped|forwarding dropped datagram|target response dropped).*reason=([a-zA-Z0-9_]+)")

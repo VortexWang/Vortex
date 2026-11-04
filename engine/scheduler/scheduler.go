@@ -125,3 +125,17 @@ func (s *Scheduler) Drops(reason DropReason) uint64 {
 }
 func (s *Scheduler) broadcastLocked() { close(s.notify); s.notify = make(chan struct{}) }
 func clone(i Item) Item               { i.Payload = append([]byte(nil), i.Payload...); return i }
+
+// TryNextWithin leaves a datagram queued if it would exceed the current writer
+// turn. A zero limit means one initial item of any valid frame size.
+func (s *Scheduler) TryNextWithin(limit int) (Item, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed || len(s.tcp)+len(s.udp) == 0 {
+		return Item{}, false
+	}
+	if len(s.udp) > 0 && limit > 0 && len(s.udp[0].Payload)+8 > limit {
+		return Item{}, false
+	}
+	return s.nextLocked(), true
+}

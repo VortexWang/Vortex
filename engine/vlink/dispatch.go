@@ -140,6 +140,8 @@ type MuxConfig struct {
 	MaxPendingOpenBytes                      int
 	StreamWindow, AggregateWindow, MaxWindow uint32
 	StreamQueueFrames                        int
+	UDPQueueFrames                           int
+	UDPQueueBytes                            int64
 	Limits                                   LimitConfig
 	Observer                                 Observer
 	Now                                      func() time.Time
@@ -151,7 +153,9 @@ type MuxLink struct {
 	dispatch        *Dispatcher
 	windows         *WindowManager
 	config          MuxConfig
-	writeMu         sync.Mutex
+	controlWrites   chan frameWrite
+	dataWrites      chan frameWrite
+	writeWake       chan struct{}
 	mu              sync.Mutex
 	streams         map[uint32]*MuxStream
 	pingNonce       [8]byte
@@ -182,6 +186,7 @@ type MuxStream struct {
 	done        chan struct{}
 	closeOnce   sync.Once
 	writeClosed atomic.Bool
+	udpQueued   atomic.Int64
 	resourceMu  sync.Mutex
 	resource    io.Closer
 }
@@ -231,7 +236,7 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if aggregateGrant > config.StreamWindow {
 		aggregateGrant = config.StreamWindow / 2
 	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
 	if m.streamGrant == 0 {
 		m.streamGrant = 1
 	}
@@ -244,22 +249,6 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	go m.readLoop()
 	go m.dgramLoop()
 	return m, nil
-}
-
-func (m *MuxLink) dgramLoop() {
-	for {
-		item, err := m.dgrams.Next(context.Background())
-		if err != nil {
-			return
-		}
-		if item.Kind != scheduler.UDP {
-			continue
-		}
-		if err := m.write(context.Background(), Frame{Type: FrameDgram, StreamID: item.StreamID, Payload: item.Payload}); err != nil {
-			m.Close(err)
-			return
-		}
-	}
 }
 
 func (m *MuxLink) Open(ctx context.Context, request OpenRequest) (*MuxStream, error) {
@@ -590,7 +579,11 @@ func (m *MuxLink) newStream(id uint32, network StreamNetwork) *MuxStream {
 		return nil
 	default:
 	}
-	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, m.config.StreamQueueFrames), done: make(chan struct{})}
+	queueFrames := m.config.StreamQueueFrames
+	if network == StreamUDP && m.config.UDPQueueFrames > 0 {
+		queueFrames = m.config.UDPQueueFrames
+	}
+	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, queueFrames), done: make(chan struct{})}
 	m.mu.Lock()
 	select {
 	case <-m.done:
@@ -630,20 +623,7 @@ func (m *MuxLink) removeStream(id uint32) {
 		m.observer.ActiveStreams(count)
 	}
 }
-func (m *MuxLink) write(ctx context.Context, frame Frame) error {
-	m.writeMu.Lock()
-	defer m.writeMu.Unlock()
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	if err := WriteFrame(m.conn, frame); err != nil {
-		return err
-	}
-	if m.observer != nil {
-		m.observer.Frame(m.peerRole(), frame.Type, 2, len(frame.Payload))
-	}
-	return nil
-}
+
 func (m *MuxLink) reset(id uint32, code uint16) {
 	var payload [2]byte
 	binary.BigEndian.PutUint16(payload[:], code)
@@ -674,16 +654,16 @@ func (s *MuxStream) TakeResource() io.Closer {
 func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
 	select {
 	case frame := <-s.receive:
-		return frame, nil
+		return s.dequeued(frame), nil
 	default:
 	}
 	select {
 	case frame := <-s.receive:
-		return frame, nil
+		return s.dequeued(frame), nil
 	case <-s.done:
 		select {
 		case frame := <-s.receive:
-			return frame, nil
+			return s.dequeued(frame), nil
 		default:
 			return Frame{}, ErrStreamState
 		}
@@ -768,6 +748,7 @@ func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error
 		}
 		return false, fmt.Errorf("vlink: UDP datagram rejected: %s", reason)
 	}
+	s.link.wakeWriter()
 	return true, nil
 }
 
@@ -884,14 +865,33 @@ func (m *MuxLink) writeWindows(ctx context.Context, streamID, streamDelta, aggre
 }
 
 func (s *MuxStream) enqueue(frame Frame) error {
+	if frame.Type == FrameDgram {
+		limit := s.link.config.UDPQueueBytes
+		if limit <= 0 {
+			limit = int64(s.link.config.StreamQueueFrames) * MaxPayloadSize
+		}
+		if s.udpQueued.Add(int64(len(frame.Payload))) > limit {
+			s.udpQueued.Add(-int64(len(frame.Payload)))
+			return fmt.Errorf("%w: UDP receive byte queue is full", ErrStreamState)
+		}
+	}
 	select {
 	case s.receive <- frame:
 		return nil
 	case <-s.done:
+		if frame.Type == FrameDgram {
+			s.udpQueued.Add(-int64(len(frame.Payload)))
+		}
 		return ErrStreamState
 	case <-s.link.done:
+		if frame.Type == FrameDgram {
+			s.udpQueued.Add(-int64(len(frame.Payload)))
+		}
 		return s.link.Err()
 	default:
+		if frame.Type == FrameDgram {
+			s.udpQueued.Add(-int64(len(frame.Payload)))
+		}
 		return fmt.Errorf("%w: stream receive queue is full", ErrStreamState)
 	}
 }
@@ -934,4 +934,17 @@ func (m *MuxLink) observeClose(err error) {
 	role := m.peerRole()
 	m.observer.Closed(role, class)
 	m.observer.Event(VLinkEvent{At: time.Now(), Kind: "link_close", LinkID: m.linkID, PeerRole: role, ErrorClass: class})
+}
+
+// FlowKey is an opaque connection-lifetime accounting identity. Stream IDs are
+// unique only within a link; including the random link ID prevents collisions.
+func (s *MuxStream) FlowKey() string {
+	return fmt.Sprintf("%x/%d/%d", s.link.linkID, s.ID, s.Network)
+}
+
+func (s *MuxStream) dequeued(frame Frame) Frame {
+	if frame.Type == FrameDgram {
+		s.udpQueued.Add(-int64(len(frame.Payload)))
+	}
+	return frame
 }

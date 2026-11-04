@@ -25,8 +25,12 @@ jobs:
       - name: Run benchmark smoke
         if: always()
         run: make phase4-m2-benchmark
+      - name: Independent TLS, latency and runtime fault checks
+        run: make phase4-runtime-comparison
       - name: Run same mixed workload in Compose
         run: BACKEND=docker make phase4-runtime-mixed
+      - name: Compare TLS and faults in Compose
+        run: BACKEND=docker make phase4-runtime-comparison
       - name: Record host metadata
         if: always()
         run: |

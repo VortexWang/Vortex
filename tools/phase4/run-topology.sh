@@ -47,7 +47,11 @@ else
 fi
 mkdir -p "$out/logs"
 for name in source relay-1 relay-2 relay-3 destination; do
-  "$bin" --config "$out/config/$name.json" >"$out/logs/$name.log" 2>&1 &
+  if [ "${CPU_PROFILE:-0}" = 1 ]; then
+    "$bin" --config "$out/config/$name.json" --cpu-profile "$out/$name.pprof" >"$out/logs/$name.log" 2>&1 &
+  else
+    "$bin" --config "$out/config/$name.json" >"$out/logs/$name.log" 2>&1 &
+  fi
   echo $! >"$out/$name.pid"
 done
 cleanup() {
@@ -63,7 +67,7 @@ trap cleanup INT TERM EXIT
 for attempt in $(seq 1 30); do
 	ready=1
 	for name in source relay-1 relay-2 relay-3 destination; do
-		grep -q 'vortex-relay ready' "$out/logs/$name.log" || ready=0
+		grep -q "${QUALIFICATION_READY_MESSAGE:-vortex-relay ready}" "$out/logs/$name.log" || ready=0
 	done
 	if [ "$ready" -eq 1 ]; then break; fi
 	sleep 1
