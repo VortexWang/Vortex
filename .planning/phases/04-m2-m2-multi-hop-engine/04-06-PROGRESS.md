@@ -140,3 +140,23 @@ zero loss in both local/native five-second diagnostics.
 succeeded. See [04-06-AUTO-EVIDENCE.md](04-06-AUTO-EVIDENCE.md). Broader recovery,
 authorized-path failover, eligible-host duration and D-04/NFR review remain
 open. Phase 4 is executing; no completion is claimed.
+
+
+## Authorized runtime route and recovery follow-up
+
+Clean `d0c1cb2` pins local route candidates at startup and accepts SIGHUP
+selection only with increasing generation and successful authenticated prewarm.
+Old TCP leases drain, old UDP contexts end, fresh old-generation OPENs fail,
+and a spare middle relay with independent identity preserves all route hops.
+Eight actual-process cases pass on local Docker and native Ubuntu, including
+failed/unlisted/stale activation, old TCP half-close, primary/active relay stop,
+no bypass, UDP non-replay and fresh-session recovery after spare restart.
+Full race and shared checks pass.
+[Actions 41836183498](https://github.com/VortexWang/Vortex/actions/runs/41836183498)
+passed shared, scale/mode, recovery and artifact upload checks. Earlier recovery
+CI attempts failed due container recreation in readiness counting and root-owned
+evidence; both fixture defects are fixed and documented. See
+[04-06-RECOVERY-EVIDENCE.md](04-06-RECOVERY-EVIDENCE.md). This is bounded local
+tracer activation and finite recovery coverage, not durable Agent/Hub authority
+or automatic health scheduling. D-04 and remaining NFR review are next; Phase 4
+remains executing.

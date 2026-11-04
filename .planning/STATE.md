@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 clean cba1bef pool/mux/auto passed Docker, native Ubuntu and Actions; broader recovery and qualification remain
-last_updated: "2026-11-04T12:43:01.951863+00:00"
+stopped_at: Plan 04-06 clean d0c1cb2 authorized route switch, TCP drain and UDP restart passed Docker, native Ubuntu and Actions; D-04 and qualification review remain
+last_updated: "2026-11-04T13:27:12.326684+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean cba1bef runtime auto selection and source response-direction regression passed; Docker, native Ubuntu and Actions mode/accounting/fault matrices passed
-state_head: cba1bef
+last_activity_desc: Clean d0c1cb2 passed eight real process recovery and authorized route cases on Docker/native Ubuntu and Actions; CI fixture restart and evidence ownership failures repaired
+state_head: d0c1cb2
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — clean cba1bef runtime pool/mux/auto validated on Docker, native Ubuntu and Actions
+Last activity: 2026-11-04 — clean d0c1cb2 authorized switching and fault recovery validated on Docker, native Ubuntu and Actions
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,11 +68,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 with broader fault/recovery and authorized-path failover coverage, eligible-host qualification and D-04/NFR review; see 04-06-AUTO-EVIDENCE.md.
+- Continue Plan 04-06 with D-04 parameter review and a concrete remaining-NFR eligibility/coverage matrix; finite runtime switching/recovery now passes. See 04-06-RECOVERY-EVIDENCE.md.
 
 ### Blockers/Concerns
 
-- Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
+- Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
 - Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification and D-04 review remain pending. No Phase 4 completion is claimed.
 
 ## Deferred Items
@@ -91,6 +91,6 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-04T12:43:01.951863+00:00
-Stopped at: Plan 04-06 executing; clean cba1bef pool/mux/auto passed Docker, native Ubuntu and Actions; qualification remains open
+Last session: 2026-11-04T13:27:12.326684+00:00
+Stopped at: Plan 04-06 executing; clean d0c1cb2 finite route switch/recovery passed Docker, native Ubuntu and Actions; D-04/NFR qualification review remains
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
