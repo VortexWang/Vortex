@@ -52,3 +52,13 @@ fixture still runs without this mode. Real grant identity/response semantics,
 UDP, snapshot switching and rate-adaptive targets are missing; full NFR/D-04
 verdicts remain unqualified. See 04-06-CREDIT-EVIDENCE.md for exact scope,
 checksums, recovery-readiness repair and Actions 41849553357.
+
+
+## d2f21f8 增量
+
+静态单快照 source Gate 现支持 UDP 双向预扣及 TCP/UDP 交错共用预算；
+可信进程内签发请求/结果已加入身份绑定、幂等、pending/unknown 占用
+和迟到确认测试。热切路/多快照/系数、远端 Hub、200 ms 请求、动态
+授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
+ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
+04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。

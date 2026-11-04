@@ -58,3 +58,13 @@ D-04 是 ENG-037/ENG-050 的授权和预扣策略，不是 VLink 的流控窗口
 Gate/块管理”的状态。当前标准混合负载脚本仍未开启该 Gate。
 远端 grant identity、未知签发响应、UDP/热切路/跨快照、动态授权目标
 和闲置策略尚缺，不能据此冻结 D-04。见 04-06-CREDIT-EVIDENCE.md。
+
+
+## d2f21f8 增量
+
+静态单快照 source Gate 现支持 UDP 双向预扣及 TCP/UDP 交错共用预算；
+可信进程内签发请求/结果已加入身份绑定、幂等、pending/unknown 占用
+和迟到确认测试。热切路/多快照/系数、远端 Hub、200 ms 请求、动态
+授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
+ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
+04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。

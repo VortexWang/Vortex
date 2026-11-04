@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 static TCP source credit and eight recovery cases pass clean 6a1faf2 Docker/native; Actions 41849553357 passed
-last_updated: "2026-11-04T13:39:13.122327+00:00"
+stopped_at: Plan 04-06 grant-result identity and static UDP source gate pass clean d2f21f8 Docker/native; Actions 41856742608 passed
+last_updated: "2026-11-04T15:33:37.417556+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Static TCP finite credit integrated and Docker/native validated; readiness EOF race repaired; Actions passed; no NFR qualification
-state_head: 6a1faf2
+last_activity_desc: Grant identity/outcome injection and TCP-UDP shared-budget exhaustion pass Docker/native; CI passed; no NFR qualification
+state_head: d2f21f8
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — D-04 review and NFR matrix completed; clean 6bfe976 local regression and Actions 41838307562 passed
+Last activity: 2026-11-04 — clean d2f21f8 grant-result identity and TCP/UDP shared-budget cases passed Docker/native; Actions passed
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 after CI: extend the static TCP finite authority with injected grant identity/outcomes, UDP and immutable snapshot separation before claiming real renewal or running D-04 sweeps. NFR-039/040/044 and NFR-007 runtime gaps remain; see 04-06-CREDIT-EVIDENCE.md.
+- Continue Plan 04-06: complete immutable runtime snapshot/grant binding and switching isolation; then NFR-039 policy-time boundaries, NFR-040 share CAS/drain and NFR-044 coefficient/source conservation. Remote request deadlines, dynamic target and D-04 sweeps remain. See 04-06-GRANT-UDP-EVIDENCE.md.
 
 ### Blockers/Concerns
 
@@ -91,23 +91,33 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-04T13:39:13.122327+00:00
-Stopped at: Plan 04-06 executing; clean 6a1faf2 static TCP source credit and recovery passed Docker/native/Actions 41849553357
+Last session: 2026-11-04T15:29:19.332951+00:00
+Stopped at: Plan 04-06 executing; d2f21f8 grant identity and static UDP source gate passed Docker/native; Actions 41856742608 passed
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
 
 ### Latest qualification review
 
-D-04 review completed, candidates not locked. Source has no real authorization
-Gate; memory accounting is not funded credit; NFR-039/040/044 runtime behavior
+D-04 review completed, candidates not locked. Standard performance workload still has no production authorization
+Gate; optional finite source credit is separate from the memory event recorder; NFR-039/040/044 runtime behavior
 and NFR-007 early TCP DATA remain missing. These gaps are actionable without
 exclusive performance hardware. Updated 04-VERIFICATION.md points to the exact
 matrix; diagnostic numeric improvements do not mark formal NFRs passed.
 
 
-### Source credit slice
+### Prior source credit slice — 6a1faf2
 
-Source authorization is now opt-in for static-snapshot TCP only; finite balance,
+At 6a1faf2 source authorization was opt-in for static-snapshot TCP only; finite balance,
 blocks and local replenishment/exhaustion are verified on Docker/native. UDP,
 hot routes, dynamic snapshot/grant and real issuer outcomes remain excluded.
 The standard performance workload still lacks full authorization integration.
 See 04-06-CREDIT-EVIDENCE.md; D-04 remains candidate and Phase 4 executing.
+
+
+### Grant and UDP increment
+
+Clean d2f21f8 Docker/native verified static-snapshot TCP/UDP credit and bounded
+trusted grant-result injection. Earlier TCP-only/UDP-exclusion notes are now
+historical. Hot routes/multiple snapshots, remote/persistent issuer, policy
+clock/share integration and formal performance qualifications remain open.
+Actions 41856742608 passed all steps on that clean SHA; extracted credit
+JSON and semantic hashes match Docker/native.

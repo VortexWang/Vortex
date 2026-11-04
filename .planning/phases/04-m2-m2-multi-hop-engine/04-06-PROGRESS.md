@@ -192,3 +192,21 @@ credit, race, mixed, mode, recovery and artifact-upload steps. Repaired a
 prior readiness EOF race exposed by failed run 41840426926; intermediate
 41849096326 was cancelled, not passed. See 04-06-CREDIT-EVIDENCE.md.
 No production issuer, multi-snapshot/UDP credit or D-04 lock is claimed.
+
+
+## Grant result identity and UDP source gate — d2f21f8
+
+Implemented bounded trusted in-process BeginGrant/ApplyGrant records, pending
+and unknown issuance occupation, idempotent same-result replay, late acceptance,
+non-issuance proof boundary and snapshot/amount/grant-ID conflict rejection.
+Wired both UDP write directions through the source Gate; explicit local queue
+refusal returns the batch, ambiguous network writes freeze it. Receive workers
+join before session.Close. Scarce balance safely reclaims only idle block tails
+across sessions of this same authority. Clean d2f21f8 Docker/native passed TCP
+and interleaved TCP/UDP 256-KiB exhaustion with matching semantic manifests,
+plus full race / local phase4-m2-check. The first Docker attempt failed before
+workload on registry-token EOF and remains recorded; same-SHA r2 passed.
+Actions 41856742608 completed all steps successfully on clean d2f21f8;
+parsed CI TCP/UDP credit results and semantic hashes match both hosts.
+No durable/remote issuer, snapshot switching,
+full NFR qualification or D-04 lock is claimed. See 04-06-GRANT-UDP-EVIDENCE.md.

@@ -41,3 +41,13 @@
 已接线，完整正式授权和混合负载尚缺”。NFR-003/005 性能、NFR-039/
 040/044 行保持未通过。尚不允许 UDP listener 或热 route set 与此
 实验 Gate 混用。详情见 04-06-CREDIT-EVIDENCE.md。
+
+
+## d2f21f8 增量
+
+静态单快照 source Gate 现支持 UDP 双向预扣及 TCP/UDP 交错共用预算；
+可信进程内签发请求/结果已加入身份绑定、幂等、pending/unknown 占用
+和迟到确认测试。热切路/多快照/系数、远端 Hub、200 ms 请求、动态
+授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
+ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
+04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。
