@@ -38,6 +38,22 @@ func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
 		snapshot.BillingSnapshotID = "qualification"
 		snapshot.BillingCoefficient = 1
 	}
+	if cfg.SourceCreditBook != nil && cfg.PolicyWindow != nil {
+		// These fields are enabled only by an explicit injected credit book and
+		// policy window. Ordinary runtime configs remain deny-by-default.
+		snapshot.RuntimeAuthorized = true
+		snapshot.SegmentAllowed = true
+		snapshot.RateShareValid = true
+		snapshot.ConnectionShareValid = true
+		snapshot.BillingAuthorized = true
+		snapshot.BillingSnapshotID = cfg.PolicyWindow.OldSnapshot
+		if active := cfg.SourceCreditBook.Active; active != "" {
+			snapshot.BillingSnapshotID = active
+		}
+		if v, ok := cfg.SourceCreditBook.Snapshots[snapshot.BillingSnapshotID]; ok {
+			snapshot.BillingCoefficient = v.Binding.CoefficientMilli
+		}
+	}
 	if cfg.NextHopNodeID != "" {
 		next, parseErr := vlink.ParseNodeID(cfg.NextHopNodeID)
 		if parseErr != nil {

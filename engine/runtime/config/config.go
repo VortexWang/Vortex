@@ -11,6 +11,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/vlink"
@@ -32,9 +33,27 @@ type Route struct {
 	HopIndex      uint16 `json:"hop_index"`
 }
 
+// PolicyWindowConfig describes an injected, process-local policy transition.
+// It is intentionally explicit: runtime defaults never infer a billing window.
+type PolicyWindowConfig struct {
+	OldSnapshot       string    `json:"old_snapshot"`
+	NewSnapshot       string    `json:"new_snapshot"`
+	At                time.Time `json:"at"`
+	PreparedAt        time.Time `json:"prepared_at"`
+	ExpiresAt         time.Time `json:"expires_at"`
+	PolicyLeaseUntil  time.Time `json:"policy_lease_until"`
+	RuntimeLeaseUntil time.Time `json:"runtime_lease_until"`
+	ShareLeaseUntil   time.Time `json:"share_lease_until"`
+	HardDeadline      time.Time `json:"hard_deadline"`
+	SelectionRevision uint64    `json:"selection_revision"`
+	UncertaintyMS     int64     `json:"uncertainty_ms"`
+	IssuerTimeoutMS   int64     `json:"issuer_timeout_ms"`
+}
+
 type Config struct {
 	SourceCreditBook  *runtimeaccounting.BookConfig   `json:"source_credit_book,omitempty"`
 	SourceCredit      *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
+	PolicyWindow      *PolicyWindowConfig             `json:"policy_window,omitempty"`
 	QualificationOnly bool                            `json:"qualification_only,omitempty"`
 	Routes            map[string]Route                `json:"routes,omitempty"`
 	ActiveRoute       string                          `json:"active_route,omitempty"`
@@ -100,6 +119,28 @@ func (c Config) Validate() error {
 			if v.Binding.RuleID != c.RuleID || v.Binding.ExecutionNode != c.NodeID || v.Binding.PathGeneration != c.PathGeneration || v.Credit.MaxBlock < 64*1024 {
 				return errors.New("config: credit snapshot differs from pinned execution path")
 			}
+		}
+	}
+	if c.PolicyWindow != nil {
+		if c.SourceCreditBook == nil {
+			return errors.New("config: policy_window requires source_credit_book")
+		}
+		w := c.PolicyWindow
+		window := runtimeaccounting.PolicyWindow{
+			OldSnapshot: w.OldSnapshot, NewSnapshot: w.NewSnapshot, At: w.At,
+			PreparedAt: w.PreparedAt, ExpiresAt: w.ExpiresAt,
+			PolicyLeaseUntil: w.PolicyLeaseUntil, RuntimeLeaseUntil: w.RuntimeLeaseUntil,
+			ShareLeaseUntil: w.ShareLeaseUntil, HardDeadline: w.HardDeadline,
+			SelectionRevision: w.SelectionRevision,
+		}
+		if err := window.Validate(); err != nil {
+			return fmt.Errorf("config: policy_window: %w", err)
+		}
+		if w.UncertaintyMS < 0 || w.UncertaintyMS > 10000 {
+			return errors.New("config: policy_window uncertainty_ms must be 0..10000")
+		}
+		if w.IssuerTimeoutMS < 1 || w.IssuerTimeoutMS > 200 {
+			return errors.New("config: policy_window issuer_timeout_ms must be 1..200")
 		}
 	}
 

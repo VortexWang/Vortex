@@ -79,7 +79,24 @@ func main() {
 		if err != nil {
 			fatal(err.Error())
 		}
-		sourceGate = book
+		var injectedGate coreaccounting.Gate = book
+		if cfg.PolicyWindow != nil {
+			w := cfg.PolicyWindow
+			boundary, boundaryErr := runtimeaccounting.NewPolicyBoundary(book,
+				runtimeaccounting.SystemPolicyClock{Uncertainty: time.Duration(w.UncertaintyMS) * time.Millisecond},
+				runtimeaccounting.PolicyWindow{
+					OldSnapshot: w.OldSnapshot, NewSnapshot: w.NewSnapshot, At: w.At,
+					PreparedAt: w.PreparedAt, ExpiresAt: w.ExpiresAt,
+					PolicyLeaseUntil: w.PolicyLeaseUntil, RuntimeLeaseUntil: w.RuntimeLeaseUntil,
+					ShareLeaseUntil: w.ShareLeaseUntil, HardDeadline: w.HardDeadline,
+					SelectionRevision: w.SelectionRevision,
+				})
+			if boundaryErr != nil {
+				fatal(fmt.Sprintf("policy window: %v", boundaryErr))
+			}
+			injectedGate = boundary
+		}
+		sourceGate = injectedGate
 		stopReload := watchCreditBook(ctx, *configPath, initialConfig, book)
 		defer func() {
 			stopReload()

@@ -6,8 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 	runtimeaccounting "vortex/engine/runtime/accounting"
 )
+
+func validPolicyWindow() *PolicyWindowConfig {
+	base := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
+	return &PolicyWindowConfig{OldSnapshot: "old", NewSnapshot: "new", At: base, PreparedAt: base.Add(-time.Minute), ExpiresAt: base.Add(5 * time.Minute), PolicyLeaseUntil: base.Add(time.Minute), RuntimeLeaseUntil: base.Add(time.Minute), ShareLeaseUntil: base.Add(time.Minute), HardDeadline: base.Add(time.Hour), SelectionRevision: 2, IssuerTimeoutMS: 200}
+}
 
 func validJSON() string {
 	return `{"version":1,"node_id":"00000000-0000-0000-0000-000000000001","role":"relay","certificate":"cert.pem","private_key":"key.pem","trust_bundle":"ca.pem","listen":"127.0.0.1:9443","peer":"127.0.0.1:9444","rule_id":"rule-1","rule_revision":1,"path_generation":1,"hop_index":1}`
@@ -146,5 +152,12 @@ func TestSourceCreditBookPinsExecutionAndBillingBindings(t *testing.T) {
 		if err := bad.Validate(); err == nil {
 			t.Fatalf("accepted mutated book config: %+v", bad.SourceCreditBook)
 		}
+	}
+}
+
+func TestPolicyWindowRequiresExplicitBookAndBoundedIssuer(t *testing.T) {
+	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000001", Role: RoleSource, Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1", Peer: "127.0.0.1:2", ServiceListen: "127.0.0.1:3", RuleID: "r", RuleRevision: 1, PathGeneration: 1, QualificationOnly: true, EvidenceFile: "events.jsonl", PolicyWindow: validPolicyWindow()}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "requires source_credit_book") {
+		t.Fatalf("policy window without a book should fail closed, got %v", err)
 	}
 }
