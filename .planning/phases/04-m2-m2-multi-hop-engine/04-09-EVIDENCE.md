@@ -2,7 +2,7 @@
 phase: 04-m2-m2-multi-hop-engine
 plan: 09
 status: partial-slice-verified
-source_sha: pending
+source_sha: ccb3065
 ---
 
 # Plan 04-09 Evidence — Share CAS and Lease Drain

@@ -3,7 +3,7 @@ phase: 04-m2-m2-multi-hop-engine
 plan: 09
 status: complete
 completed: 2026-11-05
-source_sha: pending
+source_sha: ccb3065
 ---
 
 # Plan 04-09 Summary — Share CAS and Lease Drain
