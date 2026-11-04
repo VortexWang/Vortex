@@ -162,10 +162,12 @@ func (m *Manager) Commit(key Key, generation uint64) (Revision, error) {
 	if next == nil || !next.Prepared || generation != m.fence[key] {
 		return Revision{}, ErrConflict
 	}
-	for gen, old := range m.revisions[key] {
+	for _, old := range m.revisions[key] {
 		if old.Draining && old.InUse > 0 {
 			return Revision{}, ErrDrain
 		}
+	}
+	for gen, old := range m.revisions[key] {
 		if gen == m.active[key] {
 			old.RenewalClosed, old.Draining, old.Active = true, old.InUse > 0, false
 			next.OverlapLimit = max(old.Connections, next.Connections)

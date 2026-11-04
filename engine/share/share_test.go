@@ -89,6 +89,9 @@ func TestOverlapOccupancyUsesMaximumAndDrainsOldLeases(t *testing.T) {
 	if _, e := m.Commit(k, third.Generation); e != ErrDrain {
 		t.Fatalf("third generation activated before prior drain: %v", e)
 	}
+	if active, ok := m.Get(k); !ok || !active.Active || active.Generation != newRev.Generation {
+		t.Fatalf("rejected commit partially changed active generation: %+v %v", active, ok)
+	}
 	newLeases := make([]*Lease, 10)
 	for i := range newLeases {
 		var err error
