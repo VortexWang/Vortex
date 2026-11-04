@@ -97,7 +97,7 @@
 - [x] 04-03 — Five-process Docker/native topology
 - [x] 04-04 — Mixed TCP/UDP workload and evidence gate
 - [x] 04-05 — Native/Actions qualification and report
-- [ ] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation
+- [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (execution record recovered; formal qualification gaps remain open for Phase 4 verification)
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。

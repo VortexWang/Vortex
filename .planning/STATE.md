@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
+current_plan: Phase 4 verification after recovered Plan 04-06 execution
 status: executing
-stopped_at: Plan 04-06 grant-result identity and static UDP source gate pass clean d2f21f8 Docker/native; Actions 41856742608 passed
+stopped_at: Recovered Plan 04-06 execution record at 6bfe976; Phase 4 verification is next; Actions remain pending
 last_updated: "2026-11-05T00:00:00+00:00"
-last_activity: 2026-11-04
-last_activity_desc: Grant identity/outcome injection and TCP-UDP shared-budget exhaustion pass Docker/native; CI passed; no NFR qualification
+last_activity: 2026-11-05
+last_activity_desc: Recovered Plan 04-06 summary with remaining NFR gaps explicit; no Phase 4 or NFR qualification claimed
 state_head: d7ca856
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 23
-  completed_plans: 22
+  completed_plans: 23
   percent: 38
 ---
 
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
+Current Plan: Phase 4 verification after recovered Plan 04-06 execution
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-05 — d7ca856 share CAS/drain adapter passed local Docker; Actions 41876404597 all steps green but aggregate remains in_progress; NFR-040 remains unqualified
+Last activity: 2026-11-05 — Plan 04-06 execution record recovered at 6bfe976; Phase 4 verification is next; Actions 41876404597 remains in_progress and 41879041539 queued; NFRs remain unqualified
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06: complete immutable runtime snapshot/grant binding and switching isolation; then NFR-039 policy-time boundaries, NFR-040 share CAS/drain and NFR-044 coefficient/source conservation. Remote request deadlines, dynamic target and D-04 sweeps remain. See 04-06-GRANT-UDP-EVIDENCE.md.
+- Run Phase 4 verification against the recovered Plan 04-06 summary and qualification matrix, then create an executable gap-closure plan for the remaining runtime wiring and evidence. Keep NFR-003/005/006/007/039/040/044 and D-04 open until their complete criteria are met.
 
 ### Blockers/Concerns
 
@@ -92,8 +92,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-06 executing; d7ca856 share CAS/drain adapter verified on clean Docker; Actions run 41876404597 aggregate pending; ShareGate not yet wired to relay config
-Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
+Stopped at: Plan 04-06 execution record recovered; phase verification is next. ShareGate is not wired to relay config; Actions 41876404597 remains in_progress and 41879041539 queued.
+Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-VERIFICATION.md
 
 ### Latest qualification review
 
