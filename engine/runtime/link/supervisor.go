@@ -124,10 +124,10 @@ func (s *Supervisor) track(link *vlink.MuxLink) {
 }
 
 func (s *Supervisor) untrack(link *vlink.MuxLink) {
+	link.Close(nil)
 	s.mu.Lock()
 	delete(s.links, link)
 	s.mu.Unlock()
-	link.Close(nil)
 }
 
 func (s *Supervisor) Close() {
