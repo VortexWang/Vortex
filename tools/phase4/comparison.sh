@@ -44,7 +44,7 @@ start() {
 
 # First collect actual-runtime latency and forged OPEN/link-loss evidence.
 start
-python3 "$root/tools/phase4/latency.py" --output "$out/runtime-latency.json"
+QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" latency.py --output "$out/runtime-latency.json"
 if [ "$mode" = native ]; then
   (cd "$root/engine" && go run ./cmd/phase4-probe --config "$out/config/source.json" --output "$out/forged-open.json")
 else
@@ -63,7 +63,7 @@ done
 # Maintain active TCP and UDP flows across an actual middle-process stop. The
 # driver signals readiness only after both payloads traverse the complete route.
 rm -f "$out/fault-ready" "$out/fault-injected"
-python3 "$root/tools/phase4/fault_workload.py" "$out" >"$out/fault-driver.log" 2>&1 &
+QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" fault_workload.py "$out" >"$out/fault-driver.log" 2>&1 &
 fault_pid=$!
 for attempt in $(seq 1 90); do
   test -f "$out/fault-ready" && break
@@ -91,7 +91,7 @@ else
 fi
 export QUALIFICATION_READY_MESSAGE='minimal-tls ready'
 start
-python3 "$root/tools/phase4/latency.py" --output "$out/tls-latency.json"
+QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" latency.py --output "$out/tls-latency.json"
 for name in source relay-1 relay-2 relay-3 destination; do
   probe=tls; if [ "$name" = destination ]; then probe=target; fi
   if [ "$mode" = native ]; then
@@ -100,7 +100,7 @@ for name in source relay-1 relay-2 relay-3 destination; do
     QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" exec -T "$name" /usr/local/bin/tls-baseline --config "/config/$name.json" --probe "$probe" --output "$out/rtt-$name.json"
   fi
 done
-python3 "$root/tools/phase4/mixed_workload.py" --tcp-only --duration "${MIXED_DURATION_SECONDS:-5}" --tcp-streams "${MIXED_TCP_STREAMS:-4}" --output "$out/tls-throughput.json"
+QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" mixed_workload.py --tcp-only --duration "${MIXED_DURATION_SECONDS:-5}" --tcp-streams "${MIXED_TCP_STREAMS:-4}" --output "$out/tls-throughput.json"
 cleanup
 python3 "$root/tools/phase4/compare_results.py" "$runtime" "$out"
 trap - EXIT INT TERM

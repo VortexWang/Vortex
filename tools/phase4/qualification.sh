@@ -96,7 +96,7 @@ for name in ("source", "relay-1", "relay-2", "relay-3", "destination"):
                 drop_counts["source_queue_full"] += int(source.group(1))
                 drop_counts["oversized"] += int(source.group(2))
                 drop_counts["source_capacity"] += int(source.group(3))
-drop_counts["kernel_rcvbuf_host_scope"] += workload.get("kernel_udp_host_delta", {}).get("RcvbufErrors", 0)
+drop_counts["kernel_rcvbuf_driver_scope"] += workload.get("kernel_udp_driver_delta", {}).get("RcvbufErrors", 0)
 for name, lost in container_kernel_drops.items():
     drop_counts["kernel_rcvbuf_container_" + name] += lost
 with open(os.path.join(out_dir, "drop-summary.json"), "w", encoding="utf-8") as output:
@@ -112,7 +112,7 @@ report = {
     "schema": 1, "runtime_correctness": "pass", "performance_qualification": "not-qualified",
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
     "returned_reservations": dict(returned),
-    "kernel_counter_scope": "host and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+    "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
     "end_to_end_received_bytes": (smoke_tcp + smoke_udp + workload["baseline"]["received_bytes"] +
                                   workload["mixed"]["tcp"]["received_bytes"] + workload["mixed"]["udp_bytes_received"]),
     "nfr_003": {"status": "not-qualified", "mixed_tcp_mbps": workload["mixed"]["tcp"]["throughput_mbps"],

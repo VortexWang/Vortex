@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Live middle-hop termination: established and new flows cannot bypass it."""
+import argparse
 import hashlib
 import random
 import threading
@@ -9,13 +10,17 @@ import sys
 import time
 from pathlib import Path
 
-out = Path(sys.argv[1])
+parser = argparse.ArgumentParser()
+parser.add_argument("output")
+parser.add_argument("--host", default="127.0.0.1")
+args = parser.parse_args()
+out = Path(args.output)
 # Binary integrity over the actual route before fault injection. Randomized
 # chunks make reordering, duplication and truncation visible to SHA-256.
 file_bytes = 64 * 1024 * 1024
 expected_hash, received_hash = hashlib.sha256(), hashlib.sha256()
 errors = []
-with socket.create_connection(("127.0.0.1", 18080), timeout=30) as transfer:
+with socket.create_connection((args.host, 18080), timeout=30) as transfer:
     def send_file():
         try:
             random_bytes = random.Random(0x564f5254)
@@ -41,13 +46,13 @@ with socket.create_connection(("127.0.0.1", 18080), timeout=30) as transfer:
 (out / "binary-integrity.json").write_text(json.dumps({"status": "pass", "bytes": received_bytes,
     "sha256": received_hash.hexdigest(), "pattern": "deterministic pseudorandom 64 MiB"}, indent=2) + "\n")
 
-tcp = socket.create_connection(("127.0.0.1", 18080), timeout=5)
+tcp = socket.create_connection((args.host, 18080), timeout=5)
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.settimeout(5)
 tcp.sendall(b"before-fault")
 if tcp.recv(12) != b"before-fault":
     raise SystemExit("pre-fault TCP route is unavailable")
-udp.sendto(b"before-fault", ("127.0.0.1", 18082))
+udp.sendto(b"before-fault", (args.host, 18082))
 if udp.recv(100) != b"before-fault":
     raise SystemExit("pre-fault UDP route is unavailable")
 (out / "fault-ready").touch()
@@ -71,14 +76,14 @@ finally:
     tcp.close()
 udp.settimeout(.5)
 for i in range(3):
-    udp.sendto(b"after-fault", ("127.0.0.1", 18082))
+    udp.sendto(b"after-fault", (args.host, 18082))
     try:
         if udp.recv(100):
             raise SystemExit("UDP bypassed failed relay")
     except socket.timeout:
         pass
 udp.close()
-with socket.create_connection(("127.0.0.1", 18080), timeout=3) as fresh:
+with socket.create_connection((args.host, 18080), timeout=3) as fresh:
     fresh.settimeout(3)
     fresh.sendall(b"new-after-fault")
     try:

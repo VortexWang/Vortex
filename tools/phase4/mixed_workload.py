@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Run a same-route TCP baseline followed by concurrent TCP and paced UDP."""
+import os
+import platform
 import argparse
 import json
 import multiprocessing
@@ -23,6 +25,7 @@ parser.add_argument("--udp-mbps", type=float, default=100)
 parser.add_argument("--output", required=True)
 parser.add_argument("--tcp-only", action="store_true")
 args = parser.parse_args()
+driver = {"system": platform.system(), "release": platform.release(), "machine": platform.machine(), "cpu_count": os.cpu_count()}
 
 
 def target_stats():
@@ -220,6 +223,7 @@ def mixed_phase(seconds):
 
 if args.tcp_only:
     result = tcp_phase(args.duration)
+    result["driver"] = driver
     Path(args.output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     if result["errors"] or result["sent_bytes"] != result["received_bytes"] or result["connections"] != args.tcp_streams:
         raise SystemExit("independent TLS workload failed")
@@ -238,7 +242,7 @@ def diff(after, before):
     return {key: after[key] - before[key] for key in after}
 
 report = {
-    "schema": 1,
+    "schema": 1, "driver": driver,
     "host": args.host,
     "duration_seconds_per_phase": args.duration,
     "tcp_streams": args.tcp_streams,
@@ -249,7 +253,7 @@ report = {
     "target_baseline": diff(after_baseline, before_baseline),
     "target_mixed": diff(after_mixed, before_mixed),
     "target_total": diff(after_mixed, before_baseline),
-    "kernel_udp_host_delta": {key: kernel_after[key] - kernel_before[key] for key in kernel_before},
+    "kernel_udp_driver_delta": {key: kernel_after[key] - kernel_before[key] for key in kernel_before},
 }
 with open(args.output, "w", encoding="utf-8") as result:
     json.dump(report, result, indent=2, sort_keys=True)

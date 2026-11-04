@@ -5,6 +5,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
 qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 bin=${VORTEX_RELAY_BIN:-$root/artifacts/phase4/vortex-relay}
+export BACKEND="$mode" QUALIFICATION_DIR="$qual"
 target_pid=
 mkdir -p "$root/artifacts/phase4" "$qual"
 rm -f "$qual/topology-ready"
@@ -80,25 +81,9 @@ with open(sys.argv[1], "w", encoding="utf-8") as output:
     json.dump(stats, output, sort_keys=True)
     output.write("\n")
 PY
-python3 - "$qual/client.out" "$qual/udp-client.out" <<'PY'
-import socket, sys
-with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
-    client.settimeout(10)
-    client.sendto(b"vortex-three-relay-udp-smoke", ("127.0.0.1", 18082))
-    response, _ = client.recvfrom(4096)
-if response != b"vortex-three-relay-udp-smoke":
-    raise SystemExit("udp echo payload mismatch")
-open(sys.argv[2], "wb").write(response)
-with socket.create_connection(("127.0.0.1", 18080), 10) as client:
-    client.sendall(b"vortex-three-relay-smoke")
-    client.shutdown(socket.SHUT_WR)
-    data = client.recv(4096)
-open(sys.argv[1], "wb").write(data)
-if data != b"vortex-three-relay-smoke":
-    raise SystemExit("echo payload mismatch")
-PY
+"$root/tools/phase4/driver.sh" smoke_workload.py "$qual"
 capture_container_udp start
-python3 "$root/tools/phase4/mixed_workload.py" \
+"$root/tools/phase4/driver.sh" mixed_workload.py \
   --duration "${MIXED_DURATION_SECONDS:-5}" \
   --tcp-streams "${MIXED_TCP_STREAMS:-4}" \
   --udp-mbps "${MIXED_UDP_MBPS:-100}" \

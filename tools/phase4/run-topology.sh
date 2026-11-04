@@ -22,10 +22,10 @@ if [ "$mode" = docker ]; then
 	compose_pid=
 	for attempt in $(seq 1 180); do
 		running=$(QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" ps --status running --services | wc -l | tr -d ' ')
-		if [ "$running" -ge 6 ]; then break; fi
+		if [ "$running" -ge 7 ]; then break; fi
 		sleep 1
 	done
-	if [ "$running" -lt 6 ]; then
+	if [ "$running" -lt 7 ]; then
 		echo "qualification topology failed to start all containers" >&2
 		docker compose -f "$root/test/qualification/compose.yaml" logs >&2
 		exit 1

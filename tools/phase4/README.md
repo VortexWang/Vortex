@@ -98,3 +98,13 @@ Use `GOMAXPROCS=1 make phase4-runtime-mixed` followed by
 Compose. Environment choices are recorded and included in the semantic manifest.
 The source UDP candidate queue is now 256 datagrams with a simultaneous 256 KiB
 byte bound, compared with the previous 64-packet-only bound.
+
+Compose now runs smoke, mixed throughput, latency and binary/fault traffic in a
+separate Linux client container on the fixture bridge. Both runtime and minimal
+TLS measurements use that client and the same endpoints. This avoids the
+Darwin-to-VM UDP port-forwarding path; published ports remain available for
+manual diagnostics. Native continues to use its host driver. Driver OS/CPU facts
+and placement are recorded; the two hosts are not asserted hardware-identical.
+A 64 MiB deterministic binary transfer is SHA-256 checked before middle-hop
+failure injection. Startup readiness requires all three outgoing authenticated
+relay links, rather than merely running processes or fixed sleeps.

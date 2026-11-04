@@ -32,7 +32,7 @@ manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("
                          "udp_mbps": float(os.getenv("MIXED_UDP_MBPS", "100")), "udp_payload_bytes": 1200}}
 (out / "semantic-manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command("git", "status", "--porcelain")),
-            "backend": sys.argv[2], "system": platform.system(), "release": platform.release(),
+            "backend": sys.argv[2], "driver_placement": "dedicated-linux-client-container" if sys.argv[2] == "docker" else "native-host", "system": platform.system(), "release": platform.release(),
             "machine": platform.machine(), "cpu_count": os.cpu_count(), "go": command("go", "version"),
             "semantic_manifest_sha256": digest(manifest), "exact_generated_config_sha256": digest(configs),
             "qualification": "not-qualified",

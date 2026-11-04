@@ -50,6 +50,13 @@ services:
     command: ["--config", "/config/destination.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
+  client:
+    build:
+      context: ../..
+      dockerfile: test/qualification/Dockerfile
+    entrypoint: ["python3", "-c", "import time; time.sleep(86400)"]
+    volumes: ["${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
+    networks: [vortex]
   target:
     build:
       context: ../..
