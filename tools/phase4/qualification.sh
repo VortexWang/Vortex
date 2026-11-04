@@ -19,6 +19,10 @@ done
 test "$(cat "$qual/client.out")" = "vortex-three-relay-smoke"
 test "$(cat "$qual/udp-client.out")" = "vortex-three-relay-udp-smoke"
 
+# Refresh commit, generated-config, and semantic-manifest identity for every
+# run; comparison must never combine workload evidence from different SHAs.
+python3 "$root/tools/phase4/record_evidence.py" "$qual" "$mode"
+
 python3 - "$qual/events-destination.jsonl" "$qual/mixed-workload.json" "$qual/target-start.json" "$qual/target-final.json" "$qual" <<'PY'
 import collections, hashlib, json, os, re, sys
 from pathlib import Path
