@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"math/big"
 	"net"
@@ -234,4 +235,78 @@ func TestSourceFirstTargetByteObserverIgnoresClientRequest(t *testing.T) {
 	case <-ctx.Done():
 		t.Fatal("bridge did not stop")
 	}
+}
+
+func TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority(t *testing.T) {
+	for _, zero := range []bool{false, true} {
+		t.Run(fmt.Sprint("zero=", zero), func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			client, server := authenticatedPair(t, ctx)
+			defer client.Close(nil)
+			defer server.Close(nil)
+			out, e := client.Open(ctx, vlink.OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: uint8(vlink.StreamTCP), ClientAddress: []byte{127, 0, 0, 1}})
+			if e != nil {
+				t.Fatal(e)
+			}
+			in, e := server.Accept(ctx)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if e = server.AuthorizeRemote(ctx, in.ID, func(context.Context, vlink.NodeID, vlink.OpenRequest) (io.Closer, error) { return nil, nil }); e != nil {
+				t.Fatal(e)
+			}
+			if e = out.WaitOpen(ctx); e != nil {
+				t.Fatal(e)
+			}
+			payload := []byte("credit-ambiguous-write")
+			budget := int64(len(payload))
+			if zero {
+				budget = 0
+			}
+			gate, e := memory.NewCreditGate(memory.CreditConfig{SnapshotID: "snapshot", Budget: budget, InitialBlock: 64, MaxBlock: 256, GrantTarget: 256, RenewPercent: 30})
+			if e != nil {
+				t.Fatal(e)
+			}
+			target := &countedShortTarget{shortTarget: shortTarget{done: make(chan struct{}), err: io.ErrUnexpectedEOF}}
+			done := make(chan error, 1)
+			go func() { done <- BridgeConnWithGate(ctx, in, target, gate) }()
+			if !zero {
+				if e = out.WriteData(ctx, payload); e != nil {
+					t.Fatal(e)
+				}
+			}
+			select {
+			case e := <-done:
+				if e == nil {
+					t.Fatal("expected gate/short-write failure")
+				}
+			case <-ctx.Done():
+				t.Fatal("bridge did not stop")
+			}
+			state := gate.State()
+			if state.Sessions != 0 || state.Held != 0 || state.Used != 0 || state.Unknown != budget {
+				t.Fatalf("lost upper bound: %+v", state)
+			}
+			if zero && target.calls.Load() != 0 {
+				t.Fatal("target write before grant")
+			}
+			if !zero && target.calls.Load() != 1 {
+				t.Fatal("missing short write")
+			}
+			if _, e = gate.Open(ctx, accounting.Flow{Key: "retry"}); e == nil {
+				t.Fatal("unknown credit reissued")
+			}
+		})
+	}
+}
+
+type countedShortTarget struct {
+	shortTarget
+	calls atomic.Int64
+}
+
+func (c *countedShortTarget) Write(p []byte) (int, error) {
+	c.calls.Add(1)
+	return c.shortTarget.Write(p)
 }

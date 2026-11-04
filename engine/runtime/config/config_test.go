@@ -1,10 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	runtimeaccounting "vortex/engine/runtime/accounting"
 )
 
 func validJSON() string {
@@ -42,5 +44,28 @@ func TestUDPServiceListenIsOptionalAndSourceOnly(t *testing.T) {
 	cfg.Role = RoleRelay
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("relay config accepted source UDP listener")
+	}
+}
+
+func TestSourceCreditRejectsUngatedCombinations(t *testing.T) {
+	var c Config
+	if err := json.Unmarshal([]byte(validJSON()), &c); err != nil {
+		t.Fatal(err)
+	}
+	c.Role = RoleSource
+	c.ExecutionPoint = true
+	c.ServiceListen = "127.0.0.1:1234"
+	c.EvidenceFile = "evidence.jsonl"
+	c.TransportMode = "mux"
+	c.SourceCredit = &runtimeaccounting.CreditConfig{SnapshotID: "snapshot", Budget: 4096, InitialBlock: 256, MaxBlock: 65536, GrantTarget: 65536, RenewPercent: 30}
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	for _, mutate := range []func(*Config){func(v *Config) { v.Role = RoleRelay }, func(v *Config) { v.ExecutionPoint = false }, func(v *Config) { v.EvidenceFile = "" }, func(v *Config) { v.UDPServiceListen = "127.0.0.1:1235" }, func(v *Config) { v.Routes = map[string]Route{"a": {}} }} {
+		bad := c
+		mutate(&bad)
+		if err := bad.Validate(); err == nil {
+			t.Fatalf("accepted %+v", bad)
+		}
 	}
 }

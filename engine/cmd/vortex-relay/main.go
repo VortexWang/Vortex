@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -17,6 +18,7 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	coreaccounting "vortex/engine/accounting"
 
 	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/runtime/config"
@@ -70,6 +72,23 @@ func main() {
 	gate, err := runtimeaccounting.NewGate(maxEvents)
 	if err != nil {
 		fatal(err.Error())
+	}
+	var sourceGate coreaccounting.Gate
+	if cfg.SourceCredit != nil {
+		credit, creditErr := runtimeaccounting.NewCreditGate(*cfg.SourceCredit)
+		if creditErr != nil {
+			fatal(creditErr.Error())
+		}
+		sourceGate = credit
+		defer func() {
+			data, err := json.MarshalIndent(credit.State(), "", "  ")
+			if err == nil {
+				err = os.WriteFile(cfg.EvidenceFile+".credit.json", append(data, '\n'), 0600)
+			}
+			if err != nil {
+				fatal(fmt.Sprintf("write credit evidence: %v", err))
+			}
+		}()
 	}
 	service := relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
 	if cfg.TransportMode != "" && cfg.Role != config.RoleDestination {
@@ -168,7 +187,7 @@ func main() {
 				}
 			}()
 		}
-		if err := serveSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
+		if err := serveSource(ctx, cfg, supervisor, sourceGate); err != nil && ctx.Err() == nil {
 			fatal(err.Error())
 		}
 		if udpDone != nil {
@@ -267,7 +286,9 @@ func accountingEventLimit(evidenceFile, configured string) (int, error) {
 	return parsed, nil
 }
 
-func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor) error {
+func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, gate coreaccounting.Gate) error {
+	var workers sync.WaitGroup
+	defer workers.Wait()
 	listener, err := net.Listen("tcp", cfg.ServiceListen)
 	if err != nil {
 		return err
@@ -282,7 +303,9 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 			}
 			continue
 		}
+		workers.Add(1)
 		go func(local net.Conn) {
+			defer workers.Done()
 			defer local.Close()
 			openedAt := time.Now()
 			flowConfig := cfg
@@ -302,7 +325,7 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 					return err
 				}
 				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
-				return relay.BridgeConnWithGateObserver(ctx, stream, local, nil, func() {
+				return relay.BridgeConnWithGateObserver(ctx, stream, local, gate, func() {
 					if supervisor.Transport != nil && cfg.TransportMode == vlink.ModeAuto {
 						if supervisor.Routes != nil {
 							supervisor.Routes.Observe(flowConfig.PathGeneration, time.Since(openedAt))

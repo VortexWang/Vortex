@@ -158,3 +158,48 @@ after process restart. Logs, startup config hashes, results and checksums are
 saved under `artifacts/phase4/recovery/{backend}`. This is finite in-memory
 tracer evidence, not durable Agent/Hub transaction or ledger recovery. Active
 route selection is locally controlled, not an automatic health controller.
+
+## Finite TCP source credit slice
+
+`BACKEND=docker make phase4-runtime-credit` (or `BACKEND=native` on Linux)
+starts the real three-relay route with a finite source authority. Eight
+16-KiB echo exchanges consume a 256-KiB bidirectional budget through four
+64-KiB local grant allocations. Further writes on the existing stream and a
+new stream must deliver no extra target bytes. Shutdown evidence must show
+exact consumption, no live sessions/held tails, and conservation. Native and
+Compose share this workload; results, semantic/config hashes, logs and checksums
+are under `artifacts/phase4/credit/{backend}`. The probe runs on the host (unlike
+the throughput driver's Linux container), and measures correctness only.
+
+Optional tracer configuration on a source:
+
+```json
+"execution_point": true,
+"transport_mode": "mux",
+"source_credit": {
+  "snapshot_id": "rule/execution/path-1/policy-1",
+  "budget_bytes": 33554432,
+  "initial_block_bytes": 262144,
+  "max_block_bytes": 4194304,
+  "grant_target_bytes": 8388608,
+  "renew_percent": 30
+}
+```
+
+`evidence_file` is required. Credit evidence is saved beside it with suffix
+`.credit.json`. This mode explicitly rejects UDP listeners, hot route sets,
+non-source roles and max blocks smaller than the bridge's 64-KiB read buffer.
+Each authority owns one immutable startup snapshot and a raw-byte budget;
+bridge directions are connection-relative. Sessions share that one budget,
+allocate growing per-direction blocks and return unused tails on close.
+Outstanding/unknown reservations cannot be reclaimed. A depleted direction may
+return the opposite direction's unused tail to the same authority. Unknown
+bytes remain occupied, and duplicate Batch resolution is rejected.
+
+The local allocator moves bytes from unissued to available at the configured
+waterline, bounded by remaining budget. It has no remote issuer, grant IDs,
+async requests, 200-ms network deadline, rolling-rate target, idle reclaim or
+coefficient conversion. It is non-durable: restarting starts a new test budget,
+so it must never authorize production traffic or claim recovery guarantees.
+It does not implement full billing-snapshot switching or lock D-04. Existing
+tracer configurations without `source_credit` retain their diagnostic scope.

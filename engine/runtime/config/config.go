@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 
+	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/vlink"
 )
 
@@ -32,30 +33,31 @@ type Route struct {
 }
 
 type Config struct {
-	Routes           map[string]Route    `json:"routes,omitempty"`
-	ActiveRoute      string              `json:"active_route,omitempty"`
-	Version          uint64              `json:"version"`
-	NodeID           string              `json:"node_id"`
-	Role             Role                `json:"role"`
-	Certificate      string              `json:"certificate"`
-	PrivateKey       string              `json:"private_key"`
-	TrustBundle      string              `json:"trust_bundle"`
-	Listen           string              `json:"listen"`
-	Peer             string              `json:"peer,omitempty"`
-	PeerNodeID       string              `json:"peer_node_id,omitempty"`
-	NextHopNodeID    string              `json:"next_hop_node_id,omitempty"`
-	ServiceListen    string              `json:"service_listen,omitempty"`
-	UDPServiceListen string              `json:"udp_service_listen,omitempty"`
-	ExecutionPoint   bool                `json:"execution_point,omitempty"`
-	RuleID           string              `json:"rule_id"`
-	RuleRevision     uint64              `json:"rule_revision"`
-	PathGeneration   uint64              `json:"path_generation"`
-	HopIndex         uint16              `json:"hop_index"`
-	Target           string              `json:"target,omitempty"`
-	EvidenceFile     string              `json:"evidence_file,omitempty"`
-	TransportMode    vlink.TransportMode `json:"transport_mode,omitempty"`
-	PoolMinLinks     int                 `json:"pool_min_links,omitempty"`
-	PoolMaxLinks     int                 `json:"pool_max_links,omitempty"`
+	SourceCredit     *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
+	Routes           map[string]Route                `json:"routes,omitempty"`
+	ActiveRoute      string                          `json:"active_route,omitempty"`
+	Version          uint64                          `json:"version"`
+	NodeID           string                          `json:"node_id"`
+	Role             Role                            `json:"role"`
+	Certificate      string                          `json:"certificate"`
+	PrivateKey       string                          `json:"private_key"`
+	TrustBundle      string                          `json:"trust_bundle"`
+	Listen           string                          `json:"listen"`
+	Peer             string                          `json:"peer,omitempty"`
+	PeerNodeID       string                          `json:"peer_node_id,omitempty"`
+	NextHopNodeID    string                          `json:"next_hop_node_id,omitempty"`
+	ServiceListen    string                          `json:"service_listen,omitempty"`
+	UDPServiceListen string                          `json:"udp_service_listen,omitempty"`
+	ExecutionPoint   bool                            `json:"execution_point,omitempty"`
+	RuleID           string                          `json:"rule_id"`
+	RuleRevision     uint64                          `json:"rule_revision"`
+	PathGeneration   uint64                          `json:"path_generation"`
+	HopIndex         uint16                          `json:"hop_index"`
+	Target           string                          `json:"target,omitempty"`
+	EvidenceFile     string                          `json:"evidence_file,omitempty"`
+	TransportMode    vlink.TransportMode             `json:"transport_mode,omitempty"`
+	PoolMinLinks     int                             `json:"pool_min_links,omitempty"`
+	PoolMaxLinks     int                             `json:"pool_max_links,omitempty"`
 }
 
 func LoadFile(path string) (Config, error) {
@@ -76,6 +78,15 @@ func LoadFile(path string) (Config, error) {
 }
 
 func (c Config) Validate() error {
+	if c.SourceCredit != nil {
+		if err := c.SourceCredit.Validate(); err != nil {
+			return err
+		}
+		if c.Role != RoleSource || !c.ExecutionPoint || c.UDPServiceListen != "" || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" || c.SourceCredit.MaxBlock < 64*1024 {
+			return errors.New("config: source_credit requires static TCP-only source execution point, explicit transport, max block >= 64 KiB and evidence_file")
+		}
+	}
+
 	if len(c.Routes) > 16 {
 		return errors.New("config: maximum 16 authorized routes")
 	}

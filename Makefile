@@ -58,3 +58,7 @@ phase1-release-gate: phase1-check
 .PHONY: phase4-runtime-recovery
 phase4-runtime-recovery:
 	python3 tools/phase4/recovery.py --backend $${BACKEND:-native}
+
+.PHONY: phase4-runtime-credit
+phase4-runtime-credit:
+	python3 tools/phase4/credit.py --backend $${BACKEND:-native}

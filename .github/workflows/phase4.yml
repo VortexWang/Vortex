@@ -50,6 +50,9 @@ jobs:
       - name: Authorized route switch and restart recovery
         env: {GOMAXPROCS: "1", BACKEND: docker}
         run: make phase4-runtime-recovery
+      - name: Finite source credit and exhaustion
+        env: {GOMAXPROCS: "1", BACKEND: docker}
+        run: make phase4-runtime-credit
       - name: Record host metadata
         if: always()
         run: |
