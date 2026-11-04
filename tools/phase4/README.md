@@ -159,16 +159,18 @@ saved under `artifacts/phase4/recovery/{backend}`. This is finite in-memory
 tracer evidence, not durable Agent/Hub transaction or ledger recovery. Active
 route selection is locally controlled, not an automatic health controller.
 
-## Finite TCP source credit slice
+## Finite static-snapshot source credit
 
 `BACKEND=docker make phase4-runtime-credit` (or `BACKEND=native` on Linux)
-starts the real three-relay route with a finite source authority. Eight
+runs TCP and mixed UDP/TCP cases on the real three-relay route with a finite source authority. Eight
 16-KiB echo exchanges consume a 256-KiB bidirectional budget through four
 64-KiB local grant allocations. Further writes on the existing stream and a
 new stream must deliver no extra target bytes. Shutdown evidence must show
 exact consumption, no live sessions/held tails, and conservation. Native and
 Compose share this workload; results, semantic/config hashes, logs and checksums
-are under `artifacts/phase4/credit/{backend}`. The probe runs on the host (unlike
+are under `artifacts/phase4/credit/{backend}` and `{backend}-udp`. The latter
+interleaves 64 1-KiB UDP echoes with four 16-KiB TCP echoes against one 256-KiB
+budget, then rejects old/new UDP and new TCP traffic after exhaustion. The probe runs on the host (unlike
 the throughput driver's Linux container), and measures correctness only.
 
 Optional tracer configuration on a source:
@@ -187,7 +189,7 @@ Optional tracer configuration on a source:
 ```
 
 `evidence_file` is required. Credit evidence is saved beside it with suffix
-`.credit.json`. This mode explicitly rejects UDP listeners, hot route sets,
+`.credit.json`. This mode explicitly rejects hot route sets,
 non-source roles and max blocks smaller than the bridge's 64-KiB read buffer.
 Each authority owns one immutable startup snapshot and a raw-byte budget;
 bridge directions are connection-relative. Sessions share that one budget,
@@ -197,9 +199,20 @@ return the opposite direction's unused tail to the same authority. Unknown
 bytes remain occupied, and duplicate Batch resolution is rejected.
 
 The local allocator moves bytes from unissued to available at the configured
-waterline, bounded by remaining budget. It has no remote issuer, grant IDs,
-async requests, 200-ms network deadline, rolling-rate target, idle reclaim or
+waterline, bounded by remaining budget. `BeginGrant` / `ApplyGrant` also support
+trusted in-process request/result injection: request/snapshot/amount binding,
+grant-ID uniqueness, idempotent retries, pending/unknown issuance occupation,
+and late results. Unknown issuance releases only on a matching acceptance or
+an explicitly injected proof of non-issuance, never elapsed time. Request/grant
+records and live credit sessions each have a 4,096-entry bound; reused IDs are
+not evicted. Local allocator IDs have a reserved namespace. Unused block tails
+can be returned from other sessions of this same authority under scarcity;
+in-flight writes and unknown bytes cannot. There is no remote issuer,
+async network client, 200-ms network deadline, rolling-rate target, idle reclaim or
 coefficient conversion. It is non-durable: restarting starts a new test budget,
 so it must never authorize production traffic or claim recovery guarantees.
-It does not implement full billing-snapshot switching or lock D-04. Existing
+Both UDP directions reserve before write; explicit VLink queue refusal returns
+the reservation, ambiguous network writes retain it as unknown. The UDP worker
+is joined before its credit session closes. It does not implement full
+billing-snapshot switching or lock D-04. Existing
 tracer configurations without `source_credit` retain their diagnostic scope.

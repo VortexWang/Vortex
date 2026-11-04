@@ -3,6 +3,7 @@ package accounting
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	core "vortex/engine/accounting"
@@ -27,32 +28,39 @@ func (c CreditConfig) Validate() error {
 }
 
 type CreditState struct {
-	SnapshotID string `json:"snapshot_id"`
-	Budget     int64  `json:"budget_bytes"`
-	Unissued   int64  `json:"unissued_bytes"`
-	Available  int64  `json:"available_bytes"`
-	Held       int64  `json:"held_bytes"`
-	Used       int64  `json:"used_bytes"`
-	Unknown    int64  `json:"unknown_bytes"`
-	Grants     uint64 `json:"grants"`
-	Denials    uint64 `json:"denials"`
-	Sessions   int64  `json:"sessions"`
+	SnapshotID   string `json:"snapshot_id"`
+	PendingGrant int64  `json:"pending_grant_bytes"`
+	UnknownGrant int64  `json:"unknown_grant_bytes"`
+	GrantRecords uint64 `json:"grant_records"`
+	Budget       int64  `json:"budget_bytes"`
+	Unissued     int64  `json:"unissued_bytes"`
+	Available    int64  `json:"available_bytes"`
+	Held         int64  `json:"held_bytes"`
+	Used         int64  `json:"used_bytes"`
+	Unknown      int64  `json:"unknown_bytes"`
+	Grants       uint64 `json:"grants"`
+	Denials      uint64 `json:"denials"`
+	Sessions     int64  `json:"sessions"`
 }
 
 // CreditGate serializes issuance, block allocation and settlement. At all times
-// budget = unissued + available + held + used + unknown. Held includes idle
+// budget = unissued + pending grants + unknown grants + available + held +
+// used + unknown. Held includes idle
 // session block tails and unresolved batches; closing never frees an unknown.
 type CreditGate struct {
-	mu    sync.Mutex
-	cfg   CreditConfig
-	state CreditState
+	mu          sync.Mutex
+	cfg         CreditConfig
+	state       CreditState
+	requests    map[string]grantRecord
+	grantOwners map[string]string
+	sessions    map[*creditSession]struct{}
 }
 
 func NewCreditGate(c CreditConfig) (*CreditGate, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
-	return &CreditGate{cfg: c, state: CreditState{SnapshotID: c.SnapshotID, Budget: c.Budget, Unissued: c.Budget}}, nil
+	return &CreditGate{cfg: c, requests: make(map[string]grantRecord), grantOwners: make(map[string]string), sessions: make(map[*creditSession]struct{}), state: CreditState{SnapshotID: c.SnapshotID, Budget: c.Budget, Unissued: c.Budget}}, nil
 }
 func (g *CreditGate) State() CreditState { g.mu.Lock(); defer g.mu.Unlock(); return g.state }
 func (g *CreditGate) replenish() {
@@ -61,9 +69,12 @@ func (g *CreditGate) replenish() {
 	}
 	n := min(g.cfg.GrantTarget-g.state.Available, g.state.Unissued)
 	if n > 0 {
-		g.state.Unissued -= n
-		g.state.Available += n
-		g.state.Grants++
+		id := fmt.Sprintf("local:%d", len(g.requests)+1)
+		if g.beginGrant(id, n) != nil {
+			return
+		}
+		// The default test allocator knows its local result synchronously.
+		_ = g.applyGrant(GrantReply{RequestID: id, SnapshotID: g.cfg.SnapshotID, GrantID: id, Amount: n, Outcome: GrantAccepted})
 	}
 }
 func (g *CreditGate) Open(ctx context.Context, f core.Flow) (core.Session, error) {
@@ -72,13 +83,15 @@ func (g *CreditGate) Open(ctx context.Context, f core.Flow) (core.Session, error
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
-	if f.Key == "" || g.state.Unissued+g.state.Available == 0 {
+	if len(g.sessions) >= 4096 || f.Key == "" || g.state.Unissued+g.state.Available == 0 && g.state.Held == 0 {
 		g.state.Denials++
 		return nil, core.ErrDenied
 	}
 	g.replenish()
 	g.state.Sessions++
-	return &creditSession{gate: g, next: [2]int64{g.cfg.InitialBlock, g.cfg.InitialBlock}}, nil
+	session := &creditSession{gate: g, next: [2]int64{g.cfg.InitialBlock, g.cfg.InitialBlock}}
+	g.sessions[session] = struct{}{}
+	return session, nil
 }
 
 type creditSession struct {
@@ -116,6 +129,21 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 			s.idle[other] = 0
 			g.state.Held -= tail
 			g.state.Available += tail
+		}
+		// An idle block tail is not an unresolved write. Reclaim only these
+		// unused bytes from other sessions when the finite pool is scarce.
+		for other := range g.sessions {
+			if g.state.Available >= need {
+				break
+			}
+			if other == s {
+				continue
+			}
+			for j, tail := range other.idle {
+				other.idle[j] = 0
+				g.state.Held -= tail
+				g.state.Available += tail
+			}
 		}
 		take := min(max(need, s.next[i]), g.state.Available)
 		if take < need {
@@ -157,6 +185,7 @@ func (s *creditSession) Close() error {
 		return nil
 	}
 	s.closed = true
+	delete(g.sessions, s)
 	g.state.Sessions--
 	for i, n := range s.idle {
 		g.state.Held -= n

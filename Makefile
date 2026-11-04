@@ -62,3 +62,4 @@ phase4-runtime-recovery:
 .PHONY: phase4-runtime-credit
 phase4-runtime-credit:
 	python3 tools/phase4/credit.py --backend $${BACKEND:-native}
+	python3 tools/phase4/credit.py --backend $${BACKEND:-native} --protocol udp

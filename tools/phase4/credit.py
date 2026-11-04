@@ -6,9 +6,10 @@ from pathlib import Path
 ap = argparse.ArgumentParser()
 ap.add_argument('--backend', choices=['native', 'docker'], default=os.getenv('BACKEND', 'native'))
 ap.add_argument('--out')
+ap.add_argument('--protocol', choices=['tcp','udp'], default='tcp')
 args = ap.parse_args()
 root = Path(__file__).resolve().parents[2]
-out = Path(args.out or root/'artifacts/phase4/credit'/args.backend).resolve()
+out = Path(args.out or root/'artifacts/phase4/credit'/(args.backend+('-udp' if args.protocol=='udp' else ''))).resolve()
 out.mkdir(parents=True, exist_ok=True)
 env = dict(os.environ, QUALIFICATION_DIR=str(out), TRANSPORT_MODE='mux')
 roles = ['source', 'relay-1', 'relay-2', 'relay-3', 'destination']
@@ -52,7 +53,7 @@ def stop():
             p=procs[role]; p.terminate()
             if p.wait(timeout=15) != 0: raise RuntimeError(f'{role} failed')
 
-report = {'status':'fail', 'scope':'finite static-snapshot TCP source credit; no durable issuer, UDP, switching or D-04 approval',
+report = {'status':'fail', 'scope':'finite static-snapshot source credit; no durable issuer, switching or D-04 approval', 'protocol':args.protocol,
           'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
           'dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip()),
           'backend':args.backend, 'cases':{}}
@@ -60,7 +61,7 @@ try:
     run([str(root/'tools/phase4/generate-qualification.sh'),args.backend,str(out)], stdout=subprocess.DEVNULL)
     cfgpath = out/'config/source.json'
     cfg = json.loads(cfgpath.read_text())
-    cfg.pop('udp_service_listen', None)
+    if args.protocol=='tcp': cfg.pop('udp_service_listen', None)
     cfg['execution_point'] = True
     cfg['source_credit'] = dict(snapshot_id='qualification-rule/source/path-1/policy-1', budget_bytes=262144,
                                initial_block_bytes=16384, max_block_bytes=65536, grant_target_bytes=65536, renew_percent=30)
@@ -68,7 +69,7 @@ try:
     run(['python3', str(root/'tools/phase4/record_evidence.py'), str(out), args.backend])
     manifest_path=out/'semantic-manifest.json'
     manifest=json.loads(manifest_path.read_text())
-    manifest['workload']={'protocol':'tcp','exchanges':8,'payload_bytes':16384,'budget_bytes':262144,'exhausted_existing_and_new':True}
+    manifest['workload']={'protocol':args.protocol,'exchanges':8 if args.protocol=='tcp' else 64,'payload_bytes':16384 if args.protocol=='tcp' else 1024,'budget_bytes':262144,'exhausted_existing_and_new':True,'interleaved_tcp_exchanges':4 if args.protocol=='udp' else 0}
     manifest_path.write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
     host_path=out/'host.json';host=json.loads(host_path.read_text())
     host['driver_placement']='host-python-credit-probe'
@@ -91,21 +92,51 @@ try:
     waitfor(lambda: bool(stats()))
     before=stats()
     # Readiness never sends application bytes or consumes the finite budget.
-    with socket.create_connection(('127.0.0.1',18080),timeout=5) as conn:
-        conn.settimeout(5)
-        for i in range(8):
-            payload=bytes([65+i])*16384
-            conn.sendall(payload); received=b''
-            while len(received)<len(payload):
-                chunk=conn.recv(len(payload)-len(received))
-                if not chunk: raise RuntimeError('authorized echo truncated')
-                received+=chunk
-            if received!=payload: raise RuntimeError('echo integrity')
-        report['cases']['within_budget'] = 'eight 16384-byte requests and responses accepted'
-        conn.sendall(b'forbidden-after-exhaustion')
-        try: reply=conn.recv(128)
-        except ConnectionResetError: reply=b''
-        if reply: raise RuntimeError('exhausted existing flow forwarded')
+    if args.protocol=='tcp':
+        with socket.create_connection(('127.0.0.1',18080),timeout=5) as conn:
+            conn.settimeout(5)
+            for i in range(8):
+                payload=bytes([65+i])*16384
+                conn.sendall(payload); received=b''
+                while len(received)<len(payload):
+                    chunk=conn.recv(len(payload)-len(received))
+                    if not chunk: raise RuntimeError('authorized echo truncated')
+                    received+=chunk
+                if received!=payload: raise RuntimeError('echo integrity')
+            report['cases']['within_budget'] = 'eight 16384-byte requests and responses accepted'
+            conn.sendall(b'forbidden-after-exhaustion')
+            try: reply=conn.recv(128)
+            except ConnectionResetError: reply=b''
+            if reply: raise RuntimeError('exhausted existing flow forwarded')
+    else:
+        with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as conn:
+            conn.settimeout(5)
+            for i in range(64):
+                if i==32:
+                    with socket.create_connection(('127.0.0.1',18080),timeout=5) as tcp:
+                        tcp.settimeout(5)
+                        for j in range(4):
+                            data=bytes([200+j])*16384;tcp.sendall(data);received=b''
+                            while len(received)<len(data):
+                                chunk=tcp.recv(len(data)-len(received))
+                                if not chunk:raise RuntimeError('interleaved TCP truncated')
+                                received+=chunk
+                            if received!=data:raise RuntimeError('interleaved TCP integrity')
+                payload=bytes([i])*1024
+                conn.sendto(payload,('127.0.0.1',18082))
+                if conn.recv(2048)!=payload:raise RuntimeError('UDP echo integrity')
+            report['cases']['within_budget']='64 x 1024-byte UDP and 4 x 16384-byte interleaved TCP echoes accepted'
+            conn.settimeout(.4)
+            conn.sendto(b'forbidden-old-udp',('127.0.0.1',18082))
+            try: reply=conn.recv(128)
+            except socket.timeout: reply=b''
+            if reply:raise RuntimeError('exhausted UDP flow forwarded')
+        with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as conn:
+            conn.settimeout(.4)
+            conn.sendto(b'forbidden-new-udp',('127.0.0.1',18082))
+            try: reply=conn.recv(128)
+            except socket.timeout: reply=b''
+            if reply:raise RuntimeError('new UDP flow bypassed budget')
     with socket.create_connection(('127.0.0.1',18080),timeout=5) as conn:
         conn.settimeout(5)
         try:
@@ -115,14 +146,14 @@ try:
     time.sleep(.2)
     after=stats()
     # The source denial must precede data delivery to the target.
-    if after['tcp_bytes_received']-before['tcp_bytes_received'] != 131072:
+    if after['tcp_bytes_received']-before['tcp_bytes_received'] != (131072 if args.protocol=='tcp' else 65536) or after['udp_bytes_received']-before['udp_bytes_received'] != (65536 if args.protocol=='udp' else 0):
         raise RuntimeError(f'target received unauthorized bytes: {before} -> {after}')
     report['cases']['exhausted_existing_and_new'] = 'no response and no extra target bytes'
     stop()
     state=json.loads(evidence.read_text());report['credit']=state
     if state['used_bytes']!=262144 or state['held_bytes']!=0 or state['unknown_bytes']!=0 or state['sessions']!=0 or state['denials']<2 or state['grants']<2:
         raise RuntimeError(f'credit settlement incomplete: {state}')
-    if sum(state[k] for k in ('unissued_bytes','available_bytes','held_bytes','used_bytes','unknown_bytes'))!=state['budget_bytes']:
+    if sum(state[k] for k in ('unissued_bytes','pending_grant_bytes','unknown_grant_bytes','available_bytes','held_bytes','used_bytes','unknown_bytes'))!=state['budget_bytes']:
         raise RuntimeError('credit conservation violated')
     report['cases']['conservation'] = '262144 bytes used exactly once, no held/session leak'
     report['status']='pass'

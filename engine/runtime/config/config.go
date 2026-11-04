@@ -82,8 +82,8 @@ func (c Config) Validate() error {
 		if err := c.SourceCredit.Validate(); err != nil {
 			return err
 		}
-		if c.Role != RoleSource || !c.ExecutionPoint || c.UDPServiceListen != "" || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" || c.SourceCredit.MaxBlock < 64*1024 {
-			return errors.New("config: source_credit requires static TCP-only source execution point, explicit transport, max block >= 64 KiB and evidence_file")
+		if c.Role != RoleSource || !c.ExecutionPoint || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" || c.SourceCredit.MaxBlock < 64*1024 {
+			return errors.New("config: source_credit requires static source execution point, explicit transport, max block >= 64 KiB and evidence_file")
 		}
 	}
 

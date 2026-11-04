@@ -182,7 +182,7 @@ func main() {
 			udpDone = make(chan struct{})
 			go func() {
 				defer close(udpDone)
-				if err := serveUDPSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
+				if err := serveUDPSource(ctx, cfg, supervisor, sourceGate); err != nil && ctx.Err() == nil {
 					fatal(err.Error())
 				}
 			}()
@@ -367,7 +367,7 @@ func makeOpenRequest(cfg config.Config, addr net.Addr, network uint8) vlink.Open
 	return request
 }
 
-func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor) error {
+func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, gate coreaccounting.Gate) error {
 	packet, err := net.ListenPacket("udp", cfg.UDPServiceListen)
 	if err != nil {
 		return err
@@ -432,7 +432,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 				if supervisor.Routes != nil {
 					flowConfig = supervisor.Routes.Snapshot()
 				}
-				runUDPSourceFlow(ctx, flowConfig, supervisor, packet, peer, current.out, current.done, &current.queued)
+				runUDPSourceFlow(ctx, flowConfig, supervisor, packet, peer, current.out, current.done, &current.queued, gate)
 			}(current, peer)
 		}
 		payload := append([]byte(nil), buffer[:n]...)
@@ -454,7 +454,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 	}
 }
 
-func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}, queued *atomic.Int64) {
+func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}, queued *atomic.Int64, gate coreaccounting.Gate) {
 	defer close(done)
 	if err := useRoute(ctx, cfg, supervisor, vlink.StreamUDP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 		stream, err := mux.Open(ctx, makeOpenRequest(cfg, peer, 2))
@@ -467,11 +467,26 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 		if err := stream.WaitOpen(ctx); err != nil {
 			return err
 		}
+		var session coreaccounting.Session
+		if gate != nil {
+			session, err = gate.Open(ctx, coreaccounting.Flow{Key: stream.FlowKey()})
+			if err != nil {
+				return err
+			}
+			defer session.Close()
+		}
+		flowCtx, cancel := context.WithCancel(ctx)
+		ctx = flowCtx
+		receivedDone := make(chan struct{})
+		// Join before closing the credit session. Cancellation/reset unblocks
+		// Receive; an already received datagram settles before session.Close.
+		defer func() { cancel(); resetStream(stream); <-receivedDone }()
 		slog.Info("udp source session opened", "generation", cfg.PathGeneration, "flow_key", stream.FlowKey())
 		defer slog.Info("udp source session closed", "generation", cfg.PathGeneration, "flow_key", stream.FlowKey())
 		recvErr := make(chan error, 1)
 		activity := make(chan struct{}, 1)
 		go func() {
+			defer close(receivedDone)
 			var owned vlink.Frame
 			defer func() { owned.Release() }()
 			for {
@@ -486,7 +501,7 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 					recvErr <- vlink.ErrProtocol
 					return
 				}
-				if _, err := packet.WriteTo(frame.Payload, peer); err != nil {
+				if _, err := authorizedDatagram(ctx, session, coreaccounting.LeftToRight, frame.Payload, false, func(p []byte) (int, error) { return packet.WriteTo(p, peer) }); err != nil {
 					recvErr <- err
 					return
 				}
@@ -506,7 +521,13 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 			select {
 			case payload := <-outgoing:
 				queued.Add(-int64(len(payload)))
-				accepted, err := stream.WriteDgram(ctx, payload)
+				accepted, err := authorizedDatagram(ctx, session, coreaccounting.RightToLeft, payload, true, func(p []byte) (int, error) {
+					ok, err := stream.WriteDgram(ctx, p)
+					if ok {
+						return len(p), err
+					}
+					return 0, err
+				})
 				if err != nil {
 					return err
 				}

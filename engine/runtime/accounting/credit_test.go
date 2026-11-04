@@ -18,7 +18,7 @@ func creditFixture(t *testing.T, budget int64) *CreditGate {
 func conserved(t *testing.T, g *CreditGate) {
 	t.Helper()
 	s := g.State()
-	if s.Budget != s.Unissued+s.Available+s.Held+s.Used+s.Unknown || s.Unissued < 0 || s.Available < 0 || s.Held < 0 || s.Used < 0 || s.Unknown < 0 {
+	if s.Budget != s.Unissued+s.PendingGrant+s.UnknownGrant+s.Available+s.Held+s.Used+s.Unknown || s.Unissued < 0 || s.Available < 0 || s.Held < 0 || s.Used < 0 || s.Unknown < 0 {
 		t.Fatalf("conservation: %+v", s)
 	}
 }
@@ -156,4 +156,37 @@ func TestCreditZeroBudgetAndIndependentSnapshotAuthority(t *testing.T) {
 	}
 	conserved(t, a)
 	conserved(t, b)
+}
+
+func TestCreditReclaimsOnlyIdleTailsAcrossSessions(t *testing.T) {
+	g := creditFixture(t, 128)
+	ctx := context.Background()
+	a, _ := g.Open(ctx, core.Flow{Key: "a"})
+	b, _ := g.Open(ctx, core.Flow{Key: "b"})
+	x, _ := a.Reserve(ctx, core.LeftToRight, 1)
+	x.Commit(ctx, 1)
+	y, _ := b.Reserve(ctx, core.RightToLeft, 100) // Scarce pool reclaims a's unused tail.
+	if y == nil {
+		t.Fatal("idle credit stranded")
+	}
+	if e := y.MarkUnknown(ctx); e != nil {
+		t.Fatal(e)
+	}
+	z, e := a.Reserve(ctx, core.LeftToRight, 27)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if err := z.Commit(ctx, 27); err != nil {
+		t.Fatal(err)
+	}
+	if _, e = b.Reserve(ctx, core.RightToLeft, 1); e == nil {
+		t.Fatal("unknown reissued")
+	}
+	a.Close()
+	b.Close()
+	conserved(t, g)
+	v := g.State()
+	if v.Used != 28 || v.Unknown != 100 || v.Held != 0 {
+		t.Fatal(v)
+	}
 }
