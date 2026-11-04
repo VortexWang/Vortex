@@ -10,6 +10,8 @@ rhost = load(runtime / "host.json")
 chost = load(out / "runtime-host.json")
 thost = load(out / "host.json")
 for host in (chost, thost):
+    if host.get("runtime_environment") != rhost.get("runtime_environment"):
+        raise SystemExit("comparison runtime environment differs from mixed workload")
     if host["commit"] != rhost["commit"] or host["semantic_manifest_sha256"] != rhost["semantic_manifest_sha256"]:
         raise SystemExit("comparison SHA/semantic path differs from runtime workload")
 baseline = load(out / "tls-throughput.json")
@@ -27,6 +29,7 @@ if len(segments) != 5: raise SystemExit("missing segment RTT evidence")
 rtt_sum = sum(s["median_ms"] for s in segments.values())
 report = {
     "schema": 1, "commit": rhost["commit"],
+    "runtime_environment": rhost.get("runtime_environment"),
     "dirty": any(h["dirty"] for h in (rhost, chost, thost)),
     "semantic_manifest_sha256": rhost["semantic_manifest_sha256"],
     "independent_tls": {"tcp_mbps": baseline["throughput_mbps"],

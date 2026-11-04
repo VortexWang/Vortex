@@ -23,13 +23,17 @@ jobs:
       - name: Run shared Phase 4 check
         run: make phase4-m2-check
       - name: Run benchmark smoke
+        env: {GOMAXPROCS: "1"}
         if: always()
         run: make phase4-m2-benchmark
       - name: Independent TLS, latency and runtime fault checks
+        env: {GOMAXPROCS: "1"}
         run: make phase4-runtime-comparison
       - name: Run same mixed workload in Compose
+        env: {GOMAXPROCS: "1"}
         run: BACKEND=docker make phase4-runtime-mixed
       - name: Compare TLS and faults in Compose
+        env: {GOMAXPROCS: "1"}
         run: BACKEND=docker make phase4-runtime-comparison
       - name: Record host metadata
         if: always()

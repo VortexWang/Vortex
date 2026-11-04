@@ -89,3 +89,12 @@ measured. Performance ratios and latency differences are reported even when
 thresholds fail. `flow-accounting.json` contains opaque link/stream/network keys;
 TCP echo totals must match per flow, and aggregate execution totals still match
 target counters. The in-process adapter remains non-durable.
+
+The next comparison batch uses explicit `GOMAXPROCS=1` for all role processes
+in both implementations (and both backends). This is a shared four-vCPU fixture
+candidate, not a change to the product's Go scheduler default or a D-04 lock.
+Use `GOMAXPROCS=1 make phase4-runtime-mixed` followed by
+`GOMAXPROCS=1 make phase4-runtime-comparison`; add `BACKEND=docker` to each for
+Compose. Environment choices are recorded and included in the semantic manifest.
+The source UDP candidate queue is now 256 datagrams with a simultaneous 256 KiB
+byte bound, compared with the previous 64-packet-only bound.

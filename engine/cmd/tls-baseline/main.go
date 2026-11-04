@@ -159,7 +159,7 @@ func measureSegment(cfg config.Config, tlsConfig *tls.Config, mode, output strin
 	sorted := append([]float64(nil), samples...)
 	sort.Float64s(sorted)
 	data, _ := json.MarshalIndent(map[string]any{"samples_ms": samples, "median_ms": (sorted[24] + sorted[25]) / 2, "cipher": cipher, "role": cfg.Role, "measurement": "established TLS data echo RTT, or plain destination-target echo; userspace overhead included"}, "", "  ")
-	if err = os.WriteFile(output, append(data, '\n'), 0600); err != nil {
+	if err = os.WriteFile(output, append(data, '\n'), 0644); err != nil {
 		log.Fatal(err)
 	}
 }

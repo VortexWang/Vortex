@@ -26,7 +26,7 @@ for name, config in configs.items():
     semantic["udp_service"] = bool(config.get("udp_service_listen"))
     semantic["target_service"] = "echo-target:18081" if config.get("target") else ""
     canonical[name] = semantic
-manifest = {"roles": canonical, "runtime_source_sha256": hashlib.sha256((root / "engine/runtime/link/supervisor.go").read_bytes()).hexdigest(),
+manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE")}, "roles": canonical, "runtime_source_sha256": hashlib.sha256((root / "engine/runtime/link/supervisor.go").read_bytes()).hexdigest(),
             "workload": {"duration_seconds": float(os.getenv("MIXED_DURATION_SECONDS", "5")),
                          "tcp_streams": int(os.getenv("MIXED_TCP_STREAMS", "4")),
                          "udp_mbps": float(os.getenv("MIXED_UDP_MBPS", "100")), "udp_payload_bytes": 1200}}
@@ -35,7 +35,8 @@ metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command
             "backend": sys.argv[2], "system": platform.system(), "release": platform.release(),
             "machine": platform.machine(), "cpu_count": os.cpu_count(), "go": command("go", "version"),
             "semantic_manifest_sha256": digest(manifest), "exact_generated_config_sha256": digest(configs),
-            "qualification": "not-qualified"}
+            "qualification": "not-qualified",
+            "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE")}}
 if Path("/proc/meminfo").exists():
     metadata["mem_total"] = Path("/proc/meminfo").read_text().splitlines()[0]
 if Path("/etc/os-release").exists():

@@ -4,6 +4,8 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["${QUALIFICATION_BINARY:-/usr/local/bin/vortex-relay}"]
+    environment:
+      GOMAXPROCS: "${GOMAXPROCS:-}"
     command: ["--config", "/config/source.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     ports: ["18080:18080/tcp", "18082:18082/udp"]
@@ -13,6 +15,8 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["${QUALIFICATION_BINARY:-/usr/local/bin/vortex-relay}"]
+    environment:
+      GOMAXPROCS: "${GOMAXPROCS:-}"
     command: ["--config", "/config/relay-1.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
@@ -21,6 +25,8 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["${QUALIFICATION_BINARY:-/usr/local/bin/vortex-relay}"]
+    environment:
+      GOMAXPROCS: "${GOMAXPROCS:-}"
     command: ["--config", "/config/relay-2.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
@@ -29,6 +35,8 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["${QUALIFICATION_BINARY:-/usr/local/bin/vortex-relay}"]
+    environment:
+      GOMAXPROCS: "${GOMAXPROCS:-}"
     command: ["--config", "/config/relay-3.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]
@@ -37,6 +45,8 @@ services:
       context: ../..
       dockerfile: test/qualification/Dockerfile
     entrypoint: ["${QUALIFICATION_BINARY:-/usr/local/bin/vortex-relay}"]
+    environment:
+      GOMAXPROCS: "${GOMAXPROCS:-}"
     command: ["--config", "/config/destination.json"]
     volumes: ["${QUALIFICATION_DIR}/config:/config:ro", "${QUALIFICATION_DIR}/certs:/certs:ro", "${QUALIFICATION_DIR}:${QUALIFICATION_DIR}"]
     networks: [vortex]

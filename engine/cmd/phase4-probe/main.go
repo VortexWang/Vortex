@@ -119,7 +119,7 @@ func main() {
 	check(err)
 	data, err := json.MarshalIndent(map[string]any{"status": "pass", "cases": results, "scope": "runtime TLS/HELLO, static local policy, UDP session link loss; not exhaustive fault qualification"}, "", "  ")
 	check(err)
-	check(os.WriteFile(*out, append(data, '\n'), 0600))
+	check(os.WriteFile(*out, append(data, '\n'), 0644))
 }
 
 func check(err error) {

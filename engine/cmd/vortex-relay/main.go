@@ -224,8 +224,9 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 		slog.Info("udp source drop summary", "queue_drops", queueDrops.Load(), "oversized_drops", oversizedDrops.Load(), "capacity_drops", capacityDrops.Load())
 	}()
 	type flow struct {
-		out  chan []byte
-		done chan struct{}
+		out    chan []byte
+		done   chan struct{}
+		queued atomic.Int64
 	}
 	flows := make(map[string]*flow)
 	const maxFlows = 1024
@@ -260,12 +261,12 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 				capacityDrops.Add(1)
 				continue
 			}
-			current = &flow{out: make(chan []byte, 64), done: make(chan struct{})}
+			current = &flow{out: make(chan []byte, 256), done: make(chan struct{})}
 			flows[key] = current
 			workers.Add(1)
 			go func(current *flow, peer net.Addr) {
 				defer workers.Done()
-				runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done)
+				runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done, &current.queued)
 			}(current, peer)
 		}
 		payload := append([]byte(nil), buffer[:n]...)
@@ -273,15 +274,21 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 			oversizedDrops.Add(1)
 			continue
 		}
+		if current.queued.Add(int64(len(payload))) > 256*1024 {
+			current.queued.Add(-int64(len(payload)))
+			queueDrops.Add(1)
+			continue
+		}
 		select {
 		case current.out <- payload:
 		default:
+			current.queued.Add(-int64(len(payload)))
 			queueDrops.Add(1)
 		}
 	}
 }
 
-func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}) {
+func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}, queued *atomic.Int64) {
 	defer close(done)
 	if err := supervisor.Dial(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 		stream, err := mux.Open(ctx, makeOpenRequest(cfg, peer, 2))
@@ -323,6 +330,7 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 		for {
 			select {
 			case payload := <-outgoing:
+				queued.Add(-int64(len(payload)))
 				accepted, err := stream.WriteDgram(ctx, payload)
 				if err != nil {
 					return err
