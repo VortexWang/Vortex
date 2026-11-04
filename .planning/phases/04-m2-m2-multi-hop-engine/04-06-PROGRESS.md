@@ -175,3 +175,20 @@ commands/hash expectations. Clean 6bfe976 phase4-m2-check passed; log retained
 under artifacts/phase4/review. Actions 41838307562 also succeeded on that same
 6bfe976. No new benchmark, native Ubuntu run, parameter
 lock, Phase 4 completion or Phase 5 transition is claimed.
+
+
+## Finite TCP source credit slice — 6a1faf2
+
+Injected startup-pinned finite raw-byte credit at the source TCP bridge;
+implemented directional growing blocks, bounded local issuance/waterline,
+write settlement, unused-tail return and unknown retention. Reject UDP/hot
+routes in this mode instead of silently forwarding without authorization.
+Docker/native clean 6a1faf2 both consumed exactly 262144 bytes in eight 16-KiB
+echo exchanges through four local allocations; exhausted existing/new flows
+sent no extra target bytes, no held/session leak. Semantic manifests match.
+Both backends also passed all eight recovery cases; full race passed locally
+and on native Ubuntu. Actions 41849553357 completed successfully on clean 6a1faf2, including
+credit, race, mixed, mode, recovery and artifact-upload steps. Repaired a
+prior readiness EOF race exposed by failed run 41840426926; intermediate
+41849096326 was cancelled, not passed. See 04-06-CREDIT-EVIDENCE.md.
+No production issuer, multi-snapshot/UDP credit or D-04 lock is claimed.

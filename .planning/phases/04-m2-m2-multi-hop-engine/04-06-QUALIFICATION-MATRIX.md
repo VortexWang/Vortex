@@ -31,3 +31,13 @@
 5. **正式资格化**：满足资源/链路条件后，在同一干净 SHA 做 16 streams、60 秒预热、300 秒 × 3 与独立 TLS，正式授权门控开启；本机 Docker / Actions 同 SHA 回归分别留证。性能目标差距如实记录，继续用户已授权的正确性工作，Phase 4 不虚标完成。
 
 只把可实现、可验证的工作纳入下一执行切片。原始统计、命令、exact config hash 与 semantic manifest hash 各自留存；跨环境地址和证书不同，不要求 exact config hash 相同。不会要求找回重启前的十一份旧材料。
+
+
+## Source credit 增量 — 6a1faf2
+
+新增 optional source_credit：静态单快照 TCP 有限预算/本地分配和续补
+已在同干净提交 Docker/原生验证；标准性能 workload 尚未开启它。
+因此矩阵中“source Gate 缺失”现更新为“仅静态 TCP 有限 authority
+已接线，完整正式授权和混合负载尚缺”。NFR-003/005 性能、NFR-039/
+040/044 行保持未通过。尚不允许 UDP listener 或热 route set 与此
+实验 Gate 混用。详情见 04-06-CREDIT-EVIDENCE.md。

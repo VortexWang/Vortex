@@ -41,3 +41,14 @@ Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307
 First design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point, preserving Engine process-local injection and non-authoritative tracer scope. Then cover NFR-039/040/044 runtime behavior, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
 
 No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.
+
+
+## Incremental verification: finite source credit — 6a1faf2
+
+The source-authorization gap is partially closed for opt-in static-snapshot TCP:
+finite credit, directional blocks/local replenish, settlement/unknown and
+exhaustion checks pass Docker/native at clean 6a1faf2. The normal throughput
+fixture still runs without this mode. Real grant identity/response semantics,
+UDP, snapshot switching and rate-adaptive targets are missing; full NFR/D-04
+verdicts remain unqualified. See 04-06-CREDIT-EVIDENCE.md for exact scope,
+checksums, recovery-readiness repair and Actions 41849553357.

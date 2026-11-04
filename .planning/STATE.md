@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 D-04 review and seven-row NFR matrix completed; source authorization, snapshot/CAS/time-boundary and early-DATA runtime gaps remain
+stopped_at: Plan 04-06 static TCP source credit and eight recovery cases pass clean 6a1faf2 Docker/native; Actions 41849553357 passed
 last_updated: "2026-11-04T13:39:13.122327+00:00"
 last_activity: 2026-11-04
-last_activity_desc: D-04 candidate review and remaining NFR matrix complete; clean 6bfe976 local regression and Actions 41838307562 passed; no parameter freeze or qualification pass
-state_head: 6bfe976
+last_activity_desc: Static TCP finite credit integrated and Docker/native validated; readiness EOF race repaired; Actions passed; no NFR qualification
+state_head: 6a1faf2
 progress:
   total_phases: 8
   completed_phases: 3
@@ -68,12 +68,12 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06: design and wire the finite-balance snapshot-aware issuer/Gate at the source execution point; implement block/renewal/exhaustion and unknown freeze before D-04 sweeps. Then close NFR-039/040/044 runtime coverage and NFR-007 early-DATA/controlled-RTT gaps. See 04-06-D04-REVIEW.md and 04-06-QUALIFICATION-MATRIX.md.
+- Continue Plan 04-06 after CI: extend the static TCP finite authority with injected grant identity/outcomes, UDP and immutable snapshot separation before claiming real renewal or running D-04 sweeps. NFR-039/040/044 and NFR-007 runtime gaps remain; see 04-06-CREDIT-EVIDENCE.md.
 
 ### Blockers/Concerns
 
 - Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
-- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification and D-04 review remain pending. No Phase 4 completion is claimed.
+- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification remains pending. D-04 has now received a candidate review, but parameter experiments and lock approval remain pending. No Phase 4 completion is claimed.
 
 ## Deferred Items
 
@@ -92,7 +92,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-04T13:39:13.122327+00:00
-Stopped at: Plan 04-06 executing; D-04 review and remaining NFR matrix complete; next is source authorization adapter design/integration, not another ungated performance run
+Stopped at: Plan 04-06 executing; clean 6a1faf2 static TCP source credit and recovery passed Docker/native/Actions 41849553357
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
 
 ### Latest qualification review
@@ -102,3 +102,12 @@ Gate; memory accounting is not funded credit; NFR-039/040/044 runtime behavior
 and NFR-007 early TCP DATA remain missing. These gaps are actionable without
 exclusive performance hardware. Updated 04-VERIFICATION.md points to the exact
 matrix; diagnostic numeric improvements do not mark formal NFRs passed.
+
+
+### Source credit slice
+
+Source authorization is now opt-in for static-snapshot TCP only; finite balance,
+blocks and local replenishment/exhaustion are verified on Docker/native. UDP,
+hot routes, dynamic snapshot/grant and real issuer outcomes remain excluded.
+The standard performance workload still lacks full authorization integration.
+See 04-06-CREDIT-EVIDENCE.md; D-04 remains candidate and Phase 4 executing.
