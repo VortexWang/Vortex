@@ -76,8 +76,13 @@ The same-load ratio cleared 70% in each recorded comparison, including all three
 0.048004% / 0.010241% / 0.004480%, all below 0.1%, with exact accounting and
 TCP 1,086.41 / 1,169.10 / 1,200.00 Mbps. Native full Engine race and artifact
 checksums passed. See [04-06-NATIVE-SCALE-EVIDENCE.md](04-06-NATIVE-SCALE-EVIDENCE.md).
-Next is the same-size independent TLS comparison; dedicated host/link
-eligibility, expanded latency/fault coverage and D-04 remain open.
+The same-size independent TLS comparison subsequently completed: runtime
+mixed TCP 1,086.41 Mbps versus TLS 1,314.60 Mbps, **82.64%** retention at
+comparable actual UDP offered load (approximately 100 Mbps each). Finite
+integrity, forged OPEN, direct bypass and middle-hop failure probes passed.
+See [04-06-NATIVE-TLS-EVIDENCE.md](04-06-NATIVE-TLS-EVIDENCE.md). Next are
+separate pool/mux latency and expanded fault/unknown-outcome measurements;
+dedicated host/link eligibility and D-04 remain open.
 
 ## Ordered Follow-up: UDP Stability and Scale
 

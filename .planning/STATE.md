@@ -5,10 +5,10 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 clean baa0a02 native 16-stream/60-second three-run series passed; next same-size independent TLS comparison and latency/fault coverage
+stopped_at: Plan 04-06 clean baa0a02 native 16-stream/60-second TLS comparison reached 82.64%; next pool/mux latency and expanded fault/unknown-outcome coverage
 last_updated: "2026-11-04T03:47:30.284716+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean baa0a02 native three-run 16-stream/60-second series generated approximately 100 Mbps UDP with 0.048004/0.010241/0.004480 percent loss and exact accounting; native race and checksums passed; host qualification remains open
+last_activity_desc: Clean baa0a02 native scale TLS comparison reached 82.64 percent at approximately 100 Mbps UDP; finite integrity/OPEN/bypass/middle-hop fault probes and checksums passed; pool/mux latency and qualification remain open
 state_head: baa0a02
 progress:
   total_phases: 8
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — clean baa0a02 native three-run scale series passed accounting and UDP loss below 0.1%; next same-size independent TLS comparison
+Last activity: 2026-11-04 — clean baa0a02 native 16-stream/60-second independent TLS comparison reached 82.64%; finite fault probes passed
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 with the independent TLS comparison at 16 streams/60 seconds, then pool/mux latency and fault coverage, dedicated-host qualification and D-04/NFR review; see 04-06-NATIVE-SCALE-EVIDENCE.md.
+- Continue Plan 04-06 with separate pool/mux latency and expanded fault/unknown-outcome coverage, then dedicated-host qualification and D-04/NFR review; see 04-06-NATIVE-TLS-EVIDENCE.md.
 
 ### Blockers/Concerns
 
@@ -92,5 +92,5 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-04T03:47:30.284716+00:00
-Stopped at: Plan 04-06 executing; baa0a02 clean native three-run scale series passed, next same-size independent TLS comparison; host eligibility and latency/fault coverage remain open
+Stopped at: Plan 04-06 executing; baa0a02 clean native 16-stream/60-second independent TLS ratio 82.64%; next pool/mux latency and expanded fault/unknown-outcome coverage
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md
