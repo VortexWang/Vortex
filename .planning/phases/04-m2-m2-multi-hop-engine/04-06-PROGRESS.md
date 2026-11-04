@@ -84,3 +84,14 @@ Follow-up diagnosis: increasing relay container `stop_grace_period` to two minut
 Increasing aggregate/stream credit isolated long-run stream-credit stalls. Accounting stored millions of events in one growing slice, whose large append copies stalled the single-core diagnostic. Fixed 4,096-entry chunks remove these full-history copies; JSONL output snapshots chunk headers instead of cloning all events. The final dirty-worktree 16-stream/60-second run sent and received all 624,959 UDP datagrams, with zero classified drops, TCP 3,159.85 Mbps and 84.42% contention retention. All 5,879,776 events reconciled exactly at 52,526,929,796 bytes in each direction and relay exit checks passed. This is diagnostic evidence pending clean-SHA confirmation. Candidate limits are 2 MiB stream, 8 MiB aggregate, 16 MiB hard credit cap, 2 MiB UDP reserve, 256 TCP receive frames and 2 MiB/2,048-frame UDP queues; UDP returns stream credit after one-quarter window while TCP keeps larger grants. These values remain subject to D-04 review and native qualification.
 
 No 04-06 SUMMARY or Phase 4 completion has been written. Existing Phase 4 legacy-v1 completion remains invalidated.
+
+## Clean-SHA Repair Confirmation
+
+Repair commit `baa0a02864e1d9bb8a2146ac9a7bd8d6a6a2650b` passed the full Engine race suite and local `make phase4-m2-check`. Both hosts then ran 16 TCP streams and 60 seconds per phase with the bounded 10-million-event override:
+
+| Environment | UDP sent/received | Actual UDP Mbps | Mixed TCP Mbps | Accounting events | Bytes per direction |
+|---|---:|---:|---:|---:|---:|
+| Local OrbStack, dirty=false | 624,959 / 624,959 | 99.993 | 3,151.92 | 5,865,532 | 52,301,813,636 |
+| GitHub Actions Compose | 151,285 / 151,285 | 24.206 | 635.87 | 1,449,397 | 12,732,800,164 |
+
+Both had zero classified drops, exact target/accounting reconciliation and clean relay exits. Local evidence is preserved in `artifacts/phase4/qualification/docker-baa0a02-16x60`; [Actions run 41813036017](https://github.com/VortexWang/Vortex/actions/runs/41813036017) succeeded with native and Compose checks, independent TLS/latency/fault probes, and the new scale regression. Actions requested 100 Mbps but generated only 24.21 Mbps; its zero loss proves correctness only at the measured offered load, not the 100 Mbps NFR. The local TCP retention was 84.71% versus its TCP-only contention baseline; Actions retention was 61.33%. Neither is the independent TLS relative-overhead ratio. Native host/rate eligibility, further latency/fault coverage and D-04 review remain open. Debug details: `.planning/debug/resolved/udp-accounting-drift.md`.

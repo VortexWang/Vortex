@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 accounting flush and UDP stalls fixed locally; clean-SHA Docker and Actions validation pending
+stopped_at: Plan 04-06 accounting flush and UDP stalls fixed; clean baa0a02 Docker and Actions regressions passed; native rate/host qualification remains
 last_updated: "2026-11-04T03:47:30.284716+00:00"
 last_activity: 2026-11-04
-last_activity_desc: 16-stream 60-second dirty-worktree Docker diagnostic passed with zero UDP loss and exact accounting after chunked event storage and bounded window tuning; clean-SHA validation pending
-state_head: 0b9615e
+last_activity_desc: Clean baa0a02 16-stream 60-second Docker and Actions accounting regressions passed with zero UDP loss; Actions actual offered UDP rate was 24.21 Mbps so dedicated-host 100 Mbps qualification remains open
+state_head: baa0a02
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — accounting flush and append stalls repaired; 16-stream/60-second Docker diagnostic has zero UDP loss; clean-SHA dual-host validation pending
+Last activity: 2026-11-04 — clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero UDP loss; native rate/host qualification remains
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -73,7 +73,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies, and bounded UDP credit/queue tuning produced zero loss on a 16-stream/60-second Docker diagnostic with exact accounting. Clean-SHA Docker/Actions confirmation and native qualification remain pending. No Phase 4 completion is claimed.
+- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification and D-04 review remain pending. No Phase 4 completion is claimed.
 
 ## Deferred Items
 
@@ -92,5 +92,5 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-04T03:47:30.284716+00:00
-Stopped at: Plan 04-06 executing; cross-host runtime evidence passed, performance/baseline and fault coverage remain
+Stopped at: Plan 04-06 executing; baa0a02 accounting/UDP bug fixes verified on local Docker and Actions; native rate/host qualification and remaining latency/fault coverage remain
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md

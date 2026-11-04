@@ -1,5 +1,5 @@
 ---
-status: verifying
+status: resolved
 trigger: "16-stream 60-second mixed TCP/UDP qualification has high UDP loss and target/accounting byte mismatch"
 created: 2026-11-04
 updated: 2026-11-04
@@ -20,7 +20,7 @@ updated: 2026-11-04
 - hypothesis: contiguous accounting event slice growth causes long-run scheduling stalls, while the default Docker stop grace truncates evidence on shutdown.
 - test: repeat the passing 16-stream/60-second run on a clean SHA and run GitHub Actions with the same code.
 - expecting: accounting reconciles, UDP loss is below 0.1%, and all relay exits are clean.
-- next_action: commit repairs, push, and collect same-SHA local Docker and Actions evidence.
+- next_action: continue Plan 04-06 native rate/host qualification; these bugs are resolved on clean baa0a02 and are not Phase 4 completion.
 
 ## Evidence
 
@@ -29,6 +29,8 @@ updated: 2026-11-04
 - timestamp: 2026-11-04 — Failure event IDs are contiguous through 2,943,943 with no accounting errors in relay logs. `docker compose stop` had no configured grace period; probable short JSONL flush at shutdown. Added a two-minute relay stop grace for validation.
 - timestamp: 2026-11-04 — With 2-minute relay stop grace, the 60-second-per-phase run wrote 6,015,013 rows and reconciled exactly: accounting 53,980,247,076 / 53,980,015,476 bytes; target-derived expectation matched. UDP loss remained 8,822/624,944 (1.412%), classified as stream and aggregate window drops.
 - timestamp: 2026-11-04 — Bounded credit/queue changes alone retained 5,676 stream-credit drops (0.908%) at 60 seconds. Replacing contiguous event storage with 4,096-entry chunks on the same candidate configuration produced 0/624,959 UDP loss, zero classified drops, TCP 3,159.85 Mbps, exact accounting at 52,526,929,796 bytes each direction, and 5,879,776 events. Full Engine race suite passed. Clean-SHA replay remains pending.
+- timestamp: 2026-11-04 — Clean baa0a02864e1d9bb8a2146ac9a7bd8d6a6a2650b local Docker replay passed: 624,959/624,959 UDP, zero classified drops, TCP 3,151.92 Mbps, 5,865,532 events, exact 52,301,813,636 bytes each direction, dirty=false. Preserved under artifacts/phase4/qualification/docker-baa0a02-16x60. Shared phase4-m2-check also passed.
+- timestamp: 2026-11-04 — Actions 41813036017 succeeded on the same SHA. Scale regression: 151,285/151,285 UDP, zero classified drops, TCP 635.87 Mbps, 1,449,397 events, exact 12,732,800,164 bytes each direction. Actual UDP offered rate was only 24.21 Mbps despite the 100 Mbps requested rate; this is a correctness regression, not 100 Mbps performance qualification. Logs retained at artifacts/phase4/actions-baa0a02.log and attached to the Actions run.
 
 ## Resolution
 
