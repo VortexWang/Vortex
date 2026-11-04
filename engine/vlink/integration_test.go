@@ -90,3 +90,44 @@ func TestLateWindowForClosedStreamDoesNotResetOrCloseLink(t *testing.T) {
 		t.Fatal("late WINDOW recreated a closed stream")
 	}
 }
+
+func TestResetRemovesBothStreamRecords(t *testing.T) {
+	left, right := net.Pipe()
+	client, err := newMuxLink(left, MuxConfig{LocalClient: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, err := newMuxLink(right, MuxConfig{LocalClient: false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(ErrProtocol)
+	defer server.Close(ErrProtocol)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	request := OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 2, ClientAddress: []byte{127, 0, 0, 1}}
+	local, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	remote, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, remote.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := local.WaitOpen(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := local.Reset(ctx, 8); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) && server.dispatch.streams.Count() != 0 {
+		time.Sleep(time.Millisecond)
+	}
+	if client.dispatch.streams.Count() != 0 || server.dispatch.streams.Count() != 0 {
+		t.Fatalf("stream records remain: local=%d remote=%d", client.dispatch.streams.Count(), server.dispatch.streams.Count())
+	}
+}

@@ -278,6 +278,7 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 	if first != nil {
 		cancel()
 		_ = conn.Close()
+		_ = stream.Reset(context.Background(), 8)
 	}
 	wg.Wait()
 	return first

@@ -744,6 +744,21 @@ func (s *MuxStream) CloseWrite(ctx context.Context) error {
 	}
 	return err
 }
+
+// Reset terminates one stream and releases its local resources. The reset is
+// best-effort with respect to link shutdown; the stream is removed locally in
+// either case so a failed peer cannot retain it indefinitely.
+func (s *MuxStream) Reset(ctx context.Context, code uint16) error {
+	if s == nil || s.link == nil {
+		return ErrStreamState
+	}
+	var payload [2]byte
+	binary.BigEndian.PutUint16(payload[:], code)
+	err := s.link.write(ctx, Frame{Type: FrameRST, StreamID: s.ID, Payload: payload[:]})
+	s.link.removeStream(s.ID)
+	return err
+}
+
 func (s *MuxStream) Consume(ctx context.Context, bytes uint32) error {
 	if bytes == 0 {
 		return nil

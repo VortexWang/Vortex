@@ -9,6 +9,16 @@
 - Result: `qualification=topology-and-accounting-pass`, all five role logs contained `OPEN authorized`, exact TCP echo payload returned, and destination accounting JSONL recorded two committed 24-byte directions.
 - Scope: functional runtime and accounting tracer smoke. The adapter is in-process and non-durable; this does not qualify production accounting durability.
 
+## Runtime TCP and UDP smoke on the gap-closure commit
+
+- Commit: `9ddb724d822ef0f67b2694565262776916826ea6` (clean worktree)
+- Host: Ubuntu 24.04.5 LTS, Linux 6.8.0-142-generic, x86_64; 4 vCPU, 7894 MiB.
+- Command: `BACKEND=native VORTEX_RELAY_BIN=/tmp/vortex-relay-9ddb724 QUALIFICATION_DIR=/tmp/vortex-phase4-9ddb724 ./tools/phase4/qualification.sh`
+- Result: `qualification=tcp-udp-topology-and-accounting-pass`; TCP half-close echo and a UDP datagram both crossed three relays and returned exact payloads. All five role logs recorded OPEN authorization and none reached the violation threshold.
+- Accounting reconciliation: four destination events committed exactly 28 bytes in each direction for UDP and 24 bytes in each direction for TCP; reserved and used bytes matched.
+- Scope: one TCP flow and one UDP datagram are a functional smoke only. It is not sustained mixed load, queue/fairness measurement, same-path performance ratio, or NFR qualification.
+- Docker Compose was not run on the local host because the OrbStack Docker socket was unavailable. The same Compose target still needs a live Docker run.
+
 ## Benchmark smoke on the same host
 
 - Command: `BACKEND=native VORTEX_RELAY_BIN=/tmp/vortex-relay-86f06b3 make phase4-m2-benchmark`
