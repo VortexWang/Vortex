@@ -77,7 +77,7 @@ func (m *MuxLink) dgramLoop() {
 		}
 		select {
 		case request := <-m.dataWrites:
-			if !m.sendRequest(request) {
+			if !m.sendDataBatch(request, &encoded) {
 				return
 			}
 			udpTurn = true
@@ -94,6 +94,56 @@ func (m *MuxLink) dgramLoop() {
 			return
 		}
 	}
+}
+
+// sendDataBatch writes several already-windowed DATA frames through one
+// net.Conn/TLS call. Each request is completed only after the whole batch is
+// accepted, so a partial transport failure conservatively resolves every
+// affected reservation as unknown through the caller's error path.
+func (m *MuxLink) sendDataBatch(first frameWrite, encoded *bytes.Buffer) bool {
+	encoded.Reset()
+	requests := [8]frameWrite{first}
+	count := 1
+	for count < len(requests) {
+		select {
+		case request := <-m.dataWrites:
+			requests[count] = request
+			count++
+		default:
+			count = count
+			goto ready
+		}
+	}
+ready:
+	for i := 0; i < count; i++ {
+		if err := requests[i].ctx.Err(); err != nil {
+			for j := 0; j < count; j++ {
+				requests[j].done <- err
+			}
+			return true
+		}
+		if err := WriteFrame(encoded, requests[i].frame); err != nil {
+			for j := 0; j < count; j++ {
+				requests[j].done <- err
+			}
+			m.Close(err)
+			return false
+		}
+	}
+	if err := writeFull(m.conn, encoded.Bytes()); err != nil {
+		for i := 0; i < count; i++ {
+			requests[i].done <- err
+		}
+		m.Close(err)
+		return false
+	}
+	for i := 0; i < count; i++ {
+		requests[i].done <- nil
+		if m.observer != nil {
+			m.observer.Frame(m.peerRole(), requests[i].frame.Type, 2, len(requests[i].frame.Payload))
+		}
+	}
+	return true
 }
 
 func (m *MuxLink) sendRequest(request frameWrite) bool {
