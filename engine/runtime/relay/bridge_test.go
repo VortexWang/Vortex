@@ -14,6 +14,7 @@ import (
 	"net"
 	"net/url"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -175,4 +176,62 @@ func authenticatedPair(t *testing.T, ctx context.Context) (*vlink.MuxLink, *vlin
 		t.Fatal(r.err)
 	}
 	return left, r.mux
+}
+
+func TestSourceFirstTargetByteObserverIgnoresClientRequest(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	client, server := authenticatedPair(t, ctx)
+	defer client.Close(nil)
+	defer server.Close(nil)
+	out, err := client.Open(ctx, vlink.OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: uint8(vlink.StreamTCP), ClientAddress: []byte{127, 0, 0, 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	in, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, in.ID, func(context.Context, vlink.NodeID, vlink.OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := out.WaitOpen(ctx); err != nil {
+		t.Fatal(err)
+	}
+	local, application := net.Pipe()
+	defer application.Close()
+	_ = application.SetDeadline(time.Now().Add(4 * time.Second))
+	var observed atomic.Int32
+	done := make(chan error, 1)
+	go func() { done <- BridgeConnWithGateObserver(ctx, out, local, nil, func() { observed.Add(1) }) }()
+	if _, err := application.Write([]byte("request")); err != nil {
+		t.Fatal(err)
+	}
+	frame, err := in.Receive(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	frame.Release()
+	if observed.Load() != 0 {
+		t.Fatal("client request was mistaken for target response")
+	}
+	for i := 0; i < 2; i++ {
+		if err := in.WriteData(ctx, []byte("response")); err != nil {
+			t.Fatal(err)
+		}
+		response := make([]byte, 8)
+		if _, err := io.ReadFull(application, response); err != nil {
+			t.Fatal(err)
+		}
+		if observed.Load() != 1 {
+			t.Fatalf("observer calls: %d", observed.Load())
+		}
+	}
+	_ = application.Close()
+	_ = in.Reset(ctx, 0)
+	select {
+	case <-done:
+	case <-ctx.Done():
+		t.Fatal("bridge did not stop")
+	}
 }

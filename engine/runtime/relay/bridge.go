@@ -324,6 +324,7 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	go func() {
 		defer wg.Done()
 		var owned vlink.Frame
+		firstTargetByte := true
 		defer func() { owned.Release() }()
 		for {
 			owned.Release()
@@ -335,6 +336,12 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 			}
 			switch frame.Type {
 			case vlink.FrameData, vlink.FrameDgram:
+				if firstTargetByte {
+					firstTargetByte = false
+					if onFirstTargetByte != nil {
+						onFirstTargetByte()
+					}
+				}
 				batch, err := reserve(bridgeCtx, session, engineaccounting.LeftToRight, len(frame.Payload))
 				if err != nil {
 					errCh <- err
@@ -385,16 +392,9 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 			bufferSize = vlink.MaxPayloadSize
 		}
 		buffer := make([]byte, bufferSize)
-		firstTargetByte := true
 		for {
 			n, err := conn.Read(buffer)
 			if n > 0 {
-				if firstTargetByte {
-					firstTargetByte = false
-					if onFirstTargetByte != nil {
-						onFirstTargetByte()
-					}
-				}
 				batch, reserveErr := reserve(bridgeCtx, session, engineaccounting.RightToLeft, n)
 				if reserveErr != nil {
 					errCh <- reserveErr
