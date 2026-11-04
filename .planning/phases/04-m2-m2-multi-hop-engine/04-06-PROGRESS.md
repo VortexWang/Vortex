@@ -2,7 +2,7 @@
 
 Status: **in progress**, not a completion SUMMARY. Phase 5 must not start.
 
-Latest tested application commit: `349b70d145a707aaa083ed60d06b057edc0860e4` (clean on local Docker, native Ubuntu, and Actions).
+Latest tested comparison commit: `3b9a04ce28de4b935b1f668cae4db5e88aec296b` (clean on local Docker and Actions). The native Ubuntu three-run series used application commit `349b70d145a707aaa083ed60d06b057edc0860e4`; the later `3b9a04c` change adds strict same-workload comparison checks and reporting.
 
 ## Implemented and exercised
 
@@ -49,16 +49,16 @@ This short run was five seconds with four TCP flows and did not use a same-load 
 
 ## Current Same-SHA Comparison
 
-Application commit `349b70d145a707aaa083ed60d06b057edc0860e4` is clean on local Docker, native Ubuntu, and Actions. The fair relative ratio uses runtime mixed-load TCP divided by independent TLS TCP under the same duration, TCP stream count, UDP rate, path, and runtime environment. `compare_results.py` now fails if those workload parameters differ. The legacy mixed-runtime / TLS-TCP-only ratio is retained as a cross-workload diagnostic, not as a measure of forwarding overhead.
+The application code at `349b70d145a707aaa083ed60d06b057edc0860e4` was tested on native Ubuntu; the final comparison/reporting code at `3b9a04ce28de4b935b1f668cae4db5e88aec296b` was tested on local Docker and Actions. The fair relative ratio uses runtime mixed-load TCP divided by independent TLS TCP under the same duration, TCP stream count, UDP rate, path, and runtime environment. `compare_results.py` now fails if those workload parameters differ. The legacy mixed-runtime / TLS-TCP-only ratio is retained as a cross-workload diagnostic, not as a measure of forwarding overhead.
 
 | Environment | Runtime mixed TCP Mbps | TLS mixed TCP Mbps | Same-load ratio | Runtime TCP-only / TLS TCP-only | Legacy cross-load ratio | UDP loss |
 |---|---:|---:|---:|---:|---:|---:|
-| Local OrbStack Compose, `GOMAXPROCS=1` | 2454.88 | 2960.66 | 82.92% | 83.32% | 71.61% | 0.000% |
+| Local OrbStack Compose, `GOMAXPROCS=1` | 2503.81 | 3075.30 | 81.42% | 84.13% | 72.78% | 0.000% |
 | Native Ubuntu, three runs | 817.95 / 879.38 / 822.88 | 1055.51 / 999.74 / 895.78 | 77.49% / 87.96% / 91.86% | 80.78% / 87.14% / 78.82% | 55.15% / 63.57% / 58.86% | 0.184% / 0.000% / 0.361% |
-| Actions native | 613.31 | 544.84 | 112.57% | 80.71% | 48.58% | 0.433% |
-| Actions Compose | 514.23 | 583.54 | 88.12% | 83.30% | 50.56% | 0.000% |
+| Actions native | 597.07 | 518.13 | 115.24% | 80.53% | 47.02% | 0.431% |
+| Actions Compose | 517.59 | 570.31 | 90.76% | 84.23% | 50.65% | 0.000% |
 
-The same-load ratio cleared 70% in each recorded comparison, including all three native Ubuntu repetitions. The old cross-load ratio still ranges from 48.58% to 71.61%; that number compares different UDP/CPU workloads and is not a valid relative-overhead comparison. Actions run [41784760530](https://github.com/VortexWang/Vortex/actions/runs/41784760530) succeeded on the same SHA and uploaded both native and Compose evidence. Local Docker evidence is under `artifacts/phase4/qualification/docker` and `artifacts/phase4/comparison/docker`; Ubuntu native evidence is under `/root/Vortex/artifacts/phase4/native-349b70d` on the authorized host.
+The same-load ratio cleared 70% in each recorded comparison, including all three native Ubuntu repetitions. The old cross-load ratio ranged from 47.02% to 72.78%; that number compares different UDP/CPU workloads and is not a valid relative-overhead comparison. Actions run [41788441381](https://github.com/VortexWang/Vortex/actions/runs/41788441381) succeeded on `3b9a04c` and uploaded both native and Compose evidence. Local Docker evidence is under `artifacts/phase4/qualification/docker` and `artifacts/phase4/comparison/docker`; Ubuntu native evidence is under `/root/Vortex/artifacts/phase4/native-349b70d` on the authorized host.
 
 `GOMAXPROCS=1` is part of the current Phase 4 comparison fixture and is recorded in the semantic manifest; it is not a product default. These are five-second, four-stream diagnostics, not the long-duration dedicated-host qualification. UDP loss exceeded 0.1% in two of the three Ubuntu runs and in Actions native, so NFR-005 remains open. NFR-003, NFR-006, NFR-007 and D-04 also remain unqualified pending formal duration/host criteria, broader fault/latency coverage, and tuning review.
 
