@@ -234,10 +234,7 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 		dgrams = scheduler.New(1 << 20)
 	}
 	aggregateGrant := config.AggregateWindow / 2
-	if aggregateGrant > config.StreamWindow {
-		aggregateGrant = config.StreamWindow / 2
-	}
-	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: config.StreamWindow / 2, aggregateGrant: aggregateGrant}
+	m := &MuxLink{conn: conn, dispatch: NewDispatcherWithClock(config.LocalClient, config.MaxPendingOpenBytes, config.Now), windows: NewWindowManager(config.AggregateWindow, config.MaxWindow), config: config, streams: make(map[uint32]*MuxStream), incoming: make(chan *MuxStream, 64), done: make(chan struct{}), limiter: limiter, observer: config.Observer, dgrams: dgrams, controlWrites: make(chan frameWrite, 64), dataWrites: make(chan frameWrite, 64), writeWake: make(chan struct{}, 1), writerStopped: make(chan struct{}), pendingStream: make(map[uint32]uint64), streamGrant: uint32(uint64(config.StreamWindow) * 3 / 4), aggregateGrant: aggregateGrant}
 	if m.streamGrant == 0 {
 		m.streamGrant = 1
 	}
@@ -456,6 +453,12 @@ func (m *MuxLink) readLoop() {
 			return
 		}
 		if !allowed {
+			// Losing WINDOW loses credit permanently. A throttled credit
+			// update must fail the transport, never leave a live stalled link.
+			if frame.Type == FrameWindow {
+				m.Close(fmt.Errorf("%w: WINDOW rate exceeded", ErrRateLimited))
+				return
+			}
 			if overLimit {
 				if m.recordViolation(ErrorClassRateLimited) {
 					return

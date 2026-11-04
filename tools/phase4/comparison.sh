@@ -101,6 +101,7 @@ for name in source relay-1 relay-2 relay-3 destination; do
   fi
 done
 QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" mixed_workload.py --tcp-only --duration "${MIXED_DURATION_SECONDS:-5}" --tcp-streams "${MIXED_TCP_STREAMS:-4}" --output "$out/tls-throughput.json"
+QUALIFICATION_DIR="$out" "$root/tools/phase4/driver.sh" mixed_workload.py --duration "${MIXED_DURATION_SECONDS:-5}" --tcp-streams "${MIXED_TCP_STREAMS:-4}" --udp-mbps "${MIXED_UDP_MBPS:-100}" --output "$out/tls-mixed-throughput.json"
 cleanup
 python3 "$root/tools/phase4/compare_results.py" "$runtime" "$out"
 trap - EXIT INT TERM

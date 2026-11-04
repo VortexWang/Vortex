@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 	tlsConfig.MaxVersion = tls.VersionTLS13
-	tlsConfig.NextProtos = []string{"vortex-baseline-rtt/1"}
+	tlsConfig.NextProtos = []string{"vortex-baseline-rtt/1", baselineUDPProtocol}
 	if *probe != "" {
 		measureSegment(cfg, tlsConfig, *probe, *output)
 		return
@@ -51,6 +51,15 @@ func main() {
 		log.Fatal(err)
 	}
 	var workers sync.WaitGroup
+	if cfg.Role == config.RoleSource && cfg.UDPServiceListen != "" {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			if err := serveBaselineUDP(ctx, cfg, tlsConfig); err != nil && ctx.Err() == nil {
+				log.Printf("baseline UDP error: %v", err)
+			}
+		}()
+	}
 	go func() { <-ctx.Done(); listener.Close() }()
 	fmt.Printf("minimal-tls ready role=%s listen=%s\n", cfg.Role, address)
 	for {
@@ -63,6 +72,7 @@ func main() {
 			defer workers.Done()
 			defer incoming.Close()
 			left := incoming
+			udpFlow := false
 			if cfg.Role != config.RoleSource {
 				secured := tls.Server(incoming, tlsConfig.Clone())
 				handshakeCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -76,14 +86,23 @@ func main() {
 					io.Copy(secured, secured)
 					return
 				}
+				udpFlow = secured.ConnectionState().NegotiatedProtocol == baselineUDPProtocol
 				left = secured
 			}
 			var right net.Conn
 			var err error
 			if cfg.Role == config.RoleDestination {
-				right, err = (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, "tcp", cfg.Target)
+				network := "tcp"
+				if udpFlow {
+					network = "udp"
+				}
+				right, err = (&net.Dialer{Timeout: 5 * time.Second}).DialContext(ctx, network, cfg.Target)
 			} else {
-				right, err = (&tls.Dialer{NetDialer: &net.Dialer{Timeout: 5 * time.Second}, Config: dataTLSConfig(tlsConfig)}).DialContext(ctx, "tcp", cfg.Peer)
+				outgoingTLS := dataTLSConfig(tlsConfig)
+				if udpFlow {
+					outgoingTLS.NextProtos = []string{baselineUDPProtocol}
+				}
+				right, err = (&tls.Dialer{NetDialer: &net.Dialer{Timeout: 5 * time.Second}, Config: outgoingTLS}).DialContext(ctx, "tcp", cfg.Peer)
 			}
 			if err != nil {
 				return
@@ -94,6 +113,10 @@ func main() {
 			if secured, ok := right.(*tls.Conn); ok {
 				state := secured.ConnectionState()
 				log.Printf("baseline TLS version=%x cipher=%s", state.Version, tls.CipherSuiteName(state.CipherSuite))
+			}
+			if udpFlow && cfg.Role == config.RoleDestination {
+				bridgeBaselineUDP(left, right)
+				return
 			}
 			done := make(chan struct{}, 2)
 			copyHalf := func(dst, src net.Conn) {

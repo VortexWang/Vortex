@@ -16,6 +16,7 @@ for host in (chost, thost):
         raise SystemExit("comparison SHA/semantic path differs from runtime workload")
 baseline = load(out / "tls-throughput.json")
 actual = load(runtime / "mixed-workload.json")
+tls_mixed = load(out / "tls-mixed-throughput.json")
 latency = load(out / "runtime-latency.json")
 tls_latency = load(out / "tls-latency.json")
 faults = load(out / "forged-open.json")
@@ -36,6 +37,9 @@ report = {
     "semantic_manifest_sha256": rhost["semantic_manifest_sha256"],
     "independent_tls": {"tcp_mbps": baseline["throughput_mbps"],
         "implementation": "five-process Go TLS 1.3 io.Copy, same endpoint configs, no VLink/mux/accounting"},
+    "independent_tls_mixed": {"tcp_mbps":tls_mixed["mixed"]["tcp"]["throughput_mbps"],"udp_loss":tls_mixed["mixed"]["udp_loss"],"udp_target_mbps":tls_mixed["udp_target_mbps"]},
+    "runtime_mixed_to_tls_mixed_ratio":actual["mixed"]["tcp"]["throughput_mbps"]/tls_mixed["mixed"]["tcp"]["throughput_mbps"],
+    "legacy_ratio_scope":"runtime TCP under mixed load divided by TLS TCP-only; retained as a stricter cross-workload diagnostic",
     "runtime_mixed_to_tls_ratio": actual["mixed"]["tcp"]["throughput_mbps"] / baseline["throughput_mbps"],
     "runtime_tcp_only_to_tls_ratio": actual["baseline"]["throughput_mbps"] / baseline["throughput_mbps"],
     "latency": {"runtime_median_ms": latency["median_ms"], "tls_median_ms": tls_latency["median_ms"],

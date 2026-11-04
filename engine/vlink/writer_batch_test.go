@@ -7,12 +7,39 @@ import (
 	"io"
 	"net"
 	"testing"
+	"time"
 )
 
 type batchRecordingConn struct {
 	net.Conn
 	bytes.Buffer
 	writes int
+}
+
+func TestLimitedWindowClosesInsteadOfLosingCredit(t *testing.T) {
+	local, peer := net.Pipe()
+	limits := defaultFrameLimits()
+	limits[FrameWindow] = FrameLimit{Rate: 0.001, Burst: 1}
+	link, err := newMuxLink(local, MuxConfig{AggregateWindow: 4, MaxWindow: 16, Limits: LimitConfig{ByType: limits}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer peer.Close()
+	defer link.Close(io.EOF)
+	peer.SetWriteDeadline(time.Now().Add(time.Second))
+	for i := 0; i < 2; i++ {
+		if err := WriteFrame(peer, Frame{Type: FrameWindow, Payload: []byte{0, 0, 0, 1}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	select {
+	case <-link.Closed():
+		if !errors.Is(link.Err(), ErrRateLimited) {
+			t.Fatalf("unexpected close: %v", link.Err())
+		}
+	case <-time.After(time.Second):
+		t.Fatal("rate-limited credit was silently discarded")
+	}
 }
 
 func (c *batchRecordingConn) Read(p []byte) (int, error) { return c.Buffer.Read(p) }
