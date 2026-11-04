@@ -22,6 +22,7 @@ func main() {
 	out := flag.String("output", "", "JSON result")
 	certs := flag.String("cert-dir", "", "optional host certificate directory")
 	bypassPeer := flag.String("bypass-peer", "", "attempt direct unauthorized middle or destination hop")
+	staleOnly := flag.Bool("stale-only", false, "assert the supplied old generation is rejected")
 	bypassHop := flag.Uint("bypass-hop", 0, "forged direct hop index")
 	flag.Parse()
 	cfg, err := config.LoadFile(*path)
@@ -33,6 +34,9 @@ func main() {
 	}
 	if *bypassPeer != "" {
 		cfg.Peer = *bypassPeer
+		// Deliberate adversarial probe: bypass the configured next-hop pin and
+		// test the receiving runtime policy using the real authenticated identity.
+		cfg.NextHopNodeID = ""
 	}
 	s, err := link.New(cfg)
 	check(err)
@@ -58,6 +62,22 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	err = s.Dial(ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+		if *staleOnly {
+			stream, err := mux.Open(ctx, base)
+			if err != nil {
+				return err
+			}
+			frame, err := stream.Receive(ctx)
+			if err != nil {
+				return err
+			}
+			defer frame.Release()
+			if frame.Type != vlink.FrameOpenErr || len(frame.Payload) != 18 || vlink.OpenErrorCode(binary.BigEndian.Uint16(frame.Payload)) != vlink.OpenStaleRevision {
+				return fmt.Errorf("old generation OPEN was not rejected as stale")
+			}
+			results["old-generation"] = map[string]any{"status": "pass", "code": vlink.OpenStaleRevision}
+			return nil
+		}
 		if *bypassPeer != "" {
 			request := base
 			request.HopIndex = uint16(*bypassHop)

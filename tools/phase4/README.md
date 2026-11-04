@@ -139,3 +139,22 @@ and placement are recorded; the two hosts are not asserted hardware-identical.
 A 64 MiB deterministic binary transfer is SHA-256 checked before middle-hop
 failure injection. Startup readiness requires all three outgoing authenticated
 relay links, rather than merely running processes or fixed sleeps.
+
+`BACKEND=docker make phase4-runtime-recovery` exercises actual relay processes
+with an independently identified spare middle relay. Native Linux uses
+`BACKEND=native`. The opt-in tracer `routes` map pins local authorized segments
+at startup; each entry contains `peer`, `peer_node_id`, `next_hop_node_id` and
+`hop_index`. `active_route` selects an entry. Atomically replace the config and
+send SIGHUP to activate a strictly larger `path_generation`. Other fields and
+the candidate map cannot be changed by reload. Activate downstream first,
+source last; this tracer does not implement a distributed activation transaction.
+A failed authenticated prewarm preserves the current route. Old TCP leases
+remain until drain; old UDP sessions terminate and new data requires a new OPEN.
+At most 16 draining generations are retained; additional reload is rejected.
+The fixture checks rejected unlisted/stale reloads and old OPENs, unavailable
+candidate rollback, old TCP half-close, UDP generation restart, both primary
+and active-middle failure, no unauthorized fallback and new TCP/UDP recovery
+after process restart. Logs, startup config hashes, results and checksums are
+saved under `artifacts/phase4/recovery/{backend}`. This is finite in-memory
+tracer evidence, not durable Agent/Hub transaction or ledger recovery. Active
+route selection is locally controlled, not an automatic health controller.

@@ -16,16 +16,18 @@ import (
 type TargetDialer func(context.Context, uint8, vlink.LocalTarget) (net.Conn, error)
 
 type Service struct {
-	LocalNode              vlink.NodeID
-	Policy                 vlink.OpenPolicy
-	Next                   func() *vlink.MuxLink
-	AcquireNext            func(context.Context, vlink.StreamNetwork) (*vlink.MuxLink, func(), error)
-	Dial                   TargetDialer
-	Gate                   engineaccounting.Gate
-	ObserveFirstTargetByte func(time.Duration)
-	mu                     sync.Mutex
-	closing                bool
-	workers                sync.WaitGroup
+	LocalNode                   vlink.NodeID
+	Policy                      vlink.OpenPolicy
+	Next                        func() *vlink.MuxLink
+	AcquireNext                 func(context.Context, vlink.StreamNetwork) (*vlink.MuxLink, func(), error)
+	AcquireRoute                func(context.Context, vlink.OpenRequest) (*vlink.MuxLink, func(), context.Context, error)
+	Dial                        TargetDialer
+	Gate                        engineaccounting.Gate
+	ObserveFirstTargetByte      func(time.Duration)
+	ObserveRouteFirstTargetByte func(uint64, time.Duration)
+	mu                          sync.Mutex
+	closing                     bool
+	workers                     sync.WaitGroup
 }
 
 func (s *Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
@@ -59,15 +61,24 @@ func (s *Service) Shutdown() {
 
 func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *vlink.MuxStream) {
 	openedAt := time.Now()
+	var requestedGeneration uint64
 	err := link.AuthorizeRemote(ctx, stream.ID, func(ctx context.Context, peer vlink.NodeID, request vlink.OpenRequest) (io.Closer, error) {
+		requestedGeneration = request.PathGeneration
 		decision, err := s.Policy.Authorize(ctx, peer, request)
 		if err != nil {
 			return nil, err
 		}
-		if s.Next != nil || s.AcquireNext != nil {
+		if s.Next != nil || s.AcquireNext != nil || s.AcquireRoute != nil {
 			var nextLink *vlink.MuxLink
 			release := func() {}
-			if s.AcquireNext != nil {
+			var udpContext context.Context
+			if s.AcquireRoute != nil {
+				var err error
+				nextLink, release, udpContext, err = s.AcquireRoute(ctx, request)
+				if err != nil {
+					return nil, err
+				}
+			} else if s.AcquireNext != nil {
 				var err error
 				nextLink, release, err = s.AcquireNext(ctx, stream.Network)
 				if err != nil {
@@ -97,7 +108,7 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 				return nil, err
 			}
 			transferred = true
-			return &streamResource{stream: downstream, release: release}, nil
+			return &streamResource{stream: downstream, release: release, udp: udpContext}, nil
 		}
 		if s.Dial == nil {
 			return nil, errors.New("relay: target dialer is not configured")
@@ -119,7 +130,7 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 	switch typed := resource.(type) {
 	case *streamResource:
 		defer func() {
-			if s.AcquireNext != nil {
+			if s.AcquireNext != nil || s.AcquireRoute != nil {
 				resetCtx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
 				_ = typed.stream.Reset(resetCtx, 0)
@@ -127,10 +138,18 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 			typed.releaseLease()
 		}()
 		var observe func()
-		if stream.Network == vlink.StreamTCP && s.ObserveFirstTargetByte != nil {
-			observe = func() { s.ObserveFirstTargetByte(time.Since(openedAt)) }
+		if stream.Network == vlink.StreamTCP {
+			if s.ObserveRouteFirstTargetByte != nil {
+				observe = func() { s.ObserveRouteFirstTargetByte(requestedGeneration, time.Since(openedAt)) }
+			} else if s.ObserveFirstTargetByte != nil {
+				observe = func() { s.ObserveFirstTargetByte(time.Since(openedAt)) }
+			}
 		}
-		if err := BridgeStreamsObserved(ctx, stream, typed.stream, observe); err != nil && ctx.Err() == nil {
+		bridgeCtx := ctx
+		if stream.Network == vlink.StreamUDP && typed.udp != nil {
+			bridgeCtx = typed.udp
+		}
+		if err := BridgeStreamsObserved(bridgeCtx, stream, typed.stream, observe); err != nil && ctx.Err() == nil {
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	case *connResource:
@@ -458,6 +477,7 @@ func reserve(ctx context.Context, session engineaccounting.Session, direction en
 }
 
 type streamResource struct {
+	udp     context.Context
 	stream  *vlink.MuxStream
 	release func()
 	once    sync.Once

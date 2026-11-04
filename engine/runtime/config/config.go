@@ -23,7 +23,17 @@ const (
 	RoleDestination Role = "destination"
 )
 
+// Route is a locally authorized segment. Candidate definitions are pinned at startup.
+type Route struct {
+	Peer          string `json:"peer"`
+	PeerNodeID    string `json:"peer_node_id"`
+	NextHopNodeID string `json:"next_hop_node_id"`
+	HopIndex      uint16 `json:"hop_index"`
+}
+
 type Config struct {
+	Routes           map[string]Route    `json:"routes,omitempty"`
+	ActiveRoute      string              `json:"active_route,omitempty"`
 	Version          uint64              `json:"version"`
 	NodeID           string              `json:"node_id"`
 	Role             Role                `json:"role"`
@@ -66,6 +76,36 @@ func LoadFile(path string) (Config, error) {
 }
 
 func (c Config) Validate() error {
+	if len(c.Routes) > 16 {
+		return errors.New("config: maximum 16 authorized routes")
+	}
+	if len(c.Routes) > 0 {
+		if c.TransportMode == "" {
+			return errors.New("config: routes require transport_mode")
+		}
+		if _, ok := c.Routes[c.ActiveRoute]; !ok {
+			return errors.New("config: active_route is not authorized")
+		}
+		for id, r := range c.Routes {
+			if id == "" {
+				return errors.New("config: empty route id")
+			}
+			if c.Role != RoleDestination {
+				if _, _, err := net.SplitHostPort(r.Peer); err != nil {
+					return errors.New("config: invalid route peer")
+				}
+				if _, err := vlink.ParseNodeID(r.NextHopNodeID); err != nil {
+					return errors.New("config: invalid route next hop")
+				}
+			}
+			if _, err := vlink.ParseNodeID(r.PeerNodeID); err != nil {
+				return errors.New("config: invalid route peer identity")
+			}
+		}
+	} else if c.ActiveRoute != "" {
+		return errors.New("config: active_route requires routes")
+	}
+
 	if c.TransportMode != "" && c.TransportMode != vlink.ModePool && c.TransportMode != vlink.ModeMux && c.TransportMode != vlink.ModeAuto {
 		return errors.New("config: transport_mode must be pool, mux, or auto")
 	}
@@ -182,4 +222,14 @@ func (c Config) LoadIdentity(server bool) (Identity, error) {
 		return Identity{}, errors.New("config: certificate private key is not a crypto signer")
 	}
 	return Identity{NodeID: nodeID, Signer: signer, TLS: tlsConfig}, nil
+}
+
+func (c Config) Effective() Config {
+	if r, ok := c.Routes[c.ActiveRoute]; ok {
+		c.Peer = r.Peer
+		c.PeerNodeID = r.PeerNodeID
+		c.NextHopNodeID = r.NextHopNodeID
+		c.HopIndex = r.HopIndex
+	}
+	return c
 }

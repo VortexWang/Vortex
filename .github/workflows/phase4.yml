@@ -47,6 +47,9 @@ jobs:
       - name: Explicit pool and mux runtime mode regression
         env: {GOMAXPROCS: "1", BACKEND: docker}
         run: make phase4-runtime-modes
+      - name: Authorized route switch and restart recovery
+        env: {GOMAXPROCS: "1", BACKEND: docker}
+        run: make phase4-runtime-recovery
       - name: Record host metadata
         if: always()
         run: |

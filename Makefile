@@ -54,3 +54,7 @@ phase1-release-gate: phase1-check
 	@set -eu; evidence="$$(find artifacts/phase1/runs -type f -name evidence.json -print | sort | tail -n 1)"; \
 	test -n "$$evidence" || { echo 'phase1 evidence manifest is missing'; exit 1; }; \
 	test "$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["requirements"]["NFR-038"])' "$$evidence")" = out-of-scope || { echo 'project restart disposition missing: NFR-038 must remain out-of-scope'; exit 1; }
+
+.PHONY: phase4-runtime-recovery
+phase4-runtime-recovery:
+	python3 tools/phase4/recovery.py --backend $${BACKEND:-native}

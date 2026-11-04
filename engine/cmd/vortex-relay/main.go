@@ -53,6 +53,8 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	initialConfig := cfg
+	cfg = cfg.Effective()
 	supervisor, err := link.New(cfg)
 	if err != nil {
 		fatal(err.Error())
@@ -88,6 +90,52 @@ func main() {
 				return
 			}
 		}
+	}
+	if len(initialConfig.Routes) > 0 {
+		supervisor.Routes, err = link.NewRoutes(ctx, initialConfig, supervisor)
+		if err != nil {
+			fatal(err.Error())
+		}
+		defer supervisor.Routes.Close()
+		if cfg.TransportMode == vlink.ModeAuto {
+			service.ObserveRouteFirstTargetByte = supervisor.Routes.Observe
+		}
+		service.Policy.GenerationAdmission = func(_ context.Context, req vlink.OpenRequest) error {
+			return supervisor.Routes.Admit(req.PathGeneration)
+		}
+		originalLookup := service.Policy.Lookup
+		service.Policy.Lookup = func(ctx context.Context, id [16]byte) (vlink.RuleSnapshot, bool) {
+			active := supervisor.Routes.Snapshot()
+			dynamic, err := relay.StaticPolicy(active)
+			if err != nil {
+				return vlink.RuleSnapshot{}, false
+			}
+			if dynamic.Lookup == nil {
+				return originalLookup(ctx, id)
+			}
+			return dynamic.Lookup(ctx, id)
+		}
+		reload := make(chan os.Signal, 1)
+		signal.Notify(reload, syscall.SIGHUP)
+		defer signal.Stop(reload)
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-reload:
+					next, err := config.LoadFile(*configPath)
+					if err == nil {
+						applyCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+						err = supervisor.Routes.Apply(applyCtx, next)
+						cancel()
+					}
+					if err != nil {
+						slog.Warn("runtime route reload rejected", "err", err)
+					}
+				}
+			}
+		}()
 	}
 	defer func() {
 		if cfg.EvidenceFile == "" {
@@ -128,7 +176,13 @@ func main() {
 		}
 	case config.RoleRelay:
 		if supervisor.Transport != nil {
-			service.AcquireNext = supervisor.Transport.Acquire
+			if supervisor.Routes != nil {
+				service.AcquireRoute = func(ctx context.Context, req vlink.OpenRequest) (*vlink.MuxLink, func(), context.Context, error) {
+					return supervisor.Routes.Acquire(ctx, req.PathGeneration, vlink.StreamNetwork(req.Network))
+				}
+			} else {
+				service.AcquireNext = supervisor.Transport.Acquire
+			}
 			go func() {
 				if warmTransport(ctx, supervisor.Transport) == nil {
 					slog.Info("vlink next-hop ready", "mode", cfg.TransportMode)
@@ -231,8 +285,12 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 		go func(local net.Conn) {
 			defer local.Close()
 			openedAt := time.Now()
-			if err := supervisor.Use(ctx, vlink.StreamTCP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
-				request := openRequest(cfg, local)
+			flowConfig := cfg
+			if supervisor.Routes != nil {
+				flowConfig = supervisor.Routes.Snapshot()
+			}
+			if err := useRoute(ctx, flowConfig, supervisor, vlink.StreamTCP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+				request := openRequest(flowConfig, local)
 				stream, err := mux.Open(ctx, request)
 				if err != nil {
 					return err
@@ -246,6 +304,10 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
 				return relay.BridgeConnWithGateObserver(ctx, stream, local, nil, func() {
 					if supervisor.Transport != nil && cfg.TransportMode == vlink.ModeAuto {
+						if supervisor.Routes != nil {
+							supervisor.Routes.Observe(flowConfig.PathGeneration, time.Since(openedAt))
+							return
+						}
 						if err := supervisor.Transport.ObserveFirstPacket(time.Since(openedAt)); err != nil {
 							slog.Warn("vlink auto-mode sample rejected", "err", err)
 						}
@@ -343,7 +405,11 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 			workers.Add(1)
 			go func(current *flow, peer net.Addr) {
 				defer workers.Done()
-				runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done, &current.queued)
+				flowConfig := cfg
+				if supervisor.Routes != nil {
+					flowConfig = supervisor.Routes.Snapshot()
+				}
+				runUDPSourceFlow(ctx, flowConfig, supervisor, packet, peer, current.out, current.done, &current.queued)
 			}(current, peer)
 		}
 		payload := append([]byte(nil), buffer[:n]...)
@@ -367,7 +433,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 
 func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.Supervisor, packet net.PacketConn, peer net.Addr, outgoing <-chan []byte, done chan<- struct{}, queued *atomic.Int64) {
 	defer close(done)
-	if err := supervisor.Use(ctx, vlink.StreamUDP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+	if err := useRoute(ctx, cfg, supervisor, vlink.StreamUDP, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 		stream, err := mux.Open(ctx, makeOpenRequest(cfg, peer, 2))
 		if err != nil {
 			return err
@@ -378,6 +444,8 @@ func runUDPSourceFlow(ctx context.Context, cfg config.Config, supervisor *link.S
 		if err := stream.WaitOpen(ctx); err != nil {
 			return err
 		}
+		slog.Info("udp source session opened", "generation", cfg.PathGeneration, "flow_key", stream.FlowKey())
+		defer slog.Info("udp source session closed", "generation", cfg.PathGeneration, "flow_key", stream.FlowKey())
 		recvErr := make(chan error, 1)
 		activity := make(chan struct{}, 1)
 		go func() {
@@ -473,4 +541,19 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 func fatal(message string) {
 	_, _ = fmt.Fprintln(os.Stderr, message)
 	os.Exit(2)
+}
+
+func useRoute(ctx context.Context, cfg config.Config, s *link.Supervisor, network vlink.StreamNetwork, handler link.LinkHandler) error {
+	if s.Routes == nil {
+		return s.Use(ctx, network, handler)
+	}
+	mux, release, udp, err := s.Routes.Acquire(ctx, cfg.PathGeneration, network)
+	if err != nil {
+		return err
+	}
+	defer release()
+	if network == vlink.StreamUDP {
+		ctx = udp
+	}
+	return handler(ctx, mux, vlink.NodeID{})
 }

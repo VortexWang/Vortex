@@ -17,18 +17,20 @@ import (
 )
 
 type Supervisor struct {
-	NodeID     vlink.NodeID
-	Signer     crypto.Signer
-	TLS        *tls.Config
-	ListenAddr string
-	PeerAddr   string
-	BootID     vlink.BootID
-	Generation uint64
-	Local      bool
-	mu         sync.Mutex
-	links      map[*vlink.MuxLink]struct{}
-	closed     bool
-	Transport  *Transport
+	NodeID       vlink.NodeID
+	Signer       crypto.Signer
+	TLS          *tls.Config
+	ListenAddr   string
+	PeerAddr     string
+	ExpectedPeer vlink.NodeID
+	BootID       vlink.BootID
+	Generation   uint64
+	Local        bool
+	mu           sync.Mutex
+	links        map[*vlink.MuxLink]struct{}
+	closed       bool
+	Transport    *Transport
+	Routes       *Routes
 }
 
 type LinkHandler func(context.Context, *vlink.MuxLink, vlink.NodeID) error
@@ -38,11 +40,12 @@ func New(cfg config.Config) (*Supervisor, error) {
 	if err != nil {
 		return nil, err
 	}
+	expected, _ := vlink.ParseNodeID(cfg.NextHopNodeID)
 	var boot vlink.BootID
 	if _, err := rand.Read(boot[:]); err != nil {
 		return nil, fmt.Errorf("link: generate boot id: %w", err)
 	}
-	return &Supervisor{NodeID: identity.NodeID, Signer: identity.Signer, TLS: identity.TLS, ListenAddr: cfg.Listen, PeerAddr: cfg.Peer, BootID: boot, Generation: cfg.PathGeneration, Local: cfg.Role == config.RoleSource, links: make(map[*vlink.MuxLink]struct{})}, nil
+	return &Supervisor{NodeID: identity.NodeID, Signer: identity.Signer, TLS: identity.TLS, ListenAddr: cfg.Listen, PeerAddr: cfg.Peer, ExpectedPeer: expected, BootID: boot, Generation: cfg.PathGeneration, Local: cfg.Role == config.RoleSource, links: make(map[*vlink.MuxLink]struct{})}, nil
 }
 
 func (s *Supervisor) hello(client bool) vlink.HelloConfig {
@@ -123,6 +126,10 @@ func (s *Supervisor) handshake(ctx context.Context, conn *tls.Conn, client bool)
 	link, peer, err := vlink.NewAuthenticatedMuxLink(ctx, conn, s.hello(client), vlink.MuxConfig{LocalClient: client, StreamWindow: 2 * 1024 * 1024, AggregateWindow: 8 * 1024 * 1024, MaxWindow: 16 * 1024 * 1024, UDPWindowReserve: 2 * 1024 * 1024, StreamQueueFrames: 256, UDPQueueFrames: 2048, UDPQueueBytes: 2 << 20})
 	if err != nil {
 		return nil, vlink.NodeID{}, err
+	}
+	if client && s.ExpectedPeer != (vlink.NodeID{}) && peer != s.ExpectedPeer {
+		link.Close(vlink.ErrProtocol)
+		return nil, vlink.NodeID{}, errors.New("link: unexpected authenticated next-hop identity")
 	}
 	state := conn.ConnectionState()
 	slog.Info("vlink TLS negotiated", "version", state.Version, "cipher", tls.CipherSuiteName(state.CipherSuite))
