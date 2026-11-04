@@ -2,6 +2,16 @@
 
 状态：评审已完成；**候选保留，未批准锁定**。代码审查基线 `6bfe97624cf807824d8df91fa7519b5a108e2d04`，与 `d0c1cb2` 相比仅阶段文档改变。本文是当前项目评审，不将 V1.11 升格为冻结验收依据，不增加新的历史材料门禁。
 
+## 04-11 gate update — 2026-11-05
+
+`tools/phase4/d04_scan.py` now emits the full 27-case one-factor matrix
+(64/256/1024 KiB x 10/30/60 s x 20/30/50%) with an 8 MiB floor. Generation
+does not lock any value. `tools/phase4/qualification_gate.py` rejects missing
+runtime authority, isolated native resources, dedicated link proof, less than
+60 s warmup or fewer than three trials. No eligible host and no runtime-
+authority D-04 workload were available in this run, so the candidates remain
+unlocked and the formal gate remains not-qualified.
+
 ## 结论
 
 D-04 是 ENG-037/ENG-050 的授权和预扣策略，不是 VLink 的流控窗口。现有真实三中继压测证明了 tracer 的有界队列、写入计量及有限故障恢复；没有比较过不同授权块/水位，也没有真实续申链路，因此不能从这些结果推导“D-04 最优”或完成冻结。建议保留下面的候选值作为下一轮实验的中心点，不修改产品默认值、不声称用户已批准。

@@ -3,12 +3,12 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 Plan 04-11; 04-10 early TCP DATA and finite attack slice verified
+current_plan: Phase 4 complete; formal qualification follow-up remains open
 status: executing
 stopped_at: Plan 04-07 verified on clean a7a7432; Phase 4 remains executing with formal NFR/D-04 gaps
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-05
-last_activity_desc: Verified 04-10 early TCP DATA and finite attack matrix; 04-11 D-04 scan and formal qualification gate is next
+last_activity_desc: Verified 04-11 D-04 matrix and fail-closed qualification gate; formal NFRs remain unqualified
 state_head: d068de0
 progress:
   total_phases: 8
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 Plan 04-11; 04-10 early TCP DATA and finite attack slice verified
+Current Plan: Phase 4 complete; formal qualification follow-up remains open
 Total Plans in Phase: 7
 Status: In progress
-Last activity: 2026-11-05 — Plan 04-10 early TCP DATA and finite attack slice verified; Plan 04-11 is next; NFRs remain unqualified
+Last activity: 2026-11-05 — Plan 04-11 D-04 matrix and fail-closed qualification gate verified; formal NFRs remain unqualified
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Execute Phase 4 gap-closure plan 04-11 next. Keep NFR-003/005/006/007/039/040/044 and D-04 open until complete criteria are met; durable production authorization/accounting remains a later Agent/Hub integration concern.
+- Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern.
 
 ### Blockers/Concerns
 
@@ -92,7 +92,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-10 early TCP DATA and finite attack slice verified; Phase 4 remains executing and formal NFRs/D-04 are unqualified.
+Stopped at: Plan 04-11 D-04 matrix and fail-closed qualification gate verified; Phase 4 implementation plans are complete, formal NFRs/D-04 remain unqualified.
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-11-PLAN.md
 
 ### Latest qualification review

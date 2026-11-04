@@ -62,6 +62,19 @@ phase4-runtime-recovery:
 phase4-runtime-snapshots:
 	python3 tools/phase4/snapshots.py
 
+.PHONY: phase4-d04-scan phase4-qualification-gate
+phase4-d04-scan:
+	python3 tools/phase4/d04_scan.py --output $${D04_OUTPUT:-artifacts/phase4/d04-matrix.json}
+
+phase4-qualification-gate:
+	python3 tools/phase4/qualification_gate.py \
+		--runtime "$${RUNTIME_REPORT:?RUNTIME_REPORT is required}" \
+		--tls "$${TLS_REPORT:?TLS_REPORT is required}" \
+		--host "$${HOST_REPORT:?HOST_REPORT is required}" \
+		--trials "$${QUALIFICATION_TRIALS:-0}" \
+		--warmup-seconds "$${QUALIFICATION_WARMUP_SECONDS:-0}" \
+		--output "$${GATE_OUTPUT:-artifacts/phase4/qualification-gate.json}"
+
 .PHONY: phase4-runtime-credit
 phase4-runtime-credit:
 	python3 tools/phase4/credit.py --backend $${BACKEND:-native}

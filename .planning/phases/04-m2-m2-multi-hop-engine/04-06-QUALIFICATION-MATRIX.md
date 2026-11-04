@@ -1,5 +1,9 @@
 # Phase 4 剩余资格化核对（2026-11-05）
 
+04-11 added a reproducible 27-case D-04 matrix and fail-closed qualification
+gate. It records candidate coverage without promoting any parameter or
+combining Docker, Actions and native results across SHAs.
+
 审查基线 `6bfe976`；状态 **gaps_found / executing**。矩阵区分有限已验证行为、实现缺口及环境/测量缺口；不将参考规格变成新冻结基线。以下沿用路线图与当前 Plan 04-06 的目标。未重跑的历史证据保留原始 SHA，不视作本提交的新实测。
 
 | 条目 | 已有证据 | 尚缺的实现或行为覆盖 | 尚缺的测量 / 环境 | 结论 |
