@@ -5,11 +5,11 @@ current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 current_plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 status: executing
-stopped_at: Plan 04-06 clean baa0a02 native 16-stream/60-second TLS comparison reached 82.64%; next pool/mux latency and expanded fault/unknown-outcome coverage
-last_updated: "2026-11-04T03:47:30.284716+00:00"
+stopped_at: Plan 04-06 clean 03cc7f3 explicit pool/mux passed Docker, native Ubuntu and Actions; broader recovery and qualification remain
+last_updated: "2026-11-04T11:50:08.493411+00:00"
 last_activity: 2026-11-04
-last_activity_desc: Clean baa0a02 native scale TLS comparison reached 82.64 percent at approximately 100 Mbps UDP; finite integrity/OPEN/bypass/middle-hop fault probes and checksums passed; pool/mux latency and qualification remain open
-state_head: baa0a02
+last_activity_desc: Clean 03cc7f3 explicit runtime pool/mux passed Docker and native mode, latency, accounting and finite fault checks; runtime unknown short-write tests and Actions passed
+state_head: 03cc7f3
 progress:
   total_phases: 8
   completed_phases: 3
@@ -33,7 +33,7 @@ Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
 Current Plan: Phase 4 Plan 04-06 runtime UDP and mixed-load qualification
 Total Plans in Phase: 6
 Status: In progress
-Last activity: 2026-11-04 — clean baa0a02 native 16-stream/60-second independent TLS comparison reached 82.64%; finite fault probes passed
+Last activity: 2026-11-04 — clean 03cc7f3 explicit runtime pool/mux validated on Docker, native Ubuntu and Actions
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Plan 04-06 with separate pool/mux latency and expanded fault/unknown-outcome coverage, then dedicated-host qualification and D-04/NFR review; see 04-06-NATIVE-TLS-EVIDENCE.md.
+- Continue Plan 04-06 with automatic runtime mode selection, broader fault/recovery coverage, eligible-host qualification and D-04/NFR review; see 04-06-MODES-EVIDENCE.md.
 
 ### Blockers/Concerns
 
@@ -91,6 +91,6 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-04T03:47:30.284716+00:00
-Stopped at: Plan 04-06 executing; baa0a02 clean native 16-stream/60-second independent TLS ratio 82.64%; next pool/mux latency and expanded fault/unknown-outcome coverage
+Last session: 2026-11-04T11:49:45.547427+00:00
+Stopped at: Plan 04-06 executing; clean 03cc7f3 explicit pool/mux passed Docker, native Ubuntu and Actions; qualification remains open
 Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-06-PLAN.md

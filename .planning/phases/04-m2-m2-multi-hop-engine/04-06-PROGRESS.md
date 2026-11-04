@@ -108,3 +108,18 @@ Repair commit `baa0a02864e1d9bb8a2146ac9a7bd8d6a6a2650b` passed the full Engine 
 | GitHub Actions Compose | 151,285 / 151,285 | 24.206 | 635.87 | 1,449,397 | 12,732,800,164 |
 
 Both had zero classified drops, exact target/accounting reconciliation and clean relay exits. Local evidence is preserved in `artifacts/phase4/qualification/docker-baa0a02-16x60`; [Actions run 41813036017](https://github.com/VortexWang/Vortex/actions/runs/41813036017) succeeded with native and Compose checks, independent TLS/latency/fault probes, and the new scale regression. Actions requested 100 Mbps but generated only 24.21 Mbps; its zero loss proves correctness only at the measured offered load, not the 100 Mbps NFR. The local TCP retention was 84.71% versus its TCP-only contention baseline; Actions retention was 61.33%. Neither is the independent TLS relative-overhead ratio. Native host/rate eligibility, further latency/fault coverage and D-04 review remain open. Debug details: `.planning/debug/resolved/udp-accounting-drift.md`.
+
+
+## Explicit runtime mode and unknown-outcome follow-up
+
+Clean `03cc7f3` now connects the tracer source and every relay to bounded,
+authenticated TCP pool/mux leases; UDP has a separate shared pool. Same-SHA
+Docker and native Ubuntu mode matrices passed, including actual link reuse,
+four exclusive TCP links under pool load versus one shared link under mux,
+accounting reconciliation and finite integrity/OPEN/bypass/middle-hop probes.
+Native first-byte medians are 1.6922 ms pool and 1.2833 ms mux; same-load
+TLS ratios are 80.63% and 73.54%. Four runtime short-write cases preserve
+unknown upper bounds after stream/session shutdown; full Engine race passed
+locally and natively. Actions 41822272112 succeeded, including scale and mode regression. See
+[04-06-MODES-EVIDENCE.md](04-06-MODES-EVIDENCE.md) for scope and remaining gates.
+No formal NFR or Phase 4 completion is claimed.
