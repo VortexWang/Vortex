@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 verification follow-up; G-04-01 closed, remaining qualification gaps open
+current_plan: Phase 4 gap-closure plans 04-08..11 queued; G-04-01 closed
 status: executing
 stopped_at: Plan 04-07 verified on clean a7a7432; Phase 4 remains executing with formal NFR/D-04 gaps
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-05
-last_activity_desc: Closed G-04-01 after same-SHA local Docker and Actions verification; remaining Phase 4 qualification gaps stay open
+last_activity_desc: Planned four Phase 4 gap-closure waves for policy/snapshot, share CAS, attack/latency, and D-04 qualification gaps
 state_head: a7a7432
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 25
+  total_plans: 28
   completed_plans: 24
   percent: 38
 ---
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 verification follow-up; G-04-01 closed, remaining qualification gaps open
+Current Plan: Phase 4 gap-closure plans 04-08..11 queued; G-04-01 closed
 Total Plans in Phase: 7
 Status: In progress
-Last activity: 2026-11-05 — Plan 04-07 verified on clean a7a7432; Actions 41887199379 passed; G-04-01 closed; NFRs remain unqualified
+Last activity: 2026-11-05 — Planned gap-closure waves 04-08..11 after Plan 04-07 verification; G-04-01 closed; NFRs remain unqualified
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Continue Phase 4 gap closure for NFR-003/005/006/007/039/040/044 and D-04; keep each open until its complete criteria are met. G-04-01 is closed for the default runtime boundary, while durable production authorization/accounting remains a later Agent/Hub integration concern.
+- Execute Phase 4 gap-closure plans 04-08 through 04-11 in order. Keep NFR-003/005/006/007/039/040/044 and D-04 open until complete criteria are met; durable production authorization/accounting remains a later Agent/Hub integration concern.
 
 ### Blockers/Concerns
 
@@ -92,8 +92,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-07 evidence and Phase 4 verification update are complete. Phase 4 remains executing; formal NFRs and D-04 are unqualified.
-Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-VERIFICATION.md
+Stopped at: Gap-closure plans 04-08..11 created from Phase 4 verification; Phase 4 remains executing and formal NFRs/D-04 are unqualified.
+Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-08-PLAN.md
 
 ### Latest qualification review
 

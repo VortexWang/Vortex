@@ -105,3 +105,49 @@ Verification remains `gaps_found`: NFR-003/005/006/007/039/040/044 and D-04
 are not qualified. Qualification-only in-process evidence is not durable
 production authority. Phase 4 remains executing; this update does not authorize
 Phase 5 advancement.
+
+## Remaining Gap-Closure Register
+
+These gaps are intentionally separate from the resolved default-boundary gap
+above and map directly to the queued plans:
+
+- gap_id: G-04-039
+  truth: "Policy-time clock bounds, pre-issue, lease coverage, hard deadline and bounded issuer wait are enforced at the runtime source Gate."
+  status: failed
+  severity: major
+  planned_by: "04-08-PLAN.md"
+- gap_id: G-04-044
+  truth: "Runtime accounting preserves immutable snapshot, path coefficient, grant, write and unknown upper-bound conservation per source key."
+  status: failed
+  severity: blocker
+  planned_by: "04-08-PLAN.md"
+- gap_id: G-04-040
+  truth: "Runtime share admission is fenced by node/boot/revision and drains old leases without duplicate rights or premature release."
+  status: failed
+  severity: major
+  planned_by: "04-09-PLAN.md"
+- gap_id: G-04-006
+  truth: "The finite integrity and bypass matrix covers the current authorized configuration and records included/excluded combinations."
+  status: failed
+  severity: major
+  planned_by: "04-10-PLAN.md"
+- gap_id: G-04-007
+  truth: "Authorized TCP first-byte behavior is bounded and measured without unauthorized target writes or an unbounded OPEN wait."
+  status: failed
+  severity: major
+  planned_by: "04-10-PLAN.md"
+- gap_id: G-04-003
+  truth: "Three-relay throughput qualification runs with complete authorization, resource isolation, warmup and repeated trial evidence."
+  status: failed
+  severity: major
+  planned_by: "04-11-PLAN.md"
+- gap_id: G-04-005
+  truth: "TCP/UDP fairness qualification uses actual offered load and complete classified loss/accounting evidence."
+  status: failed
+  severity: major
+  planned_by: "04-11-PLAN.md"
+- gap_id: G-D04
+  truth: "D-04 block, target and waterline candidates are experimentally compared and explicitly reviewed before lock."
+  status: failed
+  severity: major
+  planned_by: "04-11-PLAN.md"
