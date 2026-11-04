@@ -74,6 +74,25 @@ func main() {
 		fatal(err.Error())
 	}
 	var sourceGate coreaccounting.Gate
+	if cfg.SourceCreditBook != nil {
+		book, err := runtimeaccounting.NewCreditBook(*cfg.SourceCreditBook)
+		if err != nil {
+			fatal(err.Error())
+		}
+		sourceGate = book
+		stopReload := watchCreditBook(ctx, *configPath, initialConfig, book)
+		defer func() {
+			stopReload()
+			data, err := json.MarshalIndent(book.State(), "", "  ")
+			if err == nil {
+				err = os.WriteFile(cfg.EvidenceFile+".credit-book.json", append(data, '\n'), 0600)
+			}
+			if err != nil {
+				fatal(fmt.Sprintf("write snapshot evidence: %v", err))
+			}
+		}()
+	}
+
 	if cfg.SourceCredit != nil {
 		credit, creditErr := runtimeaccounting.NewCreditGate(*cfg.SourceCredit)
 		if creditErr != nil {

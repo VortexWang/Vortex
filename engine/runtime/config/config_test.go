@@ -69,3 +69,54 @@ func TestSourceCreditRejectsUngatedCombinations(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceCreditBookPinsExecutionAndBillingBindings(t *testing.T) {
+	var c Config
+	if err := json.Unmarshal([]byte(validJSON()), &c); err != nil {
+		t.Fatal(err)
+	}
+	c.Role, c.ExecutionPoint = RoleSource, true
+	c.ServiceListen, c.EvidenceFile, c.TransportMode = "127.0.0.1:1234", "evidence.jsonl", "mux"
+	version := func(id string, coefficient uint64) runtimeaccounting.CreditVersion {
+		return runtimeaccounting.CreditVersion{
+			Binding: runtimeaccounting.Binding{RuleID: "rule-1", ExecutionNode: c.NodeID, PathGeneration: 1, PolicyRevision: 1, CoefficientMilli: coefficient},
+			Credit:  runtimeaccounting.CreditConfig{SnapshotID: id, Budget: 128 << 10, InitialBlock: 64 << 10, MaxBlock: 64 << 10, GrantTarget: 64 << 10, RenewPercent: 30},
+		}
+	}
+	c.SourceCreditBook = &runtimeaccounting.BookConfig{FundingBytes: 512 << 10, Active: "old", SelectionRevision: 1, Snapshots: map[string]runtimeaccounting.CreditVersion{"old": version("old", 1000), "new": version("new", 3000)}}
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	for _, mutate := range []func(*Config){
+		func(v *Config) { v.SourceCredit = &runtimeaccounting.CreditConfig{} },
+		func(v *Config) { v.Routes = map[string]Route{"r": {}} },
+		func(v *Config) {
+			x := v.SourceCreditBook.Snapshots["new"]
+			x.Binding.RuleID = "other"
+			v.SourceCreditBook.Snapshots["new"] = x
+		},
+		func(v *Config) {
+			x := v.SourceCreditBook.Snapshots["new"]
+			x.Binding.ExecutionNode = "00000000-0000-0000-0000-000000000002"
+			v.SourceCreditBook.Snapshots["new"] = x
+		},
+		func(v *Config) {
+			x := v.SourceCreditBook.Snapshots["new"]
+			x.Binding.PathGeneration++
+			v.SourceCreditBook.Snapshots["new"] = x
+		},
+	} {
+		bad := c
+		book := *c.SourceCreditBook
+		versions := make(map[string]runtimeaccounting.CreditVersion, len(book.Snapshots))
+		for id, version := range book.Snapshots {
+			versions[id] = version
+		}
+		book.Snapshots = versions
+		bad.SourceCreditBook = &book
+		mutate(&bad)
+		if err := bad.Validate(); err == nil {
+			t.Fatalf("accepted mutated book config: %+v", bad.SourceCreditBook)
+		}
+	}
+}

@@ -55,9 +55,12 @@ phase1-release-gate: phase1-check
 	test -n "$$evidence" || { echo 'phase1 evidence manifest is missing'; exit 1; }; \
 	test "$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["requirements"]["NFR-038"])' "$$evidence")" = out-of-scope || { echo 'project restart disposition missing: NFR-038 must remain out-of-scope'; exit 1; }
 
-.PHONY: phase4-runtime-recovery
+.PHONY: phase4-runtime-recovery phase4-runtime-snapshots
 phase4-runtime-recovery:
 	python3 tools/phase4/recovery.py --backend $${BACKEND:-native}
+
+phase4-runtime-snapshots:
+	python3 tools/phase4/snapshots.py
 
 .PHONY: phase4-runtime-credit
 phase4-runtime-credit:

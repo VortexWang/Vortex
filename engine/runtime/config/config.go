@@ -33,6 +33,7 @@ type Route struct {
 }
 
 type Config struct {
+	SourceCreditBook *runtimeaccounting.BookConfig   `json:"source_credit_book,omitempty"`
 	SourceCredit     *runtimeaccounting.CreditConfig `json:"source_credit,omitempty"`
 	Routes           map[string]Route                `json:"routes,omitempty"`
 	ActiveRoute      string                          `json:"active_route,omitempty"`
@@ -78,6 +79,20 @@ func LoadFile(path string) (Config, error) {
 }
 
 func (c Config) Validate() error {
+	if c.SourceCreditBook != nil {
+		if err := c.SourceCreditBook.Validate(); err != nil {
+			return err
+		}
+		if c.SourceCredit != nil || c.Role != RoleSource || !c.ExecutionPoint || len(c.Routes) > 0 || c.EvidenceFile == "" || c.TransportMode == "" {
+			return errors.New("config: credit book requires exclusive static source authority")
+		}
+		for _, v := range c.SourceCreditBook.Snapshots {
+			if v.Binding.RuleID != c.RuleID || v.Binding.ExecutionNode != c.NodeID || v.Binding.PathGeneration != c.PathGeneration || v.Credit.MaxBlock < 64*1024 {
+				return errors.New("config: credit snapshot differs from pinned execution path")
+			}
+		}
+	}
+
 	if c.SourceCredit != nil {
 		if err := c.SourceCredit.Validate(); err != nil {
 			return err
