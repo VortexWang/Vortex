@@ -352,7 +352,17 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 	if network == 2 {
 		protocol = "udp"
 	}
-	return net.Dial(protocol, net.JoinHostPort(strings.Trim(target.Host, "[]"), port))
+	conn, err := net.Dial(protocol, net.JoinHostPort(strings.Trim(target.Host, "[]"), port))
+	if err != nil {
+		return nil, err
+	}
+	if udp, ok := conn.(*net.UDPConn); ok {
+		if err := udp.SetReadBuffer(4 * 1024 * 1024); err != nil {
+			_ = conn.Close()
+			return nil, err
+		}
+	}
+	return conn, nil
 }
 
 func fatal(message string) {

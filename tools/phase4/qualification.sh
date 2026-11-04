@@ -44,10 +44,20 @@ with open(start_file, encoding="utf-8") as source:
 with open(final_file, encoding="utf-8") as source:
     final = json.load(source)
 target = {key: final[key] - start[key] for key in final}
+container_kernel_drops = {}
+for name in ("source", "destination", "target"):
+    first = Path(out_dir, "kernel-" + name + "-start.json")
+    last = Path(out_dir, "kernel-" + name + "-final.json")
+    if first.exists() and last.exists():
+        before, after = json.loads(first.read_text()), json.loads(last.read_text())
+        delta = after["RcvbufErrors"] - before["RcvbufErrors"]
+        if delta < 0:
+            raise SystemExit("container UDP counter reset during workload")
+        container_kernel_drops[name] = delta
 smoke_tcp = len(b"vortex-three-relay-smoke")
 smoke_udp = len(b"vortex-three-relay-udp-smoke")
-expected_left = target["tcp_bytes_received"] + target["udp_bytes_received"]
-expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned["right_to_left"]
+expected_left = target["tcp_bytes_received"] + target["udp_bytes_received"] + 1200 * container_kernel_drops.get("target", 0)
+expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned["right_to_left"] - 1200 * container_kernel_drops.get("destination", 0)
 expected = {"left_to_right": expected_left, "right_to_left": expected_right}
 if count < 4 or dict(totals) != expected:
     raise SystemExit(f"accounting mismatch: events={count} totals={dict(totals)} expected={expected}")
@@ -73,6 +83,8 @@ for name in ("source", "relay-1", "relay-2", "relay-3", "destination"):
                 drop_counts["oversized"] += int(source.group(2))
                 drop_counts["source_capacity"] += int(source.group(3))
 drop_counts["kernel_rcvbuf_host_scope"] += workload.get("kernel_udp_host_delta", {}).get("RcvbufErrors", 0)
+for name, lost in container_kernel_drops.items():
+    drop_counts["kernel_rcvbuf_container_" + name] += lost
 with open(os.path.join(out_dir, "drop-summary.json"), "w", encoding="utf-8") as output:
     json.dump(dict(sorted(drop_counts.items())), output, indent=2, sort_keys=True)
     output.write("\n")
@@ -86,7 +98,7 @@ report = {
     "schema": 1, "runtime_correctness": "pass", "performance_qualification": "not-qualified",
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
     "returned_reservations": dict(returned),
-    "kernel_counter_scope": "host-wide /proc/net/snmp delta; diagnostic attribution only, not per-flow qualification",
+    "kernel_counter_scope": "host and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
     "end_to_end_received_bytes": (smoke_tcp + smoke_udp + workload["baseline"]["received_bytes"] +
                                   workload["mixed"]["tcp"]["received_bytes"] + workload["mixed"]["udp_bytes_received"]),
     "nfr_003": {"status": "not-qualified", "mixed_tcp_mbps": workload["mixed"]["tcp"]["throughput_mbps"],

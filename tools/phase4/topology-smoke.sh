@@ -34,6 +34,20 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
+capture_container_udp() {
+  if [ "$mode" != docker ]; then return; fi
+  for name in source destination target; do
+    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" exec -T "$name" python3 -c '
+import json
+lines = open("/proc/net/snmp", encoding="utf-8").read().splitlines()
+for i, line in enumerate(lines[:-1]):
+    if line.startswith("Udp:"):
+        print(json.dumps(dict(zip(line.split()[1:], map(int, lines[i+1].split()[1:]))), sort_keys=True))
+        break
+' >"$qual/kernel-$name-$1.json"
+  done
+}
+
 for attempt in $(seq 1 "${TOPOLOGY_READY_TIMEOUT_SECONDS:-900}"); do
   test -f "$qual/topology-ready" && break
   if ! kill -0 "$topology_pid" 2>/dev/null; then
@@ -75,11 +89,13 @@ open(sys.argv[1], "wb").write(data)
 if data != b"vortex-three-relay-smoke":
     raise SystemExit("echo payload mismatch")
 PY
+capture_container_udp start
 python3 "$root/tools/phase4/mixed_workload.py" \
   --duration "${MIXED_DURATION_SECONDS:-5}" \
   --tcp-streams "${MIXED_TCP_STREAMS:-4}" \
   --udp-mbps "${MIXED_UDP_MBPS:-100}" \
   --output "$qual/mixed-workload.json"
+capture_container_udp final
 python3 - "$qual/target-final.json" <<'PY'
 import json, sys, urllib.request
 with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
