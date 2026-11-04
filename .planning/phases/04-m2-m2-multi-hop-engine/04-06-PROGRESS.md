@@ -71,6 +71,14 @@ The same-load ratio cleared 70% in each recorded comparison, including all three
 5. Complete runtime fault/forged OPEN coverage for NFR-006 and per-flow reconciliation/unknown-outcome integration coverage. The in-process accounting adapter is not a durable production ledger.
 6. Review D-04 after the above measurements and host eligibility checks. Do not promote these diagnostics to production accounting or performance acceptance.
 
+2026-11-04 update: the repaired `baa0a02` now has three clean native Ubuntu
+16-stream/60-second repetitions at approximately 100 Mbps actual UDP. Loss was
+0.048004% / 0.010241% / 0.004480%, all below 0.1%, with exact accounting and
+TCP 1,086.41 / 1,169.10 / 1,200.00 Mbps. Native full Engine race and artifact
+checksums passed. See [04-06-NATIVE-SCALE-EVIDENCE.md](04-06-NATIVE-SCALE-EVIDENCE.md).
+Next is the same-size independent TLS comparison; dedicated host/link
+eligibility, expanded latency/fault coverage and D-04 remain open.
+
 ## Ordered Follow-up: UDP Stability and Scale
 
 The first follow-up added a bounded `UDPWindowReserve` of 512 KiB to each aggregate VLink window so TCP admission cannot consume the entire initial aggregate credit. Admission telemetry distinguishes per-stream and aggregate credit rejection; unit tests and `go test -race ./...` pass. This has not yet resolved UDP stability: a 10-second, four-stream OrbStack run on `9c35c78` lost 131 of 104,134 datagrams (0.126%), classified as window drops with no kernel receive-buffer errors.
