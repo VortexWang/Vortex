@@ -81,7 +81,11 @@ if (( INSTALL == 1 )) && [[ "$EUID" -eq 0 && "$os_id" == "ubuntu" ]]; then
     x86_64) go_arch=amd64 ;;
     aarch64) go_arch=arm64 ;;
   esac
-  if [[ -n "$go_arch" ]] && { ! command -v go >/dev/null 2>&1 || "$(go version 2>/dev/null || true)" != *"go1.27.3"*; }; then
+  go_version_check=""
+  if command -v go >/dev/null 2>&1; then
+    go_version_check=$(go version 2>/dev/null || true)
+  fi
+  if [[ -n "$go_arch" ]] && { ! command -v go >/dev/null 2>&1 || "$go_version_check" != *"go1.27.3"*; }; then
     curl -fsSLo /tmp/go1.27.3.linux-${go_arch}.tar.gz "https://go.dev/dl/go1.27.3.linux-${go_arch}.tar.gz"
     rm -rf /usr/local/go
     tar -C /usr/local -xzf /tmp/go1.27.3.linux-${go_arch}.tar.gz
