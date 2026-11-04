@@ -91,13 +91,14 @@
 3. 同节点/boot 的份额修改通过 prepare、关闭旧续租权、CAS 和执行回执切换，速率/连接降额在规定排空条件满足前保留旧占用。
 4. 两阶段配置应用具有幂等 Prepare/Commit/Abort，失败和丢失回执不产生双活代次、重复资源释放或未授权会话。
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
-**Plans**: 5/6 restart and gap-closure plans executed; native runtime topology/accounting smoke and Actions pass, runtime-backed mixed-load qualification remains open.
+**Plans**: 6/7 restart and gap-closure plans executed or planned; finite runtime behavior is covered, default authorization closure and formal qualification remain open.
 - [x] 04-01 — Startable runtime config and accounting adapter
 - [x] 04-02 — Supervised VLink relay and stream bridge
 - [x] 04-03 — Five-process Docker/native topology
 - [x] 04-04 — Mixed TCP/UDP workload and evidence gate
 - [x] 04-05 — Native/Actions qualification and report
 - [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (execution record recovered; formal qualification gaps remain open for Phase 4 verification)
+- [ ] 04-07 — Fail-closed source authorization (gap closure for G-04-01)
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。

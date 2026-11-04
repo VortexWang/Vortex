@@ -3,7 +3,7 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 4
 current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 verification after recovered Plan 04-06 execution
+current_plan: Phase 4 Plan 04-07 fail-closed source authorization
 status: executing
 stopped_at: Recovered Plan 04-06 execution record at 6bfe976; Phase 4 verification is next; Actions remain pending
 last_updated: "2026-11-05T00:00:00+00:00"
@@ -13,7 +13,7 @@ state_head: d7ca856
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 23
+  total_plans: 24
   completed_plans: 23
   percent: 38
 ---
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 verification after recovered Plan 04-06 execution
-Total Plans in Phase: 6
+Current Plan: Phase 4 Plan 04-07 fail-closed source authorization
+Total Plans in Phase: 7
 Status: In progress
 Last activity: 2026-11-05 — Plan 04-06 execution record recovered at 6bfe976; Phase 4 verification is next; Actions 41876404597 remains in_progress and 41879041539 queued; NFRs remain unqualified
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Run Phase 4 verification against the recovered Plan 04-06 summary and qualification matrix, then create an executable gap-closure plan for the remaining runtime wiring and evidence. Keep NFR-003/005/006/007/039/040/044 and D-04 open until their complete criteria are met.
+- Execute 04-07 to close G-04-01's unsafe default authorization boundary. Then re-run Phase 4 verification and plan remaining NFR/runtime qualification gaps independently; keep NFR-003/005/006/007/039/040/044 and D-04 open until their complete criteria are met.
 
 ### Blockers/Concerns
 
@@ -92,8 +92,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-06 execution record recovered; phase verification is next. ShareGate is not wired to relay config; Actions 41876404597 remains in_progress and 41879041539 queued.
-Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-VERIFICATION.md
+Stopped at: 04-07 fail-closed source authorization gap plan is ready for execution. Phase 4 verification remains gaps_found; NFRs are unqualified.
+Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-07-PLAN.md
 
 ### Latest qualification review
 

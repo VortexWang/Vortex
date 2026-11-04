@@ -75,3 +75,23 @@ checksums, recovery-readiness repair and Actions 41849553357.
 授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
 ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
 04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。
+
+## Gaps
+
+- gap_id: G-04-01
+  truth: "A runtime without an explicitly selected qualification-only mode must not forward traffic unless its source authorization Gate is funded and present; runtime policy must not synthesize billing or share authorization as true."
+  status: failed
+  reason: "`vortex-relay` starts with a nil sourceGate when source credit is absent, `BridgeConnWithGateObserver` treats nil as unmetered forwarding, and `StaticPolicy` hardcodes runtime, segment, rate-share, connection-share and billing authorization to true."
+  severity: blocker
+  artifacts:
+    - path: "engine/cmd/vortex-relay/main.go"
+      issue: "sourceGate is optional and source listeners can serve without a funded Gate"
+    - path: "engine/runtime/relay/bridge.go"
+      issue: "nil accounting Gate skips session creation and still forwards payload"
+    - path: "engine/runtime/relay/policy.go"
+      issue: "static tracer snapshot asserts runtime, share and billing authorization"
+  missing:
+    - "Default runtime configuration fails closed when source authorization is absent"
+    - "Qualification-only authorization is explicit, isolated from production defaults, and used only by qualification fixtures"
+    - "Production/default StaticPolicy does not synthesize runtime, billing, segment or share authorization"
+    - "Tests prove unauthorized/default source and OPEN paths transmit no target payload"
