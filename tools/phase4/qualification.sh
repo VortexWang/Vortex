@@ -20,7 +20,8 @@ test "$(cat "$qual/client.out")" = "vortex-three-relay-smoke"
 test "$(cat "$qual/udp-client.out")" = "vortex-three-relay-udp-smoke"
 
 python3 - "$qual/events-destination.jsonl" "$qual/mixed-workload.json" "$qual/target-start.json" "$qual/target-final.json" "$qual" <<'PY'
-import collections, json, os, re, sys
+import collections, hashlib, json, os, re, sys
+from pathlib import Path
 
 events_file, workload_file, start_file, final_file, out_dir = sys.argv[1:]
 totals = collections.Counter()
@@ -71,6 +72,7 @@ for name in ("source", "relay-1", "relay-2", "relay-3", "destination"):
                 drop_counts["source_queue_full"] += int(source.group(1))
                 drop_counts["oversized"] += int(source.group(2))
                 drop_counts["source_capacity"] += int(source.group(3))
+drop_counts["kernel_rcvbuf_host_scope"] += workload.get("kernel_udp_host_delta", {}).get("RcvbufErrors", 0)
 with open(os.path.join(out_dir, "drop-summary.json"), "w", encoding="utf-8") as output:
     json.dump(dict(sorted(drop_counts.items())), output, indent=2, sort_keys=True)
     output.write("\n")
@@ -84,6 +86,7 @@ report = {
     "schema": 1, "runtime_correctness": "pass", "performance_qualification": "not-qualified",
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
     "returned_reservations": dict(returned),
+    "kernel_counter_scope": "host-wide /proc/net/snmp delta; diagnostic attribution only, not per-flow qualification",
     "end_to_end_received_bytes": (smoke_tcp + smoke_udp + workload["baseline"]["received_bytes"] +
                                   workload["mixed"]["tcp"]["received_bytes"] + workload["mixed"]["udp_bytes_received"]),
     "nfr_003": {"status": "not-qualified", "mixed_tcp_mbps": workload["mixed"]["tcp"]["throughput_mbps"],
@@ -98,6 +101,14 @@ report = {
 with open(os.path.join(out_dir, "report.json"), "w", encoding="utf-8") as output:
     json.dump(report, output, indent=2, sort_keys=True)
     output.write("\n")
+paths = sorted(set(Path(out_dir).glob("*.json")) | set(Path(out_dir).glob("events-*.jsonl")) | set(Path(out_dir, "logs").glob("*.log")))
+with open(os.path.join(out_dir, "checksums.sha256"), "w", encoding="utf-8") as output:
+    for path in paths:
+        checksum = hashlib.sha256()
+        with path.open("rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                checksum.update(chunk)
+        output.write(checksum.hexdigest() + "  " + str(path.relative_to(out_dir)) + "\n")
 PY
 
 events=0

@@ -66,8 +66,11 @@ func main() {
 	fmt.Printf("vortex-relay ready node_id=%s role=%s listen=%s\n", cfg.NodeID, cfg.Role, cfg.Listen)
 	switch cfg.Role {
 	case config.RoleSource:
+		var udpDone chan struct{}
 		if cfg.UDPServiceListen != "" {
+			udpDone = make(chan struct{})
 			go func() {
+				defer close(udpDone)
 				if err := serveUDPSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
 					fatal(err.Error())
 				}
@@ -75,6 +78,9 @@ func main() {
 		}
 		if err := serveSource(ctx, cfg, supervisor); err != nil && ctx.Err() == nil {
 			fatal(err.Error())
+		}
+		if udpDone != nil {
+			<-udpDone
 		}
 	case config.RoleRelay:
 		var nextMu sync.Mutex
@@ -188,7 +194,14 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 		return err
 	}
 	defer packet.Close()
+	if udp, ok := packet.(*net.UDPConn); ok {
+		if err := udp.SetReadBuffer(4 * 1024 * 1024); err != nil {
+			return err
+		}
+	}
 	go func() { <-ctx.Done(); _ = packet.Close(); supervisor.Close() }()
+	var workers sync.WaitGroup
+	defer workers.Wait()
 	var queueDrops, oversizedDrops, capacityDrops atomic.Uint64
 	defer func() {
 		slog.Info("udp source drop summary", "queue_drops", queueDrops.Load(), "oversized_drops", oversizedDrops.Load(), "capacity_drops", capacityDrops.Load())
@@ -232,7 +245,11 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 			}
 			current = &flow{out: make(chan []byte, 64), done: make(chan struct{})}
 			flows[key] = current
-			go runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done)
+			workers.Add(1)
+			go func(current *flow, peer net.Addr) {
+				defer workers.Done()
+				runUDPSourceFlow(ctx, cfg, supervisor, packet, peer, current.out, current.done)
+			}(current, peer)
 		}
 		payload := append([]byte(nil), buffer[:n]...)
 		if len(payload) > vlink.MaxPayloadSize {

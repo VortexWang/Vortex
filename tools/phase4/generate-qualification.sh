@@ -6,6 +6,7 @@ mode=${1:-native}
 out=${2:-"$(pwd)/artifacts/phase4/qualification/$mode"}
 mkdir -p "$out/config" "$out/certs"
 rm -f "$out/topology-ready" "$out/qualification.txt" "$out/result.txt" "$out/mixed-workload.json"
+rm -f "$out/report.json" "$out/drop-summary.json" "$out/target-start.json" "$out/target-final.json"
 
 case "$mode" in
   native) host=127.0.0.1; cert_root="$out/certs"; cert_ref="$cert_root"; ;;

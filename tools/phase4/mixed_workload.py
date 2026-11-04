@@ -2,12 +2,14 @@
 """Run a same-route TCP baseline followed by concurrent TCP and paced UDP."""
 import argparse
 import json
+import multiprocessing
 import selectors
 import socket
 import struct
 import threading
 import time
 import urllib.request
+from pathlib import Path
 
 
 parser = argparse.ArgumentParser()
@@ -25,6 +27,17 @@ args = parser.parse_args()
 def target_stats():
     with urllib.request.urlopen(args.metrics, timeout=3) as response:
         return json.load(response)
+
+
+def kernel_udp_stats():
+    path = Path("/proc/net/snmp")
+    if not path.exists():
+        return {}
+    lines = path.read_text().splitlines()
+    for index, line in enumerate(lines[:-1]):
+        if line.startswith("Udp:"):
+            return dict(zip(line.split()[1:], map(int, lines[index + 1].split()[1:])))
+    return {}
 
 
 def tcp_phase(seconds):
@@ -129,6 +142,8 @@ def mixed_phase(seconds):
     received_ids = set()
     lock = threading.Lock()
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4 * 1024 * 1024)
+    totals["udp_socket_receive_buffer_bytes"] = udp.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
     udp.settimeout(0.1)
     end = time.monotonic() + seconds
     packet_size = 1200
@@ -158,14 +173,17 @@ def mixed_phase(seconds):
 
     receiver = threading.Thread(target=receive_udp, daemon=True)
     tcp_result = {}
+    process_context = multiprocessing.get_context("fork")
+    parent_pipe, child_pipe = process_context.Pipe(duplex=False)
 
     def run_tcp():
-        nonlocal tcp_result
-        tcp_result = tcp_phase(seconds)
+        child_pipe.send(tcp_phase(seconds))
+        child_pipe.close()
 
-    tcp_thread = threading.Thread(target=run_tcp)
+    tcp_process = process_context.Process(target=run_tcp)
+    tcp_process.start()
+    child_pipe.close()
     receiver.start()
-    tcp_thread.start()
     next_send = time.monotonic()
     sequence = 0
     while time.monotonic() < end:
@@ -181,11 +199,15 @@ def mixed_phase(seconds):
         if delay > 0:
             time.sleep(delay)
     stop.set()
-    tcp_thread.join(timeout=40)
-    if tcp_thread.is_alive():
-        totals["errors"].append("TCP workload thread did not finish drain")
+    if parent_pipe.poll(40):
+        tcp_result = parent_pipe.recv()
+    else:
+        totals["errors"].append("TCP workload process did not finish drain")
         tcp_result = {"throughput_mbps": 0, "received_bytes": 0, "sent_bytes": 0,
                       "connections": 0, "errors": ["TCP workload did not finish"]}
+        tcp_process.terminate()
+    parent_pipe.close()
+    tcp_process.join(timeout=3)
     receiver.join(timeout=4)
     udp.close()
     totals["tcp"] = tcp_result
@@ -195,12 +217,14 @@ def mixed_phase(seconds):
     return totals
 
 
+kernel_before = kernel_udp_stats()
 before_baseline = target_stats()
 baseline = tcp_phase(args.duration)
 after_baseline = target_stats()
 before_mixed = after_baseline
 mixed = mixed_phase(args.duration)
 after_mixed = target_stats()
+kernel_after = kernel_udp_stats()
 
 def diff(after, before):
     return {key: after[key] - before[key] for key in after}
@@ -217,6 +241,7 @@ report = {
     "target_baseline": diff(after_baseline, before_baseline),
     "target_mixed": diff(after_mixed, before_mixed),
     "target_total": diff(after_mixed, before_baseline),
+    "kernel_udp_host_delta": {key: kernel_after[key] - kernel_before[key] for key in kernel_before},
 }
 with open(args.output, "w", encoding="utf-8") as result:
     json.dump(report, result, indent=2, sort_keys=True)
