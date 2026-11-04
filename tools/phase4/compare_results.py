@@ -17,6 +17,17 @@ for host in (chost, thost):
 baseline = load(out / "tls-throughput.json")
 actual = load(runtime / "mixed-workload.json")
 tls_mixed = load(out / "tls-mixed-throughput.json")
+workload_fields = ("duration_seconds_per_phase", "tcp_streams", "udp_target_mbps")
+for field in workload_fields:
+    if actual[field] != tls_mixed[field]:
+        raise SystemExit(f"runtime/TLS mixed workload mismatch for {field}: {actual[field]} != {tls_mixed[field]}")
+if actual["mixed"]["errors"] or tls_mixed["mixed"]["errors"]:
+    raise SystemExit("runtime/TLS mixed workload reported transport errors")
+if actual["mixed"]["tcp"]["errors"] or tls_mixed["mixed"]["tcp"]["errors"]:
+    raise SystemExit("runtime/TLS mixed TCP workload reported errors")
+same_workload_ratio = actual["mixed"]["tcp"]["throughput_mbps"] / tls_mixed["mixed"]["tcp"]["throughput_mbps"]
+cross_workload_ratio = actual["mixed"]["tcp"]["throughput_mbps"] / baseline["throughput_mbps"]
+tcp_only_ratio = actual["baseline"]["throughput_mbps"] / baseline["throughput_mbps"]
 latency = load(out / "runtime-latency.json")
 tls_latency = load(out / "tls-latency.json")
 faults = load(out / "forged-open.json")
@@ -37,11 +48,15 @@ report = {
     "semantic_manifest_sha256": rhost["semantic_manifest_sha256"],
     "independent_tls": {"tcp_mbps": baseline["throughput_mbps"],
         "implementation": "five-process Go TLS 1.3 io.Copy, same endpoint configs, no VLink/mux/accounting"},
-    "independent_tls_mixed": {"tcp_mbps":tls_mixed["mixed"]["tcp"]["throughput_mbps"],"udp_loss":tls_mixed["mixed"]["udp_loss"],"udp_target_mbps":tls_mixed["udp_target_mbps"]},
-    "runtime_mixed_to_tls_mixed_ratio":actual["mixed"]["tcp"]["throughput_mbps"]/tls_mixed["mixed"]["tcp"]["throughput_mbps"],
+    "independent_tls_mixed": {"tcp_mbps": tls_mixed["mixed"]["tcp"]["throughput_mbps"],
+        "udp_loss": tls_mixed["mixed"]["udp_loss"], "udp_target_mbps": tls_mixed["udp_target_mbps"],
+        "duration_seconds_per_phase": tls_mixed["duration_seconds_per_phase"], "tcp_streams": tls_mixed["tcp_streams"]},
+    "same_workload_ratio": {"runtime_mixed_tcp_to_tls_mixed_tcp": same_workload_ratio,
+        "threshold": 0.70, "threshold_met_in_this_diagnostic": same_workload_ratio >= 0.70,
+        "basis": "same duration, TCP stream count, UDP offered rate and path"},
     "legacy_ratio_scope":"runtime TCP under mixed load divided by TLS TCP-only; retained as a stricter cross-workload diagnostic",
-    "runtime_mixed_to_tls_ratio": actual["mixed"]["tcp"]["throughput_mbps"] / baseline["throughput_mbps"],
-    "runtime_tcp_only_to_tls_ratio": actual["baseline"]["throughput_mbps"] / baseline["throughput_mbps"],
+    "runtime_mixed_to_tls_ratio": cross_workload_ratio,
+    "runtime_tcp_only_to_tls_ratio": tcp_only_ratio,
     "latency": {"runtime_median_ms": latency["median_ms"], "tls_median_ms": tls_latency["median_ms"],
         "segment_median_sum_ms": rtt_sum, "runtime_minus_segment_sum_ms": latency["median_ms"] - rtt_sum,
         "segments": segments, "median_difference_ms": latency["median_ms"] - tls_latency["median_ms"],

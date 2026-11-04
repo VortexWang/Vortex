@@ -73,7 +73,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ### Blockers/Concerns
 
 - Phase 4 restart implementation now starts and qualifies the five-process three-relay TCP topology with tracer accounting evidence on native Ubuntu.
-- Plan 04-06 now has short mixed-runtime and accounting evidence on the same clean SHA across hosts. Ubuntu mixed TCP 555.72 Mbps and UDP loss 0% pass the short diagnostic shape, but 33.48% runtime/TLS ratio is below 70%; finite TLS/latency/fault probes pass while formal NFR and D-04 remain open. No Phase 4 completion is claimed.
+- Plan 04-06 now has a same-load independent TLS comparison on clean SHA `349b70d`. With the Phase 4 fixture's `GOMAXPROCS=1`, same-load runtime/TLS ratios are above 70% on local Docker, all three native Ubuntu repeats, and Actions native/Compose; the legacy mixed-runtime/TLS-TCP-only ratio remains lower because it compares different workloads. Two of three Ubuntu repeats and Actions native exceed the 0.1% UDP loss target. All results remain short diagnostics; formal NFR and D-04 gates are open and no Phase 4 completion is claimed.
 
 ## Deferred Items
 
