@@ -18,6 +18,8 @@ import (
 type AuthorizationClock func() (earliest, latest time.Time, trusted bool)
 
 type AuthorizationGateConfig struct {
+	RuntimeLeaseID  string
+	ShareLeaseID    string
 	AuthorizationID string
 	RuleID          string
 	RuleRevision    uint64
@@ -37,6 +39,19 @@ func (n *Node) NewAuthorizationGate(c AuthorizationGateConfig) (engineaccounting
 	return &authorizationGate{node: n, config: c}, nil
 }
 
+// NewLeasedAuthorizationGate requires runtime and share leases in addition to
+// credit. Admission and every byte reservation validate all three in the same
+// SQLite snapshot; passing a credit grant alone cannot satisfy this boundary.
+func (n *Node) NewLeasedAuthorizationGate(c AuthorizationGateConfig) (engineaccounting.Gate, error) {
+	if c.Clock == nil {
+		c.Clock = n.TrustedTime
+	}
+	if c.RuntimeLeaseID == "" || c.ShareLeaseID == "" {
+		return nil, fmt.Errorf("agent: runtime and share lease identities are required")
+	}
+	return n.NewAuthorizationGate(c)
+}
+
 type authorizationGate struct {
 	node    *Node
 	config  AuthorizationGateConfig
@@ -46,6 +61,7 @@ type authorizationGate struct {
 func (g *authorizationGate) use(earliest, latest time.Time, trusted, existing bool) store.AuthorizationUse {
 	return store.AuthorizationUse{
 		NodeID: g.node.NodeID, BootID: g.node.BootID, AuthorizationID: g.config.AuthorizationID,
+		RuntimeLeaseID: g.config.RuntimeLeaseID, ShareLeaseID: g.config.ShareLeaseID,
 		Kind: "credit_grant", RuleID: g.config.RuleID, RuleRevision: g.config.RuleRevision,
 		PathGeneration: g.config.PathGeneration, BillingSnapshotID: g.config.SnapshotID,
 		Earliest: earliest, Latest: latest, TrustedTime: trusted, ExistingSession: existing,

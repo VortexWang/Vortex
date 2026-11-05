@@ -94,6 +94,8 @@ type AuthorizationRecord struct {
 }
 
 type AuthorizationUpdate struct {
+	BackendHeartbeat       time.Time
+	AutonomyDeadline       time.Time
 	NodeID                 string
 	BootID                 string
 	UpdateID               string
@@ -556,6 +558,11 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+	if !update.BackendHeartbeat.IsZero() || !update.AutonomyDeadline.IsZero() {
+		if err := persistAuthorizationHeartbeat(ctx, tx, update.BackendHeartbeat, update.AutonomyDeadline); err != nil {
+			return err
+		}
 	}
 	for key, incoming := range map[string]uint64{
 		"authorization_signer_epoch":    update.SignerEpoch,

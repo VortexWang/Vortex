@@ -21,10 +21,12 @@ func (NoopEngine) Start(context.Context) error { return nil }
 func (NoopEngine) Stop(context.Context) error  { return nil }
 
 type Node struct {
-	NodeID string
-	BootID string
-	Store  *store.Store
-	Engine Engine
+	bootStarted time.Time
+	clock       *AuthorityClock
+	NodeID      string
+	BootID      string
+	Store       *store.Store
+	Engine      Engine
 }
 
 func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
@@ -34,6 +36,7 @@ func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
 	if e == nil {
 		e = NoopEngine{}
 	}
+	bootStarted := time.Now()
 	var boot [16]byte
 	if _, err := rand.Read(boot[:]); err != nil {
 		return nil, fmt.Errorf("agent: boot id: %w", err)
@@ -43,7 +46,7 @@ func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
 	if err := s.MarkPreviousBootAuthorizationsSettlementOnly(context.Background(), nodeID, bootID); err != nil {
 		return nil, fmt.Errorf("agent: fence previous-boot authorizations before Engine start: %w", err)
 	}
-	node := &Node{NodeID: nodeID, BootID: bootID, Store: s, Engine: e}
+	node := &Node{NodeID: nodeID, BootID: bootID, Store: s, Engine: e, clock: newAuthorityClock(), bootStarted: bootStarted}
 	if err := node.recoverUsageReservations(context.Background()); err != nil {
 		return nil, fmt.Errorf("agent: recover usage reservations before Engine start: %w", err)
 	}

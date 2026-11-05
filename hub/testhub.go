@@ -33,11 +33,12 @@ type Message struct {
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
 type TestServer struct {
 	controlv1.UnimplementedNodeControlServer
-	Store        *store.Store
-	ConfigUpdate *controlv1.RuntimeConfigUpdate
-	AcceptUsage  bool
-	mu           sync.RWMutex
-	revoked      map[string]struct{}
+	Store               *store.Store
+	ConfigUpdate        *controlv1.RuntimeConfigUpdate
+	AuthorizationUpdate func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
+	AcceptUsage         bool
+	mu                  sync.RWMutex
+	revoked             map[string]struct{}
 }
 
 func (s *TestServer) Revoke(serial string) {
@@ -115,7 +116,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	if err := s.Store.RecordReceipt(ctx, receiptID, first.GetSequence()); err != nil {
 		return err
 	}
-	if s.ConfigUpdate == nil && !s.AcceptUsage {
+	if s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
 		return nil
 	}
 	var update *controlv1.RuntimeConfigUpdate
@@ -134,6 +135,23 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return err
 		}
 		controlSequence = 1
+	}
+	if s.AuthorizationUpdate != nil {
+		authorization, err := s.AuthorizationUpdate(first.GetNodeId(), first.GetBootId())
+		if err != nil {
+			return err
+		}
+		messageID, err := testHubMessageID()
+		if err != nil {
+			return err
+		}
+		controlSequence++
+		if err := stream.Send(&controlv1.ControlMessage{MessageId: messageID, Sequence: controlSequence, Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: authorization}}); err != nil {
+			return err
+		}
+		if s.ConfigUpdate == nil && !s.AcceptUsage {
+			return nil
+		}
 	}
 	for {
 		message, err := stream.Recv()

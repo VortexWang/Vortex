@@ -15,6 +15,7 @@ var ErrAuthorizationDenied = errors.New("store: durable authorization does not p
 // interval must come from a trusted conservative clock. A single wall-clock
 // sample after restart does not establish trusted time.
 type AuthorizationUse struct {
+	RuntimeLeaseID, ShareLeaseID    string
 	NodeID, BootID, AuthorizationID string
 	Kind, RuleID, BillingSnapshotID string
 	RuleRevision, PathGeneration    uint64
@@ -73,7 +74,7 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 			return AuthorizationRecord{}, ErrAuthorizationDenied
 		}
 	}
-	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || record.BillingSnapshotID != use.BillingSnapshotID {
+	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || (record.Kind == "credit_grant" || record.BillingSnapshotID != "") && record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
 	}
 
@@ -97,6 +98,19 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 		generation, err := strconv.ParseUint(current, 10, 64)
 		if err != nil || generation != use.PathGeneration {
 			return AuthorizationRecord{}, ErrAuthorizationDenied
+		}
+	}
+	if use.RuntimeLeaseID != "" || use.ShareLeaseID != "" {
+		if record.Kind != "credit_grant" || use.RuntimeLeaseID == "" || use.ShareLeaseID == "" {
+			return AuthorizationRecord{}, ErrAuthorizationDenied
+		}
+		for kind, id := range map[string]string{"runtime_lease": use.RuntimeLeaseID, "share_lease": use.ShareLeaseID} {
+			leaseUse := use
+			leaseUse.RuntimeLeaseID, leaseUse.ShareLeaseID = "", ""
+			leaseUse.AuthorizationID, leaseUse.Kind = id, kind
+			if _, err := checkAuthorizationTx(ctx, tx, leaseUse); err != nil {
+				return AuthorizationRecord{}, err
+			}
 		}
 	}
 	return record, nil

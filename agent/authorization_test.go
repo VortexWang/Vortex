@@ -554,3 +554,99 @@ func TestAuthorizationGateLatchesPersistenceFailureAcrossSessions(t *testing.T) 
 		t.Fatalf("failed transaction leaked debit: %+v %v", b, err)
 	}
 }
+
+func TestLeasedGateRequiresLiveRuntimeShareAndCreditForEveryReservation(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4), &body); err != nil {
+		t.Fatal(err)
+	}
+	credit := body["authorizations"].([]any)[0].(map[string]any)
+	runtimeID, shareID := "550e8400-e29b-41d4-a716-446655440031", "550e8400-e29b-41d4-a716-446655440032"
+	leases := []any{credit}
+	for i, id := range []string{runtimeID, shareID} {
+		lease := map[string]any{}
+		for k, v := range credit {
+			lease[k] = v
+		}
+		delete(lease, "billing_snapshot_id")
+		delete(lease, "amount_bytes")
+		lease["authorization_id"] = id
+		lease["kind"] = "runtime_lease"
+		lease["expires_at"] = "2026-11-05T12:01:45Z"
+		if i == 1 {
+			lease["kind"] = "share_lease"
+			lease["rate_bps"] = 1000000
+			lease["connections"] = 10
+		}
+		leases = append(leases, lease)
+	}
+	body["authorizations"] = leases
+	payload, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &ControlClient{Node: node}
+	if err := client.applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	config := AuthorizationGateConfig{AuthorizationID: credit["authorization_id"].(string), RuntimeLeaseID: runtimeID, ShareLeaseID: shareID, RuleID: "rule-1", RuleRevision: 2, PathGeneration: 4, SnapshotID: credit["billing_snapshot_id"].(string), Clock: func() (time.Time, time.Time, bool) { return now, now, true }}
+	invalid := config
+	invalid.ShareLeaseID = ""
+	if _, err := node.NewLeasedAuthorizationGate(invalid); err == nil {
+		t.Fatal("missing share lease accepted")
+	}
+	gate, err := node.NewLeasedAuthorizationGate(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := gate.Open(ctx, engineaccounting.Flow{Key: "leased", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := session.Reserve(ctx, engineaccounting.LeftToRight, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := batch.Commit(ctx, 100); err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(15 * time.Second)
+	if _, err := session.Reserve(ctx, engineaccounting.LeftToRight, 100); err == nil {
+		t.Fatal("expired runtime/share lease authorized an existing session write")
+	}
+	if _, err := gate.Open(ctx, engineaccounting.Flow{Key: "expired"}); err == nil {
+		t.Fatal("expired lease admitted a new session")
+	}
+	balance, err := s.AuditAuthorizationBalance(ctx, node.NodeID, config.AuthorizationID)
+	if err != nil || balance.Committed != 100 || balance.Remaining != 3996 {
+		t.Fatalf("lease refusal changed credit: %+v %v", balance, err)
+	}
+	now = now.Add(-15 * time.Second)
+	body["update_id"] = "550e8400-e29b-41d4-a716-446655440033"
+	body["authorizations"] = []any{}
+	body["revocations"] = []string{runtimeID}
+	payload, err = json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := client.applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := session.Reserve(ctx, engineaccounting.LeftToRight, 100); err == nil {
+		t.Fatal("revoked runtime lease authorized existing session write")
+	}
+	if err := session.Close(); err != nil {
+		t.Fatal(err)
+	}
+}

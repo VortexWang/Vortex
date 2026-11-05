@@ -225,3 +225,46 @@ func TestControlRunnerReconnectsAfterServerClosesStream(t *testing.T) {
 		t.Fatalf("runner result=%v", err)
 	}
 }
+
+func TestAuthenticatedAuthorizationCarriesBackendHeartbeatNotHubContact(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	serverTLS, clientTLS, _ := controlTLS(t, controlTestNodeID)
+	hs, err := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hs.Close()
+	ns, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ns.Close()
+	node, err := New(controlTestNodeID, ns, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
+		return &controlv1.AuthorizationUpdate{Generation: 4, Payload: authorizationPayloadForTest(t, id, boot, 1, 4)}, nil
+	}}, serverTLS)
+	if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, listener.Addr().String()); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, trusted := node.TrustedTime(); !trusted {
+		t.Fatal("authenticated boot-bound update did not establish time")
+	}
+	base := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
+	status, err := ns.CurrentAutonomyStatus(ctx, base.Add(30*time.Second), true)
+	if err != nil || status.BackendHeartbeat != base || status.HardDeadline != base.Add(12*time.Hour) || status.Mode != store.AutonomyOffline {
+		t.Fatalf("payload heartbeat not persisted: %+v %v", status, err)
+	}
+	// A normal Hub reconnect cannot replace the backend evidence or restart grace.
+	plain := startTestControlHub(t, ctx, &hub.TestServer{Store: hs}, serverTLS)
+	if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, plain.Addr().String()); err != nil {
+		t.Fatal(err)
+	}
+	after, err := ns.CurrentAutonomyStatus(ctx, base.Add(time.Minute), true)
+	if err != nil || after.BackendHeartbeat != base || after.HardDeadline != status.HardDeadline || after.SignerEpochOpen {
+		t.Fatalf("Hub reconnect moved authority: %+v %v", after, err)
+	}
+}

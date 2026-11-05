@@ -82,6 +82,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if tlsConfig.MinVersion > tls.VersionTLS13 || tlsConfig.MaxVersion != 0 && tlsConfig.MaxVersion < tls.VersionTLS13 {
 		return fmt.Errorf("agent: control stream requires TLS 1.3")
 	}
+	if tlsConfig.InsecureSkipVerify {
+		return fmt.Errorf("agent: unauthenticated control TLS is forbidden")
+	}
 	tlsConfig.MinVersion = tls.VersionTLS13
 	conn, err := grpc.DialContext(ctx, address,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
@@ -157,6 +160,16 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			if err := c.applyAuthorizationUpdate(ctx, body.AuthorizationUpdate); err != nil {
 				return err
 			}
+			payload, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+			if err != nil {
+				return err
+			}
+			if c.Node.clock == nil {
+				return fmt.Errorf("agent: boot-local authority clock missing")
+			}
+			if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
+				return err
+			}
 		case *controlv1.ControlMessage_UsageAck:
 			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
@@ -217,6 +230,7 @@ func (c *ControlClient) applyAuthorizationUpdate(ctx context.Context, update *co
 		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
 		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
 		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,
+		BackendHeartbeat: payload.BackendHeartbeatAt, AutonomyDeadline: payload.AutonomyDeadline,
 	}, records, payload.Revocations)
 }
 

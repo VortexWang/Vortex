@@ -161,3 +161,54 @@ func TestAuthorizedSettlementCannotChangeGrantIdentity(t *testing.T) {
 		t.Fatalf("invalid settlement released hold: %+v %v", b, err)
 	}
 }
+
+func TestAuthorizationHeartbeatCommitsAtomicallyAndCannotExtendByReplay(t *testing.T) {
+	s, _ := fundedStore(t)
+	ctx := context.Background()
+	base := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
+	update := AuthorizationUpdate{NodeID: "node", BootID: "boot", UpdateID: "heartbeat", Payload: []byte("heartbeat"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1, BackendHeartbeat: base, AutonomyDeadline: base.Add(time.Hour)}
+	if _, err := s.db.Exec(`CREATE TRIGGER fail_update BEFORE INSERT ON authorization_updates BEGIN SELECT RAISE(ABORT, 'write failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PersistAuthorizationUpdate(ctx, update, nil, nil); err == nil {
+		t.Fatal("failed update acknowledged heartbeat")
+	}
+	if _, err := s.AgentState(ctx, "backend_heartbeat"); err == nil {
+		t.Fatal("heartbeat escaped failed authorization transaction")
+	}
+	if _, err := s.db.Exec(`DROP TRIGGER fail_update`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PersistAuthorizationUpdate(ctx, update, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	status, err := s.CurrentAutonomyStatus(ctx, base.Add(30*time.Second), true)
+	if err != nil || status.Mode != AutonomyOffline {
+		t.Fatalf("status=%+v err=%v", status, err)
+	}
+	replay := update
+	replay.UpdateID = "same-heartbeat"
+	replay.Payload = []byte("same-heartbeat")
+	if err := s.PersistAuthorizationUpdate(ctx, replay, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	if status, err = s.CurrentAutonomyStatus(ctx, base.Add(time.Minute), true); err != nil || status.SignerEpochOpen {
+		t.Fatalf("replay reopened signer: %+v %v", status, err)
+	}
+	replay.UpdateID = "extended"
+	replay.Payload = []byte("extended")
+	replay.AutonomyDeadline = base.Add(2 * time.Hour)
+	if err := s.PersistAuthorizationUpdate(ctx, replay, nil, nil); err == nil {
+		t.Fatal("replay extended fixed deadline")
+	}
+	replay.UpdateID = "new-heartbeat"
+	replay.Payload = []byte("new-heartbeat")
+	replay.BackendHeartbeat = base.Add(time.Minute)
+	if err := s.PersistAuthorizationUpdate(ctx, replay, nil, nil); err == nil {
+		t.Fatal("new heartbeat bypassed closed signer handoff")
+	}
+	status, err = s.CurrentAutonomyStatus(ctx, base.Add(time.Minute), true)
+	if err != nil || status.HardDeadline != base.Add(time.Hour) {
+		t.Fatalf("failed updates changed deadline: %+v %v", status, err)
+	}
+}

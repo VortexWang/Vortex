@@ -304,3 +304,60 @@ func deadlineFromTx(ctx context.Context, tx *sql.Tx) time.Time {
 	deadline, _ := time.Parse(time.RFC3339Nano, value)
 	return deadline
 }
+
+// persistAuthorizationHeartbeat applies the authenticated payload's backend
+// evidence in the same transaction as grants/revocations. Re-delivery of an
+// unchanged heartbeat cannot move its deadline or reopen a closed signer.
+func persistAuthorizationHeartbeat(ctx context.Context, tx *sql.Tx, heartbeat, deadline time.Time) error {
+	if heartbeat.IsZero() || !deadline.After(heartbeat) || deadline.After(heartbeat.Add(12*time.Hour)) {
+		return ErrAuthorityTimeUncertain
+	}
+	previousText, err := stateValue(ctx, tx, "backend_heartbeat")
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err == nil {
+		previous, err := time.Parse(time.RFC3339Nano, previousText)
+		if err != nil {
+			return err
+		}
+		previousDeadline := deadlineFromTx(ctx, tx)
+		if previousDeadline.IsZero() {
+			return ErrAuthorityTimeUncertain
+		}
+		if heartbeat.Equal(previous) {
+			if !deadline.Equal(previousDeadline) {
+				return ErrHeartbeatStale
+			}
+			return nil
+		}
+		if heartbeat.Before(previous) {
+			return ErrHeartbeatStale
+		}
+		mode, err := stateValue(ctx, tx, "authority_mode")
+		if err != nil {
+			return err
+		}
+		open, err := stateValue(ctx, tx, "signer_epoch_open")
+		if err != nil {
+			return err
+		}
+		if mode != AutonomyOnline || open != "true" || !heartbeat.Before(previous.Add(BackendLossGrace)) {
+			return ErrAuthorityHandoffRequired
+		}
+		if !heartbeat.Before(previousDeadline) {
+			return ErrAuthorityExpired
+		}
+	}
+	for key, value := range map[string]string{
+		"backend_heartbeat": heartbeat.UTC().Format(time.RFC3339Nano),
+		"autonomy_deadline": deadline.UTC().Format(time.RFC3339Nano),
+		"authority_mode":    AutonomyOnline,
+		"signer_epoch_open": "true",
+	} {
+		if err := putState(ctx, tx, key, value, heartbeat); err != nil {
+			return err
+		}
+	}
+	return nil
+}
