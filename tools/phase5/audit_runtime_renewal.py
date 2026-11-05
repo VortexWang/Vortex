@@ -11,12 +11,16 @@ import gzip
 import hashlib
 import json
 import pathlib
+import re
 import sqlite3
 import sys
 import tempfile
 
 
 def instant(value):
+    # Go writes nanoseconds; Python 3.9 accepts only microsecond precision.
+    # Fixture boundaries differ by seconds, so truncation cannot invert them.
+    value = re.sub(r"(\.\d{6})\d+", r"\1", value)
     return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
