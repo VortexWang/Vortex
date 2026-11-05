@@ -124,6 +124,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		return nil
 	}
 	usageReceived := 0
+	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
 	controlSequence := uint64(0)
 	if s.ConfigUpdate != nil {
@@ -191,7 +192,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UnknownUsageAck{UnknownUsageAck: &controlv1.UnknownUsageAcknowledgement{BatchId: body.UnknownUsageBatch.GetBatchId(), PayloadSha256: digest[:]}}}); err != nil {
 				return err
 			}
-			usageReceived++
+			if !usageSeen[body.UnknownUsageBatch.GetBatchId()] {
+				usageSeen[body.UnknownUsageBatch.GetBatchId()] = true
+				usageReceived++
+			}
 			if s.UsageBatchLimit <= usageReceived {
 				return nil
 			}
@@ -220,7 +224,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: []string{batch.GetBatchId()}}}}); err != nil {
 				return err
 			}
-			usageReceived++
+			if !usageSeen[batch.GetBatchId()] {
+				usageSeen[batch.GetBatchId()] = true
+				usageReceived++
+			}
 			if s.UsageBatchLimit <= usageReceived {
 				return nil
 			}

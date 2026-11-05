@@ -220,3 +220,9 @@ Next implementation boundary: a continuing session must renew runtime/share/gran
 - The TCP/UDP runtime fixture now verifies all four directional renewal batches against the Agent, Hub and protocol-backend SQLite files; the real full-disk fixture remains enabled. Final clean-SHA Docker/Actions results and plan audit follow after the code commit. No completion is claimed by this implementation note.
 
 The preceding interim 1.1.0 safety guard was verified at SHA `1dbc3159acf478d775b4a2da51756a933438564f`: clean Docker and [Actions 42118509060](https://github.com/VortexWang/Vortex/actions/runs/42118509060) passed; all eight renewal snapshots passed independent audit. Artifacts are retained under `artifacts/phase5/authorization/1dbc315/`. This is historical evidence, not evidence for the new 1.2.0 implementation.
+
+### Failed first full regression, retained for audit
+
+- SHA `d8d0ac86517c6f77ac3da387d55ffdde9fc0d80b` failed clean Docker at `TestControlReportsNewUsageWithoutReconnecting` with send-side EOF. Its report/logs and available ledgers are retained in `artifacts/phase5/authorization/d8d0ac8/docker/`; Engine checks did not execute after this failure.
+- Root cause: the finite protocol fixture counted duplicate batch messages toward its early exit, and the periodic sender returned immediately on EOF before draining final received ACKs. The fixture now counts unique batch identities, while the client stops sending and drains received messages after send EOF. No failed result is promoted to pass.
+- The post-processing renewal auditor also narrows its filename match to the original two manifests so it does not confuse newly added three-party handoff manifests with the two-party renewal format.

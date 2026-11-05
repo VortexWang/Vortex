@@ -149,8 +149,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
 	}
 	lastNodeSequence := sequence
-	if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
-		return err
+	initialSendErr := c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
+		return initialSendErr
 	}
 	lastControlSequence := uint64(0)
 	seenControlIDs := make(map[string]struct{})
@@ -181,6 +182,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	}
 	ticker := time.NewTicker(usageInterval)
 	defer ticker.Stop()
+	if errors.Is(initialSendErr, io.EOF) {
+		ticker.Stop()
+	}
 	for {
 		var response received
 		select {
@@ -188,7 +192,12 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			return ctx.Err()
 		case <-ticker.C:
 			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
-				return err
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+				// Send EOF can race the peer's final successful ACK. Drain
+				// receive messages before completing this control connection.
+				ticker.Stop()
 			}
 			continue
 		case response = <-incoming:

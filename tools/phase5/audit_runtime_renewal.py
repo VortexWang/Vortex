@@ -82,7 +82,7 @@ def audit(root, expected):
         report = json.loads((folder / "report.json").read_text())
         assert report["commit"] == expected and report["status"] == "passed"
         assert report["full_disk_requested"] and not report["plan_complete"]
-        manifests = sorted(folder.glob("runtime-*-ledgers.json"))
+        manifests = sorted(folder.glob("runtime-[12]-ledgers.json"))
         assert [p.name for p in manifests] == ["runtime-1-ledgers.json", "runtime-2-ledgers.json"]
         for manifest in manifests:
             hashes = json.loads(manifest.read_text())
