@@ -22,3 +22,5 @@ jobs:
           cache: false
       - name: Run Wave 1 check
         run: make phase5-wave1-check
+      - name: Run Wave 2 check
+        run: make phase5-wave2-check

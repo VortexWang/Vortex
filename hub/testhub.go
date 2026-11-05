@@ -3,6 +3,7 @@ package hub
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -34,6 +35,10 @@ func (s *TestServer) Serve(ctx context.Context, ln net.Listener) error {
 		}
 		go s.handle(ctx, conn)
 	}
+}
+
+func (s *TestServer) ServeTLS(ctx context.Context, ln net.Listener, config *tls.Config) error {
+	return s.Serve(ctx, tls.NewListener(ln, config))
 }
 
 func (s *TestServer) handle(ctx context.Context, conn net.Conn) {

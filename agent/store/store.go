@@ -23,6 +23,13 @@ type Info struct {
 	Synchronous   string
 }
 
+type ConfigResult struct {
+	TransactionID string
+	Version       uint64
+	State         string
+	Reason        string
+}
+
 func Open(path, owner string) (*Store, error) {
 	if path == "" || owner == "" {
 		return nil, fmt.Errorf("store: path and owner are required")
@@ -70,6 +77,20 @@ CREATE TABLE IF NOT EXISTS control_receipts (
   sequence INTEGER NOT NULL,
   received_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS credentials (
+  node_id TEXT PRIMARY KEY NOT NULL,
+  certificate BLOB NOT NULL,
+  valid_until TEXT NOT NULL,
+  revoked INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS config_results (
+  transaction_id TEXT PRIMARY KEY NOT NULL,
+  version INTEGER NOT NULL,
+  state TEXT NOT NULL,
+  reason TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL
+);
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
   ON CONFLICT(key) DO NOTHING;
 `)
@@ -104,6 +125,30 @@ func (s *Store) RecordReceipt(ctx context.Context, messageID string, sequence ui
 	}
 	_, err := s.db.ExecContext(ctx, `INSERT INTO control_receipts(message_id, sequence, received_at) VALUES (?, ?, ?) ON CONFLICT(message_id) DO NOTHING`, messageID, sequence, time.Now().UTC().Format(time.RFC3339Nano))
 	return err
+}
+
+func (s *Store) SaveCredential(ctx context.Context, nodeID string, certificate []byte, validUntil time.Time) error {
+	if nodeID == "" || len(certificate) == 0 {
+		return fmt.Errorf("store: credential identity and certificate are required")
+	}
+	_, err := s.db.ExecContext(ctx, `INSERT INTO credentials(node_id, certificate, valid_until, revoked, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(node_id) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, revoked=0, updated_at=excluded.updated_at`, nodeID, certificate, validUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
+	return err
+}
+
+func (s *Store) SaveConfigResult(ctx context.Context, transactionID string, version uint64, state, reason string) error {
+	if transactionID == "" || state == "" {
+		return fmt.Errorf("store: config transaction and state are required")
+	}
+	_, err := s.db.ExecContext(ctx, `INSERT INTO config_results(transaction_id, version, state, reason, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(transaction_id) DO UPDATE SET version=excluded.version, state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, version, state, reason, time.Now().UTC().Format(time.RFC3339Nano))
+	return err
+}
+
+func (s *Store) GetConfigResult(ctx context.Context, transactionID string) (ConfigResult, error) {
+	var result ConfigResult
+	result.TransactionID = transactionID
+	err := s.db.QueryRowContext(ctx, `SELECT version, state, reason FROM config_results WHERE transaction_id = ?`, transactionID).
+		Scan(&result.Version, &result.State, &result.Reason)
+	return result, err
 }
 
 func (s *Store) EventCount(ctx context.Context) (int, error) {
