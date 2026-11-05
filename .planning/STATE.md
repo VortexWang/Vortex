@@ -1,21 +1,21 @@
 ---
 gsd_state_version: "1.0"
 milestone: V1
-current_phase: 4
-current_phase_name: M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-current_plan: Phase 4 complete; formal qualification follow-up remains open
-status: executing
-stopped_at: Plan 04-07 verified on clean a7a7432; Phase 4 remains executing with formal NFR/D-04 gaps
+current_phase: 5
+current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
+current_plan: Phase 5 discussion pending
+status: planning
+stopped_at: Phase 4 implementation closed by owner decision; qualification gaps carried forward; ready to discuss Phase 5
 last_updated: "2026-11-05T00:00:00+00:00"
 last_activity: 2026-11-05
 last_activity_desc: Verified 04-11 D-04 matrix and fail-closed qualification gate; formal NFRs remain unqualified
 state_head: fc9013e
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 28
   completed_plans: 25
-  percent: 38
+  percent: 50
 ---
 
 # Project State
@@ -25,15 +25,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-03)
 
 **Core value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
-**Current focus:** Phase 04 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
+**Current focus:** Phase 05 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 
 ## Current Position
 
-Phase: 4 — M2 多跳与引擎完备 (M2 Multi-Hop Engine)
-Current Plan: Phase 4 complete; formal qualification follow-up remains open
-Total Plans in Phase: 7
-Status: In progress
-Last activity: 2026-11-05 — Plan 04-11 D-04 matrix and fail-closed qualification gate verified; formal NFRs remain unqualified
+Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
+Current Plan: Phase 5 discussion pending
+Total Plans in Phase: TBD
+Status: Planning
+Last activity: 2026-11-05 — Phase 4 implementation closed by owner decision; qualification gaps carried forward
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -68,7 +68,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern.
+- Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
 
 ### Blockers/Concerns
 
@@ -93,8 +93,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T00:00:00.000000+00:00
-Stopped at: Plan 04-11 D-04 matrix and fail-closed qualification gate verified; Phase 4 implementation plans are complete, formal NFRs/D-04 remain unqualified.
-Resume file: .planning/phases/04-m2-m2-multi-hop-engine/04-11-PLAN.md
+Stopped at: Phase 4 implementation closed by owner decision; ready for Phase 5 discussion. Formal NFRs/D-04 remain unqualified.
+Resume file: None
 
 ### Latest qualification review
 
