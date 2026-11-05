@@ -80,3 +80,27 @@ Remaining: runtime lease admission, production configuration selection/wiring, a
 - Local Docker: a clean `git archive` of the exact SHA mounted read-only; pinned `golang:1.27.3` digest `sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048`; `make phase5-authorization-check` equivalent script invocation PASS. Raw host/race/vet logs and report: `artifacts/phase5/authorization/84dd896/docker/`.
 - GitHub Actions: [run 42051210228](https://github.com/VortexWang/Vortex/actions/runs/42051210228), same SHA, PASS. Contract checks, Wave 1, Wave 2 and `make phase5-authorization-check` completed. Downloaded raw authorization artifact: `artifacts/phase5/authorization/84dd896/actions/`; run metadata retained beside it.
 - Both authorization reports deliberately record `plan_complete: false`. These are incremental correctness regressions, not full-disk or production runtime/Hub authority acceptance.
+
+## Lease and authenticated heartbeat increment (`1d900cd`)
+
+- `AuthorizationUpdate` received through the authenticated gRPC control stream now stores its explicit backend heartbeat and fixed autonomy deadline atomically with the authorization records. A plain Hub receipt still cannot become backend heartbeat evidence. Equal-heartbeat redelivery must preserve the original deadline and cannot reopen a closed signer; late/new heartbeat after autonomy requires handoff.
+- `NewLeasedAuthorizationGate` requires named runtime and share leases as well as the credit grant. New admission and each pre-write reservation validate all three against the same SQLite snapshot, including boot, local rule/revision/path and conservative expiry. Tests revoke/expire leases while a session exists and confirm no further byte allocation occurs.
+- Added a boot-local authority clock for authenticated update delivery. It starts untrusted, uses the random boot ID's creation time to conservatively bound an update's age, intersects later observations, includes a 1000 ppm drift budget and 10 ms margin, and rejects detected clock discontinuity. Bootstrap must complete within 300 seconds; an unrefreshed anchor becomes untrusted after 300 seconds. Replays cannot move time backwards or extend the persisted autonomy deadline. These clock budgets are explicit implementation bounds, not measurements of host oscillator accuracy.
+- Protocol-test Hub now supports generating a node/boot-bound authorization update after authenticating the client. The real mTLS test proves heartbeat persistence and that a following ordinary reconnect leaves the original deadline intact.
+- Local root tests, Agent/Hub race tests and targeted vet passed. The first Docker invocation did not run tests because the OrbStack socket disappeared; the service was restarted before retrying the same clean source archive. Final Docker/Actions evidence follows separately.
+
+Remaining 05-03 acceptance work:
+
+1. Select and compose the leased Gate from the actual Agent/Engine runtime configuration and enforce share connection/rate limits. The current CLI does not automatically install it; the Engine lifecycle remains a static destination tracer.
+2. Connect persisted existing-rule/share/delegation ownership to offline renewal decisions instead of caller-supplied booleans; complete the bounded protocol-test Hub issuer/ledger behavior.
+3. Transfer unknown-liability bounds to Hub with approved wire semantics. Current wire `UsageBatch` lacks the separate bound; the Agent conservatively retains it, so no release is implied by ACK.
+4. Exercise real full-disk failure and mixed Agent/Hub/Engine traffic under the final composed runtime, then retain same-SHA Docker/Actions evidence. SQL-trigger failure tests alone do not satisfy this gate.
+5. Prove signer closure/ownership guards at the issuance boundary; full prefix S/remainder R transfer and activation recovery belong to dependent 05-04.
+
+05-03 remains executing; no SUMMARY or completion marker is produced by this increment.
+
+### Verified pair for `1d900cdc97e8695aec25dbfeb45e385163338404`
+
+- Local Docker PASS after OrbStack recovery, using a clean read-only source archive and the previously pinned Go 1.27.3 image digest. Raw logs/report are under `artifacts/phase5/authorization/1d900cd/docker/`.
+- [GitHub Actions run 42052706718](https://github.com/VortexWang/Vortex/actions/runs/42052706718) PASS at the identical SHA: frozen contracts, Wave 1, Wave 2 and incremental authorization race regression. Downloaded logs/report are under `artifacts/phase5/authorization/1d900cd/actions/`.
+- These runs verify the heartbeat/clock and lease-bound credit increment, not the remaining runtime composition, share enforcement, offline issuance or full-disk acceptance items listed above. Both reports preserve `plan_complete: false`.
