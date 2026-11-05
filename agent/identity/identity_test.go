@@ -66,8 +66,21 @@ func TestEnrollmentTokenIsSingleUseAndPrivateKeyStaysLocal(t *testing.T) {
 		t.Fatal("token reused")
 	}
 	dir := t.TempDir()
+	if err := os.Chmod(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(dir+"/runtime-key.pem", []byte("old"), 0644); err != nil {
+		t.Fatal(err)
+	}
 	if err := SaveFiles(dir, cred, caDER); err != nil {
 		t.Fatal(err)
+	}
+	dirInfo, err := os.Stat(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dirInfo.Mode().Perm() != 0700 {
+		t.Fatalf("credential directory mode=%o", dirInfo.Mode().Perm())
 	}
 	info, err := os.Stat(dir + "/runtime-key.pem")
 	if err != nil {

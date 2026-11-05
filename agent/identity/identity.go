@@ -2,7 +2,6 @@ package identity
 
 import (
 	"bytes"
-	"context"
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/elliptic"
@@ -137,15 +136,18 @@ func AttachKey(c Credential, key *ecdsa.PrivateKey, caDER []byte) (Credential, e
 	if !bytes.Equal(certKey, localKey) {
 		return Credential{}, errors.New("identity: private key does not match certificate")
 	}
-	priv, err := x509.MarshalPKCS8PrivateKey(key)
-	if err != nil {
-		return Credential{}, err
+	if len(caDER) > 0 {
+		issuer, err := x509.ParseCertificate(caDER)
+		if err != nil {
+			return Credential{}, fmt.Errorf("identity: parse issuer certificate: %w", err)
+		}
+		if err := c.Leaf.CheckSignatureFrom(issuer); err != nil {
+			return Credential{}, fmt.Errorf("identity: issuer certificate mismatch: %w", err)
+		}
 	}
-	_ = caDER
 	c.Certificate.PrivateKey = key
 	c.Certificate.Certificate = [][]byte{c.Leaf.Raw}
 	c.Certificate.Leaf = c.Leaf
-	_ = priv
 	return c, nil
 }
 
@@ -156,13 +158,20 @@ func SaveFiles(directory string, credential Credential, caDER []byte) error {
 	if err := os.MkdirAll(directory, 0700); err != nil {
 		return err
 	}
+	if err := os.Chmod(directory, 0700); err != nil {
+		return err
+	}
 	keyDER, err := x509.MarshalPKCS8PrivateKey(credential.Certificate.PrivateKey)
 	if err != nil {
 		return err
 	}
 	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: credential.Leaf.Raw})
-	if err := os.WriteFile(filepath.Join(directory, "runtime-key.pem"), keyPEM, 0600); err != nil {
+	keyPath := filepath.Join(directory, "runtime-key.pem")
+	if err := os.WriteFile(keyPath, keyPEM, 0600); err != nil {
+		return err
+	}
+	if err := os.Chmod(keyPath, 0600); err != nil {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(directory, "runtime-cert.pem"), certPEM, 0644); err != nil {
@@ -185,7 +194,10 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 	if roots == nil {
 		return nil, errors.New("identity: trust pool required")
 	}
-	conf := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{c.Certificate}, RootCAs: roots, ClientCAs: roots, ServerName: c.NodeID, ClientAuth: tls.RequireAndVerifyClientCert}
+	conf := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{c.Certificate}, RootCAs: roots, ClientCAs: roots, ServerName: c.NodeID}
+	if server {
+		conf.ClientAuth = tls.RequireAndVerifyClientCert
+	}
 	conf.VerifyConnection = func(state tls.ConnectionState) error {
 		if len(state.PeerCertificates) == 0 {
 			return errors.New("identity: peer certificate missing")
@@ -199,7 +211,5 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 		}
 		return nil
 	}
-	_ = context.Background()
-	_ = server
 	return conf, nil
 }
