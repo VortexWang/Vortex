@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
 	"vortex/agent/identity"
 	"vortex/agent/store"
 	controlv1 "vortex/contracts/protobuf/v1"
@@ -113,6 +114,50 @@ func TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC(t *testing.T) {
 	if _, err := nodeStore.AgentState(ctx, "backend_heartbeat"); err == nil {
 		t.Fatal("Hub control stream incorrectly recorded a backend heartbeat")
 	}
+}
+
+func TestControlClientHandsOffDurableUsageBeforeHubAck(t *testing.T) {
+	ctx := context.Background()
+	serverTLS, clientTLS, _ := controlTLS(t, controlTestNodeID)
+	hubStore, err := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hubStore.Close()
+	nodeStore, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nodeStore.Close()
+	node, err := New(controlTestNodeID, nodeStore, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch := &controlv1.UsageBatch{BatchId: "batch-1", BillingSnapshotId: "snapshot-1", Deltas: []*controlv1.UsageDelta{{RuleId: "rule-1", Role: "source", Direction: "egress", Bytes: 512, GrantId: "grant-1"}}}
+	if err := node.PersistUsageBatch(ctx, batch, 1024); err != nil {
+		t.Fatal(err)
+	}
+	server := &hub.TestServer{Store: hubStore, AcceptUsage: true}
+	listener := startTestControlHub(t, ctx, server, serverTLS)
+	client := &ControlClient{Node: node, TLS: clientTLS}
+	if err := client.Connect(ctx, listener.Addr().String()); err != nil {
+		t.Fatal(err)
+	}
+	if pending, err := nodeStore.PendingUsageOutbox(ctx, controlTestNodeID); err != nil || len(pending) != 0 {
+		t.Fatalf("outbox after durable Hub ACK=%+v err=%v", pending, err)
+	}
+	if err := hubStore.PersistUsageLedger(ctx, store.UsageBatch{NodeID: controlTestNodeID, BootID: "replay-boot", BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: pendingPayload(t, batch)}); err != nil {
+		t.Fatalf("Hub ledger replay was not idempotent: %v", err)
+	}
+}
+
+func pendingPayload(t *testing.T, batch *controlv1.UsageBatch) []byte {
+	t.Helper()
+	payload, err := (proto.MarshalOptions{Deterministic: true}).Marshal(batch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return payload
 }
 
 func TestControlClientRejectsCertificateNodeMismatch(t *testing.T) {

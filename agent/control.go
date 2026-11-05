@@ -14,6 +14,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/protobuf/proto"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
@@ -117,6 +118,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
 	}
 	lastNodeSequence := sequence
+	if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+		return err
+	}
 	lastControlSequence := uint64(0)
 	seenControlIDs := make(map[string]struct{})
 	for {
@@ -148,10 +152,15 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			}
 			lastNodeSequence = responseSequence
 		case *controlv1.ControlMessage_UsageAck:
-			if c.AcknowledgeUsage == nil {
-				return fmt.Errorf("agent: usage acknowledgements are unsupported by this node runtime")
+			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
+				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 			}
-			if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
+			if c.AcknowledgeUsage != nil {
+				if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
+					return err
+				}
+			}
+			if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
 				return err
 			}
 		case *controlv1.ControlMessage_Error:
@@ -163,6 +172,34 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			return fmt.Errorf("agent: unsupported control message body")
 		}
 	}
+}
+
+func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64) error {
+	batches, err := c.Node.Store.PendingUsageOutbox(ctx, c.Node.NodeID)
+	if err != nil {
+		return fmt.Errorf("agent: read durable usage outbox: %w", err)
+	}
+	for _, record := range batches {
+		batch := new(controlv1.UsageBatch)
+		if err := proto.Unmarshal(record.Payload, batch); err != nil {
+			return fmt.Errorf("agent: decode durable usage batch %s: %w", record.BatchID, err)
+		}
+		if batch.GetBatchId() != record.BatchID || batch.GetBillingSnapshotId() != record.SnapshotID {
+			return fmt.Errorf("agent: durable usage batch metadata mismatch")
+		}
+		sequence, err := c.Node.Store.NextControlSequence(ctx)
+		if err != nil {
+			return fmt.Errorf("agent: allocate usage sequence: %w", err)
+		}
+		if err := stream.Send(&controlv1.NodeMessage{
+			NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence,
+			Body: &controlv1.NodeMessage_UsageBatch{UsageBatch: batch},
+		}); err != nil {
+			return fmt.Errorf("agent: send durable usage batch %s: %w", record.BatchID, err)
+		}
+		*lastSequence = sequence
+	}
+	return nil
 }
 
 func stableControlErrorCode(code string) bool {

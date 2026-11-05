@@ -35,6 +35,7 @@ type TestServer struct {
 	controlv1.UnimplementedNodeControlServer
 	Store        *store.Store
 	ConfigUpdate *controlv1.RuntimeConfigUpdate
+	AcceptUsage  bool
 	mu           sync.RWMutex
 	revoked      map[string]struct{}
 }
@@ -114,33 +115,66 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	if err := s.Store.RecordReceipt(ctx, receiptID, first.GetSequence()); err != nil {
 		return err
 	}
-	if s.ConfigUpdate == nil {
+	if s.ConfigUpdate == nil && !s.AcceptUsage {
 		return nil
 	}
-	messageID, err := testHubMessageID()
-	if err != nil {
-		return err
+	var update *controlv1.RuntimeConfigUpdate
+	controlSequence := uint64(0)
+	if s.ConfigUpdate != nil {
+		messageID, err := testHubMessageID()
+		if err != nil {
+			return err
+		}
+		update = proto.Clone(s.ConfigUpdate).(*controlv1.RuntimeConfigUpdate)
+		if err := stream.Send(&controlv1.ControlMessage{
+			MessageId: messageID,
+			Sequence:  1,
+			Body:      &controlv1.ControlMessage_ConfigUpdate{ConfigUpdate: update},
+		}); err != nil {
+			return err
+		}
+		controlSequence = 1
 	}
-	update := proto.Clone(s.ConfigUpdate).(*controlv1.RuntimeConfigUpdate)
-	if err := stream.Send(&controlv1.ControlMessage{
-		MessageId: messageID,
-		Sequence:  1,
-		Body:      &controlv1.ControlMessage_ConfigUpdate{ConfigUpdate: update},
-	}); err != nil {
-		return err
+	for {
+		message, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		if message.GetNodeId() != first.GetNodeId() || message.GetBootId() == "" || message.GetSequence() <= first.GetSequence() {
+			return fmt.Errorf("test hub: control message identity or sequence invalid")
+		}
+		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_UsageBatch:
+			batch := body.UsageBatch
+			if batch == nil || batch.GetBatchId() == "" || batch.GetBillingSnapshotId() == "" {
+				return fmt.Errorf("test hub: usage batch identity is invalid")
+			}
+			payload, err := (proto.MarshalOptions{Deterministic: true}).Marshal(batch)
+			if err != nil {
+				return err
+			}
+			if err := s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload}); err != nil {
+				return err
+			}
+			ackID, err := testHubMessageID()
+			if err != nil {
+				return err
+			}
+			controlSequence++
+			return stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: []string{batch.GetBatchId()}}}})
+		case *controlv1.NodeMessage_ApplyResult:
+			if update == nil || body.ApplyResult == nil || !bytesEqual(body.ApplyResult.GetTransactionId(), update.GetTransactionId()) {
+				return fmt.Errorf("test hub: config result does not correlate with update")
+			}
+			payload, err := proto.Marshal(body.ApplyResult)
+			if err != nil {
+				return err
+			}
+			return s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId()), "control-apply-result", payload)
+		default:
+			return fmt.Errorf("test hub: unsupported node control message")
+		}
 	}
-	result, err := stream.Recv()
-	if err != nil {
-		return err
-	}
-	if result.GetNodeId() != first.GetNodeId() || result.GetBootId() != first.GetBootId() || result.GetSequence() <= first.GetSequence() || result.GetApplyResult() == nil || !bytesEqual(result.GetApplyResult().GetTransactionId(), update.GetTransactionId()) {
-		return fmt.Errorf("test hub: config result does not correlate with update")
-	}
-	payload, err := proto.Marshal(result.GetApplyResult())
-	if err != nil {
-		return err
-	}
-	return s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId())+"-"+messageID, "control-apply-result", payload)
 }
 
 func testHubMessageID() (string, error) {

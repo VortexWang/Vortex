@@ -3,6 +3,7 @@ package store
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/x509"
 	"database/sql"
 	"errors"
@@ -47,6 +48,18 @@ type CredentialVersion struct {
 	OverlapUntil time.Time
 }
 
+type UsageBatch struct {
+	NodeID       string
+	BootID       string
+	BatchID      string
+	SnapshotID   string
+	Payload      []byte
+	Digest       []byte
+	UnknownUpper uint64
+	State        string
+	CreatedAt    time.Time
+}
+
 var ErrCredentialRevoked = fmt.Errorf("store: credential revoked")
 
 var (
@@ -54,6 +67,7 @@ var (
 	ErrConfigVersionStale    = errors.New("store: config expected version is stale")
 	ErrConfigGenerationStale = errors.New("store: config fencing generation is stale")
 	ErrConfigUnresolved      = errors.New("store: an activation outcome is unresolved")
+	ErrUsageBatchConflict    = errors.New("store: usage batch identity conflicts with durable payload")
 )
 
 func Open(path, owner string) (*Store, error) {
@@ -145,6 +159,19 @@ CREATE TABLE IF NOT EXISTS config_object_results (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(transaction_id, object_id)
 );
+CREATE TABLE IF NOT EXISTS usage_batches (
+  node_id TEXT NOT NULL,
+  batch_id TEXT NOT NULL,
+  boot_id TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  payload BLOB NOT NULL,
+  payload_sha256 BLOB NOT NULL,
+  unknown_upper_bound TEXT NOT NULL,
+  state TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, batch_id)
+);
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
   ON CONFLICT(key) DO NOTHING;
 `)
@@ -163,6 +190,144 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
 		}
 	}
 	return nil
+}
+
+// PersistUsageOutbox stores exact serialized usage bytes and the conservative
+// unknown-liability upper bound before the caller may send or locally ACK them.
+func (s *Store) PersistUsageOutbox(ctx context.Context, batch UsageBatch) error {
+	if batch.NodeID == "" || batch.BootID == "" || batch.BatchID == "" || batch.SnapshotID == "" || len(batch.Payload) == 0 {
+		return fmt.Errorf("store: usage batch identity, snapshot and payload are required")
+	}
+	if len(batch.Payload) > 1<<20 {
+		return fmt.Errorf("store: usage batch payload exceeds 1 MiB")
+	}
+	digest := sha256.Sum256(batch.Payload)
+	if len(batch.Digest) != 0 && !bytes.Equal(batch.Digest, digest[:]) {
+		return fmt.Errorf("store: usage batch digest mismatch")
+	}
+	return s.putUsageBatch(ctx, batch, digest[:], "pending")
+}
+
+// PersistUsageLedger commits a Hub-side batch before its acknowledgement is sent.
+// Replaying identical bytes is idempotent; reusing an identity for new bytes fails.
+func (s *Store) PersistUsageLedger(ctx context.Context, batch UsageBatch) error {
+	if batch.NodeID == "" || batch.BootID == "" || batch.BatchID == "" || batch.SnapshotID == "" || len(batch.Payload) == 0 {
+		return fmt.Errorf("store: usage batch identity, snapshot and payload are required")
+	}
+	if len(batch.Payload) > 1<<20 {
+		return fmt.Errorf("store: usage batch payload exceeds 1 MiB")
+	}
+	digest := sha256.Sum256(batch.Payload)
+	if len(batch.Digest) != 0 && !bytes.Equal(batch.Digest, digest[:]) {
+		return fmt.Errorf("store: usage batch digest mismatch")
+	}
+	return s.putUsageBatch(ctx, batch, digest[:], "ledgered")
+}
+
+func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []byte, initialState string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var previous UsageBatch
+	var upper, created string
+	err = tx.QueryRowContext(ctx, `SELECT boot_id, snapshot_id, payload, payload_sha256, unknown_upper_bound, state, created_at FROM usage_batches WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).
+		Scan(&previous.BootID, &previous.SnapshotID, &previous.Payload, &previous.Digest, &upper, &previous.State, &created)
+	if err == nil {
+		previous.NodeID, previous.BatchID = batch.NodeID, batch.BatchID
+		previous.UnknownUpper, err = strconv.ParseUint(upper, 10, 64)
+		if err != nil {
+			return fmt.Errorf("store: invalid usage liability: %w", err)
+		}
+		if previous.SnapshotID != batch.SnapshotID || previous.UnknownUpper != batch.UnknownUpper || !bytes.Equal(previous.Payload, batch.Payload) || !bytes.Equal(previous.Digest, digest) {
+			return ErrUsageBatchConflict
+		}
+		if initialState == "ledgered" && previous.State != "ledgered" {
+			if _, err := tx.ExecContext(ctx, `UPDATE usage_batches SET state='ledgered', updated_at=? WHERE node_id=? AND batch_id=?`, time.Now().UTC().Format(time.RFC3339Nano), batch.NodeID, batch.BatchID); err != nil {
+				return err
+			}
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	_, err = tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, batch.NodeID, batch.BatchID, batch.BootID, batch.SnapshotID, batch.Payload, digest, strconv.FormatUint(batch.UnknownUpper, 10), initialState, now, now)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// PendingUsageOutbox includes locally acknowledged batches: local autonomy ACK
+// permits metering to continue, but does not discharge the Hub handoff liability.
+func (s *Store) PendingUsageOutbox(ctx context.Context, nodeID string) ([]UsageBatch, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND state IN ('pending','locally_acked') ORDER BY created_at,batch_id`, nodeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var batches []UsageBatch
+	for rows.Next() {
+		var batch UsageBatch
+		var upper, created string
+		if err := rows.Scan(&batch.NodeID, &batch.BootID, &batch.BatchID, &batch.SnapshotID, &batch.Payload, &batch.Digest, &upper, &batch.State, &created); err != nil {
+			return nil, err
+		}
+		if batch.UnknownUpper, err = strconv.ParseUint(upper, 10, 64); err != nil {
+			return nil, err
+		}
+		if batch.CreatedAt, err = time.Parse(time.RFC3339Nano, created); err != nil {
+			return nil, err
+		}
+		batches = append(batches, batch)
+	}
+	return batches, rows.Err()
+}
+
+func (s *Store) MarkUsageLocallyAcknowledged(ctx context.Context, nodeID string, batchIDs []string) error {
+	return s.transitionUsageBatches(ctx, nodeID, batchIDs, "locally_acked")
+}
+
+func (s *Store) AcknowledgeUsageBatches(ctx context.Context, nodeID string, batchIDs []string) error {
+	return s.transitionUsageBatches(ctx, nodeID, batchIDs, "hub_acked")
+}
+
+func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batchIDs []string, target string) error {
+	if nodeID == "" || len(batchIDs) == 0 {
+		return fmt.Errorf("store: usage acknowledgement identity is required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	seen := make(map[string]struct{}, len(batchIDs))
+	for _, batchID := range batchIDs {
+		if batchID == "" {
+			return fmt.Errorf("store: empty usage batch id")
+		}
+		if _, duplicate := seen[batchID]; duplicate {
+			continue
+		}
+		seen[batchID] = struct{}{}
+		var state string
+		if err := tx.QueryRowContext(ctx, `SELECT state FROM usage_batches WHERE node_id=? AND batch_id=?`, nodeID, batchID).Scan(&state); err != nil {
+			return err
+		}
+		if state == "hub_acked" && target == "hub_acked" || state == "locally_acked" && target == "locally_acked" {
+			continue
+		}
+		if state != "pending" && !(target == "hub_acked" && state == "locally_acked") {
+			return fmt.Errorf("store: invalid usage acknowledgement transition %s to %s", state, target)
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE usage_batches SET state=?,updated_at=? WHERE node_id=? AND batch_id=?`, target, time.Now().UTC().Format(time.RFC3339Nano), nodeID, batchID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (s *Store) ensureColumn(table, name, declaration string) error {

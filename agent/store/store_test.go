@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -37,6 +38,88 @@ func TestDurableEventSurvivesReopen(t *testing.T) {
 	}
 	if i.JournalMode != "wal" || i.Synchronous != "2" {
 		t.Fatalf("unexpected sqlite settings: %+v", i)
+	}
+}
+
+func TestUsageOutboxSurvivesRestartAndLocalAckRetainsHandoff(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "agent.db")
+	ctx := context.Background()
+	batch := UsageBatch{NodeID: "node-1", BootID: "boot-1", BatchID: "batch-1", SnapshotID: "snapshot-1", Payload: []byte("usage"), UnknownUpper: 9876543210}
+	s, err := Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PersistUsageOutbox(ctx, batch); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	pending, err := s.PendingUsageOutbox(ctx, "node-1")
+	if err != nil || len(pending) != 1 || pending[0].UnknownUpper != batch.UnknownUpper || string(pending[0].Payload) != "usage" {
+		t.Fatalf("reopened outbox=%+v err=%v", pending, err)
+	}
+	if err := s.MarkUsageLocallyAcknowledged(ctx, "node-1", []string{"batch-1"}); err != nil {
+		t.Fatal(err)
+	}
+	pending, err = s.PendingUsageOutbox(ctx, "node-1")
+	if err != nil || len(pending) != 1 || pending[0].State != "locally_acked" {
+		t.Fatalf("local ACK discarded handoff batch: %+v err=%v", pending, err)
+	}
+	if err := s.AcknowledgeUsageBatches(ctx, "node-1", []string{"batch-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if pending, err = s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 0 {
+		t.Fatalf("Hub ACK did not close outbox: %+v err=%v", pending, err)
+	}
+}
+
+func TestUsageBatchIdentityIsIdempotentAndPayloadBound(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	batch := UsageBatch{NodeID: "node-1", BootID: "boot-1", BatchID: "batch-1", SnapshotID: "snapshot-1", Payload: []byte("usage")}
+	if err := s.PersistUsageLedger(ctx, batch); err != nil {
+		t.Fatal(err)
+	}
+	// A replay from a later boot is the same liability if the immutable bytes match.
+	batch.BootID = "boot-2"
+	if err := s.PersistUsageLedger(ctx, batch); err != nil {
+		t.Fatalf("identical usage replay conflicted: %v", err)
+	}
+	batch.Payload = []byte("different")
+	if err := s.PersistUsageLedger(ctx, batch); !errors.Is(err, ErrUsageBatchConflict) {
+		t.Fatalf("same batch ID with different payload err=%v", err)
+	}
+}
+
+func TestUsageOutboxWriteFailureCannotBeSentOrAcknowledged(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if _, err := s.db.Exec(`CREATE TRIGGER reject_usage BEFORE INSERT ON usage_batches BEGIN SELECT RAISE(ABORT, 'simulated disk write failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	batch := UsageBatch{NodeID: "node-1", BootID: "boot-1", BatchID: "batch-1", SnapshotID: "snapshot-1", Payload: []byte("usage")}
+	if err := s.PersistUsageOutbox(ctx, batch); err == nil {
+		t.Fatal("outbox persistence succeeded despite injected write failure")
+	}
+	if pending, err := s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 0 {
+		t.Fatalf("uncommitted batch became sendable: %+v err=%v", pending, err)
+	}
+	if err := s.MarkUsageLocallyAcknowledged(ctx, "node-1", []string{"batch-1"}); err == nil {
+		t.Fatal("unpersisted batch was acknowledged locally")
 	}
 }
 
