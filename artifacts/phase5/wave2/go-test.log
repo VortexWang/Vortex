@@ -1,6 +1,6 @@
-ok  	vortex/agent	(cached)
-ok  	vortex/agent/identity	(cached)
-ok  	vortex/agent/store	(cached)
-ok  	vortex/agent/upgrade	(cached)
-ok  	vortex/hub	(cached)
-ok  	vortex/test/phase5	(cached)
+ok  	vortex/agent	0.926s
+ok  	vortex/agent/identity	0.037s
+ok  	vortex/agent/store	0.810s
+ok  	vortex/agent/upgrade	0.039s
+ok  	vortex/hub	0.743s
+ok  	vortex/test/phase5	0.697s

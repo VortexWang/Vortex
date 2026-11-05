@@ -106,6 +106,14 @@ Commit `7754bae` adds the first production-shaped Agent-to-Engine lifecycle boun
 
 The lifecycle fixture creates a temporary TLS 1.3 identity, starts the destination runtime through the Agent, observes that the serving goroutine remains alive, and stops it through the Agent boundary. It is intentionally a lifecycle and wiring check; it does not claim a complete multi-hop data-plane qualification.
 
+Commit `3aed10a` hardens that boundary: listener binding is synchronous and a bind conflict fails `Start`; the runtime exposes its bound address and terminal result; the node remains alive after the one-shot test Hub handshake, propagates Engine serving failures, and performs a bounded stop on signal. Repeated stop is safe. Tests cover live listener reachability and occupied-port failure.
+
+Same-SHA validation for `3aed10a2344231786d066558ed15a339d1770a5e`:
+
+- Native macOS arm64: `make phase5-wave2-check`, Agent/Hub race tests, Go vet and Engine runtime package tests passed.
+- Docker `golang:1.27.3` on Linux arm64: `make phase5-wave2-check` passed; report in `artifacts/phase5/wave2/report.json`.
+- GitHub Actions Ubuntu 24.04: run `41998791768` passed on the same SHA.
+
 ## Performance
 
 - **Duration:** about 40 min
@@ -130,10 +138,14 @@ The lifecycle fixture creates a temporary TLS 1.3 identity, starts the destinati
 5. **Hardening: enforce credential file permissions** - `5f34619`.
 6. **Hardening: preserve enrollment token after invalid CSR** - `3153797`.
 7. **Complete control state, object reconciliation and upgrade recovery** - `a5bff0b`.
+8. **Connect Agent lifecycle to Engine runtime** - `7754bae`.
+9. **Constrain runtime tracer mode and verify identity binding** - `5fac111`.
+10. **Make listener lifecycle fail-fast and supervised** - `3aed10a`.
 
 ## Files Created/Modified
 
 - `agent/identity/` - CSR enrollment, CA signing, credential persistence, TLS config and detached-signature verification.
+- `agent/engine_runtime.go`, `engine/runtime/runtime.go` - Engine runtime lifecycle adapter and bounded qualification destination tracer.
 - `agent/control.go`, `agent/credential.go`, `agent/reconcile.go` - regional mTLS control, credential persistence and durable config reconciliation.
 - `agent/upgrade/` - signed preflight, bounded drain, health rollback and irreversible migration guard.
 - `agent/store/store.go`, `hub/testhub.go` - durable config result query and TLS test listener.
@@ -176,7 +188,7 @@ None for this test slice. Production Hub CA/token lifecycle, certificate renewal
 
 ## Next Phase Readiness
 
-Still not ready for `05-03`: production Hub authority, certificate renewal/revocation orchestration, durable authority-safe binary installation/recovery, and end-to-end control/data-plane fault tests remain incomplete. The runnable node now has an explicit Engine runtime path, while the legacy no-config mode remains a control-only tracer and is not treated as production data-plane integration.
+Still not ready for `05-03`: production Hub authority, certificate renewal/revocation orchestration, durable authority-safe binary installation/recovery, and end-to-end control/data-plane fault tests remain incomplete. The runtime supports only the explicit static qualification destination tracer; source/relay Agent integration and a contract-defined durable config update protocol remain open. The legacy no-config mode remains a control-only tracer and is not treated as production data-plane integration.
 
 ---
 *Phase: 05-m3-agent-edge-hub-m3-agent-and-hub*
