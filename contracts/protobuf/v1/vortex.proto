@@ -4,8 +4,8 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// DRAFT 1.1.0. Source: V1.11 §3.4, §7, AGT-001..012, HUB-001..018.
-// Message field numbers and lifecycle semantics require contract review.
+// CONTRACT 1.1.0. Additive extension approved from the 1.0.0 baseline.
+// Approval record binds the exact proposal hash in 05-05-CONTRACT-PROPOSAL.md.
 
 service NodeControl {
   // Bidirectional control stream. Business forwarding traffic must never use it.
@@ -36,8 +36,17 @@ message ControlMessage {
   }
 }
 
-message RegisterRequest { string enrollment_token = 1; bytes csr_der = 2; string requested_node_id = 3; }
-message ControlError { string code = 1; string message_id = 2; bool retryable = 3; }
+message RegisterRequest {
+  string enrollment_token = 1;
+  bytes csr_der = 2;
+  string requested_node_id = 3;
+}
+
+message ControlError {
+  string code = 1;
+  string message_id = 2;
+  bool retryable = 3;
+}
 
 message Heartbeat {
   uint64 applied_config_version = 1;
@@ -59,12 +68,29 @@ message UsageDelta {
 }
 
 message UsageAcknowledgement { repeated string batch_ids = 1; }
-message ApplyResult { uint64 version = 1; string state = 2; repeated ObjectResult objects = 3; }
+message ApplyResult {
+  uint64 version = 1;
+  string state = 2;
+  repeated ObjectResult objects = 3;
+  bytes transaction_id = 4;
+  uint64 fencing_generation = 5;
+  string error_code = 6;
+}
+
 message ObjectResult { string object_id = 1; string state = 2; string reason = 3; }
-message RuntimeConfigUpdate { uint64 version = 1; bytes payload = 2; }
+
+message RuntimeConfigUpdate {
+  uint64 version = 1;
+  bytes payload = 2;
+  bytes transaction_id = 3;
+  uint64 fencing_generation = 4;
+  bytes payload_sha256 = 5;
+  uint64 expected_version = 6;
+}
+
 message AuthorizationUpdate { uint64 generation = 1; bytes payload = 2; }
 message NodeEvent { string event_id = 1; string kind = 2; bytes payload = 3; }
 
-// DRAFT GAP: payload encoding, canonical timestamps, signing, retry/idempotency,
-// all state-specific messages, expiry boundaries and compatibility rules are
-// not fully enumerated in the normative source and must be reviewed before freeze.
+// RuntimeConfigUpdate.payload is UTF-8 JSON validated against the frozen runtime
+// schema before Prepare. See the control contract review for bounds, stable
+// errors, idempotency, fencing, retries and activation-unknown behavior.

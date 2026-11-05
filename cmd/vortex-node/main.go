@@ -17,6 +17,7 @@ import (
 	"vortex/agent"
 	"vortex/agent/identity"
 	"vortex/agent/store"
+	"vortex/engine/apply"
 )
 
 func main() {
@@ -194,7 +195,9 @@ func main() {
 		fatal(err)
 	}
 	defer stopNode(n)
-	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig}
+	applyManager := apply.NewManager()
+	reconciler := &agent.Reconciler{Store: s, Apply: agent.EngineApplier{Manager: applyManager}}
+	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
 	runErr := make(chan error, 1)
 	go func() { runErr <- client.Run(ctx, *hubAddr) }()

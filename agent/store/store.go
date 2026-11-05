@@ -1,10 +1,14 @@
 package store
 
 import (
+	"bytes"
 	"context"
 	"crypto/x509"
 	"database/sql"
+	"errors"
 	"fmt"
+	"math"
+	"strconv"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -25,10 +29,14 @@ type Info struct {
 }
 
 type ConfigResult struct {
-	TransactionID string
-	Version       uint64
-	State         string
-	Reason        string
+	TransactionID     string
+	Version           uint64
+	FencingGeneration uint64
+	ExpectedVersion   uint64
+	Payload           []byte
+	PayloadSHA256     []byte
+	State             string
+	Reason            string
 }
 
 type ObjectResult struct{ ObjectID, State, Reason string }
@@ -40,6 +48,13 @@ type CredentialVersion struct {
 }
 
 var ErrCredentialRevoked = fmt.Errorf("store: credential revoked")
+
+var (
+	ErrConfigRequestConflict = errors.New("store: config transaction request conflicts with durable request")
+	ErrConfigVersionStale    = errors.New("store: config expected version is stale")
+	ErrConfigGenerationStale = errors.New("store: config fencing generation is stale")
+	ErrConfigUnresolved      = errors.New("store: an activation outcome is unresolved")
+)
 
 func Open(path, owner string) (*Store, error) {
 	if path == "" || owner == "" {
@@ -108,6 +123,11 @@ CREATE TABLE IF NOT EXISTS credential_versions (
 CREATE TABLE IF NOT EXISTS config_results (
   transaction_id TEXT PRIMARY KEY NOT NULL,
   version INTEGER NOT NULL,
+  version_u64 TEXT NOT NULL DEFAULT '0',
+  fencing_generation TEXT NOT NULL DEFAULT '0',
+  expected_version TEXT NOT NULL DEFAULT '0',
+  payload BLOB NOT NULL DEFAULT X'',
+  payload_sha256 BLOB NOT NULL DEFAULT X'',
   state TEXT NOT NULL,
   reason TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
@@ -130,6 +150,43 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
 `)
 	if err != nil {
 		return fmt.Errorf("store: schema: %w", err)
+	}
+	for name, declaration := range map[string]string{
+		"version_u64":        "TEXT NOT NULL DEFAULT '0'",
+		"fencing_generation": "TEXT NOT NULL DEFAULT '0'",
+		"expected_version":   "TEXT NOT NULL DEFAULT '0'",
+		"payload":            "BLOB NOT NULL DEFAULT X''",
+		"payload_sha256":     "BLOB NOT NULL DEFAULT X''",
+	} {
+		if err := s.ensureColumn("config_results", name, declaration); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Store) ensureColumn(table, name, declaration string) error {
+	rows, err := s.db.Query("PRAGMA table_info(" + table + ")")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid, notnull, pk int
+		var column, kind string
+		var defaultValue any
+		if err := rows.Scan(&cid, &column, &kind, &notnull, &defaultValue, &pk); err != nil {
+			return err
+		}
+		if column == name {
+			return rows.Err()
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	if _, err := s.db.Exec("ALTER TABLE " + table + " ADD COLUMN " + name + " " + declaration); err != nil {
+		return fmt.Errorf("store: add %s.%s: %w", table, name, err)
 	}
 	return nil
 }
@@ -468,16 +525,166 @@ func (s *Store) SaveConfigResult(ctx context.Context, transactionID string, vers
 	if transactionID == "" || state == "" {
 		return fmt.Errorf("store: config transaction and state are required")
 	}
-	_, err := s.db.ExecContext(ctx, `INSERT INTO config_results(transaction_id, version, state, reason, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(transaction_id) DO UPDATE SET version=excluded.version, state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, version, state, reason, time.Now().UTC().Format(time.RFC3339Nano))
+	legacyVersion := int64(0)
+	if version <= math.MaxInt64 {
+		legacyVersion = int64(version)
+	}
+	_, err := s.db.ExecContext(ctx, `INSERT INTO config_results(transaction_id, version, version_u64, state, reason, updated_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(transaction_id) DO UPDATE SET version=excluded.version, version_u64=excluded.version_u64, state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, legacyVersion, strconv.FormatUint(version, 10), state, reason, time.Now().UTC().Format(time.RFC3339Nano))
 	return err
 }
 
 func (s *Store) GetConfigResult(ctx context.Context, transactionID string) (ConfigResult, error) {
 	var result ConfigResult
 	result.TransactionID = transactionID
-	err := s.db.QueryRowContext(ctx, `SELECT version, state, reason FROM config_results WHERE transaction_id = ?`, transactionID).
-		Scan(&result.Version, &result.State, &result.Reason)
+	var legacyVersion int64
+	var version, generation, expected string
+	err := s.db.QueryRowContext(ctx, `SELECT version, version_u64, fencing_generation, expected_version, payload, payload_sha256, state, reason FROM config_results WHERE transaction_id = ?`, transactionID).
+		Scan(&legacyVersion, &version, &generation, &expected, &result.Payload, &result.PayloadSHA256, &result.State, &result.Reason)
+	if err != nil {
+		return result, err
+	}
+	var parseErr error
+	result.Version, parseErr = strconv.ParseUint(version, 10, 64)
+	if parseErr != nil {
+		return result, parseErr
+	}
+	if result.Version == 0 && legacyVersion > 0 {
+		result.Version = uint64(legacyVersion)
+	}
+	result.FencingGeneration, parseErr = strconv.ParseUint(generation, 10, 64)
+	if parseErr != nil {
+		return result, parseErr
+	}
+	result.ExpectedVersion, parseErr = strconv.ParseUint(expected, 10, 64)
+	if parseErr != nil {
+		return result, parseErr
+	}
 	return result, err
+}
+
+func (s *Store) ConfigResultCount(ctx context.Context) (int, error) {
+	var count int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM config_results`).Scan(&count)
+	return count, err
+}
+
+// SaveConfigRequest atomically persists the immutable request and advances the
+// fencing lower bound before the Engine Prepare call can occur.
+func (s *Store) SaveConfigRequest(ctx context.Context, request ConfigResult) (ConfigResult, error) {
+	if request.TransactionID == "" || request.Version == 0 || request.FencingGeneration == 0 || len(request.Payload) == 0 || len(request.PayloadSHA256) != 32 {
+		return ConfigResult{}, fmt.Errorf("store: incomplete config request")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return ConfigResult{}, err
+	}
+	defer tx.Rollback()
+	var previous ConfigResult
+	var versionText, generationText, expectedText string
+	err = tx.QueryRowContext(ctx, `SELECT version_u64, fencing_generation, expected_version, payload, payload_sha256, state, reason FROM config_results WHERE transaction_id=?`, request.TransactionID).
+		Scan(&versionText, &generationText, &expectedText, &previous.Payload, &previous.PayloadSHA256, &previous.State, &previous.Reason)
+	if err == nil {
+		previous.TransactionID = request.TransactionID
+		previous.Version, err = strconv.ParseUint(versionText, 10, 64)
+		if err == nil {
+			previous.FencingGeneration, err = strconv.ParseUint(generationText, 10, 64)
+		}
+		if err == nil {
+			previous.ExpectedVersion, err = strconv.ParseUint(expectedText, 10, 64)
+		}
+		if err != nil {
+			return ConfigResult{}, err
+		}
+		if previous.Version != request.Version || previous.FencingGeneration != request.FencingGeneration || previous.ExpectedVersion != request.ExpectedVersion || !bytes.Equal(previous.Payload, request.Payload) || !bytes.Equal(previous.PayloadSHA256, request.PayloadSHA256) {
+			return ConfigResult{}, ErrConfigRequestConflict
+		}
+		return previous, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return ConfigResult{}, err
+	}
+	var activeVersionText string
+	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='applied_version'`).Scan(&activeVersionText)
+	activeVersion := uint64(0)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return ConfigResult{}, err
+	}
+	if err == nil {
+		activeVersion, err = strconv.ParseUint(activeVersionText, 10, 64)
+		if err != nil {
+			return ConfigResult{}, fmt.Errorf("store: applied version is invalid: %w", err)
+		}
+	}
+	if request.ExpectedVersion != activeVersion || request.Version <= activeVersion {
+		return ConfigResult{}, ErrConfigVersionStale
+	}
+	var currentGenerationText string
+	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='fencing_generation'`).Scan(&currentGenerationText)
+	activeGeneration := uint64(0)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return ConfigResult{}, err
+	}
+	if err == nil {
+		activeGeneration, err = strconv.ParseUint(currentGenerationText, 10, 64)
+		if err != nil {
+			return ConfigResult{}, fmt.Errorf("store: fencing generation is invalid: %w", err)
+		}
+	}
+	if request.FencingGeneration <= activeGeneration {
+		return ConfigResult{}, ErrConfigGenerationStale
+	}
+	var unresolved int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM config_results WHERE state IN ('commit-requested','activation-unknown')`).Scan(&unresolved); err != nil {
+		return ConfigResult{}, err
+	}
+	if unresolved != 0 {
+		return ConfigResult{}, ErrConfigUnresolved
+	}
+	legacyVersion := int64(0)
+	if request.Version <= math.MaxInt64 {
+		legacyVersion = int64(request.Version)
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO config_results(transaction_id, version, version_u64, fencing_generation, expected_version, payload, payload_sha256, state, reason, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'received', '', ?)`, request.TransactionID, legacyVersion, strconv.FormatUint(request.Version, 10), strconv.FormatUint(request.FencingGeneration, 10), strconv.FormatUint(request.ExpectedVersion, 10), request.Payload, request.PayloadSHA256, time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return ConfigResult{}, err
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('fencing_generation', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, strconv.FormatUint(request.FencingGeneration, 10), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return ConfigResult{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return ConfigResult{}, err
+	}
+	request.State = "received"
+	return request, nil
+}
+
+func (s *Store) FinalizeConfigResult(ctx context.Context, transactionID string, version uint64, objects []ObjectResult) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	updated := time.Now().UTC().Format(time.RFC3339Nano)
+	for _, result := range objects {
+		if result.ObjectID == "" || result.State == "" {
+			return fmt.Errorf("store: object result identity and state required")
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO config_object_results(transaction_id, object_id, state, reason, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(transaction_id, object_id) DO UPDATE SET state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, result.ObjectID, result.State, result.Reason, updated); err != nil {
+			return err
+		}
+	}
+	legacyVersion := int64(0)
+	if version <= math.MaxInt64 {
+		legacyVersion = int64(version)
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE config_results SET version=?, version_u64=?, state='active', reason='', updated_at=? WHERE transaction_id=?`, legacyVersion, strconv.FormatUint(version, 10), updated, transactionID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('applied_version', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, strconv.FormatUint(version, 10), updated); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *Store) SaveObjectResults(ctx context.Context, transactionID string, results []ObjectResult) error {

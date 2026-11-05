@@ -52,17 +52,6 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 	}
 	var id [16]byte
 	copy(id[:], decoded)
-	if current, err := r.Store.AgentState(ctx, "applied_version"); err == nil {
-		applied, parseErr := strconv.ParseUint(current, 10, 64)
-		if parseErr != nil {
-			return fmt.Errorf("agent: stored applied version invalid")
-		}
-		if version < applied {
-			return ErrStaleRevision
-		}
-	} else if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
 	if previous, err := r.Store.GetConfigResult(ctx, txID); err == nil {
 		if previous.Version != version {
 			return ErrConfigConflict
@@ -74,6 +63,17 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 			return ErrActivationUnknown
 		case "aborted", "prepare-failed", "commit-failed":
 			return ErrConfigConflict
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if current, err := r.Store.AgentState(ctx, "applied_version"); err == nil {
+		applied, parseErr := strconv.ParseUint(current, 10, 64)
+		if parseErr != nil {
+			return fmt.Errorf("agent: stored applied version invalid")
+		}
+		if version < applied {
+			return ErrStaleRevision
 		}
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -93,7 +93,12 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		return err
 	}
 	result, err := r.Apply.Commit(id, commitUnknown)
+	var objectResults []ObjectResult
 	if results, ok := result.([]ObjectResult); ok && len(results) > 0 {
+		if err := validateObjectResults(results); err != nil {
+			return err
+		}
+		objectResults = results
 		if saveErr := r.Store.SaveObjectResults(ctx, txID, results); saveErr != nil {
 			return saveErr
 		}
@@ -108,5 +113,5 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		}
 		return err
 	}
-	return r.Store.SaveConfigResult(ctx, txID, version, "active", "")
+	return r.Store.FinalizeConfigResult(ctx, txID, version, objectResults)
 }

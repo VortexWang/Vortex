@@ -51,7 +51,7 @@ func main() {
 		panic("invalid node CA")
 	}
 	config := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}, ClientCAs: pool, ClientAuth: tls.RequireAndVerifyClientCert}
-	if err := (&hub.TestServer{Store: s}).ServeTLS(ctx, ln, config); err != nil && ctx.Err() == nil {
+	if err := (&hub.TestServer{Store: s}).ServeGRPC(ctx, ln, config); err != nil && ctx.Err() == nil {
 		panic(err)
 	}
 }

@@ -3,15 +3,22 @@ package hub
 import (
 	"bufio"
 	"context"
+	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
 	"sync"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/protobuf/proto"
 	"vortex/agent/store"
+	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 type Message struct {
@@ -25,9 +32,11 @@ type Message struct {
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
 type TestServer struct {
-	Store   *store.Store
-	mu      sync.RWMutex
-	revoked map[string]struct{}
+	controlv1.UnimplementedNodeControlServer
+	Store        *store.Store
+	ConfigUpdate *controlv1.RuntimeConfigUpdate
+	mu           sync.RWMutex
+	revoked      map[string]struct{}
 }
 
 func (s *TestServer) Revoke(serial string) {
@@ -62,6 +71,98 @@ func (s *TestServer) Serve(ctx context.Context, ln net.Listener) error {
 
 func (s *TestServer) ServeTLS(ctx context.Context, ln net.Listener, config *tls.Config) error {
 	return s.Serve(ctx, tls.NewListener(ln, config))
+}
+
+// ServeGRPC runs the contract-defined mTLS control service used by the node
+// process tests. It is not a production Hub authority.
+func (s *TestServer) ServeGRPC(ctx context.Context, ln net.Listener, config *tls.Config) error {
+	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(config.Clone())))
+	controlv1.RegisterNodeControlServer(server, s)
+	go func() {
+		<-ctx.Done()
+		server.Stop()
+	}()
+	err := server.Serve(ln)
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	return err
+}
+
+func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage, controlv1.ControlMessage]) error {
+	ctx := stream.Context()
+	remote, ok := peer.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("test hub: control peer identity missing")
+	}
+	tlsInfo, ok := remote.AuthInfo.(credentials.TLSInfo)
+	if !ok || len(tlsInfo.State.PeerCertificates) == 0 {
+		return fmt.Errorf("test hub: control mTLS certificate missing")
+	}
+	certificate := tlsInfo.State.PeerCertificates[0]
+	if certificate.Subject.CommonName == "" || len(certificate.DNSNames) != 1 || certificate.DNSNames[0] != certificate.Subject.CommonName || s.isRevoked(certificate) {
+		return fmt.Errorf("test hub: control identity rejected")
+	}
+	first, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+	if first.GetNodeId() != certificate.DNSNames[0] || first.GetBootId() == "" || first.GetSequence() == 0 || first.GetHeartbeat() == nil {
+		return fmt.Errorf("test hub: control session identity or first heartbeat invalid")
+	}
+	receiptID := fmt.Sprintf("control/%s/%s/%d", first.GetNodeId(), first.GetBootId(), first.GetSequence())
+	if err := s.Store.RecordReceipt(ctx, receiptID, first.GetSequence()); err != nil {
+		return err
+	}
+	if s.ConfigUpdate == nil {
+		return nil
+	}
+	messageID, err := testHubMessageID()
+	if err != nil {
+		return err
+	}
+	update := proto.Clone(s.ConfigUpdate).(*controlv1.RuntimeConfigUpdate)
+	if err := stream.Send(&controlv1.ControlMessage{
+		MessageId: messageID,
+		Sequence:  1,
+		Body:      &controlv1.ControlMessage_ConfigUpdate{ConfigUpdate: update},
+	}); err != nil {
+		return err
+	}
+	result, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+	if result.GetNodeId() != first.GetNodeId() || result.GetBootId() != first.GetBootId() || result.GetSequence() <= first.GetSequence() || result.GetApplyResult() == nil || !bytesEqual(result.GetApplyResult().GetTransactionId(), update.GetTransactionId()) {
+		return fmt.Errorf("test hub: config result does not correlate with update")
+	}
+	payload, err := proto.Marshal(result.GetApplyResult())
+	if err != nil {
+		return err
+	}
+	return s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId())+"-"+messageID, "control-apply-result", payload)
+}
+
+func testHubMessageID() (string, error) {
+	var id [16]byte
+	if _, err := rand.Read(id[:]); err != nil {
+		return "", err
+	}
+	id[6] = (id[6] & 0x0f) | 0x40
+	id[8] = (id[8] & 0x3f) | 0x80
+	encoded := hex.EncodeToString(id[:])
+	return encoded[:8] + "-" + encoded[8:12] + "-" + encoded[12:16] + "-" + encoded[16:20] + "-" + encoded[20:], nil
+}
+
+func bytesEqual(left, right []byte) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	var diff byte
+	for i := range left {
+		diff |= left[i] ^ right[i]
+	}
+	return diff == 0
 }
 
 func (s *TestServer) handle(ctx context.Context, conn net.Conn) {

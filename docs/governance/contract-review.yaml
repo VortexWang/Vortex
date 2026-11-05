@@ -5,12 +5,15 @@
   "decision": "freeze-contracts",
   "review_date": "2026-11-03",
   "contracts": [
-    {"id":"vortex.database","path":"contracts/database/schema.sql","sha256":"11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2","decision":"approved"},
-    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","sha256":"b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191","decision":"approved"},
-    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","sha256":"4aedc57c1433102d36ab861ea4deee6d063707010f69e70dadf3d433abb4117a","decision":"approved"},
-    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","sha256":"43261cd1e9b115cddadee08b52ecabddf82f7e69c1f47690424568af91435ef8","decision":"approved"},
-    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","sha256":"dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52","decision":"approved"}
+    {"id":"vortex.database","path":"contracts/database/schema.sql","version":"1.0.0","sha256":"11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2","decision":"approved"},
+    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","version":"1.0.0","sha256":"b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191","decision":"approved"},
+    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","version":"1.1.0","sha256":"0b1ecdb1480fd28632571a14850fff96907dc2ba32a06ea92486667705328da0","decision":"approved"},
+    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","version":"1.0.0","sha256":"43261cd1e9b115cddadee08b52ecabddf82f7e69c1f47690424568af91435ef8","decision":"approved"},
+    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","version":"1.0.0","sha256":"dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52","decision":"approved"}
   ],
   "approved_at": "2026-11-03T04:26:01Z",
-  "note": "The approved hashes bind the frozen 1.0.0 content. Any normative change requires a SemVer update, requirements-map review and changelog record."
+  "note": "Each approved hash binds the exact frozen content at the recorded SemVer version. Any normative change requires owner approval, a SemVer update, requirements-map review and changelog record.",
+  "change_approvals": [
+    {"contract_id":"vortex.control.v1","from":"1.0.0","version":"1.1.0","proposal_sha256":"d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218","contract_sha256":"0b1ecdb1480fd28632571a14850fff96907dc2ba32a06ea92486667705328da0","reviewer":"user-approved-in-session","approved_at":"2026-11-05T11:26:21Z","decision":"approved"}
+  ]
 }

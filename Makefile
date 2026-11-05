@@ -1,4 +1,7 @@
-.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check phase2-benchmark-smoke phase2-benchmark phase5-wave1-check phase5-wave2-check
+.PHONY: phase1-quick phase1-model phase1-check phase1-release-gate phase2-engine-quick phase2-engine-check phase2-benchmark-smoke phase2-benchmark phase5-contract-check phase5-wave1-check phase5-wave2-check
+
+phase5-contract-check:
+	tools/phase5/contracts_check.sh
 
 phase5-wave1-check:
 	tools/phase5/wave1_check.sh

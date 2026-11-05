@@ -3,6 +3,7 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 out=${PHASE5_EVIDENCE_DIR:-"$root/artifacts/phase5/wave2"}
 mkdir -p "$out"
+"$root/tools/phase5/contracts_check.sh" > "$out/contracts-check.log"
 {
   printf 'commit: '; git -C "$root" rev-parse HEAD
   printf 'go: '; go version
