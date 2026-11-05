@@ -108,8 +108,11 @@ for name in ("source", "destination", "target"):
         container_kernel_drops[name] = delta
 smoke_tcp = len(b"vortex-three-relay-smoke")
 smoke_udp = len(b"vortex-three-relay-udp-smoke")
-expected_left = target["tcp_bytes_received"] + target["udp_bytes_received"] + 1200 * container_kernel_drops.get("target", 0)
-expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned["right_to_left"] - 1200 * container_kernel_drops.get("destination", 0)
+expected_left = (smoke_tcp + smoke_udp + target["tcp_bytes_received"] +
+                 target["udp_bytes_received"] + 1200 * container_kernel_drops.get("target", 0))
+expected_right = (smoke_tcp + smoke_udp + target["tcp_bytes_sent"] +
+                  target["udp_bytes_sent"] - returned["right_to_left"] -
+                  1200 * container_kernel_drops.get("destination", 0))
 expected = {"left_to_right": expected_left, "right_to_left": expected_right}
 if count < 4 or dict(totals) != expected:
     raise SystemExit(f"accounting mismatch: events={count} totals={dict(totals)} expected={expected}")
