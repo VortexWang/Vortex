@@ -326,3 +326,28 @@ existing AuthorizationUpdate for success. Owner approval requested because
 contract-review.yaml explicitly requires owner approval for normative changes.
 No frozen schema, approval hash or version has been modified. Independent
 implementation continues; transport implementation awaits that decision.
+
+## Approved control 1.3.0 and durable Hub demand outcomes
+
+Owner explicitly approved in chat: “批准 1.3.0 提案”. Recorded approval at
+2026-11-05T23:42:15Z for unchanged proposal hash
+1dfd8ae92fb93217011118ccbd605067f94b8944ef9e257fcadeba8cfcbb2064.
+The control schema is now 1.3.0 with CreditDemand, CreditDemandDenied and the
+three definitive-denial enum values. Updated approval hash, version, changelog
+and ENG-037/ENG-050/Agent/Hub mapping. Generated using pinned protoc 36.2,
+protoc-gen-go 1.36.12, protoc-gen-go-grpc 1.6.2. Contract freeze/map/change,
+reproducible generation and five contract checker unit tests PASS.
+
+ResolveHubDemand uses the same transaction as issuer validation/issuance.
+Insufficient funds, expired authority or invalid scope can produce a committed
+non-issuance record. Invalid envelopes, unknown time, closed signer, conflicts
+and storage errors produce no definitive response. Persistent denials prevent
+the legacy IssueHubAuthorization API from later issuing that same identity.
+Hub Issuer.ResolveDemand maps committed outcomes to the approved typed messages.
+
+Tests cover denial/restart/replay, payload conflict, fresh smaller request,
+write-failure without outcome, and sixteen concurrent successful replays with
+exactly one debit. Agent/Hub full race PASS; vet and contract gate PASS. The
+new Hub typed adapter builds and is not yet called by the stream dispatcher.
+Agent denial processing/outbound delivery and adaptive scheduling remain open.
+This approval and these finite tests do not lock parameters or close Phase 4.

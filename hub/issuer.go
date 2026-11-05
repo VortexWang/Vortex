@@ -29,3 +29,31 @@ func (i *Issuer) Issue(ctx context.Context, delegationID, nodeID, bootID, reques
 	}
 	return &controlv1.AuthorizationUpdate{Generation: result.Generation, Payload: result.Payload}, nil
 }
+
+// ResolveDemand is called only after the control server binds nodeID/bootID to
+// its authenticated stream. Exactly one response is returned after Store has
+// committed an immutable success or definitive non-issuance outcome.
+func (i *Issuer) ResolveDemand(ctx context.Context, nodeID, bootID string, demand *controlv1.CreditDemand) (*controlv1.AuthorizationUpdate, *controlv1.CreditDemandDenied, error) {
+	if i == nil || i.Store == nil || i.Clock == nil || i.HubID == "" || demand == nil {
+		return nil, nil, fmt.Errorf("hub: durable demand issuer unavailable")
+	}
+	result, err := i.Store.ResolveHubDemand(ctx, store.IssueRequest{ID: demand.GetRequestId(), HubID: i.HubID, DelegationID: demand.GetDelegationId(), NodeID: nodeID, BootID: bootID, RawBytes: demand.GetRawBytes(), TTL: time.Duration(demand.GetTtlSeconds()) * time.Second}, i.Clock())
+	if err != nil {
+		return nil, nil, err
+	}
+	if result.Denial == "" {
+		return &controlv1.AuthorizationUpdate{Generation: result.Authorization.Generation, Payload: result.Authorization.Payload}, nil, nil
+	}
+	var reason controlv1.CreditDemandDenial
+	switch result.Denial {
+	case "invalid_scope":
+		reason = controlv1.CreditDemandDenial_CREDIT_DEMAND_DENIAL_INVALID_SCOPE
+	case "insufficient_funds":
+		reason = controlv1.CreditDemandDenial_CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS
+	case "expired":
+		reason = controlv1.CreditDemandDenial_CREDIT_DEMAND_DENIAL_EXPIRED
+	default:
+		return nil, nil, fmt.Errorf("hub: invalid persisted demand denial")
+	}
+	return nil, &controlv1.CreditDemandDenied{RequestId: demand.GetRequestId(), Reason: reason}, nil
+}

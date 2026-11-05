@@ -182,6 +182,22 @@ func issuerModeTx(ctx context.Context, tx *sql.Tx, now IssuerTime) (time.Time, t
 // payload in one FULL transaction. Lost responses only replay the same payload;
 // expiry, disconnection and process restart do not return any reserved bytes.
 func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return IssuedAuthorization{}, err
+	}
+	defer tx.Rollback()
+	result, err := s.issueHubAuthorizationTx(ctx, tx, r, now)
+	if err != nil {
+		return IssuedAuthorization{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return IssuedAuthorization{}, err
+	}
+	return result, nil
+}
+
+func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
 	var result IssuedAuthorization
 	if s.owner != "hub" {
 		return result, ErrAuthorizationDenied
@@ -196,11 +212,17 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	if err != nil {
 		return result, err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return result, err
+	var deniedRequest []byte
+	deniedErr := tx.QueryRowContext(ctx, `SELECT request FROM issuer_demand_denials WHERE request_id=?`, r.ID).Scan(&deniedRequest)
+	if deniedErr == nil {
+		if !bytes.Equal(deniedRequest, request) {
+			return result, ErrAuthorizationUpdateConflict
+		}
+		return result, ErrDemandDefinitivelyDenied
 	}
-	defer tx.Rollback()
+	if !errors.Is(deniedErr, sql.ErrNoRows) {
+		return result, deniedErr
+	}
 	var priorRequest []byte
 	err = tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256 FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest)
 	if err == nil {
@@ -218,7 +240,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 			return IssuedAuthorization{}, err
 		}
 		result.Generation = envelope.PathGeneration
-		return result, tx.Commit()
+		return result, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return result, err
@@ -266,7 +288,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return result, err
 	}
 	if r.RawBytes > remaining {
-		return result, ErrAuthorizationDenied
+		return result, ErrDemandInsufficientFunds
 	}
 	expires := now.Latest.Add(r.TTL)
 	for _, limit := range []time.Time{d.ExpiresAt, d.HardDeadline, deadline, d.AutonomyDeadline} {
@@ -294,9 +316,6 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return IssuedAuthorization{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO issuer_issues(issue_id,delegation_id,request,payload,payload_sha256,amount_bytes,created_at) VALUES(?,?,?,?,?,?,?)`, r.ID, d.ID, request, result.Payload, result.Digest, strconv.FormatUint(r.RawBytes, 10), now.Latest.UTC().Format(time.RFC3339Nano)); err != nil {
-		return IssuedAuthorization{}, err
-	}
-	if err := tx.Commit(); err != nil {
 		return IssuedAuthorization{}, err
 	}
 	return result, nil

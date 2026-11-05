@@ -356,6 +356,10 @@ CREATE TABLE IF NOT EXISTS issuer_delegations (
  payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
  remaining_bytes TEXT NOT NULL, state TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS issuer_demand_denials (
+ request_id TEXT PRIMARY KEY NOT NULL, request BLOB NOT NULL,
+ reason TEXT NOT NULL CHECK(reason IN ('invalid_scope','insufficient_funds','expired'))
+);
 CREATE TABLE IF NOT EXISTS issuer_issues (
  issue_id TEXT PRIMARY KEY NOT NULL, delegation_id TEXT NOT NULL,
  request BLOB NOT NULL, payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
@@ -421,7 +425,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '12')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '13')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
