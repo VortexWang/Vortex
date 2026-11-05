@@ -104,3 +104,33 @@ Remaining 05-03 acceptance work:
 - Local Docker PASS after OrbStack recovery, using a clean read-only source archive and the previously pinned Go 1.27.3 image digest. Raw logs/report are under `artifacts/phase5/authorization/1d900cd/docker/`.
 - [GitHub Actions run 42052706718](https://github.com/VortexWang/Vortex/actions/runs/42052706718) PASS at the identical SHA: frozen contracts, Wave 1, Wave 2 and incremental authorization race regression. Downloaded logs/report are under `artifacts/phase5/authorization/1d900cd/actions/`.
 - These runs verify the heartbeat/clock and lease-bound credit increment, not the remaining runtime composition, share enforcement, offline issuance or full-disk acceptance items listed above. Both reports preserve `plan_complete: false`.
+
+## Automatic runtime authority composition (`d64fe72`)
+
+- `Node.New` now installs a dynamic durable Gate into `RuntimeEngine`, using the local Engine configuration's rule, revision and path generation. The static destination runtime accepts non-qualification configurations but refuses to start without an Agent Gate. No remote OPEN can alter the locally configured target or rule.
+- Target admission moved before dialing: local topology checks run first, then durable runtime/share/grant admission. The same admitted session is used for transfer; a second post-dial admission is not created.
+- Added persistent runtime session slots and a per-share-source rate bucket (SQLite schema version 5). All Gate instances count the same held connection slots. Unknown previous-boot slots continue to count; a different boot cannot release them. Each write revalidates the pinned runtime/share/grant and open session in the reservation transaction. Rate debits are atomic with quota holds; returning unused quota does not refund rate tokens. A prior-boot rate bucket requires handoff rather than being silently refilled.
+- New TCP and UDP tests start the real `RuntimeEngine` and VLink TLS/HELLO, demonstrate no target contact before authorization, obtain boot-bound authorization from the mTLS Hub fixture, reject a second stream at the one-connection share limit, transfer payload in both directions, and reconcile exact byte totals against the Agent source ledger.
+- The same fixture sends resulting usage over the real control stream, waits for durable Hub acknowledgements, and verifies the Hub ledger has both directional batches. With the evidence environment enabled it retains compressed, closed SQLite Agent/Hub files and their uncompressed SHA-256 values. The archive contains test authority and ledger state, not runtime credential private keys.
+- Local Agent/Hub race and targeted vet PASS; Engine accounting/runtime race PASS. Docker/Actions evidence follows below after completion.
+
+Current remaining 05-03 boundaries: restricted offline issuance must be derived from durable parent/share/delegation ownership rather than booleans; unknown upper bounds still need explicit wire treatment; real full-disk regression and issuance-boundary fencing guards remain open. The Agent lifecycle supports a static destination configuration; source/relay topology process composition is not supplied by this increment and still needs assessment against full runtime acceptance. No full 05-03 completion is claimed.
+
+## Actual full-disk runtime regression (`cebe5ab`)
+
+- The TCP/UDP runtime fixture can place the Agent database on an explicitly supplied isolated 4 MiB tmpfs, fill it to operating-system ENOSPC, and assert SQLite error code 13. The default test never fills the host filesystem; a misconfigured fixture fails after a bounded 16 MiB write.
+- After successful authorized traffic, the fixture exhausts the Agent filesystem and sends additional traffic over the existing stream. The Engine stops the stream before the target receives those bytes. Deleting the filler does not automatically reopen the fault-latched Gate. Previously confirmed usage still reaches the separate Hub ledger after storage recovery.
+- The fixture retains compressed closed Agent and Hub SQLite files plus SHA-256 values. Independent read-only inspection of the Docker snapshots returned `PRAGMA quick_check = ok`; both TCP and UDP Agent/Hub stores contain two usage records, covering the known ingress and egress batches.
+- This supplies actual full-disk evidence for the composed static-destination path. It does not claim a power-loss test, unknown-outcome wire handoff, all source/relay roles, or 05-04 recovery completion.
+- Docker clean SHA `cebe5ab0bf181ea6e06f36d27b84ee60f60d8b5c`, pinned Go 1.27.3 image, isolated 4 MiB tmpfs: PASS. `full_disk_requested: true` is recorded. GitHub Actions verification is recorded below when terminal.
+
+## Next contract checkpoint
+
+The exact unknown-liability wire proposal is retained in `05-03-UNKNOWN-USAGE-PROPOSAL.md`, SHA-256 `4f44708c18bd4086c49ee1fb9af611e23a98501ff9e52679e0a51995f8e38d67`, requesting additive `vortex.control.v1` 1.2.0. Owner approval is pending. No normative contract was changed. Approval is required by `docs/governance/contract-review.yaml` before changing frozen wire semantics. Offline issuance/ownership work can proceed independently while this decision is pending.
+
+### Verified full-disk pair for `cebe5ab0bf181ea6e06f36d27b84ee60f60d8b5c`
+
+- Local Docker and [GitHub Actions run 42054542619](https://github.com/VortexWang/Vortex/actions/runs/42054542619) both PASS at the identical source SHA. Both reports record `full_disk_requested: true` and `plan_complete: false`. Actions also passed the contract gate and preceding Wave 1/2 regressions.
+- Raw artifacts and run metadata are retained under `artifacts/phase5/authorization/cebe5ab/{docker,actions}/` and `actions-run.json`.
+- Independently verified all eight closed SQLite snapshots (Agent/Hub × TCP/UDP × Docker/Actions): decompressed SHA-256 matches each fixture manifest, `PRAGMA quick_check` returns `ok`, and each snapshot contains two known directional usage batches. Machine-readable results: `artifacts/phase5/authorization/cebe5ab/ledger-audit.json`.
+- This closes the actual-full-disk mixed-runtime regression item for the static destination path. Offline issuance/ownership, typed unknown-liability handoff, and broader runtime lifecycle acceptance remain open.

@@ -5,11 +5,11 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 3
 status: executing
-stopped_at: 05-03 lease-bound reservations and authenticated heartbeat persistence implemented; runtime composition and offline issuance guards remain open
-last_updated: "2026-11-05T15:15:57Z"
+stopped_at: 05-03 automatic static-destination runtime composition and durable share limits implemented; offline issuance and unknown-liability wire handoff remain open
+last_updated: "2026-11-05T15:28:04Z"
 last_activity: 2026-11-05
-last_activity_desc: Lease checks, atomic heartbeat persistence and boot-local clock added; runtime composition remains open; plan 05-03 remains executing
-state_head: 1d900cdc97e8695aec25dbfeb45e385163338404
+last_activity_desc: Same-SHA Docker and Actions actual-full-disk runtime regression passed with raw ledger audit; offline issuance and unknown-liability handoff remain open
+state_head: cebe5ab0bf181ea6e06f36d27b84ee60f60d8b5c
 progress:
   total_phases: 8
   completed_phases: 4
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 3
 Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 remains in progress: lease-bound credit checks and authenticated heartbeat persistence implemented; runtime composition, offline issuance and handoff guards remain open
+Last activity: 2026-11-05 — Plan 05-03 remains in progress: automatic runtime admission and durable share enforcement implemented; offline issuance and unknown-liability handoff remain open
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
