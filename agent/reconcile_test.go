@@ -21,7 +21,7 @@ type persistedApplier struct {
 func (persistedApplier) Prepare([16]byte, uint64) (any, error) { return struct{}{}, nil }
 func (a persistedApplier) Commit(id [16]byte, uncertain bool) (any, error) {
 	result, err := a.store.GetConfigResult(context.Background(), hex.EncodeToString(id[:]))
-	if err != nil || result.State != "commit-requested" {
+	if err != nil || result.State != "committing" {
 		a.t.Fatalf("Commit issued before durable intent: result=%+v err=%v", result, err)
 	}
 	if uncertain {

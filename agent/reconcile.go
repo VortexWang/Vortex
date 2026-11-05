@@ -63,7 +63,7 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		switch previous.State {
 		case "active":
 			return nil
-		case "activation-unknown", "commit-requested":
+		case "activation-unknown", "committing", "commit-requested":
 			return ErrActivationUnknown
 		case "released", "aborted", "prepare-failed", "commit-failed":
 			return ErrConfigConflict
@@ -109,6 +109,20 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 			return err
 		}
 	}
+	if preparer, ok := r.Apply.(interface {
+		PrepareConfig([16]byte, uint64, []byte) error
+	}); ok {
+		record, err := r.Store.GetConfigResult(ctx, txID)
+		if err != nil {
+			return err
+		}
+		if err = preparer.PrepareConfig(id, generation, record.Payload); err != nil {
+			if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error()); saveErr != nil {
+				return errors.Join(err, saveErr)
+			}
+			return err
+		}
+	}
 	if _, err := r.Apply.Prepare(id, generation); err != nil {
 		if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error()); saveErr != nil {
 			return errors.Join(err, saveErr)
@@ -119,7 +133,7 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		_, _ = r.Apply.Abort(id)
 		return err
 	}
-	if err := r.Store.SaveConfigResult(ctx, txID, version, "commit-requested", ""); err != nil {
+	if err := r.Store.SaveConfigResult(ctx, txID, version, "committing", ""); err != nil {
 		_, _ = r.Apply.Abort(id)
 		return err
 	}
@@ -133,6 +147,12 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		if saveErr := r.Store.SaveObjectResults(ctx, txID, results); saveErr != nil {
 			return saveErr
 		}
+	}
+	if errors.Is(err, ErrActivationPending) {
+		if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepared", ""); saveErr != nil {
+			return saveErr
+		}
+		return err
 	}
 	if err != nil {
 		state := "activation-unknown"

@@ -974,17 +974,21 @@
       "id": "AGT-003",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "AGT-004",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "AGT-005",
@@ -994,7 +998,7 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "AGT-006",
@@ -1003,7 +1007,7 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "AGT-007",
@@ -1105,7 +1109,7 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-006",
@@ -1115,7 +1119,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-007",
@@ -1126,7 +1130,7 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-008",
@@ -1137,7 +1141,7 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-009",
@@ -1148,7 +1152,7 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-010",
@@ -1158,7 +1162,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-011",
@@ -1168,7 +1172,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-012",
@@ -1178,7 +1182,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-013",
@@ -1188,7 +1192,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-014",
@@ -1197,7 +1201,7 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-015",
@@ -1207,7 +1211,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-016",
@@ -1217,7 +1221,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-017",
@@ -1227,7 +1231,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "HUB-018",
@@ -1238,7 +1242,7 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "BE-001",
@@ -2326,9 +2330,11 @@
       "id": "SUP-B4-001",
       "contracts": [
         "vortex.runtime-config",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
     },
     {
       "id": "SUP-B5-001",

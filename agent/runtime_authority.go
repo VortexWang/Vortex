@@ -25,6 +25,9 @@ func (n *Node) newRuntimeAuthorityGate(scope RuntimeScope, clock AuthorizationCl
 	return &runtimeAuthorityGate{node: n, scope: scope, clock: clock}
 }
 func (g *runtimeAuthorityGate) Open(ctx context.Context, flow engineaccounting.Flow) (engineaccounting.Session, error) {
+	if e, ok := g.node.Engine.(*RuntimeEngine); ok && e.activationRequired.Load() && !e.activated.Load() {
+		return nil, engineaccounting.ErrDenied
+	}
 	if g.faulted.Load() || flow.Key == "" || flow.RuleID != "" && flow.RuleID != g.scope.RuleID {
 		return nil, engineaccounting.ErrDenied
 	}

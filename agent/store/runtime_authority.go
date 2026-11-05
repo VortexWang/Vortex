@@ -130,3 +130,17 @@ func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n
 	_, err = tx.ExecContext(ctx, `INSERT INTO runtime_rate_buckets(node_id,source_id,boot_id,tokens,last_tick) VALUES(?,?,?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET boot_id=excluded.boot_id,tokens=excluded.tokens,last_tick=excluded.last_tick`, use.NodeID, share.SourceID, use.BootID, tokens-n, use.Latest.UnixNano())
 	return err
 }
+
+// CheckRuntimeReady validates a matching live lease/share/grant without opening
+// a session or spending bytes. Commit must call it again after Prepare.
+func (s *Store) CheckRuntimeReady(ctx context.Context, scope AuthorizationUse) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil); err != nil {
+		return err
+	}
+	return tx.Commit()
+}

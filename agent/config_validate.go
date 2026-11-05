@@ -148,12 +148,19 @@ func validateSchemaValue(value any, schema jsonSchema, path string) error {
 		if schema.Minimum != nil && f < *schema.Minimum || schema.Maximum != nil && f > *schema.Maximum {
 			return fmt.Errorf("%s is outside its allowed range", strings.TrimSpace(path))
 		}
+	case "":
+		if len(schema.Enum) == 0 && schema.Const == nil {
+			return fmt.Errorf("schema has unconstrained value at %s", path)
+		}
 	case "boolean":
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("%s must be a boolean", strings.TrimSpace(path))
 		}
 	default:
 		return fmt.Errorf("schema has unsupported type %q", schema.Type)
+	}
+	if len(schema.Enum) > 0 && !schemaContains(schema.Enum, value) {
+		return fmt.Errorf("%s has an unsupported value", strings.TrimSpace(path))
 	}
 	if schema.Const != nil && !schemaValueEqual(value, schema.Const) {
 		return fmt.Errorf("%s does not match its required constant", strings.TrimSpace(path))

@@ -149,6 +149,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
 	}
 	lastNodeSequence := sequence
+	if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
+		return err
+	}
 	initialSendErr := c.sendPendingUsage(ctx, stream, &lastNodeSequence)
 	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
 		return initialSendErr
@@ -247,6 +250,30 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
 				return err
 			}
+			if c.Reconciler != nil {
+				prepared, err := c.Node.Store.PreparedConfigs(ctx)
+				if err != nil {
+					return err
+				}
+				for _, record := range prepared {
+					err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
+					if err != nil && !errors.Is(err, ErrActivationPending) {
+						return err
+					}
+					stored, err := c.Node.Store.GetConfigResult(ctx, record.TransactionID)
+					if err != nil {
+						return err
+					}
+					sequence, err := c.Node.Store.NextControlSequence(ctx)
+					if err != nil {
+						return err
+					}
+					if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ApplyResult{ApplyResult: c.Reconciler.readApplyResult(ctx, stored)}}); err != nil {
+						return err
+					}
+					lastNodeSequence = sequence
+				}
+			}
 		case *controlv1.ControlMessage_UsageAck:
 			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
@@ -317,8 +344,8 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
-		IssuerID: issuer,
-		NodeID:   c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
+		IssuerID: issuer, Handoffs: payload.Handoffs,
+		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
 		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
 		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,
 		BackendHeartbeat: payload.BackendHeartbeatAt, AutonomyDeadline: payload.AutonomyDeadline,
@@ -496,4 +523,31 @@ func newControlID() (string, error) {
 	id[8] = (id[8] & 0x3f) | 0x80
 	encoded := hex.EncodeToString(id[:])
 	return encoded[:8] + "-" + encoded[8:12] + "-" + encoded[12:16] + "-" + encoded[16:20] + "-" + encoded[20:], nil
+}
+
+func (c *ControlClient) sendRecoveryEvents(ctx context.Context, stream controlv1.NodeControl_ConnectClient, last *uint64) error {
+	after := ""
+	for {
+		events, err := c.Node.Store.RecoveryEvents(ctx, after)
+		if err != nil {
+			return err
+		}
+		if len(events) == 0 {
+			return nil
+		}
+		for _, event := range events {
+			if len(event.Payload) > 1<<20 {
+				return fmt.Errorf("agent: recovery event exceeds payload bound")
+			}
+			sequence, err := c.Node.Store.NextControlSequence(ctx)
+			if err != nil {
+				return err
+			}
+			if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_Event{Event: &controlv1.NodeEvent{EventId: event.ID, Kind: "boot-recovery", Payload: event.Payload}}}); err != nil {
+				return err
+			}
+			*last = sequence
+			after = event.ID
+		}
+	}
 }

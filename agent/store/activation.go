@@ -44,6 +44,8 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 	}
 	target := "activation-unknown"
 	switch state {
+	case "prepared", "committing":
+		target = state
 	case "active":
 		target = "active"
 		// Never regress an already applied version using a delayed observation.
@@ -66,7 +68,7 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 			return err
 		}
 	case "aborted", "released":
-		if previous == "active" {
+		if previous == "active" && state != "released" {
 			return ErrConfigRequestConflict
 		}
 		target = "released"
@@ -114,6 +116,15 @@ func (s *Store) BindActivationExecutor(ctx context.Context, id, executor string)
 	if _, err = tx.ExecContext(ctx, `INSERT INTO activation_executors(transaction_id,execution_id) VALUES(?,?)`, id, executor); err != nil {
 		return err
 	}
+	witness, err := currentProcessWitness()
+	if err != nil {
+		return err
+	}
+	if len(witness) > 0 {
+		if _, err = tx.ExecContext(ctx, `INSERT INTO activation_processes(transaction_id,witness) VALUES(?,?)`, id, witness); err != nil {
+			return err
+		}
+	}
 	return tx.Commit()
 }
 func (s *Store) ActivationExecutorMatches(ctx context.Context, id, executor string) (bool, error) {
@@ -123,4 +134,21 @@ func (s *Store) ActivationExecutorMatches(ctx context.Context, id, executor stri
 		return false, nil
 	}
 	return executor != "" && previous == executor, err
+}
+
+func validConfigTransition(from, to string) bool {
+	if from == to {
+		return true
+	}
+	switch from {
+	case "received":
+		return to == "prepared" || to == "prepare-failed"
+	case "prepared":
+		return to == "committing" || to == "commit-requested" || to == "aborted"
+	case "committing", "commit-requested":
+		return to == "active" || to == "activation-unknown" || to == "commit-failed" || to == "prepared"
+	case "activation-unknown":
+		return to == "active"
+	}
+	return false
 }

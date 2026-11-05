@@ -99,3 +99,7 @@ phase4-runtime-credit:
 .PHONY: phase5-authorization-check
 phase5-authorization-check:
 	tools/phase5/authorization_check.sh
+
+.PHONY: phase5-check
+phase5-check:
+	sh tools/phase5/check.sh

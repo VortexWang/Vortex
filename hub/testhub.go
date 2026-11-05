@@ -170,6 +170,13 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		}
 		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_Event:
+			if body.Event == nil || body.Event.Kind != "boot-recovery" || len(body.Event.Payload) > 1<<20 {
+				return fmt.Errorf("test hub: invalid recovery event")
+			}
+			if err := s.Store.PersistRecoveryEvent(ctx, first.GetNodeId(), body.Event.EventId, body.Event.Payload); err != nil {
+				return err
+			}
 		case *controlv1.NodeMessage_UnknownUsageBatch:
 			payload, err := contracts.EncodeUnknownUsage(body.UnknownUsageBatch)
 			if err != nil {
@@ -238,6 +245,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			payload, err := proto.Marshal(body.ApplyResult)
 			if err != nil {
 				return err
+			}
+			if body.ApplyResult.State == "prepared" {
+				continue
 			}
 			return s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId()), "control-apply-result", payload)
 		default:

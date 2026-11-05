@@ -43,8 +43,8 @@
     {
       "id": "vortex.authorization.v1",
       "path": "contracts/authorization/v1/payload.schema.json",
-      "version": "1.0.0",
-      "sha256": "eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af",
+      "version": "1.1.0",
+      "sha256": "0febf4b5b7f23cf17f6121d22e7aa41071a3728b2953e462737844f2091c7ece",
       "decision": "approved"
     }
   ],
@@ -79,6 +79,16 @@
       "contract_sha256": "5d1c2b2ef7d3b0d7163c8d09bb786b2ba4c528f3308cbf7e280064cafca5784e",
       "reviewer": "user-approved-in-session",
       "approved_at": "2026-11-05T22:07:56Z",
+      "decision": "approved"
+    },
+    {
+      "contract_id": "vortex.authorization.v1",
+      "from": "1.0.0",
+      "version": "1.1.0",
+      "proposal_sha256": "185541ee09e8dfbb0333a6249e0571c805b182220c77e7c2a79976d45efa4b6e",
+      "contract_sha256": "0febf4b5b7f23cf17f6121d22e7aa41071a3728b2953e462737844f2091c7ece",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-05T23:16:47.278117+00:00",
       "decision": "approved"
     }
   ]

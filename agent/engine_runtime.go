@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 
 	engineaccounting "vortex/engine/accounting"
 	engineruntime "vortex/engine/runtime"
@@ -13,9 +14,12 @@ import (
 // Configuration is loaded before Start so malformed or unauthorized runtime
 // state cannot be acknowledged as an Agent heartbeat.
 type RuntimeEngine struct {
-	ConfigPath string
-	runtime    *engineruntime.Runtime
-	scope      RuntimeScope
+	config             config.Config
+	activationRequired atomic.Bool
+	activated          atomic.Bool
+	ConfigPath         string
+	runtime            *engineruntime.Runtime
+	scope              RuntimeScope
 }
 
 func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
@@ -33,7 +37,7 @@ func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RuntimeEngine{ConfigPath: configPath, runtime: rt, scope: RuntimeScope{RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}}, nil
+	return &RuntimeEngine{config: cfg, ConfigPath: configPath, runtime: rt, scope: RuntimeScope{RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}}, nil
 }
 
 func (e *RuntimeEngine) Start(ctx context.Context) error {

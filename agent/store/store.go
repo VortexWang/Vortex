@@ -95,6 +95,7 @@ type AuthorizationRecord struct {
 }
 
 type AuthorizationUpdate struct {
+	Handoffs               []EpochHandoff
 	IssuerID               string
 	BackendHeartbeat       time.Time
 	AutonomyDeadline       time.Time
@@ -212,6 +213,10 @@ CREATE TABLE IF NOT EXISTS config_object_results (
 CREATE TABLE IF NOT EXISTS activation_holds (
  transaction_id TEXT PRIMARY KEY NOT NULL, generation TEXT NOT NULL,
  state TEXT NOT NULL, FOREIGN KEY(transaction_id) REFERENCES config_results(transaction_id)
+);
+CREATE TABLE IF NOT EXISTS activation_processes (
+ transaction_id TEXT PRIMARY KEY NOT NULL, witness BLOB NOT NULL,
+ FOREIGN KEY(transaction_id) REFERENCES config_results(transaction_id)
 );
 CREATE TABLE IF NOT EXISTS activation_executors (
  transaction_id TEXT PRIMARY KEY NOT NULL, execution_id TEXT NOT NULL,
@@ -375,6 +380,13 @@ CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id)
 );
+CREATE TABLE IF NOT EXISTS authorization_handoffs (
+ node_id TEXT NOT NULL, source_id TEXT NOT NULL, from_epoch TEXT NOT NULL,
+ to_epoch TEXT NOT NULL, transfer_id TEXT NOT NULL,
+ payload BLOB NOT NULL, remaining_bytes TEXT NOT NULL,
+ PRIMARY KEY(node_id,source_id,from_epoch), UNIQUE(node_id,source_id,to_epoch),
+ UNIQUE(node_id,source_id,transfer_id)
+);
 CREATE TABLE IF NOT EXISTS hub_ledger (
  sequence INTEGER PRIMARY KEY AUTOINCREMENT,
  kind TEXT NOT NULL, record_id TEXT NOT NULL, payload BLOB NOT NULL,
@@ -415,7 +427,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '11')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '13')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -701,9 +713,27 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	for _, id := range revocations {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET state='revoked' WHERE node_id=? AND authorization_id=?`, update.NodeID, id); err != nil {
+			return err
+		}
+	}
+	for _, h := range update.Handoffs {
+		if err := persistEpochHandoffTx(ctx, tx, update, h); err != nil {
+			return err
+		}
+	}
 	if !update.BackendHeartbeat.IsZero() || !update.AutonomyDeadline.IsZero() {
 		if err := persistAuthorizationHeartbeat(ctx, tx, update.BackendHeartbeat, update.AutonomyDeadline); err != nil {
-			return err
+			if !errors.Is(err, ErrAuthorityHandoffRequired) || len(update.Handoffs) == 0 {
+				return err
+			}
+			if err := resumeHandoffHeartbeatTx(ctx, tx, update); err != nil {
+				return err
+			}
 		}
 	}
 	for key, incoming := range map[string]uint64{
@@ -773,6 +803,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 				if err := checkSourceLineageTx(ctx, tx, update.NodeID, record); err != nil {
 					return err
 				}
+				if err := spendHandoffBudgetTx(ctx, tx, update.NodeID, record); err != nil {
+					return err
+				}
 				var initialText string
 				if err := tx.QueryRowContext(ctx, `SELECT initial_bytes FROM authorization_source_owners WHERE node_id=? AND source_id=?`, update.NodeID, record.SourceID).Scan(&initialText); err != nil {
 					return err
@@ -790,14 +823,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 			}
 		}
 	}
-	for _, id := range revocations {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
-			return err
-		}
-		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET state='revoked' WHERE node_id=? AND authorization_id=?`, update.NodeID, id); err != nil {
-			return err
-		}
-	}
+
 	_, err = tx.ExecContext(ctx, `INSERT INTO authorization_updates(node_id,update_id,boot_id,payload,payload_sha256,signer_epoch,path_generation,fencing_generation_floor,created_at) VALUES(?,?,?,?,?,?,?,?,?)`, update.NodeID, update.UpdateID, update.BootID, update.Payload, digest[:], strconv.FormatUint(update.SignerEpoch, 10), strconv.FormatUint(update.PathGeneration, 10), strconv.FormatUint(update.FencingGenerationFloor, 10), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
 		return err
@@ -1308,12 +1334,33 @@ func (s *Store) SaveConfigResult(ctx context.Context, transactionID string, vers
 	if transactionID == "" || state == "" {
 		return fmt.Errorf("store: config transaction and state are required")
 	}
-	legacyVersion := int64(0)
-	if version <= math.MaxInt64 {
-		legacyVersion = int64(version)
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
 	}
-	_, err := s.db.ExecContext(ctx, `INSERT INTO config_results(transaction_id, version, version_u64, state, reason, updated_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(transaction_id) DO UPDATE SET version=excluded.version, version_u64=excluded.version_u64, state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, legacyVersion, strconv.FormatUint(version, 10), state, reason, time.Now().UTC().Format(time.RFC3339Nano))
-	return err
+	defer tx.Rollback()
+	var priorVersion, priorState, generation string
+	err = tx.QueryRowContext(ctx, `SELECT version_u64,state,fencing_generation FROM config_results WHERE transaction_id=?`, transactionID).Scan(&priorVersion, &priorState, &generation)
+	if err == nil {
+		if priorVersion != strconv.FormatUint(version, 10) {
+			return ErrConfigRequestConflict
+		}
+		if generation != "0" && !validConfigTransition(priorState, state) {
+			return ErrConfigRequestConflict
+		}
+		if _, err = tx.ExecContext(ctx, `UPDATE config_results SET state=?,reason=?,updated_at=? WHERE transaction_id=?`, state, reason, time.Now().UTC().Format(time.RFC3339Nano), transactionID); err != nil {
+			return err
+		}
+	} else if errors.Is(err, sql.ErrNoRows) {
+		// Legacy/import records carry no execution proof and cannot be released by
+		// recovery. New execution always starts with SaveConfigRequest.
+		if _, err = tx.ExecContext(ctx, `INSERT INTO config_results(transaction_id,version,version_u64,state,reason,updated_at) VALUES(?,0,?,?,?,?)`, transactionID, strconv.FormatUint(version, 10), state, reason, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *Store) GetConfigResult(ctx context.Context, transactionID string) (ConfigResult, error) {
@@ -1417,7 +1464,7 @@ func (s *Store) SaveConfigRequest(ctx context.Context, request ConfigResult) (Co
 		return ConfigResult{}, ErrConfigGenerationStale
 	}
 	var unresolved int
-	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM config_results WHERE state IN ('commit-requested','activation-unknown')`).Scan(&unresolved); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM config_results WHERE state IN ('received','prepared','committing','commit-requested','activation-unknown')`).Scan(&unresolved); err != nil {
 		return ConfigResult{}, err
 	}
 	if unresolved != 0 {
@@ -1451,6 +1498,23 @@ func (s *Store) FinalizeConfigResult(ctx context.Context, transactionID string, 
 		return err
 	}
 	defer tx.Rollback()
+	var storedVersion, state string
+	if err = tx.QueryRowContext(ctx, `SELECT version_u64,state FROM config_results WHERE transaction_id=?`, transactionID).Scan(&storedVersion, &state); err != nil {
+		return err
+	}
+	if storedVersion != strconv.FormatUint(version, 10) || !validConfigTransition(state, "active") {
+		return ErrConfigRequestConflict
+	}
+	var current string
+	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='applied_version'`).Scan(&current)
+	if err == nil {
+		n, e := strconv.ParseUint(current, 10, 64)
+		if e != nil || n > version {
+			return ErrConfigVersionStale
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	updated := time.Now().UTC().Format(time.RFC3339Nano)
 	for _, result := range objects {
 		if result.ObjectID == "" || result.State == "" {

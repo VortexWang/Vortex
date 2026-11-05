@@ -43,6 +43,9 @@ func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
 	}
 	encodedBoot := hex.EncodeToString(boot[:])
 	bootID := encodedBoot[:8] + "-" + encodedBoot[8:12] + "-" + encodedBoot[12:16] + "-" + encodedBoot[16:20] + "-" + encodedBoot[20:]
+	if err := s.BeginBootRecovery(context.Background(), bootID); err != nil {
+		return nil, fmt.Errorf("agent: boot activation recovery: %w", err)
+	}
 	if err := s.MarkPreviousBootAuthorizationsSettlementOnly(context.Background(), nodeID, bootID); err != nil {
 		return nil, fmt.Errorf("agent: fence previous-boot authorizations before Engine start: %w", err)
 	}

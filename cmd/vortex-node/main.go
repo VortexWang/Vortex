@@ -17,7 +17,6 @@ import (
 	"vortex/agent"
 	"vortex/agent/identity"
 	"vortex/agent/store"
-	"vortex/engine/apply"
 )
 
 func main() {
@@ -191,12 +190,22 @@ func main() {
 	if string(storedCertificate) != string(leaf.Raw) || !storedExpiry.Equal(leaf.NotAfter) {
 		fatal(errors.New("durable runtime credential is inconsistent with the recovered credential"))
 	}
+	var runtimeApply *agent.RuntimeApplier
+	if _, ok := engine.(*agent.RuntimeEngine); ok {
+		runtimeApply, err = n.RuntimeApplier()
+		if err != nil {
+			fatal(err)
+		}
+	}
 	if err := n.Start(ctx); err != nil {
 		fatal(err)
 	}
 	defer stopNode(n)
-	applyManager := apply.NewManager()
-	reconciler := &agent.Reconciler{Store: s, Apply: agent.EngineApplier{Manager: applyManager}}
+	reconciler := &agent.Reconciler{Store: s, Apply: agent.EngineApplier{}}
+	if runtimeApply != nil {
+		reconciler.Apply = runtimeApply
+	}
+
 	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
 	runErr := make(chan error, 1)

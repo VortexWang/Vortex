@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -149,10 +151,20 @@ func TestHandoffFullDiskDoesNotPartiallyTransfer(t *testing.T) {
 		t.Fatal(err)
 	}
 	chunk := make([]byte, 64*1024)
-	for {
+	full := false
+	for written := 0; written < 16*1024*1024; written += len(chunk) {
 		if _, err = f.Write(chunk); err != nil {
+			full = true
 			break
 		}
+	}
+	if !full {
+		f.Close()
+		t.Fatal("full disk fixture must be an isolated filesystem of at most 16 MiB")
+	}
+	if !errors.Is(err, syscall.ENOSPC) {
+		f.Close()
+		t.Fatalf("unexpected disk error: %v", err)
 	}
 	f.Close()
 	h := HandoffRequest{ID: "550e8400-e29b-41d4-a716-446655440800", HubID: d.HubID, FromEpoch: 1, ToEpoch: 2, Heartbeat: d.BackendHeartbeat.Add(time.Minute)}

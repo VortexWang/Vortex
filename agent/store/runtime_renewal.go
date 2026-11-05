@@ -90,7 +90,11 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 		}
 		if initial != nil {
 			base := map[string]AuthorizationRecord{"credit_grant": initial.grant, "runtime_lease": initial.runtime, "share_lease": initial.share}[r.Kind]
-			if base.AuthorizationID == "" || !sameRuntimeFamily(r, base) {
+			compatible, err := sameRuntimeFamilyTx(ctx, tx, scope.NodeID, r, base)
+			if err != nil {
+				return result, err
+			}
+			if base.AuthorizationID == "" || !compatible {
 				continue
 			}
 		}
@@ -240,4 +244,57 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		return "", err
 	}
 	return id, nil
+}
+
+// A changed signer is eligible only with already committed parent handoff
+// evidence. Ordinary renewal retains the original strict family checks.
+func sameRuntimeFamilyTx(ctx context.Context, tx *sql.Tx, node string, next, initial AuthorizationRecord) (bool, error) {
+	if sameRuntimeFamily(next, initial) {
+		return true, nil
+	}
+	if next.SignerEpoch <= initial.SignerEpoch {
+		return false, nil
+	}
+	candidate := next
+	candidate.SignerEpoch = initial.SignerEpoch
+	if !sameRuntimeFamily(candidate, initial) {
+		return false, nil
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT DISTINCT o.source_id,a.signer_epoch FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND a.parent_authorization_id=? AND a.issuer_id=? AND a.boot_id=?`, node, initial.ParentAuthorizationID, initial.IssuerID, initial.BootID)
+	if err != nil {
+		return false, err
+	}
+	type root struct {
+		source string
+		epoch  uint64
+	}
+	var roots []root
+	for rows.Next() {
+		var source, epoch string
+		if err = rows.Scan(&source, &epoch); err != nil {
+			rows.Close()
+			return false, err
+		}
+		n, err := strconv.ParseUint(epoch, 10, 64)
+		if err != nil {
+			rows.Close()
+			return false, err
+		}
+		roots = append(roots, root{source, n})
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return false, err
+	}
+	for _, r := range roots {
+		latest, err := sourceEpochTx(ctx, tx, node, r.source, r.epoch)
+		if err != nil {
+			return false, err
+		}
+		if initial.SignerEpoch >= r.epoch && next.SignerEpoch <= latest {
+			return true, nil
+		}
+	}
+	return false, nil
 }

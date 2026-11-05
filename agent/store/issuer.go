@@ -287,6 +287,9 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	if err != nil {
 		return result, err
 	}
+	if err = attachEpochHandoffTx(ctx, tx, d, &result); err != nil {
+		return IssuedAuthorization{}, err
+	}
 	result.Generation = d.PathGeneration
 	issuedHash := sha256.Sum256(result.Payload)
 	result.Digest = issuedHash[:]

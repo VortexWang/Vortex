@@ -9,12 +9,15 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"encoding/hex"
+	"vortex/agent/store"
 	"vortex/contracts"
 )
 
-const authorizationSchemaVersion = "1.0.0"
+const authorizationSchemaVersion = "1.1.0"
 
 type authorizationPayload struct {
+	Handoffs               []store.EpochHandoff      `json:"epoch_handoffs,omitempty"`
 	SchemaVersion          string                    `json:"schema_version"`
 	UpdateID               string                    `json:"update_id"`
 	NodeID                 string                    `json:"node_id"`
@@ -60,6 +63,7 @@ type authorizationRestrictions struct {
 }
 
 type authorizationRequired struct {
+	Handoffs               *json.RawMessage `json:"epoch_handoffs"`
 	SchemaVersion          *string          `json:"schema_version"`
 	UpdateID               *string          `json:"update_id"`
 	NodeID                 *string          `json:"node_id"`
@@ -103,11 +107,41 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
 		return result, fmt.Errorf("invalid_authorization: multiple JSON values")
 	}
-	if result.SchemaVersion != authorizationSchemaVersion || result.NodeID != nodeID || result.BootID != bootID || result.PathGeneration != generation || generation == 0 {
+	if (result.SchemaVersion != authorizationSchemaVersion && result.SchemaVersion != "1.0.0") || result.NodeID != nodeID || result.BootID != bootID || result.PathGeneration != generation || generation == 0 {
 		return result, fmt.Errorf("identity_mismatch: authorization schema, node, boot or path generation mismatch")
 	}
 	if !canonicalUUID(result.UpdateID) || !canonicalUUID(result.NodeID) || !canonicalUUID(result.BootID) || result.SignerEpoch == 0 || result.FencingGenerationFloor == 0 || result.Authorizations == nil || result.Revocations == nil || len(result.Authorizations) > 4096 || len(result.Revocations) > 4096 {
 		return result, fmt.Errorf("invalid_authorization: identity, epoch or collection bound is invalid")
+	}
+	var envelopeFields map[string]json.RawMessage
+	if err := json.Unmarshal(payload, &envelopeFields); err != nil {
+		return result, err
+	}
+	if raw, present := envelopeFields["epoch_handoffs"]; present && (result.SchemaVersion != "1.1.0" || bytes.Equal(bytes.TrimSpace(raw), []byte("null"))) {
+		return result, fmt.Errorf("invalid_authorization: unsupported or null handoffs")
+	}
+	if required.Handoffs != nil {
+		if result.SchemaVersion != "1.1.0" || result.Handoffs == nil || len(result.Handoffs) > 4096 {
+			return result, fmt.Errorf("invalid_authorization: unsupported handoffs")
+		}
+		var raw []map[string]json.RawMessage
+		if err := json.Unmarshal(*required.Handoffs, &raw); err != nil {
+			return result, err
+		}
+		seen := map[string]bool{}
+		for i, h := range result.Handoffs {
+			for _, key := range []string{"transfer_id", "parent_authorization_id", "source_id", "from_epoch", "to_epoch", "remaining_bytes", "sealed_sequence", "record_sha256"} {
+				v, ok := raw[i][key]
+				if !ok || bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+					return result, fmt.Errorf("invalid_authorization: handoff field missing")
+				}
+			}
+			hash, e := hex.DecodeString(h.RecordSHA256)
+			if !canonicalUUID(h.TransferID) || !canonicalUUID(h.ParentID) || !canonicalUUID(h.SourceID) || h.From == 0 || h.From == math.MaxUint64 || h.To != h.From+1 || h.To != result.SignerEpoch || h.Remaining > math.MaxInt64 || h.SealedSequence < 0 || e != nil || len(hash) != 32 || hex.EncodeToString(hash) != h.RecordSHA256 || seen[h.SourceID] {
+				return result, fmt.Errorf("invalid_authorization: invalid handoff")
+			}
+			seen[h.SourceID] = true
+		}
 	}
 	r := result.Restrictions
 	if r.ExistingRulesOnly == nil || r.ExistingSharesOnly == nil || r.ExistingDelegatedBalancesOnly == nil || r.NewRules == nil || r.NewPorts == nil || r.DNSChanges == nil || r.Registrations == nil || r.CrossNodeRebalance == nil || !*r.ExistingRulesOnly || !*r.ExistingSharesOnly || !*r.ExistingDelegatedBalancesOnly || *r.NewRules || *r.NewPorts || *r.DNSChanges || *r.Registrations || *r.CrossNodeRebalance {

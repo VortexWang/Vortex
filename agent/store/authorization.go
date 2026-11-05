@@ -421,7 +421,18 @@ func checkSourceLineageTx(ctx context.Context, tx *sql.Tx, nodeID string, r Auth
 	}
 	rootDeadline, e1 := time.Parse(time.RFC3339Nano, deadline)
 	grantDeadline, e2 := time.Parse(time.RFC3339Nano, r.HardDeadline)
-	if issuer == "" || issuer != r.IssuerID || r.ParentAuthorizationID == "" || parent != r.ParentAuthorizationID || boot != r.BootID || snapshot != r.BillingSnapshotID || rule != r.RuleID || revision != strconv.FormatUint(r.RuleRevision, 10) || path != strconv.FormatUint(r.PathGeneration, 10) || epoch != strconv.FormatUint(r.SignerEpoch, 10) || e1 != nil || e2 != nil || grantDeadline.After(rootDeadline) {
+	if issuer == "" || issuer != r.IssuerID || r.ParentAuthorizationID == "" || parent != r.ParentAuthorizationID || boot != r.BootID || snapshot != r.BillingSnapshotID || rule != r.RuleID || revision != strconv.FormatUint(r.RuleRevision, 10) || path != strconv.FormatUint(r.PathGeneration, 10) || e1 != nil || e2 != nil || grantDeadline.After(rootDeadline) {
+		return ErrAuthorityHandoffRequired
+	}
+	rootEpoch, err := strconv.ParseUint(epoch, 10, 64)
+	if err != nil {
+		return err
+	}
+	latest, err := sourceEpochTx(ctx, tx, nodeID, r.SourceID, rootEpoch)
+	if err != nil {
+		return err
+	}
+	if r.SignerEpoch < rootEpoch || r.SignerEpoch > latest {
 		return ErrAuthorityHandoffRequired
 	}
 	return nil

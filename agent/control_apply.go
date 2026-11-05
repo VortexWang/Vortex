@@ -144,7 +144,7 @@ func validObjectResult(object ObjectResult) bool {
 }
 
 func wireApplyState(state string) string {
-	if state == "activation-unknown" || state == "commit-requested" {
+	if state == "activation-unknown" || state == "commit-requested" || state == "committing" {
 		return "activation_unknown"
 	}
 	switch state {
@@ -157,7 +157,7 @@ func wireApplyState(state string) string {
 
 func stateErrorCode(state string) string {
 	switch state {
-	case "activation-unknown", "commit-requested":
+	case "activation-unknown", "committing", "commit-requested":
 		return "activation_unknown"
 	case "prepare-failed":
 		return "prepare_failed"
@@ -165,7 +165,7 @@ func stateErrorCode(state string) string {
 		return "commit_failed"
 	case "aborted":
 		return "aborted"
-	case "active":
+	case "active", "prepared":
 		return ""
 	default:
 		return "tx_conflict"
