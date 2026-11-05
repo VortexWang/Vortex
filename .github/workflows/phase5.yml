@@ -45,5 +45,8 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: phase5-authorization-${{ github.sha }}
-          path: artifacts/phase5/authorization/
+          path: |
+            artifacts/phase5/authorization/*.log
+            artifacts/phase5/authorization/*.txt
+            artifacts/phase5/authorization/report.json
           if-no-files-found: error
