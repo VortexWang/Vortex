@@ -47,11 +47,11 @@ func (e *Enroller) Redeem(token, nodeID string, csrDER []byte, now time.Time, tt
 	if !e.Tokens[token] {
 		return Credential{}, errors.New("identity: invalid or consumed enrollment token")
 	}
-	delete(e.Tokens, token)
 	cred, err := e.CA.SignCSR(csrDER, nodeID, now, ttl)
 	if err != nil {
 		return Credential{}, err
 	}
+	delete(e.Tokens, token)
 	return cred, nil
 }
 

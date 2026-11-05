@@ -145,6 +145,25 @@ func TestEnrollmentTokenCanBeRedeemedOnlyOnceConcurrently(t *testing.T) {
 	}
 }
 
+func TestInvalidCSRDoesNotConsumeEnrollmentToken(t *testing.T) {
+	now := time.Now().UTC()
+	ca, _, err := NewCA(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enroller := &Enroller{CA: ca, Tokens: map[string]bool{"retry": true}}
+	if _, err := enroller.Redeem("retry", "node-retry", []byte("invalid"), now, time.Hour); err == nil {
+		t.Fatal("invalid CSR accepted")
+	}
+	_, csr, err := GenerateCSR("node-retry")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := enroller.Redeem("retry", "node-retry", csr, now, time.Hour); err != nil {
+		t.Fatalf("token consumed by invalid CSR: %v", err)
+	}
+}
+
 func TestDetachedUpgradeSignature(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
