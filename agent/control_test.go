@@ -134,7 +134,11 @@ func TestControlClientHandsOffDurableUsageBeforeHubAck(t *testing.T) {
 		t.Fatal(err)
 	}
 	batch := &controlv1.UsageBatch{BatchId: "batch-1", BillingSnapshotId: "snapshot-1", Deltas: []*controlv1.UsageDelta{{RuleId: "rule-1", Role: "source", Direction: "egress", Bytes: 512, GrantId: "grant-1"}}}
-	if err := node.PersistUsageBatch(ctx, batch, 1024); err != nil {
+	if err := node.PersistUsageBatch(ctx, batch, 0); err != nil {
+		t.Fatal(err)
+	}
+	unknown := &controlv1.UsageBatch{BatchId: "unknown-batch", BillingSnapshotId: "snapshot-1", Deltas: []*controlv1.UsageDelta{{RuleId: "rule-1", Role: "source", Direction: "ingress", Bytes: 1024, GrantId: "grant-1"}}}
+	if err := node.PersistUsageBatch(ctx, unknown, 1024); err != nil {
 		t.Fatal(err)
 	}
 	server := &hub.TestServer{Store: hubStore, AcceptUsage: true}
@@ -143,8 +147,11 @@ func TestControlClientHandsOffDurableUsageBeforeHubAck(t *testing.T) {
 	if err := client.Connect(ctx, listener.Addr().String()); err != nil {
 		t.Fatal(err)
 	}
-	if pending, err := nodeStore.PendingUsageOutbox(ctx, controlTestNodeID); err != nil || len(pending) != 0 {
-		t.Fatalf("outbox after durable Hub ACK=%+v err=%v", pending, err)
+	if pending, err := nodeStore.PendingUsageOutbox(ctx, controlTestNodeID); err != nil || len(pending) != 1 || pending[0].BatchID != "unknown-batch" || pending[0].UnknownUpper != 1024 {
+		t.Fatalf("known ACK did not retain unknown liability=%+v err=%v", pending, err)
+	}
+	if err := nodeStore.AcknowledgeUsageBatches(ctx, controlTestNodeID, []string{"unknown-batch"}); err == nil {
+		t.Fatal("ordinary ACK accepted unsent unknown record")
 	}
 	if err := hubStore.PersistUsageLedger(ctx, store.UsageBatch{NodeID: controlTestNodeID, BootID: "replay-boot", BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: pendingPayload(t, batch)}); err != nil {
 		t.Fatalf("Hub ledger replay was not idempotent: %v", err)
@@ -158,6 +165,68 @@ func pendingPayload(t *testing.T, batch *controlv1.UsageBatch) []byte {
 		t.Fatal(err)
 	}
 	return payload
+}
+
+type capturedUsageStream struct {
+	controlv1.NodeControl_ConnectClient
+	sent []*controlv1.NodeMessage
+}
+
+func (s *capturedUsageStream) Send(message *controlv1.NodeMessage) error {
+	s.sent = append(s.sent, message)
+	return nil
+}
+
+func TestPendingUnknownUsageNeverUsesOrdinaryWireOrAck(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		id    string
+		upper uint64
+	}{{"unknown", 1024}, {"known", 0}} {
+		batch := &controlv1.UsageBatch{BatchId: tc.id, BillingSnapshotId: "snapshot", Deltas: []*controlv1.UsageDelta{{RuleId: "rule", Role: "source", Direction: "egress", Bytes: 17, GrantId: "grant"}}}
+		if err := node.PersistUsageBatch(ctx, batch, tc.upper); err != nil {
+			t.Fatal(err)
+		}
+	}
+	stream := &capturedUsageStream{}
+	var sequence uint64
+	for range 2 {
+		if err := (&ControlClient{Node: node}).sendPendingUsage(ctx, stream, &sequence); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(stream.sent) != 2 {
+		t.Fatalf("unexpected sent count: %d", len(stream.sent))
+	}
+	for _, message := range stream.sent {
+		if message.GetUsageBatch().GetBatchId() != "known" {
+			t.Fatal("unknown liability was sent as consumed bytes")
+		}
+	}
+	if err := s.AcknowledgeUsageBatches(ctx, controlTestNodeID, []string{"known", "unknown"}); err == nil {
+		t.Fatal("mixed ACK acknowledged unknown liability")
+	}
+	// Refusing the unknown record rolls back the entire mixed ACK transaction.
+	pending, err := s.PendingUsageOutbox(ctx, controlTestNodeID)
+	if err != nil || len(pending) != 2 {
+		t.Fatalf("partial ACK changed outbox: %+v %v", pending, err)
+	}
+	if err := s.AcknowledgeUsageBatches(ctx, controlTestNodeID, []string{"known"}); err != nil {
+		t.Fatal(err)
+	}
+	pending, err = s.PendingUsageOutbox(ctx, controlTestNodeID)
+	if err != nil || len(pending) != 1 || pending[0].BatchID != "unknown" || pending[0].UnknownUpper != 1024 {
+		t.Fatalf("unknown evidence lost: %+v %v", pending, err)
+	}
 }
 
 func TestControlClientRejectsCertificateNodeMismatch(t *testing.T) {

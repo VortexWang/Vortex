@@ -200,13 +200,15 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 			}
+			if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
+				return err
+			}
+			// Notify only after durable validation. In particular an ordinary
+			// ACK must never expose unknown batches as acknowledged to a hook.
 			if c.AcknowledgeUsage != nil {
 				if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
 					return err
 				}
-			}
-			if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
-				return err
 			}
 		case *controlv1.ControlMessage_Error:
 			if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
@@ -271,6 +273,12 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 		return fmt.Errorf("agent: read durable usage outbox: %w", err)
 	}
 	for _, record := range batches {
+		// The frozen ordinary UsageBatch has no unknown-liability field.
+		// Preserve these rows for a typed handoff rather than reporting their
+		// reserved upper bound as actual consumption on the old wire path.
+		if record.UnknownUpper != 0 {
+			continue
+		}
 		batch := new(controlv1.UsageBatch)
 		if err := proto.Unmarshal(record.Payload, batch); err != nil {
 			return fmt.Errorf("agent: decode durable usage batch %s: %w", record.BatchID, err)

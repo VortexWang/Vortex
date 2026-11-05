@@ -195,3 +195,16 @@ Next implementation boundary: a continuing session must renew runtime/share/gran
 - `tools/phase5/audit_runtime_renewal.py` independently audits closed SQLite artifacts, hashes, grant balances, immutable/current session IDs, pre/post-expiry settlement timestamps and Hub issue conservation. Same-SHA Docker/Actions results will be appended after the implementation commit.
 
 05-03 remains executing. Typed unknown-liability handoff still awaits the existing control 1.2.0 proposal decision, and complete runtime-role/issuance acceptance remains to be reviewed. Full signer ownership transfer and restart recovery remain in 05-04. No SUMMARY or phase completion is claimed.
+
+### Verified renewal pair and retained slots
+
+- Renewal code SHA `86640e7c1bfefe420ad3eb9952bd0078c1ebaff9` passed clean pinned Docker and [Actions run 42060467701](https://github.com/VortexWang/Vortex/actions/runs/42060467701). Both executed real full-disk TCP/UDP coverage and retained `plan_complete: false`. Raw artifacts are under `artifacts/phase5/authorization/86640e7/`.
+- Independently audited all eight raw SQLite snapshots. Each Agent records one continuing session, two 4096-byte grants with 4050 bytes left in each, and four committed 23-byte directional batches: two before and two after the original grant's expiry. Hub issuance remains 8192 of 12288 bytes, with 4096 unissued.
+- UDP session-slot closure attempted while the filesystem is full can fail to persist. Those slots remain `open` in the evidence instead of being assumed released. The runtime is stopped, the fault latch rejects new streams, and recovery must later prove closure before reclaiming the slot. The audit reports this retained state explicitly; it does not certify 05-04 recovery or claim every slot was released.
+- Phase 1 run `42060467716` failed only `contract-check`: existing VLink content differs from its approved hash. This drift is already documented by the 05-05 proposal; no VLink approval/version/hash was changed during renewal work. Remaining Phase 1 checks passed.
+
+### Interim protection for unknown usage pending typed wire approval
+
+- The old ordinary usage sender could serialize the local unknown upper bound as actual consumed bytes, losing its distinction at the Hub. It now withholds every durable record with `unknown_upper_bound > 0` from the ordinary wire path. Original payload/digest and unresolved reservation remain retained without migration or deletion.
+- Ordinary Hub ACKs reject unknown rows transactionally, including mixed known/unknown ACK lists; notification hooks run only after durable validation. Known usage still reaches the Hub and is acknowledged independently. Tests cover send/retry suppression, mixed-ACK rollback and retained liability.
+- This is a fail-closed interim fix within the existing 1.1.0 protocol. It does not implement or approve the proposed typed 1.2.0 handoff; that exact proposal remains pending owner approval.

@@ -34,7 +34,10 @@ def audit_agent(db):
     ).fetchall()
     assert len(sessions) == 1
     session = sessions[0]
-    assert session[6] == "closed" and all(session[i] != session[i + 3] for i in range(3))
+    # A close attempted during SQLITE_FULL can conservatively retain the
+    # slot. Only later recovery with execution proof may release that slot.
+    assert session[6] in {"closed", "open"}
+    assert all(session[i] != session[i + 3] for i in range(3))
     current, initial = session[0], session[3]
     expiry = instant(db.execute(
         "SELECT expires_at FROM authorization_records WHERE authorization_id=?", (initial,)
@@ -58,7 +61,8 @@ def audit_agent(db):
     assert states == [("hub_acked",)]
     assert db.execute("SELECT COUNT(*) FROM runtime_rate_buckets").fetchone()[0] == 1
     return {"issued": 8192, "remaining": 8100, "used": 92,
-            "same_session_renewal": True, "post_expiry_batches": 2, "issuer": "hub"}
+            "same_session_renewal": True, "post_expiry_batches": 2, "issuer": "hub",
+            "session_slot_state": session[6], "retained_slot_requires_recovery": session[6] == "open"}
 
 
 def audit_hub(db):

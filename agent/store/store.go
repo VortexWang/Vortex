@@ -818,9 +818,16 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 			continue
 		}
 		seen[batchID] = struct{}{}
-		var state string
-		if err := tx.QueryRowContext(ctx, `SELECT state FROM usage_batches WHERE node_id=? AND batch_id=?`, nodeID, batchID).Scan(&state); err != nil {
+		var state, upper string
+		if err := tx.QueryRowContext(ctx, `SELECT state,unknown_upper_bound FROM usage_batches WHERE node_id=? AND batch_id=?`, nodeID, batchID).Scan(&state, &upper); err != nil {
 			return err
+		}
+		unknown, err := strconv.ParseUint(upper, 10, 64)
+		if err != nil {
+			return err
+		}
+		if target == "hub_acked" && unknown != 0 {
+			return fmt.Errorf("store: ordinary usage acknowledgement cannot acknowledge unknown liability")
 		}
 		if state == "hub_acked" && target == "hub_acked" || state == "locally_acked" && target == "locally_acked" {
 			continue

@@ -71,11 +71,11 @@ func TestUsageOutboxSurvivesRestartAndLocalAckRetainsHandoff(t *testing.T) {
 	if err != nil || len(pending) != 1 || pending[0].State != "locally_acked" {
 		t.Fatalf("local ACK discarded handoff batch: %+v err=%v", pending, err)
 	}
-	if err := s.AcknowledgeUsageBatches(ctx, "node-1", []string{"batch-1"}); err != nil {
-		t.Fatal(err)
+	if err := s.AcknowledgeUsageBatches(ctx, "node-1", []string{"batch-1"}); err == nil {
+		t.Fatal("ordinary Hub ACK accepted unknown liability")
 	}
-	if pending, err = s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 0 {
-		t.Fatalf("Hub ACK did not close outbox: %+v err=%v", pending, err)
+	if pending, err = s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 1 || pending[0].State != "locally_acked" || pending[0].UnknownUpper != batch.UnknownUpper {
+		t.Fatalf("ordinary Hub ACK changed unknown outbox: %+v err=%v", pending, err)
 	}
 }
 
