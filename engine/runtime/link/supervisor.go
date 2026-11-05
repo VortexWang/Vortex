@@ -123,7 +123,7 @@ func (s *Supervisor) handshake(ctx context.Context, conn *tls.Conn, client bool)
 	// updates keep bulk transfers within the control-frame rate budget. The
 	// larger aggregate reserve absorbs UDP bursts while concurrent TCP streams
 	// remain bounded by the aggregate credit ceiling.
-	link, peer, err := vlink.NewAuthenticatedMuxLink(ctx, conn, s.hello(client), vlink.MuxConfig{LocalClient: client, StreamWindow: 8 * 1024 * 1024, AggregateWindow: 64 * 1024 * 1024, MaxWindow: 128 * 1024 * 1024, UDPWindowReserve: 16 * 1024 * 1024, StreamQueueFrames: 512, UDPQueueFrames: 8192, UDPQueueBytes: 16 << 20})
+	link, peer, err := vlink.NewAuthenticatedMuxLink(ctx, conn, s.hello(client), vlink.MuxConfig{LocalClient: client, MaxPendingOpenBytes: 64 * 1024, StreamWindow: 8 * 1024 * 1024, AggregateWindow: 64 * 1024 * 1024, MaxWindow: 128 * 1024 * 1024, UDPWindowReserve: 16 * 1024 * 1024, StreamQueueFrames: 512, UDPQueueFrames: 8192, UDPQueueBytes: 16 << 20})
 	if err != nil {
 		return nil, vlink.NodeID{}, err
 	}

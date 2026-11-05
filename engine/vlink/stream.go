@@ -239,10 +239,13 @@ func (t *StreamTable) MarkLocalFIN(id uint32) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	stream := t.streams[id]
-	if stream == nil || stream.Network != StreamTCP || stream.LocalFIN || stream.Lifecycle == StreamOpening || stream.Lifecycle == StreamReset {
+	if stream == nil || stream.Network != StreamTCP || stream.LocalFIN || stream.Lifecycle == StreamReset || stream.Lifecycle == StreamOpening && !stream.InitiatedLocal {
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}
 	stream.LocalFIN = true
+	if stream.Lifecycle == StreamOpening {
+		return nil
+	}
 	if stream.RemoteFIN {
 		stream.Lifecycle = StreamClosed
 		delete(t.streams, id)

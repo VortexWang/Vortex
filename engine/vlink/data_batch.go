@@ -49,6 +49,9 @@ func (s *MuxStream) WriteDataFrames(ctx context.Context, frames []Frame) error {
 	}
 	var pending [4]frameWrite
 	for i, frame := range frames {
+		if err := s.reserveEarlyData(ctx, len(frame.Payload)); err != nil {
+			return err
+		}
 		started := time.Now()
 		if err := s.link.windows.Acquire(ctx, s.ID, uint32(len(frame.Payload))); err != nil {
 			return s.stopDataWrite(err)

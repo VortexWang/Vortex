@@ -409,11 +409,7 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 				if supervisor.Transport != nil {
 					defer resetStream(stream)
 				}
-				if err := stream.WaitOpen(ctx); err != nil {
-					return err
-				}
-				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
-				return relay.BridgeConnWithGateObserver(ctx, stream, local, gate, func() {
+				return relay.BridgeOpeningConn(ctx, stream, local, gate, func() {
 					if supervisor.Transport != nil && cfg.TransportMode == vlink.ModeAuto {
 						if supervisor.Routes != nil {
 							supervisor.Routes.Observe(flowConfig.PathGeneration, time.Since(openedAt))
