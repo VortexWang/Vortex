@@ -251,6 +251,12 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatal(err)
 			}
 			defer hs.Close()
+			backendDB := filepath.Join(dir, "backend.db")
+			bs, err := store.Open(backendDB, "hub")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer bs.Close()
 			// The protocol backend installs a fixed allocation. The Hub must
 			// reserve it durably before its control response becomes visible.
 			issuedAt := time.Now().UTC()
@@ -271,6 +277,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatal(err)
 			}
 			issuer := &hub.Issuer{Store: hs, HubID: delegation.HubID, Clock: issuerClock}
+			usageRelay := &hub.UsageRelay{Store: hs, Clock: issuerClock, Backend: &durableUsageBackend{store: bs}}
 			const issueID = "550e8400-e29b-41d4-a716-446655440020"
 			const initialTTL = 4 * time.Second
 			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, 4096, initialTTL)
@@ -382,7 +389,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 					topupGrantID = record.AuthorizationID
 				}
 			}
-			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AcceptUsage: true, UsageBatchLimit: 2, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
+			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, UsageBatchLimit: 2, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
 				return issuer.Issue(ctx, delegation.ID, id, boot, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
 			}}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, topupHub.Addr().String()); err != nil {
@@ -458,7 +465,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := node.Stop(ctx); err != nil {
 				t.Fatal(err)
 			}
-			usageHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AcceptUsage: true, UsageBatchLimit: 2}, serverTLS)
+			usageHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, UsageBatchLimit: 2}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, usageHub.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
@@ -475,8 +482,13 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := hs.Close(); err != nil {
 				t.Fatal(err)
 			}
+			if err := bs.Close(); err != nil {
+				t.Fatal(err)
+			}
 			assertRawLedger(t, hubDB, 4)
+			assertRawLedger(t, backendDB, 4)
 			saveRuntimeLedger(t, network, agentDB, hubDB)
+			saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 		})
 	}
 }
@@ -499,6 +511,14 @@ func assertRawLedger(t *testing.T, path string, want int) {
 }
 
 func saveRuntimeLedger(t *testing.T, network uint8, agentDB, hubDB string) {
+	saveNamedLedger(t, fmt.Sprintf("runtime-%d", network), agentDB, hubDB)
+}
+
+func saveNamedLedger(t *testing.T, label, agentDB, hubDB string) {
+	saveLedgerFiles(t, label, map[string]string{"agent": agentDB, "hub": hubDB})
+}
+
+func saveLedgerFiles(t *testing.T, label string, files map[string]string) {
 	t.Helper()
 	out := os.Getenv("PHASE5_AUTHORIZATION_EVIDENCE_DIR")
 	if out == "" {
@@ -508,14 +528,14 @@ func saveRuntimeLedger(t *testing.T, network uint8, agentDB, hubDB string) {
 		t.Fatal(err)
 	}
 	checksums := map[string]string{}
-	for name, path := range map[string]string{"agent": agentDB, "hub": hubDB} {
+	for name, path := range files {
 		raw, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
 		digest := sha256.Sum256(raw)
 		checksums[name] = fmt.Sprintf("%x", digest)
-		f, err := os.Create(filepath.Join(out, fmt.Sprintf("runtime-%d-%s.sqlite.gz", network, name)))
+		f, err := os.Create(filepath.Join(out, fmt.Sprintf("%s-%s.sqlite.gz", label, name)))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -534,7 +554,7 @@ func saveRuntimeLedger(t *testing.T, network uint8, agentDB, hubDB string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(out, fmt.Sprintf("runtime-%d-ledgers.json", network)), encoded, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(out, label+"-ledgers.json"), encoded, 0644); err != nil {
 		t.Fatal(err)
 	}
 }

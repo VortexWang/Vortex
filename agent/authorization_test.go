@@ -326,8 +326,12 @@ func TestAuthorizationGateAtomicallyConsumesAndReconcilesQuota(t *testing.T) {
 		t.Fatal(err)
 	}
 	pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
-	if err != nil || len(pending) != 2 || pending[1].UnknownUpper != 2896 {
+	if err != nil || len(pending) != 1 || pending[0].UnknownUpper != 0 {
 		t.Fatalf("durable usage=%+v err=%v", pending, err)
+	}
+	unknown, err := s.PendingUnknownUsage(ctx, node.NodeID)
+	if err != nil || len(unknown) != 1 || unknown[0].Upper != 2896 {
+		t.Fatalf("unknown liability=%+v %v", unknown, err)
 	}
 }
 
@@ -488,16 +492,16 @@ func TestRestartFreezesAuthorizedReservationAndRecoversUnknownBound(t *testing.T
 	if err != nil || balance.Remaining != 3096 || balance.Unknown != 1000 {
 		t.Fatalf("recovered grant balance=%+v err=%v", balance, err)
 	}
-	pending, err := s.PendingUsageOutbox(ctx, controlTestNodeID)
-	if err != nil || len(pending) != 1 || pending[0].UnknownUpper != 1000 {
+	pending, err := s.PendingUnknownUsage(ctx, controlTestNodeID)
+	if err != nil || len(pending) != 1 || pending[0].Upper != 1000 {
 		t.Fatalf("recovered durable liability=%+v err=%v", pending, err)
 	}
-	var batch controlv1.UsageBatch
+	var batch controlv1.UnknownUsageBatch
 	if err := proto.Unmarshal(pending[0].Payload, &batch); err != nil {
 		t.Fatal(err)
 	}
-	if batch.GetDeltas()[0].GetGrantId() != "550e8400-e29b-41d4-a716-446655440021" {
-		t.Fatalf("recovered grant attribution=%+v", batch.GetDeltas()[0])
+	if batch.GetGrantId() != "550e8400-e29b-41d4-a716-446655440021" || batch.GetOriginBootId() != node.BootID {
+		t.Fatalf("recovered grant/origin attribution=%+v", &batch)
 	}
 }
 

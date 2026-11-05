@@ -33,6 +33,7 @@ type NodeMessage struct {
 	//	*NodeMessage_ApplyResult
 	//	*NodeMessage_Event
 	//	*NodeMessage_Register
+	//	*NodeMessage_UnknownUsageBatch
 	Body          isNodeMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -141,6 +142,15 @@ func (x *NodeMessage) GetRegister() *RegisterRequest {
 	return nil
 }
 
+func (x *NodeMessage) GetUnknownUsageBatch() *UnknownUsageBatch {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_UnknownUsageBatch); ok {
+			return x.UnknownUsageBatch
+		}
+	}
+	return nil
+}
+
 type isNodeMessage_Body interface {
 	isNodeMessage_Body()
 }
@@ -165,6 +175,10 @@ type NodeMessage_Register struct {
 	Register *RegisterRequest `protobuf:"bytes,14,opt,name=register,proto3,oneof"`
 }
 
+type NodeMessage_UnknownUsageBatch struct {
+	UnknownUsageBatch *UnknownUsageBatch `protobuf:"bytes,15,opt,name=unknown_usage_batch,json=unknownUsageBatch,proto3,oneof"`
+}
+
 func (*NodeMessage_Heartbeat) isNodeMessage_Body() {}
 
 func (*NodeMessage_UsageBatch) isNodeMessage_Body() {}
@@ -174,6 +188,8 @@ func (*NodeMessage_ApplyResult) isNodeMessage_Body() {}
 func (*NodeMessage_Event) isNodeMessage_Body() {}
 
 func (*NodeMessage_Register) isNodeMessage_Body() {}
+
+func (*NodeMessage_UnknownUsageBatch) isNodeMessage_Body() {}
 
 type ControlMessage struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -185,6 +201,7 @@ type ControlMessage struct {
 	//	*ControlMessage_UsageAck
 	//	*ControlMessage_AuthorizationUpdate
 	//	*ControlMessage_Error
+	//	*ControlMessage_UnknownUsageAck
 	Body          isControlMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -277,6 +294,15 @@ func (x *ControlMessage) GetError() *ControlError {
 	return nil
 }
 
+func (x *ControlMessage) GetUnknownUsageAck() *UnknownUsageAcknowledgement {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_UnknownUsageAck); ok {
+			return x.UnknownUsageAck
+		}
+	}
+	return nil
+}
+
 type isControlMessage_Body interface {
 	isControlMessage_Body()
 }
@@ -297,6 +323,10 @@ type ControlMessage_Error struct {
 	Error *ControlError `protobuf:"bytes,13,opt,name=error,proto3,oneof"`
 }
 
+type ControlMessage_UnknownUsageAck struct {
+	UnknownUsageAck *UnknownUsageAcknowledgement `protobuf:"bytes,14,opt,name=unknown_usage_ack,json=unknownUsageAck,proto3,oneof"`
+}
+
 func (*ControlMessage_ConfigUpdate) isControlMessage_Body() {}
 
 func (*ControlMessage_UsageAck) isControlMessage_Body() {}
@@ -304,6 +334,8 @@ func (*ControlMessage_UsageAck) isControlMessage_Body() {}
 func (*ControlMessage_AuthorizationUpdate) isControlMessage_Body() {}
 
 func (*ControlMessage_Error) isControlMessage_Body() {}
+
+func (*ControlMessage_UnknownUsageAck) isControlMessage_Body() {}
 
 type RegisterRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -657,6 +689,158 @@ func (x *UsageAcknowledgement) GetBatchIds() []string {
 	return nil
 }
 
+type UnknownUsageBatch struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	BatchId           string                 `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	OriginBootId      string                 `protobuf:"bytes,2,opt,name=origin_boot_id,json=originBootId,proto3" json:"origin_boot_id,omitempty"`
+	BillingSnapshotId string                 `protobuf:"bytes,3,opt,name=billing_snapshot_id,json=billingSnapshotId,proto3" json:"billing_snapshot_id,omitempty"`
+	RuleId            string                 `protobuf:"bytes,4,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`
+	GrantId           string                 `protobuf:"bytes,5,opt,name=grant_id,json=grantId,proto3" json:"grant_id,omitempty"`
+	Role              string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	Direction         string                 `protobuf:"bytes,7,opt,name=direction,proto3" json:"direction,omitempty"`
+	UnknownUpperBound uint64                 `protobuf:"varint,8,opt,name=unknown_upper_bound,json=unknownUpperBound,proto3" json:"unknown_upper_bound,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UnknownUsageBatch) Reset() {
+	*x = UnknownUsageBatch{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnknownUsageBatch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnknownUsageBatch) ProtoMessage() {}
+
+func (x *UnknownUsageBatch) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnknownUsageBatch.ProtoReflect.Descriptor instead.
+func (*UnknownUsageBatch) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UnknownUsageBatch) GetBatchId() string {
+	if x != nil {
+		return x.BatchId
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetOriginBootId() string {
+	if x != nil {
+		return x.OriginBootId
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetBillingSnapshotId() string {
+	if x != nil {
+		return x.BillingSnapshotId
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetRuleId() string {
+	if x != nil {
+		return x.RuleId
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetGrantId() string {
+	if x != nil {
+		return x.GrantId
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetDirection() string {
+	if x != nil {
+		return x.Direction
+	}
+	return ""
+}
+
+func (x *UnknownUsageBatch) GetUnknownUpperBound() uint64 {
+	if x != nil {
+		return x.UnknownUpperBound
+	}
+	return 0
+}
+
+type UnknownUsageAcknowledgement struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BatchId       string                 `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnknownUsageAcknowledgement) Reset() {
+	*x = UnknownUsageAcknowledgement{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnknownUsageAcknowledgement) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnknownUsageAcknowledgement) ProtoMessage() {}
+
+func (x *UnknownUsageAcknowledgement) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnknownUsageAcknowledgement.ProtoReflect.Descriptor instead.
+func (*UnknownUsageAcknowledgement) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UnknownUsageAcknowledgement) GetBatchId() string {
+	if x != nil {
+		return x.BatchId
+	}
+	return ""
+}
+
+func (x *UnknownUsageAcknowledgement) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
 type ApplyResult struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Version           uint64                 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
@@ -671,7 +855,7 @@ type ApplyResult struct {
 
 func (x *ApplyResult) Reset() {
 	*x = ApplyResult{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[8]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -683,7 +867,7 @@ func (x *ApplyResult) String() string {
 func (*ApplyResult) ProtoMessage() {}
 
 func (x *ApplyResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[8]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -696,7 +880,7 @@ func (x *ApplyResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyResult.ProtoReflect.Descriptor instead.
 func (*ApplyResult) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{8}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ApplyResult) GetVersion() uint64 {
@@ -752,7 +936,7 @@ type ObjectResult struct {
 
 func (x *ObjectResult) Reset() {
 	*x = ObjectResult{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[9]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -764,7 +948,7 @@ func (x *ObjectResult) String() string {
 func (*ObjectResult) ProtoMessage() {}
 
 func (x *ObjectResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[9]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -777,7 +961,7 @@ func (x *ObjectResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObjectResult.ProtoReflect.Descriptor instead.
 func (*ObjectResult) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{9}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ObjectResult) GetObjectId() string {
@@ -815,7 +999,7 @@ type RuntimeConfigUpdate struct {
 
 func (x *RuntimeConfigUpdate) Reset() {
 	*x = RuntimeConfigUpdate{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[10]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -827,7 +1011,7 @@ func (x *RuntimeConfigUpdate) String() string {
 func (*RuntimeConfigUpdate) ProtoMessage() {}
 
 func (x *RuntimeConfigUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[10]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -840,7 +1024,7 @@ func (x *RuntimeConfigUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeConfigUpdate.ProtoReflect.Descriptor instead.
 func (*RuntimeConfigUpdate) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{10}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *RuntimeConfigUpdate) GetVersion() uint64 {
@@ -895,7 +1079,7 @@ type AuthorizationUpdate struct {
 
 func (x *AuthorizationUpdate) Reset() {
 	*x = AuthorizationUpdate{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[11]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -907,7 +1091,7 @@ func (x *AuthorizationUpdate) String() string {
 func (*AuthorizationUpdate) ProtoMessage() {}
 
 func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[11]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -920,7 +1104,7 @@ func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizationUpdate.ProtoReflect.Descriptor instead.
 func (*AuthorizationUpdate) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{11}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *AuthorizationUpdate) GetGeneration() uint64 {
@@ -948,7 +1132,7 @@ type NodeEvent struct {
 
 func (x *NodeEvent) Reset() {
 	*x = NodeEvent{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[12]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -960,7 +1144,7 @@ func (x *NodeEvent) String() string {
 func (*NodeEvent) ProtoMessage() {}
 
 func (x *NodeEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[12]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -973,7 +1157,7 @@ func (x *NodeEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeEvent.ProtoReflect.Descriptor instead.
 func (*NodeEvent) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{12}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *NodeEvent) GetEventId() string {
@@ -1001,7 +1185,7 @@ var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
-	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xa0\x03\n" +
+	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xf8\x03\n" +
 	"\vNodeMessage\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x17\n" +
 	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
@@ -1012,8 +1196,9 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"usageBatch\x12C\n" +
 	"\fapply_result\x18\f \x01(\v2\x1e.vortex.control.v1.ApplyResultH\x00R\vapplyResult\x124\n" +
 	"\x05event\x18\r \x01(\v2\x1c.vortex.control.v1.NodeEventH\x00R\x05event\x12@\n" +
-	"\bregister\x18\x0e \x01(\v2\".vortex.control.v1.RegisterRequestH\x00R\bregisterB\x06\n" +
-	"\x04body\"\x80\x03\n" +
+	"\bregister\x18\x0e \x01(\v2\".vortex.control.v1.RegisterRequestH\x00R\bregister\x12V\n" +
+	"\x13unknown_usage_batch\x18\x0f \x01(\v2$.vortex.control.v1.UnknownUsageBatchH\x00R\x11unknownUsageBatchB\x06\n" +
+	"\x04body\"\xde\x03\n" +
 	"\x0eControlMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -1022,7 +1207,8 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	" \x01(\v2&.vortex.control.v1.RuntimeConfigUpdateH\x00R\fconfigUpdate\x12F\n" +
 	"\tusage_ack\x18\v \x01(\v2'.vortex.control.v1.UsageAcknowledgementH\x00R\busageAck\x12[\n" +
 	"\x14authorization_update\x18\f \x01(\v2&.vortex.control.v1.AuthorizationUpdateH\x00R\x13authorizationUpdate\x127\n" +
-	"\x05error\x18\r \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05errorB\x06\n" +
+	"\x05error\x18\r \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12\\\n" +
+	"\x11unknown_usage_ack\x18\x0e \x01(\v2..vortex.control.v1.UnknownUsageAcknowledgementH\x00R\x0funknownUsageAckB\x06\n" +
 	"\x04body\"\x81\x01\n" +
 	"\x0fRegisterRequest\x12)\n" +
 	"\x10enrollment_token\x18\x01 \x01(\tR\x0fenrollmentToken\x12\x17\n" +
@@ -1050,7 +1236,19 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x05bytes\x18\x04 \x01(\x04R\x05bytes\x12\x19\n" +
 	"\bgrant_id\x18\x05 \x01(\tR\agrantId\"3\n" +
 	"\x14UsageAcknowledgement\x12\x1b\n" +
-	"\tbatch_ids\x18\x01 \x03(\tR\bbatchIds\"\xed\x01\n" +
+	"\tbatch_ids\x18\x01 \x03(\tR\bbatchIds\"\x9a\x02\n" +
+	"\x11UnknownUsageBatch\x12\x19\n" +
+	"\bbatch_id\x18\x01 \x01(\tR\abatchId\x12$\n" +
+	"\x0eorigin_boot_id\x18\x02 \x01(\tR\foriginBootId\x12.\n" +
+	"\x13billing_snapshot_id\x18\x03 \x01(\tR\x11billingSnapshotId\x12\x17\n" +
+	"\arule_id\x18\x04 \x01(\tR\x06ruleId\x12\x19\n" +
+	"\bgrant_id\x18\x05 \x01(\tR\agrantId\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1c\n" +
+	"\tdirection\x18\a \x01(\tR\tdirection\x12.\n" +
+	"\x13unknown_upper_bound\x18\b \x01(\x04R\x11unknownUpperBound\"_\n" +
+	"\x1bUnknownUsageAcknowledgement\x12\x19\n" +
+	"\bbatch_id\x18\x01 \x01(\tR\abatchId\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"\xed\x01\n" +
 	"\vApplyResult\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x04R\aversion\x12\x14\n" +
 	"\x05state\x18\x02 \x01(\tR\x05state\x129\n" +
@@ -1094,41 +1292,45 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
-	(*NodeMessage)(nil),          // 0: vortex.control.v1.NodeMessage
-	(*ControlMessage)(nil),       // 1: vortex.control.v1.ControlMessage
-	(*RegisterRequest)(nil),      // 2: vortex.control.v1.RegisterRequest
-	(*ControlError)(nil),         // 3: vortex.control.v1.ControlError
-	(*Heartbeat)(nil),            // 4: vortex.control.v1.Heartbeat
-	(*UsageBatch)(nil),           // 5: vortex.control.v1.UsageBatch
-	(*UsageDelta)(nil),           // 6: vortex.control.v1.UsageDelta
-	(*UsageAcknowledgement)(nil), // 7: vortex.control.v1.UsageAcknowledgement
-	(*ApplyResult)(nil),          // 8: vortex.control.v1.ApplyResult
-	(*ObjectResult)(nil),         // 9: vortex.control.v1.ObjectResult
-	(*RuntimeConfigUpdate)(nil),  // 10: vortex.control.v1.RuntimeConfigUpdate
-	(*AuthorizationUpdate)(nil),  // 11: vortex.control.v1.AuthorizationUpdate
-	(*NodeEvent)(nil),            // 12: vortex.control.v1.NodeEvent
+	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
+	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
+	(*RegisterRequest)(nil),             // 2: vortex.control.v1.RegisterRequest
+	(*ControlError)(nil),                // 3: vortex.control.v1.ControlError
+	(*Heartbeat)(nil),                   // 4: vortex.control.v1.Heartbeat
+	(*UsageBatch)(nil),                  // 5: vortex.control.v1.UsageBatch
+	(*UsageDelta)(nil),                  // 6: vortex.control.v1.UsageDelta
+	(*UsageAcknowledgement)(nil),        // 7: vortex.control.v1.UsageAcknowledgement
+	(*UnknownUsageBatch)(nil),           // 8: vortex.control.v1.UnknownUsageBatch
+	(*UnknownUsageAcknowledgement)(nil), // 9: vortex.control.v1.UnknownUsageAcknowledgement
+	(*ApplyResult)(nil),                 // 10: vortex.control.v1.ApplyResult
+	(*ObjectResult)(nil),                // 11: vortex.control.v1.ObjectResult
+	(*RuntimeConfigUpdate)(nil),         // 12: vortex.control.v1.RuntimeConfigUpdate
+	(*AuthorizationUpdate)(nil),         // 13: vortex.control.v1.AuthorizationUpdate
+	(*NodeEvent)(nil),                   // 14: vortex.control.v1.NodeEvent
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
 	5,  // 1: vortex.control.v1.NodeMessage.usage_batch:type_name -> vortex.control.v1.UsageBatch
-	8,  // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
-	12, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
+	10, // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
+	14, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
 	2,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
-	10, // 5: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
-	7,  // 6: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
-	11, // 7: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	3,  // 8: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
-	6,  // 9: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
-	9,  // 10: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
-	0,  // 11: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	1,  // 12: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	12, // [12:13] is the sub-list for method output_type
-	11, // [11:12] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	8,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
+	12, // 6: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
+	7,  // 7: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
+	13, // 8: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	3,  // 9: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
+	9,  // 10: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
+	6,  // 11: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
+	11, // 12: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
+	0,  // 13: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	1,  // 14: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	14, // [14:15] is the sub-list for method output_type
+	13, // [13:14] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -1142,12 +1344,14 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*NodeMessage_ApplyResult)(nil),
 		(*NodeMessage_Event)(nil),
 		(*NodeMessage_Register)(nil),
+		(*NodeMessage_UnknownUsageBatch)(nil),
 	}
 	file_contracts_protobuf_v1_vortex_proto_msgTypes[1].OneofWrappers = []any{
 		(*ControlMessage_ConfigUpdate)(nil),
 		(*ControlMessage_UsageAck)(nil),
 		(*ControlMessage_AuthorizationUpdate)(nil),
 		(*ControlMessage_Error)(nil),
+		(*ControlMessage_UnknownUsageAck)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1155,7 +1359,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

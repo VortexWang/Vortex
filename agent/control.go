@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
 	"vortex/agent/store"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
@@ -30,6 +31,7 @@ type ControlClient struct {
 	RetryMin         time.Duration
 	RetryMax         time.Duration
 	Interval         time.Duration
+	UsageInterval    time.Duration
 	AcknowledgeUsage func(context.Context, []string) error
 }
 
@@ -76,6 +78,8 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	tlsConfig, err := c.tlsConfig()
 	if err != nil {
 		return err
@@ -150,8 +154,46 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	}
 	lastControlSequence := uint64(0)
 	seenControlIDs := make(map[string]struct{})
+	// Only this loop sends messages; gRPC permits one concurrent receiver, but
+	// not multiple senders. Periodic outbox delivery shares sequence ordering
+	// with config responses and never races an authorization update.
+	type received struct {
+		message *controlv1.ControlMessage
+		err     error
+	}
+	incoming := make(chan received)
+	go func() {
+		for {
+			message, err := stream.Recv()
+			select {
+			case incoming <- received{message, err}:
+			case <-ctx.Done():
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	usageInterval := c.UsageInterval
+	if usageInterval <= 0 {
+		usageInterval = 10 * time.Second
+	}
+	ticker := time.NewTicker(usageInterval)
+	defer ticker.Stop()
 	for {
-		message, recvErr := stream.Recv()
+		var response received
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+				return err
+			}
+			continue
+		case response = <-incoming:
+		}
+		message, recvErr := response.message, response.err
 		if errors.Is(recvErr, io.EOF) {
 			receiptID, idErr := newControlID()
 			if idErr != nil {
@@ -209,6 +251,13 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 				if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
 					return err
 				}
+			}
+		case *controlv1.ControlMessage_UnknownUsageAck:
+			if body.UnknownUsageAck == nil {
+				return fmt.Errorf("agent: missing unknown usage acknowledgement")
+			}
+			if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
+				return err
 			}
 		case *controlv1.ControlMessage_Error:
 			if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
@@ -277,6 +326,9 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 		// Preserve these rows for a typed handoff rather than reporting their
 		// reserved upper bound as actual consumption on the old wire path.
 		if record.UnknownUpper != 0 {
+			if err := c.migrateUnknownUsage(ctx, record); err != nil {
+				return err
+			}
 			continue
 		}
 		batch := new(controlv1.UsageBatch)
@@ -298,7 +350,44 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 		}
 		*lastSequence = sequence
 	}
+	unknown, err := c.Node.Store.PendingUnknownUsage(ctx, c.Node.NodeID)
+	if err != nil {
+		return err
+	}
+	for _, record := range unknown {
+		batch, err := contracts.DecodeUnknownUsage(record.Payload)
+		if err != nil {
+			return err
+		}
+		sequence, err := c.Node.Store.NextControlSequence(ctx)
+		if err != nil {
+			return err
+		}
+		if err := stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_UnknownUsageBatch{UnknownUsageBatch: batch}}); err != nil {
+			return err
+		}
+		*lastSequence = sequence
+	}
 	return nil
+}
+
+func (c *ControlClient) migrateUnknownUsage(ctx context.Context, record store.UsageBatch) error {
+	var legacy controlv1.UsageBatch
+	if err := proto.Unmarshal(record.Payload, &legacy); err != nil {
+		return err
+	}
+	if legacy.GetBatchId() != record.BatchID || legacy.GetBillingSnapshotId() != record.SnapshotID || len(legacy.GetDeltas()) != 1 {
+		return store.ErrUsageBatchConflict
+	}
+	d := legacy.GetDeltas()[0]
+	if d.GetBytes() != record.UnknownUpper {
+		return store.ErrUsageBatchConflict
+	}
+	payload, err := contracts.EncodeUnknownUsage(&controlv1.UnknownUsageBatch{BatchId: record.BatchID, OriginBootId: record.BootID, BillingSnapshotId: record.SnapshotID, RuleId: d.GetRuleId(), GrantId: d.GetGrantId(), Role: d.GetRole(), Direction: d.GetDirection(), UnknownUpperBound: record.UnknownUpper})
+	if err != nil {
+		return err
+	}
+	return c.Node.Store.MigrateLegacyUnknownUsage(ctx, record, payload)
 }
 
 func stableControlErrorCode(code string) bool {

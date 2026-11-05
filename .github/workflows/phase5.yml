@@ -57,4 +57,8 @@ jobs:
             artifacts/phase5/authorization/report.json
             artifacts/phase5/authorization/runtime-*.json
             artifacts/phase5/authorization/runtime-*.sqlite.gz
+            artifacts/phase5/authorization/unknown-*.json
+            artifacts/phase5/authorization/unknown-*.sqlite.gz
+            artifacts/phase5/authorization/handoff-*.json
+            artifacts/phase5/authorization/handoff-*.sqlite.gz
           if-no-files-found: error

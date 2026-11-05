@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
@@ -18,6 +19,7 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
 	"vortex/agent/store"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
@@ -38,6 +40,7 @@ type TestServer struct {
 	AuthorizationUpdate func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
 	UsageBatchLimit     int
 	AcceptUsage         bool
+	Usage               *UsageRelay
 	mu                  sync.RWMutex
 	revoked             map[string]struct{}
 }
@@ -155,15 +158,43 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return nil
 		}
 	}
+	lastNodeSequence := first.GetSequence()
 	for {
 		message, err := stream.Recv()
 		if err != nil {
 			return err
 		}
-		if message.GetNodeId() != first.GetNodeId() || message.GetBootId() == "" || message.GetSequence() <= first.GetSequence() {
+		if message.GetNodeId() != first.GetNodeId() || message.GetBootId() != first.GetBootId() || message.GetSequence() <= lastNodeSequence {
 			return fmt.Errorf("test hub: control message identity or sequence invalid")
 		}
+		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_UnknownUsageBatch:
+			payload, err := contracts.EncodeUnknownUsage(body.UnknownUsageBatch)
+			if err != nil {
+				return err
+			}
+			if s.Usage != nil {
+				err = s.Usage.AcceptUnknown(ctx, first.GetNodeId(), body.UnknownUsageBatch)
+			} else {
+				err = s.Store.PersistUnknownUsage(ctx, first.GetNodeId(), payload)
+			}
+			if err != nil {
+				return err
+			}
+			digest := sha256.Sum256(payload)
+			ackID, err := testHubMessageID()
+			if err != nil {
+				return err
+			}
+			controlSequence++
+			if err := stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UnknownUsageAck{UnknownUsageAck: &controlv1.UnknownUsageAcknowledgement{BatchId: body.UnknownUsageBatch.GetBatchId(), PayloadSha256: digest[:]}}}); err != nil {
+				return err
+			}
+			usageReceived++
+			if s.UsageBatchLimit <= usageReceived {
+				return nil
+			}
 		case *controlv1.NodeMessage_UsageBatch:
 			batch := body.UsageBatch
 			if batch == nil || batch.GetBatchId() == "" || batch.GetBillingSnapshotId() == "" {
@@ -173,7 +204,12 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err != nil {
 				return err
 			}
-			if err := s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload}); err != nil {
+			if s.Usage != nil {
+				err = s.Usage.AcceptKnown(ctx, first.GetNodeId(), message.GetBootId(), batch)
+			} else {
+				err = s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload})
+			}
+			if err != nil {
 				return err
 			}
 			ackID, err := testHubMessageID()

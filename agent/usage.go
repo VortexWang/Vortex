@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"vortex/agent/store"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 	engineaccounting "vortex/engine/accounting"
 	runtimeaccounting "vortex/engine/runtime/accounting"
@@ -62,11 +63,21 @@ func (n *Node) recoverUsageReservations(ctx context.Context) error {
 			SnapshotID: reservation.SnapshotID, AuthorizationID: reservation.AuthorizationID, Direction: direction,
 			Resolution: engineaccounting.Unknown, Reserved: int64(reservation.Reserved), Used: int64(reservation.Reserved),
 		}
-		payload, err := marshalUsage(record, reservation.Direction, reservation.Reserved)
+		payload, err := marshalUnknownUsage(record, reservation.Direction, reservation.BootID)
+		if reservation.AuthorizationID == "" {
+			// Older diagnostic reservations lack a grant identity. Retain
+			// their original evidence; never fabricate a wire-eligible grant.
+			payload, err = marshalUsage(record, reservation.Direction, reservation.Reserved)
+		}
 		if err != nil {
 			return err
 		}
-		if err := n.Store.SettleUsageReservation(ctx, reservation, "unknown", reservation.Reserved, payload, reservation.Reserved); err != nil {
+		if reservation.AuthorizationID != "" {
+			err = n.Store.SettleUnknownUsageReservation(ctx, reservation, payload)
+		} else {
+			err = n.Store.SettleUsageReservation(ctx, reservation, "unknown", reservation.Reserved, payload, reservation.Reserved)
+		}
+		if err != nil {
 			return fmt.Errorf("freeze recovered reservation %s: %w", reservation.BatchID, err)
 		}
 	}
@@ -95,9 +106,11 @@ func (n *Node) SettleUsage(ctx context.Context, record engineaccounting.UsageRec
 	case engineaccounting.Committed:
 		payload, err = marshalUsage(record, direction, used)
 	case engineaccounting.Unknown:
-		used = uint64(record.Reserved)
-		unknownUpper = uint64(record.Reserved)
-		payload, err = marshalUsage(record, direction, used)
+		payload, err = marshalUnknownUsage(record, direction, n.BootID)
+		if err != nil {
+			return err
+		}
+		return n.Store.SettleUnknownUsageReservation(ctx, reservation, payload)
 	default:
 		return fmt.Errorf("agent: unsupported Engine usage resolution")
 	}
@@ -130,6 +143,10 @@ func marshalUsage(record engineaccounting.UsageRecord, direction string, bytesUs
 	return payload, nil
 }
 
+func marshalUnknownUsage(record engineaccounting.UsageRecord, direction, originBoot string) ([]byte, error) {
+	return contracts.EncodeUnknownUsage(&controlv1.UnknownUsageBatch{BatchId: record.BatchID, OriginBootId: originBoot, BillingSnapshotId: record.SnapshotID, RuleId: record.RuleID, GrantId: record.AuthorizationID, Role: "source", Direction: direction, UnknownUpperBound: uint64(record.Reserved)})
+}
+
 // PersistUsage implements the Engine's database-free in-process accounting
 // interface. The FULL SQLite transaction completes before Engine settles its hold.
 func (n *Node) PersistUsage(ctx context.Context, record engineaccounting.UsageRecord) error {
@@ -139,8 +156,15 @@ func (n *Node) PersistUsage(ctx context.Context, record engineaccounting.UsageRe
 	bytesUsed := uint64(record.Used)
 	unknownUpper := uint64(0)
 	if record.Resolution == engineaccounting.Unknown {
-		bytesUsed = uint64(record.Reserved)
-		unknownUpper = uint64(record.Reserved)
+		direction, err := usageDirection(record.Direction)
+		if err != nil {
+			return err
+		}
+		payload, err := marshalUnknownUsage(record, direction, n.BootID)
+		if err != nil {
+			return err
+		}
+		return n.Store.PersistUnknownUsage(ctx, n.NodeID, payload)
 	} else if record.Resolution != engineaccounting.Committed {
 		return fmt.Errorf("agent: unsupported Engine usage resolution")
 	}

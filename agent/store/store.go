@@ -344,7 +344,26 @@ CREATE TABLE IF NOT EXISTS issuer_issues (
  amount_bytes TEXT NOT NULL, created_at TEXT NOT NULL,
  FOREIGN KEY(delegation_id) REFERENCES issuer_delegations(delegation_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8')
+CREATE TABLE IF NOT EXISTS unknown_usage_batches (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, origin_boot_id TEXT NOT NULL,
+ snapshot_id TEXT NOT NULL, grant_id TEXT NOT NULL, rule_id TEXT NOT NULL,
+ direction TEXT NOT NULL, unknown_upper_bound TEXT NOT NULL,
+ payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
+ transport_state TEXT NOT NULL, liability_state TEXT NOT NULL,
+ legacy_before_image BLOB, created_at TEXT NOT NULL,
+ PRIMARY KEY(node_id,batch_id)
+);
+CREATE TABLE IF NOT EXISTS unknown_usage_conflicts (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, payload BLOB NOT NULL,
+ payload_sha256 BLOB NOT NULL, created_at TEXT NOT NULL,
+ PRIMARY KEY(node_id,batch_id,payload_sha256)
+);
+CREATE TABLE IF NOT EXISTS usage_backend_receipts (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, kind TEXT NOT NULL,
+ payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
+ PRIMARY KEY(node_id,batch_id)
+);
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '9')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -435,6 +454,21 @@ func (s *Store) ReserveUsage(ctx context.Context, reservation UsageReservation) 
 // SettleUsageReservation atomically resolves a pre-write hold and, for actual
 // or unknown usage, places its immutable payload in the durable handoff outbox.
 func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64) error {
+	return s.settleUsageReservation(ctx, reservation, resolution, used, payload, unknownUpper, nil)
+}
+
+func (s *Store) SettleUnknownUsageReservation(ctx context.Context, reservation UsageReservation, payload []byte) error {
+	r, err := unknownRecord(reservation.NodeID, payload)
+	if err != nil {
+		return err
+	}
+	if r.BatchID != reservation.BatchID || r.OriginBootID != reservation.BootID || r.SnapshotID != reservation.SnapshotID || r.GrantID != reservation.AuthorizationID || r.RuleID != reservation.RuleID || r.Direction != reservation.Direction || r.Upper != reservation.Reserved {
+		return ErrUsageBatchConflict
+	}
+	return s.settleUsageReservation(ctx, reservation, "unknown", reservation.Reserved, payload, reservation.Reserved, &r)
+}
+
+func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64, typed *UnknownUsageRecord) error {
 	if resolution != "committed" && resolution != "returned" && resolution != "unknown" {
 		return fmt.Errorf("store: invalid usage reservation resolution")
 	}
@@ -473,6 +507,16 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 			return ErrUsageBatchConflict
 		}
 		if resolution != "returned" {
+			if typed != nil {
+				var previousPayload []byte
+				if err := tx.QueryRowContext(ctx, `SELECT payload FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&previousPayload); err != nil {
+					return err
+				}
+				if !bytes.Equal(previousPayload, payload) {
+					return ErrUsageBatchConflict
+				}
+				return tx.Commit()
+			}
 			var storedPayload []byte
 			var storedUpper string
 			var storedDigest []byte
@@ -533,7 +577,14 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 	} else if !errors.Is(holdErr, sql.ErrNoRows) {
 		return holdErr
 	}
-	if resolution != "returned" {
+	if typed != nil {
+		if err := insertUnknownUsageTx(ctx, tx, *typed, "pending", nil); err != nil {
+			return err
+		}
+	} else if resolution != "returned" {
+		if err := rejectUnknownIdentityTx(ctx, tx, reservation.NodeID, reservation.BatchID); err != nil {
+			return err
+		}
 		digest := sha256.Sum256(payload)
 		now := time.Now().UTC().Format(time.RFC3339Nano)
 		_, err = tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, reservation.NodeID, reservation.BatchID, reservation.BootID, reservation.SnapshotID, payload, digest[:], strconv.FormatUint(unknownUpper, 10), "pending", now, now)
@@ -756,6 +807,9 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 		return tx.Commit()
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err := rejectUnknownIdentityTx(ctx, tx, batch.NodeID, batch.BatchID); err != nil {
 		return err
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano)

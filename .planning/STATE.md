@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 3
 status: executing
-stopped_at: 05-03 durable Hub issuer and same-source top-ups implemented; in-session renewal and typed unknown-liability handoff remain open
-last_updated: "2026-11-05T15:45:18Z"
+stopped_at: 05-03 control 1.2.0 approved and typed unknown/backend handoff implemented; final same-SHA verification and plan audit in progress
+last_updated: "2026-11-05T22:16:26Z"
 last_activity: 2026-11-05
-last_activity_desc: Same-SHA Docker and Actions pass durable Hub issuance, source top-ups and issuer identity; in-session renewal and typed unknown handoff remain open
+last_activity_desc: Verifying approved typed unknown handoff, online backend ACK ordering and continued control-stream reporting
 state_head: 04bd2bf5647dc0eb280e519f5281105e78b154f3
 progress:
   total_phases: 8
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 3
 Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 remains in progress: durable Hub issuance and source-bound top-ups implemented; in-session renewal and unknown-liability handoff remain open
+Last activity: 2026-11-05 — Plan 05-03 final verification in progress; approved control 1.2.0 implemented with typed unknown handoff and online/autonomous ACK ordering
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 

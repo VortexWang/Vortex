@@ -25,14 +25,14 @@ func TestNodeUsageSinkPersistsCommittedAndUnknownBounds(t *testing.T) {
 	}
 	for _, record := range []engineaccounting.UsageRecord{
 		{BatchID: "batch-committed", RuleID: "rule-1", SnapshotID: "snapshot-1", Direction: engineaccounting.LeftToRight, Resolution: engineaccounting.Committed, Reserved: 64, Used: 20},
-		{BatchID: "batch-unknown", RuleID: "rule-1", SnapshotID: "snapshot-1", Direction: engineaccounting.RightToLeft, Resolution: engineaccounting.Unknown, Reserved: 32, Used: 32},
+		{BatchID: "batch-unknown", AuthorizationID: "550e8400-e29b-41d4-a716-446655440021", RuleID: "rule-1", SnapshotID: "550e8400-e29b-41d4-a716-446655440024", Direction: engineaccounting.RightToLeft, Resolution: engineaccounting.Unknown, Reserved: 32, Used: 32},
 	} {
 		if err := node.PersistUsage(ctx, record); err != nil {
 			t.Fatal(err)
 		}
 	}
 	pending, err := s.PendingUsageOutbox(ctx, controlTestNodeID)
-	if err != nil || len(pending) != 2 {
+	if err != nil || len(pending) != 1 {
 		t.Fatalf("pending usage=%+v err=%v", pending, err)
 	}
 	for _, record := range pending {
@@ -46,9 +46,11 @@ func TestNodeUsageSinkPersistsCommittedAndUnknownBounds(t *testing.T) {
 		if record.BatchID == "batch-committed" && (record.UnknownUpper != 0 || batch.GetDeltas()[0].GetBytes() != 20) {
 			t.Fatalf("committed record=%+v delta=%+v", record, batch.GetDeltas()[0])
 		}
-		if record.BatchID == "batch-unknown" && (record.UnknownUpper != 32 || batch.GetDeltas()[0].GetBytes() != 32 || batch.GetDeltas()[0].GetDirection() != "ingress") {
-			t.Fatalf("unknown record=%+v delta=%+v", record, batch.GetDeltas()[0])
-		}
+
+	}
+	unknown, err := s.PendingUnknownUsage(ctx, controlTestNodeID)
+	if err != nil || len(unknown) != 1 || unknown[0].Upper != 32 || unknown[0].Direction != "ingress" {
+		t.Fatalf("typed unknown record=%+v %v", unknown, err)
 	}
 }
 

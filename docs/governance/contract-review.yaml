@@ -5,17 +5,81 @@
   "decision": "freeze-contracts",
   "review_date": "2026-11-03",
   "contracts": [
-    {"id":"vortex.database","path":"contracts/database/schema.sql","version":"1.0.0","sha256":"11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2","decision":"approved"},
-    {"id":"vortex.public-api","path":"contracts/openapi/v1/openapi.yaml","version":"1.0.0","sha256":"b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191","decision":"approved"},
-    {"id":"vortex.control.v1","path":"contracts/protobuf/v1/vortex.proto","version":"1.1.0","sha256":"0b1ecdb1480fd28632571a14850fff96907dc2ba32a06ea92486667705328da0","decision":"approved"},
-    {"id":"vortex.runtime-config","path":"contracts/runtime/config.schema.json","version":"1.0.0","sha256":"43261cd1e9b115cddadee08b52ecabddf82f7e69c1f47690424568af91435ef8","decision":"approved"},
-    {"id":"vortex.vlink.v1","path":"contracts/vlink/v1/encoding.md","version":"1.0.0","sha256":"dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52","decision":"approved"},
-    {"id":"vortex.authorization.v1","path":"contracts/authorization/v1/payload.schema.json","version":"1.0.0","sha256":"eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af","decision":"approved"}
+    {
+      "id": "vortex.database",
+      "path": "contracts/database/schema.sql",
+      "version": "1.0.0",
+      "sha256": "11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2",
+      "decision": "approved"
+    },
+    {
+      "id": "vortex.public-api",
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "version": "1.0.0",
+      "sha256": "b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191",
+      "decision": "approved"
+    },
+    {
+      "id": "vortex.control.v1",
+      "path": "contracts/protobuf/v1/vortex.proto",
+      "version": "1.2.0",
+      "sha256": "5d1c2b2ef7d3b0d7163c8d09bb786b2ba4c528f3308cbf7e280064cafca5784e",
+      "decision": "approved"
+    },
+    {
+      "id": "vortex.runtime-config",
+      "path": "contracts/runtime/config.schema.json",
+      "version": "1.0.0",
+      "sha256": "43261cd1e9b115cddadee08b52ecabddf82f7e69c1f47690424568af91435ef8",
+      "decision": "approved"
+    },
+    {
+      "id": "vortex.vlink.v1",
+      "path": "contracts/vlink/v1/encoding.md",
+      "version": "1.0.0",
+      "sha256": "dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52",
+      "decision": "approved"
+    },
+    {
+      "id": "vortex.authorization.v1",
+      "path": "contracts/authorization/v1/payload.schema.json",
+      "version": "1.0.0",
+      "sha256": "eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af",
+      "decision": "approved"
+    }
   ],
   "approved_at": "2026-11-03T04:26:01Z",
   "note": "Each approved hash binds the exact frozen content at the recorded SemVer version. Any normative change requires owner approval, a SemVer update, requirements-map review and changelog record.",
   "change_approvals": [
-    {"contract_id":"vortex.control.v1","from":"1.0.0","version":"1.1.0","proposal_sha256":"d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218","contract_sha256":"0b1ecdb1480fd28632571a14850fff96907dc2ba32a06ea92486667705328da0","reviewer":"user-approved-in-session","approved_at":"2026-11-05T11:26:21Z","decision":"approved"},
-    {"contract_id":"vortex.authorization.v1","from":"none","version":"1.0.0","proposal_sha256":"ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07","contract_sha256":"eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af","reviewer":"user-approved-in-session","approved_at":"2026-11-05T13:41:37Z","decision":"approved"}
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.0.0",
+      "version": "1.1.0",
+      "proposal_sha256": "d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218",
+      "contract_sha256": "0b1ecdb1480fd28632571a14850fff96907dc2ba32a06ea92486667705328da0",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-05T11:26:21Z",
+      "decision": "approved"
+    },
+    {
+      "contract_id": "vortex.authorization.v1",
+      "from": "none",
+      "version": "1.0.0",
+      "proposal_sha256": "ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07",
+      "contract_sha256": "eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-05T13:41:37Z",
+      "decision": "approved"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.1.0",
+      "version": "1.2.0",
+      "proposal_sha256": "4f44708c18bd4086c49ee1fb9af611e23a98501ff9e52679e0a51995f8e38d67",
+      "contract_sha256": "5d1c2b2ef7d3b0d7163c8d09bb786b2ba4c528f3308cbf7e280064cafca5784e",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-05T22:07:56Z",
+      "decision": "approved"
+    }
   ]
 }
