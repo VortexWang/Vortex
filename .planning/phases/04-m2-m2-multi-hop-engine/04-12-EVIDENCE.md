@@ -301,3 +301,28 @@ Scope: response handling is now connected to authenticated control. Outbound
 request transport, rolling consumption/target/waterline scheduling, bounded
 authority wait, idle proof protocol and full host qualification are still open.
 No D-04 parameter lock or full attack qualification is asserted.
+
+## D-04 rolling target candidate and transport proposal
+
+Added DemandPolicy with explicit candidate configuration (no approved defaults).
+It keeps sixty fixed per-second buckets of successfully committed raw bytes.
+The current/previous 59 buckets produce ceil(minute_bytes * horizon_seconds / 60),
+clamped to configured floor/ceiling. At or below the configured remaining
+waterline it requests target minus available, never target plus held/unknown.
+Arithmetic saturates instead of wrapping. A clock rollback faults the estimator
+until explicitly reconstructed; losing its estimates cannot retire a durable
+pending request. Scope isolation must be enforced by its owning controller.
+
+Tests verify cold floor, a 100 Mbps minute -> 375 MB 30-second target, exact
+30-percent waterline, full window expiry, rollback fail-closed, concurrent
+observations, saturation and request cap. Targeted race and Agent vet PASS.
+This helper is not yet connected to settlement or outbound scheduling; it is
+not evidence of measured adaptive issuance or a parameter lock.
+
+Prepared 04-13-DEMAND-CONTRACT-PROPOSAL.md with SHA-256
+1dfd8ae92fb93217011118ccbd605067f94b8944ef9e257fcadeba8cfcbb2064.
+It proposes control 1.3.0 demand and durable definitive-denial messages, using
+existing AuthorizationUpdate for success. Owner approval requested because
+contract-review.yaml explicitly requires owner approval for normative changes.
+No frozen schema, approval hash or version has been modified. Independent
+implementation continues; transport implementation awaits that decision.
