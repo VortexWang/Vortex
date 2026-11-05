@@ -65,7 +65,7 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 			return nil
 		case "activation-unknown", "commit-requested":
 			return ErrActivationUnknown
-		case "aborted", "prepare-failed", "commit-failed":
+		case "released", "aborted", "prepare-failed", "commit-failed":
 			return ErrConfigConflict
 		}
 	} else if !errors.Is(err, sql.ErrNoRows) {
@@ -103,6 +103,11 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		}
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+	if executor, ok := r.Apply.(interface{ ExecutionID() string }); ok {
+		if err := r.Store.BindActivationExecutor(ctx, txID, executor.ExecutionID()); err != nil {
+			return err
+		}
 	}
 	if _, err := r.Apply.Prepare(id, generation); err != nil {
 		if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error()); saveErr != nil {

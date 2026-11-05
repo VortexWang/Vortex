@@ -131,6 +131,9 @@ func TestRecoveryAcceptsMatchingAbortProof(t *testing.T) {
 		t.Fatal(err)
 	}
 	mgr := apply.NewManager()
+	if err := s.BindActivationExecutor(ctx, id, mgr.InstanceID()); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := mgr.Prepare([16]byte{1}, 9); err != nil {
 		t.Fatal(err)
 	}
@@ -156,5 +159,34 @@ func TestRecoveryAcceptsMatchingAbortProof(t *testing.T) {
 	var state string
 	if err := db.QueryRow(`SELECT state FROM activation_holds WHERE transaction_id=?`, id).Scan(&state); err != nil || state != "released" {
 		t.Fatal(state, err)
+	}
+}
+
+func TestNewExecutorCannotForgeOldAbortProof(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	const id = "01000000000000000000000000000000"
+	original := &Reconciler{Store: s, Apply: lostCommitReceipt{EngineApplier{Manager: apply.NewManager()}}}
+	if err = original.ApplyConfig(ctx, id, 1, 9, false); !errors.Is(err, ErrActivationUnknown) {
+		t.Fatal(err)
+	}
+	replacement := apply.NewManager()
+	if _, err = replacement.Prepare([16]byte{1}, 9); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = replacement.Abort([16]byte{1}); err != nil {
+		t.Fatal(err)
+	}
+	recovered := &Reconciler{Store: s, Apply: EngineApplier{Manager: replacement}}
+	if err = recovered.RecoverConfig(ctx, id); !errors.Is(err, ErrActivationUnknown) {
+		t.Fatalf("forged proof: %v", err)
+	}
+	row, err := s.GetConfigResult(ctx, id)
+	if err != nil || row.State != "activation-unknown" {
+		t.Fatal(row, err)
 	}
 }

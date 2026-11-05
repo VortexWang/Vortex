@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -46,8 +48,16 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 		target = "active"
 		// Never regress an already applied version using a delayed observation.
 		var current string
-		_ = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='applied_version'`).Scan(&current)
-		old, _ := strconv.ParseUint(current, 10, 64)
+		readErr := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='applied_version'`).Scan(&current)
+		var old uint64
+		if readErr == nil {
+			old, err = strconv.ParseUint(current, 10, 64)
+			if err != nil {
+				return fmt.Errorf("store: corrupt applied version: %w", err)
+			}
+		} else if !errors.Is(readErr, sql.ErrNoRows) {
+			return readErr
+		}
 		next, err := strconv.ParseUint(version, 10, 64)
 		if err != nil || next < old {
 			return fmt.Errorf("store: stale active observation")
@@ -68,4 +78,49 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 		return err
 	}
 	return tx.Commit()
+}
+
+// BindActivationExecutor is immutable. A new process cannot recreate an old
+// transaction ID, abort its empty copy, and use that as proof to release holds.
+func (s *Store) BindActivationExecutor(ctx context.Context, id, executor string) error {
+	if len(executor) != 32 {
+		return ErrConfigRequestConflict
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var state string
+	if err = tx.QueryRowContext(ctx, `SELECT state FROM config_results WHERE transaction_id=?`, id).Scan(&state); err != nil {
+		return err
+	}
+	var prior string
+	err = tx.QueryRowContext(ctx, `SELECT execution_id FROM activation_executors WHERE transaction_id=?`, id).Scan(&prior)
+	if err == nil {
+		if prior != executor {
+			return ErrConfigUnresolved
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	// Only a new request may first bind. Legacy or already-running rows lack
+	// sufficient evidence; migrating them must retain uncertainty.
+	if state != "received" {
+		return ErrConfigUnresolved
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO activation_executors(transaction_id,execution_id) VALUES(?,?)`, id, executor); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func (s *Store) ActivationExecutorMatches(ctx context.Context, id, executor string) (bool, error) {
+	var previous string
+	err := s.db.QueryRowContext(ctx, `SELECT execution_id FROM activation_executors WHERE transaction_id=?`, id).Scan(&previous)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return executor != "" && previous == executor, err
 }

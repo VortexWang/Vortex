@@ -213,6 +213,10 @@ CREATE TABLE IF NOT EXISTS activation_holds (
  transaction_id TEXT PRIMARY KEY NOT NULL, generation TEXT NOT NULL,
  state TEXT NOT NULL, FOREIGN KEY(transaction_id) REFERENCES config_results(transaction_id)
 );
+CREATE TABLE IF NOT EXISTS activation_executors (
+ transaction_id TEXT PRIMARY KEY NOT NULL, execution_id TEXT NOT NULL,
+ FOREIGN KEY(transaction_id) REFERENCES config_results(transaction_id)
+);
 CREATE TABLE IF NOT EXISTS activation_observations (
  sequence INTEGER PRIMARY KEY AUTOINCREMENT, transaction_id TEXT NOT NULL,
  generation TEXT NOT NULL, execution_state TEXT NOT NULL, observed_at TEXT NOT NULL
@@ -371,7 +375,47 @@ CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '10')
+CREATE TABLE IF NOT EXISTS hub_ledger (
+ sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+ kind TEXT NOT NULL, record_id TEXT NOT NULL, payload BLOB NOT NULL,
+ payload_sha256 BLOB NOT NULL, confirmed INTEGER NOT NULL DEFAULT 0,
+ UNIQUE(kind,record_id)
+);
+CREATE TABLE IF NOT EXISTS hub_handoffs (
+ handoff_id TEXT PRIMARY KEY, hub_id TEXT NOT NULL, from_epoch TEXT NOT NULL,
+ to_epoch TEXT NOT NULL, sealed_sequence INTEGER NOT NULL,
+ request BLOB NOT NULL, UNIQUE(hub_id,from_epoch), UNIQUE(hub_id,to_epoch)
+);
+CREATE TABLE IF NOT EXISTS hub_transfers (
+ handoff_id TEXT NOT NULL, delegation_id TEXT NOT NULL, remaining_bytes TEXT NOT NULL,
+ PRIMARY KEY(handoff_id,delegation_id),
+ FOREIGN KEY(handoff_id) REFERENCES hub_handoffs(handoff_id)
+);
+CREATE TRIGGER IF NOT EXISTS hub_journal_issue AFTER INSERT ON issuer_issues BEGIN
+ INSERT INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ VALUES('issue',NEW.issue_id,NEW.payload,NEW.payload_sha256);
+END;
+CREATE TRIGGER IF NOT EXISTS hub_journal_usage AFTER INSERT ON usage_batches
+ WHEN NEW.state='ledgered' AND NEW.unknown_upper_bound='0' BEGIN
+ INSERT INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ VALUES('known',NEW.node_id || '/' || NEW.batch_id,NEW.payload,NEW.payload_sha256);
+END;
+CREATE TRIGGER IF NOT EXISTS hub_journal_usage_update AFTER UPDATE OF state ON usage_batches
+ WHEN NEW.state='ledgered' AND NEW.unknown_upper_bound='0' BEGIN
+ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ VALUES('known',NEW.node_id || '/' || NEW.batch_id,NEW.payload,NEW.payload_sha256);
+END;
+CREATE TRIGGER IF NOT EXISTS hub_journal_unknown AFTER INSERT ON unknown_usage_batches BEGIN
+ INSERT INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ VALUES('unknown',NEW.node_id || '/' || NEW.batch_id,NEW.payload,NEW.payload_sha256);
+END;
+INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ SELECT 'issue',issue_id,payload,payload_sha256 FROM issuer_issues i WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='issue' AND l.record_id=i.issue_id) ORDER BY rowid;
+INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
+INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
+ SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '11')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {

@@ -224,8 +224,8 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return result, err
 	}
 	var raw, digest []byte
-	var remainingText, state string
-	err = tx.QueryRowContext(ctx, `SELECT payload,payload_sha256,remaining_bytes,state FROM issuer_delegations WHERE delegation_id=?`, r.DelegationID).Scan(&raw, &digest, &remainingText, &state)
+	var remainingText, state, ownerEpoch string
+	err = tx.QueryRowContext(ctx, `SELECT payload,payload_sha256,remaining_bytes,state,signer_epoch FROM issuer_delegations WHERE delegation_id=?`, r.DelegationID).Scan(&raw, &digest, &remainingText, &state, &ownerEpoch)
 	if errors.Is(err, sql.ErrNoRows) {
 		return result, ErrNewAuthorityInAutonomy
 	}
@@ -247,8 +247,12 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	if err := tx.QueryRowContext(ctx, `SELECT signer_epoch,state FROM issuer_epochs WHERE hub_id=?`, d.HubID).Scan(&epoch, &epochState); err != nil {
 		return result, err
 	}
-	if epoch != strconv.FormatUint(d.SignerEpoch, 10) || epochState != "open" {
+	if epoch != ownerEpoch || epochState != "open" {
 		return result, ErrSignerEpochClosed
+	}
+	d.SignerEpoch, err = strconv.ParseUint(ownerEpoch, 10, 64)
+	if err != nil || d.SignerEpoch == 0 {
+		return result, ErrAuthorizationDenied
 	}
 	heartbeat, deadline, err := issuerModeTx(ctx, tx, now)
 	if err != nil {

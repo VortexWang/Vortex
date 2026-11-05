@@ -12,6 +12,13 @@ type EngineApplier struct {
 	Manager *apply.Manager
 }
 
+func (a EngineApplier) ExecutionID() string {
+	if a.Manager == nil {
+		return ""
+	}
+	return a.Manager.InstanceID()
+}
+
 func (a EngineApplier) Query(id [16]byte) (apply.Transaction, bool) {
 	if a.Manager == nil {
 		return apply.Transaction{}, false

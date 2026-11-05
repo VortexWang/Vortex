@@ -1,6 +1,8 @@
 package apply
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"sync"
 )
@@ -27,12 +29,22 @@ type Transaction struct {
 	State      State
 }
 type Manager struct {
-	mu     sync.Mutex
-	tx     map[[16]byte]Transaction
-	active uint64
+	instance string
+	mu       sync.Mutex
+	tx       map[[16]byte]Transaction
+	active   uint64
 }
 
-func NewManager() *Manager { return &Manager{tx: make(map[[16]byte]Transaction)} }
+func NewManager() *Manager {
+	var id [16]byte
+	if _, err := rand.Read(id[:]); err != nil {
+		panic(err)
+	}
+	return &Manager{instance: hex.EncodeToString(id[:]), tx: make(map[[16]byte]Transaction)}
+}
+
+// InstanceID identifies this execution lifetime, not the Agent boot or tx ID.
+func (m *Manager) InstanceID() string { return m.instance }
 
 // Query reports retained execution state. Absence is not proof of inactivity.
 func (m *Manager) Query(id [16]byte) (Transaction, bool) {

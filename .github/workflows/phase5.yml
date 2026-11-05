@@ -46,6 +46,17 @@ jobs:
         env:
           VORTEX_TEST_FULL_DISK_DIR: /tmp/vortex-full-disk
         run: make phase5-authorization-check
+      - name: Run activation and S/R recovery regression
+        env:
+          VORTEX_TEST_FULL_DISK_DIR: /tmp/vortex-full-disk
+        run: sh tools/phase5/recovery_check.sh
+      - name: Retain recovery regression evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-recovery-${{ github.sha }}
+          path: artifacts/phase5/recovery/
+          if-no-files-found: error
       - name: Retain authorization regression evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

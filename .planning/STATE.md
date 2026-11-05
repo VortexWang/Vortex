@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 4
 status: executing
-stopped_at: 05-04 executing; direct reconcile fencing and unresolved-activation guard implemented
+stopped_at: 05-04 executing; atomic S/R handoff and execution-instance recovery implemented; integrated boot recovery remains open
 last_updated: "2026-11-05T22:24:05.531Z"
 last_activity: 2026-11-05
-last_activity_desc: 05-04 executing; persistent activation guard implemented, recovery and S/R transfer remain open
+last_activity_desc: 05-04 executing; S/R and fault regressions implemented; final paired verification pending
 state_head: 0e462c71ca9a7b6bf006faeeabbff8fe97759fba
 progress:
   total_phases: 8

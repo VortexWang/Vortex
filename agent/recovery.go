@@ -9,6 +9,7 @@ import (
 
 type executionQuerier interface {
 	Query([16]byte) (apply.Transaction, bool)
+	ExecutionID() string
 }
 
 // RecoverConfig asks the same execution boundary for retained transaction
@@ -23,6 +24,9 @@ func (r *Reconciler) RecoverConfig(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+	if record.FencingGeneration == 0 {
+		return ErrConfigConflict
+	}
 	raw, err := hex.DecodeString(id)
 	if err != nil || len(raw) != 16 {
 		return ErrConfigConflict
@@ -33,7 +37,12 @@ func (r *Reconciler) RecoverConfig(ctx context.Context, id string) error {
 	if !ok {
 		return fmt.Errorf("agent: execution query unavailable")
 	}
+	sameExecutor, err := r.Store.ActivationExecutorMatches(ctx, id, q.ExecutionID())
+	if err != nil {
+		return err
+	}
 	result, found := q.Query(txid)
+	found = found && sameExecutor
 	state := "missing"
 	if found {
 		if result.ID != txid || result.Generation != record.FencingGeneration {
