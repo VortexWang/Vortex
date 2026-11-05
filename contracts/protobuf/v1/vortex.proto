@@ -4,7 +4,7 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// DRAFT 1.0.0. Source: V1.11 §3.4, §7, AGT-006, HUB-003 and HUB-012.
+// DRAFT 1.1.0. Source: V1.11 §3.4, §7, AGT-001..012, HUB-001..018.
 // Message field numbers and lifecycle semantics require contract review.
 
 service NodeControl {
@@ -21,6 +21,7 @@ message NodeMessage {
     UsageBatch usage_batch = 11;
     ApplyResult apply_result = 12;
     NodeEvent event = 13;
+    RegisterRequest register = 14;
   }
 }
 
@@ -31,8 +32,12 @@ message ControlMessage {
     RuntimeConfigUpdate config_update = 10;
     UsageAcknowledgement usage_ack = 11;
     AuthorizationUpdate authorization_update = 12;
+    ControlError error = 13;
   }
 }
+
+message RegisterRequest { string enrollment_token = 1; bytes csr_der = 2; string requested_node_id = 3; }
+message ControlError { string code = 1; string message_id = 2; bool retryable = 3; }
 
 message Heartbeat {
   uint64 applied_config_version = 1;

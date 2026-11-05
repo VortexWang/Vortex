@@ -116,7 +116,7 @@
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
 **Plans**: 4 plans in 4 waves; ready for execution after research and plan review.
 **Wave 1**
-- [ ] 05-01 — Startable node and durable local store
+- [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 05-02 — Registration, mTLS control, reconcile and upgrade supervision
 **Wave 3** *(blocked on Wave 2 completion)*
