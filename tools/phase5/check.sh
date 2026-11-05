@@ -28,7 +28,7 @@ trap finish EXIT
 sh tools/phase5/contracts_check.sh > "$out/contracts.log" 2>&1
 go test -count=1 ./... > "$out/root-test.log" 2>&1
 (cd engine && go test -count=1 ./...) > "$out/engine-test.log" 2>&1
-(cd engine && go test -count=1 -race ./apply ./accounting ./runtime/...) > "$out/engine-race.log" 2>&1
+(cd engine && go test -count=1 -race -v ./apply ./accounting ./runtime/...) > "$out/engine-race.log" 2>&1
 PHASE5_RECOVERY_EVIDENCE_DIR="$out/recovery" sh tools/phase5/recovery_check.sh > "$out/recovery.log" 2>&1
 python3 tools/phase5/audit_recovery.py "$out/recovery" > "$out/audit.json"
 # Missing or skipped required faults cannot be turned into a passing report.
@@ -37,6 +37,7 @@ import json,pathlib,sys
 out=pathlib.Path(sys.argv[1]);sha=sys.argv[2]
 r=json.loads((out/'recovery/report.json').read_text())
 assert r['status']=='passed' and r['commit']==sha and r['backend']=='protocol-test-only'
+assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome ' in (out/'engine-race.log').read_text()
 for path in ('contracts.log','root-test.log','engine-test.log','engine-race.log','recovery/recovery-race.log','recovery/host.txt','audit.json'):
  assert (out/path).is_file() and (out/path).stat().st_size>0,path
 PY

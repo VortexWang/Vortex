@@ -1,6 +1,46 @@
 package apply
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
+
+func TestConcurrentCommitAbortHasOneOutcome(t *testing.T) {
+	for i := 0; i < 128; i++ {
+		m := NewManager()
+		id := [16]byte{1}
+		if _, err := m.Prepare(id, 1); err != nil {
+			t.Fatal(err)
+		}
+		var commitErr, abortErr error
+		start := make(chan struct{})
+		var wg sync.WaitGroup
+		wg.Add(2)
+		go func() { defer wg.Done(); <-start; _, commitErr = m.Commit(id, false) }()
+		go func() { defer wg.Done(); <-start; _, abortErr = m.Abort(id) }()
+		close(start)
+		wg.Wait()
+		if (commitErr == nil) == (abortErr == nil) {
+			t.Fatalf("ambiguous outcome: commit=%v abort=%v", commitErr, abortErr)
+		}
+		tx, _ := m.Query(id)
+		if commitErr == nil {
+			if tx.State != Active || m.active != 1 {
+				t.Fatalf("lost active outcome: %+v", tx)
+			}
+			if replay, err := m.Commit(id, false); err != nil || replay != tx {
+				t.Fatal("commit replay", replay, err)
+			}
+		} else {
+			if tx.State != Aborted || m.active != 0 {
+				t.Fatalf("aborted transaction activated: %+v", tx)
+			}
+			if replay, err := m.Abort(id); err != nil || replay != tx {
+				t.Fatal("abort replay", replay, err)
+			}
+		}
+	}
+}
 
 func TestTransactionIdentityAndUnknownAbort(t *testing.T) {
 	m := NewManager()
