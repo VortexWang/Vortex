@@ -91,23 +91,29 @@ func main() {
 		fatal(fmt.Errorf("invalid Hub CA"))
 	}
 	client := &agent.ControlClient{Node: n, TLS: &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{certificate}, RootCAs: roots, ServerName: *hubName}}
-	if err := client.Connect(ctx, *hubAddr); err != nil {
-		fatal(err)
-	}
-	if err := n.Heartbeat(ctx, 1); err != nil {
-		fatal(err)
-	}
-	fmt.Printf("vortex-node connected node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
+	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
+	runErr := make(chan error, 1)
+	go func() { runErr <- client.Run(ctx, *hubAddr) }()
 	if runtimeEngine, ok := engine.(*agent.RuntimeEngine); ok {
 		select {
 		case <-ctx.Done():
+		case err := <-runErr:
+			if ctx.Err() == nil && err != nil {
+				fatal(err)
+			}
 		case <-runtimeEngine.Done():
 			if err := runtimeEngine.Err(); err != nil {
 				fatal(err)
 			}
 		}
 	} else {
-		<-ctx.Done()
+		select {
+		case <-ctx.Done():
+		case err := <-runErr:
+			if ctx.Err() == nil && err != nil {
+				fatal(err)
+			}
+		}
 	}
 }
 

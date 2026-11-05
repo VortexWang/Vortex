@@ -80,3 +80,28 @@ func TestControlSequenceAndStateSurviveReopen(t *testing.T) {
 		t.Fatalf("version=%q err=%v", version, err)
 	}
 }
+
+func TestControlReceiptCommitsHeartbeatAndRejectsSequenceConflict(t *testing.T) {
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	ctx := context.Background()
+	heartbeat := time.Now().UTC()
+	if err := s.PersistControlReceipt(ctx, "message-1", 4, heartbeat); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PersistControlReceipt(ctx, "message-1", 4, heartbeat); err != nil {
+		t.Fatalf("same receipt retry should be idempotent: %v", err)
+	}
+	if err := s.PersistControlReceipt(ctx, "message-1", 5, heartbeat); err == nil {
+		t.Fatal("same message ID with conflicting sequence was accepted")
+	}
+	if _, err := s.AgentState(ctx, "backend_heartbeat"); err != nil {
+		t.Fatalf("backend heartbeat not persisted with receipt: %v", err)
+	}
+	if _, err := s.AgentState(ctx, "applied_version"); err == nil {
+		t.Fatal("control receipt must not advance applied config version")
+	}
+}

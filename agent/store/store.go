@@ -190,6 +190,41 @@ func (s *Store) PersistControlAck(ctx context.Context, messageID string, sequenc
 	return tx.Commit()
 }
 
+// PersistControlReceipt records a successful backend contact only after the
+// correlated receipt is durably committed. It does not advance applied config.
+func (s *Store) PersistControlReceipt(ctx context.Context, messageID string, sequence uint64, heartbeat time.Time) error {
+	if messageID == "" || sequence == 0 || heartbeat.IsZero() {
+		return fmt.Errorf("store: control receipt identity and heartbeat are required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var recordedSequence uint64
+	lookupErr := tx.QueryRowContext(ctx, `SELECT sequence FROM control_receipts WHERE message_id = ?`, messageID).Scan(&recordedSequence)
+	if lookupErr != nil && lookupErr != sql.ErrNoRows {
+		return lookupErr
+	}
+	if lookupErr == nil && recordedSequence != sequence {
+		return fmt.Errorf("store: control receipt sequence conflicts with durable receipt")
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO control_receipts(message_id, sequence, received_at) VALUES (?, ?, ?) ON CONFLICT(message_id) DO NOTHING`, messageID, sequence, time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	for key, value := range map[string]string{
+		"control_sequence":  fmt.Sprint(sequence),
+		"backend_heartbeat": heartbeat.UTC().Format(time.RFC3339Nano),
+	} {
+		_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, key, value, time.Now().UTC().Format(time.RFC3339Nano))
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 func (s *Store) AgentState(ctx context.Context, key string) (string, error) {
 	var value string
 	err := s.db.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = ?`, key).Scan(&value)

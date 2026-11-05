@@ -140,8 +140,8 @@ func TestControlClientUsesMutualTLSAndPersistsAck(t *testing.T) {
 			t.Fatalf("%s=%q err=%v", key, got, err)
 		}
 	}
-	if _, err := s.AgentState(ctx, "backend_heartbeat"); err == nil {
-		t.Fatal("Hub ACK incorrectly recorded as backend heartbeat")
+	if heartbeat, err := s.AgentState(ctx, "backend_heartbeat"); err != nil || heartbeat == "" {
+		t.Fatalf("successful Hub ACK did not persist backend heartbeat: %q %v", heartbeat, err)
 	}
 	if _, err := s.AgentState(ctx, "applied_version"); err == nil {
 		t.Fatal("Hub ACK incorrectly recorded as applied configuration")
@@ -208,5 +208,104 @@ func TestControlRejectsAcknowledgementForDifferentMessage(t *testing.T) {
 	defer cancel()
 	if err := (&ControlClient{Node: n, TLS: clientTLS, MaxAttempts: 1}).Connect(ctx, ln.Addr().String()); err == nil {
 		t.Fatal("mismatched acknowledgement accepted")
+	}
+}
+
+func TestControlRunnerReconnectsAfterLostStream(t *testing.T) {
+	now := time.Now().UTC()
+	ca, caDER, err := identity.NewCA(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	makeCredential := func(id string) identity.Credential {
+		key, csr, err := identity.GenerateCSR(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		credential, err := ca.SignCSR(csr, id, now, time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		credential, err = identity.AttachKey(credential, key, caDER)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return credential
+	}
+	pool := x509Pool(ca.Certificate)
+	serverTLS, err := identity.TLSConfig(makeCredential("hub"), pool, nil, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientTLS, err := identity.TLSConfig(makeCredential("node-reconnect"), pool, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientTLS.ServerName = "hub"
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	listener := tls.NewListener(ln, serverTLS)
+	accepted := make(chan int, 2)
+	go func() {
+		for attempt := 1; attempt <= 2; attempt++ {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			var in controlWire
+			if json.NewDecoder(bufio.NewReader(conn)).Decode(&in) != nil {
+				_ = conn.Close()
+				continue
+			}
+			accepted <- attempt
+			if attempt == 1 {
+				_ = conn.Close()
+				continue
+			}
+			_ = json.NewEncoder(conn).Encode(controlWire{Type: "ack", ID: in.ID, Version: in.Version, Sequence: in.Sequence})
+			_ = conn.Close()
+		}
+	}()
+	db, err := store.Open(filepath.Join(t.TempDir(), "node.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	node, err := New("node-reconnect", db, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	client := &ControlClient{Node: node, TLS: clientTLS, MaxAttempts: 1, RetryMin: 10 * time.Millisecond, RetryMax: 20 * time.Millisecond}
+	done := make(chan error, 1)
+	go func() { done <- client.Run(ctx, ln.Addr().String()) }()
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		count, countErr := db.ReceiptCount(ctx)
+		if countErr != nil {
+			t.Fatal(countErr)
+		}
+		if count == 1 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("control runner did not recover after dropped stream")
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	cancel()
+	if err := <-done; err != context.Canceled {
+		t.Fatalf("runner exit = %v, want context canceled", err)
+	}
+	if first, second := <-accepted, <-accepted; first != 1 || second != 2 {
+		t.Fatalf("accepted connection order %d, %d", first, second)
+	}
+	sequence, err := db.AgentState(context.Background(), "control_sequence")
+	if err != nil || sequence != "2" {
+		t.Fatalf("sequence=%q err=%v, want both attempted exchanges durable", sequence, err)
 	}
 }

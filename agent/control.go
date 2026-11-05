@@ -14,6 +14,39 @@ type ControlClient struct {
 	Node        *Node
 	TLS         *tls.Config
 	MaxAttempts int
+	RetryMin    time.Duration
+	RetryMax    time.Duration
+}
+
+// Run reconnects after failed or completed one-shot control exchanges until
+// the caller cancels. Each exchange uses a new durable sequence number.
+func (c *ControlClient) Run(ctx context.Context, address string) error {
+	if c == nil || c.Node == nil || c.TLS == nil || address == "" {
+		return fmt.Errorf("agent: control client or endpoint is incomplete")
+	}
+	minimum, maximum := c.retryBounds()
+	delay := minimum
+	for {
+		err := c.Connect(ctx, address)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		if err == nil {
+			delay = minimum
+		} else if delay < maximum {
+			delay *= 2
+			if delay > maximum {
+				delay = maximum
+			}
+		}
+		timer := time.NewTimer(delay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
 }
 
 type HubEndpoint struct {
@@ -114,7 +147,7 @@ func (c *ControlClient) exchange(ctx context.Context, conn net.Conn) error {
 	if ack.ID != id || ack.Sequence != sequence || ack.Version < 1 {
 		return fmt.Errorf("agent: control acknowledgement does not match request")
 	}
-	if err := c.Node.Store.RecordReceipt(ctx, ack.ID, ack.Sequence); err != nil {
+	if err := c.Node.Store.PersistControlReceipt(ctx, ack.ID, ack.Sequence, time.Now().UTC()); err != nil {
 		return err
 	}
 	return nil
@@ -125,4 +158,15 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func (c *ControlClient) retryBounds() (time.Duration, time.Duration) {
+	minimum, maximum := c.RetryMin, c.RetryMax
+	if minimum <= 0 {
+		minimum = 250 * time.Millisecond
+	}
+	if maximum < minimum {
+		maximum = 30 * time.Second
+	}
+	return minimum, maximum
 }
