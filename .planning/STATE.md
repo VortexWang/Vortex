@@ -58,7 +58,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
-| Phase 05 P03 | multi-session | 4 tasks | 36 files |
+| Phase 05 P03 | multi-session | 4 tasks | 61 files (source/governance; evidence excluded) |
 
 ## Accumulated Context
 
