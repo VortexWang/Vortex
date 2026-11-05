@@ -17,6 +17,11 @@ def command(*args):
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
+def udp_socket_limits():
+    names = ("rmem_max", "rmem_default", "wmem_max", "wmem_default")
+    root = Path("/proc/sys/net/core")
+    return {name: int((root / name).read_text().strip()) for name in names if (root / name).exists()}
+
 configs = {path.stem: json.loads(path.read_text()) for path in sorted((out / "config").glob("*.json"))}
 canonical = {}
 for name, config in configs.items():
@@ -26,7 +31,8 @@ for name, config in configs.items():
     semantic["udp_service"] = bool(config.get("udp_service_listen"))
     semantic["target_service"] = "echo-target:18081" if config.get("target") else ""
     canonical[name] = semantic
-manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")}, "roles": canonical, "runtime_source_sha256": hashlib.sha256((root / "engine/runtime/link/supervisor.go").read_bytes()).hexdigest(),
+manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")},
+            "udp_socket_limits": udp_socket_limits(), "roles": canonical, "runtime_source_sha256": hashlib.sha256((root / "engine/runtime/link/supervisor.go").read_bytes()).hexdigest(),
             "workload": {"duration_seconds": float(os.getenv("MIXED_DURATION_SECONDS", "5")),
                          "tcp_streams": int(os.getenv("MIXED_TCP_STREAMS", "4")),
                          "udp_mbps": float(os.getenv("MIXED_UDP_MBPS", "100")), "udp_payload_bytes": 1200}}
@@ -41,7 +47,8 @@ metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command
                     for config in configs.values())
             ) else "qualification-only",
             "qualification": "not-qualified",
-            "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")}}
+            "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")},
+            "udp_socket_limits": udp_socket_limits()}
 if Path("/etc/os-release").exists():
     release_fields = {}
     for line in Path("/etc/os-release").read_text().splitlines():

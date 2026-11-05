@@ -35,3 +35,5 @@ when the formal workload and measured thresholds pass.
 - A first warmup attempt exposed relay OPEN rejection under the default
   fail-closed static policy. Added pinned `runtime_authority` config for each
   route node; source traffic remains gated by finite source credit.
+- Host and semantic evidence records UDP socket sysctl limits because the first
+  warmup showed kernel receive-buffer caps were driving observed packet loss.
