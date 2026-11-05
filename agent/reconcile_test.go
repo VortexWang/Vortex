@@ -54,12 +54,8 @@ func TestReconcilerPersistsActivationUnknownBeforeReturning(t *testing.T) {
 	if err != nil || unknown.State != "activation-unknown" {
 		t.Fatalf("unknown result=%+v err=%v", unknown, err)
 	}
-	if err := r.ApplyConfig(context.Background(), "10112233445566778899aabbccddeeff", 3, 2, false); err != nil {
-		t.Fatal(err)
-	}
-	objects, err := s.GetObjectResults(context.Background(), "10112233445566778899aabbccddeeff")
-	if err != nil || len(objects) != 1 || objects[0].ObjectID != "rule-1" {
-		t.Fatalf("objects=%+v err=%v", objects, err)
+	if err := r.ApplyConfig(context.Background(), "10112233445566778899aabbccddeeff", 3, 2, false); !errors.Is(err, store.ErrConfigUnresolved) {
+		t.Fatalf("new transaction bypassed unknown activation: %v", err)
 	}
 	if err := r.ApplyConfig(context.Background(), "00112233445566778899aabbccddeeff", 2, 1, false); !errors.Is(err, ErrActivationUnknown) {
 		t.Fatalf("replay unknown transaction err=%v", err)
@@ -69,5 +65,41 @@ func TestReconcilerPersistsActivationUnknownBeforeReturning(t *testing.T) {
 	}
 	if err := r.ApplyConfig(context.Background(), "20112233445566778899aabbccddeeff", 1, 3, false); !errors.Is(err, ErrStaleRevision) {
 		t.Fatalf("stale revision err=%v", err)
+	}
+}
+
+func TestDirectReconcileRetainsFencingAndUnknownAcrossReopen(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "agent.db")
+	s, err := store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := &Reconciler{Store: s, Apply: fakeApplier{}}
+	const id = "00112233445566778899aabbccddeeff"
+	if err := r.ApplyConfig(ctx, id, 1, 7, true); err == nil {
+		t.Fatal("expected unknown")
+	}
+	row, err := s.GetConfigResult(ctx, id)
+	if err != nil || row.FencingGeneration != 7 {
+		t.Fatal("fence not durable", row, err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	r = &Reconciler{Store: s, Apply: fakeApplier{}}
+	if err := r.ApplyConfig(ctx, id, 1, 8, false); !errors.Is(err, ErrConfigConflict) {
+		t.Fatal("changed fencing accepted", err)
+	}
+	if err := r.ApplyConfig(ctx, id, 1, 7, false); !errors.Is(err, ErrActivationUnknown) {
+		t.Fatal("restart resolved uncertainty", err)
+	}
+	if err := r.ApplyConfig(ctx, "10112233445566778899aabbccddeeff", 2, 8, false); !errors.Is(err, store.ErrConfigUnresolved) {
+		t.Fatal("new transaction bypassed persisted uncertainty", err)
 	}
 }

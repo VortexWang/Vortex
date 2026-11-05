@@ -30,10 +30,7 @@ func TestEngineApplierReconcilesAndRetainsUnknown(t *testing.T) {
 		t.Fatalf("unknown retry: %v", err)
 	}
 	const active = "02000000000000000000000000000000"
-	if err := r.ApplyConfig(ctx, active, 2, 2, false); err != nil {
-		t.Fatal(err)
-	}
-	if err := r.ApplyConfig(ctx, active, 2, 2, false); err != nil {
-		t.Fatalf("active retry: %v", err)
+	if err := r.ApplyConfig(ctx, active, 2, 2, false); !errors.Is(err, store.ErrConfigUnresolved) {
+		t.Fatalf("new activation bypassed unknown: %v", err)
 	}
 }

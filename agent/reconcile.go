@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
 	"errors"
@@ -56,6 +57,9 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		if previous.Version != version {
 			return ErrConfigConflict
 		}
+		if previous.FencingGeneration != generation {
+			return ErrConfigConflict
+		}
 		switch previous.State {
 		case "active":
 			return nil
@@ -66,6 +70,28 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 		}
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+	// Even callers outside the control decoder must durably claim the
+	// fencing generation before touching Engine state. An unresolved commit
+	// blocks new transactions through the same store-level guard.
+	if _, err := r.Store.GetConfigResult(ctx, txID); errors.Is(err, sql.ErrNoRows) {
+		expected := uint64(0)
+		if raw, err := r.Store.AgentState(ctx, "applied_version"); err == nil {
+			expected, err = strconv.ParseUint(raw, 10, 64)
+			if err != nil {
+				return err
+			}
+		} else if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		payload := []byte(fmt.Sprintf("legacy-apply:%s:%d:%d", txID, version, generation))
+		digest := sha256.Sum256(payload)
+		if _, err := r.Store.SaveConfigRequest(ctx, store.ConfigResult{TransactionID: txID, Version: version, FencingGeneration: generation, ExpectedVersion: expected, Payload: payload, PayloadSHA256: digest[:]}); err != nil {
+			if errors.Is(err, store.ErrConfigVersionStale) {
+				return ErrStaleRevision
+			}
+			return err
+		}
 	}
 	if current, err := r.Store.AgentState(ctx, "applied_version"); err == nil {
 		applied, parseErr := strconv.ParseUint(current, 10, 64)

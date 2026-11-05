@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 4
 status: executing
-stopped_at: Completed 05-03; ready for 05-04 ledger handoff and activation recovery
+stopped_at: 05-04 executing; direct reconcile fencing and unresolved-activation guard implemented
 last_updated: "2026-11-05T22:24:05.531Z"
 last_activity: 2026-11-05
-last_activity_desc: 05-03 complete with same-SHA Docker/Actions and ledger audits; 05-04 ready
+last_activity_desc: 05-04 executing; persistent activation guard implemented, recovery and S/R transfer remain open
 state_head: 0e462c71ca9a7b6bf006faeeabbff8fe97759fba
 progress:
   total_phases: 8
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 4
 Total Plans in Phase: 5
-Status: Ready to execute
+Status: Executing
 Last activity: 2026-11-05 — Plan 05-03 complete; control 1.2.0, durable grants, typed unknown handoff and online/autonomous ACK verified on ebff5b0. Ready for 05-04.
 
 Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 remains in progress.
