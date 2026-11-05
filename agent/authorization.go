@@ -113,11 +113,32 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 	if r.ExistingRulesOnly == nil || r.ExistingSharesOnly == nil || r.ExistingDelegatedBalancesOnly == nil || r.NewRules == nil || r.NewPorts == nil || r.DNSChanges == nil || r.Registrations == nil || r.CrossNodeRebalance == nil || !*r.ExistingRulesOnly || !*r.ExistingSharesOnly || !*r.ExistingDelegatedBalancesOnly || *r.NewRules || *r.NewPorts || *r.DNSChanges || *r.Registrations || *r.CrossNodeRebalance {
 		return result, fmt.Errorf("invalid_authorization: restricted-autonomy flags violate the frozen contract")
 	}
-	if result.AutonomyDeadline.Before(result.BackendHeartbeatAt) || result.AutonomyDeadline.After(result.BackendHeartbeatAt.Add(12*time.Hour)) || result.IssuedAt.Before(result.BackendHeartbeatAt) || result.IssuedAt.After(result.AutonomyDeadline) {
+	if result.BackendHeartbeatAt.IsZero() || result.AutonomyDeadline.IsZero() || result.IssuedAt.IsZero() || !result.AutonomyDeadline.After(result.BackendHeartbeatAt) || result.AutonomyDeadline.After(result.BackendHeartbeatAt.Add(12*time.Hour)) || result.IssuedAt.Before(result.BackendHeartbeatAt) || result.IssuedAt.After(result.AutonomyDeadline) {
 		return result, fmt.Errorf("invalid_authorization: heartbeat or autonomy time bounds are invalid")
 	}
 	ids := make(map[string]struct{}, len(result.Authorizations))
+	var rawAuthorizations []map[string]json.RawMessage
+	if err := json.Unmarshal(*required.Authorizations, &rawAuthorizations); err != nil {
+		return result, fmt.Errorf("invalid_authorization: invalid authorization records")
+	}
 	for i, a := range result.Authorizations {
+		for _, field := range []string{"authorization_id", "parent_authorization_id", "source_id", "kind", "rule_id", "rule_revision", "path_generation", "issued_at", "not_before", "expires_at", "hard_deadline"} {
+			value, present := rawAuthorizations[i][field]
+			if !present || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] requires %s", i, field)
+			}
+		}
+		for _, field := range []string{"billing_snapshot_id", "amount_bytes", "rate_bps", "connections"} {
+			if value, present := rawAuthorizations[i][field]; present && bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] has null %s", i, field)
+			}
+		}
+		if _, present := rawAuthorizations[i]["billing_snapshot_id"]; present && !canonicalUUID(a.BillingSnapshotID) ||
+			a.AmountBytes != nil && (*a.AmountBytes == 0 || *a.AmountBytes > math.MaxInt64) ||
+			a.RateBPS != nil && (*a.RateBPS == 0 || *a.RateBPS > 1_000_000_000_000) ||
+			a.Connections != nil && (*a.Connections == 0 || *a.Connections > 1_000_000) {
+			return result, fmt.Errorf("invalid_authorization: authorization[%d] optional limit or identity is invalid", i)
+		}
 		if !canonicalUUID(a.AuthorizationID) || !canonicalUUID(a.ParentAuthorizationID) || !canonicalUUID(a.SourceID) || a.RuleID == "" || len([]byte(a.RuleID)) > 128 || a.RuleRevision == 0 || a.PathGeneration != result.PathGeneration || a.IssuedAt.IsZero() || a.IssuedAt.Before(result.IssuedAt) || a.NotBefore.Before(a.IssuedAt) || !a.ExpiresAt.After(a.NotBefore) || a.ExpiresAt.After(a.HardDeadline) || a.HardDeadline.After(result.AutonomyDeadline) || a.ExpiresAt.Sub(a.IssuedAt) > 300*time.Second {
 			return result, fmt.Errorf("invalid_authorization: authorization[%d] identity, scope or time bound is invalid", i)
 		}
