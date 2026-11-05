@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: 05-02 crash-safe credential renewal verified; contract-defined config apply and complete upgrade lifecycle pending
-last_updated: "2026-11-05T10:49:09.000Z"
+stopped_at: Phase 5 Wave 2 complete; continue with plan 05-03 grants, usage handoff and bounded autonomy
+last_updated: "2026-11-05T12:26:25.000Z"
 last_activity: 2026-11-05
-last_activity_desc: Phase 5 05-02 credential rotation recovery hardened; same-SHA native/Docker/Actions checks pass; config contract and installer work remain
-state_head: 3127fb90802bf2064fa62b184dbe2dbce2bbbc11
+last_activity_desc: Approved control contract 1.1.0, completed durable config apply boundary and file upgrade lifecycle, and passed same-SHA native/Docker/Actions Wave 2
+state_head: a1ab77c637f1a2c523f9d94a6d16db3d2bc0676a
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 32
-  completed_plans: 29
+  total_plans: 33
+  completed_plans: 31
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-Current Plan: 2
-Total Plans in Phase: 4
+Current Plan: 3
+Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — 05-02 crash-safe credential rotation and same-SHA native/Docker/Actions checks passed; config contract and installer work remain
+Last activity: 2026-11-05 — Phase 5 Wave 2 completed on same SHA across native, Docker and Actions; next is plan 05-03
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -94,8 +94,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T07:27:29.384Z
-Stopped at: 05-02 crash-safe credential renewal verified; contract-defined config apply and complete upgrade lifecycle pending
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-02-PLAN.md
+Stopped at: Phase 5 Wave 2 complete; continue with plan 05-03
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 
