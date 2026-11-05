@@ -47,3 +47,17 @@ func (e *RuntimeEngine) Stop(ctx context.Context) error {
 	}
 	return e.runtime.Stop(ctx)
 }
+
+func (e *RuntimeEngine) Done() <-chan struct{} {
+	if e == nil || e.runtime == nil {
+		return nil
+	}
+	return e.runtime.Done()
+}
+
+func (e *RuntimeEngine) Err() error {
+	if e == nil || e.runtime == nil {
+		return nil
+	}
+	return e.runtime.Err()
+}

@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -23,13 +24,19 @@ type Runtime struct {
 	service    *relay.Service
 	ctx        context.Context
 	cancel     context.CancelFunc
-	done       chan error
+	done       chan struct{}
+	err        error
+	addr       net.Addr
 	mu         sync.Mutex
 	started    bool
 }
 
 // Done reports the serving goroutine's terminal error.
-func (r *Runtime) Done() <-chan error { return r.done }
+func (r *Runtime) Done() <-chan struct{} { return r.done }
+
+func (r *Runtime) Addr() net.Addr { r.mu.Lock(); defer r.mu.Unlock(); return r.addr }
+
+func (r *Runtime) Err() error { r.mu.Lock(); defer r.mu.Unlock(); return r.err }
 
 func New(cfg config.Config) (*Runtime, error) {
 	if err := cfg.Validate(); err != nil {
@@ -49,7 +56,7 @@ func New(cfg config.Config) (*Runtime, error) {
 		return nil, err
 	}
 	service := &relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget}
-	return &Runtime{cfg: cfg, supervisor: supervisor, service: service, done: make(chan error, 1)}, nil
+	return &Runtime{cfg: cfg, supervisor: supervisor, service: service, done: make(chan struct{})}, nil
 }
 
 func (r *Runtime) Start(parent context.Context) error {
@@ -58,13 +65,26 @@ func (r *Runtime) Start(parent context.Context) error {
 	if r.started {
 		return errors.New("runtime: already started")
 	}
+	if err := parent.Err(); err != nil {
+		return err
+	}
+	listener, err := net.Listen("tcp", r.cfg.Listen)
+	if err != nil {
+		return fmt.Errorf("runtime: listen %s: %w", r.cfg.Listen, err)
+	}
 	r.ctx, r.cancel = context.WithCancel(parent)
+	r.addr = listener.Addr()
 	r.started = true
 	go func() {
-		err := r.supervisor.Serve(r.ctx, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+		err := r.supervisor.ServeListener(r.ctx, listener, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
 			return r.service.ServeLink(ctx, mux)
 		})
-		r.done <- err
+		r.supervisor.Close()
+		r.service.Shutdown()
+		r.mu.Lock()
+		r.err = err
+		r.mu.Unlock()
+		close(r.done)
 	}()
 	return nil
 }
@@ -78,9 +98,9 @@ func (r *Runtime) Stop(ctx context.Context) error {
 	r.cancel()
 	r.supervisor.Close()
 	r.mu.Unlock()
-	r.service.Shutdown()
 	select {
-	case err := <-r.done:
+	case <-r.done:
+		err := r.Err()
 		if errors.Is(err, context.Canceled) {
 			return nil
 		}

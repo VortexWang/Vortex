@@ -60,11 +60,21 @@ func (s *Supervisor) Serve(ctx context.Context, handler LinkHandler) error {
 	if err != nil {
 		return fmt.Errorf("link: listen %s: %w", s.ListenAddr, err)
 	}
+	return s.ServeListener(ctx, listener, handler)
+}
+
+// ServeListener takes ownership of an already bound listener.
+func (s *Supervisor) ServeListener(ctx context.Context, listener net.Listener, handler LinkHandler) error {
 	defer listener.Close()
+	done := make(chan struct{})
+	defer close(done)
 	go func() {
-		<-ctx.Done()
-		_ = listener.Close()
-		s.Close()
+		select {
+		case <-ctx.Done():
+			_ = listener.Close()
+			s.Close()
+		case <-done:
+		}
 	}()
 	for {
 		conn, acceptErr := listener.Accept()
@@ -72,7 +82,12 @@ func (s *Supervisor) Serve(ctx context.Context, handler LinkHandler) error {
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
-			continue
+			if !errors.Is(acceptErr, net.ErrClosed) {
+				if e, ok := acceptErr.(net.Error); ok && e.Temporary() {
+					continue
+				}
+			}
+			return acceptErr
 		}
 		go s.accept(ctx, conn, handler)
 	}

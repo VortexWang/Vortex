@@ -9,6 +9,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"math/big"
+	"net"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -46,22 +47,43 @@ func TestRuntimeEngineStartsAndStopsThroughNode(t *testing.T) {
 	if err := n.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	errCh := e.runtimeDone()
-	select {
-	case err := <-errCh:
-		if err != nil && err != context.Canceled {
-			t.Fatalf("Engine runtime exited during start: %v", err)
-		}
-	case <-time.After(50 * time.Millisecond):
+	conn, err := net.DialTimeout("tcp", e.runtime.Addr().String(), time.Second)
+	if err != nil {
+		t.Fatalf("Engine listener is not ready: %v", err)
 	}
+	_ = conn.Close()
 	stopCtx, stopCancel := context.WithTimeout(context.Background(), time.Second)
 	defer stopCancel()
 	if err := n.Stop(stopCtx); err != nil {
 		t.Fatal(err)
 	}
+	if err := n.Stop(stopCtx); err != nil {
+		t.Fatalf("repeated stop: %v", err)
+	}
 }
 
-func (e *RuntimeEngine) runtimeDone() <-chan error { return e.runtime.Done() }
+func TestRuntimeEngineStartReturnsListenerConflict(t *testing.T) {
+	dir := t.TempDir()
+	const nodeID = "00000000-0000-0000-0000-000000000012"
+	certPath, keyPath, caPath := writeRuntimeIdentity(t, dir, nodeID)
+	occupied, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer occupied.Close()
+	configPath := filepath.Join(dir, "engine.json")
+	config := `{"qualification_only":true,"evidence_file":"` + filepath.Join(dir, "events.jsonl") + `","node_id":"` + nodeID + `","role":"destination","certificate":"` + certPath + `","private_key":"` + keyPath + `","trust_bundle":"` + caPath + `","listen":"` + occupied.Addr().String() + `","version":1,"rule_id":"rule","rule_revision":1,"path_generation":1,"hop_index":0,"target":"127.0.0.1:9","execution_point":true}`
+	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	e, err := NewRuntimeEngine(configPath, nodeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.Start(context.Background()); err == nil {
+		t.Fatal("expected bind conflict to fail synchronously")
+	}
+}
 
 func writeRuntimeIdentity(t *testing.T, dir, nodeID string) (string, string, string) {
 	t.Helper()

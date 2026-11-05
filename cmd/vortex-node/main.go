@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"vortex/agent"
 	"vortex/agent/store"
@@ -45,9 +46,26 @@ func main() {
 	if err := n.Start(ctx); err != nil {
 		fatal(err)
 	}
+	defer func() {
+		stopCtx, stopCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer stopCancel()
+		if err := n.Stop(stopCtx); err != nil {
+			fmt.Fprintln(os.Stderr, "engine shutdown:", err)
+		}
+	}()
 	if *hubAddr == "" {
 		fmt.Printf("vortex-node node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
-		<-ctx.Done()
+		if runtimeEngine, ok := engine.(*agent.RuntimeEngine); ok {
+			select {
+			case <-ctx.Done():
+			case <-runtimeEngine.Done():
+				if err := runtimeEngine.Err(); err != nil {
+					fatal(err)
+				}
+			}
+		} else {
+			<-ctx.Done()
+		}
 		return
 	}
 	if *certPath == "" || *keyPath == "" || *caPath == "" || *hubName == "" {
@@ -80,6 +98,17 @@ func main() {
 		fatal(err)
 	}
 	fmt.Printf("vortex-node connected node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
+	if runtimeEngine, ok := engine.(*agent.RuntimeEngine); ok {
+		select {
+		case <-ctx.Done():
+		case <-runtimeEngine.Done():
+			if err := runtimeEngine.Err(); err != nil {
+				fatal(err)
+			}
+		}
+	} else {
+		<-ctx.Done()
+	}
 }
 
 func fatal(err error) { fmt.Fprintln(os.Stderr, err); os.Exit(1) }
