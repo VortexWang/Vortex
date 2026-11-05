@@ -10,6 +10,7 @@ import (
 	"time"
 
 	engineaccounting "vortex/engine/accounting"
+	enginerelay "vortex/engine/relay"
 	"vortex/engine/vlink"
 )
 
@@ -335,11 +336,8 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	defer cancel()
 	if stream.Network == vlink.StreamUDP {
 		if udp, ok := conn.(*net.UDPConn); ok {
-			if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-				return err
-			}
-			if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-				return err
+			if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+				slog.Warn("udp relay socket buffer tuning unavailable", "err", err)
 			}
 		}
 		if err := conn.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {

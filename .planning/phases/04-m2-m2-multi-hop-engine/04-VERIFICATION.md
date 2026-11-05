@@ -176,3 +176,20 @@ Plans 04-08 through 04-11 executed on clean commits `9385d42`, `ccb3065`,
 The verification route is therefore **not** Phase 5. Correctness slices are
 implemented, while formal performance qualification and durable authority must
 be completed before Phase 4 can transition.
+
+## 2026-11-05 optimization closure branch
+
+Branch `gsd/phase-4-optimization-closure` added bounded UDP socket-buffer
+fallback shared by source, relay, and destination paths. Hosts that reject the
+preferred 32 MiB request now try 8 MiB, 4 MiB, 1 MiB, and 256 KiB before
+retaining the operating-system default; tuning failure is warning-level because
+it is a throughput optimization and does not invalidate a usable socket.
+
+The regression was reproduced on native Darwin: the prior fixed 32 MiB request
+returned `ENOBUFS` at the destination and the UDP smoke timed out. After the
+fallback, the UDP smoke and Docker runtime accounting completed. OrbStack
+Docker produced zero classified UDP loss and exact left/right accounting for
+the mixed workload. Native Darwin still cannot classify all host UDP receive
+losses, and the library benchmark exposed VLink mux timeout / loopback loss;
+the benchmark therefore remains fail-closed and no NFR or D-04 qualification
+is promoted.

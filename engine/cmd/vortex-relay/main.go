@@ -19,6 +19,7 @@ import (
 	"syscall"
 	"time"
 	coreaccounting "vortex/engine/accounting"
+	enginerelay "vortex/engine/relay"
 
 	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/runtime/config"
@@ -460,11 +461,8 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 	}
 	defer packet.Close()
 	if udp, ok := packet.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-			return err
-		}
-		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-			return err
+		if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+			slog.Warn("udp source socket buffer tuning unavailable", "err", err)
 		}
 	}
 	go func() { <-ctx.Done(); _ = packet.Close(); supervisor.Close() }()
@@ -663,13 +661,8 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 		return nil, err
 	}
 	if udp, ok := conn.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-			_ = conn.Close()
-			return nil, err
-		}
-		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-			_ = conn.Close()
-			return nil, err
+		if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+			slog.Warn("udp target socket buffer tuning unavailable", "err", err)
 		}
 	}
 	return conn, nil
