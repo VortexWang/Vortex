@@ -1,12 +1,12 @@
 # 05-05 Control Contract Change Proposal
 
-Status: **Owner decision required. No normative contract change is approved by this proposal.**
+Status: **Approved for implementation as `vortex.control.v1` 1.1.0.**
 
 Prepared: 2026-11-05
 
-## Decision Requested
+## Decision Record
 
-Approve, request edits to, or defer the proposed `vortex.control.v1` 1.1.0 additive extension described below. Approval must identify this document's SHA-256 and the selected SemVer version. Until then, `vortex.proto`, generated code, contract version records, the requirements map, and the contract changelog remain unchanged.
+The owner approved the exact proposal SHA-256 `d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218` as `vortex.control.v1` 1.1.0 at `2026-11-05T11:26:21Z`. The corresponding approval is recorded in `docs/governance/contract-review.yaml`. This does not approve the separate VLink hash drift.
 
 ## Baselines and Observed Drift
 

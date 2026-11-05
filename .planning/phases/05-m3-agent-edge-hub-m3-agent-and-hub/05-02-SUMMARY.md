@@ -93,7 +93,7 @@ coverage:
     human_judgment: false
 duration: 40min
 completed: 2026-11-05
-status: in_progress
+status: complete
 ---
 
 # Phase 5 Plan 02: Registration, mTLS Control, Reconcile and Upgrade Summary
@@ -196,13 +196,15 @@ Same-SHA evidence for `4c408566a9dddb570c8d5f3d8304f893eac89491`:
 
 This continuation does not complete 05-02. The Protobuf `RuntimeConfigUpdate` payload and lifecycle semantics remain draft, so control-stream delivery is not yet connected to durable Reconciler → Engine Prepare/Commit/Abort. The Hub enrollment/revocation authority is still a protocol-test service, and upgrade remains bounded supervision hooks rather than a complete signed installer and file-level automatic rollback. Keep 05-02 `in_progress` until those planned boundaries and fault evidence are complete.
 
+GSD routing note: the partial summary was closed by gap-closure plan `05-05-PLAN.md`; see `05-05-SUMMARY.md` and `05-05-EVIDENCE.md` for the approved control contract, durable config apply boundary, file installer and same-SHA evidence.
+
 ## User Setup Required
 
 None for this test slice. Production Hub CA/token lifecycle, certificate renewal orchestration, systemd integration, and an actual binary replacement installer remain incomplete and must not be inferred from these hooks/tests.
 
 ## Next Phase Readiness
 
-Still not ready for `05-03`: production Hub authority, certificate renewal/revocation orchestration, durable authority-safe binary installation/recovery, and end-to-end control/data-plane fault tests remain incomplete. The runtime supports only the explicit static qualification destination tracer; source/relay Agent integration and a contract-defined durable config update protocol remain open. The legacy no-config mode remains a control-only tracer and is not treated as production data-plane integration.
+Ready for `05-03`. Production Hub authority, certificate renewal/revocation orchestration, service-level installer orchestration, business-route hot application, and source/relay Agent integration remain open and must not be inferred from the completed control and installer boundary work. The legacy no-config mode remains a control-only tracer and is not treated as production data-plane integration.
 
 ---
 *Phase: 05-m3-agent-edge-hub-m3-agent-and-hub*
