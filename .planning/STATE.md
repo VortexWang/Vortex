@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: 05-03 control 1.2.0 approved and typed unknown/backend handoff implemented; final same-SHA verification and plan audit in progress
-last_updated: "2026-11-05T22:16:26Z"
+stopped_at: Completed 05-03; ready for 05-04 ledger handoff and activation recovery
+last_updated: "2026-11-05T22:24:05.531Z"
 last_activity: 2026-11-05
-last_activity_desc: Verifying approved typed unknown handoff, online backend ACK ordering and continued control-stream reporting
-state_head: 04bd2bf5647dc0eb280e519f5281105e78b154f3
+last_activity_desc: 05-03 complete with same-SHA Docker/Actions and ledger audits; 05-04 ready
+state_head: 0e462c71ca9a7b6bf006faeeabbff8fe97759fba
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 33
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-Current Plan: 3
+Current Plan: 4
 Total Plans in Phase: 5
-Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 final verification in progress; approved control 1.2.0 implemented with typed unknown handoff and online/autonomous ACK ordering
+Status: Ready to execute
+Last activity: 2026-11-05 — Plan 05-03 complete; control 1.2.0, durable grants, typed unknown handoff and online/autonomous ACK verified on ebff5b0. Ready for 05-04.
 
-Progress: ░░░░░░░░░░ [████░░░░░░] 38%
+Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 remains in progress.
 
 ## Performance Metrics
 
@@ -53,6 +53,12 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 **Recent Trend:**
 - Last 5 plans: -
 - Trend: Not enough data
+
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 05 P03 | multi-session | 4 tasks | 36 files |
 
 ## Accumulated Context
 
@@ -93,9 +99,9 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-05T07:27:29.384Z
-Stopped at: 05-03 incremental authorization implementation; see 05-03-EVIDENCE.md for remaining runtime authority and handoff work
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-PLAN.md
+Last session: 2026-11-05T22:23:43.770Z
+Stopped at: Completed 05-03; ready for 05-04 ledger handoff and activation recovery
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 
