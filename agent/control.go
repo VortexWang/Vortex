@@ -23,16 +23,18 @@ import (
 )
 
 type ControlClient struct {
-	Node             *Node
-	TLS              *tls.Config
-	TLSProvider      func() (*tls.Config, error)
-	Reconciler       *Reconciler
-	MaxAttempts      int
-	RetryMin         time.Duration
-	RetryMax         time.Duration
-	Interval         time.Duration
-	UsageInterval    time.Duration
-	AcknowledgeUsage func(context.Context, []string) error
+	EnableCreditDemand bool // opt-in only for configured control 1.3.0 peers
+	DemandInterval     time.Duration
+	Node               *Node
+	TLS                *tls.Config
+	TLSProvider        func() (*tls.Config, error)
+	Reconciler         *Reconciler
+	MaxAttempts        int
+	RetryMin           time.Duration
+	RetryMax           time.Duration
+	Interval           time.Duration
+	UsageInterval      time.Duration
+	AcknowledgeUsage   func(context.Context, []string) error
 }
 
 // Run reconnects after failed or completed control streams until cancellation.
@@ -153,6 +155,24 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
 		return initialSendErr
 	}
+	var demandCursor string
+	var demandTicks <-chan time.Time
+	if c.EnableCreditDemand {
+		interval := c.DemandInterval
+		if interval == 0 {
+			interval = time.Second
+		}
+		if interval < 100*time.Millisecond {
+			return fmt.Errorf("agent: demand polling interval below bound")
+		}
+		demandTicker := time.NewTicker(interval)
+		defer demandTicker.Stop()
+		demandTicks = demandTicker.C
+		issuer, _ := issuerIdentity.Load().(string)
+		if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
+			return err
+		}
+	}
 	lastControlSequence := uint64(0)
 	seenControlIDs := make(map[string]struct{})
 	// Only this loop sends messages; gRPC permits one concurrent receiver, but
@@ -190,6 +210,15 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-demandTicks:
+			issuer, _ := issuerIdentity.Load().(string)
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+				demandTicks = nil
+			}
+			continue
 		case <-ticker.C:
 			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
@@ -245,6 +274,11 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 				return fmt.Errorf("agent: boot-local authority clock missing")
 			}
 			if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
+				return err
+			}
+		case *controlv1.ControlMessage_CreditDemandDenied:
+			issuer, _ := issuerIdentity.Load().(string)
+			if err := c.applyDemandDenial(ctx, issuer, body.CreditDemandDenied); err != nil {
 				return err
 			}
 		case *controlv1.ControlMessage_UsageAck:

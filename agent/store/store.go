@@ -250,7 +250,8 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
 );
 CREATE TABLE IF NOT EXISTS authorization_demands (
  request_id TEXT PRIMARY KEY NOT NULL, scope BLOB NOT NULL, request BLOB NOT NULL,
- state TEXT NOT NULL CHECK(state IN ('pending','applied')), grant_id TEXT NOT NULL DEFAULT ''
+ state TEXT NOT NULL CHECK(state IN ('pending','applied','denied')), grant_id TEXT NOT NULL DEFAULT '',
+ denial_reason TEXT NOT NULL DEFAULT ''
 );
 CREATE UNIQUE INDEX IF NOT EXISTS one_pending_authorization_demand
  ON authorization_demands(scope) WHERE state='pending';
@@ -425,7 +426,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '13')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -455,7 +456,7 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '13')
 	if _, err := s.db.Exec(`UPDATE runtime_sessions SET initial_grant_id=grant_id,initial_runtime_lease_id=runtime_lease_id,initial_share_lease_id=share_lease_id WHERE initial_grant_id=''`); err != nil {
 		return err
 	}
-	return nil
+	return s.migrateDemandDenialState()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative

@@ -34,6 +34,8 @@ type Message struct {
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
 type TestServer struct {
+	DemandIssuer *Issuer // explicit opt-in for demand protocol fixtures
+	DemandLimit  int     // optional finite test bound
 	controlv1.UnimplementedNodeControlServer
 	Store               *store.Store
 	ConfigUpdate        *controlv1.RuntimeConfigUpdate
@@ -120,9 +122,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	if err := s.Store.RecordReceipt(ctx, receiptID, first.GetSequence()); err != nil {
 		return err
 	}
-	if s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
+	if s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage && s.DemandIssuer == nil {
 		return nil
 	}
+	demandsReceived := 0
 	usageReceived := 0
 	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
@@ -155,7 +158,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		if err := stream.Send(&controlv1.ControlMessage{MessageId: messageID, Sequence: controlSequence, Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: authorization}}); err != nil {
 			return err
 		}
-		if s.ConfigUpdate == nil && !s.AcceptUsage {
+		if s.ConfigUpdate == nil && !s.AcceptUsage && s.DemandIssuer == nil {
 			return nil
 		}
 	}
@@ -170,6 +173,32 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		}
 		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_CreditDemand:
+			if s.DemandIssuer == nil {
+				return fmt.Errorf("test hub: demand protocol disabled")
+			}
+			authorization, denied, err := s.DemandIssuer.ResolveDemand(ctx, first.GetNodeId(), first.GetBootId(), body.CreditDemand)
+			if err != nil {
+				return err
+			}
+			id, err := testHubMessageID()
+			if err != nil {
+				return err
+			}
+			controlSequence++
+			response := &controlv1.ControlMessage{MessageId: id, Sequence: controlSequence}
+			if authorization != nil {
+				response.Body = &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: authorization}
+			} else {
+				response.Body = &controlv1.ControlMessage_CreditDemandDenied{CreditDemandDenied: denied}
+			}
+			if err := stream.Send(response); err != nil {
+				return err
+			}
+			demandsReceived++
+			if s.DemandLimit > 0 && demandsReceived >= s.DemandLimit {
+				return nil
+			}
 		case *controlv1.NodeMessage_UnknownUsageBatch:
 			payload, err := contracts.EncodeUnknownUsage(body.UnknownUsageBatch)
 			if err != nil {

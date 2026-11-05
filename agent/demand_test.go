@@ -85,4 +85,45 @@ func TestDemandCompletesOnlyFromBoundTLSIssuer(t *testing.T) {
 	if err != nil || delegated.Issued != 8<<20 || delegated.Remaining != 8<<20 {
 		t.Fatalf("response retry duplicated funding: %+v %v", delegated, err)
 	}
+	// Switch from prearranged responses to actual typed outbound requests.
+	transport := func() {
+		t.Helper()
+		st, ct, _ := controlTLSForHub(t, n.NodeID, d.HubID)
+		ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, DemandIssuer: &issuer, DemandLimit: 1}, st)
+		if err := (&ControlClient{Node: n, TLS: ct, EnableCreditDemand: true}).Connect(ctx, ln.Addr().String()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	transport() // the pending 4 MiB demand is dispatched and installed
+	oversized, err := as.PrepareDemand(ctx, scope, 8<<20, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transport() // only 4 MiB remains at the issuer: definitive denial
+	smaller, err := as.PrepareDemand(ctx, scope, 4<<20, time.Minute)
+	if err != nil || smaller.ID == oversized.ID {
+		t.Fatalf("wire denial did not retire request: %+v %v", smaller, err)
+	}
+	// A stale denial cannot retire the new pending request or change balances.
+	if err := as.DenyDemand(ctx, n.NodeID, n.BootID, d.HubID, oversized.ID, "insufficient_funds"); err != nil {
+		t.Fatal(err)
+	}
+	pending, err := as.PendingDemands(ctx, n.NodeID, n.BootID, d.HubID, "")
+	if err != nil || len(pending) != 1 || pending[0] != smaller {
+		t.Fatalf("wrong pending scope: %+v %v", pending, err)
+	}
+	transport()
+	pending, err = as.PendingDemands(ctx, n.NodeID, n.BootID, d.HubID, "")
+	if err != nil || len(pending) != 0 {
+		t.Fatalf("resolved requests remain pending: %+v %v", pending, err)
+	}
+	delegated, err = hs.AuditHubDelegation(ctx, d.ID)
+	if err != nil || delegated.Issued != 16<<20 || delegated.Remaining != 0 {
+		t.Fatalf("wire outcome funding: %+v %v", delegated, err)
+	}
+	balance, err = as.AuditAuthorizationSource(ctx, n.NodeID, d.SourceID)
+	if err != nil || balance.Initial != 16<<20 || balance.Remaining != 16<<20 {
+		t.Fatalf("wire installed funds: %+v %v", balance, err)
+	}
+
 }

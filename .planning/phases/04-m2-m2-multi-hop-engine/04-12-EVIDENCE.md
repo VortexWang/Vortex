@@ -351,3 +351,33 @@ exactly one debit. Agent/Hub full race PASS; vet and contract gate PASS. The
 new Hub typed adapter builds and is not yet called by the stream dispatcher.
 Agent denial processing/outbound delivery and adaptive scheduling remain open.
 This approval and these finite tests do not lock parameters or close Phase 4.
+
+## Typed demand delivery and Agent denial receipts
+
+Opt-in ControlClient.EnableCreditDemand now dispatches durable pending requests
+through its single-sender authenticated gRPC loop. It filters by actual verified
+Hub UUID, current node and boot, pages at 32 requests, and rotates a cursor.
+Default polling is one second; intervals below 100 ms are rejected. Requests
+retain identity until success or definitive denial; transport errors never
+remove them. This polling is not yet the candidate 200 ms data-path waiter.
+
+The explicit test Hub DemandIssuer adapter handles CreditDemand and returns the
+committed success or typed denial. Agent accepts known denial enums only, checks
+the immutable Hub/node/boot binding, and persists denied state. Duplicate denial
+is idempotent; different denial, late success after denial, and denial after
+success conflict. No grant/balance/usage table is touched by denial processing.
+Schema 14 transactionally migrates the previous pending/applied table, retaining
+request identity and the one-pending-per-scope index.
+
+The real mTLS test now sends actual requests: installed 8 MiB plus a requested
+4 MiB, denied an 8 MiB request against the final 4 MiB, then requested 4 MiB
+under a fresh ID. Final Agent initial=remaining=16 MiB and Hub issued=16 MiB,
+remaining=0. Stale denial replay does not retire the next request. Additional
+tests cover old schema migration, wrong node/boot/Hub and denial-write rollback.
+Full Agent/Hub race, vet, reproducible protobuf generation and contract gates
+PASS. No tests remained running at completion of this slice.
+
+Still open: feed committed consumption and exact scoped available balance into
+the rolling policy, admission wait/notifications, production startup wiring,
+proof-based idle drain, delayed/lost-response workload, complete attack review
+and dedicated-host adaptive qualification. No parameter lock is asserted.

@@ -24,7 +24,7 @@ type DemandScope struct {
 // installed. Timeout, expiry and a larger new estimate cannot retire it.
 func (s *Store) PrepareDemand(ctx context.Context, scope DemandScope, amount uint64, ttl time.Duration) (IssueRequest, error) {
 	var result IssueRequest
-	if s.owner != "agent" || amount == 0 || amount > math.MaxInt64 || ttl <= 0 || ttl > 300*time.Second || scope.RuleID == "" || len(scope.RuleID) > 128 || scope.SignerEpoch == 0 || scope.RuleRevision == 0 || scope.PathGeneration == 0 {
+	if s.owner != "agent" || amount == 0 || amount > math.MaxInt64 || ttl < time.Second || ttl > 300*time.Second || ttl%time.Second != 0 || scope.RuleID == "" || len(scope.RuleID) > 128 || scope.SignerEpoch == 0 || scope.RuleRevision == 0 || scope.PathGeneration == 0 {
 		return result, ErrAuthorizationDenied
 	}
 	for _, id := range []string{scope.HubID, scope.DelegationID, scope.NodeID, scope.BootID, scope.SourceID, scope.SnapshotID} {
@@ -107,6 +107,9 @@ func completeDemandTx(ctx context.Context, tx *sql.Tx, requestID, grantID string
 	var state, completedGrant string
 	if err := tx.QueryRowContext(ctx, `SELECT scope,request,state,grant_id FROM authorization_demands WHERE request_id=?`, requestID).Scan(&key, &raw, &state, &completedGrant); err != nil {
 		return err
+	}
+	if state == "denied" {
+		return ErrAuthorizationUpdateConflict
 	}
 	if state == "applied" {
 		if completedGrant != grantID {
