@@ -93,12 +93,18 @@ coverage:
     human_judgment: false
 duration: 40min
 completed: 2026-11-05
-status: incomplete
+status: in_progress
 ---
 
 # Phase 5 Plan 02: Registration, mTLS Control, Reconcile and Upgrade Summary
 
 Added a testable Agent identity and control slice: one-time CSR enrollment, node SAN certificates, local private-key storage, TLS 1.3 mTLS exchange, durable ACK receipts, configuration result persistence, and signed upgrade supervision hooks.
+
+## Continuation: Engine runtime lifecycle integration
+
+Commit `7754bae` adds the first production-shaped Agent-to-Engine lifecycle boundary. `agent.RuntimeEngine` loads a validated runtime config and delegates Start/Stop to the new `engine/runtime.Runtime`; `cmd/vortex-node` accepts `--engine-config` and passes the adapter into `agent.New`. The runtime owns the Engine Supervisor and relay service lifecycle, so stopping the node cancels links and waits for relay workers instead of silently using `NoopEngine`.
+
+The lifecycle fixture creates a temporary TLS 1.3 identity, starts the destination runtime through the Agent, observes that the serving goroutine remains alive, and stops it through the Agent boundary. It is intentionally a lifecycle and wiring check; it does not claim a complete multi-hop data-plane qualification.
 
 ## Performance
 
@@ -170,7 +176,7 @@ None for this test slice. Production Hub CA/token lifecycle, certificate renewal
 
 ## Next Phase Readiness
 
-Not ready for `05-03`: the runnable node still uses the plaintext test path and NoopEngine. Complete authenticated runtime handshake, certificate renewal and revocation enforcement, actual Engine integration, durable authority-safe upgrade installation and recovery, and end-to-end fault tests before closing 05-02. The current tests validate isolated interfaces and the test Hub only.
+Still not ready for `05-03`: production Hub authority, certificate renewal/revocation orchestration, durable authority-safe binary installation/recovery, and end-to-end control/data-plane fault tests remain incomplete. The runnable node now has an explicit Engine runtime path, while the legacy no-config mode remains a control-only tracer and is not treated as production data-plane integration.
 
 ---
 *Phase: 05-m3-agent-edge-hub-m3-agent-and-hub*

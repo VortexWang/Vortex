@@ -1,0 +1,3 @@
+commit: 7754baeb5d6101ef85fb415e33a76ba99ff76443
+go: go version go1.27.3 linux/arm64
+arch: aarch64

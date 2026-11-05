@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 2
 status: executing
-stopped_at: 05-02 runtime integration and lifecycle verification pending
-last_updated: "2026-11-05T07:27:29.729Z"
+stopped_at: 05-02 production control/upgrade lifecycle verification pending
+last_updated: "2026-11-05T08:35:00.000Z"
 last_activity: 2026-11-05
-last_activity_desc: Phase 5 Wave 1 startable tracer and durable local stores verified; Phase 4 qualification remains parallel
+last_activity_desc: Phase 5 05-02 Engine runtime lifecycle adapter and same-entry native/Docker checks verified; production authority gaps remain
 state_head: 3127fb90802bf2064fa62b184dbe2dbce2bbbc11
 progress:
   total_phases: 8
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 2
 Total Plans in Phase: 4
 Status: Executing
-Last activity: 2026-11-05 — Wave 2 interface tests passed; production-shaped runtime integration remains incomplete
+Last activity: 2026-11-05 — 05-02 runtime lifecycle adapter and same-entry native/Docker checks passed; production authority gaps remain
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
