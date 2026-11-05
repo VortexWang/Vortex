@@ -31,7 +31,7 @@ func main() {
 	defer s.Close()
 	var engine agent.Engine
 	if *engineConfig != "" {
-		engine, err = agent.NewRuntimeEngine(*engineConfig)
+		engine, err = agent.NewRuntimeEngine(*engineConfig, *nodeID)
 		if err != nil {
 			fatal(err)
 		}

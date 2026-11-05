@@ -16,13 +16,16 @@ type RuntimeEngine struct {
 	runtime    *engineruntime.Runtime
 }
 
-func NewRuntimeEngine(configPath string) (*RuntimeEngine, error) {
+func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
 	if configPath == "" {
 		return nil, fmt.Errorf("agent: engine config path is required")
 	}
 	cfg, err := config.LoadFile(configPath)
 	if err != nil {
 		return nil, err
+	}
+	if cfg.NodeID != nodeID {
+		return nil, fmt.Errorf("agent: engine node identity does not match agent")
 	}
 	rt, err := engineruntime.New(cfg)
 	if err != nil {

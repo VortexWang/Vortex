@@ -33,7 +33,7 @@ func TestRuntimeEngineStartsAndStopsThroughNode(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer s.Close()
-	e, err := NewRuntimeEngine(configPath)
+	e, err := NewRuntimeEngine(configPath, nodeID)
 	if err != nil {
 		t.Fatal(err)
 	}

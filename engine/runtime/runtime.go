@@ -35,6 +35,9 @@ func New(cfg config.Config) (*Runtime, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
+	if cfg.Role != config.RoleDestination || !cfg.QualificationOnly || len(cfg.Routes) != 0 {
+		return nil, errors.New("runtime: only the static qualification destination tracer is supported")
+	}
 	cfg = cfg.Effective()
 	supervisor, err := link.New(cfg)
 	if err != nil {
