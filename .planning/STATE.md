@@ -5,11 +5,11 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 3
 status: executing
-stopped_at: 05-03 automatic static-destination runtime composition and durable share limits implemented; offline issuance and unknown-liability wire handoff remain open
-last_updated: "2026-11-05T15:28:04Z"
+stopped_at: 05-03 durable Hub issuer and same-source top-ups implemented; in-session renewal and typed unknown-liability handoff remain open
+last_updated: "2026-11-05T15:45:18Z"
 last_activity: 2026-11-05
-last_activity_desc: Same-SHA Docker and Actions actual-full-disk runtime regression passed with raw ledger audit; offline issuance and unknown-liability handoff remain open
-state_head: cebe5ab0bf181ea6e06f36d27b84ee60f60d8b5c
+last_activity_desc: Same-SHA Docker and Actions pass durable Hub issuance, source top-ups and issuer identity; in-session renewal and typed unknown handoff remain open
+state_head: 04bd2bf5647dc0eb280e519f5281105e78b154f3
 progress:
   total_phases: 8
   completed_phases: 4
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 3
 Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 remains in progress: automatic runtime admission and durable share enforcement implemented; offline issuance and unknown-liability handoff remain open
+Last activity: 2026-11-05 — Plan 05-03 remains in progress: durable Hub issuance and source-bound top-ups implemented; in-session renewal and unknown-liability handoff remain open
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
