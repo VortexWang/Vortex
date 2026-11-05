@@ -74,6 +74,7 @@ type UsageReservation struct {
 }
 
 type AuthorizationRecord struct {
+	IssuerID              string
 	AuthorizationID       string
 	ParentAuthorizationID string
 	SourceID              string
@@ -94,6 +95,7 @@ type AuthorizationRecord struct {
 }
 
 type AuthorizationUpdate struct {
+	IssuerID               string
 	BackendHeartbeat       time.Time
 	AutonomyDeadline       time.Time
 	NodeID                 string
@@ -237,6 +239,7 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
 CREATE TABLE IF NOT EXISTS authorization_updates (
   node_id TEXT NOT NULL,
   update_id TEXT NOT NULL,
+  issuer_id TEXT NOT NULL DEFAULT '',
   boot_id TEXT NOT NULL,
   payload BLOB NOT NULL,
   payload_sha256 BLOB NOT NULL,
@@ -249,6 +252,7 @@ CREATE TABLE IF NOT EXISTS authorization_updates (
 CREATE TABLE IF NOT EXISTS authorization_records (
   node_id TEXT NOT NULL,
   authorization_id TEXT NOT NULL,
+  issuer_id TEXT NOT NULL DEFAULT '',
   parent_authorization_id TEXT NOT NULL,
   source_id TEXT NOT NULL,
   kind TEXT NOT NULL,
@@ -338,7 +342,7 @@ CREATE TABLE IF NOT EXISTS issuer_issues (
  amount_bytes TEXT NOT NULL, created_at TEXT NOT NULL,
  FOREIGN KEY(delegation_id) REFERENCES issuer_delegations(delegation_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '6')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '7')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -352,6 +356,11 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '6')
 		"payload_sha256":     "BLOB NOT NULL DEFAULT X''",
 	} {
 		if err := s.ensureColumn("config_results", name, declaration); err != nil {
+			return err
+		}
+	}
+	for _, table := range []string{"authorization_updates", "authorization_records"} {
+		if err := s.ensureColumn(table, "issuer_id", "TEXT NOT NULL DEFAULT ''"); err != nil {
 			return err
 		}
 	}
@@ -568,9 +577,10 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	}
 	defer tx.Rollback()
 	var previousDigest []byte
-	err = tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM authorization_updates WHERE node_id=? AND update_id=?`, update.NodeID, update.UpdateID).Scan(&previousDigest)
+	var previousIssuer string
+	err = tx.QueryRowContext(ctx, `SELECT payload_sha256,issuer_id FROM authorization_updates WHERE node_id=? AND update_id=?`, update.NodeID, update.UpdateID).Scan(&previousDigest, &previousIssuer)
 	if err == nil {
-		if !bytes.Equal(previousDigest, digest[:]) {
+		if !bytes.Equal(previousDigest, digest[:]) || previousIssuer != update.IssuerID {
 			return ErrAuthorizationUpdateConflict
 		}
 		return tx.Commit()
@@ -603,6 +613,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		}
 	}
 	for _, record := range records {
+		record.IssuerID = update.IssuerID
 		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
 			return fmt.Errorf("store: authorization record does not match update identity or fencing")
 		}
@@ -624,6 +635,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		}
 		_, err = tx.ExecContext(ctx, `INSERT INTO authorization_records(node_id,authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.ParentAuthorizationID, record.SourceID, record.Kind, record.RuleID, strconv.FormatUint(record.RuleRevision, 10), strconv.FormatUint(record.PathGeneration, 10), strconv.FormatUint(record.SignerEpoch, 10), record.BootID, record.IssuedAt, record.NotBefore, record.ExpiresAt, record.HardDeadline, record.BillingSnapshotID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.RateBPS, 10), strconv.FormatUint(record.Connections, 10), state)
 		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET issuer_id=? WHERE node_id=? AND authorization_id=?`, update.IssuerID, update.NodeID, record.AuthorizationID); err != nil {
 			return err
 		}
 		if record.Kind == "credit_grant" {
@@ -673,6 +687,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO authorization_updates(node_id,update_id,boot_id,payload,payload_sha256,signer_epoch,path_generation,fencing_generation_floor,created_at) VALUES(?,?,?,?,?,?,?,?,?)`, update.NodeID, update.UpdateID, update.BootID, update.Payload, digest[:], strconv.FormatUint(update.SignerEpoch, 10), strconv.FormatUint(update.PathGeneration, 10), strconv.FormatUint(update.FencingGenerationFloor, 10), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE authorization_updates SET issuer_id=? WHERE node_id=? AND update_id=?`, update.IssuerID, update.NodeID, update.UpdateID); err != nil {
 		return err
 	}
 	return tx.Commit()

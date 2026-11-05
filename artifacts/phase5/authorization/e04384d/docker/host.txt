@@ -1,0 +1,4 @@
+commit: e04384d40cffbc4d0cb53984bb5c7ae2b8aebf00
+go version go1.27.3 linux/arm64
+Linux 7.2.12-orbstack-00394-gbecdd6130068 aarch64
+source: caller-supplied clean archive

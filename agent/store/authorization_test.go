@@ -17,7 +17,7 @@ func fundedStore(t *testing.T) (*Store, AuthorizationUse) {
 	t.Cleanup(func() { _ = s.Close() })
 	now := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
 	r := AuthorizationRecord{AuthorizationID: "grant", ParentAuthorizationID: "parent", SourceID: "source", Kind: "credit_grant", RuleID: "rule", RuleRevision: 1, PathGeneration: 1, SignerEpoch: 1, BootID: "boot", IssuedAt: now.Format(time.RFC3339Nano), NotBefore: now.Format(time.RFC3339Nano), ExpiresAt: now.Add(5 * time.Minute).Format(time.RFC3339Nano), HardDeadline: now.Add(time.Hour).Format(time.RFC3339Nano), BillingSnapshotID: "snapshot", AmountBytes: 4096}
-	if err := s.PersistAuthorizationUpdate(context.Background(), AuthorizationUpdate{NodeID: "node", BootID: "boot", UpdateID: "update", Payload: []byte("approved-fixture"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, []AuthorizationRecord{r}, nil); err != nil {
+	if err := s.PersistAuthorizationUpdate(context.Background(), AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: "boot", UpdateID: "update", Payload: []byte("approved-fixture"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, []AuthorizationRecord{r}, nil); err != nil {
 		t.Fatal(err)
 	}
 	return s, AuthorizationUse{NodeID: "node", BootID: "boot", AuthorizationID: "grant", Kind: "credit_grant", RuleID: "rule", RuleRevision: 1, PathGeneration: 1, BillingSnapshotID: "snapshot", Earliest: now.Add(time.Second), Latest: now.Add(time.Second), TrustedTime: true, ExistingSession: true}

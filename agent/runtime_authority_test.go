@@ -320,6 +320,11 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				case <-time.After(time.Millisecond):
 				}
 			}
+			low, high, trusted := node.TrustedTime()
+			boundGrant, err := s.CheckStoredAuthorization(ctx, store.AuthorizationUse{NodeID: node.NodeID, BootID: node.BootID, AuthorizationID: topupGrantID, Kind: "credit_grant", RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, BillingSnapshotID: delegation.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted})
+			if err != nil || boundGrant.IssuerID != "hub" {
+				t.Fatalf("grant missing authenticated Hub identity: %s %v", boundGrant.IssuerID, err)
+			}
 			stream := open()
 			if err := stream.WaitOpen(ctx); err != nil {
 				t.Fatal(err)

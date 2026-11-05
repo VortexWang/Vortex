@@ -156,3 +156,22 @@ The exact unknown-liability wire proposal is retained in `05-03-UNKNOWN-USAGE-PR
 - The real mTLS/TCP/UDP fixture now sends two grants from the same persisted delegation, asserts the runtime selects the second grant, and keeps both reservations on the Hub. Unit tests cover replay, unknown old usage, correct per-grant refunds and refusal of changed ownership/boundaries.
 - A compile error in the new assertion (grant ID is on UsageDelta, not UsageBatch) was corrected before acceptance testing. No production protocol changed.
 - In-session grant/lease renewal and complete runtime lifecycle verification remain to be completed; this increment does not declare 05-03 finished.
+
+## Current 05-03 acceptance audit
+
+| Plan obligation | Current evidence | Remaining work |
+| --- | --- | --- |
+| Durable grants/leases, conservative time and 30-second loss transition | Persisted authorization and issuer transactions; clock/deadline/epoch unit and race tests | Renew authority for an already-open session without changing its billing snapshot or freeing old holds |
+| Engine-to-Agent-to-Hub durable usage | Real TCP/UDP, FULL reservation/settlement/outbox and Hub-before-ACK tests | Separate unknown-liability wire handoff; proposal 1.2.0 still awaits approval |
+| Restricted autonomy | Durable preinstalled node/rule/share/delegation scope; no new allocation during loss; source conservation under concurrent issuance | Complete the ongoing renewal loop and review all runtime roles against the plan |
+| Signer-epoch and ownership safety | Durable irreversible closure; cross-epoch/source/boot top-ups rejected; old unknown liabilities retained | Full prefix/remainder transfer and recovery belong to dependent 05-04; 05-03 must still verify the integrated issuance boundary |
+| Docker/Actions mixed fixture | `cebe5ab` and `e702704` paired evidence; latest `e04384d` Docker passes | Retain latest Actions evidence when the run completes |
+
+No 05-03 SUMMARY or completion status has been created.
+
+### Verified top-up pair and issuer identity follow-up
+
+- Top-up SHA `e04384d40cffbc4d0cb53984bb5c7ae2b8aebf00` passed pinned Docker and [Actions run 42056885512](https://github.com/VortexWang/Vortex/actions/runs/42056885512). Raw snapshots retain two grants totaling 8192 bytes against a 12288-byte parent allocation; the Hub retains 4096 bytes unissued. Actual traffic is recorded against the second grant.
+- Follow-up review identified the need to bind same-source continuation to the authenticated issuing Hub as well as the numeric epoch. The control TLS verifier now requires an unambiguous CA-verified Hub certificate identity and persists it with each authorization update/record (local SQLite schema 7). Cross-Hub or missing-identity top-ups fail closed even when parent/epoch match.
+- Existing pre-upgrade records are not assigned fabricated issuer evidence: they retain an empty issuer and cannot accept source top-ups until reconciled. Existing authorization remains bounded by its original lifetime. The frozen wire/JSON contracts are unchanged.
+- Added tests for missing/foreign issuers; the live mTLS fixture checks the persisted issuer identity. Local Agent/Hub race and vet passed. Final same-source verification for this follow-up is recorded after the next commit.

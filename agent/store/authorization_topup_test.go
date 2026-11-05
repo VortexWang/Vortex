@@ -30,7 +30,7 @@ func TestSourceTopupKeepsUnknownAndRefundsInOriginalGrant(t *testing.T) {
 		t.Fatal(err)
 	}
 	newGrant := topupRecord(t, s, use)
-	u := AuthorizationUpdate{NodeID: "node", BootID: "boot", UpdateID: "topup-update", Payload: []byte("signed-topup"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}
+	u := AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: "boot", UpdateID: "topup-update", Payload: []byte("signed-topup"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}
 	if err := s.PersistAuthorizationUpdate(ctx, u, []AuthorizationRecord{newGrant}, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -81,13 +81,26 @@ func TestTopupCannotChangeDelegationEpochBootScopeOrBoundary(t *testing.T) {
 			ctx := context.Background()
 			r := topupRecord(t, s, use)
 			tc.change(&r)
-			u := AuthorizationUpdate{NodeID: "node", BootID: r.BootID, UpdateID: "bad-topup", Payload: []byte("changed-scope"), SignerEpoch: r.SignerEpoch, PathGeneration: r.PathGeneration, FencingGenerationFloor: 1}
+			u := AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: r.BootID, UpdateID: "bad-topup", Payload: []byte("changed-scope"), SignerEpoch: r.SignerEpoch, PathGeneration: r.PathGeneration, FencingGenerationFloor: 1}
 			if err := s.PersistAuthorizationUpdate(ctx, u, []AuthorizationRecord{r}, nil); !errors.Is(err, ErrAuthorityHandoffRequired) {
 				t.Fatalf("changed scope accepted: %v", err)
 			}
 			b, err := s.AuditAuthorizationSource(ctx, "node", "source")
 			if err != nil || b.Initial != 4096 || b.Remaining != 4096 {
 				t.Fatalf("failed topup changed ledger: %+v %v", b, err)
+			}
+		})
+	}
+}
+
+func TestSourceTopupRejectsMissingOrChangedIssuer(t *testing.T) {
+	for _, issuer := range []string{"", "another-hub"} {
+		t.Run(issuer, func(t *testing.T) {
+			s, use := fundedStore(t)
+			r := topupRecord(t, s, use)
+			err := s.PersistAuthorizationUpdate(context.Background(), AuthorizationUpdate{IssuerID: issuer, NodeID: "node", BootID: "boot", UpdateID: "changed-issuer", Payload: []byte("changed-issuer"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, []AuthorizationRecord{r}, nil)
+			if !errors.Is(err, ErrAuthorityHandoffRequired) {
+				t.Fatalf("foreign or missing issuer allowed: %v", err)
 			}
 		})
 	}

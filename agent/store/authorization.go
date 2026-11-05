@@ -62,6 +62,9 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 	if err != nil {
 		return AuthorizationRecord{}, fmt.Errorf("%w: %w", ErrAuthorizationDenied, err)
 	}
+	if err := tx.QueryRowContext(ctx, `SELECT issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, use.NodeID, use.AuthorizationID).Scan(&record.IssuerID); err != nil {
+		return AuthorizationRecord{}, err
+	}
 	for _, field := range []struct {
 		text  string
 		value *uint64
@@ -391,8 +394,8 @@ func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID s
 // are independent reservations, not ownership transfers. Only the Hub knows
 // the parent's unissued budget and must reserve it before sending each grant.
 func checkSourceLineageTx(ctx context.Context, tx *sql.Tx, nodeID string, r AuthorizationRecord) error {
-	var id, parent, boot, snapshot, rule, revision, path, epoch, deadline string
-	err := tx.QueryRowContext(ctx, `SELECT a.authorization_id,a.parent_authorization_id,a.boot_id,a.billing_snapshot_id,a.rule_id,a.rule_revision,a.path_generation,a.signer_epoch,a.hard_deadline FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND o.source_id=?`, nodeID, r.SourceID).Scan(&id, &parent, &boot, &snapshot, &rule, &revision, &path, &epoch, &deadline)
+	var id, parent, boot, snapshot, rule, revision, path, epoch, deadline, issuer string
+	err := tx.QueryRowContext(ctx, `SELECT a.authorization_id,a.parent_authorization_id,a.boot_id,a.billing_snapshot_id,a.rule_id,a.rule_revision,a.path_generation,a.signer_epoch,a.hard_deadline,a.issuer_id FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND o.source_id=?`, nodeID, r.SourceID).Scan(&id, &parent, &boot, &snapshot, &rule, &revision, &path, &epoch, &deadline, &issuer)
 	if err != nil {
 		return err
 	}
@@ -401,7 +404,7 @@ func checkSourceLineageTx(ctx context.Context, tx *sql.Tx, nodeID string, r Auth
 	}
 	rootDeadline, e1 := time.Parse(time.RFC3339Nano, deadline)
 	grantDeadline, e2 := time.Parse(time.RFC3339Nano, r.HardDeadline)
-	if r.ParentAuthorizationID == "" || parent != r.ParentAuthorizationID || boot != r.BootID || snapshot != r.BillingSnapshotID || rule != r.RuleID || revision != strconv.FormatUint(r.RuleRevision, 10) || path != strconv.FormatUint(r.PathGeneration, 10) || epoch != strconv.FormatUint(r.SignerEpoch, 10) || e1 != nil || e2 != nil || grantDeadline.After(rootDeadline) {
+	if issuer == "" || issuer != r.IssuerID || r.ParentAuthorizationID == "" || parent != r.ParentAuthorizationID || boot != r.BootID || snapshot != r.BillingSnapshotID || rule != r.RuleID || revision != strconv.FormatUint(r.RuleRevision, 10) || path != strconv.FormatUint(r.PathGeneration, 10) || epoch != strconv.FormatUint(r.SignerEpoch, 10) || e1 != nil || e2 != nil || grantDeadline.After(rootDeadline) {
 		return ErrAuthorityHandoffRequired
 	}
 	return nil

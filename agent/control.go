@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"google.golang.org/grpc"
@@ -85,6 +86,27 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if tlsConfig.InsecureSkipVerify {
 		return fmt.Errorf("agent: unauthenticated control TLS is forbidden")
 	}
+	var issuerIdentity atomic.Value
+	previousVerify := tlsConfig.VerifyConnection
+	tlsConfig.VerifyConnection = func(state tls.ConnectionState) error {
+		if previousVerify != nil {
+			if err := previousVerify(state); err != nil {
+				return err
+			}
+		}
+		if len(state.VerifiedChains) == 0 || len(state.PeerCertificates) == 0 {
+			return fmt.Errorf("agent: verified Hub identity missing")
+		}
+		cert := state.PeerCertificates[0]
+		if len(cert.DNSNames) != 1 || cert.Subject.CommonName != cert.DNSNames[0] {
+			return fmt.Errorf("agent: ambiguous Hub identity")
+		}
+		issuerIdentity.CompareAndSwap(nil, cert.DNSNames[0])
+		if issuerIdentity.Load().(string) != cert.DNSNames[0] {
+			return fmt.Errorf("agent: Hub identity changed within control session")
+		}
+		return nil
+	}
 	tlsConfig.MinVersion = tls.VersionTLS13
 	conn, err := grpc.DialContext(ctx, address,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
@@ -157,7 +179,11 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			}
 			lastNodeSequence = responseSequence
 		case *controlv1.ControlMessage_AuthorizationUpdate:
-			if err := c.applyAuthorizationUpdate(ctx, body.AuthorizationUpdate); err != nil {
+			issuer, ok := issuerIdentity.Load().(string)
+			if !ok || issuer == "" {
+				return fmt.Errorf("agent: authenticated Hub identity missing")
+			}
+			if err := c.applyAuthorizationUpdateFrom(ctx, body.AuthorizationUpdate, issuer); err != nil {
 				return err
 			}
 			payload, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
@@ -194,6 +220,10 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 }
 
 func (c *ControlClient) applyAuthorizationUpdate(ctx context.Context, update *controlv1.AuthorizationUpdate) error {
+	return c.applyAuthorizationUpdateFrom(ctx, update, "")
+}
+
+func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update *controlv1.AuthorizationUpdate, issuer string) error {
 	if c == nil || c.Node == nil || update == nil {
 		return fmt.Errorf("invalid_authorization: missing authenticated node or update")
 	}
@@ -227,7 +257,8 @@ func (c *ControlClient) applyAuthorizationUpdate(ctx context.Context, update *co
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
-		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
+		IssuerID: issuer,
+		NodeID:   c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
 		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
 		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,
 		BackendHeartbeat: payload.BackendHeartbeatAt, AutonomyDeadline: payload.AutonomyDeadline,

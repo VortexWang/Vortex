@@ -1,0 +1,7 @@
+ok  	vortex/engine/accounting	1.019s
+?   	vortex/engine/runtime	[no test files]
+ok  	vortex/engine/runtime/accounting	1.617s
+ok  	vortex/engine/runtime/config	1.021s
+ok  	vortex/engine/runtime/link	1.021s
+ok  	vortex/engine/runtime/relay	1.228s
+ok  	vortex/engine/runtime/topology	1.010s
