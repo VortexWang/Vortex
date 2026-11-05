@@ -126,6 +126,8 @@ func (c *ControlClient) ConnectRegion(ctx context.Context, region string, endpoi
 }
 
 func (c *ControlClient) exchange(ctx context.Context, conn net.Conn) error {
+	stopClose := context.AfterFunc(ctx, func() { _ = conn.Close() })
+	defer stopClose()
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
 	}

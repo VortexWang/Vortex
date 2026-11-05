@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"database/sql"
 	"errors"
 	"flag"
 	"fmt"
@@ -127,6 +128,14 @@ func main() {
 	}
 	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != n.NodeID {
 		fatal(errors.New("node certificate SAN does not match node-id"))
+	}
+	storedCertificate, storedExpiry, credentialErr := s.Credential(ctx, n.NodeID)
+	if credentialErr == nil {
+		if string(storedCertificate) != string(leaf.Raw) || !storedExpiry.Equal(leaf.NotAfter) {
+			fatal(errors.New("local runtime certificate differs from durable credential state"))
+		}
+	} else if credentialErr != sql.ErrNoRows {
+		fatal(credentialErr)
 	}
 	client := &agent.ControlClient{Node: n, TLS: &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{certificate}, RootCAs: roots, ServerName: *hubName}}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)

@@ -32,6 +32,8 @@ type ConfigResult struct {
 
 type ObjectResult struct{ ObjectID, State, Reason string }
 
+var ErrCredentialRevoked = fmt.Errorf("store: credential revoked")
+
 func Open(path, owner string) (*Store, error) {
 	if path == "" || owner == "" {
 		return nil, fmt.Errorf("store: path and owner are required")
@@ -190,11 +192,11 @@ func (s *Store) PersistControlAck(ctx context.Context, messageID string, sequenc
 	return tx.Commit()
 }
 
-// PersistControlReceipt records a successful backend contact only after the
-// correlated receipt is durably committed. It does not advance applied config.
-func (s *Store) PersistControlReceipt(ctx context.Context, messageID string, sequence uint64, heartbeat time.Time) error {
-	if messageID == "" || sequence == 0 || heartbeat.IsZero() {
-		return fmt.Errorf("store: control receipt identity and heartbeat are required")
+// PersistControlReceipt records a Hub contact, which is not evidence of a
+// successful backend heartbeat and cannot extend an autonomy deadline.
+func (s *Store) PersistControlReceipt(ctx context.Context, messageID string, sequence uint64, contact time.Time) error {
+	if messageID == "" || sequence == 0 || contact.IsZero() {
+		return fmt.Errorf("store: control receipt identity and contact time are required")
 	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -214,8 +216,8 @@ func (s *Store) PersistControlReceipt(ctx context.Context, messageID string, seq
 		return err
 	}
 	for key, value := range map[string]string{
-		"control_sequence":  fmt.Sprint(sequence),
-		"backend_heartbeat": heartbeat.UTC().Format(time.RFC3339Nano),
+		"control_sequence": fmt.Sprint(sequence),
+		"hub_contact":      contact.UTC().Format(time.RFC3339Nano),
 	} {
 		_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, key, value, time.Now().UTC().Format(time.RFC3339Nano))
 		if err != nil {
@@ -240,9 +242,12 @@ func (s *Store) Credential(ctx context.Context, nodeID string) ([]byte, time.Tim
 		return nil, time.Time{}, err
 	}
 	if revoked != 0 {
-		return nil, time.Time{}, fmt.Errorf("store: credential revoked")
+		return nil, time.Time{}, ErrCredentialRevoked
 	}
 	valid, err := time.Parse(time.RFC3339Nano, validUntil)
+	if err == nil && !time.Now().Before(valid) {
+		return nil, time.Time{}, fmt.Errorf("store: credential expired")
+	}
 	return cert, valid, err
 }
 
@@ -250,8 +255,36 @@ func (s *Store) SaveCredential(ctx context.Context, nodeID string, certificate [
 	if nodeID == "" || len(certificate) == 0 {
 		return fmt.Errorf("store: credential identity and certificate are required")
 	}
-	_, err := s.db.ExecContext(ctx, `INSERT INTO credentials(node_id, certificate, valid_until, revoked, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(node_id) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, revoked=0, updated_at=excluded.updated_at`, nodeID, certificate, validUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
-	return err
+	result, err := s.db.ExecContext(ctx, `INSERT INTO credentials(node_id, certificate, valid_until, revoked, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(node_id) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, updated_at=excluded.updated_at WHERE credentials.revoked=0`, nodeID, certificate, validUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed == 0 {
+		return ErrCredentialRevoked
+	}
+	return nil
+}
+
+func (s *Store) RevokeCredential(ctx context.Context, nodeID string) error {
+	if nodeID == "" {
+		return fmt.Errorf("store: node identity required for revocation")
+	}
+	result, err := s.db.ExecContext(ctx, `UPDATE credentials SET revoked=1, updated_at=? WHERE node_id=?`, time.Now().UTC().Format(time.RFC3339Nano), nodeID)
+	if err != nil {
+		return err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (s *Store) SaveConfigResult(ctx context.Context, transactionID string, version uint64, state, reason string) error {

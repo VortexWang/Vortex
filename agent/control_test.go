@@ -140,8 +140,11 @@ func TestControlClientUsesMutualTLSAndPersistsAck(t *testing.T) {
 			t.Fatalf("%s=%q err=%v", key, got, err)
 		}
 	}
-	if heartbeat, err := s.AgentState(ctx, "backend_heartbeat"); err != nil || heartbeat == "" {
-		t.Fatalf("successful Hub ACK did not persist backend heartbeat: %q %v", heartbeat, err)
+	if contact, err := s.AgentState(ctx, "hub_contact"); err != nil || contact == "" {
+		t.Fatalf("successful Hub ACK did not persist Hub contact: %q %v", contact, err)
+	}
+	if _, err := s.AgentState(ctx, "backend_heartbeat"); err == nil {
+		t.Fatal("Hub ACK incorrectly recorded as backend heartbeat")
 	}
 	if _, err := s.AgentState(ctx, "applied_version"); err == nil {
 		t.Fatal("Hub ACK incorrectly recorded as applied configuration")

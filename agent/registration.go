@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,6 +46,8 @@ func Register(ctx context.Context, nodeID, token, address, certificateDir string
 		return identity.Credential{}, fmt.Errorf("agent registration: connect: %w", err)
 	}
 	defer conn.Close()
+	stopClose := context.AfterFunc(ctx, func() { _ = conn.Close() })
+	defer stopClose()
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
 	}
@@ -71,6 +74,9 @@ func Register(ctx context.Context, nodeID, token, address, certificateDir string
 	}
 	credential, err := identity.AttachKey(identity.Credential{NodeID: nodeID, Leaf: leaf}, key, response.CA)
 	if err != nil {
+		return identity.Credential{}, err
+	}
+	if _, _, err := db.Credential(ctx, nodeID); err != nil && err != sql.ErrNoRows {
 		return identity.Credential{}, err
 	}
 	if err := identity.SaveFiles(certificateDir, credential, response.CA); err != nil {

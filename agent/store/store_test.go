@@ -98,10 +98,34 @@ func TestControlReceiptCommitsHeartbeatAndRejectsSequenceConflict(t *testing.T) 
 	if err := s.PersistControlReceipt(ctx, "message-1", 5, heartbeat); err == nil {
 		t.Fatal("same message ID with conflicting sequence was accepted")
 	}
-	if _, err := s.AgentState(ctx, "backend_heartbeat"); err != nil {
-		t.Fatalf("backend heartbeat not persisted with receipt: %v", err)
+	if _, err := s.AgentState(ctx, "hub_contact"); err != nil {
+		t.Fatalf("Hub contact not persisted with receipt: %v", err)
+	}
+	if _, err := s.AgentState(ctx, "backend_heartbeat"); err == nil {
+		t.Fatal("Hub receipt must not advance backend heartbeat")
 	}
 	if _, err := s.AgentState(ctx, "applied_version"); err == nil {
 		t.Fatal("control receipt must not advance applied config version")
+	}
+}
+
+func TestRevokedCredentialCannotBeReplacedByOrdinarySave(t *testing.T) {
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	ctx := context.Background()
+	if err := s.SaveCredential(ctx, "node-1", []byte("old"), time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.RevokeCredential(ctx, "node-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveCredential(ctx, "node-1", []byte("replacement"), time.Now().Add(time.Hour)); err != ErrCredentialRevoked {
+		t.Fatalf("ordinary credential save cleared revocation: %v", err)
+	}
+	if _, _, err := s.Credential(ctx, "node-1"); err != ErrCredentialRevoked {
+		t.Fatalf("revoked credential became readable: %v", err)
 	}
 }
