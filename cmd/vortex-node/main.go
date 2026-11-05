@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -19,11 +20,13 @@ func main() {
 	nodeID := flag.String("node-id", "node-1", "node identity")
 	dbPath := flag.String("db", "agent.db", "Agent SQLite path")
 	hubAddr := flag.String("hub", "", "protocol-test Hub address")
+	enrollmentAddr := flag.String("enrollment-hub", "", "server-authenticated one-time enrollment endpoint")
 	certPath := flag.String("tls-cert", "", "node certificate PEM")
 	keyPath := flag.String("tls-key", "", "node private key PEM")
 	caPath := flag.String("tls-ca", "", "trusted Hub CA PEM")
 	hubName := flag.String("hub-name", "", "Hub certificate DNS identity")
 	engineConfig := flag.String("engine-config", "", "Engine runtime JSON configuration")
+	credentialDir := flag.String("credential-dir", "credentials", "directory for locally generated node credentials")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "agent")
 	if err != nil {
@@ -68,27 +71,62 @@ func main() {
 		}
 		return
 	}
-	if *certPath == "" || *keyPath == "" || *caPath == "" || *hubName == "" {
-		fatal(fmt.Errorf("hub connection requires tls-cert, tls-key, tls-ca and hub-name"))
+	if *hubName == "" {
+		fatal(errors.New("hub-name is required for a Hub connection"))
 	}
-	certificate, err := tls.LoadX509KeyPair(*certPath, *keyPath)
-	if err != nil {
-		fatal(err)
+	if *certPath == "" {
+		*certPath = *credentialDir + "/runtime-cert.pem"
+	}
+	if *keyPath == "" {
+		*keyPath = *credentialDir + "/runtime-key.pem"
+	}
+	if *caPath == "" {
+		*caPath = *credentialDir + "/trust-ca.pem"
+	}
+	certificate, loadErr := tls.LoadX509KeyPair(*certPath, *keyPath)
+	var roots *x509.CertPool
+	if loadErr != nil {
+		if !errors.Is(loadErr, os.ErrNotExist) {
+			fatal(loadErr)
+		}
+		token := os.Getenv("VORTEX_ENROLLMENT_TOKEN")
+		bootstrapCA := os.Getenv("VORTEX_HUB_CA")
+		if token == "" || bootstrapCA == "" || *enrollmentAddr == "" {
+			fatal(fmt.Errorf("node credentials are missing; set VORTEX_ENROLLMENT_TOKEN, VORTEX_HUB_CA and --enrollment-hub for initial registration"))
+		}
+		caPEM, readErr := os.ReadFile(bootstrapCA)
+		if readErr != nil {
+			fatal(readErr)
+		}
+		roots = x509.NewCertPool()
+		if !roots.AppendCertsFromPEM(caPEM) {
+			fatal(errors.New("invalid bootstrap Hub CA"))
+		}
+		credential, registerErr := agent.Register(ctx, n.NodeID, token, *enrollmentAddr, *credentialDir, roots, *hubName, s)
+		if registerErr != nil {
+			fatal(registerErr)
+		}
+		certificate = credential.Certificate
+		if err := os.Unsetenv("VORTEX_ENROLLMENT_TOKEN"); err != nil {
+			fatal(err)
+		}
+		fmt.Printf("vortex-node enrolled node_id=%s expires=%s\n", n.NodeID, credential.Leaf.NotAfter.UTC().Format(time.RFC3339))
+	} else {
+		caPEM, readErr := os.ReadFile(*caPath)
+		if readErr != nil {
+			fatal(readErr)
+		}
+		roots = x509.NewCertPool()
+		if !roots.AppendCertsFromPEM(caPEM) {
+			fatal(errors.New("invalid Hub CA"))
+		}
 	}
 	leaf, err := x509.ParseCertificate(certificate.Certificate[0])
 	if err != nil {
 		fatal(err)
 	}
 	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != n.NodeID {
-		fatal(fmt.Errorf("node certificate SAN does not match node-id"))
-	}
-	caPEM, err := os.ReadFile(*caPath)
-	if err != nil {
-		fatal(err)
-	}
-	roots := x509.NewCertPool()
-	if !roots.AppendCertsFromPEM(caPEM) {
-		fatal(fmt.Errorf("invalid Hub CA"))
+		fatal(errors.New("node certificate SAN does not match node-id"))
 	}
 	client := &agent.ControlClient{Node: n, TLS: &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{certificate}, RootCAs: roots, ServerName: *hubName}}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
