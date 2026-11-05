@@ -6,6 +6,18 @@ mode=${1:-native}
 out=${2:-"$(pwd)/artifacts/phase4/qualification/$mode"}
 formal=${PHASE4_FORMAL:-0}
 credit_budget=${PHASE4_SOURCE_CREDIT_BUDGET:-1099511627776}
+credit_initial=${PHASE4_CREDIT_INITIAL_BLOCK:-4194304}
+credit_max=${PHASE4_CREDIT_MAX_BLOCK:-4194304}
+credit_target=${PHASE4_CREDIT_GRANT_TARGET:-134217728}
+credit_renew=${PHASE4_CREDIT_RENEW_PERCENT:-30}
+credit_observe=${PHASE4_CREDIT_OBSERVE:-false}
+for value in "$credit_initial" "$credit_max" "$credit_target" "$credit_renew"; do
+  case "$value" in ''|*[!0-9]*) echo "credit parameters must be positive integers" >&2; exit 2 ;; esac
+done
+case "$credit_observe" in true|false) ;; *) echo "invalid credit observation flag" >&2; exit 2 ;; esac
+if [ "$credit_initial" -lt 1 ] || [ "$credit_max" -lt "$credit_initial" ] || [ "$credit_max" -gt 4194304 ] || [ "$credit_target" -lt "$credit_max" ] || [ "$credit_target" -gt 1099511627776 ] || [ "$credit_renew" -lt 1 ] || [ "$credit_renew" -gt 99 ]; then
+  echo "invalid bounded credit parameters" >&2; exit 2
+fi
 case "$formal" in 0|1) ;; *) echo "PHASE4_FORMAL must be 0 or 1" >&2; exit 2 ;; esac
 case "$credit_budget" in ''|*[!0-9]*) echo "PHASE4_SOURCE_CREDIT_BUDGET must be a positive integer" >&2; exit 2 ;; esac
 if [ "$credit_budget" -lt 1 ] || [ "$credit_budget" -gt 1125899906842624 ]; then
@@ -56,7 +68,7 @@ json() {
     auth=
     runtime_authority='"runtime_authority":true,'
     if [ "$role" = source ]; then
-      authority=",\"source_credit\":{\"snapshot_id\":\"phase4-formal/source/path-1/policy-1\",\"budget_bytes\":$credit_budget,\"initial_block_bytes\":4194304,\"max_block_bytes\":4194304,\"grant_target_bytes\":134217728,\"renew_percent\":30}"
+      authority=",\"source_credit\":{\"snapshot_id\":\"phase4-formal/source/path-1/policy-1\",\"budget_bytes\":$credit_budget,\"initial_block_bytes\":$credit_initial,\"max_block_bytes\":$credit_max,\"grant_target_bytes\":$credit_target,\"renew_percent\":$credit_renew,\"observe\":$credit_observe}"
     fi
   fi
   : > "$out/events-$name.jsonl"

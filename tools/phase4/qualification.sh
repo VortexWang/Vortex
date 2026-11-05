@@ -73,7 +73,10 @@ if count < 4 or dict(totals) != expected:
 
 tcp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/1")}
 udp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/2")}
-if len(tcp_flows) != 1 + 2 * workload["tcp_streams"] or len(udp_flows) != 2:
+short_flow_count = int(os.getenv("D04_SHORT_SAMPLES", "0"))
+if short_flow_count:
+    short_flow_count += 5  # latency.py warmup connections
+if len(tcp_flows) != 1 + 2 * workload["tcp_streams"] + short_flow_count or len(udp_flows) != 2:
     raise SystemExit("unexpected or colliding per-flow accounting identities")
 for key, flow in tcp_flows.items():
     if flow.get("left_to_right", 0) != flow.get("right_to_left", 0):

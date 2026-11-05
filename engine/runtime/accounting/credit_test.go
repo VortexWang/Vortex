@@ -190,3 +190,45 @@ func TestCreditReclaimsOnlyIdleTailsAcrossSessions(t *testing.T) {
 		t.Fatal(v)
 	}
 }
+
+func TestCreditObservationsAreBoundedAndCopied(t *testing.T) {
+	cfg := CreditConfig{SnapshotID: "observed", Budget: 4096, InitialBlock: 64, MaxBlock: 256, GrantTarget: 512, RenewPercent: 30, Observe: true}
+	gate, err := NewCreditGate(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := gate.Open(context.Background(), core.Flow{Key: "observed"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 12 {
+		batch, err := session.Reserve(context.Background(), core.LeftToRight, 32)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := batch.Commit(context.Background(), 32); err != nil {
+			t.Fatal(err)
+		}
+	}
+	session.Close()
+	state := gate.State()
+	obs := state.Observations
+	if obs == nil || obs.Reservations != 12 || obs.BlockAllocations != 3 || obs.PeakSessions != 1 || obs.PeakHeld < 256 || obs.IssuerCalls != state.Grants {
+		t.Fatalf("invalid bounded observations: %+v, state %+v", obs, state)
+	}
+	var samples uint64
+	for _, n := range obs.IssuerNanos {
+		samples += n
+	}
+	if samples != obs.IssuerCalls {
+		t.Fatal("timing samples lost")
+	}
+	obs.Reservations = 0
+	if gate.State().Observations.Reservations != 12 {
+		t.Fatal("State leaked mutable observations")
+	}
+	conserved(t, gate)
+	if creditFixture(t, 256).State().Observations != nil {
+		t.Fatal("diagnostics enabled by default")
+	}
+}

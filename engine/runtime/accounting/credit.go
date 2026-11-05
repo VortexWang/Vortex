@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/bits"
 	"sync"
+	"time"
 
 	core "vortex/engine/accounting"
 )
@@ -12,6 +14,7 @@ import (
 // CreditConfig is a test-only, startup-pinned, raw-byte authority. It is not a
 // durable issuer or a billing conversion implementation. Zero budget denies.
 type CreditConfig struct {
+	Observe      bool   `json:"observe,omitempty"`
 	SnapshotID   string `json:"snapshot_id"`
 	Budget       int64  `json:"budget_bytes"`
 	InitialBlock int64  `json:"initial_block_bytes"`
@@ -27,20 +30,32 @@ func (c CreditConfig) Validate() error {
 	return nil
 }
 
+// CreditObservations is a bounded, opt-in diagnostic for D-04 experiments.
+// Issuer timings cover the process-local allocator only, never a remote Hub.
+type CreditObservations struct {
+	Reservations     uint64     `json:"reservations"`
+	BlockAllocations uint64     `json:"block_allocations"`
+	PeakSessions     int64      `json:"peak_sessions"`
+	PeakHeld         int64      `json:"peak_held_bytes"`
+	IssuerCalls      uint64     `json:"issuer_calls"`
+	IssuerNanos      [64]uint64 `json:"issuer_nanoseconds_log2_buckets"`
+}
+
 type CreditState struct {
-	SnapshotID   string `json:"snapshot_id"`
-	PendingGrant int64  `json:"pending_grant_bytes"`
-	UnknownGrant int64  `json:"unknown_grant_bytes"`
-	GrantRecords uint64 `json:"grant_records"`
-	Budget       int64  `json:"budget_bytes"`
-	Unissued     int64  `json:"unissued_bytes"`
-	Available    int64  `json:"available_bytes"`
-	Held         int64  `json:"held_bytes"`
-	Used         int64  `json:"used_bytes"`
-	Unknown      int64  `json:"unknown_bytes"`
-	Grants       uint64 `json:"grants"`
-	Denials      uint64 `json:"denials"`
-	Sessions     int64  `json:"sessions"`
+	Observations *CreditObservations `json:"observations,omitempty"`
+	SnapshotID   string              `json:"snapshot_id"`
+	PendingGrant int64               `json:"pending_grant_bytes"`
+	UnknownGrant int64               `json:"unknown_grant_bytes"`
+	GrantRecords uint64              `json:"grant_records"`
+	Budget       int64               `json:"budget_bytes"`
+	Unissued     int64               `json:"unissued_bytes"`
+	Available    int64               `json:"available_bytes"`
+	Held         int64               `json:"held_bytes"`
+	Used         int64               `json:"used_bytes"`
+	Unknown      int64               `json:"unknown_bytes"`
+	Grants       uint64              `json:"grants"`
+	Denials      uint64              `json:"denials"`
+	Sessions     int64               `json:"sessions"`
 }
 
 // CreditGate serializes issuance, block allocation and settlement. At all times
@@ -48,12 +63,13 @@ type CreditState struct {
 // used + unknown. Held includes idle
 // session block tails and unresolved batches; closing never frees an unknown.
 type CreditGate struct {
-	mu          sync.Mutex
-	cfg         CreditConfig
-	state       CreditState
-	requests    map[string]grantRecord
-	grantOwners map[string]string
-	sessions    map[*creditSession]struct{}
+	mu           sync.Mutex
+	cfg          CreditConfig
+	state        CreditState
+	observations CreditObservations
+	requests     map[string]grantRecord
+	grantOwners  map[string]string
+	sessions     map[*creditSession]struct{}
 }
 
 func NewCreditGate(c CreditConfig) (*CreditGate, error) {
@@ -62,13 +78,30 @@ func NewCreditGate(c CreditConfig) (*CreditGate, error) {
 	}
 	return &CreditGate{cfg: c, requests: make(map[string]grantRecord), grantOwners: make(map[string]string), sessions: make(map[*creditSession]struct{}), state: CreditState{SnapshotID: c.SnapshotID, Budget: c.Budget, Unissued: c.Budget}}, nil
 }
-func (g *CreditGate) State() CreditState { g.mu.Lock(); defer g.mu.Unlock(); return g.state }
+func (g *CreditGate) State() CreditState {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	state := g.state
+	if g.cfg.Observe {
+		observation := g.observations
+		state.Observations = &observation
+	}
+	return state
+}
 func (g *CreditGate) replenish() {
 	if g.state.Available > g.cfg.GrantTarget*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
 		return
 	}
 	n := min(g.cfg.GrantTarget-g.state.Available, g.state.Unissued)
 	if n > 0 {
+		if g.cfg.Observe {
+			start := time.Now()
+			defer func() {
+				ns := max(int64(1), time.Since(start).Nanoseconds())
+				g.observations.IssuerCalls++
+				g.observations.IssuerNanos[bits.Len64(uint64(ns))-1]++
+			}()
+		}
 		id := fmt.Sprintf("local:%d", len(g.requests)+1)
 		if g.beginGrant(id, n) != nil {
 			return
@@ -89,6 +122,9 @@ func (g *CreditGate) Open(ctx context.Context, f core.Flow) (core.Session, error
 	}
 	g.replenish()
 	g.state.Sessions++
+	if g.cfg.Observe {
+		g.observations.PeakSessions = max(g.observations.PeakSessions, g.state.Sessions)
+	}
 	session := &creditSession{gate: g, next: [2]int64{g.cfg.InitialBlock, g.cfg.InitialBlock}}
 	g.sessions[session] = struct{}{}
 	return session, nil
@@ -152,9 +188,16 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 		}
 		g.state.Available -= take
 		g.state.Held += take
+		if g.cfg.Observe {
+			g.observations.BlockAllocations++
+			g.observations.PeakHeld = max(g.observations.PeakHeld, g.state.Held)
+		}
 		s.idle[i] += take
 		s.next[i] = min(g.cfg.MaxBlock, s.next[i]*2)
 		g.replenish()
+	}
+	if g.cfg.Observe {
+		g.observations.Reservations++
 	}
 	s.idle[i] -= n
 	return core.NewBatch(n, func(_ context.Context, o core.Outcome) error {

@@ -89,6 +89,9 @@ with open(sys.argv[1], "w", encoding="utf-8") as output:
     json.dump(stats, output, sort_keys=True)
     output.write("\n")
 PY
+if [ "${D04_SHORT_SAMPLES:-0}" != 0 ]; then
+  "$root/tools/phase4/driver.sh" latency.py --samples "$D04_SHORT_SAMPLES" --output "$qual/short-flow-latency.json"
+fi
 "$root/tools/phase4/driver.sh" smoke_workload.py "$qual"
 capture_container_udp start
 "$root/tools/phase4/driver.sh" mixed_workload.py \

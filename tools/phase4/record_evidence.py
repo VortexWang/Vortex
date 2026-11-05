@@ -36,6 +36,9 @@ manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("
             "workload": {"duration_seconds": float(os.getenv("MIXED_DURATION_SECONDS", "5")),
                          "tcp_streams": int(os.getenv("MIXED_TCP_STREAMS", "4")),
                          "udp_mbps": float(os.getenv("MIXED_UDP_MBPS", "100")), "udp_payload_bytes": 1200}}
+if int(os.getenv("D04_SHORT_SAMPLES", "0")):
+    manifest["workload"]["short_flow_samples"] = int(os.environ["D04_SHORT_SAMPLES"])
+    manifest["workload"]["short_flow_warmup_connections"] = 5
 (out / "semantic-manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command("git", "status", "--porcelain")),
             "backend": sys.argv[2], "driver_placement": "dedicated-linux-client-container" if sys.argv[2] == "docker" else "native-host", "system": platform.system(), "release": platform.release(),
