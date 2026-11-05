@@ -1,6 +1,6 @@
 # Phase 5 Plan 05-03 Evidence (Partial)
 
-Status: **In progress. This evidence covers durable usage handoff and bounded autonomy timing only.**
+Status: **In progress. This evidence covers durable usage handoff, bounded autonomy timing, the approved authorization payload, and stored authorization validation. It does not establish complete runtime authority enforcement.**
 
 ## Implemented in `cad20a4cf8d5148a274dc25c784bf069d98c6daf`
 
@@ -29,22 +29,35 @@ Status: **In progress. This evidence covers durable usage handoff and bounded au
 ## Remaining Plan Work and Limits
 
 - `hub.TestServer` is a protocol fixture, not the production Hub authority or ledger service.
-- The Engine does not yet automatically emit usage through a production Agent accounting adapter; `Node.PersistUsageBatch` is the durable integration boundary exposed for that follow-up.
+- `Node.NewCreditBook` now provides an Engine-to-Agent reservation and settlement adapter. The production `RuntimeEngine` still needs to use durable, source-bound grant/lease authority rather than treating a configured in-memory budget as authority.
 - `unknown_upper_bound` remains durably stored on the Agent row after Hub ACK. The current approved `UsageBatch` wire message has no field that transfers this separate bound, so no code treats the Hub ACK as proof that the unknown liability is settled or releases it.
 - `RecordBackendHeartbeat` is a persistence API but is not yet wired to an authenticated production backend heartbeat source. The caller must supply the fixed hard deadline; the maximum autonomy duration is not locked here.
-- The `vortex.authorization.v1` payload proposal remains pending owner approval; no authorization payload schema or epoch semantics were frozen by the separate approval of `vortex.control.v1` 1.1.0.
-- Grant/lease persistence, numeric signer-epoch fencing, atomic remaining-quota transfer, and signer-epoch/path-generation recovery separation remain unimplemented and unverified.
-- No production Engine accounting adapter persists each measured/unknown write outcome before the Engine releases its reservation; that integration and full-disk stop behavior remain open.
+- The owner approved `vortex.authorization.v1` 1.0.0 at proposal SHA `ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07`. The exact proposal is retained as an immutable historical snapshot; its original pending wording is superseded by `docs/governance/contract-review.yaml`. `AuthorizationUpdate.generation = path_generation`; signer epoch remains independent.
+- Grant/lease records and independent numeric signer/path fencing are persisted. Source-bound quota allocation, atomic remaining-quota transfer, and full recovery orchestration remain open. A stored authorization check does not prove parent delegation ownership or remaining spendable quota.
+- The process-internal UsageSink persists reservation-before-write and settlement-before-release, with injected failure tests. Wiring this into the production runtime authority gate and exercising a real full-disk topology remain open.
 
-## Incremental Reservation Durability (Uncommitted)
+## Incremental Reservation Durability (`c8c0dc6`)
 
 - Added an Engine `UsageSink` boundary with FULL SQLite reservation-before-write and atomic settlement plus outbox insertion. Engine receives no writable batch when reservation persistence fails; any uncertain persistence/settlement freezes the gate and retains the entire reservation as unknown.
 - Agent startup scans unresolved reservations from previous boot IDs before Engine startup, converts each to an unknown upper-bound usage batch, and leaves it in the normal Hub handoff queue. Recovery is retryable after interruption.
 - SQLite storage now binds settlement retries to the original accounting identity, payload bytes, digest and unknown upper bound. A failed outbox insert leaves the reservation in `reserved` state.
 - Added tests for pre-write refusal, disk/outbox write failure, payload-bound idempotency, cross-boot unknown recovery, and Engine-to-Agent persistence.
 - Local host: root `go test ./...` PASS; Engine module `go test ./...` PASS; root Agent race tests and Engine runtime accounting race tests PASS; root and Engine vet checks PASS after cleanup.
-- This is an incremental implementation snapshot, not the complete 05-03 acceptance. Durable grant/lease authority, numeric signer-epoch ownership transfer, atomic remaining-quota transfer, authenticated heartbeat wiring, and Docker/Actions same-SHA evidence remain open.
+- This is an incremental implementation snapshot, not the complete 05-03 acceptance. End-to-end grant/lease authority, signer-epoch ownership transfer, atomic remaining-quota transfer, and authenticated backend heartbeat wiring remain open. Docker/Actions results are listed separately below.
 - Owner approved the exact `vortex.authorization.v1` 1.0.0 proposal SHA `ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07`; `AuthorizationUpdate.generation` equals `path_generation`, and `signer_epoch` remains independent. Approval is recorded in `docs/governance/contract-review.yaml`; contract implementation and validation are now unblocked.
 - Frozen JSON Schema SHA-256: `eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af`. Contract catalog, approval record, SemVer changelog, 24 affected requirement mappings and schema embed are present. Control-stream validation and SQLite persistence now bind exact update bytes, signer epoch, path generation, fencing floor, individual authorization records and revocations; same-ID changed-payload replay and stale epochs are rejected.
+
+## Approved Contract Follow-up (`130dcae`)
+
+- Required authorization record fields cannot be omitted or null. Optional limits and snapshot IDs are validated whenever present, including on runtime leases. Zero/invalid heartbeat bounds are rejected.
+- `Store.CheckStoredAuthorization` reads a consistent SQLite snapshot and checks node/boot, rule revision, path generation, billing snapshot, persisted active/revoked/settlement-only state and conservative time bounds. The entire trusted time interval must fit inside the authorization interval; exact expiry denies use.
+- Signer epoch changes preserve outstanding authorization at its original boundary. Old paths reject new admission while permitting already established sessions to drain. Reopening the store and starting a fresh Agent boot cannot revive old settlement-only authorization, even if a caller supplies the old boot ID.
+- This API returns a validation snapshot, not a write capability. It does not reserve quota, establish parent/source ownership, make a check-then-write sequence atomic, or prove that a caller's `ExistingSession` assertion is authentic. The runtime adapter must own those boundaries before complete acceptance.
+- Local host: `go test -race ./agent/... ./hub ./test/phase5` PASS; targeted vet PASS.
+- Full `make phase5-contract-check` PASS using the pinned protoc 36.2 archive, verified against locked darwin-arm64 SHA-256 `9cd98a532c5c5e0c4161314de0225de27e4c8a323917b6ea7b1b714d3ae23466`, and pinned Go generators. No global protoc replacement was made.
+- GitHub Actions run [42042555033](https://github.com/VortexWang/Vortex/actions/runs/42042555033), SHA `c8c0dc62c3a20b25f2cbe138c47f0bc2a4d84b11`: contract gate, Wave 1 and Wave 2 PASS. This run predates the additional stored-use checks in `130dcae`.
+- Docker Go 1.27.3, clean `git archive 130dcae77c45bc93032b9d5361966474d30e2108` mounted read-only: `go test -race ./agent/... ./hub ./test/phase5` PASS (Agent, identity, store, upgrade, Hub and tracer packages). The retained user edits are excluded from this snapshot.
+- GitHub Actions run [42044110569](https://github.com/VortexWang/Vortex/actions/runs/42044110569), same SHA `130dcae77c45bc93032b9d5361966474d30e2108`: contract gate, Wave 1 and Wave 2 PASS. This establishes the current incremental regression result, not complete 05-03 acceptance.
+- At `c8c0dc6`, Phase 1 remains failed on the existing VLink approved-review hash mismatch; Phase 3 fails during its benchmark; Phase 4 fails the 64 MiB binary integrity/half-close check. These results are not green and are not silently changed by this authorization work. Phase 4 remains on its separately agreed workstream.
 
 This file is incremental evidence, not a 05-03 SUMMARY and not a phase completion claim.

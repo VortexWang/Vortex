@@ -5,11 +5,11 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 3
 status: executing
-stopped_at: Phase 5 Wave 2 complete; continue with plan 05-03 grants, usage handoff and bounded autonomy
-last_updated: "2026-11-05T12:26:25.000Z"
+stopped_at: 05-03 incremental authorization contract and stored-use checks implemented; runtime source-bound quota enforcement and handoff remain open
+last_updated: "2026-11-05T14:22:24Z"
 last_activity: 2026-11-05
-last_activity_desc: Approved control contract 1.1.0, completed durable config apply boundary and file upgrade lifecycle, and passed same-SHA native/Docker/Actions Wave 2
-state_head: a1ab77c637f1a2c523f9d94a6d16db3d2bc0676a
+last_activity_desc: Owner-approved authorization 1.0.0 implemented; durable usage and stored authorization checks added; plan 05-03 remains executing
+state_head: 130dcae77c45bc93032b9d5361966474d30e2108
 progress:
   total_phases: 8
   completed_phases: 4
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 3
 Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — Phase 5 Wave 2 completed on same SHA across native, Docker and Actions; next is plan 05-03
+Last activity: 2026-11-05 — Plan 05-03 remains in progress: approved authorization 1.0.0, durable usage reservations and stored-use validation are implemented; runtime source-bound quota enforcement remains open
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -94,7 +94,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T07:27:29.384Z
-Stopped at: Phase 5 Wave 2 complete; continue with plan 05-03
+Stopped at: 05-03 incremental authorization implementation; see 05-03-EVIDENCE.md for remaining runtime authority and handoff work
 Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
