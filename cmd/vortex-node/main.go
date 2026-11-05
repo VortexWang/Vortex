@@ -22,13 +22,21 @@ func main() {
 	keyPath := flag.String("tls-key", "", "node private key PEM")
 	caPath := flag.String("tls-ca", "", "trusted Hub CA PEM")
 	hubName := flag.String("hub-name", "", "Hub certificate DNS identity")
+	engineConfig := flag.String("engine-config", "", "Engine runtime JSON configuration")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "agent")
 	if err != nil {
 		fatal(err)
 	}
 	defer s.Close()
-	n, err := agent.New(*nodeID, s, nil)
+	var engine agent.Engine
+	if *engineConfig != "" {
+		engine, err = agent.NewRuntimeEngine(*engineConfig)
+		if err != nil {
+			fatal(err)
+		}
+	}
+	n, err := agent.New(*nodeID, s, engine)
 	if err != nil {
 		fatal(err)
 	}
