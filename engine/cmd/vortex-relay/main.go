@@ -512,7 +512,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 				capacityDrops.Add(1)
 				continue
 			}
-			current = &flow{out: make(chan []byte, 256), done: make(chan struct{})}
+			current = &flow{out: make(chan []byte, 1024), done: make(chan struct{})}
 			flows[key] = current
 			workers.Add(1)
 			go func(current *flow, peer net.Addr) {
@@ -529,7 +529,7 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 			oversizedDrops.Add(1)
 			continue
 		}
-		if current.queued.Add(int64(len(payload))) > 256*1024 {
+		if current.queued.Add(int64(len(payload))) > 1024*1024 {
 			current.queued.Add(-int64(len(payload)))
 			queueDrops.Add(1)
 			continue
