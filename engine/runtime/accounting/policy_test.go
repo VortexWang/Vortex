@@ -251,3 +251,23 @@ func TestPolicyTransitionPreservesBothPathsAndOldUnknownLiability(t *testing.T) 
 		}
 	}
 }
+
+func TestPolicyTransitionRejectsClockRollbackAfterActivation(t *testing.T) {
+	at := time.Unix(1800000000, 0)
+	boundary, book, clock, _ := policyFixture(t, TimeBounds{Earliest: at, Latest: at})
+	session, err := boundary.Open(context.Background(), core.Flow{Key: "advanced"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+	clock.Set(TimeBounds{Earliest: at.Add(-time.Second), Latest: at.Add(-time.Second)})
+	if _, err := session.Reserve(context.Background(), core.LeftToRight, 1); !errors.Is(err, ErrPolicyUncertain) {
+		t.Fatalf("rollback reserve: %v", err)
+	}
+	if _, err := boundary.Open(context.Background(), core.Flow{Key: "rollback"}); !errors.Is(err, ErrPolicyUncertain) {
+		t.Fatalf("rollback open: %v", err)
+	}
+	if s := book.State(); s.Snapshots["old"].Credit.Used != 0 || s.Snapshots["new"].Credit.Used != 0 {
+		t.Fatal("rollback consumed credit")
+	}
+}

@@ -59,6 +59,7 @@ type PolicyBoundary struct {
 	window    PolicyWindow
 	pausedAt  time.Time
 	newPolicy uint64
+	advanced  bool
 }
 
 func NewPolicyBoundary(book *CreditBook, clock PolicyClock, window PolicyWindow) (*PolicyBoundary, error) {
@@ -87,6 +88,9 @@ func (p *PolicyBoundary) decision(now TimeBounds) (string, bool, error) {
 	if !now.Latest.Before(p.window.HardDeadline) {
 		return "", false, ErrPolicyExpired
 	}
+	if p.advanced && now.Earliest.Before(p.window.At) {
+		return "", false, ErrPolicyUncertain
+	}
 	uncertainty := now.Latest.Sub(now.Earliest)
 	if now.Earliest.Before(p.window.At) && !now.Latest.Before(p.window.At) {
 		if uncertainty > 10*time.Second {
@@ -114,6 +118,7 @@ func (p *PolicyBoundary) Open(ctx context.Context, f core.Flow) (core.Session, e
 		if err := p.book.selectPolicy(p.newPolicy, p.window.SelectionRevision); err != nil {
 			return nil, err
 		}
+		p.advanced = true
 	}
 	session, snapshot, binding, err := p.book.openCurrent(ctx, f)
 	if err != nil {
@@ -146,6 +151,7 @@ func (s *policySession) Reserve(ctx context.Context, direction core.Direction, n
 		if err == nil && !paused && id == s.owner.window.NewSnapshot {
 			if err = s.owner.book.selectPolicy(s.owner.newPolicy, s.owner.window.SelectionRevision); err == nil {
 				s.owner.pausedAt = time.Time{}
+				s.owner.advanced = true
 			}
 		}
 		if paused && err == nil {
