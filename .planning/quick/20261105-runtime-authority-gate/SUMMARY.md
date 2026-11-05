@@ -1,7 +1,8 @@
 # Runtime authority qualification gate
 
-The formal Phase 4 fixture now runs with an explicit finite source-credit Gate;
-the default diagnostic fixture remains qualification-only. Reports mark NFR
+The formal Phase 4 fixture now runs with pinned runtime authorization on every
+route node and an explicit finite source-credit Gate on source. The default
+diagnostic fixture remains qualification-only. Reports mark NFR
 performance as passed only when formal mode, runtime authority, duration, flow
 count, throughput, actual UDP offered load/loss, and runtime/TLS ratio satisfy
 the configured thresholds.

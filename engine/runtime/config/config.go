@@ -69,6 +69,7 @@ type Config struct {
 	PolicyWindow      *PolicyWindowConfig             `json:"policy_window,omitempty"`
 	Share             *ShareConfig                    `json:"share,omitempty"`
 	QualificationOnly bool                            `json:"qualification_only,omitempty"`
+	RuntimeAuthority  bool                            `json:"runtime_authority,omitempty"`
 	Routes            map[string]Route                `json:"routes,omitempty"`
 	ActiveRoute       string                          `json:"active_route,omitempty"`
 	Version           uint64                          `json:"version"`
@@ -118,6 +119,12 @@ func (c Config) Validate() error {
 	}
 	if c.QualificationOnly && c.EvidenceFile == "" {
 		return errors.New("config: qualification_only requires evidence_file")
+	}
+	if c.QualificationOnly && c.RuntimeAuthority {
+		return errors.New("config: qualification_only and runtime_authority are mutually exclusive")
+	}
+	if c.RuntimeAuthority && (c.EvidenceFile == "" || c.RuleID == "" || c.RuleRevision == 0 || c.PathGeneration == 0) {
+		return errors.New("config: runtime_authority requires evidence and a pinned rule path")
 	}
 	if c.Share != nil {
 		if c.Role != RoleSource || !c.ExecutionPoint || c.SourceCreditBook == nil && c.SourceCredit == nil {

@@ -96,7 +96,9 @@ def main() -> int:
     else:
         if warmup.get("runtime_correctness") != "pass" or warmup.get("authorization_mode") != "runtime-authority":
             reasons.append("formal warmup report did not pass under runtime authority")
-        if warmup.get("commit") != (runtime or {}).get("commit") or warmup.get("dirty") is not False:
+        if (warmup.get("commit") != (runtime or {}).get("commit") or
+                warmup.get("semantic_manifest_sha256") != (runtime or {}).get("semantic_manifest_sha256") or
+                warmup.get("dirty") is not False):
             reasons.append("formal warmup does not share the clean runtime commit")
         if warmup.get("qualification_metrics", {}).get("duration_seconds", 0) < 60:
             reasons.append("formal warmup report is shorter than 60 seconds")

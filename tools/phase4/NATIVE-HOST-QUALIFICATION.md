@@ -75,8 +75,9 @@ make phase4-qualification-gate \
 ```
 
 The existing short workload remains diagnostic. Set `PHASE4_FORMAL=1` for
-each runtime and comparison command to use the finite source-credit authority
-instead of qualification-only mode. Use the configured event limit needed by
+each runtime and comparison command to use pinned runtime authorization on each
+route node plus a finite source-credit authority on source, instead of
+qualification-only mode. Use the configured event limit needed by
 the 300-second runs (up to the fixture's hard cap), and preserve each trial in
 its own output directory. Formal qualification requires 16 TCP streams, at
 least 400 Mbps mixed TCP, at least 99 Mbps of paced UDP offered load, at most

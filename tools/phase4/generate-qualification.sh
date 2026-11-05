@@ -50,16 +50,18 @@ json() {
   fi
   if [ "$role" = source ]; then udp_service=",\"udp_service_listen\":\"$host:18082\""; fi
   auth='"qualification_only":true,'
+  runtime_authority=
   authority=
   if [ "$formal" = 1 ]; then
     auth=
+    runtime_authority='"runtime_authority":true,'
     if [ "$role" = source ]; then
       authority=",\"source_credit\":{\"snapshot_id\":\"phase4-formal/source/path-1/policy-1\",\"budget_bytes\":$credit_budget,\"initial_block_bytes\":4194304,\"max_block_bytes\":4194304,\"grant_target_bytes\":134217728,\"renew_percent\":30}"
     fi
   fi
   : > "$out/events-$name.jsonl"
   cat > "config/$name.json" <<EOF
-{"version":1,"node_id":"$node_id","role":"$role",$auth"certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service"$udp_service,"rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( if [ "$formal" = 1 ] && [ "$role" = source ]; then echo true; elif [ "$role" = destination ]; then echo true; else echo false; fi )$transport$authority}
+{"version":1,"node_id":"$node_id","role":"$role",$auth$runtime_authority"certificate":"$cert_ref/$name.pem","private_key":"$cert_ref/$name-key.pem","trust_bundle":"$cert_ref/ca.pem","listen":"$listen","peer":"$peer","peer_node_id":"$peer_id","next_hop_node_id":"$next_id","service_listen":"$service"$udp_service,"rule_id":"qualification-rule","rule_revision":1,"path_generation":1,"hop_index":$hop,"target":"$target","evidence_file":"$out/events-$name.jsonl","execution_point":$( if [ "$formal" = 1 ] && [ "$role" = source ]; then echo true; elif [ "$role" = destination ]; then echo true; else echo false; fi )$transport$authority}
 EOF
 }
 

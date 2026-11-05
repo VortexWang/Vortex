@@ -40,4 +40,13 @@ func TestStaticPolicyRequiresExplicitQualificationAuthorization(t *testing.T) {
 	if _, err := policy.Authorize(context.Background(), peerID, request); err != nil {
 		t.Fatalf("explicit qualification fixture was rejected: %v", err)
 	}
+	cfg.QualificationOnly = false
+	cfg.RuntimeAuthority = true
+	policy, err = StaticPolicy(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := policy.Authorize(context.Background(), peerID, request); err != nil {
+		t.Fatalf("explicit pinned runtime authority was rejected: %v", err)
+	}
 }

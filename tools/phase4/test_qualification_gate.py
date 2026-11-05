@@ -29,6 +29,7 @@ class QualificationGateTests(unittest.TestCase):
                 trial_paths.append(str(path))
             warmup = warmup or {"runtime_correctness": "pass", "authorization_mode": "runtime-authority",
                                 "commit": runtime["commit"], "dirty": False,
+                                "semantic_manifest_sha256": runtime["semantic_manifest_sha256"],
                                 "qualification_metrics": {"duration_seconds": 60}}
             paths["warmup"].write_text(json.dumps(warmup))
             command = [

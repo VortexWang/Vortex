@@ -8,8 +8,8 @@ when the formal workload and measured thresholds pass.
 
 ## Scope
 
-- Generate formal source configs with bounded `source_credit` and explicit
-  runtime authorization; preserve diagnostic defaults.
+- Generate formal configs with bounded source `source_credit` and explicit
+  pinned runtime authorization on every route node; preserve diagnostic defaults.
 - Derive report qualification fields from formal workload evidence and host
   metadata instead of hard-coded diagnostic values.
 - Document formal invocation and the retained fail-closed limitations.
@@ -32,3 +32,6 @@ when the formal workload and measured thresholds pass.
   unique, passing trial reports.
 - Focused unit, config generation, syntax, and Engine package checks passed.
 - Dedicated-host execution is pending after this commit is deployed.
+- A first warmup attempt exposed relay OPEN rejection under the default
+  fail-closed static policy. Added pinned `runtime_authority` config for each
+  route node; source traffic remains gated by finite source credit.
