@@ -1,0 +1,15 @@
+status: measured
+qualification: numeric candidate measurements; full system acceptance requires approved path topology and workload
+commit: 79a1c0b148f77e765190ee51075adf845e5ad115
+worktree: clean
+architecture: amd64
+docker_os: Ubuntu 24.04.5 LTS
+kernel: 7.0.0-1017-azure
+virtualization: microsoft
+cpu_summary: AMD EPYC 7763 64-Core Processor
+cpu_count: 4
+memory_kib: 16367524
+go_version: go version go1.27.3 linux/amd64
+topology: loopback TCP pairs; measured path does not include external network hops
+workload: single 64 MiB tracer or Mux transfer per sample; production accounting gate disabled
+benchmark: go test ./vlink -run '^$' -bench '^BenchmarkVLink(TCPThroughput|FirstByte)$' -benchtime=7x -count=3

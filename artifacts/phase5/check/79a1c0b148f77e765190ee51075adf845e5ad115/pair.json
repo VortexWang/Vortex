@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "implementation_sha": "79a1c0b148f77e765190ee51075adf845e5ad115",
+  "entry": "make phase5-check",
+  "docker": "passed",
+  "actions": "passed",
+  "actions_run": 42132354600,
+  "docker_audit": {
+    "snapshots": 5,
+    "required_fault_cases": 10
+  },
+  "actions_audit": {
+    "snapshots": 5,
+    "required_fault_cases": 10
+  },
+  "concurrent_commit_abort": "passed on both hosts",
+  "negative_gate_cases": 4,
+  "backend": "protocol-test-only",
+  "production_backend_authority": false,
+  "phase_complete": false,
+  "scope": "05-04 plan acceptance"
+}

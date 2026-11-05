@@ -1,0 +1,21 @@
+{
+  "commit": "79a1c0b148f77e765190ee51075adf845e5ad115",
+  "status": "passed",
+  "cases": [
+    {
+      "case": "missing-snapshot",
+      "result": "rejected",
+      "error": "FileNotFoundError"
+    },
+    {
+      "case": "digest-mismatch",
+      "result": "rejected",
+      "error": "AssertionError"
+    },
+    {
+      "case": "missing-fault-pass",
+      "result": "rejected",
+      "error": "AssertionError"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "implementation_sha": "79a1c0b148f77e765190ee51075adf845e5ad115",
+  "execution": "clean-committed-clone",
+  "observed_at": "2026-11-05T23:52:44.407652+00:00",
+  "host": "macOS-26.6.2-arm64-arm-64bit",
+  "docker_server": "29.8.2",
+  "docker_arch": "aarch64",
+  "docker_os": "OrbStack",
+  "image": "golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048",
+  "full_disk_fixture_bytes": 4194304,
+  "source_clean": true,
+  "entry": "make phase5-check",
+  "note": "Functional recovery evidence; no performance qualification or production backend authority claimed."
+}

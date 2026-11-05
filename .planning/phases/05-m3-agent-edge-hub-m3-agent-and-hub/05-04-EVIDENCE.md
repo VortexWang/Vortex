@@ -1,6 +1,6 @@
 # 05-04 Incremental Evidence
 
-Status: executing; no SUMMARY or completion claimed.
+Status: plan acceptance passed on `79a1c0b148f77e765190ee51075adf845e5ad115`. Earlier entries below are chronological incremental records, not the final verdict. Phase-wide verification remains pending.
 
 ## Direct reconcile safety prerequisite
 
@@ -45,3 +45,20 @@ Commit `fef53edf5a383765cc5e0750a4b79a137c98e0ee`: local clean Docker recovery g
 
 - `6448c7d` Docker full gate passed. Actions `42131377838` identified the preflight cause: preceding Python contract tests generated untracked `tools/phase1/__pycache__/*.pyc`. Generated Python bytecode is now ignored; actual untracked source still blocks the gate.
 - Final safety audit added runtime fencing checks: Commit rejects a prepared generation below the durable authorization floor, and new-flow allocation reads the floor in the same SQLite transaction as authority/slot allocation. A raised floor blocks new flows without discarding the original bounds of an existing draining session. Targeted Agent/store/Hub race tests pass; the final clean-SHA pair follows this change.
+
+## Final same-SHA acceptance
+
+Implementation: `79a1c0b148f77e765190ee51075adf845e5ad115`.
+
+| Host | Entry and environment | Result |
+| --- | --- | --- |
+| Local Docker | `make phase5-check`; clean committed clone; OrbStack Linux arm64, pinned Go 1.27.3 image / Debian 13.7; 4 MiB isolated tmpfs | PASS |
+| Actions | [42132354600](https://github.com/VortexWang/Vortex/actions/runs/42132354600); Ubuntu 24.04 amd64; same Make target, exact protoc 36.2 and Go generators; 4 MiB isolated tmpfs | PASS |
+
+Raw evidence: `artifacts/phase5/check/79a1c0b148f77e765190ee51075adf845e5ad115/{docker,actions}`. Both verdicts name the exact implementation SHA. Downloaded snapshots were independently re-audited: five snapshots and ten required non-skipped fault cases per host pass. Full root/Engine tests, Engine race, Agent/store/Hub race, vet and contract generation/freeze/mapping pass. Engine race logs additionally retain the 128-iteration competing Commit/Abort test.
+
+Negative checks reject missing snapshots, changed ledger hashes, removed required fault PASS markers, and a missing isolated full-disk fixture. `pair.json`, `actions-run.json` and `SHA256SUMS.json` bind the source, run and raw archive. Intermediate Docker evidence remains under the corresponding source SHA; it cannot substitute for this final pair.
+
+Cross-phase status is not globally green: Phase 2 run `42132354546` passed; Phase 1 `42132354613` still rejects the existing VLink approval hash; Phase 3 `42132354583` passes its Go/race/protocol checks and raw benchmark invocation but exits nonzero in benchmark reporting. Relevant raw failures are retained under `cross-phase/`. These existing phase-level items are not marked resolved by 05-04. Phase 4 performance work remains on its separate workstream.
+
+This accepts the four current 05-04 tasks within the agreed static destination runtime and protocol-backend boundary. It does not certify a production PostgreSQL backend, all hot-route roles, unbounded model correctness, power-loss hardware guarantees, or Phase 4 performance qualification. No financial unknown liability is released by the activation/process proof or transport ACK.
