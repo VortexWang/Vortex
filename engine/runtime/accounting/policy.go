@@ -53,11 +53,12 @@ func (w PolicyWindow) Validate() error {
 }
 
 type PolicyBoundary struct {
-	mu       sync.Mutex
-	book     *CreditBook
-	clock    PolicyClock
-	window   PolicyWindow
-	pausedAt time.Time
+	mu        sync.Mutex
+	book      *CreditBook
+	clock     PolicyClock
+	window    PolicyWindow
+	pausedAt  time.Time
+	newPolicy uint64
 }
 
 func NewPolicyBoundary(book *CreditBook, clock PolicyClock, window PolicyWindow) (*PolicyBoundary, error) {
@@ -71,7 +72,12 @@ func NewPolicyBoundary(book *CreditBook, clock PolicyClock, window PolicyWindow)
 	if _, ok := state.Snapshots[window.NewSnapshot]; !ok {
 		return nil, core.ErrSnapshotMismatch
 	}
-	return &PolicyBoundary{book: book, clock: clock, window: window}, nil
+	oldPolicy := state.Snapshots[window.OldSnapshot].Binding.PolicyRevision
+	newPolicy := state.Snapshots[window.NewSnapshot].Binding.PolicyRevision
+	if newPolicy <= oldPolicy {
+		return nil, core.ErrSnapshotMismatch
+	}
+	return &PolicyBoundary{book: book, clock: clock, window: window, newPolicy: newPolicy}, nil
 }
 
 func (p *PolicyBoundary) decision(now TimeBounds) (string, bool, error) {
@@ -105,29 +111,40 @@ func (p *PolicyBoundary) Open(ctx context.Context, f core.Flow) (core.Session, e
 		return nil, ErrPolicyPaused
 	}
 	if id == p.window.NewSnapshot {
-		if err := p.book.Select(id, p.window.SelectionRevision); err != nil {
+		if err := p.book.selectPolicy(p.newPolicy, p.window.SelectionRevision); err != nil {
 			return nil, err
 		}
 	}
-	session, err := p.book.Open(ctx, f)
+	session, snapshot, binding, err := p.book.openCurrent(ctx, f)
 	if err != nil {
 		return nil, err
 	}
-	return &policySession{owner: p, inner: session}, nil
+	return &policySession{owner: p, inner: session, flow: f, snapshot: snapshot, binding: binding}, nil
 }
 
 type policySession struct {
-	owner *PolicyBoundary
-	inner core.Session
+	mu       sync.Mutex
+	flow     core.Flow
+	snapshot string
+	binding  Binding
+	closed   bool
+	owner    *PolicyBoundary
+	inner    core.Session
 }
 
 func (s *policySession) Reserve(ctx context.Context, direction core.Direction, n int64) (*core.Batch, error) {
 	for {
+		s.mu.Lock()
+		closed := s.closed
+		s.mu.Unlock()
+		if closed {
+			return nil, core.ErrDenied
+		}
 		s.owner.mu.Lock()
 		bounds := s.owner.clock.Bounds()
 		id, paused, err := s.owner.decision(bounds)
 		if err == nil && !paused && id == s.owner.window.NewSnapshot {
-			if err = s.owner.book.Select(id, s.owner.window.SelectionRevision); err == nil {
+			if err = s.owner.book.selectPolicy(s.owner.newPolicy, s.owner.window.SelectionRevision); err == nil {
 				s.owner.pausedAt = time.Time{}
 			}
 		}
@@ -144,6 +161,21 @@ func (s *policySession) Reserve(ctx context.Context, direction core.Direction, n
 			return nil, err
 		}
 		if !paused {
+			s.mu.Lock()
+			defer s.mu.Unlock()
+			if s.closed {
+				return nil, core.ErrDenied
+			}
+			if id == s.owner.window.NewSnapshot && s.binding.PolicyRevision != s.owner.newPolicy {
+				next, snapshot, err := s.owner.book.openPolicy(ctx, s.flow, s.binding, s.owner.newPolicy)
+				if err != nil {
+					return nil, err
+				}
+				// Outstanding batches retain their original resolver and liability.
+				_ = s.inner.Close()
+				s.inner, s.snapshot = next, snapshot
+				s.binding.PolicyRevision = s.owner.newPolicy
+			}
 			return s.inner.Reserve(ctx, direction, n)
 		}
 		if err := s.owner.clock.Wait(ctx, 10*time.Millisecond); err != nil {
@@ -152,7 +184,15 @@ func (s *policySession) Reserve(ctx context.Context, direction core.Direction, n
 	}
 }
 
-func (s *policySession) Close() error { return s.inner.Close() }
+func (s *policySession) Close() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed {
+		return nil
+	}
+	s.closed = true
+	return s.inner.Close()
+}
 
 type SystemPolicyClock struct{ Uncertainty time.Duration }
 

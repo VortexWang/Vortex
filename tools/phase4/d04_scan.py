@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create the controlled D-04 one-factor candidate matrix.
+"""Create the D-04 full-factorial candidate inventory.
 
 The matrix is deliberately an evidence plan until each case has raw runtime
 authority observations. It never promotes a candidate to a locked default.
@@ -44,7 +44,8 @@ def main() -> int:
             "grant_target_seconds": GRANTS,
             "waterline_percent": WATERLINES,
             "minimum_budget_bytes": 8 * 1024 * 1024,
-            "one_factor_at_a_time": True,
+            "one_factor_at_a_time": False,
+            "execution_entrypoint": "tools/phase4/d04_run.py (seven one-factor cases)",
         },
         "required_observations": [
             "issuer_wait_p50_p95_p99_ms",

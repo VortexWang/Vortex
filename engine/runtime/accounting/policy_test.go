@@ -3,6 +3,7 @@ package accounting
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -38,7 +39,11 @@ func (c *testPolicyClock) Advance(bounds TimeBounds) { c.Set(bounds); c.step <- 
 
 func policyFixture(t *testing.T, bounds TimeBounds) (*PolicyBoundary, *CreditBook, *testPolicyClock, PolicyWindow) {
 	t.Helper()
-	book, err := NewCreditBook(bookFixture(t, 512<<10))
+	cfg := bookFixture(t, 512<<10)
+	next := cfg.Snapshots["new"]
+	next.Binding.PolicyRevision = 2
+	cfg.Snapshots["new"] = next
+	book, err := NewCreditBook(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,8 +120,8 @@ func TestPolicyBoundaryPausesExistingSessionThenResumesSameSession(t *testing.T)
 	if err := <-result; err != nil {
 		t.Fatal(err)
 	}
-	if s := book.State(); s.Active != "new" || s.Snapshots["old"].Credit.Used != 1 || s.Snapshots["new"].Credit.Used != 0 {
-		t.Fatalf("existing session did not retain old accounting snapshot: %+v", s)
+	if s := book.State(); s.Active != "new" || s.Snapshots["old"].Credit.Used != 0 || s.Snapshots["new"].Credit.Used != 1 {
+		t.Fatalf("existing session did not switch policy snapshot: %+v", s)
 	}
 	_ = session.Close()
 }
@@ -175,4 +180,74 @@ func TestPolicyBoundaryDoesNotReleaseOldUnknownLiability(t *testing.T) {
 		t.Fatalf("policy boundary moved unknown liability: %+v", state.Snapshots)
 	}
 	_ = session.Close()
+}
+
+func TestPolicyTransitionPreservesBothPathsAndOldUnknownLiability(t *testing.T) {
+	cfg := bookFixture(t, 4<<20)
+	cfg.Snapshots = make(map[string]CreditVersion)
+	for _, path := range []uint64{4, 5} {
+		for _, policy := range []uint64{1, 2} {
+			id := fmt.Sprintf("path-%d-policy-%d", path, policy)
+			cfg.Snapshots[id] = CreditVersion{Binding: Binding{RuleID: "rule", ExecutionNode: "node", PathGeneration: path, PolicyRevision: policy, CoefficientMilli: path * 1000}, Credit: CreditConfig{SnapshotID: id, Budget: 128 << 10, InitialBlock: 64 << 10, MaxBlock: 64 << 10, GrantTarget: 64 << 10, RenewPercent: 30}}
+		}
+	}
+	cfg.Active = "path-4-policy-1"
+	book, err := NewCreditBook(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	at := time.Unix(1800000000, 0)
+	clock := newTestPolicyClock(TimeBounds{Earliest: at.Add(-time.Second), Latest: at.Add(-time.Second)})
+	window := PolicyWindow{OldSnapshot: "path-4-policy-1", NewSnapshot: "path-4-policy-2", At: at, PreparedAt: at.Add(-60 * time.Second), ExpiresAt: at.Add(240 * time.Second), PolicyLeaseUntil: at, RuntimeLeaseUntil: at, ShareLeaseUntil: at, HardDeadline: at.Add(time.Hour), SelectionRevision: 3}
+	boundary, err := NewPolicyBoundary(book, clock, window)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldPath, err := boundary.Open(context.Background(), core.Flow{Key: "old-path-tcp"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pending, err := oldPath.Reserve(context.Background(), core.LeftToRight, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := book.Select("path-5-policy-1", 2); err != nil {
+		t.Fatal(err)
+	}
+	newPath, err := boundary.Open(context.Background(), core.Flow{Key: "new-path-udp"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	clock.Set(TimeBounds{Earliest: at, Latest: at})
+	for _, session := range []core.Session{oldPath, newPath} {
+		batch, err := session.Reserve(context.Background(), core.LeftToRight, 100)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := batch.Commit(context.Background(), 100); err != nil {
+			t.Fatal(err)
+		}
+		session.Close()
+	}
+	if err := pending.MarkUnknown(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	state := book.State()
+	if state.Active != "path-5-policy-2" {
+		t.Fatalf("policy switch changed active path: %s", state.Active)
+	}
+	if state.Snapshots["path-4-policy-1"].Credit.Unknown != 100 || state.Snapshots["path-4-policy-1"].Credit.Used != 0 || state.Snapshots["path-5-policy-1"].Credit.Used != 0 {
+		t.Fatalf("old policies consumed or released: %+v", state)
+	}
+	for _, id := range []string{"path-4-policy-2", "path-5-policy-2"} {
+		if state.Snapshots[id].Credit.Used != 100 {
+			t.Fatalf("path/policy isolation failed: %+v", state)
+		}
+	}
+	for id, snapshot := range state.Snapshots {
+		s := snapshot.Credit
+		if s.Budget != s.Unissued+s.PendingGrant+s.UnknownGrant+s.Available+s.Held+s.Used+s.Unknown || s.Sessions != 0 || s.Held != 0 {
+			t.Fatalf("snapshot %s unconserved: %+v", id, s)
+		}
+	}
 }
