@@ -15,6 +15,7 @@ import (
 type RuntimeEngine struct {
 	ConfigPath string
 	runtime    *engineruntime.Runtime
+	scope      RuntimeScope
 }
 
 func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
@@ -32,7 +33,7 @@ func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RuntimeEngine{ConfigPath: configPath, runtime: rt}, nil
+	return &RuntimeEngine{ConfigPath: configPath, runtime: rt, scope: RuntimeScope{RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}}, nil
 }
 
 func (e *RuntimeEngine) Start(ctx context.Context) error {

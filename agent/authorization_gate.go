@@ -18,6 +18,7 @@ import (
 type AuthorizationClock func() (earliest, latest time.Time, trusted bool)
 
 type AuthorizationGateConfig struct {
+	SessionID       string
 	RuntimeLeaseID  string
 	ShareLeaseID    string
 	AuthorizationID string
@@ -53,14 +54,15 @@ func (n *Node) NewLeasedAuthorizationGate(c AuthorizationGateConfig) (engineacco
 }
 
 type authorizationGate struct {
-	node    *Node
-	config  AuthorizationGateConfig
-	faulted atomic.Bool
+	node        *Node
+	config      AuthorizationGateConfig
+	faulted     atomic.Bool
+	parentFault *atomic.Bool
 }
 
 func (g *authorizationGate) use(earliest, latest time.Time, trusted, existing bool) store.AuthorizationUse {
 	return store.AuthorizationUse{
-		NodeID: g.node.NodeID, BootID: g.node.BootID, AuthorizationID: g.config.AuthorizationID,
+		SessionID: g.config.SessionID, NodeID: g.node.NodeID, BootID: g.node.BootID, AuthorizationID: g.config.AuthorizationID,
 		RuntimeLeaseID: g.config.RuntimeLeaseID, ShareLeaseID: g.config.ShareLeaseID,
 		Kind: "credit_grant", RuleID: g.config.RuleID, RuleRevision: g.config.RuleRevision,
 		PathGeneration: g.config.PathGeneration, BillingSnapshotID: g.config.SnapshotID,
@@ -69,7 +71,7 @@ func (g *authorizationGate) use(earliest, latest time.Time, trusted, existing bo
 }
 
 func (g *authorizationGate) Open(ctx context.Context, flow engineaccounting.Flow) (engineaccounting.Session, error) {
-	if g.faulted.Load() || flow.Key == "" || flow.RuleID != "" && flow.RuleID != g.config.RuleID {
+	if g.isFaulted() || flow.Key == "" || flow.RuleID != "" && flow.RuleID != g.config.RuleID {
 		return nil, engineaccounting.ErrDenied
 	}
 	earliest, latest, trusted := g.config.Clock()
@@ -86,7 +88,24 @@ type authorizationSession struct {
 }
 
 func (s *authorizationSession) Reserve(ctx context.Context, direction engineaccounting.Direction, n int64) (*engineaccounting.Batch, error) {
-	if s.gate.faulted.Load() || s.closed.Load() || n < 1 || n > 4<<20 || (direction != engineaccounting.LeftToRight && direction != engineaccounting.RightToLeft) {
+	for {
+		batch, err := s.reserveOnce(ctx, direction, n)
+		var limited *store.RateLimited
+		if !errors.As(err, &limited) {
+			return batch, err
+		}
+		timer := time.NewTimer(limited.RetryAfter)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
+func (s *authorizationSession) reserveOnce(ctx context.Context, direction engineaccounting.Direction, n int64) (*engineaccounting.Batch, error) {
+	if s.gate.isFaulted() || s.closed.Load() || n < 1 || n > 4<<20 || (direction != engineaccounting.LeftToRight && direction != engineaccounting.RightToLeft) {
 		return nil, engineaccounting.ErrDenied
 	}
 	if err := ctx.Err(); err != nil {
@@ -95,7 +114,7 @@ func (s *authorizationSession) Reserve(ctx context.Context, direction engineacco
 	early, late, trusted := s.gate.config.Clock()
 	batchID, err := authorizationBatchID()
 	if err != nil {
-		s.gate.faulted.Store(true)
+		s.gate.fail()
 		return nil, err
 	}
 	record := engineaccounting.UsageRecord{
@@ -115,8 +134,9 @@ func (s *authorizationSession) Reserve(ctx context.Context, direction engineacco
 	}
 	effectiveID, err := s.gate.node.Store.ReserveAuthorizedUsage(ctx, reservation, s.gate.use(early, late, trusted, true))
 	if err != nil {
-		if !errors.Is(err, store.ErrAuthorizationDenied) && !errors.Is(err, store.ErrAuthorityTimeUncertain) {
-			s.gate.faulted.Store(true)
+		var limited *store.RateLimited
+		if !errors.Is(err, store.ErrAuthorizationDenied) && !errors.Is(err, store.ErrAuthorityTimeUncertain) && !errors.As(err, &limited) {
+			s.gate.fail()
 		}
 		return nil, err
 	}
@@ -127,7 +147,7 @@ func (s *authorizationSession) Reserve(ctx context.Context, direction engineacco
 		record.Used = outcome.Used
 		err := s.gate.node.SettleUsage(resolveCtx, record)
 		if err != nil {
-			s.gate.faulted.Store(true)
+			s.gate.fail()
 		}
 		return err
 	})
@@ -142,6 +162,26 @@ func authorizationBatchID() (string, error) {
 }
 
 func (s *authorizationSession) Close() error {
-	s.closed.Store(true)
+	if s.closed.Swap(true) {
+		return nil
+	}
+	if s.gate.config.SessionID != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		if err := s.gate.node.Store.CloseRuntimeSession(ctx, s.gate.node.NodeID, s.gate.node.BootID, s.gate.config.SessionID); err != nil {
+			s.gate.fail()
+			return err
+		}
+	}
 	return nil
+}
+
+func (g *authorizationGate) isFaulted() bool {
+	return g.faulted.Load() || g.parentFault != nil && g.parentFault.Load()
+}
+func (g *authorizationGate) fail() {
+	g.faulted.Store(true)
+	if g.parentFault != nil {
+		g.parentFault.Store(true)
+	}
 }

@@ -313,7 +313,17 @@ CREATE TABLE IF NOT EXISTS autonomy_transitions (
   backend_heartbeat TEXT NOT NULL,
   hard_deadline TEXT NOT NULL
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '4')
+CREATE TABLE IF NOT EXISTS runtime_sessions (
+ node_id TEXT NOT NULL, session_id TEXT NOT NULL, boot_id TEXT NOT NULL,
+ flow_key TEXT NOT NULL, source_id TEXT NOT NULL, grant_id TEXT NOT NULL,
+ runtime_lease_id TEXT NOT NULL, share_lease_id TEXT NOT NULL,
+ state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
+);
+CREATE TABLE IF NOT EXISTS runtime_rate_buckets (
+ node_id TEXT NOT NULL, source_id TEXT NOT NULL, boot_id TEXT NOT NULL,
+ tokens INTEGER NOT NULL, last_tick INTEGER NOT NULL, PRIMARY KEY(node_id,source_id)
+);
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '5')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {

@@ -5,6 +5,7 @@ root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
 out=${PHASE5_AUTHORIZATION_EVIDENCE_DIR:-"$root/artifacts/phase5/authorization"}
 mkdir -p "$out"
+export PHASE5_AUTHORIZATION_EVIDENCE_DIR="$out"
 sha=${VERIFY_SHA:-$(git rev-parse HEAD)}
 case "$sha" in *[!0-9a-f]*|'') echo 'invalid source SHA' >&2; exit 1;; esac
 [ ${#sha} -eq 40 ] || { echo 'source SHA must be full length' >&2; exit 1; }

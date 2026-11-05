@@ -58,15 +58,15 @@ func NewWithAccountingGate(cfg config.Config, gate engineaccounting.Gate) (*Runt
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
-	if cfg.Role != config.RoleDestination || !cfg.QualificationOnly || len(cfg.Routes) != 0 {
-		return nil, errors.New("runtime: only the static qualification destination tracer is supported")
+	if cfg.Role != config.RoleDestination || len(cfg.Routes) != 0 {
+		return nil, errors.New("runtime: only the static destination runtime is supported")
 	}
 	cfg = cfg.Effective()
 	supervisor, err := link.New(cfg)
 	if err != nil {
 		return nil, err
 	}
-	policy, err := relay.StaticPolicy(cfg)
+	policy, err := relay.AgentPolicy(cfg)
 	if err != nil {
 		supervisor.Close()
 		return nil, err
@@ -83,6 +83,9 @@ func (r *Runtime) Start(parent context.Context) error {
 	}
 	if err := parent.Err(); err != nil {
 		return err
+	}
+	if !r.cfg.QualificationOnly && r.service.Gate == nil {
+		return errors.New("runtime: Agent authorization gate is required")
 	}
 	listener, err := net.Listen("tcp", r.cfg.Listen)
 	if err != nil {

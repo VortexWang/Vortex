@@ -11,7 +11,12 @@ import (
 	"vortex/engine/vlink"
 )
 
-func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
+func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) { return staticPolicy(cfg, false) }
+
+// AgentPolicy delegates runtime and quota admission to the mandatory Gate,
+// called by Service before dialing. This policy still enforces local topology.
+func AgentPolicy(cfg config.Config) (vlink.OpenPolicy, error) { return staticPolicy(cfg, true) }
+func staticPolicy(cfg config.Config, external bool) (vlink.OpenPolicy, error) {
 	local, err := vlink.ParseNodeID(cfg.NodeID)
 	if err != nil {
 		return vlink.OpenPolicy{}, err
@@ -28,6 +33,10 @@ func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
 		Active:          true,
 		AllowedNetworks: map[uint8]bool{1: true, 2: true},
 		SelfHosted:      cfg.ExecutionPoint,
+	}
+	if external {
+		snapshot.RuntimeAuthorized = true
+		snapshot.SegmentAllowed = true
 	}
 	if cfg.QualificationOnly {
 		snapshot.RuntimeAuthorized = true

@@ -49,4 +49,6 @@ jobs:
             artifacts/phase5/authorization/*.log
             artifacts/phase5/authorization/*.txt
             artifacts/phase5/authorization/report.json
+            artifacts/phase5/authorization/runtime-*.json
+            artifacts/phase5/authorization/runtime-*.sqlite.gz
           if-no-files-found: error

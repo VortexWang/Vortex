@@ -50,6 +50,11 @@ func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
 	if err := node.recoverUsageReservations(context.Background()); err != nil {
 		return nil, fmt.Errorf("agent: recover usage reservations before Engine start: %w", err)
 	}
+	if runtime, ok := e.(*RuntimeEngine); ok {
+		if err := runtime.SetAccountingGate(node.newRuntimeAuthorityGate(runtime.scope, node.TrustedTime)); err != nil {
+			return nil, err
+		}
+	}
 	return node, nil
 }
 

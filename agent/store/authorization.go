@@ -15,6 +15,7 @@ var ErrAuthorizationDenied = errors.New("store: durable authorization does not p
 // interval must come from a trusted conservative clock. A single wall-clock
 // sample after restart does not establish trusted time.
 type AuthorizationUse struct {
+	SessionID                       string
 	RuntimeLeaseID, ShareLeaseID    string
 	NodeID, BootID, AuthorizationID string
 	Kind, RuleID, BillingSnapshotID string
@@ -106,11 +107,20 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 		}
 		for kind, id := range map[string]string{"runtime_lease": use.RuntimeLeaseID, "share_lease": use.ShareLeaseID} {
 			leaseUse := use
-			leaseUse.RuntimeLeaseID, leaseUse.ShareLeaseID = "", ""
+			leaseUse.RuntimeLeaseID, leaseUse.ShareLeaseID, leaseUse.SessionID = "", "", ""
 			leaseUse.AuthorizationID, leaseUse.Kind = id, kind
 			if _, err := checkAuthorizationTx(ctx, tx, leaseUse); err != nil {
 				return AuthorizationRecord{}, err
 			}
+		}
+	}
+	if use.SessionID != "" {
+		var boot, grant, runtimeLease, shareLease, state string
+		if err := tx.QueryRowContext(ctx, `SELECT boot_id,grant_id,runtime_lease_id,share_lease_id,state FROM runtime_sessions WHERE node_id=? AND session_id=?`, use.NodeID, use.SessionID).Scan(&boot, &grant, &runtimeLease, &shareLease, &state); err != nil {
+			return AuthorizationRecord{}, err
+		}
+		if state != "open" || boot != use.BootID || grant != use.AuthorizationID || runtimeLease != use.RuntimeLeaseID || shareLease != use.ShareLeaseID {
+			return AuthorizationRecord{}, ErrAuthorizationDenied
 		}
 	}
 	return record, nil
@@ -177,6 +187,11 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 	remaining, err := strconv.ParseUint(remainingText, 10, 64)
 	if err != nil || remaining < reservation.Reserved {
 		return "", ErrAuthorizationDenied
+	}
+	if use.SessionID != "" {
+		if err := consumeRuntimeRate(ctx, tx, use, reservation.Reserved); err != nil {
+			return "", err
+		}
 	}
 	if err := insertUsageReservationTx(ctx, tx, reservation); err != nil {
 		return "", err

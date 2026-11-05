@@ -36,6 +36,7 @@ type TestServer struct {
 	Store               *store.Store
 	ConfigUpdate        *controlv1.RuntimeConfigUpdate
 	AuthorizationUpdate func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
+	UsageBatchLimit     int
 	AcceptUsage         bool
 	mu                  sync.RWMutex
 	revoked             map[string]struct{}
@@ -119,6 +120,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	if s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
 		return nil
 	}
+	usageReceived := 0
 	var update *controlv1.RuntimeConfigUpdate
 	controlSequence := uint64(0)
 	if s.ConfigUpdate != nil {
@@ -179,7 +181,13 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			controlSequence++
-			return stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: []string{batch.GetBatchId()}}}})
+			if err := stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: []string{batch.GetBatchId()}}}}); err != nil {
+				return err
+			}
+			usageReceived++
+			if s.UsageBatchLimit <= usageReceived {
+				return nil
+			}
 		case *controlv1.NodeMessage_ApplyResult:
 			if update == nil || body.ApplyResult == nil || !bytesEqual(body.ApplyResult.GetTransactionId(), update.GetTransactionId()) {
 				return fmt.Errorf("test hub: config result does not correlate with update")
