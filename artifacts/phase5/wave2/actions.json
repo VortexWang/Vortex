@@ -1,7 +1,7 @@
 {
-  "run_id": 41986823563,
-  "url": "https://github.com/VortexWang/Vortex/actions/runs/41986823563",
-  "head_sha": "3127fb90802bf2064fa62b184dbe2dbce2bbbc11",
+  "run_id": 42013055297,
+  "url": "https://github.com/VortexWang/Vortex/actions/runs/42013055297",
+  "head_sha": "4c408566a9dddb570c8d5f3d8304f893eac89491",
   "status": "success",
   "runner": "ubuntu-24.04 amd64",
   "checks": [

@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 2
 status: executing
-stopped_at: 05-02 runtime lifecycle hardened; contract-defined config apply and production identity/upgrade orchestration pending
-last_updated: "2026-11-05T09:15:00.000Z"
+stopped_at: 05-02 crash-safe credential renewal verified; contract-defined config apply and complete upgrade lifecycle pending
+last_updated: "2026-11-05T10:49:09.000Z"
 last_activity: 2026-11-05
-last_activity_desc: Phase 5 05-02 Engine listener fail-fast lifecycle and same-SHA native/Docker/Actions checks verified; contract and production authority gaps remain
+last_activity_desc: Phase 5 05-02 credential rotation recovery hardened; same-SHA native/Docker/Actions checks pass; config contract and installer work remain
 state_head: 3127fb90802bf2064fa62b184dbe2dbce2bbbc11
 progress:
   total_phases: 8
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 2
 Total Plans in Phase: 4
 Status: Executing
-Last activity: 2026-11-05 — 05-02 Engine listener fail-fast lifecycle and same-SHA native/Docker/Actions checks passed; production authority gaps remain
+Last activity: 2026-11-05 — 05-02 crash-safe credential rotation and same-SHA native/Docker/Actions checks passed; config contract and installer work remain
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -94,7 +94,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T07:27:29.384Z
-Stopped at: 05-02 contract-defined config apply and production identity/upgrade orchestration pending
+Stopped at: 05-02 crash-safe credential renewal verified; contract-defined config apply and complete upgrade lifecycle pending
 Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-02-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)

@@ -182,6 +182,20 @@ Same-SHA validation for `3aed10a2344231786d066558ed15a339d1770a5e`:
 
 The first Actions run (`41980275603`) stopped at Wave 1 because `protoc` was not installed. The workflow prerequisite was fixed. Final native, Docker and Actions Wave 2 reports all reference SHA `3127fb9`.
 
+## Continued Execution: Durable Credential Renewal
+
+Commit `4c408566a9dddb570c8d5f3d8304f893eac89491` closes credential-rotation crash windows found while continuing 05-02. The node now validates its persisted active identity before starting the Engine listener, uses SQLite as the authoritative active/overlap set, recovers and repairs compatibility aliases after restart, retains only the current overlap key material, and rejects locally revoked credentials without reactivating the node. Replacement key/certificate files are synced before the atomic SQLite rotation; active aliases are repaired only after the DB commit.
+
+Focused regression coverage includes rejected renewal leaving the old DB and alias untouched, overlap recovery after restart when the alias is stale, expired overlap pruning, revoked previous-credential removal, and refusing rotation after node revocation.
+
+Same-SHA evidence for `4c408566a9dddb570c8d5f3d8304f893eac89491`:
+
+- Native macOS arm64: `make phase5-wave2-check` passed; raw logs under `artifacts/phase5/wave2/native/`.
+- Docker `golang:1.27.3` Linux arm64: `make phase5-wave2-check` passed from a clean detached checkout; raw logs under `artifacts/phase5/wave2/docker/`.
+- GitHub Actions Ubuntu 24.04 amd64: run `42013055297` passed both Wave 1 and Wave 2 on the same SHA; metadata in `artifacts/phase5/wave2/actions.json`.
+
+This continuation does not complete 05-02. The Protobuf `RuntimeConfigUpdate` payload and lifecycle semantics remain draft, so control-stream delivery is not yet connected to durable Reconciler → Engine Prepare/Commit/Abort. The Hub enrollment/revocation authority is still a protocol-test service, and upgrade remains bounded supervision hooks rather than a complete signed installer and file-level automatic rollback. Keep 05-02 `in_progress` until those planned boundaries and fault evidence are complete.
+
 ## User Setup Required
 
 None for this test slice. Production Hub CA/token lifecycle, certificate renewal orchestration, systemd integration, and an actual binary replacement installer remain incomplete and must not be inferred from these hooks/tests.
