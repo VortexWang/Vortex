@@ -96,6 +96,13 @@ func (s *Store) CompleteDemand(ctx context.Context, requestID, grantID string) e
 		return err
 	}
 	defer tx.Rollback()
+	if err := completeDemandTx(ctx, tx, requestID, grantID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func completeDemandTx(ctx context.Context, tx *sql.Tx, requestID, grantID string) error {
 	var key, raw []byte
 	var state, completedGrant string
 	if err := tx.QueryRowContext(ctx, `SELECT scope,request,state,grant_id FROM authorization_demands WHERE request_id=?`, requestID).Scan(&key, &raw, &state, &completedGrant); err != nil {
@@ -105,7 +112,7 @@ func (s *Store) CompleteDemand(ctx context.Context, requestID, grantID string) e
 		if completedGrant != grantID {
 			return ErrAuthorizationUpdateConflict
 		}
-		return tx.Commit()
+		return nil
 	}
 	var scope DemandScope
 	var request IssueRequest
@@ -145,5 +152,30 @@ func (s *Store) CompleteDemand(ctx context.Context, requestID, grantID string) e
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_demands SET state='applied',grant_id=? WHERE request_id=? AND state='pending'`, grantID, requestID); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
+}
+
+// Called inside authorization installation: malformed or mismatched responses
+// roll back both the new authority and request completion.
+func resolveDemandUpdateTx(ctx context.Context, tx *sql.Tx, updateID string, records []AuthorizationRecord) error {
+	var count int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM authorization_demands WHERE request_id=?`, updateID).Scan(&count); err != nil {
+		return err
+	}
+	if count == 0 {
+		return nil
+	}
+	var grant string
+	for _, r := range records {
+		if r.Kind == "credit_grant" {
+			if grant != "" {
+				return ErrAuthorizationDenied
+			}
+			grant = r.AuthorizationID
+		}
+	}
+	if grant == "" {
+		return ErrAuthorizationDenied
+	}
+	return completeDemandTx(ctx, tx, updateID, grant)
 }

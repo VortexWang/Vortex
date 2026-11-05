@@ -272,3 +272,32 @@ can safely match DemandScope.HubID; do not weaken this check to integrate it.
 Rolling consumption, adaptive target/waterline, 200 ms admission deadline,
 proof-based idle drain and native qualification remain required. Parameters
 remain candidates, and full D-04/attack qualification remains open.
+
+## Atomic control-response completion and TLS issuer binding
+
+PersistAuthorizationUpdate now resolves a matching durable demand in the same
+transaction that installs its authorization records and balance. A scope or
+issuer mismatch rolls back authorization records, balances, fencing changes and
+request completion. An injected completion write failure similarly leaves no
+partial authority. Unsolicited updates without a demand keep their prior path.
+Replaying an already installed update validates the same completed request and
+cannot retire a later demand.
+
+The previous note about a generic control issuer is refined by code inspection:
+ControlClient already derives issuer identity from verified TLS certificate
+DNSName/CommonName. The older test fixture used the literal name hub; no
+production identity check was weakened. A new fixture issues a certificate for
+the UUID matching DemandScope.HubID and exercises the existing authenticated
+control stream and real Hub issuer.
+
+TestDemandCompletesOnlyFromBoundTLSIssuer passes: a different trusted TLS Hub
+identity cannot install the response or clear pending demand; correct identity
+installs 8 MiB once and completes the request; replay after preparing the next
+request neither clears that request nor repeats the issuer debit. Store tests
+now inject mismatched incoming records before installation, assert rollback,
+and cover write failure at completion. Agent/Hub full race and vet PASS.
+
+Scope: response handling is now connected to authenticated control. Outbound
+request transport, rolling consumption/target/waterline scheduling, bounded
+authority wait, idle proof protocol and full host qualification are still open.
+No D-04 parameter lock or full attack qualification is asserted.

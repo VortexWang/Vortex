@@ -702,6 +702,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if !bytes.Equal(previousDigest, digest[:]) || previousIssuer != update.IssuerID {
 			return ErrAuthorizationUpdateConflict
 		}
+		if err := resolveDemandUpdateTx(ctx, tx, update.UpdateID, records); err != nil {
+			return err
+		}
 		return tx.Commit()
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
@@ -809,6 +812,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		return err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_updates SET issuer_id=? WHERE node_id=? AND update_id=?`, update.IssuerID, update.NodeID, update.UpdateID); err != nil {
+		return err
+	}
+	if err := resolveDemandUpdateTx(ctx, tx, update.UpdateID, records); err != nil {
 		return err
 	}
 	return tx.Commit()

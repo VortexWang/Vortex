@@ -80,39 +80,57 @@ func TestDemandCoalescesAcrossRestartAndLostIssuerResponse(t *testing.T) {
 		t.Fatal("uninstalled response cleared pending demand")
 	}
 	record := AuthorizationRecord{AuthorizationID: grant, ParentAuthorizationID: d.ID, SourceID: d.SourceID, Kind: "credit_grant", RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, SignerEpoch: d.SignerEpoch, BootID: d.BootID, IssuedAt: clock.Latest.Format(time.RFC3339Nano), NotBefore: clock.Latest.Format(time.RFC3339Nano), ExpiresAt: clock.Latest.Add(time.Minute).Format(time.RFC3339Nano), HardDeadline: d.HardDeadline.Format(time.RFC3339Nano), BillingSnapshotID: d.BillingSnapshotID, AmountBytes: 256}
-	if err := agent.PersistAuthorizationUpdate(ctx, AuthorizationUpdate{IssuerID: d.HubID, NodeID: d.NodeID, BootID: d.BootID, UpdateID: first.ID, Payload: issued.Payload, SignerEpoch: d.SignerEpoch, PathGeneration: d.PathGeneration, FencingGenerationFloor: d.FencingFloor}, []AuthorizationRecord{record}, nil); err != nil {
-		t.Fatal(err)
-	}
-	// A response installed under the same update ID still cannot resolve a
-	// different immutable scope or impersonate another issuer.
-	for _, attack := range []struct{ column, original, forged string }{
-		{"issuer_id", d.HubID, d.NodeID},
-		{"parent_authorization_id", d.ID, d.NodeID},
-		{"source_id", d.SourceID, d.NodeID},
-		{"billing_snapshot_id", d.BillingSnapshotID, d.NodeID},
-		{"rule_id", d.RuleID, "different-rule"},
-		{"rule_revision", "2", "3"},
-		{"path_generation", "4", "5"},
-		{"signer_epoch", "1", "2"},
-		{"boot_id", d.BootID, d.NodeID},
-		{"amount_bytes", "256", "512"},
+	update := AuthorizationUpdate{IssuerID: d.HubID, NodeID: d.NodeID, BootID: d.BootID, UpdateID: first.ID, Payload: issued.Payload, SignerEpoch: d.SignerEpoch, PathGeneration: d.PathGeneration, FencingGenerationFloor: d.FencingFloor}
+	for _, attack := range []struct {
+		name   string
+		mutate func(*AuthorizationUpdate, *AuthorizationRecord)
+	}{
+		{"issuer", func(u *AuthorizationUpdate, r *AuthorizationRecord) { u.IssuerID = d.NodeID }},
+		{"parent", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.ParentAuthorizationID = d.NodeID }},
+		{"source", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.SourceID = d.NodeID }},
+		{"snapshot", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.BillingSnapshotID = d.NodeID }},
+		{"rule", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.RuleID = "different-rule" }},
+		{"revision", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.RuleRevision++ }},
+		{"path", func(u *AuthorizationUpdate, r *AuthorizationRecord) { u.PathGeneration++; r.PathGeneration++ }},
+		{"epoch", func(u *AuthorizationUpdate, r *AuthorizationRecord) { u.SignerEpoch++; r.SignerEpoch++ }},
+		{"boot", func(u *AuthorizationUpdate, r *AuthorizationRecord) { u.BootID = d.NodeID; r.BootID = d.NodeID }},
+		{"amount", func(u *AuthorizationUpdate, r *AuthorizationRecord) { r.AmountBytes++ }},
 	} {
-		t.Run("mismatched-"+attack.column, func(t *testing.T) {
-			query := "UPDATE authorization_records SET " + attack.column + "=? WHERE node_id=? AND authorization_id=?"
-			if _, err := agent.db.Exec(query, attack.forged, d.NodeID, grant); err != nil {
-				t.Fatal(err)
+		t.Run("mismatched-"+attack.name, func(t *testing.T) {
+			u, r := update, record
+			attack.mutate(&u, &r)
+			if err := agent.PersistAuthorizationUpdate(ctx, u, []AuthorizationRecord{r}, nil); err == nil {
+				t.Fatal("mismatched response installed authority")
 			}
-			if err := agent.CompleteDemand(ctx, first.ID, grant); err == nil {
-				t.Fatal("mismatched response cleared pending demand")
-			}
-			if _, err := agent.db.Exec(query, attack.original, d.NodeID, grant); err != nil {
-				t.Fatal(err)
+			var count int
+			if err := agent.db.QueryRow(`SELECT COUNT(*) FROM authorization_records`).Scan(&count); err != nil || count != 0 {
+				t.Fatalf("failed response left authority: %d %v", count, err)
 			}
 			retry, err := agent.PrepareDemand(ctx, scope, 512, time.Minute)
 			if err != nil || retry != first {
 				t.Fatalf("rejected response replaced pending request: %+v %v", retry, err)
 			}
 		})
+	}
+	if _, err := agent.db.Exec(`CREATE TRIGGER fail_demand_completion BEFORE UPDATE ON authorization_demands BEGIN SELECT RAISE(ABORT,'completion disk failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := agent.PersistAuthorizationUpdate(ctx, update, []AuthorizationRecord{record}, nil); err == nil {
+		t.Fatal("completion failure returned installed authority")
+	}
+	var count int
+	if err := agent.db.QueryRow(`SELECT COUNT(*) FROM authorization_records`).Scan(&count); err != nil || count != 0 {
+		t.Fatalf("partial installation: %d %v", count, err)
+	}
+	if _, err := agent.db.Exec(`DROP TRIGGER fail_demand_completion`); err != nil {
+		t.Fatal(err)
+	}
+	if err := agent.PersistAuthorizationUpdate(ctx, update, []AuthorizationRecord{record}, nil); err != nil {
+		t.Fatal(err)
+	}
+	var state string
+	if err := agent.db.QueryRow(`SELECT state FROM authorization_demands WHERE request_id=?`, first.ID).Scan(&state); err != nil || state != "applied" {
+		t.Fatalf("installation did not complete request: %s %v", state, err)
 	}
 	// Completion must also survive a crash after installation but before ack.
 	if err := agent.Close(); err != nil {
