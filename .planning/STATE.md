@@ -4,17 +4,17 @@ milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 4
-status: executing
-stopped_at: 05-04 executing; atomic S/R handoff and execution-instance recovery implemented; integrated boot recovery remains open
-last_updated: "2026-11-05T22:24:05.531Z"
+status: verifying
+stopped_at: 05-04 complete; Phase 5 plan execution finished; phase-wide review, validation/security hooks and UAT pending
+last_updated: "2026-11-05T23:58:30.372085Z"
 last_activity: 2026-11-05
-last_activity_desc: 05-04 executing; S/R and fault regressions implemented; final paired verification pending
-state_head: 0e462c71ca9a7b6bf006faeeabbff8fe97759fba
+last_activity_desc: 05-04 passed same-SHA Docker/Actions on 79a1c0b; SUMMARY committed as 6c957cd
+state_head: 6c957cd
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 33
-  completed_plans: 32
+  completed_plans: 33
 ---
 
 # Project State
@@ -31,10 +31,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 4
 Total Plans in Phase: 5
-Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 complete; control 1.2.0, durable grants, typed unknown handoff and online/autonomous ACK verified on ebff5b0. Ready for 05-04.
+Status: Verifying — all planned implementation complete; phase acceptance pending
+Last activity: 2026-11-05 — Plan 05-04 complete. Authorization 1.1.0, atomic S/R, authenticated runtime restart and fault evidence pass on 79a1c0b; Actions 42132354600.
 
-Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 remains in progress.
+Progress: Phase 5 [██████████] 5/5 plans executed; phase-wide review, validation/security hooks, requirement audit and UAT remain pending.
 
 ## Performance Metrics
 
@@ -63,6 +63,8 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 ## Accumulated Context
 
 ### Decisions
+
+- 05-04 owner approved authorization 1.1.0 exact proposal 185541ee09e8dfbb0333a6249e0571c805b182220c77e7c2a79976d45efa4b6e. Signer S/R transfer preserves path generation and prior grant/debt boundaries; production backend remains Phase 6.
 
 - 2026-11-05 owner decision: Phase 4 qualification and optimization continue on gsd/phase-4-optimization-closure; main proceeds with Phase 5. Historical Phase 4 gaps do not block main progression or automatically reopen Phase 4. Final acceptance findings remain truthful.
 
@@ -99,9 +101,9 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ## Session Continuity
 
-Last session: 2026-11-05T22:23:43.770Z
-Stopped at: Completed 05-03; ready for 05-04 ledger handoff and activation recovery
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-PLAN.md
+Last session: 2026-11-05
+Stopped at: Completed 05-04; continue Phase 5 verification, security/validation hooks and UAT before Phase 6
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-VERIFICATION.md
 
 ### Historical qualification review (not a main-workflow gate)
 

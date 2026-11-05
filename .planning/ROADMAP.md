@@ -114,7 +114,7 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 4/5 plans complete. Wave 3 (05-03) passed same-SHA Docker/Actions and raw ledger audits; Wave 4 (05-04) is ready for ledger transfer and activation recovery.
+**Plans**: 5/5 plans executed. Wave 4 (05-04) passed same-SHA Docker/Actions and raw ledger audits on `79a1c0b` (Actions `42132354600`); SUMMARY committed. Phase-wide review, validation/security hooks, requirement audit and UAT remain pending before phase completion.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -123,7 +123,7 @@
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 05-03 — Grants, usage handoff and bounded autonomy (depends on 05-05)
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 05-04 — Ledger handoff, activation recovery and evidence gate
+- [x] 05-04 — Ledger handoff, activation recovery and evidence gate
 
 ### Phase 6: M4 后端业务闭环 (M4 Backend)
 **Goal**: 用户和管理员可通过权威后端管理租户、节点、规则和权益；授权、额度、份额及结算由事务性业务事实控制。
@@ -172,7 +172,7 @@
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
-| 5. M3 Agent and Edge Hub | 4/5 | Wave 2 complete; Wave 3 ready | - |
+| 5. M3 Agent and Edge Hub | 5/5 | Implementation verified; phase acceptance pending | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
