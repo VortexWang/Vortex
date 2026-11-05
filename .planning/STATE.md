@@ -3,9 +3,9 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 3
+current_plan: 2
 status: executing
-stopped_at: Completed 05-02; ready for 05-03
+stopped_at: 05-02 runtime integration and lifecycle verification pending
 last_updated: "2026-11-05T07:27:29.729Z"
 last_activity: 2026-11-05
 last_activity_desc: Phase 5 Wave 1 startable tracer and durable local stores verified; Phase 4 qualification remains parallel
@@ -14,7 +14,7 @@ progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 29
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-Current Plan: 3
+Current Plan: 2
 Total Plans in Phase: 4
-Status: Ready to execute
-Last activity: 2026-11-05 — Phase 5 Wave 2 passed same-SHA native, Docker and GitHub Actions checks
+Status: Executing
+Last activity: 2026-11-05 — Wave 2 interface tests passed; production-shaped runtime integration remains incomplete
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
@@ -94,8 +94,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Session Continuity
 
 Last session: 2026-11-05T07:27:29.384Z
-Stopped at: Completed 05-02; ready for 05-03
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-PLAN.md
+Stopped at: 05-02 runtime integration and lifecycle verification pending
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-02-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 

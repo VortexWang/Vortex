@@ -114,11 +114,11 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 2/4 plans complete in 4 waves; Wave 2 passed same-SHA native, Docker and GitHub Actions verification.
+**Plans**: 1/4 plans complete; Wave 2 interface tests passed but runtime integration remains incomplete.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
-- [x] 05-02 — Registration, mTLS control, reconcile and upgrade supervision
+- [ ] 05-02 — Registration, mTLS control, reconcile and upgrade supervision (runtime integration pending)
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 05-03 — Grants, usage handoff and bounded autonomy
 **Wave 4** *(blocked on Wave 3 completion)*

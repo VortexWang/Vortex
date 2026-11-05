@@ -93,7 +93,7 @@ coverage:
     human_judgment: false
 duration: 40min
 completed: 2026-11-05
-status: complete
+status: incomplete
 ---
 
 # Phase 5 Plan 02: Registration, mTLS Control, Reconcile and Upgrade Summary
@@ -170,7 +170,7 @@ None for this test slice. Production Hub CA/token lifecycle, certificate renewal
 
 ## Next Phase Readiness
 
-Ready for `05-03`: durable grants, usage handoff, conservative time and bounded Hub autonomy. This Wave 2 summary does not claim production registration authority, complete reconnect/renewal lifecycle, full config-to-Engine wiring, or an installable upgrade path.
+Not ready for `05-03`: the runnable node still uses the plaintext test path and NoopEngine. Complete authenticated runtime handshake, certificate renewal and revocation enforcement, actual Engine integration, durable authority-safe upgrade installation and recovery, and end-to-end fault tests before closing 05-02. The current tests validate isolated interfaces and the test Hub only.
 
 ---
 *Phase: 05-m3-agent-edge-hub-m3-agent-and-hub*
