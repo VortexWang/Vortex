@@ -172,8 +172,16 @@ CREATE TABLE IF NOT EXISTS usage_batches (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
-  ON CONFLICT(key) DO NOTHING;
+CREATE TABLE IF NOT EXISTS autonomy_transitions (
+  transition_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  from_mode TEXT NOT NULL,
+  to_mode TEXT NOT NULL,
+  occurred_at TEXT NOT NULL,
+  backend_heartbeat TEXT NOT NULL,
+  hard_deadline TEXT NOT NULL
+);
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '2')
+  ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
 		return fmt.Errorf("store: schema: %w", err)
