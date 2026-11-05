@@ -60,14 +60,59 @@ type UsageBatch struct {
 	CreatedAt    time.Time
 }
 
+type UsageReservation struct {
+	NodeID     string
+	BootID     string
+	BatchID    string
+	SnapshotID string
+	FlowKey    string
+	RuleID     string
+	Direction  string
+	Reserved   uint64
+	Resolution string
+}
+
+type AuthorizationRecord struct {
+	AuthorizationID       string
+	ParentAuthorizationID string
+	SourceID              string
+	Kind                  string
+	RuleID                string
+	RuleRevision          uint64
+	PathGeneration        uint64
+	SignerEpoch           uint64
+	BootID                string
+	IssuedAt              string
+	NotBefore             string
+	ExpiresAt             string
+	HardDeadline          string
+	BillingSnapshotID     string
+	AmountBytes           uint64
+	RateBPS               uint64
+	Connections           uint64
+}
+
+type AuthorizationUpdate struct {
+	NodeID                 string
+	BootID                 string
+	UpdateID               string
+	Payload                []byte
+	Digest                 []byte
+	SignerEpoch            uint64
+	PathGeneration         uint64
+	FencingGenerationFloor uint64
+}
+
 var ErrCredentialRevoked = fmt.Errorf("store: credential revoked")
 
 var (
-	ErrConfigRequestConflict = errors.New("store: config transaction request conflicts with durable request")
-	ErrConfigVersionStale    = errors.New("store: config expected version is stale")
-	ErrConfigGenerationStale = errors.New("store: config fencing generation is stale")
-	ErrConfigUnresolved      = errors.New("store: an activation outcome is unresolved")
-	ErrUsageBatchConflict    = errors.New("store: usage batch identity conflicts with durable payload")
+	ErrConfigRequestConflict        = errors.New("store: config transaction request conflicts with durable request")
+	ErrConfigVersionStale           = errors.New("store: config expected version is stale")
+	ErrConfigGenerationStale        = errors.New("store: config fencing generation is stale")
+	ErrConfigUnresolved             = errors.New("store: an activation outcome is unresolved")
+	ErrUsageBatchConflict           = errors.New("store: usage batch identity conflicts with durable payload")
+	ErrAuthorizationUpdateConflict  = errors.New("store: authorization update identity conflicts with durable payload")
+	ErrAuthorizationGenerationStale = errors.New("store: authorization signer or path generation is stale")
 )
 
 func Open(path, owner string) (*Store, error) {
@@ -172,6 +217,61 @@ CREATE TABLE IF NOT EXISTS usage_batches (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS usage_reservations (
+  node_id TEXT NOT NULL,
+  boot_id TEXT NOT NULL,
+  batch_id TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  flow_key TEXT NOT NULL,
+  rule_id TEXT NOT NULL,
+  direction TEXT NOT NULL,
+  reserved_bytes TEXT NOT NULL,
+  state TEXT NOT NULL,
+  used_bytes TEXT NOT NULL DEFAULT '0',
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, batch_id)
+);
+CREATE TABLE IF NOT EXISTS authorization_updates (
+  node_id TEXT NOT NULL,
+  update_id TEXT NOT NULL,
+  boot_id TEXT NOT NULL,
+  payload BLOB NOT NULL,
+  payload_sha256 BLOB NOT NULL,
+  signer_epoch TEXT NOT NULL,
+  path_generation TEXT NOT NULL,
+  fencing_generation_floor TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, update_id)
+);
+CREATE TABLE IF NOT EXISTS authorization_records (
+  node_id TEXT NOT NULL,
+  authorization_id TEXT NOT NULL,
+  parent_authorization_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  rule_id TEXT NOT NULL,
+  rule_revision TEXT NOT NULL,
+  path_generation TEXT NOT NULL,
+  signer_epoch TEXT NOT NULL,
+  boot_id TEXT NOT NULL,
+  issued_at TEXT NOT NULL,
+  not_before TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  hard_deadline TEXT NOT NULL,
+  billing_snapshot_id TEXT NOT NULL,
+  amount_bytes TEXT NOT NULL,
+  rate_bps TEXT NOT NULL,
+  connections TEXT NOT NULL,
+  state TEXT NOT NULL,
+  PRIMARY KEY(node_id, authorization_id)
+);
+CREATE TABLE IF NOT EXISTS authorization_revocations (
+  node_id TEXT NOT NULL,
+  authorization_id TEXT NOT NULL,
+  signer_epoch TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, authorization_id)
+);
 CREATE TABLE IF NOT EXISTS autonomy_transitions (
   transition_id INTEGER PRIMARY KEY AUTOINCREMENT,
   from_mode TEXT NOT NULL,
@@ -180,7 +280,7 @@ CREATE TABLE IF NOT EXISTS autonomy_transitions (
   backend_heartbeat TEXT NOT NULL,
   hard_deadline TEXT NOT NULL
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '2')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '3')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -214,6 +314,223 @@ func (s *Store) PersistUsageOutbox(ctx context.Context, batch UsageBatch) error 
 		return fmt.Errorf("store: usage batch digest mismatch")
 	}
 	return s.putUsageBatch(ctx, batch, digest[:], "pending")
+}
+
+// ReserveUsage durably records the full upper bound before Engine receives a
+// writable batch. Repeating the same identity is idempotent.
+func (s *Store) ReserveUsage(ctx context.Context, reservation UsageReservation) error {
+	if reservation.NodeID == "" || reservation.BootID == "" || reservation.BatchID == "" || reservation.SnapshotID == "" || reservation.RuleID == "" || reservation.FlowKey == "" || reservation.Reserved == 0 || (reservation.Direction != "egress" && reservation.Direction != "ingress") {
+		return fmt.Errorf("store: incomplete usage reservation")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var previous UsageReservation
+	var reserved string
+	err = tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
+		Scan(&previous.BootID, &previous.SnapshotID, &previous.FlowKey, &previous.RuleID, &previous.Direction, &reserved, &previous.Resolution)
+	if err == nil {
+		previous.NodeID, previous.BatchID = reservation.NodeID, reservation.BatchID
+		previous.Reserved, err = strconv.ParseUint(reserved, 10, 64)
+		if err != nil {
+			return fmt.Errorf("store: invalid durable reservation amount: %w", err)
+		}
+		if previous.BootID != reservation.BootID || previous.SnapshotID != reservation.SnapshotID || previous.FlowKey != reservation.FlowKey || previous.RuleID != reservation.RuleID || previous.Direction != reservation.Direction || previous.Reserved != reservation.Reserved {
+			return ErrUsageBatchConflict
+		}
+		if previous.Resolution != "reserved" {
+			return fmt.Errorf("store: usage reservation already resolved as %s", previous.Resolution)
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, reservation.NodeID, reservation.BootID, reservation.BatchID, reservation.SnapshotID, reservation.FlowKey, reservation.RuleID, reservation.Direction, strconv.FormatUint(reservation.Reserved, 10), "reserved", time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// SettleUsageReservation atomically resolves a pre-write hold and, for actual
+// or unknown usage, places its immutable payload in the durable handoff outbox.
+func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64) error {
+	if resolution != "committed" && resolution != "returned" && resolution != "unknown" {
+		return fmt.Errorf("store: invalid usage reservation resolution")
+	}
+	if resolution == "committed" && (used > reservation.Reserved || len(payload) == 0 || unknownUpper != 0) || resolution == "unknown" && (used != reservation.Reserved || unknownUpper != reservation.Reserved || len(payload) == 0) || resolution == "returned" && (used != 0 || unknownUpper != 0 || len(payload) != 0) {
+		return fmt.Errorf("store: inconsistent usage settlement")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var bootID, snapshotID, flowKey, ruleID, direction, reservedText, state, usedText string
+	err = tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
+		Scan(&bootID, &snapshotID, &flowKey, &ruleID, &direction, &reservedText, &state, &usedText)
+	if err != nil {
+		return err
+	}
+	storedReserved, err := strconv.ParseUint(reservedText, 10, 64)
+	if err != nil {
+		return err
+	}
+	if bootID != reservation.BootID || snapshotID != reservation.SnapshotID || flowKey != reservation.FlowKey || ruleID != reservation.RuleID || direction != reservation.Direction || storedReserved != reservation.Reserved {
+		return ErrUsageBatchConflict
+	}
+	if state != "reserved" {
+		storedUsed, parseErr := strconv.ParseUint(usedText, 10, 64)
+		if parseErr != nil || state != resolution || storedUsed != used {
+			return ErrUsageBatchConflict
+		}
+		if resolution != "returned" {
+			var storedPayload []byte
+			var storedUpper string
+			var storedDigest []byte
+			if err := tx.QueryRowContext(ctx, `SELECT payload,payload_sha256,unknown_upper_bound FROM usage_batches WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&storedPayload, &storedDigest, &storedUpper); err != nil {
+				return err
+			}
+			digest := sha256.Sum256(payload)
+			upper, parseErr := strconv.ParseUint(storedUpper, 10, 64)
+			if parseErr != nil || upper != unknownUpper || !bytes.Equal(storedPayload, payload) || !bytes.Equal(storedDigest, digest[:]) {
+				return ErrUsageBatchConflict
+			}
+		}
+		return tx.Commit()
+	}
+	if resolution != "returned" {
+		digest := sha256.Sum256(payload)
+		now := time.Now().UTC().Format(time.RFC3339Nano)
+		_, err = tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, reservation.NodeID, reservation.BatchID, reservation.BootID, reservation.SnapshotID, payload, digest[:], strconv.FormatUint(unknownUpper, 10), "pending", now, now)
+		if err != nil {
+			return err
+		}
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE usage_reservations SET state=?,used_bytes=?,updated_at=? WHERE node_id=? AND batch_id=? AND state='reserved'`, resolution, strconv.FormatUint(used, 10), time.Now().UTC().Format(time.RFC3339Nano), reservation.NodeID, reservation.BatchID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// UnresolvedUsageReservations returns reservations from earlier boots. The
+// caller must settle each as unknown before starting Engine traffic.
+func (s *Store) UnresolvedUsageReservations(ctx context.Context, nodeID, currentBootID string) ([]UsageReservation, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes FROM usage_reservations WHERE node_id=? AND boot_id<>? AND state='reserved' ORDER BY updated_at,batch_id`, nodeID, currentBootID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var result []UsageReservation
+	for rows.Next() {
+		var r UsageReservation
+		var reserved string
+		if err := rows.Scan(&r.NodeID, &r.BootID, &r.BatchID, &r.SnapshotID, &r.FlowKey, &r.RuleID, &r.Direction, &reserved); err != nil {
+			return nil, err
+		}
+		if r.Reserved, err = strconv.ParseUint(reserved, 10, 64); err != nil {
+			return nil, err
+		}
+		r.Resolution = "reserved"
+		result = append(result, r)
+	}
+	return result, rows.Err()
+}
+
+// PersistAuthorizationUpdate applies an authenticated update once. It stores
+// authority epoch and path fencing independently and preserves revocations.
+func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update AuthorizationUpdate, records []AuthorizationRecord, revocations []string) error {
+	if update.NodeID == "" || update.BootID == "" || update.UpdateID == "" || len(update.Payload) == 0 || update.SignerEpoch == 0 || update.PathGeneration == 0 || update.FencingGenerationFloor == 0 {
+		return fmt.Errorf("store: incomplete authorization update")
+	}
+	digest := sha256.Sum256(update.Payload)
+	if len(update.Digest) != 0 && !bytes.Equal(update.Digest, digest[:]) {
+		return fmt.Errorf("store: authorization payload digest mismatch")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var previousDigest []byte
+	err = tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM authorization_updates WHERE node_id=? AND update_id=?`, update.NodeID, update.UpdateID).Scan(&previousDigest)
+	if err == nil {
+		if !bytes.Equal(previousDigest, digest[:]) {
+			return ErrAuthorizationUpdateConflict
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	for key, incoming := range map[string]uint64{
+		"authorization_signer_epoch":    update.SignerEpoch,
+		"authorization_path_generation": update.PathGeneration,
+		"authorization_fencing_floor":   update.FencingGenerationFloor,
+	} {
+		var previous string
+		err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key=?`, key).Scan(&previous)
+		if err == nil {
+			value, parseErr := strconv.ParseUint(previous, 10, 64)
+			if parseErr != nil || incoming < value {
+				return ErrAuthorizationGenerationStale
+			}
+		} else if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		if err := putState(ctx, tx, key, strconv.FormatUint(incoming, 10), time.Now().UTC()); err != nil {
+			return err
+		}
+	}
+	for _, record := range records {
+		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
+			return fmt.Errorf("store: authorization record does not match update identity or fencing")
+		}
+		var existing string
+		err := tx.QueryRowContext(ctx, `SELECT source_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&existing)
+		if err == nil {
+			return ErrAuthorizationUpdateConflict
+		}
+		if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		var revoked int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM authorization_revocations WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&revoked); err != nil {
+			return err
+		}
+		state := "active"
+		if revoked > 0 {
+			state = "revoked"
+		}
+		_, err = tx.ExecContext(ctx, `INSERT INTO authorization_records(node_id,authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.ParentAuthorizationID, record.SourceID, record.Kind, record.RuleID, strconv.FormatUint(record.RuleRevision, 10), strconv.FormatUint(record.PathGeneration, 10), strconv.FormatUint(record.SignerEpoch, 10), record.BootID, record.IssuedAt, record.NotBefore, record.ExpiresAt, record.HardDeadline, record.BillingSnapshotID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.RateBPS, 10), strconv.FormatUint(record.Connections, 10), state)
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range revocations {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET state='revoked' WHERE node_id=? AND authorization_id=?`, update.NodeID, id); err != nil {
+			return err
+		}
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO authorization_updates(node_id,update_id,boot_id,payload,payload_sha256,signer_epoch,path_generation,fencing_generation_floor,created_at) VALUES(?,?,?,?,?,?,?,?,?)`, update.NodeID, update.UpdateID, update.BootID, update.Payload, digest[:], strconv.FormatUint(update.SignerEpoch, 10), strconv.FormatUint(update.PathGeneration, 10), strconv.FormatUint(update.FencingGenerationFloor, 10), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) MarkPreviousBootAuthorizationsSettlementOnly(ctx context.Context, nodeID, bootID string) error {
+	if nodeID == "" || bootID == "" {
+		return fmt.Errorf("store: node and boot identity are required")
+	}
+	_, err := s.db.ExecContext(ctx, `UPDATE authorization_records SET state='settlement_only' WHERE node_id=? AND boot_id<>? AND state='active'`, nodeID, bootID)
+	return err
 }
 
 // PersistUsageLedger commits a Hub-side batch before its acknowledgement is sent.

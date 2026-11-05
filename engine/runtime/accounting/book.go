@@ -76,6 +76,10 @@ type CreditBook struct {
 type grantOwner struct{ snapshot, request string }
 
 func NewCreditBook(c BookConfig) (*CreditBook, error) {
+	return NewCreditBookWithUsage(c, nil)
+}
+
+func NewCreditBookWithUsage(c BookConfig, sink core.UsageSink) (*CreditBook, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -84,7 +88,7 @@ func NewCreditBook(c BookConfig) (*CreditBook, error) {
 	gates := make(map[string]*CreditGate, len(c.Snapshots))
 	for id, v := range c.Snapshots {
 		versions[id] = v
-		gates[id], _ = NewCreditGate(v.Credit)
+		gates[id], _ = NewCreditGateWithUsage(v.Credit, sink)
 	}
 	c.Snapshots = versions
 	return &CreditBook{cfg: c, gates: gates, owners: make(map[string]grantOwner)}, nil
@@ -110,6 +114,9 @@ func (b *CreditBook) Open(ctx context.Context, f core.Flow) (core.Session, error
 	defer b.mu.Unlock()
 	// Admission and selection serialize here; returned sessions permanently own
 	// their original gate, even while later flows use a different snapshot.
+	// Billing identity always comes from the locally pinned snapshot, never from
+	// the flow key or an Engine caller-provided label.
+	f.RuleID = b.cfg.Snapshots[b.cfg.Active].Binding.RuleID
 	return b.gates[b.cfg.Active].Open(ctx, f)
 }
 func (b *CreditBook) State() BookState {

@@ -123,6 +123,73 @@ func TestUsageOutboxWriteFailureCannotBeSentOrAcknowledged(t *testing.T) {
 	}
 }
 
+func TestUsageReservationIsDurableAndSettlementCreatesOutboxAtomically(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	r := UsageReservation{NodeID: "node-1", BootID: "boot-1", BatchID: "batch-1", SnapshotID: "snapshot-1", FlowKey: "flow-1", RuleID: "rule-1", Direction: "egress", Reserved: 64}
+	if err := s.ReserveUsage(ctx, r); err != nil {
+		t.Fatal(err)
+	}
+	if pending, err := s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 0 {
+		t.Fatalf("unsettled reservation was exposed as usage: %+v err=%v", pending, err)
+	}
+	payload := []byte("settled-usage")
+	if _, err := s.db.Exec(`CREATE TRIGGER reject_settled_outbox BEFORE INSERT ON usage_batches BEGIN SELECT RAISE(ABORT, 'simulated outbox failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SettleUsageReservation(ctx, r, "committed", 20, payload, 0); err == nil {
+		t.Fatal("settlement succeeded despite outbox write failure")
+	}
+	var state string
+	if err := s.db.QueryRow(`SELECT state FROM usage_reservations WHERE node_id=? AND batch_id=?`, r.NodeID, r.BatchID).Scan(&state); err != nil || state != "reserved" {
+		t.Fatalf("failed outbox insert released reservation: state=%q err=%v", state, err)
+	}
+	if _, err := s.db.Exec(`DROP TRIGGER reject_settled_outbox`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SettleUsageReservation(ctx, r, "committed", 20, payload, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SettleUsageReservation(ctx, r, "committed", 20, payload, 0); err != nil {
+		t.Fatalf("identical settlement retry was not idempotent: %v", err)
+	}
+	if err := s.SettleUsageReservation(ctx, r, "committed", 20, []byte("different-payload"), 0); !errors.Is(err, ErrUsageBatchConflict) {
+		t.Fatalf("changed settled payload was accepted: %v", err)
+	}
+	if pending, err := s.PendingUsageOutbox(ctx, "node-1"); err != nil || len(pending) != 1 || string(pending[0].Payload) != string(payload) {
+		t.Fatalf("settled outbox=%+v err=%v", pending, err)
+	}
+}
+
+func TestAuthorizationUpdateFencesEpochsAndIsPayloadBound(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	u := AuthorizationUpdate{NodeID: "node-1", BootID: "boot-1", UpdateID: "update-1", Payload: []byte("payload"), SignerEpoch: 2, PathGeneration: 4, FencingGenerationFloor: 8}
+	if err := s.PersistAuthorizationUpdate(ctx, u, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PersistAuthorizationUpdate(ctx, u, nil, nil); err != nil {
+		t.Fatalf("identical update replay failed: %v", err)
+	}
+	u.Payload = []byte("changed")
+	if err := s.PersistAuthorizationUpdate(ctx, u, nil, nil); !errors.Is(err, ErrAuthorizationUpdateConflict) {
+		t.Fatalf("changed replay err=%v", err)
+	}
+	u.UpdateID = "update-2"
+	u.SignerEpoch = 1
+	if err := s.PersistAuthorizationUpdate(ctx, u, nil, nil); !errors.Is(err, ErrAuthorizationGenerationStale) {
+		t.Fatalf("stale signer epoch err=%v", err)
+	}
+}
+
 func TestReceiptIsIdempotent(t *testing.T) {
 	s, err := Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
 	if err != nil {

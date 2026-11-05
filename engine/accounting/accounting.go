@@ -23,7 +23,26 @@ const (
 )
 
 type Flow struct {
-	Key string
+	Key    string
+	RuleID string
+}
+
+type UsageRecord struct {
+	BatchID    string
+	FlowKey    string
+	RuleID     string
+	SnapshotID string
+	Direction  Direction
+	Resolution Resolution
+	Reserved   int64
+	Used       int64
+}
+
+// UsageSink is implemented by the Agent. Engine calls it before settling a
+// reservation, keeping durable authority outside the Engine module.
+type UsageSink interface {
+	ReserveUsage(context.Context, UsageRecord) error
+	SettleUsage(context.Context, UsageRecord) error
 }
 
 // Gate admits a flow and returns a session policy. Gate implementations may

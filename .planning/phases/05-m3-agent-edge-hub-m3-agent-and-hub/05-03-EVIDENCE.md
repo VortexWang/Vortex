@@ -36,4 +36,15 @@ Status: **In progress. This evidence covers durable usage handoff and bounded au
 - Grant/lease persistence, numeric signer-epoch fencing, atomic remaining-quota transfer, and signer-epoch/path-generation recovery separation remain unimplemented and unverified.
 - No production Engine accounting adapter persists each measured/unknown write outcome before the Engine releases its reservation; that integration and full-disk stop behavior remain open.
 
+## Incremental Reservation Durability (Uncommitted)
+
+- Added an Engine `UsageSink` boundary with FULL SQLite reservation-before-write and atomic settlement plus outbox insertion. Engine receives no writable batch when reservation persistence fails; any uncertain persistence/settlement freezes the gate and retains the entire reservation as unknown.
+- Agent startup scans unresolved reservations from previous boot IDs before Engine startup, converts each to an unknown upper-bound usage batch, and leaves it in the normal Hub handoff queue. Recovery is retryable after interruption.
+- SQLite storage now binds settlement retries to the original accounting identity, payload bytes, digest and unknown upper bound. A failed outbox insert leaves the reservation in `reserved` state.
+- Added tests for pre-write refusal, disk/outbox write failure, payload-bound idempotency, cross-boot unknown recovery, and Engine-to-Agent persistence.
+- Local host: root `go test ./...` PASS; Engine module `go test ./...` PASS; root Agent race tests and Engine runtime accounting race tests PASS; root and Engine vet checks PASS after cleanup.
+- This is an incremental implementation snapshot, not the complete 05-03 acceptance. Durable grant/lease authority, numeric signer-epoch ownership transfer, atomic remaining-quota transfer, authenticated heartbeat wiring, and Docker/Actions same-SHA evidence remain open.
+- Owner approved the exact `vortex.authorization.v1` 1.0.0 proposal SHA `ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07`; `AuthorizationUpdate.generation` equals `path_generation`, and `signer_epoch` remains independent. Approval is recorded in `docs/governance/contract-review.yaml`; contract implementation and validation are now unblocked.
+- Frozen JSON Schema SHA-256: `eb83a6050ca15acd5f7dd78fece4816c59dc10846d8539480eff2d5152f8d8af`. Contract catalog, approval record, SemVer changelog, 24 affected requirement mappings and schema embed are present. Control-stream validation and SQLite persistence now bind exact update bytes, signer epoch, path generation, fencing floor, individual authorization records and revocations; same-ID changed-payload replay and stale epochs are rejected.
+
 This file is incremental evidence, not a 05-03 SUMMARY and not a phase completion claim.

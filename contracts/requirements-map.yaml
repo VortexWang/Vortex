@@ -990,14 +990,16 @@
       "id": "AGT-005",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "AGT-006",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1019,7 +1021,8 @@
     {
       "id": "AGT-012",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1027,7 +1030,8 @@
       "id": "AGT-009",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1035,7 +1039,8 @@
       "id": "AGT-010",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1043,14 +1048,16 @@
       "id": "AGT-011",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-001",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1059,7 +1066,8 @@
       "contracts": [
         "vortex.control.v1",
         "vortex.database",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1067,28 +1075,32 @@
       "id": "HUB-003",
       "contracts": [
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-004",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-005",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-006",
       "contracts": [
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1097,7 +1109,8 @@
       "contracts": [
         "vortex.control.v1",
         "vortex.database",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1106,7 +1119,8 @@
       "contracts": [
         "vortex.control.v1",
         "vortex.database",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1115,7 +1129,8 @@
       "contracts": [
         "vortex.control.v1",
         "vortex.database",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1123,21 +1138,24 @@
       "id": "HUB-010",
       "contracts": [
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-011",
       "contracts": [
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-012",
       "contracts": [
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1145,28 +1163,32 @@
       "id": "HUB-013",
       "contracts": [
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-014",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-015",
       "contracts": [
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "HUB-016",
       "contracts": [
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1174,7 +1196,8 @@
       "id": "HUB-017",
       "contracts": [
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -1183,7 +1206,8 @@
       "contracts": [
         "vortex.control.v1",
         "vortex.database",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },

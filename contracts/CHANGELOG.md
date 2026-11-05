@@ -19,5 +19,5 @@ Contract source baseline: VORTEX V1.11, SHA-256 `95c73f356841da9a41f9d8bd4ada008
 Machine-readable change records (CI authority):
 
 ```json
-{"changes": [{"contract_id":"vortex.control.v1","from":"1.0.0","version":"1.1.0","kind":"compatible","proposal_sha256":"d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218","approved_at":"2026-11-05T11:26:21Z","summary":"Add config transaction identity, fencing, digest, expected version, apply result correlation, registration and stable errors."}]}
+{"changes": [{"contract_id":"vortex.control.v1","from":"1.0.0","version":"1.1.0","kind":"compatible","proposal_sha256":"d166443ec3b6e92180592f7ef6354306169f69fd930c459e7ac869cdac3d9e7218","approved_at":"2026-11-05T11:26:21Z","summary":"Add config transaction identity, fencing, digest, expected version, apply result correlation, registration and stable errors."},{"contract_id":"vortex.authorization.v1","from":"none","version":"1.0.0","kind":"new","proposal_sha256":"ac63e8301d6ccb05c6b55bd1675742a858fab1cab75993552ea00252017d6a07","approved_at":"2026-11-05T13:41:37Z","summary":"Freeze the independent JSON authorization payload schema with distinct signer epoch and path generation semantics."}]}
 ```

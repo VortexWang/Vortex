@@ -42,6 +42,11 @@ class ContractVersionTests(unittest.TestCase):
         approved_change = {"changes": [{"contract_id": "vortex.control.v1", "version": "1.1.0", "kind": "compatible"}]}
         self.assertEqual([], check_change({"vortex.control.v1"}, approved, draft, approved_change))
 
+    def test_approved_new_contract_can_start_at_one_zero_zero(self):
+        after = {"vortex.authorization.v1": "1.0.0"}
+        change = {"changes": [{"contract_id": "vortex.authorization.v1", "from": "none", "version": "1.0.0", "kind": "new"}]}
+        self.assertEqual([], check_change({"vortex.authorization.v1"}, {}, after, change))
+
 
 if __name__ == "__main__":
     unittest.main()

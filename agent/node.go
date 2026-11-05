@@ -38,7 +38,16 @@ func New(nodeID string, s *store.Store, e Engine) (*Node, error) {
 	if _, err := rand.Read(boot[:]); err != nil {
 		return nil, fmt.Errorf("agent: boot id: %w", err)
 	}
-	return &Node{NodeID: nodeID, BootID: hex.EncodeToString(boot[:]), Store: s, Engine: e}, nil
+	encodedBoot := hex.EncodeToString(boot[:])
+	bootID := encodedBoot[:8] + "-" + encodedBoot[8:12] + "-" + encodedBoot[12:16] + "-" + encodedBoot[16:20] + "-" + encodedBoot[20:]
+	if err := s.MarkPreviousBootAuthorizationsSettlementOnly(context.Background(), nodeID, bootID); err != nil {
+		return nil, fmt.Errorf("agent: fence previous-boot authorizations before Engine start: %w", err)
+	}
+	node := &Node{NodeID: nodeID, BootID: bootID, Store: s, Engine: e}
+	if err := node.recoverUsageReservations(context.Background()); err != nil {
+		return nil, fmt.Errorf("agent: recover usage reservations before Engine start: %w", err)
+	}
+	return node, nil
 }
 
 func (n *Node) Start(ctx context.Context) error {

@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ID_RE = re.compile(r"\*\*([A-Z][A-Z0-9]*-[A-Z0-9-]+)\*\*")
-CONTRACT_IDS = {"vortex.database", "vortex.public-api", "vortex.control.v1", "vortex.runtime-config", "vortex.vlink.v1"}
+CONTRACT_IDS = {"vortex.database", "vortex.public-api", "vortex.control.v1", "vortex.runtime-config", "vortex.vlink.v1", "vortex.authorization.v1"}
 SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 CHANGELOG_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
 
@@ -57,17 +57,18 @@ def check_change(changed_ids, before, after, changelog):
     for contract_id in changed_ids:
         old, new = semver_tuple(before.get(contract_id)), semver_tuple(after.get(contract_id))
         entry = log.get(contract_id)
-        if old is None or new is None or entry is None:
+        if new is None or entry is None:
             errors.append(f"{contract_id}: changed content requires valid old/new versions and a change record")
             continue
         if entry.get("version") != after[contract_id]:
             errors.append(f"{contract_id}: changelog version does not match current version")
             continue
         kind = entry.get("kind")
-        valid = new[0] > old[0] if kind == "breaking" else (
+        valid = old is None and entry.get("from") == "none" and kind == "new" and new == (1, 0, 0)
+        valid = valid or old is not None and (new[0] > old[0] if kind == "breaking" else (
             new[0] == old[0] and new[1] > old[1] if kind == "compatible" else
             new[:2] == old[:2] and new[2] > old[2] if kind == "fix" else False
-        )
+        ))
         if not valid:
             errors.append(f"{contract_id}: version increment does not match change kind {kind!r}")
     return errors

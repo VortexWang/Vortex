@@ -32,6 +32,8 @@ jobs:
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.12
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Run frozen contract and traceability checks
+        run: make phase5-contract-check
       - name: Run Wave 1 check
         run: make phase5-wave1-check
       - name: Run Wave 2 check

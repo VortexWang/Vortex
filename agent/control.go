@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/tls"
 	"database/sql"
 	"encoding/hex"
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
+	"vortex/agent/store"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
@@ -151,6 +153,10 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 				return err
 			}
 			lastNodeSequence = responseSequence
+		case *controlv1.ControlMessage_AuthorizationUpdate:
+			if err := c.applyAuthorizationUpdate(ctx, body.AuthorizationUpdate); err != nil {
+				return err
+			}
 		case *controlv1.ControlMessage_UsageAck:
 			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
@@ -172,6 +178,46 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			return fmt.Errorf("agent: unsupported control message body")
 		}
 	}
+}
+
+func (c *ControlClient) applyAuthorizationUpdate(ctx context.Context, update *controlv1.AuthorizationUpdate) error {
+	if c == nil || c.Node == nil || update == nil {
+		return fmt.Errorf("invalid_authorization: missing authenticated node or update")
+	}
+	payload, err := validateAuthorizationUpdate(update.GetPayload(), c.Node.NodeID, c.Node.BootID, update.GetGeneration())
+	if err != nil {
+		return err
+	}
+	digest := sha256.Sum256(update.GetPayload())
+	records := make([]store.AuthorizationRecord, 0, len(payload.Authorizations))
+	for _, authorization := range payload.Authorizations {
+		record := store.AuthorizationRecord{
+			AuthorizationID: authorization.AuthorizationID, ParentAuthorizationID: authorization.ParentAuthorizationID,
+			SourceID: authorization.SourceID, Kind: authorization.Kind, RuleID: authorization.RuleID,
+			RuleRevision: authorization.RuleRevision, PathGeneration: authorization.PathGeneration,
+			SignerEpoch: payload.SignerEpoch, BootID: payload.BootID,
+			IssuedAt:          authorization.IssuedAt.UTC().Format(time.RFC3339Nano),
+			NotBefore:         authorization.NotBefore.UTC().Format(time.RFC3339Nano),
+			ExpiresAt:         authorization.ExpiresAt.UTC().Format(time.RFC3339Nano),
+			HardDeadline:      authorization.HardDeadline.UTC().Format(time.RFC3339Nano),
+			BillingSnapshotID: authorization.BillingSnapshotID,
+		}
+		if authorization.AmountBytes != nil {
+			record.AmountBytes = *authorization.AmountBytes
+		}
+		if authorization.RateBPS != nil {
+			record.RateBPS = *authorization.RateBPS
+		}
+		if authorization.Connections != nil {
+			record.Connections = *authorization.Connections
+		}
+		records = append(records, record)
+	}
+	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
+		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
+		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
+		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,
+	}, records, payload.Revocations)
 }
 
 func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64) error {
