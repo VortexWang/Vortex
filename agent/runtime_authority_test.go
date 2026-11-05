@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
 	"vortex/agent/identity"
 	"vortex/agent/store"
 	controlv1 "vortex/contracts/protobuf/v1"
@@ -258,7 +259,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				SourceID: "550e8400-e29b-41d4-a716-446655440023", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440061", ShareSourceID: "550e8400-e29b-41d4-a716-446655440062",
 				NodeID: node.NodeID, BootID: node.BootID, BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440024",
 				RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, FencingFloor: 8, SignerEpoch: 1,
-				RawBytes: 8192, RateBPS: 1000000, Connections: 1,
+				RawBytes: 12288, RateBPS: 1000000, Connections: 1,
 				ValidFrom: issuedAt, ExpiresAt: issuedAt.Add(time.Hour), HardDeadline: issuedAt.Add(time.Hour),
 				BackendHeartbeat: issuedAt, AutonomyDeadline: issuedAt.Add(2 * time.Hour),
 			}
@@ -275,7 +276,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err != nil {
 				t.Fatal(err)
 			}
-			preparedPayload, err := validateAuthorizationUpdate(prepared.Payload, node.NodeID, node.BootID, 4)
+			_, err = validateAuthorizationUpdate(prepared.Payload, node.NodeID, node.BootID, 4)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -285,10 +286,32 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, ln.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
+			// A second same-parent grant is fresh reserved credit, not a transfer
+			// or a refund of the first grant. Deliver it over the real control link.
+			topupPrepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			topupPayload, err := validateAuthorizationUpdate(topupPrepared.Payload, node.NodeID, node.BootID, 4)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var topupGrantID string
+			for _, record := range topupPayload.Authorizations {
+				if record.Kind == "credit_grant" {
+					topupGrantID = record.AuthorizationID
+				}
+			}
+			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
+				return issuer.Issue(ctx, delegation.ID, id, boot, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
+			}}, serverTLS)
+			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, topupHub.Addr().String()); err != nil {
+				t.Fatal(err)
+			}
 			// Wait until the conservative lower clock bound reaches not_before.
 			for {
 				low, _, trusted := node.TrustedTime()
-				if trusted && !low.Before(preparedPayload.IssuedAt) {
+				if trusted && !low.Before(topupPayload.IssuedAt) {
 					break
 				}
 				select {
@@ -331,13 +354,26 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if b.Committed == uint64(2*len(message)) {
+				if b.Committed == uint64(2*len(message)) && b.Initial == 8192 {
 					break
 				}
 				select {
 				case <-ctx.Done():
 					t.Fatalf("metering not settled: %+v", b)
 				case <-time.After(time.Millisecond):
+				}
+			}
+			pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
+			if err != nil || len(pending) != 2 {
+				t.Fatalf("topup usage outbox: %d %v", len(pending), err)
+			}
+			for _, row := range pending {
+				var usage controlv1.UsageBatch
+				if err := proto.Unmarshal(row.Payload, &usage); err != nil {
+					t.Fatal(err)
+				}
+				if len(usage.Deltas) != 1 || usage.Deltas[0].GrantId != topupGrantID {
+					t.Fatalf("runtime did not select topped-up grant: %+v", usage.Deltas)
 				}
 			}
 			if fullDiskRoot != "" {
@@ -390,7 +426,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatalf("outbox not acknowledged: %d %v", len(pending), err)
 			}
 			balance, err := hs.AuditHubDelegation(ctx, delegation.ID)
-			if err != nil || balance.Initial != 8192 || balance.Remaining != 4096 || balance.Issued != 4096 {
+			if err != nil || balance.Initial != 12288 || balance.Remaining != 4096 || balance.Issued != 8192 {
 				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
 			}
 			if err := s.Close(); err != nil {

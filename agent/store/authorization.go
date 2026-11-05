@@ -78,6 +78,11 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || (record.Kind == "credit_grant" || record.BillingSnapshotID != "") && record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
 	}
+	if record.Kind == "credit_grant" {
+		if err := checkSourceLineageTx(ctx, tx, use.NodeID, record); err != nil {
+			return AuthorizationRecord{}, err
+		}
+	}
 
 	notBefore, e1 := time.Parse(time.RFC3339Nano, record.NotBefore)
 	expires, e2 := time.Parse(time.RFC3339Nano, record.ExpiresAt)
@@ -167,15 +172,6 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 		return "", err
 	}
 	effectiveID := use.AuthorizationID
-	if record.SourceID != "" {
-		var owner string
-		if err := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, use.NodeID, record.SourceID).Scan(&owner); err != nil {
-			return "", err
-		}
-		if owner != use.AuthorizationID {
-			return "", ErrAuthorityHandoffRequired
-		}
-	}
 	if record.Kind != "credit_grant" || reservation.Reserved > record.AmountBytes {
 		return "", ErrAuthorizationDenied
 	}
@@ -301,15 +297,46 @@ func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID s
 		return result, err
 	}
 	defer tx.Rollback()
-	var initialText, ownerID, remainingText string
-	if err := tx.QueryRowContext(ctx, `SELECT o.initial_bytes,o.authorization_id,b.remaining_bytes FROM authorization_source_owners o JOIN authorization_balances b ON b.node_id=o.node_id AND b.authorization_id=o.authorization_id AND b.source_id=o.source_id WHERE o.node_id=? AND o.source_id=?`, nodeID, sourceID).Scan(&initialText, &ownerID, &remainingText); err != nil {
+	var initialText string
+	if err := tx.QueryRowContext(ctx, `SELECT initial_bytes FROM authorization_source_owners WHERE node_id=? AND source_id=?`, nodeID, sourceID).Scan(&initialText); err != nil {
 		return result, err
 	}
 	if result.Initial, err = strconv.ParseUint(initialText, 10, 64); err != nil {
 		return result, err
 	}
-	if result.Remaining, err = strconv.ParseUint(remainingText, 10, 64); err != nil {
+	balances, err := tx.QueryContext(ctx, `SELECT initial_bytes,remaining_bytes FROM authorization_balances WHERE node_id=? AND source_id=?`, nodeID, sourceID)
+	if err != nil {
 		return result, err
+	}
+	var sumInitial uint64
+	for balances.Next() {
+		var initial, remaining string
+		if err := balances.Scan(&initial, &remaining); err != nil {
+			balances.Close()
+			return result, err
+		}
+		i, e1 := strconv.ParseUint(initial, 10, 64)
+		r, e2 := strconv.ParseUint(remaining, 10, 64)
+		if e1 != nil || e2 != nil || r > i {
+			balances.Close()
+			return result, ErrUsageBatchConflict
+		}
+		if err := addAuthorizationAmount(&sumInitial, i, result.Initial); err != nil {
+			balances.Close()
+			return result, err
+		}
+		if err := addAuthorizationAmount(&result.Remaining, r, result.Initial); err != nil {
+			balances.Close()
+			return result, err
+		}
+	}
+	err = balances.Err()
+	balances.Close()
+	if err != nil {
+		return result, err
+	}
+	if sumInitial != result.Initial {
+		return result, ErrUsageBatchConflict
 	}
 	rows, err := tx.QueryContext(ctx, `SELECT h.reserved_bytes,h.state,u.used_bytes FROM authorization_usage_holds h LEFT JOIN usage_reservations u ON u.node_id=h.node_id AND u.batch_id=h.batch_id WHERE h.node_id=? AND h.source_id=?`, nodeID, sourceID)
 	if err != nil {
@@ -357,6 +384,27 @@ func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID s
 		return result, fmt.Errorf("store: authorization source %s violates conservation", sourceID)
 	}
 	return result, nil
+}
+
+// A source is anchored to a single parent allocation, boot, billing scope and
+// signer epoch. Additional grants from that same authenticated Hub allocation
+// are independent reservations, not ownership transfers. Only the Hub knows
+// the parent's unissued budget and must reserve it before sending each grant.
+func checkSourceLineageTx(ctx context.Context, tx *sql.Tx, nodeID string, r AuthorizationRecord) error {
+	var id, parent, boot, snapshot, rule, revision, path, epoch, deadline string
+	err := tx.QueryRowContext(ctx, `SELECT a.authorization_id,a.parent_authorization_id,a.boot_id,a.billing_snapshot_id,a.rule_id,a.rule_revision,a.path_generation,a.signer_epoch,a.hard_deadline FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND o.source_id=?`, nodeID, r.SourceID).Scan(&id, &parent, &boot, &snapshot, &rule, &revision, &path, &epoch, &deadline)
+	if err != nil {
+		return err
+	}
+	if id == r.AuthorizationID {
+		return nil
+	}
+	rootDeadline, e1 := time.Parse(time.RFC3339Nano, deadline)
+	grantDeadline, e2 := time.Parse(time.RFC3339Nano, r.HardDeadline)
+	if r.ParentAuthorizationID == "" || parent != r.ParentAuthorizationID || boot != r.BootID || snapshot != r.BillingSnapshotID || rule != r.RuleID || revision != strconv.FormatUint(r.RuleRevision, 10) || path != strconv.FormatUint(r.PathGeneration, 10) || epoch != strconv.FormatUint(r.SignerEpoch, 10) || e1 != nil || e2 != nil || grantDeadline.After(rootDeadline) {
+		return ErrAuthorityHandoffRequired
+	}
+	return nil
 }
 
 func addAuthorizationAmount(total *uint64, amount, limit uint64) error {

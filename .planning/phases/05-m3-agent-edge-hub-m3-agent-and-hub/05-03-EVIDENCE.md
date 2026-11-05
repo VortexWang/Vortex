@@ -143,3 +143,16 @@ The exact unknown-liability wire proposal is retained in `05-03-UNKNOWN-USAGE-PR
 - The real TCP/UDP runtime fixture now obtains its initial grant from this persisted Hub issuer and the mTLS control stream. The actual-full-disk fixture uses separate Agent/Hub SQLite files on the same isolated filesystem, proving that a full disk refuses a new Hub issuance as well as stopping Agent forwarding.
 - Local root tests, Agent/Hub race, targeted vet and pinned Go 1.27.3 Docker full-disk TCP/UDP tests PASS. Same-SHA final Docker/Actions evidence will be recorded after the implementation commit.
 - Remaining: the Agent still conservatively rejects a second credit grant on an already-owned source; repeated Hub top-up delivery therefore is not yet an end-to-end acceptance result. Parent raw-byte allocation/billing conversion and authentication use the explicit protocol backend boundary until Phase 6. Typed unknown-liability handoff is awaiting the existing 1.2.0 proposal decision. Complete 05-03 acceptance and 05-04 ownership-transfer/recovery are not claimed.
+
+### Verified Hub issuer pair for `e702704e55ecc92091ed497f40cd7239547dceb9`
+
+- Clean pinned Go 1.27.3 Docker and [Actions run 42056223206](https://github.com/VortexWang/Vortex/actions/runs/42056223206) PASS. Raw results are retained in `artifacts/phase5/authorization/e702704/`. Both reports record real full-disk coverage and `plan_complete: false`.
+- This SHA verifies initial durable Hub issuance and its source reserve, not the subsequent same-source top-up support described below.
+
+## Same-source grant top-up increment
+
+- Additional grants are accepted only within the original source's parent allocation, node boot, signer epoch, rule revision, path and immutable billing snapshot; the original hard deadline cannot grow. Different parents/epochs/boots/scopes still require explicit handoff and are rejected. Authority to allocate the parent's total remains at the authenticated Hub, whose preceding issuance transaction reserves each grant.
+- Every grant keeps its own balance and usage holds. Proven unused bytes return to that same grant; old unknown liabilities are not transferred, refunded or erased by a new grant. Source audit sums all granted slices and verifies remaining + known + unknown + held conservation without overflow.
+- The real mTLS/TCP/UDP fixture now sends two grants from the same persisted delegation, asserts the runtime selects the second grant, and keeps both reservations on the Hub. Unit tests cover replay, unknown old usage, correct per-grant refunds and refusal of changed ownership/boundaries.
+- A compile error in the new assertion (grant ID is on UsageDelta, not UsageBatch) was corrected before acceptance testing. No production protocol changed.
+- In-session grant/lease renewal and complete runtime lifecycle verification remain to be completed; this increment does not declare 05-03 finished.

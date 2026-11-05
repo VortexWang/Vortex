@@ -67,7 +67,7 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 		}
 		if c.kind == "credit_grant" {
 			var remaining string
-			err := tx.QueryRowContext(ctx, `SELECT b.remaining_bytes FROM authorization_balances b JOIN authorization_source_owners o ON o.node_id=b.node_id AND o.authorization_id=b.authorization_id WHERE b.node_id=? AND b.authorization_id=?`, scope.NodeID, c.id).Scan(&remaining)
+			err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, scope.NodeID, c.id).Scan(&remaining)
 			if errors.Is(err, sql.ErrNoRows) {
 				continue
 			}

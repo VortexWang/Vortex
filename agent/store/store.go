@@ -484,11 +484,8 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 				refund = held
 			}
 			if refund > 0 {
-				var sourceID, oldAuthID, authID, remainingText string
-				if err := tx.QueryRowContext(ctx, `SELECT source_id,authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&sourceID, &oldAuthID); err != nil {
-					return err
-				}
-				if err := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, reservation.NodeID, sourceID).Scan(&authID); err != nil {
+				var sourceID, authID, remainingText string
+				if err := tx.QueryRowContext(ctx, `SELECT source_id,authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&sourceID, &authID); err != nil {
 					return err
 				}
 				if err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=? AND source_id=?`, reservation.NodeID, authID, sourceID).Scan(&remainingText); err != nil {
@@ -497,9 +494,6 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 				remaining, parseErr := strconv.ParseUint(remainingText, 10, 64)
 				if parseErr != nil || remaining > math.MaxUint64-refund {
 					return ErrUsageBatchConflict
-				}
-				if authID != oldAuthID {
-					return ErrAuthorityHandoffRequired
 				}
 				var initialText string
 				if err := tx.QueryRowContext(ctx, `SELECT initial_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, reservation.NodeID, authID).Scan(&initialText); err != nil {
@@ -649,11 +643,23 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 			} else if ownerErr != nil {
 				return ownerErr
 			} else {
-				// A parent ID and a newer signer epoch are not evidence that the
-				// old issuer has closed or that its remainder can be transferred.
-				// Keep the old source frozen against duplicate allocation until
-				// the explicit durable handoff protocol is implemented.
-				return ErrAuthorityHandoffRequired
+				if err := checkSourceLineageTx(ctx, tx, update.NodeID, record); err != nil {
+					return err
+				}
+				var initialText string
+				if err := tx.QueryRowContext(ctx, `SELECT initial_bytes FROM authorization_source_owners WHERE node_id=? AND source_id=?`, update.NodeID, record.SourceID).Scan(&initialText); err != nil {
+					return err
+				}
+				initial, err := strconv.ParseUint(initialText, 10, 64)
+				if err != nil || record.AmountBytes > math.MaxUint64-initial {
+					return ErrUsageBatchConflict
+				}
+				if _, err := tx.ExecContext(ctx, `UPDATE authorization_source_owners SET initial_bytes=?,updated_at=? WHERE node_id=? AND source_id=?`, strconv.FormatUint(initial+record.AmountBytes, 10), now, update.NodeID, record.SourceID); err != nil {
+					return err
+				}
+				if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_balances(node_id,authorization_id,source_id,initial_bytes,remaining_bytes,updated_at) VALUES(?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.SourceID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.AmountBytes, 10), now); err != nil {
+					return err
+				}
 			}
 		}
 	}
