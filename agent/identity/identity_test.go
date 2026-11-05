@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"os"
+	"sync"
 	"testing"
 	"time"
 )
@@ -97,6 +98,37 @@ func TestAttachKeyRejectsKeyThatDoesNotMatchCSR(t *testing.T) {
 	}
 	if _, err := AttachKey(cred, wrongKey, nil); err == nil {
 		t.Fatal("mismatched key accepted")
+	}
+}
+
+func TestEnrollmentTokenCanBeRedeemedOnlyOnceConcurrently(t *testing.T) {
+	now := time.Now().UTC()
+	ca, _, err := NewCA(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, csr, err := GenerateCSR("node-race")
+	if err != nil {
+		t.Fatal(err)
+	}
+	enroller := &Enroller{CA: ca, Tokens: map[string]bool{"single": true}}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	successes := 0
+	for range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := enroller.Redeem("single", "node-race", csr, now, time.Hour); err == nil {
+				mu.Lock()
+				successes++
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	if successes != 1 {
+		t.Fatalf("successful redemptions=%d, want 1", successes)
 	}
 }
 

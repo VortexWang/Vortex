@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -35,10 +36,16 @@ type CA struct {
 type Enroller struct {
 	CA     *CA
 	Tokens map[string]bool
+	mu     sync.Mutex
 }
 
 func (e *Enroller) Redeem(token, nodeID string, csrDER []byte, now time.Time, ttl time.Duration) (Credential, error) {
-	if e == nil || e.CA == nil || token == "" || !e.Tokens[token] {
+	if e == nil || e.CA == nil || token == "" {
+		return Credential{}, errors.New("identity: invalid or consumed enrollment token")
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if !e.Tokens[token] {
 		return Credential{}, errors.New("identity: invalid or consumed enrollment token")
 	}
 	delete(e.Tokens, token)
@@ -86,6 +93,9 @@ func GenerateCSR(nodeID string) (*ecdsa.PrivateKey, []byte, error) {
 }
 
 func (ca *CA) SignCSR(csrDER []byte, nodeID string, now time.Time, ttl time.Duration) (Credential, error) {
+	if ca == nil || ca.Certificate == nil || ca.Key == nil || strings.TrimSpace(nodeID) == "" || strings.TrimSpace(nodeID) != nodeID || ttl <= 0 {
+		return Credential{}, errors.New("identity: CA, canonical node_id and positive certificate lifetime are required")
+	}
 	csr, err := x509.ParseCertificateRequest(csrDER)
 	if err != nil {
 		return Credential{}, fmt.Errorf("identity: parse CSR: %w", err)
