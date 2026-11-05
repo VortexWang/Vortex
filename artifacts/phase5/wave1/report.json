@@ -1,0 +1,1 @@
+{"schema":1,"status":"passed","commit":"9e67f96688fc125df59c3fac47c1de91d94696a8","tests":"go test ./...","vet":"go vet ./...","control_descriptor":"/Users/peng/Documents/123/VORTEX/artifacts/phase5/wave1/control-v1.pb"}

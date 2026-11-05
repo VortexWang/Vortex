@@ -3,7 +3,7 @@ phase: 05-m3-agent-edge-hub-m3-agent-and-hub
 plan: 01
 status: complete
 completed: 2026-11-05
-commit: pending
+commit: 9e67f96
 ---
 
 # Wave 1 Summary
