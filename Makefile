@@ -95,3 +95,7 @@ phase4-native-preflight:
 phase4-runtime-credit:
 	python3 tools/phase4/credit.py --backend $${BACKEND:-native}
 	python3 tools/phase4/credit.py --backend $${BACKEND:-native} --protocol udp
+
+.PHONY: phase5-authorization-check
+phase5-authorization-check:
+	tools/phase5/authorization_check.sh

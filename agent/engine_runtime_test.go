@@ -42,10 +42,23 @@ func TestRuntimeEngineStartsAndStopsThroughNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	gate, err := n.NewAuthorizationGate(AuthorizationGateConfig{
+		AuthorizationID: "grant-id", RuleID: "rule", RuleRevision: 1, PathGeneration: 1,
+		SnapshotID: "snapshot-id", Clock: func() (time.Time, time.Time, bool) { now := time.Now(); return now, now, false },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.SetAccountingGate(gate); err != nil {
+		t.Fatalf("install Agent gate before Engine start: %v", err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	if err := n.Start(ctx); err != nil {
 		t.Fatal(err)
+	}
+	if err := e.SetAccountingGate(nil); err == nil {
+		t.Fatal("replaced accounting policy after traffic listener start")
 	}
 	conn, err := net.DialTimeout("tcp", e.runtime.Addr().String(), time.Second)
 	if err != nil {

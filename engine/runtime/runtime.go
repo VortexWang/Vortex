@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	engineaccounting "vortex/engine/accounting"
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/link"
 	"vortex/engine/runtime/relay"
@@ -36,9 +37,24 @@ func (r *Runtime) Done() <-chan struct{} { return r.done }
 
 func (r *Runtime) Addr() net.Addr { r.mu.Lock(); defer r.mu.Unlock(); return r.addr }
 
+// SetAccountingGate permits Agent composition before Start only.
+func (r *Runtime) SetAccountingGate(gate engineaccounting.Gate) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.started {
+		return errors.New("runtime: accounting gate must be installed before Start")
+	}
+	r.service.Gate = gate
+	return nil
+}
+
 func (r *Runtime) Err() error { r.mu.Lock(); defer r.mu.Unlock(); return r.err }
 
-func New(cfg config.Config) (*Runtime, error) {
+func New(cfg config.Config) (*Runtime, error) { return NewWithAccountingGate(cfg, nil) }
+
+// NewWithAccountingGate injects the Agent-owned in-process authorization and
+// durable accounting boundary. Runtime never opens the Agent database itself.
+func NewWithAccountingGate(cfg config.Config, gate engineaccounting.Gate) (*Runtime, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -55,7 +71,7 @@ func New(cfg config.Config) (*Runtime, error) {
 		supervisor.Close()
 		return nil, err
 	}
-	service := &relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget}
+	service := &relay.Service{LocalNode: supervisor.NodeID, Policy: policy, Dial: dialTarget, Gate: gate}
 	return &Runtime{cfg: cfg, supervisor: supervisor, service: service, done: make(chan struct{})}, nil
 }
 

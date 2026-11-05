@@ -29,11 +29,22 @@ func (n *Node) ReserveUsage(ctx context.Context, record engineaccounting.UsageRe
 	if err != nil {
 		return err
 	}
-	return n.Store.ReserveUsage(ctx, store.UsageReservation{
-		NodeID: n.NodeID, BootID: n.BootID, BatchID: record.BatchID,
+	reservation := store.UsageReservation{
+		NodeID: n.NodeID, BootID: n.BootID, BatchID: record.BatchID, AuthorizationID: record.AuthorizationID,
 		SnapshotID: record.SnapshotID, FlowKey: record.FlowKey, RuleID: record.RuleID,
 		Direction: direction, Reserved: uint64(record.Reserved),
-	})
+	}
+	if record.AuthorizationID != "" {
+		_, err = n.Store.ReserveAuthorizedUsage(ctx, reservation, store.AuthorizationUse{
+			NodeID: n.NodeID, BootID: n.BootID, AuthorizationID: record.AuthorizationID,
+			Kind: "credit_grant", RuleID: record.RuleID, RuleRevision: record.RuleRevision,
+			PathGeneration: record.PathGeneration, BillingSnapshotID: record.SnapshotID,
+			Earliest: record.Earliest, Latest: record.Latest, TrustedTime: record.TrustedTime,
+			ExistingSession: record.ExistingSession,
+		})
+		return err
+	}
+	return n.Store.ReserveUsage(ctx, reservation)
 }
 
 func (n *Node) recoverUsageReservations(ctx context.Context) error {
@@ -48,7 +59,7 @@ func (n *Node) recoverUsageReservations(ctx context.Context) error {
 		}
 		record := engineaccounting.UsageRecord{
 			BatchID: reservation.BatchID, FlowKey: reservation.FlowKey, RuleID: reservation.RuleID,
-			SnapshotID: reservation.SnapshotID, Direction: direction,
+			SnapshotID: reservation.SnapshotID, AuthorizationID: reservation.AuthorizationID, Direction: direction,
 			Resolution: engineaccounting.Unknown, Reserved: int64(reservation.Reserved), Used: int64(reservation.Reserved),
 		}
 		payload, err := marshalUsage(record, reservation.Direction, reservation.Reserved)
@@ -72,7 +83,7 @@ func (n *Node) SettleUsage(ctx context.Context, record engineaccounting.UsageRec
 		return err
 	}
 	reservation := store.UsageReservation{
-		NodeID: n.NodeID, BootID: n.BootID, BatchID: record.BatchID,
+		NodeID: n.NodeID, BootID: n.BootID, BatchID: record.BatchID, AuthorizationID: record.AuthorizationID,
 		SnapshotID: record.SnapshotID, FlowKey: record.FlowKey, RuleID: record.RuleID,
 		Direction: direction, Reserved: uint64(record.Reserved),
 	}
@@ -110,7 +121,7 @@ func usageDirection(direction engineaccounting.Direction) (string, error) {
 func marshalUsage(record engineaccounting.UsageRecord, direction string, bytesUsed uint64) ([]byte, error) {
 	batch := &controlv1.UsageBatch{
 		BatchId: record.BatchID, BillingSnapshotId: record.SnapshotID,
-		Deltas: []*controlv1.UsageDelta{{RuleId: record.RuleID, Role: "source", Direction: direction, Bytes: bytesUsed}},
+		Deltas: []*controlv1.UsageDelta{{RuleId: record.RuleID, Role: "source", Direction: direction, Bytes: bytesUsed, GrantId: record.AuthorizationID}},
 	}
 	payload, err := (proto.MarshalOptions{Deterministic: true}).Marshal(batch)
 	if err != nil {

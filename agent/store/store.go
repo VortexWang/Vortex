@@ -61,15 +61,16 @@ type UsageBatch struct {
 }
 
 type UsageReservation struct {
-	NodeID     string
-	BootID     string
-	BatchID    string
-	SnapshotID string
-	FlowKey    string
-	RuleID     string
-	Direction  string
-	Reserved   uint64
-	Resolution string
+	NodeID          string
+	BootID          string
+	BatchID         string
+	AuthorizationID string
+	SnapshotID      string
+	FlowKey         string
+	RuleID          string
+	Direction       string
+	Reserved        uint64
+	Resolution      string
 }
 
 type AuthorizationRecord struct {
@@ -265,6 +266,36 @@ CREATE TABLE IF NOT EXISTS authorization_records (
   state TEXT NOT NULL,
   PRIMARY KEY(node_id, authorization_id)
 );
+CREATE TABLE IF NOT EXISTS authorization_balances (
+  node_id TEXT NOT NULL,
+  authorization_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  initial_bytes TEXT NOT NULL,
+  remaining_bytes TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, authorization_id),
+  FOREIGN KEY(node_id, authorization_id) REFERENCES authorization_records(node_id, authorization_id)
+);
+CREATE TABLE IF NOT EXISTS authorization_source_owners (
+  node_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  authorization_id TEXT NOT NULL,
+  initial_bytes TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, source_id),
+  UNIQUE(node_id, authorization_id),
+  FOREIGN KEY(node_id, authorization_id) REFERENCES authorization_records(node_id, authorization_id)
+);
+CREATE TABLE IF NOT EXISTS authorization_usage_holds (
+  node_id TEXT NOT NULL,
+  batch_id TEXT NOT NULL,
+  authorization_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  reserved_bytes TEXT NOT NULL,
+  state TEXT NOT NULL,
+  PRIMARY KEY(node_id, batch_id),
+  FOREIGN KEY(node_id, authorization_id) REFERENCES authorization_records(node_id, authorization_id)
+);
 CREATE TABLE IF NOT EXISTS authorization_revocations (
   node_id TEXT NOT NULL,
   authorization_id TEXT NOT NULL,
@@ -280,7 +311,7 @@ CREATE TABLE IF NOT EXISTS autonomy_transitions (
   backend_heartbeat TEXT NOT NULL,
   hard_deadline TEXT NOT NULL
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '3')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '4')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -382,6 +413,14 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 	if bootID != reservation.BootID || snapshotID != reservation.SnapshotID || flowKey != reservation.FlowKey || ruleID != reservation.RuleID || direction != reservation.Direction || storedReserved != reservation.Reserved {
 		return ErrUsageBatchConflict
 	}
+	var durableAuthorizationID string
+	authorityErr := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&durableAuthorizationID)
+	if authorityErr != nil && !errors.Is(authorityErr, sql.ErrNoRows) {
+		return authorityErr
+	}
+	if durableAuthorizationID != reservation.AuthorizationID {
+		return ErrUsageBatchConflict
+	}
 	if state != "reserved" {
 		storedUsed, parseErr := strconv.ParseUint(usedText, 10, 64)
 		if parseErr != nil || state != resolution || storedUsed != used {
@@ -402,6 +441,58 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 		}
 		return tx.Commit()
 	}
+	var holdReserved, holdState string
+	holdErr := tx.QueryRowContext(ctx, `SELECT reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&holdReserved, &holdState)
+	if holdErr == nil {
+		if holdState != "reserved" {
+			return ErrUsageBatchConflict
+		}
+		held, parseErr := strconv.ParseUint(holdReserved, 10, 64)
+		if parseErr != nil || held != reservation.Reserved || (resolution != "returned" && resolution != "committed" && resolution != "unknown") {
+			return ErrUsageBatchConflict
+		}
+		if resolution != "unknown" {
+			refund := held - used
+			if resolution == "returned" {
+				refund = held
+			}
+			if refund > 0 {
+				var sourceID, oldAuthID, authID, remainingText string
+				if err := tx.QueryRowContext(ctx, `SELECT source_id,authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&sourceID, &oldAuthID); err != nil {
+					return err
+				}
+				if err := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, reservation.NodeID, sourceID).Scan(&authID); err != nil {
+					return err
+				}
+				if err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=? AND source_id=?`, reservation.NodeID, authID, sourceID).Scan(&remainingText); err != nil {
+					return err
+				}
+				remaining, parseErr := strconv.ParseUint(remainingText, 10, 64)
+				if parseErr != nil || remaining > math.MaxUint64-refund {
+					return ErrUsageBatchConflict
+				}
+				if authID != oldAuthID {
+					return ErrAuthorityHandoffRequired
+				}
+				var initialText string
+				if err := tx.QueryRowContext(ctx, `SELECT initial_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, reservation.NodeID, authID).Scan(&initialText); err != nil {
+					return err
+				}
+				initial, parseErr := strconv.ParseUint(initialText, 10, 64)
+				if parseErr != nil || remaining+refund > initial {
+					return ErrUsageBatchConflict
+				}
+				if _, err := tx.ExecContext(ctx, `UPDATE authorization_balances SET remaining_bytes=?,updated_at=? WHERE node_id=? AND authorization_id=?`, strconv.FormatUint(remaining+refund, 10), time.Now().UTC().Format(time.RFC3339Nano), reservation.NodeID, authID); err != nil {
+					return err
+				}
+			}
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE authorization_usage_holds SET state=? WHERE node_id=? AND batch_id=? AND state='reserved'`, resolution, reservation.NodeID, reservation.BatchID); err != nil {
+			return err
+		}
+	} else if !errors.Is(holdErr, sql.ErrNoRows) {
+		return holdErr
+	}
 	if resolution != "returned" {
 		digest := sha256.Sum256(payload)
 		now := time.Now().UTC().Format(time.RFC3339Nano)
@@ -419,7 +510,7 @@ func (s *Store) SettleUsageReservation(ctx context.Context, reservation UsageRes
 // UnresolvedUsageReservations returns reservations from earlier boots. The
 // caller must settle each as unknown before starting Engine traffic.
 func (s *Store) UnresolvedUsageReservations(ctx context.Context, nodeID, currentBootID string) ([]UsageReservation, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes FROM usage_reservations WHERE node_id=? AND boot_id<>? AND state='reserved' ORDER BY updated_at,batch_id`, nodeID, currentBootID)
+	rows, err := s.db.QueryContext(ctx, `SELECT u.node_id,u.boot_id,u.batch_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,COALESCE(h.authorization_id,'') FROM usage_reservations u LEFT JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id WHERE u.node_id=? AND u.boot_id<>? AND u.state='reserved' ORDER BY u.updated_at,u.batch_id`, nodeID, currentBootID)
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +519,7 @@ func (s *Store) UnresolvedUsageReservations(ctx context.Context, nodeID, current
 	for rows.Next() {
 		var r UsageReservation
 		var reserved string
-		if err := rows.Scan(&r.NodeID, &r.BootID, &r.BatchID, &r.SnapshotID, &r.FlowKey, &r.RuleID, &r.Direction, &reserved); err != nil {
+		if err := rows.Scan(&r.NodeID, &r.BootID, &r.BatchID, &r.SnapshotID, &r.FlowKey, &r.RuleID, &r.Direction, &reserved, &r.AuthorizationID); err != nil {
 			return nil, err
 		}
 		if r.Reserved, err = strconv.ParseUint(reserved, 10, 64); err != nil {
@@ -508,6 +599,30 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		_, err = tx.ExecContext(ctx, `INSERT INTO authorization_records(node_id,authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.ParentAuthorizationID, record.SourceID, record.Kind, record.RuleID, strconv.FormatUint(record.RuleRevision, 10), strconv.FormatUint(record.PathGeneration, 10), strconv.FormatUint(record.SignerEpoch, 10), record.BootID, record.IssuedAt, record.NotBefore, record.ExpiresAt, record.HardDeadline, record.BillingSnapshotID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.RateBPS, 10), strconv.FormatUint(record.Connections, 10), state)
 		if err != nil {
 			return err
+		}
+		if record.Kind == "credit_grant" {
+			if record.AmountBytes == 0 {
+				return fmt.Errorf("store: credit grant has no authorized amount")
+			}
+			now := time.Now().UTC().Format(time.RFC3339Nano)
+			var currentOwner string
+			ownerErr := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, update.NodeID, record.SourceID).Scan(&currentOwner)
+			if errors.Is(ownerErr, sql.ErrNoRows) {
+				if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_source_owners(node_id,source_id,authorization_id,initial_bytes,updated_at) VALUES(?,?,?,?,?)`, update.NodeID, record.SourceID, record.AuthorizationID, strconv.FormatUint(record.AmountBytes, 10), now); err != nil {
+					return err
+				}
+				if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_balances(node_id,authorization_id,source_id,initial_bytes,remaining_bytes,updated_at) VALUES(?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.SourceID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.AmountBytes, 10), now); err != nil {
+					return err
+				}
+			} else if ownerErr != nil {
+				return ownerErr
+			} else {
+				// A parent ID and a newer signer epoch are not evidence that the
+				// old issuer has closed or that its remainder can be transferred.
+				// Keep the old source frozen against duplicate allocation until
+				// the explicit durable handoff protocol is implemented.
+				return ErrAuthorityHandoffRequired
+			}
 		}
 	}
 	for _, id := range revocations {

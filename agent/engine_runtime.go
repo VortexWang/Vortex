@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	engineaccounting "vortex/engine/accounting"
 	engineruntime "vortex/engine/runtime"
 	"vortex/engine/runtime/config"
 )
@@ -39,6 +40,15 @@ func (e *RuntimeEngine) Start(ctx context.Context) error {
 		return fmt.Errorf("agent: runtime engine is not configured")
 	}
 	return e.runtime.Start(ctx)
+}
+
+// SetAccountingGate wires the Agent-owned durable grant gate before the Engine
+// listener starts. It cannot replace policy after traffic admission begins.
+func (e *RuntimeEngine) SetAccountingGate(gate engineaccounting.Gate) error {
+	if e == nil || e.runtime == nil {
+		return fmt.Errorf("agent: runtime engine is not configured")
+	}
+	return e.runtime.SetAccountingGate(gate)
 }
 
 func (e *RuntimeEngine) Stop(ctx context.Context) error {

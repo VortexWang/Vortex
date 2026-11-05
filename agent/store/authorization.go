@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
@@ -28,19 +29,31 @@ type AuthorizationUse struct {
 // The result is a snapshot, not a capability to write after a later revocation.
 func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationUse) (AuthorizationRecord, error) {
 	var record AuthorizationRecord
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return record, err
+	}
+	defer tx.Rollback()
+	record, err = checkAuthorizationTx(ctx, tx, use)
+	if err != nil {
+		return AuthorizationRecord{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return AuthorizationRecord{}, err
+	}
+	return record, nil
+}
+
+func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse) (AuthorizationRecord, error) {
+	var record AuthorizationRecord
 	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
 		return record, ErrAuthorityTimeUncertain
 	}
 	if use.NodeID == "" || use.BootID == "" || use.AuthorizationID == "" || use.Kind == "" || use.RuleID == "" || use.RuleRevision == 0 || use.PathGeneration == 0 {
 		return record, ErrAuthorizationDenied
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return record, err
-	}
-	defer tx.Rollback()
 	var state, ruleRevision, pathGeneration, signerEpoch, amount, rate, connections string
-	err = tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state FROM authorization_records WHERE node_id=? AND authorization_id=?`, use.NodeID, use.AuthorizationID).Scan(
+	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state FROM authorization_records WHERE node_id=? AND authorization_id=?`, use.NodeID, use.AuthorizationID).Scan(
 		&record.AuthorizationID, &record.ParentAuthorizationID, &record.SourceID, &record.Kind, &record.RuleID,
 		&ruleRevision, &pathGeneration, &signerEpoch, &record.BootID, &record.IssuedAt, &record.NotBefore,
 		&record.ExpiresAt, &record.HardDeadline, &record.BillingSnapshotID, &amount, &rate, &connections, &state)
@@ -63,6 +76,7 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
 	}
+
 	notBefore, e1 := time.Parse(time.RFC3339Nano, record.NotBefore)
 	expires, e2 := time.Parse(time.RFC3339Nano, record.ExpiresAt)
 	deadline, e3 := time.Parse(time.RFC3339Nano, record.HardDeadline)
@@ -75,6 +89,9 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 	if !use.ExistingSession {
 		current, err := stateValue(ctx, tx, "authorization_path_generation")
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return AuthorizationRecord{}, ErrAuthorizationDenied
+			}
 			return AuthorizationRecord{}, err
 		}
 		generation, err := strconv.ParseUint(current, 10, 64)
@@ -82,8 +99,241 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 			return AuthorizationRecord{}, ErrAuthorizationDenied
 		}
 	}
-	if err := tx.Commit(); err != nil {
-		return AuthorizationRecord{}, err
-	}
 	return record, nil
+}
+
+// ReserveAuthorizedUsage atomically checks the persisted grant and deducts its
+// full byte upper bound in the same FULL SQLite transaction that records the
+// Engine pre-write reservation. Duplicate retries never debit twice.
+func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageReservation, use AuthorizationUse) (string, error) {
+	if reservation.AuthorizationID != use.AuthorizationID || reservation.NodeID != use.NodeID || reservation.BootID != use.BootID || reservation.BatchID == "" || reservation.FlowKey == "" || reservation.Reserved == 0 || reservation.SnapshotID != use.BillingSnapshotID || reservation.RuleID != use.RuleID || (reservation.Direction != "egress" && reservation.Direction != "ingress") {
+		return "", ErrAuthorizationDenied
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback()
+	var priorAuth, priorReserved, priorState string
+	err = tx.QueryRowContext(ctx, `SELECT authorization_id,reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&priorAuth, &priorReserved, &priorState)
+	if err == nil {
+		prior, parseErr := strconv.ParseUint(priorReserved, 10, 64)
+
+		if parseErr != nil || priorAuth != use.AuthorizationID || prior != reservation.Reserved || priorState != "reserved" {
+			return "", ErrUsageBatchConflict
+		}
+		var bootID, snapshotID, flowKey, ruleID, direction, reservationAmount, resolution string
+		err = tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&bootID, &snapshotID, &flowKey, &ruleID, &direction, &reservationAmount, &resolution)
+		if err != nil || bootID != reservation.BootID || snapshotID != reservation.SnapshotID || flowKey != reservation.FlowKey || ruleID != reservation.RuleID || direction != reservation.Direction || reservationAmount != strconv.FormatUint(reservation.Reserved, 10) || resolution != "reserved" {
+			return "", ErrUsageBatchConflict
+		}
+		if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
+			return "", err
+		}
+		if err := tx.Commit(); err != nil {
+			return "", err
+		}
+		return priorAuth, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return "", err
+	}
+	record, err := checkAuthorizationTx(ctx, tx, use)
+	if err != nil {
+		return "", err
+	}
+	effectiveID := use.AuthorizationID
+	if record.SourceID != "" {
+		var owner string
+		if err := tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, use.NodeID, record.SourceID).Scan(&owner); err != nil {
+			return "", err
+		}
+		if owner != use.AuthorizationID {
+			return "", ErrAuthorityHandoffRequired
+		}
+	}
+	if record.Kind != "credit_grant" || reservation.Reserved > record.AmountBytes {
+		return "", ErrAuthorizationDenied
+	}
+	var sourceID, remainingText string
+	err = tx.QueryRowContext(ctx, `SELECT source_id,remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, use.NodeID, effectiveID).Scan(&sourceID, &remainingText)
+	if err != nil || sourceID != record.SourceID {
+		return "", ErrAuthorizationDenied
+	}
+	remaining, err := strconv.ParseUint(remainingText, 10, 64)
+	if err != nil || remaining < reservation.Reserved {
+		return "", ErrAuthorizationDenied
+	}
+	if err := insertUsageReservationTx(ctx, tx, reservation); err != nil {
+		return "", err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE authorization_balances SET remaining_bytes=?,updated_at=? WHERE node_id=? AND authorization_id=? AND source_id=?`, strconv.FormatUint(remaining-reservation.Reserved, 10), time.Now().UTC().Format(time.RFC3339Nano), use.NodeID, effectiveID, record.SourceID); err != nil {
+		return "", err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_usage_holds(node_id,batch_id,authorization_id,source_id,reserved_bytes,state) VALUES(?,?,?,?,?,?)`, use.NodeID, reservation.BatchID, effectiveID, record.SourceID, strconv.FormatUint(reservation.Reserved, 10), "reserved"); err != nil {
+		return "", err
+	}
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
+	return effectiveID, nil
+}
+
+func insertUsageReservationTx(ctx context.Context, tx *sql.Tx, r UsageReservation) error {
+	_, err := tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, r.NodeID, r.BootID, r.BatchID, r.SnapshotID, r.FlowKey, r.RuleID, r.Direction, strconv.FormatUint(r.Reserved, 10), "reserved", time.Now().UTC().Format(time.RFC3339Nano))
+	return err
+}
+
+func (s *Store) RemainingAuthorizationBytes(ctx context.Context, nodeID, authorizationID string) (uint64, error) {
+	var text string
+	if err := s.db.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&text); err != nil {
+		return 0, err
+	}
+	return strconv.ParseUint(text, 10, 64)
+}
+
+type AuthorizationBalance struct {
+	Initial, Remaining, Committed, Unknown, Reserved uint64
+}
+
+// AuditAuthorizationBalance checks conservation for one persisted credit grant.
+func (s *Store) AuditAuthorizationBalance(ctx context.Context, nodeID, authorizationID string) (AuthorizationBalance, error) {
+	var result AuthorizationBalance
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		return result, err
+	}
+	defer tx.Rollback()
+	var initialText, remainingText string
+	if err := tx.QueryRowContext(ctx, `SELECT initial_bytes,remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&initialText, &remainingText); err != nil {
+		return result, err
+	}
+	if result.Initial, err = strconv.ParseUint(initialText, 10, 64); err != nil {
+		return result, err
+	}
+	if result.Remaining, err = strconv.ParseUint(remainingText, 10, 64); err != nil {
+		return result, err
+	}
+
+	rows, err := tx.QueryContext(ctx, `SELECT h.reserved_bytes,h.state,u.used_bytes FROM authorization_usage_holds h LEFT JOIN usage_reservations u ON u.node_id=h.node_id AND u.batch_id=h.batch_id WHERE h.node_id=? AND h.authorization_id=?`, nodeID, authorizationID)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var reservedText, usedText, state string
+		if err := rows.Scan(&reservedText, &state, &usedText); err != nil {
+			return result, err
+		}
+		reserved, err := strconv.ParseUint(reservedText, 10, 64)
+		if err != nil {
+			return result, err
+		}
+		used, err := strconv.ParseUint(usedText, 10, 64)
+		if err != nil {
+			return result, err
+		}
+		switch state {
+		case "reserved":
+			if err := addAuthorizationAmount(&result.Reserved, reserved, result.Initial); err != nil {
+				return result, err
+			}
+		case "committed":
+			if used > reserved {
+				return result, ErrUsageBatchConflict
+			}
+			if err := addAuthorizationAmount(&result.Committed, used, result.Initial); err != nil {
+				return result, err
+			}
+		case "unknown":
+			if err := addAuthorizationAmount(&result.Unknown, reserved, result.Initial); err != nil {
+				return result, err
+			}
+		case "returned":
+		default:
+			return result, ErrUsageBatchConflict
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
+	if result.Remaining > result.Initial || result.Committed > result.Initial-result.Remaining || result.Unknown > result.Initial-result.Remaining-result.Committed || result.Reserved != result.Initial-result.Remaining-result.Committed-result.Unknown {
+		return result, fmt.Errorf("store: authorization source balance violates conservation")
+	}
+	return result, nil
+}
+
+// AuditAuthorizationSource verifies the single-source conservation equation
+// across outstanding usage holds.
+func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID string) (AuthorizationBalance, error) {
+	var result AuthorizationBalance
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		return result, err
+	}
+	defer tx.Rollback()
+	var initialText, ownerID, remainingText string
+	if err := tx.QueryRowContext(ctx, `SELECT o.initial_bytes,o.authorization_id,b.remaining_bytes FROM authorization_source_owners o JOIN authorization_balances b ON b.node_id=o.node_id AND b.authorization_id=o.authorization_id AND b.source_id=o.source_id WHERE o.node_id=? AND o.source_id=?`, nodeID, sourceID).Scan(&initialText, &ownerID, &remainingText); err != nil {
+		return result, err
+	}
+	if result.Initial, err = strconv.ParseUint(initialText, 10, 64); err != nil {
+		return result, err
+	}
+	if result.Remaining, err = strconv.ParseUint(remainingText, 10, 64); err != nil {
+		return result, err
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT h.reserved_bytes,h.state,u.used_bytes FROM authorization_usage_holds h LEFT JOIN usage_reservations u ON u.node_id=h.node_id AND u.batch_id=h.batch_id WHERE h.node_id=? AND h.source_id=?`, nodeID, sourceID)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var reservedText, usedText, state string
+		if err := rows.Scan(&reservedText, &state, &usedText); err != nil {
+			return result, err
+		}
+		reserved, e := strconv.ParseUint(reservedText, 10, 64)
+		if e != nil {
+			return result, e
+		}
+		used, e := strconv.ParseUint(usedText, 10, 64)
+		if e != nil {
+			return result, e
+		}
+		switch state {
+		case "reserved":
+			if err := addAuthorizationAmount(&result.Reserved, reserved, result.Initial); err != nil {
+				return result, err
+			}
+		case "committed":
+			if used > reserved {
+				return result, ErrUsageBatchConflict
+			}
+			if err := addAuthorizationAmount(&result.Committed, used, result.Initial); err != nil {
+				return result, err
+			}
+		case "unknown":
+			if err := addAuthorizationAmount(&result.Unknown, reserved, result.Initial); err != nil {
+				return result, err
+			}
+		case "returned":
+		default:
+			return result, ErrUsageBatchConflict
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
+	if result.Remaining > result.Initial || result.Committed > result.Initial-result.Remaining || result.Unknown > result.Initial-result.Remaining-result.Committed || result.Reserved != result.Initial-result.Remaining-result.Committed-result.Unknown {
+		return result, fmt.Errorf("store: authorization source %s violates conservation", sourceID)
+	}
+	return result, nil
+}
+
+func addAuthorizationAmount(total *uint64, amount, limit uint64) error {
+	if *total > limit || amount > limit-*total {
+		return ErrUsageBatchConflict
+	}
+	*total += amount
+	return nil
 }

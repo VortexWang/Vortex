@@ -38,3 +38,12 @@ jobs:
         run: make phase5-wave1-check
       - name: Run Wave 2 check
         run: make phase5-wave2-check
+      - name: Run incremental durable authorization regression
+        run: make phase5-authorization-check
+      - name: Retain authorization regression evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-authorization-${{ github.sha }}
+          path: artifacts/phase5/authorization/
+          if-no-files-found: error

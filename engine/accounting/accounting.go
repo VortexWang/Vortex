@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
 var (
@@ -28,14 +29,21 @@ type Flow struct {
 }
 
 type UsageRecord struct {
-	BatchID    string
-	FlowKey    string
-	RuleID     string
-	SnapshotID string
-	Direction  Direction
-	Resolution Resolution
-	Reserved   int64
-	Used       int64
+	BatchID         string
+	FlowKey         string
+	RuleID          string
+	SnapshotID      string
+	AuthorizationID string
+	RuleRevision    uint64
+	PathGeneration  uint64
+	Direction       Direction
+	Resolution      Resolution
+	Reserved        int64
+	Used            int64
+	Earliest        time.Time
+	Latest          time.Time
+	TrustedTime     bool
+	ExistingSession bool
 }
 
 // UsageSink is implemented by the Agent. Engine calls it before settling a

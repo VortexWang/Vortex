@@ -2,15 +2,19 @@ package agent
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
 	"vortex/agent/store"
 	controlv1 "vortex/contracts/protobuf/v1"
+	engineaccounting "vortex/engine/accounting"
 )
 
 func authorizationPayloadForTest(t *testing.T, nodeID, bootID string, signerEpoch, generation uint64) []byte {
@@ -245,5 +249,308 @@ func TestRestartDoesNotReviveStoredAuthorization(t *testing.T) {
 	})
 	if !errors.Is(err, store.ErrAuthorizationDenied) {
 		t.Fatalf("restart revived old boot authorization: %v", err)
+	}
+}
+
+func TestAuthorizationGateAtomicallyConsumesAndReconcilesQuota(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4)
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	gate, err := node.NewAuthorizationGate(AuthorizationGateConfig{
+		AuthorizationID: "550e8400-e29b-41d4-a716-446655440021", RuleID: "rule-1", RuleRevision: 2,
+		PathGeneration: 4, SnapshotID: "550e8400-e29b-41d4-a716-446655440024",
+		Clock: func() (time.Time, time.Time, bool) { return now, now.Add(time.Second), true },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := gate.Open(ctx, engineaccounting.Flow{Key: "opaque-flow", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := session.Reserve(ctx, engineaccounting.LeftToRight, 3000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if remaining, err := s.RemainingAuthorizationBytes(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440021"); err != nil || remaining != 1096 {
+		t.Fatalf("remaining after pre-write reserve=%d err=%v", remaining, err)
+	}
+	if err := batch.Commit(ctx, 1200); err != nil {
+		t.Fatal(err)
+	}
+	if balance, err := s.AuditAuthorizationBalance(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440021"); err != nil || balance.Remaining != 2896 || balance.Committed != 1200 {
+		t.Fatalf("committed source balance=%+v err=%v", balance, err)
+	}
+	var next map[string]any
+	if err := json.Unmarshal(authorizationPayloadForTest(t, node.NodeID, node.BootID, 2, 5), &next); err != nil {
+		t.Fatal(err)
+	}
+	next["update_id"] = "550e8400-e29b-41d4-a716-446655440040"
+	next["authorizations"] = []any{}
+	newPayload, err := json.Marshal(next)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 5, Payload: newPayload}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := gate.Open(ctx, engineaccounting.Flow{Key: "new-flow", RuleID: "rule-1"}); err == nil {
+		t.Fatal("old path generation admitted a new flow")
+	}
+	uncertain, err := session.Reserve(ctx, engineaccounting.RightToLeft, 2896)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := uncertain.MarkUnknown(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if balance, err := s.AuditAuthorizationBalance(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440021"); err != nil || balance.Remaining != 0 || balance.Committed != 1200 || balance.Unknown != 2896 {
+		t.Fatalf("unknown liability balance=%+v err=%v", balance, err)
+	}
+	if _, err := session.Reserve(ctx, engineaccounting.LeftToRight, 1); err == nil {
+		t.Fatal("exhausted grant authorized another write")
+	}
+	if err := session.Close(); err != nil {
+		t.Fatal(err)
+	}
+	pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
+	if err != nil || len(pending) != 2 || pending[1].UnknownUpper != 2896 {
+		t.Fatalf("durable usage=%+v err=%v", pending, err)
+	}
+}
+
+func TestConcurrentAuthorizedReservationsCannotOverdrawGrant(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4)}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	gate, err := node.NewAuthorizationGate(AuthorizationGateConfig{AuthorizationID: "550e8400-e29b-41d4-a716-446655440021", RuleID: "rule-1", RuleRevision: 2, PathGeneration: 4, SnapshotID: "550e8400-e29b-41d4-a716-446655440024", Clock: func() (time.Time, time.Time, bool) { return now, now, true }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sessions := make([]engineaccounting.Session, 2)
+	for i := range sessions {
+		sessions[i], err = gate.Open(ctx, engineaccounting.Flow{Key: fmt.Sprintf("parallel-%d", i), RuleID: "rule-1"})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	start := make(chan struct{})
+	errs := make(chan error, len(sessions))
+	for i, session := range sessions {
+		go func(i int, session engineaccounting.Session) {
+			<-start
+			_, err := session.Reserve(ctx, engineaccounting.LeftToRight, 3000)
+			errs <- err
+		}(i, session)
+	}
+	close(start)
+	accepted, denied := 0, 0
+	for range sessions {
+		if err := <-errs; err == nil {
+			accepted++
+		} else {
+			denied++
+		}
+	}
+	if accepted != 1 || denied != 1 {
+		t.Fatalf("accepted=%d denied=%d", accepted, denied)
+	}
+	balance, err := s.AuditAuthorizationBalance(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440021")
+	if err != nil || balance.Remaining != 1096 || balance.Reserved != 3000 {
+		t.Fatalf("concurrent grant balance=%+v err=%v", balance, err)
+	}
+}
+
+func TestSignerEpochCannotTransferSourceWithoutHandoffEvidence(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldID := "550e8400-e29b-41d4-a716-446655440021"
+	sourceID := "550e8400-e29b-41d4-a716-446655440023"
+	payload := authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4)
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	gate, err := node.NewAuthorizationGate(AuthorizationGateConfig{AuthorizationID: oldID, RuleID: "rule-1", RuleRevision: 2, PathGeneration: 4, SnapshotID: "550e8400-e29b-41d4-a716-446655440024", Clock: func() (time.Time, time.Time, bool) { return now, now.Add(time.Second), true }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldSession, err := gate.Open(ctx, engineaccounting.Flow{Key: "old-path-session", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldHold, err := oldSession.Reserve(ctx, engineaccounting.LeftToRight, 1000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var next map[string]any
+	if err := json.Unmarshal(authorizationPayloadForTest(t, node.NodeID, node.BootID, 2, 4), &next); err != nil {
+		t.Fatal(err)
+	}
+	next["update_id"] = "550e8400-e29b-41d4-a716-446655440041"
+	auth := next["authorizations"].([]any)[0].(map[string]any)
+	newID := "550e8400-e29b-41d4-a716-446655440042"
+	auth["authorization_id"] = newID
+	auth["parent_authorization_id"] = oldID
+	auth["amount_bytes"] = uint64(3096)
+	newPayload, err := json.Marshal(next)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: newPayload}); !errors.Is(err, store.ErrAuthorityHandoffRequired) {
+		t.Fatalf("parent ID was accepted as handoff evidence: %v", err)
+	}
+	if err := oldHold.Commit(ctx, 500); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.RemainingAuthorizationBytes(ctx, node.NodeID, newID); !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("unproven successor became spendable: %v", err)
+	}
+	if source, err := s.AuditAuthorizationSource(ctx, node.NodeID, sourceID); err != nil || source.Remaining != 3596 || source.Committed != 500 {
+		t.Fatalf("old source changed by rejected transfer=%+v err=%v", source, err)
+	}
+}
+
+func TestRestartFreezesAuthorizedReservationAndRecoversUnknownBound(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "agent.db")
+	s, err := store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4)
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	gate, err := node.NewAuthorizationGate(AuthorizationGateConfig{
+		AuthorizationID: "550e8400-e29b-41d4-a716-446655440021", RuleID: "rule-1", RuleRevision: 2,
+		PathGeneration: 4, SnapshotID: "550e8400-e29b-41d4-a716-446655440024",
+		Clock: func() (time.Time, time.Time, bool) { return now, now.Add(time.Second), true },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := gate.Open(ctx, engineaccounting.Flow{Key: "restart-flow", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := session.Reserve(ctx, engineaccounting.LeftToRight, 1000); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if _, err := New(controlTestNodeID, s, nil); err != nil {
+		t.Fatal(err)
+	}
+	balance, err := s.AuditAuthorizationBalance(ctx, controlTestNodeID, "550e8400-e29b-41d4-a716-446655440021")
+	if err != nil || balance.Remaining != 3096 || balance.Unknown != 1000 {
+		t.Fatalf("recovered grant balance=%+v err=%v", balance, err)
+	}
+	pending, err := s.PendingUsageOutbox(ctx, controlTestNodeID)
+	if err != nil || len(pending) != 1 || pending[0].UnknownUpper != 1000 {
+		t.Fatalf("recovered durable liability=%+v err=%v", pending, err)
+	}
+	var batch controlv1.UsageBatch
+	if err := proto.Unmarshal(pending[0].Payload, &batch); err != nil {
+		t.Fatal(err)
+	}
+	if batch.GetDeltas()[0].GetGrantId() != "550e8400-e29b-41d4-a716-446655440021" {
+		t.Fatalf("recovered grant attribution=%+v", batch.GetDeltas()[0])
+	}
+}
+
+func TestAuthorizationGateLatchesPersistenceFailureAcrossSessions(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "agent.db")
+	s, err := store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	node, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&ControlClient{Node: node}).applyAuthorizationUpdate(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: authorizationPayloadForTest(t, node.NodeID, node.BootID, 1, 4)}); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
+	gate, err := node.NewAuthorizationGate(AuthorizationGateConfig{AuthorizationID: "550e8400-e29b-41d4-a716-446655440021", RuleID: "rule-1", RuleRevision: 2, PathGeneration: 4, SnapshotID: "550e8400-e29b-41d4-a716-446655440024", Clock: func() (time.Time, time.Time, bool) { return now, now, true }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := gate.Open(ctx, engineaccounting.Flow{Key: "first", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := gate.Open(ctx, engineaccounting.Flow{Key: "second", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	if _, err := db.Exec(`CREATE TRIGGER fail_authority_hold BEFORE INSERT ON authorization_usage_holds BEGIN SELECT RAISE(ABORT, 'injected write failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.Reserve(ctx, engineaccounting.LeftToRight, 100); err == nil {
+		t.Fatal("failed persistence returned writable batch")
+	}
+	if _, err := db.Exec(`DROP TRIGGER fail_authority_hold`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := second.Reserve(ctx, engineaccounting.LeftToRight, 100); err == nil {
+		t.Fatal("other session bypassed latched disk failure")
+	}
+	if _, err := gate.Open(ctx, engineaccounting.Flow{Key: "third", RuleID: "rule-1"}); err == nil {
+		t.Fatal("new session bypassed latched disk failure")
+	}
+	b, err := s.AuditAuthorizationSource(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440023")
+	if err != nil || b.Remaining != 4096 || b.Reserved != 0 {
+		t.Fatalf("failed transaction leaked debit: %+v %v", b, err)
 	}
 }
