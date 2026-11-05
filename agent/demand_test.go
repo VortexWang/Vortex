@@ -126,4 +126,43 @@ func TestDemandCompletesOnlyFromBoundTLSIssuer(t *testing.T) {
 		t.Fatalf("wire installed funds: %+v %v", balance, err)
 	}
 
+	// Adaptive planning reads the actual 16 MiB Agent balance. With this
+	// explicit test-only 64 MiB target, the 30% waterline requests the 48 MiB
+	// deficit; the exhausted issuer must deny it without inventing credits.
+	adaptive := AdaptiveDemandConfig{Scope: scope, Policy: DemandPolicyConfig{Minimum: 64 << 20, MaxTarget: 64 << 20, TargetSeconds: 30, RenewPercent: 30}, TTL: time.Minute}
+	// The conservative earliest clock can lag a just-issued not-before by
+	// the measured transport uncertainty. Do not count that grant early.
+	for {
+		early, late, trusted := n.TrustedTime()
+		ledger, err := as.ReadDemandLedger(ctx, scope, store.IssuerTime{Earliest: early, Latest: late, Trusted: trusted}, time.Now())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if ledger.Available == 16<<20 {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		case <-time.After(time.Millisecond):
+		}
+	}
+	planned, estimate, err := n.PrepareAdaptiveDemand(ctx, adaptive)
+	if err != nil || planned.RawBytes != 48<<20 || estimate.MinuteBytes != 0 || estimate.Target != 64<<20 {
+		t.Fatalf("adaptive durable deficit: %+v %+v %v", planned, estimate, err)
+	}
+	st, ct, _ := controlTLSForHub(t, n.NodeID, d.HubID)
+	ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, DemandIssuer: &issuer, DemandLimit: 1}, st)
+	if err := (&ControlClient{Node: n, TLS: ct, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, ln.Addr().String()); err != nil {
+		t.Fatal(err)
+	}
+	pending, err = as.PendingDemands(ctx, n.NodeID, n.BootID, d.HubID, "")
+	if err != nil || len(pending) != 0 {
+		t.Fatalf("adaptive denial not committed: %+v %v", pending, err)
+	}
+	balance, err = as.AuditAuthorizationSource(ctx, n.NodeID, d.SourceID)
+	if err != nil || balance.Remaining != 16<<20 {
+		t.Fatalf("adaptive denial changed funds: %+v %v", balance, err)
+	}
+
 }

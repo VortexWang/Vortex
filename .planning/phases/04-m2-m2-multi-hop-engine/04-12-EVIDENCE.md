@@ -381,3 +381,38 @@ Still open: feed committed consumption and exact scoped available balance into
 the rolling policy, admission wait/notifications, production startup wiring,
 proof-based idle drain, delayed/lost-response workload, complete attack review
 and dedicated-host adaptive qualification. No parameter lock is asserted.
+
+## Adaptive request planning uses durable settlement and balance
+
+Schema 15 adds a sixty-slot durable consumption ring for each complete immutable
+demand scope. Successful known settlement adds actual bytes in the same SQLite
+transaction; duplicates, returned bytes and unknown upper bounds do not add
+consumption. Ring-write failure rolls the whole settlement back. It uses local
+seconds for rate estimation only, rejects rollback, and never grants authority.
+
+ReadDemandLedger reads that ring and exact scoped remaining grants in one
+transaction. Credit must pass conservative trusted-time validity and source
+lineage checks; Hub, delegation, node, boot, source, snapshot, rule/revision,
+path and epoch must all match. Held and unknown bytes stay deducted. Missing
+time trust prevents planning. Future not-before grants are not counted early.
+
+Node.PrepareAdaptiveDemand now derives target/waterline from those actual
+values and persists the resulting deficit. Opt-in ControlClient accepts at
+most 64 trusted-provisioned adaptive scopes, plans only for the authenticated
+Hub, and sends through the existing durable demand delivery. Bootstrap time
+trust still requires an authenticated anchor before adaptive issuance starts.
+
+Tests: actual reserve/commit/replay/unknown settlement, seven changed scopes,
+rate expiry without fund release, injected rate-write rollback, 121 seconds
+occupying exactly 60 rows, and clock rollback. Real mTLS fixture verifies a
+64 MiB test-only target reads 16 MiB valid remaining credit and requests the
+48 MiB deficit, then safely processes issuer denial. Initial test assumed a
+just-installed grant was already time-valid; corrected it to wait for the
+conservative earliest bound crossing not-before, without weakening checks.
+Agent/Hub full race and vet PASS; additional bounded-window targeted race PASS.
+
+Remaining: demand-driven wakeup and at-most-200ms data-path waiting, denial
+backoff, production configuration wiring, safe idle shrink/reclaim, workload
+scans with real durable issuer, full attack matrix and same-SHA native evidence.
+The additional settlement transaction work has not yet been performance
+qualified; c6a0761 performance cannot be reused for this implementation.

@@ -23,6 +23,7 @@ import (
 )
 
 type ControlClient struct {
+	AdaptiveDemands    []AdaptiveDemandConfig
 	EnableCreditDemand bool // opt-in only for configured control 1.3.0 peers
 	DemandInterval     time.Duration
 	Node               *Node

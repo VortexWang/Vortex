@@ -248,6 +248,10 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS demand_consumption (
+ scope BLOB NOT NULL, slot INTEGER NOT NULL CHECK(slot>=0 AND slot<60),
+ second INTEGER NOT NULL, bytes TEXT NOT NULL, PRIMARY KEY(scope,slot)
+);
 CREATE TABLE IF NOT EXISTS authorization_demands (
  request_id TEXT PRIMARY KEY NOT NULL, scope BLOB NOT NULL, request BLOB NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('pending','applied','denied')), grant_id TEXT NOT NULL DEFAULT '',
@@ -426,7 +430,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '15')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -657,6 +661,11 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE usage_reservations SET state=?,used_bytes=?,updated_at=? WHERE node_id=? AND batch_id=? AND state='reserved'`, resolution, strconv.FormatUint(used, 10), time.Now().UTC().Format(time.RFC3339Nano), reservation.NodeID, reservation.BatchID); err != nil {
 		return err
+	}
+	if resolution == "committed" && used > 0 && durableAuthorizationID != "" {
+		if err := recordDemandConsumptionTx(ctx, tx, reservation.NodeID, durableAuthorizationID, used, time.Now()); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

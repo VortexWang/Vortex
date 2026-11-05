@@ -94,6 +94,10 @@ func (p *DemandPolicy) Estimate(at time.Time, available uint64) (DemandEstimate,
 			total += b.bytes
 		}
 	}
+	return p.estimateTotal(total, available), nil
+}
+
+func (p *DemandPolicy) estimateTotal(total, available uint64) DemandEstimate {
 	// ceil(total * seconds / 60), arranged to avoid multiplication overflow.
 	horizon := p.config.TargetSeconds
 	target := total/60*horizon + (total%60*horizon+59)/60
@@ -108,5 +112,5 @@ func (p *DemandPolicy) Estimate(at time.Time, available uint64) (DemandEstimate,
 	if available <= threshold {
 		result.RequestBytes = target - available
 	}
-	return result, nil
+	return result
 }

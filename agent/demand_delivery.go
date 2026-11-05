@@ -2,12 +2,30 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+	"vortex/agent/store"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1.NodeControl_ConnectClient, issuer string, cursor *string, sequence *uint64) error {
+	if len(c.AdaptiveDemands) > 64 {
+		return fmt.Errorf("agent: adaptive demand scope limit exceeded")
+	}
+	for _, config := range c.AdaptiveDemands {
+		if config.Scope.HubID != issuer {
+			continue
+		}
+		if _, _, err := c.Node.PrepareAdaptiveDemand(ctx, config); err != nil {
+			// Boot trust must first be established by authenticated time. Do
+			// not issue cold authority based solely on the process wall clock.
+			if errors.Is(err, store.ErrAuthorityTimeUncertain) {
+				continue
+			}
+			return err
+		}
+	}
 	requests, err := c.Node.Store.PendingDemands(ctx, c.Node.NodeID, c.Node.BootID, issuer, *cursor)
 	if err != nil {
 		return err
