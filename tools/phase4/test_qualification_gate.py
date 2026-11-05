@@ -30,7 +30,8 @@ class QualificationGateTests(unittest.TestCase):
             warmup = warmup or {"runtime_correctness": "pass", "authorization_mode": "runtime-authority",
                                 "commit": runtime["commit"], "dirty": False,
                                 "semantic_manifest_sha256": runtime["semantic_manifest_sha256"],
-                                "qualification_metrics": {"duration_seconds": 60}}
+                                "qualification_metrics": {"duration_seconds": 60,
+                                    "source_credit_conserved": True, "source_credit_settled": True}}
             paths["warmup"].write_text(json.dumps(warmup))
             command = [
                 sys.executable, str(GATE), "--runtime", str(paths["runtime"]),
@@ -44,7 +45,8 @@ class QualificationGateTests(unittest.TestCase):
 
     def test_matching_clean_formal_evidence_passes(self):
         metrics = {"duration_seconds": 300, "tcp_streams": 16, "mixed_tcp_mbps": 500,
-                   "udp_offered_mbps": 100, "udp_loss": 0.0001}
+                   "udp_offered_mbps": 100, "udp_loss": 0.0001,
+                   "source_credit_conserved": True, "source_credit_settled": True}
         runtime = {"performance_qualification": "pass", "authorization_mode": "runtime-authority",
                    "commit": "abc123", "semantic_manifest_sha256": "same", "dirty": False,
                    "trial_id": "trial-1", "qualification_metrics": metrics}

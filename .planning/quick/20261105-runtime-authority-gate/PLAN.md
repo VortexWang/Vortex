@@ -37,3 +37,5 @@ when the formal workload and measured thresholds pass.
   route node; source traffic remains gated by finite source credit.
 - Host and semantic evidence records UDP socket sysctl limits because the first
   warmup showed kernel receive-buffer caps were driving observed packet loss.
+- Runtime trial qualification requires a conserved and fully settled source
+  credit state with zero live sessions, pending/unknown amounts, or denials.

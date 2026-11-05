@@ -121,7 +121,13 @@ authorization_mode = host.get("authorization_mode")
 duration = float(workload.get("duration_seconds_per_phase", 0))
 udp_offered_mbps = (workload["mixed"].get("udp_sent", 0) * 1200 * 8 /
                     max(duration, 0.001) / 1_000_000)
-formal_metrics = (formal and authorization_mode == "runtime-authority" and duration >= 300 and
+credit_path = Path(out_dir, "events-source.jsonl.credit.json")
+credit = json.loads(credit_path.read_text()) if credit_path.exists() else {}
+credit_conserved = bool(credit) and credit.get("budget_bytes") == sum(credit.get(key, 0) for key in
+    ("unissued_bytes", "pending_grant_bytes", "unknown_grant_bytes", "available_bytes", "held_bytes", "used_bytes", "unknown_bytes"))
+credit_settled = (credit_conserved and credit.get("sessions") == 0 and credit.get("pending_grant_bytes") == 0 and
+                  credit.get("unknown_grant_bytes") == 0 and credit.get("unknown_bytes") == 0 and credit.get("denials") == 0)
+formal_metrics = (formal and authorization_mode == "runtime-authority" and credit_settled and duration >= 300 and
                   int(workload.get("tcp_streams", 0)) >= 16 and
                   float(workload.get("udp_target_mbps", 0)) >= 100 and
                   udp_offered_mbps >= 99 and
@@ -137,7 +143,8 @@ report = {
     "semantic_manifest_sha256": host.get("semantic_manifest_sha256"),
     "qualification_metrics": {"duration_seconds": duration, "tcp_streams": workload.get("tcp_streams"),
         "mixed_tcp_mbps": workload["mixed"]["tcp"].get("throughput_mbps"),
-        "udp_offered_mbps": udp_offered_mbps, "udp_loss": workload["mixed"].get("udp_loss")},
+        "udp_offered_mbps": udp_offered_mbps, "udp_loss": workload["mixed"].get("udp_loss"),
+        "source_credit_conserved": credit_conserved, "source_credit_settled": credit_settled},
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
     "returned_reservations": dict(returned),
     "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",

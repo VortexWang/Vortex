@@ -80,7 +80,8 @@ def main() -> int:
             metrics = report.get("qualification_metrics", {})
             if (metrics.get("duration_seconds", 0) < 300 or metrics.get("tcp_streams", 0) < 16 or
                     metrics.get("mixed_tcp_mbps", 0) < 400 or metrics.get("udp_offered_mbps", 0) < 99 or
-                    metrics.get("udp_loss", 1) > 0.001):
+                    metrics.get("udp_loss", 1) > 0.001 or not metrics.get("source_credit_conserved") or
+                    not metrics.get("source_credit_settled")):
                 reasons.append("one or more runtime trial metrics miss formal thresholds")
                 break
             if (runtime is not None and
@@ -102,6 +103,9 @@ def main() -> int:
             reasons.append("formal warmup does not share the clean runtime commit")
         if warmup.get("qualification_metrics", {}).get("duration_seconds", 0) < 60:
             reasons.append("formal warmup report is shorter than 60 seconds")
+        if (not warmup.get("qualification_metrics", {}).get("source_credit_conserved") or
+                not warmup.get("qualification_metrics", {}).get("source_credit_settled")):
+            reasons.append("formal warmup source credit did not conserve and settle")
     if tls is not None:
         metrics = tls.get("qualification_metrics", {})
         if (metrics.get("runtime_mixed_tcp_mbps", 0) < 400 or metrics.get("tls_mixed_tcp_mbps", 0) < 400 or

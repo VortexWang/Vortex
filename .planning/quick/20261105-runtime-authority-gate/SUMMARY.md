@@ -13,7 +13,8 @@ and fails closed on missing or mismatched evidence. D-04 and the other remaining
 Phase 4 requirements remain separate.
 
 UDP socket sysctl limits are included in host and semantic evidence so buffer
-conditions are part of the measured workload identity.
+conditions are part of the measured workload identity. Runtime trial reports
+also require source credit conservation and settled state at shutdown.
 
 Focused gate tests, formal-config generation, Python and shell syntax checks,
 and relevant Engine package tests passed. Dedicated-host formal execution must
