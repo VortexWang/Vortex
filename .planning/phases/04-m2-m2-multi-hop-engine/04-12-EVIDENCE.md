@@ -150,3 +150,26 @@ NFR-039/040/044 retain integration obligations: trusted persistent time,
 pre-issue/missing-authority bounded request, persisted share ownership/CAS
 receipts, restart recovery, and per-source durable snapshot accounting. These
 are already assigned to Agent/Hub integration, but assignment is not a pass.
+
+## Follow-up: adversarial protocols and pending-frame ordering
+
+The six configured forged-OPEN cases now run for both TCP and UDP. The local
+five-process test produced twelve rejected cases with expected rejection codes
+and nonzero correlation IDs, plus the existing UDP link-loss check.
+
+A fresh VLink run exposed a real race in `acceptRemote`: marking the stream open
+before draining its cached prefix allowed newly received DATA to overtake that
+prefix. Pending-frame enqueue now occurs under the stream-table lock before
+publishing the open state. The queue operation is nonblocking. The existing
+bounded-prefix/FIN-order regression passed 100 repetitions under race; the full
+Engine race suite and targeted vet also passed.
+
+Integration is still NOT qualified: both local comparison attempts stopped at
+64 MiB binary transfer with a stream reset. Logs remain under
+`artifacts/phase4/attack-matrix{,-fixed}/comparison/`. The second failure persists
+after the ordering fix, so the ordering fix must not be claimed to resolve it.
+The twelve-case forged-OPEN report passed before that failure. These local runs
+used a dirty worktree and are diagnostic, not clean-SHA qualification evidence.
+The latest main-worktree Phase 5 implementation has progressed to persisted
+in-session renewal (86640e7), but still records pending handoff/recovery work;
+its uncommitted work was left untouched.

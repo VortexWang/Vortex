@@ -360,26 +360,17 @@ func (m *MuxLink) AuthorizeRemote(ctx context.Context, id uint32, authorize Remo
 }
 
 func (m *MuxLink) acceptRemote(ctx context.Context, id uint32) error {
-	if err := m.dispatch.streams.AcceptRemote(id); err != nil {
+	stream := m.getStream(id)
+	if stream == nil {
+		return ErrUnknownStream
+	}
+	if err := m.dispatch.streams.acceptRemote(id, stream.enqueue); err != nil {
+		m.reset(id, 8)
 		return err
 	}
 	if err := m.write(ctx, Frame{Type: FrameOpenOK, StreamID: id}); err != nil {
 		m.Close(err)
 		return err
-	}
-	frames, err := m.dispatch.streams.DrainPendingOpenFrames(id)
-	if err != nil {
-		return err
-	}
-	stream := m.getStream(id)
-	if stream == nil {
-		return ErrUnknownStream
-	}
-	for _, frame := range frames {
-		if err := stream.enqueue(frame); err != nil {
-			m.reset(id, 8)
-			return err
-		}
 	}
 	return nil
 }
