@@ -8,7 +8,7 @@ status: planning
 stopped_at: Phase 5 context gathered; ready for research and planning
 last_updated: "2026-11-05T05:13:32.754Z"
 last_activity: 2026-11-05
-last_activity_desc: Verified 04-11 D-04 matrix and fail-closed qualification gate; formal NFRs remain unqualified
+last_activity_desc: Phase 4 live-boundary and early TCP fixes verified; D-04 scan and pool/mux latency passed; durable integration and final performance remain open
 state_head: d30eb254f77901754bacb5dd12772c531f792480
 progress:
   total_phases: 8
@@ -67,7 +67,7 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ### Pending Todos
 
-- Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
+- Phase 4: NFR-003/005 existing dedicated-host gate passed on fe2a4ba; the newer runtime still requires same-build performance requalification. Plan 04-12 completed 21 static D-04 trials, passed the 91e409e pool/mux latency gate, and repaired policy/share/early-DATA boundaries. D-04 lock and NFR-006/007/039/040/044 remaining scope must retain explicit evidence status; persisted Agent/Hub authority remains an integration obligation, not a pass inferred from Engine tests. Phase 5 proceeds independently.
 
 ### Blockers/Concerns
 

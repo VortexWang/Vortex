@@ -557,11 +557,11 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | SEC-010 | Phase 7 | Pending |
 | NFR-001 | Phase 2 | Complete |
 | NFR-002 | Phase 3 | Complete |
-| NFR-003 | Phase 4 | Pending |
+| NFR-003 | Phase 4 | fe2a4ba gate passed; new runtime requalification pending |
 | NFR-004 | Phase 3 | Complete |
-| NFR-005 | Phase 4 | Pending |
+| NFR-005 | Phase 4 | fe2a4ba gate passed; new runtime requalification pending |
 | NFR-006 | Phase 4 | Pending |
-| NFR-007 | Phase 3 | Complete |
+| NFR-007 | Phase 3 / Phase 4 | Complete — native pool/mux gate, 91e409e |
 | NFR-008 | Phase 8 | Pending |
 | NFR-009 | Phase 8 | Pending |
 | NFR-010 | Phase 8 | Pending |

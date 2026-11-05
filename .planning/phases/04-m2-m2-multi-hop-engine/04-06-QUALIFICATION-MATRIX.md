@@ -1,5 +1,16 @@
 # Phase 4 剩余资格化核对（2026-11-05）
 
+## Current result: Plan 04-12
+
+See [04-12-EVIDENCE.md](04-12-EVIDENCE.md) for the authoritative current status:
+21 D-04 static trials complete; 91e409e pool/mux latency gate passes; finite
+runtime safety probes and native race pass. Production D-04 lock, complete
+NFR-006 coverage, durable authority and final same-build formal performance
+remain open. The older matrix and incremental notes below retain their
+historical context and do not override this reconciliation.
+
+## Historical matrix
+
 04-11 added a reproducible 27-case D-04 matrix and fail-closed qualification
 gate. It records candidate coverage without promoting any parameter or
 combining Docker, Actions and native results across SHAs.

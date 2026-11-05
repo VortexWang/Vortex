@@ -2,11 +2,32 @@
 phase: 04-m2-m2-multi-hop-engine
 verified: 2026-11-05
 status: gaps_found
-score: runtime gap slices verified; formal qualification and durable authority remain unqualified
+score: D-04 static scan and 91e409e latency verified; durable authority and final performance remain open
 behavior_unverified: 5
 ---
 
 # Phase 4 Verification — current qualification review
+
+## Current reconciliation — Plan 04-12
+
+The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
+The review text below this section is historical and retains its original SHA.
+
+- `fe2a4ba` passed the existing formal performance gate; this is not a performance
+  measurement of the later runtime corrections.
+- `d1ee7d2` completed 21 real static D-04 trials, with source conservation and no
+  UDP loss. Production parameter lock is still open.
+- `91e409e` corrects live share expiry, policy snapshot transition and the actual
+  early TCP data path. Native pool/mux additional first-byte medians are
+  2.1215/2.1623 ms; the raw-data latency gate passes.
+- Native Engine race/vet, source TCP/UDP credit, snapshot checks and local Docker
+  pass. Finite integrity/bypass/forged-OPEN probes also pass on this runtime.
+- Full NFR-006 coverage, persisted NFR-039/040/044 integration and a formal
+  performance qualification of the final integrated runtime remain open.
+
+Overall status remains **gaps_found**. No full Phase 4 acceptance is claimed.
+
+## Historical reviews
 
 Review source: `5bd384a` (Plans 04-08 through 04-11 code and evidence successor). Phase 4 stays **executing** because formal qualification and durable authority gaps remain. V1.11 is reference only. No old restart documents are required to continue implementation.
 

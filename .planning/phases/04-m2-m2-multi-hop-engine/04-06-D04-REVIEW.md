@@ -1,5 +1,19 @@
 # D-04 参数评审（2026-11-04）
 
+## 04-12 measured review
+
+The candidate inventory has now been executed as seven one-factor cases x
+three repetitions on d1ee7d2. All 21 source ledgers reconcile; all UDP runs have
+zero loss. TCP medians span 1030.47–1034.22 Mbps and short-flow medians span
+1.665–1.694 ms. This small spread does not establish a winner. Keep the proposed
+256 KiB initial block / 4 MiB ceiling / 30-second adaptive target / 30% waterline
+as **unlocked** candidates. The sweep used a fixed 100 Mbps grant-rate reference,
+not a production adaptive issuer. Delayed/lost issuance, drain/idle policy and
+durable funding observations still need integration evidence. Full table and
+raw evidence identifiers: [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
+
+The prior reviews below are historical.
+
 状态：评审已完成；**候选保留，未批准锁定**。代码审查基线 `6bfe97624cf807824d8df91fa7519b5a108e2d04`，与 `d0c1cb2` 相比仅阶段文档改变。本文是当前项目评审，不将 V1.11 升格为冻结验收依据，不增加新的历史材料门禁。
 
 ## 04-11 gate update — 2026-11-05
