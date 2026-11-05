@@ -52,6 +52,13 @@ func (s *TestServer) handle(ctx context.Context, conn net.Conn) {
 			_ = enc.Encode(Message{Type: "error"})
 			return
 		}
+		if tlsConn, ok := conn.(*tls.Conn); ok {
+			state := tlsConn.ConnectionState()
+			if in.Type != "hello" || in.BootID == "" || len(state.PeerCertificates) == 0 || len(state.PeerCertificates[0].DNSNames) != 1 || state.PeerCertificates[0].DNSNames[0] != in.NodeID {
+				_ = enc.Encode(Message{Type: "error", ID: in.ID})
+				return
+			}
+		}
 		if in.ID == "" {
 			in.ID = fmt.Sprintf("%s-%s-%d", in.Type, in.NodeID, in.Version)
 		}

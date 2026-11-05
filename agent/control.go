@@ -114,7 +114,7 @@ func (c *ControlClient) exchange(ctx context.Context, conn net.Conn) error {
 	if ack.ID != id || ack.Sequence != sequence || ack.Version < 1 {
 		return fmt.Errorf("agent: control acknowledgement does not match request")
 	}
-	if err := c.Node.Store.PersistControlAck(ctx, ack.ID, ack.Sequence, ack.Version, time.Now().UTC()); err != nil {
+	if err := c.Node.Store.RecordReceipt(ctx, ack.ID, ack.Sequence); err != nil {
 		return err
 	}
 	return nil

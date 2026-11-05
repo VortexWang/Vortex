@@ -135,10 +135,16 @@ func TestControlClientUsesMutualTLSAndPersistsAck(t *testing.T) {
 	if count, err := s.ReceiptCount(ctx); err != nil || count != 1 {
 		t.Fatalf("receipts=%d err=%v", count, err)
 	}
-	for key, want := range map[string]string{"control_sequence": "1", "applied_version": "1"} {
+	for key, want := range map[string]string{"control_sequence": "1"} {
 		if got, err := s.AgentState(ctx, key); err != nil || got != want {
 			t.Fatalf("%s=%q err=%v", key, got, err)
 		}
+	}
+	if _, err := s.AgentState(ctx, "backend_heartbeat"); err == nil {
+		t.Fatal("Hub ACK incorrectly recorded as backend heartbeat")
+	}
+	if _, err := s.AgentState(ctx, "applied_version"); err == nil {
+		t.Fatal("Hub ACK incorrectly recorded as applied configuration")
 	}
 }
 
