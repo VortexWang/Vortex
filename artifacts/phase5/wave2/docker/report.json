@@ -1,1 +1,1 @@
-{"schema":1,"status":"passed","commit":"a5bff0bc83b336b64b405136f6149331b6a4cda9","tests":"go test ./agent/... ./hub ./test/phase5","vet":"go vet ./agent/... ./hub ./test/phase5","scope":"registration-mtls-reconcile-upgrade"}
+{"schema":1,"status":"passed","commit":"3127fb90802bf2064fa62b184dbe2dbce2bbbc11","tests":"go test ./agent/... ./hub ./test/phase5","vet":"go vet ./agent/... ./hub ./test/phase5","scope":"registration-mtls-reconcile-upgrade"}

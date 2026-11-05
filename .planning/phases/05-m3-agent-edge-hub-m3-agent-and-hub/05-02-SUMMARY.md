@@ -155,14 +155,14 @@ Added a testable Agent identity and control slice: one-time CSR enrollment, node
 - **Found during:** same-SHA Actions run
 - **Issue:** Wave 1 workflow failed because `protoc` was absent, so Wave 2 never ran.
 - **Fix:** Added the pinned `arduino/setup-protoc` action at commit `c65c819552d16ad3c9b72d9dfd5ba5237b9c906b` and version 36.2.
-- **Verification:** Actions run `41985997445` succeeded for Wave 1 and Wave 2 on SHA `a5bff0b`.
+- **Verification:** Actions run `41986823563` succeeded for Wave 1 and Wave 2 on SHA `3127fb9`.
 - **Committed in:** `f618e14`.
 
 **Total deviations:** 2 auto-fixed. **Impact:** Both corrections close verification and identity safety gaps within the planned scope.
 
 ## Issues Encountered
 
-The first Actions run (`41980275603`) stopped at Wave 1 because `protoc` was not installed. The workflow prerequisite was fixed. Final native, Docker and Actions Wave 2 reports all reference SHA `a5bff0b`.
+The first Actions run (`41980275603`) stopped at Wave 1 because `protoc` was not installed. The workflow prerequisite was fixed. Final native, Docker and Actions Wave 2 reports all reference SHA `3127fb9`.
 
 ## User Setup Required
 
