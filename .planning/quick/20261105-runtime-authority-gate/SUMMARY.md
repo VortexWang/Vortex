@@ -19,3 +19,13 @@ also require source credit conservation and settled state at shutdown.
 Focused gate tests, formal-config generation, Python and shell syntax checks,
 and relevant Engine package tests passed. Dedicated-host formal execution must
 still be performed and recorded separately after deployment.
+
+The dedicated-host comparison stopped during its 64 MiB TCP binary-integrity
+probe. Per-stream DATA and FIN were not serialized across the separate data and
+control writer queues, allowing a concurrent CloseWrite to overtake DATA
+waiting for flow-control credit. The MuxStream now serializes WriteData,
+WriteDataFrames, and CloseWrite and rejects DATA after FIN. The regression test,
+25 repeated targeted runs, VLink/relay race checks, and the complete Engine Go
+test suite pass. Deploy the new clean SHA and rerun comparison and final gate
+before claiming the performance gate is complete; restore temporary UDP socket
+buffer sysctls afterward.

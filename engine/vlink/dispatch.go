@@ -189,6 +189,7 @@ type MuxStream struct {
 	receive     chan Frame
 	done        chan struct{}
 	closeOnce   sync.Once
+	writeMu     sync.Mutex
 	writeClosed atomic.Bool
 	udpQueued   atomic.Int64
 	resourceMu  sync.Mutex
@@ -715,6 +716,11 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 	if s.Network != StreamTCP || len(payload) == 0 {
 		return ErrProtocol
 	}
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	if s.writeClosed.Load() {
+		return ErrStreamState
+	}
 	for len(payload) > 0 {
 		groupSize := len(payload)
 		if groupSize > 4*MaxTLSRecordPayload {
@@ -851,6 +857,8 @@ func (s *MuxStream) CloseWrite(ctx context.Context) error {
 	if s.Network != StreamTCP {
 		return ErrProtocol
 	}
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
 	if !s.writeClosed.CompareAndSwap(false, true) {
 		return nil
 	}

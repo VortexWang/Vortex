@@ -42,6 +42,11 @@ func (s *MuxStream) WriteDataFrames(ctx context.Context, frames []Frame) error {
 			return ErrProtocol
 		}
 	}
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	if s.writeClosed.Load() {
+		return ErrStreamState
+	}
 	var pending [4]frameWrite
 	for i, frame := range frames {
 		started := time.Now()

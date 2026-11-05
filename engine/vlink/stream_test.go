@@ -116,6 +116,81 @@ func TestMuxLinkMultiplexesStreamsAndHonorsWindows(t *testing.T) {
 	server.Close(nil)
 }
 
+func TestMuxStreamCloseWriteWaitsForPendingData(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	config := MuxConfig{LocalClient: true, StreamWindow: 3, AggregateWindow: 3, MaxWindow: 32}
+	client, err := newMuxLink(clientConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.LocalClient = false
+	server, err := newMuxLink(serverConn, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(ErrProtocol)
+	defer server.Close(ErrProtocol)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	request := OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: 1, ClientAddress: []byte{127, 0, 0, 1}}
+	sender, err := client.Open(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	receiver, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, receiver.ID, func(context.Context, NodeID, OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := sender.Receive(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := sender.WriteData(ctx, []byte("abc")); err != nil {
+		t.Fatal(err)
+	}
+	first, err := receiver.Receive(ctx)
+	if err != nil || string(first.Payload) != "abc" {
+		t.Fatalf("first DATA=%q err=%v", first.Payload, err)
+	}
+
+	dataDone := make(chan error, 1)
+	go func() { dataDone <- sender.WriteData(ctx, []byte("d")) }()
+	select {
+	case err := <-dataDone:
+		t.Fatalf("second DATA was not held by exhausted stream window: %v", err)
+	case <-time.After(20 * time.Millisecond):
+	}
+	finDone := make(chan error, 1)
+	go func() { finDone <- sender.CloseWrite(ctx) }()
+	select {
+	case err := <-finDone:
+		t.Fatalf("FIN overtook DATA waiting for stream credit: %v", err)
+	case <-time.After(20 * time.Millisecond):
+	}
+	if err := receiver.Consume(ctx, 3); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-dataDone; err != nil {
+		t.Fatal(err)
+	}
+	second, err := receiver.Receive(ctx)
+	if err != nil || second.Type != FrameData || string(second.Payload) != "d" {
+		t.Fatalf("second frame type=%v payload=%q err=%v", second.Type, second.Payload, err)
+	}
+	if err := <-finDone; err != nil {
+		t.Fatal(err)
+	}
+	last, err := receiver.Receive(ctx)
+	if err != nil || last.Type != FrameFIN {
+		t.Fatalf("last frame type=%v err=%v", last.Type, err)
+	}
+	if err := sender.WriteData(ctx, []byte("late")); err == nil {
+		t.Fatal("accepted DATA after local FIN")
+	}
+}
+
 func TestMuxTCPDataFramesFitOneTLSRecord(t *testing.T) {
 	clientConn, serverConn := net.Pipe()
 	window := uint32(MaxTLSRecordPayload * 2)
