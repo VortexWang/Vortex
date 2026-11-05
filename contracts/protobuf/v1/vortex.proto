@@ -4,8 +4,8 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.2.0. Additive extension approved from the 1.1.0 baseline.
-// Approval record binds the exact proposal hash in 05-05-CONTRACT-PROPOSAL.md.
+// CONTRACT 1.3.0. Additive extension approved from the 1.2.0 baseline.
+// Approval binds 04-13-DEMAND-CONTRACT-PROPOSAL.md; durable demand outcomes only.
 
 service NodeControl {
   // Bidirectional control stream. Business forwarding traffic must never use it.
@@ -23,6 +23,7 @@ message NodeMessage {
     NodeEvent event = 13;
     RegisterRequest register = 14;
     UnknownUsageBatch unknown_usage_batch = 15;
+    CreditDemand credit_demand = 16;
   }
 }
 
@@ -35,6 +36,7 @@ message ControlMessage {
     AuthorizationUpdate authorization_update = 12;
     ControlError error = 13;
     UnknownUsageAcknowledgement unknown_usage_ack = 14;
+    CreditDemandDenied credit_demand_denied = 15;
   }
 }
 
@@ -113,3 +115,25 @@ message NodeEvent { string event_id = 1; string kind = 2; bytes payload = 3; }
 // RuntimeConfigUpdate.payload is UTF-8 JSON validated against the frozen runtime
 // schema before Prepare. See the control contract review for bounds, stable
 // errors, idempotency, fencing, retries and activation-unknown behavior.
+
+// Requests never confer authority. IDs bind immutable durable issuer outcomes.
+// Amount: 1..MaxInt64 raw bytes; TTL: 1..300 whole seconds. Node and boot
+// identities come from the authenticated NodeMessage envelope.
+message CreditDemand {
+  string request_id = 1;
+  string delegation_id = 2;
+  uint64 raw_bytes = 3;
+  uint32 ttl_seconds = 4;
+}
+// Sent only after durable proof that this request issued no rights.
+// Success uses AuthorizationUpdate with payload.update_id=request_id.
+message CreditDemandDenied {
+  string request_id = 1;
+  CreditDemandDenial reason = 2;
+}
+enum CreditDemandDenial {
+  CREDIT_DEMAND_DENIAL_UNSPECIFIED = 0;
+  CREDIT_DEMAND_DENIAL_INVALID_SCOPE = 1;
+  CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS = 2;
+  CREDIT_DEMAND_DENIAL_EXPIRED = 3;
+}

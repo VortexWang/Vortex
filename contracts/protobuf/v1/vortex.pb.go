@@ -21,6 +21,58 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type CreditDemandDenial int32
+
+const (
+	CreditDemandDenial_CREDIT_DEMAND_DENIAL_UNSPECIFIED        CreditDemandDenial = 0
+	CreditDemandDenial_CREDIT_DEMAND_DENIAL_INVALID_SCOPE      CreditDemandDenial = 1
+	CreditDemandDenial_CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS CreditDemandDenial = 2
+	CreditDemandDenial_CREDIT_DEMAND_DENIAL_EXPIRED            CreditDemandDenial = 3
+)
+
+// Enum value maps for CreditDemandDenial.
+var (
+	CreditDemandDenial_name = map[int32]string{
+		0: "CREDIT_DEMAND_DENIAL_UNSPECIFIED",
+		1: "CREDIT_DEMAND_DENIAL_INVALID_SCOPE",
+		2: "CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS",
+		3: "CREDIT_DEMAND_DENIAL_EXPIRED",
+	}
+	CreditDemandDenial_value = map[string]int32{
+		"CREDIT_DEMAND_DENIAL_UNSPECIFIED":        0,
+		"CREDIT_DEMAND_DENIAL_INVALID_SCOPE":      1,
+		"CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS": 2,
+		"CREDIT_DEMAND_DENIAL_EXPIRED":            3,
+	}
+)
+
+func (x CreditDemandDenial) Enum() *CreditDemandDenial {
+	p := new(CreditDemandDenial)
+	*p = x
+	return p
+}
+
+func (x CreditDemandDenial) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CreditDemandDenial) Descriptor() protoreflect.EnumDescriptor {
+	return file_contracts_protobuf_v1_vortex_proto_enumTypes[0].Descriptor()
+}
+
+func (CreditDemandDenial) Type() protoreflect.EnumType {
+	return &file_contracts_protobuf_v1_vortex_proto_enumTypes[0]
+}
+
+func (x CreditDemandDenial) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CreditDemandDenial.Descriptor instead.
+func (CreditDemandDenial) EnumDescriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{0}
+}
+
 type NodeMessage struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	NodeId   string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -34,6 +86,7 @@ type NodeMessage struct {
 	//	*NodeMessage_Event
 	//	*NodeMessage_Register
 	//	*NodeMessage_UnknownUsageBatch
+	//	*NodeMessage_CreditDemand
 	Body          isNodeMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -151,6 +204,15 @@ func (x *NodeMessage) GetUnknownUsageBatch() *UnknownUsageBatch {
 	return nil
 }
 
+func (x *NodeMessage) GetCreditDemand() *CreditDemand {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_CreditDemand); ok {
+			return x.CreditDemand
+		}
+	}
+	return nil
+}
+
 type isNodeMessage_Body interface {
 	isNodeMessage_Body()
 }
@@ -179,6 +241,10 @@ type NodeMessage_UnknownUsageBatch struct {
 	UnknownUsageBatch *UnknownUsageBatch `protobuf:"bytes,15,opt,name=unknown_usage_batch,json=unknownUsageBatch,proto3,oneof"`
 }
 
+type NodeMessage_CreditDemand struct {
+	CreditDemand *CreditDemand `protobuf:"bytes,16,opt,name=credit_demand,json=creditDemand,proto3,oneof"`
+}
+
 func (*NodeMessage_Heartbeat) isNodeMessage_Body() {}
 
 func (*NodeMessage_UsageBatch) isNodeMessage_Body() {}
@@ -191,6 +257,8 @@ func (*NodeMessage_Register) isNodeMessage_Body() {}
 
 func (*NodeMessage_UnknownUsageBatch) isNodeMessage_Body() {}
 
+func (*NodeMessage_CreditDemand) isNodeMessage_Body() {}
+
 type ControlMessage struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	MessageId string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
@@ -202,6 +270,7 @@ type ControlMessage struct {
 	//	*ControlMessage_AuthorizationUpdate
 	//	*ControlMessage_Error
 	//	*ControlMessage_UnknownUsageAck
+	//	*ControlMessage_CreditDemandDenied
 	Body          isControlMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -303,6 +372,15 @@ func (x *ControlMessage) GetUnknownUsageAck() *UnknownUsageAcknowledgement {
 	return nil
 }
 
+func (x *ControlMessage) GetCreditDemandDenied() *CreditDemandDenied {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_CreditDemandDenied); ok {
+			return x.CreditDemandDenied
+		}
+	}
+	return nil
+}
+
 type isControlMessage_Body interface {
 	isControlMessage_Body()
 }
@@ -327,6 +405,10 @@ type ControlMessage_UnknownUsageAck struct {
 	UnknownUsageAck *UnknownUsageAcknowledgement `protobuf:"bytes,14,opt,name=unknown_usage_ack,json=unknownUsageAck,proto3,oneof"`
 }
 
+type ControlMessage_CreditDemandDenied struct {
+	CreditDemandDenied *CreditDemandDenied `protobuf:"bytes,15,opt,name=credit_demand_denied,json=creditDemandDenied,proto3,oneof"`
+}
+
 func (*ControlMessage_ConfigUpdate) isControlMessage_Body() {}
 
 func (*ControlMessage_UsageAck) isControlMessage_Body() {}
@@ -336,6 +418,8 @@ func (*ControlMessage_AuthorizationUpdate) isControlMessage_Body() {}
 func (*ControlMessage_Error) isControlMessage_Body() {}
 
 func (*ControlMessage_UnknownUsageAck) isControlMessage_Body() {}
+
+func (*ControlMessage_CreditDemandDenied) isControlMessage_Body() {}
 
 type RegisterRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -1181,11 +1265,136 @@ func (x *NodeEvent) GetPayload() []byte {
 	return nil
 }
 
+// Requests never confer authority. IDs bind immutable durable issuer outcomes.
+// Amount: 1..MaxInt64 raw bytes; TTL: 1..300 whole seconds. Node and boot
+// identities come from the authenticated NodeMessage envelope.
+type CreditDemand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	DelegationId  string                 `protobuf:"bytes,2,opt,name=delegation_id,json=delegationId,proto3" json:"delegation_id,omitempty"`
+	RawBytes      uint64                 `protobuf:"varint,3,opt,name=raw_bytes,json=rawBytes,proto3" json:"raw_bytes,omitempty"`
+	TtlSeconds    uint32                 `protobuf:"varint,4,opt,name=ttl_seconds,json=ttlSeconds,proto3" json:"ttl_seconds,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreditDemand) Reset() {
+	*x = CreditDemand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreditDemand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreditDemand) ProtoMessage() {}
+
+func (x *CreditDemand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreditDemand.ProtoReflect.Descriptor instead.
+func (*CreditDemand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CreditDemand) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *CreditDemand) GetDelegationId() string {
+	if x != nil {
+		return x.DelegationId
+	}
+	return ""
+}
+
+func (x *CreditDemand) GetRawBytes() uint64 {
+	if x != nil {
+		return x.RawBytes
+	}
+	return 0
+}
+
+func (x *CreditDemand) GetTtlSeconds() uint32 {
+	if x != nil {
+		return x.TtlSeconds
+	}
+	return 0
+}
+
+// Sent only after durable proof that this request issued no rights.
+// Success uses AuthorizationUpdate with payload.update_id=request_id.
+type CreditDemandDenied struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Reason        CreditDemandDenial     `protobuf:"varint,2,opt,name=reason,proto3,enum=vortex.control.v1.CreditDemandDenial" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreditDemandDenied) Reset() {
+	*x = CreditDemandDenied{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreditDemandDenied) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreditDemandDenied) ProtoMessage() {}
+
+func (x *CreditDemandDenied) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreditDemandDenied.ProtoReflect.Descriptor instead.
+func (*CreditDemandDenied) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CreditDemandDenied) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *CreditDemandDenied) GetReason() CreditDemandDenial {
+	if x != nil {
+		return x.Reason
+	}
+	return CreditDemandDenial_CREDIT_DEMAND_DENIAL_UNSPECIFIED
+}
+
 var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
-	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xf8\x03\n" +
+	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xc0\x04\n" +
 	"\vNodeMessage\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x17\n" +
 	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
@@ -1197,8 +1406,9 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\fapply_result\x18\f \x01(\v2\x1e.vortex.control.v1.ApplyResultH\x00R\vapplyResult\x124\n" +
 	"\x05event\x18\r \x01(\v2\x1c.vortex.control.v1.NodeEventH\x00R\x05event\x12@\n" +
 	"\bregister\x18\x0e \x01(\v2\".vortex.control.v1.RegisterRequestH\x00R\bregister\x12V\n" +
-	"\x13unknown_usage_batch\x18\x0f \x01(\v2$.vortex.control.v1.UnknownUsageBatchH\x00R\x11unknownUsageBatchB\x06\n" +
-	"\x04body\"\xde\x03\n" +
+	"\x13unknown_usage_batch\x18\x0f \x01(\v2$.vortex.control.v1.UnknownUsageBatchH\x00R\x11unknownUsageBatch\x12F\n" +
+	"\rcredit_demand\x18\x10 \x01(\v2\x1f.vortex.control.v1.CreditDemandH\x00R\fcreditDemandB\x06\n" +
+	"\x04body\"\xb9\x04\n" +
 	"\x0eControlMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -1208,7 +1418,8 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\tusage_ack\x18\v \x01(\v2'.vortex.control.v1.UsageAcknowledgementH\x00R\busageAck\x12[\n" +
 	"\x14authorization_update\x18\f \x01(\v2&.vortex.control.v1.AuthorizationUpdateH\x00R\x13authorizationUpdate\x127\n" +
 	"\x05error\x18\r \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12\\\n" +
-	"\x11unknown_usage_ack\x18\x0e \x01(\v2..vortex.control.v1.UnknownUsageAcknowledgementH\x00R\x0funknownUsageAckB\x06\n" +
+	"\x11unknown_usage_ack\x18\x0e \x01(\v2..vortex.control.v1.UnknownUsageAcknowledgementH\x00R\x0funknownUsageAck\x12Y\n" +
+	"\x14credit_demand_denied\x18\x0f \x01(\v2%.vortex.control.v1.CreditDemandDeniedH\x00R\x12creditDemandDeniedB\x06\n" +
 	"\x04body\"\x81\x01\n" +
 	"\x0fRegisterRequest\x12)\n" +
 	"\x10enrollment_token\x18\x01 \x01(\tR\x0fenrollmentToken\x12\x17\n" +
@@ -1276,7 +1487,23 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\tNodeEvent\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload2_\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload\"\x90\x01\n" +
+	"\fCreditDemand\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12#\n" +
+	"\rdelegation_id\x18\x02 \x01(\tR\fdelegationId\x12\x1b\n" +
+	"\traw_bytes\x18\x03 \x01(\x04R\brawBytes\x12\x1f\n" +
+	"\vttl_seconds\x18\x04 \x01(\rR\n" +
+	"ttlSeconds\"r\n" +
+	"\x12CreditDemandDenied\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12=\n" +
+	"\x06reason\x18\x02 \x01(\x0e2%.vortex.control.v1.CreditDemandDenialR\x06reason*\xb1\x01\n" +
+	"\x12CreditDemandDenial\x12$\n" +
+	" CREDIT_DEMAND_DENIAL_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"CREDIT_DEMAND_DENIAL_INVALID_SCOPE\x10\x01\x12+\n" +
+	"'CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS\x10\x02\x12 \n" +
+	"\x1cCREDIT_DEMAND_DENIAL_EXPIRED\x10\x032_\n" +
 	"\vNodeControl\x12P\n" +
 	"\aConnect\x12\x1e.vortex.control.v1.NodeMessage\x1a!.vortex.control.v1.ControlMessage(\x010\x01B(Z&vortex/contracts/protobuf/v1;controlv1b\x06proto3"
 
@@ -1292,45 +1519,52 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_contracts_protobuf_v1_vortex_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
-	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
-	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
-	(*RegisterRequest)(nil),             // 2: vortex.control.v1.RegisterRequest
-	(*ControlError)(nil),                // 3: vortex.control.v1.ControlError
-	(*Heartbeat)(nil),                   // 4: vortex.control.v1.Heartbeat
-	(*UsageBatch)(nil),                  // 5: vortex.control.v1.UsageBatch
-	(*UsageDelta)(nil),                  // 6: vortex.control.v1.UsageDelta
-	(*UsageAcknowledgement)(nil),        // 7: vortex.control.v1.UsageAcknowledgement
-	(*UnknownUsageBatch)(nil),           // 8: vortex.control.v1.UnknownUsageBatch
-	(*UnknownUsageAcknowledgement)(nil), // 9: vortex.control.v1.UnknownUsageAcknowledgement
-	(*ApplyResult)(nil),                 // 10: vortex.control.v1.ApplyResult
-	(*ObjectResult)(nil),                // 11: vortex.control.v1.ObjectResult
-	(*RuntimeConfigUpdate)(nil),         // 12: vortex.control.v1.RuntimeConfigUpdate
-	(*AuthorizationUpdate)(nil),         // 13: vortex.control.v1.AuthorizationUpdate
-	(*NodeEvent)(nil),                   // 14: vortex.control.v1.NodeEvent
+	(CreditDemandDenial)(0),             // 0: vortex.control.v1.CreditDemandDenial
+	(*NodeMessage)(nil),                 // 1: vortex.control.v1.NodeMessage
+	(*ControlMessage)(nil),              // 2: vortex.control.v1.ControlMessage
+	(*RegisterRequest)(nil),             // 3: vortex.control.v1.RegisterRequest
+	(*ControlError)(nil),                // 4: vortex.control.v1.ControlError
+	(*Heartbeat)(nil),                   // 5: vortex.control.v1.Heartbeat
+	(*UsageBatch)(nil),                  // 6: vortex.control.v1.UsageBatch
+	(*UsageDelta)(nil),                  // 7: vortex.control.v1.UsageDelta
+	(*UsageAcknowledgement)(nil),        // 8: vortex.control.v1.UsageAcknowledgement
+	(*UnknownUsageBatch)(nil),           // 9: vortex.control.v1.UnknownUsageBatch
+	(*UnknownUsageAcknowledgement)(nil), // 10: vortex.control.v1.UnknownUsageAcknowledgement
+	(*ApplyResult)(nil),                 // 11: vortex.control.v1.ApplyResult
+	(*ObjectResult)(nil),                // 12: vortex.control.v1.ObjectResult
+	(*RuntimeConfigUpdate)(nil),         // 13: vortex.control.v1.RuntimeConfigUpdate
+	(*AuthorizationUpdate)(nil),         // 14: vortex.control.v1.AuthorizationUpdate
+	(*NodeEvent)(nil),                   // 15: vortex.control.v1.NodeEvent
+	(*CreditDemand)(nil),                // 16: vortex.control.v1.CreditDemand
+	(*CreditDemandDenied)(nil),          // 17: vortex.control.v1.CreditDemandDenied
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
-	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
-	5,  // 1: vortex.control.v1.NodeMessage.usage_batch:type_name -> vortex.control.v1.UsageBatch
-	10, // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
-	14, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
-	2,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
-	8,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
-	12, // 6: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
-	7,  // 7: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
-	13, // 8: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	3,  // 9: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
-	9,  // 10: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
-	6,  // 11: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
-	11, // 12: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
-	0,  // 13: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	1,  // 14: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	14, // [14:15] is the sub-list for method output_type
-	13, // [13:14] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	5,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
+	6,  // 1: vortex.control.v1.NodeMessage.usage_batch:type_name -> vortex.control.v1.UsageBatch
+	11, // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
+	15, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
+	3,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
+	9,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
+	16, // 6: vortex.control.v1.NodeMessage.credit_demand:type_name -> vortex.control.v1.CreditDemand
+	13, // 7: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
+	8,  // 8: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
+	14, // 9: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	4,  // 10: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
+	10, // 11: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
+	17, // 12: vortex.control.v1.ControlMessage.credit_demand_denied:type_name -> vortex.control.v1.CreditDemandDenied
+	7,  // 13: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
+	12, // 14: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
+	0,  // 15: vortex.control.v1.CreditDemandDenied.reason:type_name -> vortex.control.v1.CreditDemandDenial
+	1,  // 16: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	2,  // 17: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	17, // [17:18] is the sub-list for method output_type
+	16, // [16:17] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -1345,6 +1579,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*NodeMessage_Event)(nil),
 		(*NodeMessage_Register)(nil),
 		(*NodeMessage_UnknownUsageBatch)(nil),
+		(*NodeMessage_CreditDemand)(nil),
 	}
 	file_contracts_protobuf_v1_vortex_proto_msgTypes[1].OneofWrappers = []any{
 		(*ControlMessage_ConfigUpdate)(nil),
@@ -1352,19 +1587,21 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*ControlMessage_AuthorizationUpdate)(nil),
 		(*ControlMessage_Error)(nil),
 		(*ControlMessage_UnknownUsageAck)(nil),
+		(*ControlMessage_CreditDemandDenied)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   15,
+			NumEnums:      1,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_contracts_protobuf_v1_vortex_proto_goTypes,
 		DependencyIndexes: file_contracts_protobuf_v1_vortex_proto_depIdxs,
+		EnumInfos:         file_contracts_protobuf_v1_vortex_proto_enumTypes,
 		MessageInfos:      file_contracts_protobuf_v1_vortex_proto_msgTypes,
 	}.Build()
 	File_contracts_protobuf_v1_vortex_proto = out.File

@@ -846,7 +846,8 @@
         "vortex.vlink.v1",
         "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": " Control 1.3.0: authenticated durable demand and definitive non-issuance outcome; no timeout refunds."
     },
     {
       "id": "ENG-038",
@@ -873,7 +874,8 @@
         "vortex.vlink.v1",
         "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": " Control 1.3.0: authenticated durable demand and definitive non-issuance outcome; no timeout refunds."
     },
     {
       "id": "ENG-040",
@@ -1003,7 +1005,7 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release. Control 1.3.0: authenticated durable demand and definitive non-issuance outcome; no timeout refunds."
     },
     {
       "id": "AGT-007",
@@ -1087,7 +1089,7 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release. Control 1.3.0: authenticated durable demand and definitive non-issuance outcome; no timeout refunds."
     },
     {
       "id": "HUB-004",
