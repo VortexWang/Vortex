@@ -215,3 +215,29 @@ formal-exit=0 and qualification-gate status=pass, reasons=[], trials=3,
 warmup_seconds=300, with remote HEAD c6a0761. That performance evidence
 remains scoped to c6a0761 and must not be attributed to this integration tree.
 D-04 adaptive demand/idle policy and complete attack coverage remain open.
+
+## Funded durable OPEN attack coverage
+
+Extended TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget with
+five route forgeries for each of TCP and UDP after the real Hub-issued credit,
+runtime lease and share lease are installed through authenticated control.
+Future rule revision and path generation require OPEN class 7; skipped hop and
+visited local node require class 1; duplicate visited node requires class 8.
+Each case checks the received 18-byte OPEN_ERR including nonzero correlation
+ID, no target access, and the durable source balance: initial=remaining=4096,
+reserved=committed=unknown=0. The following successful stream and same-session
+renewal ensure failed admission does not exhaust the sole connection slot.
+
+Validation: go test -race ./agent -run
+TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget -count=1 PASS.
+This is local real TLS/SQLite runtime coverage, not full multi-hop attack or
+dedicated-host qualification. WaitOpen intentionally exposes only a formatted
+error; assertions inspect the wire frame to verify the correlation ID.
+
+D-04 integration audit: ReserveRuntimeUsage selects already installed grants
+and renews session references atomically; Issuer.Issue durably deduplicates
+explicit requests. No active demand-driven control loop connects these APIs.
+Remaining implementation must add per-immutable-key rolling consumption,
+coalesced persistent request identity and authenticated delivery, bounded
+missing-authority wait, and proof-based idle drain. Do not reinterpret
+selection of preinstalled grants as adaptive issuance or lock the candidates.

@@ -10,6 +10,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"database/sql"
+	"encoding/binary"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -317,6 +318,49 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				}
 			}
 			waitUntil(initialPayload.IssuedAt)
+			localNode, err := vlink.ParseNodeID(controlTestNodeID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			peerNode, err := vlink.ParseNodeID(peerID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// An installed, funded durable lease must not turn forged route
+			// metadata into permission. Each rejection precedes target access
+			// and leaves both source funds and connection admission untouched.
+			for _, attack := range []struct {
+				name   string
+				code   vlink.OpenErrorCode
+				mutate func(*vlink.OpenRequest)
+			}{
+				{"future-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision++ }},
+				{"future-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration++ }},
+				{"skipped-hop", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.HopIndex++ }},
+				{"visited-local", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.Visited = []vlink.NodeID{localNode} }},
+				{"duplicate-visited", vlink.OpenProtocolError, func(r *vlink.OpenRequest) { r.Visited = []vlink.NodeID{peerNode, peerNode} }},
+			} {
+				t.Run("funded-attack-"+attack.name, func(t *testing.T) {
+					request := vlink.OpenRequest{RuleID: rule, RuleRevision: 2, PathGeneration: 4, Network: network, ClientAddress: []byte{127, 0, 0, 1}}
+					attack.mutate(&request)
+					forged, err := mux.Open(ctx, request)
+					if err != nil {
+						t.Fatal(err)
+					}
+					frame, err := forged.Receive(ctx)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer frame.Release()
+					if frame.Type != vlink.FrameOpenErr || len(frame.Payload) != 18 || vlink.OpenErrorCode(binary.BigEndian.Uint16(frame.Payload[:2])) != attack.code || bytes.Equal(frame.Payload[2:], make([]byte, 16)) {
+						t.Fatalf("wrong audited rejection: type=%d payload=%x", frame.Type, frame.Payload)
+					}
+					balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+					if err != nil || balance.Initial != 4096 || balance.Remaining != 4096 || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
+						t.Fatalf("forged route changed authority or target: %+v targets=%d err=%v", balance, targets.Load(), err)
+					}
+				})
+			}
 			stream := open()
 			if err := stream.WaitOpen(ctx); err != nil {
 				t.Fatal(err)
