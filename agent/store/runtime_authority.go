@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -25,6 +26,9 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 		return result, err
 	}
 	defer tx.Rollback()
+	if err := checkRuntimeFenceTx(ctx, tx, scope.FencingGeneration); err != nil {
+		return result, err
+	}
 	chosen, err := selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil)
 	if err != nil {
 		return result, err
@@ -139,8 +143,32 @@ func (s *Store) CheckRuntimeReady(ctx context.Context, scope AuthorizationUse) e
 		return err
 	}
 	defer tx.Rollback()
+	if err := checkRuntimeFenceTx(ctx, tx, scope.FencingGeneration); err != nil {
+		return err
+	}
 	if _, err = selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil); err != nil {
 		return err
 	}
 	return tx.Commit()
+}
+
+// The floor and the new-session allocation are read in the same SQLite
+// transaction, so an intervening authorization update cannot admit a stale
+// configuration. Zero is reserved for callers without a runtime config gate.
+func checkRuntimeFenceTx(ctx context.Context, tx *sql.Tx, generation uint64) error {
+	if generation == 0 {
+		return nil
+	}
+	var raw string
+	if err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='authorization_fencing_floor'`).Scan(&raw); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrAuthorizationDenied
+		}
+		return err
+	}
+	floor, err := strconv.ParseUint(raw, 10, 64)
+	if err != nil || floor == 0 || generation < floor {
+		return ErrConfigGenerationStale
+	}
+	return nil
 }

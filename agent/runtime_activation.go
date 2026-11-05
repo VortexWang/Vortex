@@ -72,9 +72,13 @@ func (a *RuntimeApplier) Prepare(id [16]byte, generation uint64) (any, error) {
 func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	tx, ok := a.EngineApplier.Query(id)
+	if !ok {
+		return nil, ErrConfigConflict
+	}
 	low, high, trusted := a.node.TrustedTime()
 	scope := a.engine.scope
-	if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+	if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, FencingGeneration: tx.Generation, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
 		if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) {
 			return nil, ErrActivationPending
 		}
@@ -90,6 +94,7 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 	}
 	result, err := a.EngineApplier.Commit(id, unknown)
 	if err == nil {
+		a.engine.activeFence.Store(tx.Generation)
 		a.engine.activated.Store(true)
 	}
 	return result, err

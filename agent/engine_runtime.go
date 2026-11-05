@@ -17,6 +17,7 @@ type RuntimeEngine struct {
 	config             config.Config
 	activationRequired atomic.Bool
 	activated          atomic.Bool
+	activeFence        atomic.Uint64
 	ConfigPath         string
 	runtime            *engineruntime.Runtime
 	scope              RuntimeScope

@@ -3,3 +3,5 @@ artifacts/phase1/status.env
 artifacts/phase1/modelcheck/
 artifacts/phase4/
 test/netns/fixture/bin/
+__pycache__/
+*.pyc

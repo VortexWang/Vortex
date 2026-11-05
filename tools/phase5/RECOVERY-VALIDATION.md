@@ -20,6 +20,12 @@ share leases, funded credit and trusted time permit Commit. Prepared requests
 are retried after authenticated authorization arrives. Headless control without
 an Engine cannot report successful execution.
 
+Commit validates its fencing generation against the durable authorization floor.
+New-session admission rechecks that floor atomically with lease and quota selection;
+a later floor increase cannot use the old committed config to open new flows.
+Existing sessions may drain only within their independently revalidated original
+lease, share and credit bounds.
+
 On restart, old authorizations become settlement-only and unfinished writes
 become typed unknown liabilities. Config holds are released only after a retained
 same-instance Engine query or a same-kernel/same-PID-namespace process witness

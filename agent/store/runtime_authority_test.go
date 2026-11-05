@@ -67,6 +67,40 @@ func TestRuntimeShareSlotsPersistAcrossStoreReopen(t *testing.T) {
 	}
 }
 
+func TestRuntimeFencingAdvanceBlocksNewAdmissionButRetainsSession(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	scope.FencingGeneration = 1
+	authority, err := s.OpenRuntimeSession(ctx, scope, "existing", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	update := AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: "boot", UpdateID: "higher-floor", Payload: []byte("higher-floor"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 2}
+	if err := s.PersistAuthorizationUpdate(ctx, update, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CheckRuntimeReady(ctx, scope); !errors.Is(err, ErrConfigGenerationStale) {
+		t.Fatalf("stale prepared commit accepted: %v", err)
+	}
+	if _, err := s.OpenRuntimeSession(ctx, scope, "stale", "flow-stale"); !errors.Is(err, ErrConfigGenerationStale) {
+		t.Fatalf("stale admission accepted: %v", err)
+	}
+	r := UsageReservation{NodeID: "node", BootID: "boot", BatchID: "drain", AuthorizationID: "grant", SnapshotID: "snapshot", FlowKey: "flow", RuleID: "rule", Direction: "egress", Reserved: 1}
+	if _, err := s.ReserveRuntimeUsage(ctx, r, authority.Use); err != nil {
+		t.Fatalf("existing valid session cannot drain: %v", err)
+	}
+	if err := s.CloseRuntimeSession(ctx, "node", "boot", "existing"); err != nil {
+		t.Fatal(err)
+	}
+	scope.FencingGeneration = 2
+	if err := s.CheckRuntimeReady(ctx, scope); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.OpenRuntimeSession(ctx, scope, "successor", "flow-successor"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRuntimeRateAndClosedSessionCannotAllocateBytes(t *testing.T) {
 	s, scope, _ := runtimeStore(t)
 	ctx := context.Background()

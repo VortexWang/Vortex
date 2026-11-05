@@ -83,7 +83,8 @@ def audit(out):
              'TestRuntimeSIGKILLFreshBootReprepareAndRecoverDebt',
              'TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor',
              'TestActivationTransitionsRejectLateAndConcurrentResults',
-             'TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer')
+             'TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer',
+             'TestRuntimeFencingAdvanceBlocksNewAdmissionButRetainsSession')
     for name in names:
         assert f'--- PASS: {name} ' in log, name
         assert f'--- SKIP: {name}' not in log, name

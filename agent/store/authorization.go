@@ -20,9 +20,12 @@ type AuthorizationUse struct {
 	NodeID, BootID, AuthorizationID string
 	Kind, RuleID, BillingSnapshotID string
 	RuleRevision, PathGeneration    uint64
-	Earliest, Latest                time.Time
-	TrustedTime                     bool
-	ExistingSession                 bool
+	// Nonzero for admission by a committed runtime configuration. Existing
+	// sessions retain their original rights and are checked separately.
+	FencingGeneration uint64
+	Earliest, Latest  time.Time
+	TrustedTime       bool
+	ExistingSession   bool
 }
 
 // CheckStoredAuthorization checks a persisted lease or grant without issuing,
