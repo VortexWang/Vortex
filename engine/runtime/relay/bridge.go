@@ -351,6 +351,10 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
+		if stream.Network == vlink.StreamTCP {
+			errCh <- bridgeTCPToConn(bridgeCtx, stream, conn, session, onFirstTargetByte)
+			return
+		}
 		var owned vlink.Frame
 		firstTargetByte := true
 		defer func() { owned.Release() }()
@@ -476,6 +480,94 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	}
 	wg.Wait()
 	return first
+}
+
+// bridgeTCPToConn settles a batch of already-framed DATA before releasing the
+// stream window. This keeps accounting semantics byte exact while avoiding a
+// lock and event commit for every 16 KiB frame at the destination.
+func bridgeTCPToConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, session engineaccounting.Session, onFirstTargetByte func()) error {
+	var frames [4]vlink.Frame
+	first := true
+	for {
+		n, err := stream.ReceiveBatch(ctx, frames[:])
+		if err != nil {
+			return err
+		}
+		dataCount := 0
+		var total int
+		for _, frame := range frames[:n] {
+			if frame.Type != vlink.FrameData {
+				break
+			}
+			dataCount++
+			total += len(frame.Payload)
+		}
+		if dataCount > 0 {
+			if first && onFirstTargetByte != nil {
+				onFirstTargetByte()
+			}
+			first = false
+			batch, reserveErr := reserve(ctx, session, engineaccounting.LeftToRight, total)
+			if reserveErr != nil {
+				releaseFrames(frames[:n])
+				return reserveErr
+			}
+			written := 0
+			var writeErr error
+			for _, frame := range frames[:dataCount] {
+				var nw int
+				nw, writeErr = conn.Write(frame.Payload)
+				written += nw
+				if writeErr != nil || nw != len(frame.Payload) {
+					if writeErr == nil {
+						writeErr = io.ErrShortWrite
+					}
+					break
+				}
+			}
+			if writeErr != nil {
+				if batch != nil {
+					_ = batch.MarkUnknown(ctx)
+				}
+				releaseFrames(frames[:n])
+				return writeErr
+			}
+			if batch != nil {
+				if err := batch.Commit(ctx, int64(written)); err != nil {
+					releaseFrames(frames[:n])
+					return err
+				}
+			}
+			if err := stream.Consume(ctx, uint32(written)); err != nil {
+				releaseFrames(frames[:n])
+				return err
+			}
+		}
+		for _, frame := range frames[dataCount:n] {
+			switch frame.Type {
+			case vlink.FrameFIN:
+				releaseFrames(frames[:n])
+				if tcp, ok := conn.(*net.TCPConn); ok {
+					return tcp.CloseWrite()
+				}
+				return errors.New("relay: destination does not support half-close")
+			case vlink.FrameRST:
+				releaseFrames(frames[:n])
+				return errors.New("relay: stream reset")
+			default:
+				releaseFrames(frames[:n])
+				return errors.New("relay: unexpected stream frame")
+			}
+		}
+		releaseFrames(frames[:n])
+	}
+}
+
+func releaseFrames(frames []vlink.Frame) {
+	for i := range frames {
+		frames[i].Release()
+		frames[i] = vlink.Frame{}
+	}
 }
 
 func reserve(ctx context.Context, session engineaccounting.Session, direction engineaccounting.Direction, size int) (*engineaccounting.Batch, error) {
