@@ -199,6 +199,9 @@ func (s *Store) CurrentAutonomyStatus(ctx context.Context, now time.Time, truste
 	return status, nil
 }
 
+// CheckAuthorization is a legacy mode check, not an issuance capability.
+// Booleans cannot prove ownership; autonomous issuance must use the durable
+// delegation transaction in IssueHubAuthorization.
 func (s *Store) CheckAuthorization(ctx context.Context, now time.Time, trustedClock, existingRule, existingShare, existingDelegation bool) error {
 	status, err := s.CurrentAutonomyStatus(ctx, now, trustedClock)
 	if err != nil {
@@ -216,7 +219,7 @@ func (s *Store) CheckAuthorization(ctx context.Context, now time.Time, trustedCl
 	if status.Mode == AutonomyOffline && status.SignerEpochOpen {
 		return ErrSignerEpochOpenInAutonomy
 	}
-	if status.Mode == AutonomyOffline && !(existingRule && existingShare && existingDelegation) {
+	if status.Mode == AutonomyOffline {
 		return ErrNewAuthorityInAutonomy
 	}
 	return nil

@@ -241,13 +241,46 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatal("unauthorized OPEN reached target")
 			}
 			serverTLS, clientTLS, _ := controlTLS(t, controlTestNodeID)
-			hs, err := store.Open(filepath.Join(dir, "hub.db"), "hub")
+			hubDB := filepath.Join(dir, "hub.db")
+			if fullDiskRoot != "" {
+				hubDB = filepath.Join(filepath.Dir(agentDB), "hub.db")
+			}
+			hs, err := store.Open(hubDB, "hub")
 			if err != nil {
 				t.Fatal(err)
 			}
 			defer hs.Close()
+			// The protocol backend installs a fixed allocation. The Hub must
+			// reserve it durably before its control response becomes visible.
+			issuedAt := time.Now().UTC()
+			delegation := store.HubDelegation{
+				ID: "550e8400-e29b-41d4-a716-446655440022", HubID: "550e8400-e29b-41d4-a716-446655440060",
+				SourceID: "550e8400-e29b-41d4-a716-446655440023", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440061", ShareSourceID: "550e8400-e29b-41d4-a716-446655440062",
+				NodeID: node.NodeID, BootID: node.BootID, BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440024",
+				RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, FencingFloor: 8, SignerEpoch: 1,
+				RawBytes: 8192, RateBPS: 1000000, Connections: 1,
+				ValidFrom: issuedAt, ExpiresAt: issuedAt.Add(time.Hour), HardDeadline: issuedAt.Add(time.Hour),
+				BackendHeartbeat: issuedAt, AutonomyDeadline: issuedAt.Add(2 * time.Hour),
+			}
+			issuerClock := func() store.IssuerTime {
+				now := time.Now().UTC()
+				return store.IssuerTime{Earliest: now, Latest: now, Trusted: true}
+			}
+			if err := hs.InstallHubDelegation(ctx, delegation, issuerClock()); err != nil {
+				t.Fatal(err)
+			}
+			issuer := &hub.Issuer{Store: hs, HubID: delegation.HubID, Clock: issuerClock}
+			const issueID = "550e8400-e29b-41d4-a716-446655440020"
+			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, 4096, 2*time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			preparedPayload, err := validateAuthorizationUpdate(prepared.Payload, node.NodeID, node.BootID, 4)
+			if err != nil {
+				t.Fatal(err)
+			}
 			ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
-				return &controlv1.AuthorizationUpdate{Generation: 4, Payload: leasedPayload(t, id, boot)}, nil
+				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, 4096, 2*time.Minute)
 			}}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, ln.Addr().String()); err != nil {
 				t.Fatal(err)
@@ -255,7 +288,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			// Wait until the conservative lower clock bound reaches not_before.
 			for {
 				low, _, trusted := node.TrustedTime()
-				if trusted && !low.Before(time.Date(2026, 11, 5, 12, 1, 0, 0, time.UTC)) {
+				if trusted && !low.Before(preparedPayload.IssuedAt) {
 					break
 				}
 				select {
@@ -314,6 +347,9 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				if !errors.As(probeErr, &sqliteErr) || sqliteErr.Code()&255 != 13 {
 					t.Fatalf("expected SQLITE_FULL, got %v", probeErr)
 				}
+				if result, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440088", 64, time.Minute); err == nil || result != nil {
+					t.Fatalf("full disk returned new Hub authority: %v", err)
+				}
 				if network == 1 {
 					err = stream.WriteData(ctx, []byte("must-not-reach-target"))
 				} else {
@@ -353,14 +389,18 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if pending, err := s.PendingUsageOutbox(ctx, node.NodeID); err != nil || len(pending) != 0 {
 				t.Fatalf("outbox not acknowledged: %d %v", len(pending), err)
 			}
+			balance, err := hs.AuditHubDelegation(ctx, delegation.ID)
+			if err != nil || balance.Initial != 8192 || balance.Remaining != 4096 || balance.Issued != 4096 {
+				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
+			}
 			if err := s.Close(); err != nil {
 				t.Fatal(err)
 			}
 			if err := hs.Close(); err != nil {
 				t.Fatal(err)
 			}
-			assertRawLedger(t, filepath.Join(dir, "hub.db"), 2)
-			saveRuntimeLedger(t, network, agentDB, filepath.Join(dir, "hub.db"))
+			assertRawLedger(t, hubDB, 2)
+			saveRuntimeLedger(t, network, agentDB, hubDB)
 		})
 	}
 }

@@ -31,8 +31,8 @@ func TestAutonomyUsesFixedHeartbeatDeadlineAcrossRestart(t *testing.T) {
 	if status.AutonomyStartedAt != base.Add(BackendLossGrace) || status.HardDeadline != deadline {
 		t.Fatalf("autonomy boundary moved: %+v", status)
 	}
-	if err := s.CheckAuthorization(ctx, base.Add(time.Minute), true, true, true, true); err != nil {
-		t.Fatalf("renewal of all existing authority rejected: %v", err)
+	if err := s.CheckAuthorization(ctx, base.Add(time.Minute), true, true, true, true); !errors.Is(err, ErrNewAuthorityInAutonomy) {
+		t.Fatalf("caller booleans bypassed durable ownership checks: %v", err)
 	}
 	if err := s.CheckAuthorization(ctx, base.Add(time.Minute), true, true, false, true); !errors.Is(err, ErrNewAuthorityInAutonomy) {
 		t.Fatalf("partial existing-resource match was allowed: %v", err)

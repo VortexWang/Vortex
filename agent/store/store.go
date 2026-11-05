@@ -323,7 +323,22 @@ CREATE TABLE IF NOT EXISTS runtime_rate_buckets (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, boot_id TEXT NOT NULL,
  tokens INTEGER NOT NULL, last_tick INTEGER NOT NULL, PRIMARY KEY(node_id,source_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '5')
+CREATE TABLE IF NOT EXISTS issuer_epochs (
+ hub_id TEXT PRIMARY KEY NOT NULL, signer_epoch TEXT NOT NULL, state TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS issuer_delegations (
+ delegation_id TEXT PRIMARY KEY NOT NULL, hub_id TEXT NOT NULL,
+ source_id TEXT NOT NULL, signer_epoch TEXT NOT NULL,
+ payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
+ remaining_bytes TEXT NOT NULL, state TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS issuer_issues (
+ issue_id TEXT PRIMARY KEY NOT NULL, delegation_id TEXT NOT NULL,
+ request BLOB NOT NULL, payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
+ amount_bytes TEXT NOT NULL, created_at TEXT NOT NULL,
+ FOREIGN KEY(delegation_id) REFERENCES issuer_delegations(delegation_id)
+);
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '6')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
