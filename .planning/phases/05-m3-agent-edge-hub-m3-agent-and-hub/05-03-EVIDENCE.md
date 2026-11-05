@@ -61,3 +61,22 @@ Status: **In progress. This evidence covers durable usage handoff, bounded auton
 - At `c8c0dc6`, Phase 1 remains failed on the existing VLink approved-review hash mismatch; Phase 3 fails during its benchmark; Phase 4 fails the 64 MiB binary integrity/half-close check. These results are not green and are not silently changed by this authorization work. Phase 4 remains on its separately agreed workstream.
 
 This file is incremental evidence, not a 05-03 SUMMARY and not a phase completion claim.
+
+## Durable credit-gate increment (`84dd896`)
+
+- Added an Agent-owned credit-grant Gate and a pre-start Engine injection interface. Each writable batch atomically checks persisted node/boot/rule/revision/path/snapshot/time and subtracts a full byte upper bound under SQLite FULL before returning to Engine. Concurrent reservations cannot overdraw the grant.
+- Settlement binds the original grant identity, returns only proven unused bytes, and commits usage/outbox with the reservation state. An unknown outcome retains its entire bound. Restart recovery retains the grant ID in the unknown outbox record.
+- A persistence failure latches the Gate against later reservations and new sessions. Tests cover other already-open sessions attempting subsequent reservations after the fault. This does not establish interruption of writes for batches already issued before the fault.
+- Source ownership is single-owner and conservative in this increment. A parent authorization ID or higher signer epoch alone cannot transfer the remainder: a second grant on the same source returns `ErrAuthorityHandoffRequired`, with the complete update rolled back. No implicit signer-epoch ownership transfer is implemented.
+- Balance audits read a consistent SQLite transaction and reject arithmetic overflow. Added tests cover concurrent exhaustion, replay after revocation, changed grant identity on settlement, restart unknown recovery and SQL-trigger write failures.
+- SQLite schema version is 4. Existing authorization rows are not assigned synthetic balances during upgrade; without a durable balance they remain unable to reserve new bytes. Recovery/migration of previously issued grants requires explicit reconciliation.
+- Added `make phase5-authorization-check` to run Agent/Hub race, targeted vet and Engine accounting/runtime race checks. It retains host, SHA, raw test logs and a report that explicitly sets `plan_complete: false`; the same command runs in Docker and Actions.
+- Local root `go test ./...`, Agent/Hub race and targeted vet PASS; Engine `go test ./...` PASS.
+
+Remaining: runtime lease admission, production configuration selection/wiring, authenticated conservative time/backend heartbeat, full-disk topology, durable signer closure/ownership handoff and complete Hub authority. `NewAuthorizationGate` is a credit adapter, not the complete production authorization policy. The `vortex-node` CLI is not yet automatically wired to it. The approved authorization and control contracts are unchanged.
+
+### Same-source verification for `84dd89655adc1ca6296da43b7265d197c0ae143f`
+
+- Local Docker: a clean `git archive` of the exact SHA mounted read-only; pinned `golang:1.27.3` digest `sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048`; `make phase5-authorization-check` equivalent script invocation PASS. Raw host/race/vet logs and report: `artifacts/phase5/authorization/84dd896/docker/`.
+- GitHub Actions: [run 42051210228](https://github.com/VortexWang/Vortex/actions/runs/42051210228), same SHA, PASS. Contract checks, Wave 1, Wave 2 and `make phase5-authorization-check` completed. Downloaded raw authorization artifact: `artifacts/phase5/authorization/84dd896/actions/`; run metadata retained beside it.
+- Both authorization reports deliberately record `plan_complete: false`. These are incremental correctness regressions, not full-disk or production runtime/Hub authority acceptance.

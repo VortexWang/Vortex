@@ -5,11 +5,11 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 3
 status: executing
-stopped_at: 05-03 incremental authorization contract and stored-use checks implemented; runtime source-bound quota enforcement and handoff remain open
-last_updated: "2026-11-05T14:22:24Z"
+stopped_at: 05-03 durable credit reservations implemented; production lease admission, heartbeat and handoff remain open
+last_updated: "2026-11-05T15:07:37Z"
 last_activity: 2026-11-05
-last_activity_desc: Owner-approved authorization 1.0.0 implemented; durable usage and stored authorization checks added; plan 05-03 remains executing
-state_head: 130dcae77c45bc93032b9d5361966474d30e2108
+last_activity_desc: Durable source-bound credit adapter and fault regressions added; production authority wiring remains open; plan 05-03 remains executing
+state_head: 84dd89655adc1ca6296da43b7265d197c0ae143f
 progress:
   total_phases: 8
   completed_phases: 4
@@ -32,7 +32,7 @@ Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 3
 Total Plans in Phase: 5
 Status: Executing
-Last activity: 2026-11-05 — Plan 05-03 remains in progress: approved authorization 1.0.0, durable usage reservations and stored-use validation are implemented; runtime source-bound quota enforcement remains open
+Last activity: 2026-11-05 — Plan 05-03 remains in progress: durable credit Gate and reservation/settlement accounting implemented; production lease admission, heartbeat and handoff remain open
 
 Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
