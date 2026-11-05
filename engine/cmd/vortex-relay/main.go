@@ -363,12 +363,13 @@ func resetStream(stream *vlink.MuxStream) {
 
 func accountingEventLimit(evidenceFile, configured string) (int, error) {
 	const defaultLimit = 1000000
+	const qualificationLimit = 50000000
 	if evidenceFile == "" || configured == "" {
 		return defaultLimit, nil
 	}
 	parsed, err := strconv.Atoi(configured)
-	if err != nil || parsed < 1 || parsed > 10000000 {
-		return 0, errors.New("VORTEX_QUALIFICATION_EVENT_LIMIT must be between 1 and 10000000")
+	if err != nil || parsed < 1 || parsed > qualificationLimit {
+		return 0, errors.New("VORTEX_QUALIFICATION_EVENT_LIMIT must be between 1 and 50000000")
 	}
 	return parsed, nil
 }
