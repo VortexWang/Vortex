@@ -173,3 +173,20 @@ used a dirty worktree and are diagnostic, not clean-SHA qualification evidence.
 The latest main-worktree Phase 5 implementation has progressed to persisted
 in-session renewal (86640e7), but still records pending handoff/recovery work;
 its uncommitted work was left untouched.
+
+## Persistent goal continuation: case-level attack gate
+
+Added `attack_gate.py` to the comparison execution path. It requires every one
+of twelve configured TCP/UDP rejection cases, exact rejection classes, nonzero
+128-bit audit correlation IDs, and UDP link-loss termination. A top-level pass
+flag no longer suffices for this enumerated matrix. Tests remove each case,
+substitute wrong classes/correlations and remove the UDP half of the matrix;
+all fail closed. The complete local diagnostic matrix passes. Eighteen Python
+checks pass in total. This is not full identity, durable authority or recovery
+coverage, and does not relabel the earlier dirty local run as formal evidence.
+
+Live main-worktree review now finds Phase 5 commits through fef53ed (persisted
+signer remainder handoff), with active uncommitted contract/store work. Durable
+integration must use a coherent committed baseline; no uncommitted files from
+that worktree were copied or overwritten. D-04 adaptive issuance/idle proof and
+full cross-layer attack verification remain part of the active goal.
