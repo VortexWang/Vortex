@@ -209,6 +209,14 @@ CREATE TABLE IF NOT EXISTS config_object_results (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(transaction_id, object_id)
 );
+CREATE TABLE IF NOT EXISTS activation_holds (
+ transaction_id TEXT PRIMARY KEY NOT NULL, generation TEXT NOT NULL,
+ state TEXT NOT NULL, FOREIGN KEY(transaction_id) REFERENCES config_results(transaction_id)
+);
+CREATE TABLE IF NOT EXISTS activation_observations (
+ sequence INTEGER PRIMARY KEY AUTOINCREMENT, transaction_id TEXT NOT NULL,
+ generation TEXT NOT NULL, execution_state TEXT NOT NULL, observed_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS usage_batches (
   node_id TEXT NOT NULL,
   batch_id TEXT NOT NULL,
@@ -363,7 +371,7 @@ CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '9')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '10')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -1381,6 +1389,9 @@ func (s *Store) SaveConfigRequest(ctx context.Context, request ConfigResult) (Co
 	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('fencing_generation', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, strconv.FormatUint(request.FencingGeneration, 10), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
+		return ConfigResult{}, err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO activation_holds(transaction_id,generation,state) VALUES(?,?,'held')`, request.TransactionID, strconv.FormatUint(request.FencingGeneration, 10)); err != nil {
 		return ConfigResult{}, err
 	}
 	if err := tx.Commit(); err != nil {

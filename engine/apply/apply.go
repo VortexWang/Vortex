@@ -33,6 +33,14 @@ type Manager struct {
 }
 
 func NewManager() *Manager { return &Manager{tx: make(map[[16]byte]Transaction)} }
+
+// Query reports retained execution state. Absence is not proof of inactivity.
+func (m *Manager) Query(id [16]byte) (Transaction, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	t, ok := m.tx[id]
+	return t, ok
+}
 func (m *Manager) Prepare(id [16]byte, gen uint64) (Transaction, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()

@@ -12,6 +12,13 @@ type EngineApplier struct {
 	Manager *apply.Manager
 }
 
+func (a EngineApplier) Query(id [16]byte) (apply.Transaction, bool) {
+	if a.Manager == nil {
+		return apply.Transaction{}, false
+	}
+	return a.Manager.Query(id)
+}
+
 func (a EngineApplier) Prepare(id [16]byte, generation uint64) (any, error) {
 	if a.Manager == nil {
 		return nil, ErrConfigConflict
