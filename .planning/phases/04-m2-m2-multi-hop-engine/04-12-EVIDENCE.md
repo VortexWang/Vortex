@@ -241,3 +241,34 @@ Remaining implementation must add per-immutable-key rolling consumption,
 coalesced persistent request identity and authenticated delivery, bounded
 missing-authority wait, and proof-based idle drain. Do not reinterpret
 selection of preinstalled grants as adaptive issuance or lock the candidates.
+
+## D-04 durable request coalescing
+
+Added Agent-owned authorization_demands (schema 12) and PrepareDemand /
+CompleteDemand. An immutable Hub/delegation/node/boot/source/snapshot/rule/
+revision/path/epoch scope has at most one pending request. Preparation commits
+before returning a dispatchable UUID. Concurrent callers, changed amount/TTL,
+process restart and a lost issuer response all retain the original request.
+A 4096-pending cap rejects excess work without deleting unresolved requests.
+
+Completion requires the matching installed authorization update and matching
+credit record, including exact authenticated issuer, parent delegation, source,
+boot, rule/revision, path, epoch, snapshot and amount. A repeated completion
+with the same grant is idempotent. No timeout/expiry frees an outstanding issue,
+installed grant balance, or unknown liability. These APIs do not grant authority.
+
+Evidence: TestDemandCoalescesAcrossRestartAndLostIssuerResponse uses separate
+Agent/Hub SQLite stores, 16 concurrent preparers, actual close/reopen, durable
+Hub issuance/replay and source audit (256 issued once, 768 remaining). It tests
+crash after installation, 10 mismatched response fields, repeated completion,
+and next request identity. TestDemandPersistenceFailureReturnsNoRequest injects
+a failed insert and requires no dispatchable request. Targeted race PASS;
+Agent/Hub full race PASS before the additional mismatch assertions; final
+targeted race includes all assertions. go vet ./agent/store PASS.
+
+Not yet wired into the demand/control loop. Current generic control issuer
+label must be replaced or bound to authenticated Hub identity before completion
+can safely match DemandScope.HubID; do not weaken this check to integrate it.
+Rolling consumption, adaptive target/waterline, 200 ms admission deadline,
+proof-based idle drain and native qualification remain required. Parameters
+remain candidates, and full D-04/attack qualification remains open.

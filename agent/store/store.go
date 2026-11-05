@@ -248,6 +248,12 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS authorization_demands (
+ request_id TEXT PRIMARY KEY NOT NULL, scope BLOB NOT NULL, request BLOB NOT NULL,
+ state TEXT NOT NULL CHECK(state IN ('pending','applied')), grant_id TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS one_pending_authorization_demand
+ ON authorization_demands(scope) WHERE state='pending';
 CREATE TABLE IF NOT EXISTS authorization_updates (
   node_id TEXT NOT NULL,
   update_id TEXT NOT NULL,
@@ -415,7 +421,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '11')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '12')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
