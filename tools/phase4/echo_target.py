@@ -41,11 +41,11 @@ tcp.bind((args.host, args.port))
 tcp.listen()
 tcp.setblocking(False)
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4 * 1024 * 1024)
+udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 32 * 1024 * 1024)
+udp.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 32 * 1024 * 1024)
 udp.bind((args.host, args.port))
-udp.setblocking(False)
+udp.settimeout(0.5)
 selector.register(tcp, selectors.EVENT_READ, "tcp")
-selector.register(udp, selectors.EVENT_READ, "udp")
 
 def echo_tcp(conn):
     conn.setblocking(True)
@@ -60,18 +60,29 @@ def echo_tcp(conn):
             with stats_lock:
                 stats["tcp_bytes_sent"] += len(payload)
 
+def echo_udp():
+    while True:
+        try:
+            payload, peer = udp.recvfrom(65535)
+        except socket.timeout:
+            continue
+        except OSError:
+            return
+        try:
+            sent = udp.sendto(payload, peer)
+        except OSError:
+            return
+        with stats_lock:
+            stats["udp_datagrams_received"] += 1
+            stats["udp_datagrams_sent"] += 1
+            stats["udp_bytes_received"] += len(payload)
+            stats["udp_bytes_sent"] += sent
+
+threading.Thread(target=echo_udp, daemon=True).start()
+
 try:
     while True:
         for key, _ in selector.select():
-            if key.data == "udp":
-                payload, peer = udp.recvfrom(65535)
-                sent = udp.sendto(payload, peer)
-                with stats_lock:
-                    stats["udp_datagrams_received"] += 1
-                    stats["udp_datagrams_sent"] += 1
-                    stats["udp_bytes_received"] += len(payload)
-                    stats["udp_bytes_sent"] += sent
-                continue
             if key.data == "tcp":
                 conn, _ = tcp.accept()
                 threading.Thread(target=echo_tcp, args=(conn,), daemon=True).start()

@@ -187,9 +187,13 @@ it is a throughput optimization and does not invalidate a usable socket.
 
 The regression was reproduced on native Darwin: the prior fixed 32 MiB request
 returned `ENOBUFS` at the destination and the UDP smoke timed out. After the
-fallback, the UDP smoke and Docker runtime accounting completed. OrbStack
-Docker produced zero classified UDP loss and exact left/right accounting for
-the mixed workload. Native Darwin still cannot classify all host UDP receive
-losses, and the library benchmark exposed VLink mux timeout / loopback loss;
-the benchmark therefore remains fail-closed and no NFR or D-04 qualification
-is promoted.
+fallback and a dedicated UDP reader in the echo fixture, the UDP smoke and
+Docker runtime accounting completed. OrbStack Docker produced zero classified
+UDP loss, exact left/right accounting, successful 64 MiB mux forward/reverse
+benchmarks, and zero loopback UDP loss. The mux benchmark now uses a generous
+correctness deadline so low diagnostic throughput is measured instead of
+turning into a fixed 30-second false failure.
+
+Native Darwin still cannot classify all host UDP receive losses under the
+100 Mbps three-relay workload; its strict accounting run remains fail-closed.
+No NFR or D-04 qualification is promoted from either host.

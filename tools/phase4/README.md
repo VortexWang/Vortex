@@ -15,6 +15,17 @@ orbctl start
 DOCKER_CONTEXT=orbstack BACKEND=docker make phase4-runtime-mixed
 ```
 
+Use the Docker backend for the complete benchmark on macOS:
+
+```sh
+DOCKER_CONTEXT=orbstack BACKEND=docker make phase4-m2-benchmark
+```
+
+The native backend remains useful for host diagnostics, but Darwin does not
+expose the Linux UDP receive-buffer counters used to classify every loss in the
+strict accounting gate. A native Darwin run with unexplained socket loss is
+therefore expected to fail closed rather than being treated as qualification.
+
 The mixed check starts source → relay-1 → relay-2 → relay-3 → destination,
 plus a fixture echo target. It verifies a TCP half-close payload and UDP payload,
 then runs four TCP flows for five seconds as a contention baseline, followed by
