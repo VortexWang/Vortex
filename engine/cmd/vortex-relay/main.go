@@ -460,7 +460,10 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 	}
 	defer packet.Close()
 	if udp, ok := packet.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(4 * 1024 * 1024); err != nil {
+		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
+			return err
+		}
+		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
 			return err
 		}
 	}
@@ -660,7 +663,11 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 		return nil, err
 	}
 	if udp, ok := conn.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(4 * 1024 * 1024); err != nil {
+		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
+			_ = conn.Close()
+			return nil, err
+		}
+		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
 			_ = conn.Close()
 			return nil, err
 		}

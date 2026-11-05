@@ -334,6 +334,14 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	bridgeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	if stream.Network == vlink.StreamUDP {
+		if udp, ok := conn.(*net.UDPConn); ok {
+			if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
+				return err
+			}
+			if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
+				return err
+			}
+		}
 		if err := conn.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {
 			return err
 		}

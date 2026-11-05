@@ -11,7 +11,9 @@ import (
 	"vortex/engine/accounting"
 )
 
-const bufferSize = 32 * 1024
+// Larger gated chunks reduce accounting and frame scheduling overhead while
+// remaining below the VLink payload aggregation limit.
+const bufferSize = 128 * 1024
 
 var ErrShortWrite = errors.New("relay: short write")
 
