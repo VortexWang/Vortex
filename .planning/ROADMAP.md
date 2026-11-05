@@ -106,7 +106,7 @@
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。
-**Depends on**: Phase 4
+**Depends on**: Phase 4 已交付的实现基础。资格化与优化在 `gsd/phase-4-optimization-closure` 分支并行，不阻断 Phase 5 研究、规划、执行与验证。
 **Requirements**: AGT-001, AGT-002, AGT-003, AGT-004, AGT-005, AGT-006, AGT-007, AGT-008, AGT-012, AGT-009, AGT-010, AGT-011, HUB-001, HUB-002, HUB-003, HUB-004, HUB-005, HUB-006, HUB-007, HUB-008, HUB-009, HUB-010, HUB-011, HUB-012, HUB-013, HUB-014, HUB-015, HUB-016, HUB-017, HUB-018, SUP-AGENT-001, SUP-B1-001, SUP-B3-001, SUP-B4-001
 **Success Criteria** (what must be TRUE):
 1. Agent 与 Engine 交付单一 `vortex-node`，注册凭据和运行身份分离；mTLS 双向流、证书续期、排空和可回退升级可验证。
@@ -163,7 +163,7 @@
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
-| 5. M3 Agent and Edge Hub | 0/TBD | Ready for discussion | - |
+| 5. M3 Agent and Edge Hub | 0/TBD | Context complete; ready for research/planning | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

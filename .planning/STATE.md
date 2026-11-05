@@ -3,13 +3,13 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: Phase 5 discussion pending
+current_plan: Phase 5 research and planning pending
 status: planning
-stopped_at: Phase 5 context gathered; ready for research and planning
-last_updated: "2026-11-05T05:13:32.754Z"
+stopped_at: Phase 5 context complete; Phase 4 qualification parallel branch; ready for research and planning
+last_updated: "2026-11-05T05:25:48.438Z"
 last_activity: 2026-11-05
 last_activity_desc: Verified 04-11 D-04 matrix and fail-closed qualification gate; formal NFRs remain unqualified
-state_head: d30eb254f77901754bacb5dd12772c531f792480
+state_head: eb6ddd663b5d7a4b04ac5c48f8f23adc4bcb45d1
 progress:
   total_phases: 8
   completed_phases: 4
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-Current Plan: Phase 5 discussion pending
+Current Plan: Phase 5 research and planning pending
 Total Plans in Phase: TBD
 Status: Planning
 Last activity: 2026-11-05 — Phase 4 implementation closed by owner decision; qualification gaps carried forward
@@ -57,6 +57,8 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 ## Accumulated Context
 
 ### Decisions
+
+- 2026-11-05 owner decision: Phase 4 qualification and optimization continue on gsd/phase-4-optimization-closure; main proceeds with Phase 5. Historical Phase 4 gaps do not block main progression or automatically reopen Phase 4. Final acceptance findings remain truthful.
 
 - V1.11 is a product reference, not a frozen acceptance baseline; current owner decisions govern.
 - The user approved Vegeta in place of k6; CR-001 records the tooling and acceptance impact without altering the frozen source.
@@ -91,11 +93,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-05T05:13:32.199Z
-Stopped at: Phase 5 context gathered; ready for research and planning
+Last session: 2026-11-05T05:25:47.897Z
+Stopped at: Phase 5 context complete; Phase 4 qualification parallel branch; ready for research and planning
 Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-CONTEXT.md
 
-### Latest qualification review
+### Historical qualification review (not a main-workflow gate)
 
 D-04 review completed, candidates not locked. Standard performance workload still has no production authorization
 Gate; optional finite source credit is separate from the memory event recorder; NFR-039/040/044 runtime behavior
