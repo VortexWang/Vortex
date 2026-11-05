@@ -29,7 +29,7 @@ func runtimeStore(t *testing.T) (*Store, AuthorizationUse, string) {
 	share.SourceID = "share-source"
 	share.RateBPS = 65536
 	share.Connections = 1
-	if err := s.PersistAuthorizationUpdate(context.Background(), AuthorizationUpdate{NodeID: "node", BootID: "boot", UpdateID: "initial", Payload: []byte("initial"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, []AuthorizationRecord{base, runtime, share}, nil); err != nil {
+	if err := s.PersistAuthorizationUpdate(context.Background(), AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: "boot", UpdateID: "initial", Payload: []byte("initial"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, []AuthorizationRecord{base, runtime, share}, nil); err != nil {
 		t.Fatal(err)
 	}
 	return s, AuthorizationUse{NodeID: "node", BootID: "boot", RuleID: "rule", RuleRevision: 1, PathGeneration: 1, Earliest: now.Add(time.Second), Latest: now.Add(time.Second), TrustedTime: true}, path

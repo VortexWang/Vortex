@@ -103,7 +103,7 @@ func runtimeIdentities(t *testing.T, dir string, ids ...string) map[string]confi
 func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T) {
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 			defer cancel()
 			const peerID = "550e8400-e29b-41d4-a716-446655440099"
 			dir := t.TempDir()
@@ -272,22 +272,102 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			}
 			issuer := &hub.Issuer{Store: hs, HubID: delegation.HubID, Clock: issuerClock}
 			const issueID = "550e8400-e29b-41d4-a716-446655440020"
-			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, 4096, 2*time.Minute)
+			const initialTTL = 4 * time.Second
+			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, 4096, initialTTL)
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = validateAuthorizationUpdate(prepared.Payload, node.NodeID, node.BootID, 4)
+			initialPayload, err := validateAuthorizationUpdate(prepared.Payload, node.NodeID, node.BootID, 4)
 			if err != nil {
 				t.Fatal(err)
+			}
+			var initialGrantID string
+			var initialExpiry time.Time
+			for _, record := range initialPayload.Authorizations {
+				if record.Kind == "credit_grant" {
+					initialGrantID = record.AuthorizationID
+					initialExpiry = record.ExpiresAt
+				}
 			}
 			ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
-				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, 4096, 2*time.Minute)
+				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, 4096, initialTTL)
 			}}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, ln.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
-			// A second same-parent grant is fresh reserved credit, not a transfer
-			// or a refund of the first grant. Deliver it over the real control link.
+			waitUntil := func(at time.Time) {
+				t.Helper()
+				for {
+					low, _, trusted := node.TrustedTime()
+					if trusted && !low.Before(at) {
+						return
+					}
+					select {
+					case <-ctx.Done():
+						t.Fatal(ctx.Err())
+					case <-time.After(time.Millisecond):
+					}
+				}
+			}
+			waitUntil(initialPayload.IssuedAt)
+			stream := open()
+			if err := stream.WaitOpen(ctx); err != nil {
+				t.Fatal(err)
+			}
+			second := open()
+			if err := second.WaitOpen(ctx); err == nil {
+				t.Fatal("persisted connection share limit bypassed")
+			}
+			message := []byte("metered runtime payload")
+			exchange := func() {
+				t.Helper()
+				if network == 1 {
+					err = stream.WriteData(ctx, message)
+				} else {
+					var accepted bool
+					accepted, err = stream.WriteDgram(ctx, message)
+					if !accepted {
+						t.Fatalf("datagram not accepted: %v", err)
+					}
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+				frame, err := stream.Receive(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer frame.Release()
+				if !bytes.Equal(frame.Payload, message) {
+					t.Fatalf("response=%q", frame.Payload)
+				}
+			}
+			waitSettled := func(initial, committed uint64) {
+				t.Helper()
+				for {
+					b, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if b.Committed == committed && b.Initial == initial {
+						return
+					}
+					select {
+					case <-ctx.Done():
+						t.Fatalf("metering not settled: %+v", b)
+					case <-time.After(time.Millisecond):
+					}
+				}
+			}
+			// Open and consume on the first grant before delivering its renewal.
+			exchange()
+			waitSettled(4096, uint64(2*len(message)))
+			initialUsage, err := s.PendingUsageOutbox(ctx, node.NodeID)
+			if err != nil || len(initialUsage) != 2 {
+				t.Fatalf("initial usage outbox: %d %v", len(initialUsage), err)
+			}
+			// The same stream stays open while a fresh, same-parent grant and
+			// leases arrive over authenticated control. No OPEN is replayed.
 			topupPrepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
 			if err != nil {
 				t.Fatal(err)
@@ -302,85 +382,40 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 					topupGrantID = record.AuthorizationID
 				}
 			}
-			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
+			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AcceptUsage: true, UsageBatchLimit: 2, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
 				return issuer.Issue(ctx, delegation.ID, id, boot, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
 			}}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, topupHub.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
-			// Wait until the conservative lower clock bound reaches not_before.
-			for {
-				low, _, trusted := node.TrustedTime()
-				if trusted && !low.Before(topupPayload.IssuedAt) {
-					break
-				}
-				select {
-				case <-ctx.Done():
-					t.Fatal(ctx.Err())
-				case <-time.After(time.Millisecond):
-				}
-			}
+			waitUntil(topupPayload.IssuedAt)
 			low, high, trusted := node.TrustedTime()
 			boundGrant, err := s.CheckStoredAuthorization(ctx, store.AuthorizationUse{NodeID: node.NodeID, BootID: node.BootID, AuthorizationID: topupGrantID, Kind: "credit_grant", RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, BillingSnapshotID: delegation.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted})
 			if err != nil || boundGrant.IssuerID != "hub" {
 				t.Fatalf("grant missing authenticated Hub identity: %s %v", boundGrant.IssuerID, err)
 			}
-			stream := open()
-			if err := stream.WaitOpen(ctx); err != nil {
-				t.Fatal(err)
-			}
-			second := open()
-			if err := second.WaitOpen(ctx); err == nil {
-				t.Fatal("persisted connection share limit bypassed")
-			}
-			message := []byte("metered runtime payload")
-			if network == 1 {
-				err = stream.WriteData(ctx, message)
-			} else {
-				var accepted bool
-				accepted, err = stream.WriteDgram(ctx, message)
-				if !accepted {
-					t.Fatalf("datagram not accepted: %v", err)
-				}
-			}
-			if err != nil {
-				t.Fatal(err)
-			}
-			frame, err := stream.Receive(ctx)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !bytes.Equal(frame.Payload, message) {
-				t.Fatalf("response=%q", frame.Payload)
-			}
-			frame.Release()
-			for {
-				b, err := s.AuditAuthorizationSource(ctx, node.NodeID, "550e8400-e29b-41d4-a716-446655440023")
-				if err != nil {
-					t.Fatal(err)
-				}
-				if b.Committed == uint64(2*len(message)) && b.Initial == 8192 {
-					break
-				}
-				select {
-				case <-ctx.Done():
-					t.Fatalf("metering not settled: %+v", b)
-				case <-time.After(time.Millisecond):
-				}
-			}
+			waitUntil(initialExpiry)
+			exchange()
+			waitSettled(8192, uint64(4*len(message)))
 			pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
 			if err != nil || len(pending) != 2 {
-				t.Fatalf("topup usage outbox: %d %v", len(pending), err)
+				t.Fatalf("renewal usage outbox: %d %v", len(pending), err)
 			}
-			for _, row := range pending {
+			counts := map[string]int{}
+			for _, row := range append(initialUsage, pending...) {
 				var usage controlv1.UsageBatch
 				if err := proto.Unmarshal(row.Payload, &usage); err != nil {
 					t.Fatal(err)
 				}
-				if len(usage.Deltas) != 1 || usage.Deltas[0].GrantId != topupGrantID {
-					t.Fatalf("runtime did not select topped-up grant: %+v", usage.Deltas)
+				if len(usage.Deltas) != 1 {
+					t.Fatalf("invalid metered batch: %+v", usage.Deltas)
 				}
+				counts[usage.Deltas[0].GrantId]++
 			}
+			if counts[initialGrantID] != 2 || counts[topupGrantID] != 2 || len(counts) != 2 {
+				t.Fatalf("old and renewed usage lost their grant identities: %+v", counts)
+			}
+			t.Logf("same stream renewed after initial expiry %s; two directional batches per grant", initialExpiry.Format(time.RFC3339Nano))
 			if fullDiskRoot != "" {
 				filler := fillRuntimeDisk(t, filepath.Dir(agentDB))
 				probeErr := s.AppendEvent(ctx, "full-disk-probe", "probe", []byte("must fail durably"))
@@ -408,7 +443,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 					t.Fatal("full disk did not reset runtime stream")
 				}
 				frame.Release()
-				if targetBytes.Load() != int64(len(message)) {
+				if targetBytes.Load() != int64(2*len(message)) {
 					t.Fatalf("unrecordable traffic reached target: %d", targetBytes.Load())
 				}
 				if err := os.Remove(filler); err != nil {
@@ -440,7 +475,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := hs.Close(); err != nil {
 				t.Fatal(err)
 			}
-			assertRawLedger(t, hubDB, 2)
+			assertRawLedger(t, hubDB, 4)
 			saveRuntimeLedger(t, network, agentDB, hubDB)
 		})
 	}

@@ -132,7 +132,12 @@ func (s *authorizationSession) reserveOnce(ctx context.Context, direction engine
 	if direction == engineaccounting.RightToLeft {
 		reservation.Direction = "ingress"
 	}
-	effectiveID, err := s.gate.node.Store.ReserveAuthorizedUsage(ctx, reservation, s.gate.use(early, late, trusted, true))
+	var effectiveID string
+	if s.gate.config.SessionID != "" {
+		effectiveID, err = s.gate.node.Store.ReserveRuntimeUsage(ctx, reservation, s.gate.use(early, late, trusted, true))
+	} else {
+		effectiveID, err = s.gate.node.Store.ReserveAuthorizedUsage(ctx, reservation, s.gate.use(early, late, trusted, true))
+	}
 	if err != nil {
 		var limited *store.RateLimited
 		if !errors.Is(err, store.ErrAuthorizationDenied) && !errors.Is(err, store.ErrAuthorityTimeUncertain) && !errors.As(err, &limited) {

@@ -321,6 +321,8 @@ CREATE TABLE IF NOT EXISTS runtime_sessions (
  node_id TEXT NOT NULL, session_id TEXT NOT NULL, boot_id TEXT NOT NULL,
  flow_key TEXT NOT NULL, source_id TEXT NOT NULL, grant_id TEXT NOT NULL,
  runtime_lease_id TEXT NOT NULL, share_lease_id TEXT NOT NULL,
+ initial_grant_id TEXT NOT NULL DEFAULT '', initial_runtime_lease_id TEXT NOT NULL DEFAULT '',
+ initial_share_lease_id TEXT NOT NULL DEFAULT '',
  state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
 );
 CREATE TABLE IF NOT EXISTS runtime_rate_buckets (
@@ -342,7 +344,7 @@ CREATE TABLE IF NOT EXISTS issuer_issues (
  amount_bytes TEXT NOT NULL, created_at TEXT NOT NULL,
  FOREIGN KEY(delegation_id) REFERENCES issuer_delegations(delegation_id)
 );
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '7')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -363,6 +365,14 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '7')
 		if err := s.ensureColumn(table, "issuer_id", "TEXT NOT NULL DEFAULT ''"); err != nil {
 			return err
 		}
+	}
+	for _, column := range []string{"initial_grant_id", "initial_runtime_lease_id", "initial_share_lease_id"} {
+		if err := s.ensureColumn("runtime_sessions", column, "TEXT NOT NULL DEFAULT ''"); err != nil {
+			return err
+		}
+	}
+	if _, err := s.db.Exec(`UPDATE runtime_sessions SET initial_grant_id=grant_id,initial_runtime_lease_id=runtime_lease_id,initial_share_lease_id=share_lease_id WHERE initial_grant_id=''`); err != nil {
+		return err
 	}
 	return nil
 }

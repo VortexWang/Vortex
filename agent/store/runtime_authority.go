@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
 )
 
@@ -26,70 +25,11 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 		return result, err
 	}
 	defer tx.Rollback()
-	rows, err := tx.QueryContext(ctx, `SELECT authorization_id,kind,billing_snapshot_id FROM authorization_records WHERE node_id=? AND boot_id=? AND rule_id=? AND rule_revision=? AND path_generation=? AND state='active' ORDER BY issued_at DESC,authorization_id`, scope.NodeID, scope.BootID, scope.RuleID, strconv.FormatUint(scope.RuleRevision, 10), strconv.FormatUint(scope.PathGeneration, 10))
+	chosen, err := selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil)
 	if err != nil {
 		return result, err
 	}
-	type candidate struct{ id, kind, snapshot string }
-	var candidates []candidate
-	for rows.Next() {
-		var c candidate
-		if err := rows.Scan(&c.id, &c.kind, &c.snapshot); err != nil {
-			rows.Close()
-			return result, err
-		}
-		candidates = append(candidates, c)
-		if len(candidates) > 4096 {
-			rows.Close()
-			return result, ErrAuthorizationDenied
-		}
-	}
-	err = rows.Err()
-	rows.Close()
-	if err != nil {
-		return result, err
-	}
-	selected := map[string]AuthorizationRecord{}
-	for _, c := range candidates {
-		if _, found := selected[c.kind]; found {
-			continue
-		}
-		use := scope
-		use.AuthorizationID = c.id
-		use.Kind = c.kind
-		use.BillingSnapshotID = c.snapshot
-		record, err := checkAuthorizationTx(ctx, tx, use)
-		if errors.Is(err, ErrAuthorizationDenied) {
-			continue
-		}
-		if err != nil {
-			return result, err
-		}
-		if c.kind == "credit_grant" {
-			var remaining string
-			err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, scope.NodeID, c.id).Scan(&remaining)
-			if errors.Is(err, sql.ErrNoRows) {
-				continue
-			}
-			if err != nil {
-				return result, err
-			}
-			amount, err := strconv.ParseUint(remaining, 10, 64)
-			if err != nil {
-				return result, err
-			}
-			if amount == 0 {
-				continue
-			}
-		}
-		selected[c.kind] = record
-	}
-	grant, gok := selected["credit_grant"]
-	runtime, rok := selected["runtime_lease"]
-	share, sok := selected["share_lease"]
-	if !gok || !rok || !sok || share.Connections == 0 || share.RateBPS == 0 {
-		return result, ErrAuthorizationDenied
-	}
+	grant, runtime, share := chosen.grant, chosen.runtime, chosen.share
 	// All held slots on this source count, including unproven previous boots.
 	var count uint64
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM runtime_sessions WHERE node_id=? AND source_id=? AND state='open'`, scope.NodeID, share.SourceID).Scan(&count); err != nil {
@@ -107,7 +47,7 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 	if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
 		return result, err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_sessions(node_id,session_id,boot_id,flow_key,source_id,grant_id,runtime_lease_id,share_lease_id,state) VALUES(?,?,?,?,?,?,?,?, 'open')`, scope.NodeID, sessionID, scope.BootID, flowKey, share.SourceID, grant.AuthorizationID, runtime.AuthorizationID, share.AuthorizationID); err != nil {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_sessions(node_id,session_id,boot_id,flow_key,source_id,grant_id,runtime_lease_id,share_lease_id,initial_grant_id,initial_runtime_lease_id,initial_share_lease_id,state) VALUES(?,?,?,?,?,?,?,?,?,?,?, 'open')`, scope.NodeID, sessionID, scope.BootID, flowKey, share.SourceID, grant.AuthorizationID, runtime.AuthorizationID, share.AuthorizationID, grant.AuthorizationID, runtime.AuthorizationID, share.AuthorizationID); err != nil {
 		return result, err
 	}
 	if err := tx.Commit(); err != nil {

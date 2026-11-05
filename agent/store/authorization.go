@@ -46,24 +46,20 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 	return record, nil
 }
 
-func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse) (AuthorizationRecord, error) {
+// readAuthorizationTx also reads expired records as immutable lineage evidence.
+// It does not grant permission to use them.
+func readAuthorizationTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationID string) (AuthorizationRecord, string, error) {
 	var record AuthorizationRecord
-	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
-		return record, ErrAuthorityTimeUncertain
-	}
-	if use.NodeID == "" || use.BootID == "" || use.AuthorizationID == "" || use.Kind == "" || use.RuleID == "" || use.RuleRevision == 0 || use.PathGeneration == 0 {
-		return record, ErrAuthorizationDenied
-	}
 	var state, ruleRevision, pathGeneration, signerEpoch, amount, rate, connections string
-	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state FROM authorization_records WHERE node_id=? AND authorization_id=?`, use.NodeID, use.AuthorizationID).Scan(
+	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(
 		&record.AuthorizationID, &record.ParentAuthorizationID, &record.SourceID, &record.Kind, &record.RuleID,
 		&ruleRevision, &pathGeneration, &signerEpoch, &record.BootID, &record.IssuedAt, &record.NotBefore,
 		&record.ExpiresAt, &record.HardDeadline, &record.BillingSnapshotID, &amount, &rate, &connections, &state)
 	if err != nil {
-		return AuthorizationRecord{}, fmt.Errorf("%w: %w", ErrAuthorizationDenied, err)
+		return AuthorizationRecord{}, "", fmt.Errorf("%w: %w", ErrAuthorizationDenied, err)
 	}
-	if err := tx.QueryRowContext(ctx, `SELECT issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, use.NodeID, use.AuthorizationID).Scan(&record.IssuerID); err != nil {
-		return AuthorizationRecord{}, err
+	if err := tx.QueryRowContext(ctx, `SELECT issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&record.IssuerID); err != nil {
+		return AuthorizationRecord{}, "", err
 	}
 	for _, field := range []struct {
 		text  string
@@ -75,8 +71,23 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 	} {
 		*field.value, err = strconv.ParseUint(field.text, 10, 64)
 		if err != nil {
-			return AuthorizationRecord{}, ErrAuthorizationDenied
+			return AuthorizationRecord{}, "", ErrAuthorizationDenied
 		}
+	}
+	return record, state, nil
+}
+
+func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse) (AuthorizationRecord, error) {
+	var record AuthorizationRecord
+	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
+		return record, ErrAuthorityTimeUncertain
+	}
+	if use.NodeID == "" || use.BootID == "" || use.AuthorizationID == "" || use.Kind == "" || use.RuleID == "" || use.RuleRevision == 0 || use.PathGeneration == 0 {
+		return record, ErrAuthorizationDenied
+	}
+	record, state, err := readAuthorizationTx(ctx, tx, use.NodeID, use.AuthorizationID)
+	if err != nil {
+		return AuthorizationRecord{}, err
 	}
 	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || (record.Kind == "credit_grant" || record.BillingSnapshotID != "") && record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
@@ -146,6 +157,18 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 		return "", err
 	}
 	defer tx.Rollback()
+	id, err := reserveAuthorizedUsageTx(ctx, tx, reservation, use)
+	if err != nil {
+		return "", err
+	}
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func reserveAuthorizedUsageTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, use AuthorizationUse) (string, error) {
+	var err error
 	var priorAuth, priorReserved, priorState string
 	err = tx.QueryRowContext(ctx, `SELECT authorization_id,reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&priorAuth, &priorReserved, &priorState)
 	if err == nil {
@@ -160,9 +183,6 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 			return "", ErrUsageBatchConflict
 		}
 		if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
-			return "", err
-		}
-		if err := tx.Commit(); err != nil {
 			return "", err
 		}
 		return priorAuth, nil
@@ -199,9 +219,6 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 		return "", err
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_usage_holds(node_id,batch_id,authorization_id,source_id,reserved_bytes,state) VALUES(?,?,?,?,?,?)`, use.NodeID, reservation.BatchID, effectiveID, record.SourceID, strconv.FormatUint(reservation.Reserved, 10), "reserved"); err != nil {
-		return "", err
-	}
-	if err := tx.Commit(); err != nil {
 		return "", err
 	}
 	return effectiveID, nil
