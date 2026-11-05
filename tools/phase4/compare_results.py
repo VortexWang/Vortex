@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -63,7 +64,38 @@ report = {
         "measurement": "client connect to first byte; raw samples retained",
         "nfr_007": "not-qualified: five userspace segment RTT samples and fresh-runtime first-byte samples recorded; pool and mux not separately covered"},
     "binary_integrity": integrity, "direct_bypass": bypass, "forged_open": faults, "middle_hop_failure": middle,
-    "qualification": "not-qualified: short shared-host diagnostic; host/duration, segment RTT, mode coverage and D-04 review remain",
+    "authorization_mode": rhost.get("authorization_mode"),
+    "performance_qualification": "pass" if (
+        os.getenv("PHASE4_FORMAL") == "1" and
+        rhost.get("authorization_mode") == "runtime-authority" and
+        actual.get("duration_seconds_per_phase", 0) >= 300 and
+        actual.get("tcp_streams", 0) >= 16 and
+        actual.get("udp_target_mbps", 0) >= 100 and
+        actual["mixed"]["tcp"].get("throughput_mbps", 0) >= 400 and
+        actual["mixed"].get("udp_sent", 0) * 1200 * 8 /
+            max(actual.get("duration_seconds_per_phase", 0), 0.001) / 1_000_000 >= 99 and
+        actual["mixed"].get("udp_loss", 1) <= 0.001 and
+        tls_mixed["mixed"]["tcp"].get("throughput_mbps", 0) >= 400 and
+        tls_mixed["mixed"].get("udp_sent", 0) * 1200 * 8 /
+            max(tls_mixed.get("duration_seconds_per_phase", 0), 0.001) / 1_000_000 >= 99 and
+        same_workload_ratio >= 0.70 and
+        tls_mixed.get("udp_loss", 1) <= 0.001 and
+        not rhost.get("dirty", True) and
+        not chost.get("dirty", True) and not thost.get("dirty", True) and
+        not actual["mixed"].get("errors") and not tls_mixed["mixed"].get("errors")
+    ) else "not-qualified",
+    "qualification_metrics": {
+        "runtime_mixed_tcp_mbps": actual["mixed"]["tcp"].get("throughput_mbps", 0),
+        "tls_mixed_tcp_mbps": tls_mixed["mixed"]["tcp"].get("throughput_mbps", 0),
+        "runtime_udp_offered_mbps": actual["mixed"].get("udp_sent", 0) * 1200 * 8 /
+            max(actual.get("duration_seconds_per_phase", 0), 0.001) / 1_000_000,
+        "tls_udp_offered_mbps": tls_mixed["mixed"].get("udp_sent", 0) * 1200 * 8 /
+            max(tls_mixed.get("duration_seconds_per_phase", 0), 0.001) / 1_000_000,
+        "runtime_udp_loss": actual["mixed"].get("udp_loss", 1),
+        "tls_udp_loss": tls_mixed["mixed"].get("udp_loss", 1),
+        "same_workload_ratio": same_workload_ratio,
+    },
+    "qualification": "formal runtime-authority evidence" if os.getenv("PHASE4_FORMAL") == "1" else "not-qualified: short shared-host diagnostic; host/duration, segment RTT, mode coverage and D-04 review remain",
 }
 (out / "comparison.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
 with (out / "checksums.sha256").open("w") as f:

@@ -43,7 +43,7 @@ Increasing `MIXED_DURATION_SECONDS` can exhaust that bound; an exhausted or
 unresolved accounting run must fail.
 
 Long-duration qualification can set `VORTEX_QUALIFICATION_EVENT_LIMIT` for the
-fixture only (maximum 10,000,000 events per execution process). The default
+fixture only (maximum 50,000,000 events per execution process). The default
 remains 1,000,000, and the selected value is included in host/semantic evidence.
 The override is ignored by runtime configs without an evidence file.
 Events are retained in bounded 4,096-entry chunks to avoid large contiguous

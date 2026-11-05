@@ -72,6 +72,8 @@ phase4-qualification-gate:
 		--tls "$${TLS_REPORT:?TLS_REPORT is required}" \
 		--host "$${HOST_REPORT:?HOST_REPORT is required}" \
 		--trials "$${QUALIFICATION_TRIALS:-0}" \
+		--trial-reports $${RUNTIME_TRIAL_REPORTS:?RUNTIME_TRIAL_REPORTS is required} \
+		--warmup-report "$${WARMUP_REPORT:?WARMUP_REPORT is required}" \
 		--warmup-seconds "$${QUALIFICATION_WARMUP_SECONDS:-0}" \
 		--output "$${GATE_OUTPUT:-artifacts/phase4/qualification-gate.json}"
 

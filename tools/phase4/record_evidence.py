@@ -38,6 +38,21 @@ metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command
             "authorization_mode": "qualification-only" if all(config.get("qualification_only") for config in configs.values()) else "runtime-authority",
             "qualification": "not-qualified",
             "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT")}}
+if Path("/etc/os-release").exists():
+    release_fields = {}
+    for line in Path("/etc/os-release").read_text().splitlines():
+        if "=" in line:
+            key, value = line.split("=", 1)
+            release_fields[key] = value.strip().strip('"')
+    metadata["os_id"] = release_fields.get("ID", "")
+    metadata["os_version"] = release_fields.get("VERSION_ID", "")
+if platform.system() == "Linux":
+    try:
+        routes = subprocess.check_output(["ip", "route", "show", "default"], text=True).splitlines()
+        fields = routes[0].split() if routes else []
+        metadata["qualification_interface"] = fields[fields.index("dev") + 1] if "dev" in fields else ""
+    except (OSError, subprocess.CalledProcessError, ValueError):
+        metadata["qualification_interface"] = ""
 if Path("/proc/meminfo").exists():
     metadata["mem_total"] = Path("/proc/meminfo").read_text().splitlines()[0]
 if Path("/etc/os-release").exists():
