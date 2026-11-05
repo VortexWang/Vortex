@@ -76,6 +76,10 @@ type CreditBook struct {
 type grantOwner struct{ snapshot, request string }
 
 func NewCreditBook(c BookConfig) (*CreditBook, error) {
+	return NewCreditBookWithUsage(c, nil)
+}
+
+func NewCreditBookWithUsage(c BookConfig, sink core.UsageSink) (*CreditBook, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -84,7 +88,7 @@ func NewCreditBook(c BookConfig) (*CreditBook, error) {
 	gates := make(map[string]*CreditGate, len(c.Snapshots))
 	for id, v := range c.Snapshots {
 		versions[id] = v
-		gates[id], _ = NewCreditGate(v.Credit)
+		gates[id], _ = NewCreditGateWithUsage(v.Credit, sink)
 	}
 	c.Snapshots = versions
 	return &CreditBook{cfg: c, gates: gates, owners: make(map[string]grantOwner)}, nil
@@ -114,6 +118,7 @@ func (b *CreditBook) openCurrent(ctx context.Context, f core.Flow) (core.Session
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	id := b.cfg.Active
+	f.RuleID = b.cfg.Snapshots[id].Binding.RuleID
 	session, err := b.gates[id].Open(ctx, f)
 	return session, id, b.cfg.Snapshots[id].Binding, err
 }
@@ -127,6 +132,7 @@ func (b *CreditBook) openPolicy(ctx context.Context, f core.Flow, original Bindi
 	if err != nil {
 		return nil, "", err
 	}
+	f.RuleID = b.cfg.Snapshots[id].Binding.RuleID
 	session, err := b.gates[id].Open(ctx, f)
 	return session, id, err
 }

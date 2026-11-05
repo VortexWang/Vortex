@@ -1,0 +1,66 @@
+[
+  {
+    "environment": "docker",
+    "fixture": "runtime-1-ledgers",
+    "role": "agent",
+    "sha256": "1b98990320466fc931b675e95b096337620da5238af20207bec6f0bb761120cb",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "docker",
+    "fixture": "runtime-1-ledgers",
+    "role": "hub",
+    "sha256": "b06a3e8da790d4d8cfb085b7d8eca1390b0e8ce42bdc03d71f5f2e754a8f7780",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "docker",
+    "fixture": "runtime-2-ledgers",
+    "role": "agent",
+    "sha256": "ad4a48dc207035a4e90b00150a7e6fa6ce4ad01b97ad573ae6d3ecb24161e2e4",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "docker",
+    "fixture": "runtime-2-ledgers",
+    "role": "hub",
+    "sha256": "95398746e4407acd74959f90f5d2d223411eb76ab1b28a040f0a1040aebf2290",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "actions",
+    "fixture": "runtime-1-ledgers",
+    "role": "agent",
+    "sha256": "11164e38754c8dce8a3d1ec65d406c7dd7f9e2093cfa25205550606a60bc04cc",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "actions",
+    "fixture": "runtime-1-ledgers",
+    "role": "hub",
+    "sha256": "5060d4098ac7ad7197d50fc68b427e55043c6738d7756709522f7f0d01c0a898",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "actions",
+    "fixture": "runtime-2-ledgers",
+    "role": "agent",
+    "sha256": "d4ad15add08c0417aefb7981a282268e327797c9821fa2c9dcb7a2afae1d54db",
+    "quick_check": "ok",
+    "usage_batches": 2
+  },
+  {
+    "environment": "actions",
+    "fixture": "runtime-2-ledgers",
+    "role": "hub",
+    "sha256": "1704b55c2f2dd700d981871ecb8f15fa38a504f04c859b897e7e606e848c60b5",
+    "quick_check": "ok",
+    "usage_batches": 2
+  }
+]

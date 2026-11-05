@@ -1,0 +1,140 @@
+package agent
+
+import (
+	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
+	"net"
+	"net/url"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"vortex/agent/store"
+)
+
+func TestRuntimeEngineStartsAndStopsThroughNode(t *testing.T) {
+	dir := t.TempDir()
+	const nodeID = "00000000-0000-0000-0000-000000000011"
+	certPath, keyPath, caPath := writeRuntimeIdentity(t, dir, nodeID)
+	listen := "127.0.0.1:0"
+	configPath := filepath.Join(dir, "engine.json")
+	config := `{"qualification_only":true,"evidence_file":"` + filepath.Join(dir, "events.jsonl") + `","node_id":"` + nodeID + `","role":"destination","certificate":"` + certPath + `","private_key":"` + keyPath + `","trust_bundle":"` + caPath + `","listen":"` + listen + `","version":1,"rule_id":"rule","rule_revision":1,"path_generation":1,"hop_index":0,"target":"127.0.0.1:9","execution_point":true}`
+	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	s, err := store.Open(filepath.Join(dir, "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	e, err := NewRuntimeEngine(configPath, nodeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := New(nodeID, s, e)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gate, err := n.NewAuthorizationGate(AuthorizationGateConfig{
+		AuthorizationID: "grant-id", RuleID: "rule", RuleRevision: 1, PathGeneration: 1,
+		SnapshotID: "snapshot-id", Clock: func() (time.Time, time.Time, bool) { now := time.Now(); return now, now, false },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.SetAccountingGate(gate); err != nil {
+		t.Fatalf("install Agent gate before Engine start: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := n.Start(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.SetAccountingGate(nil); err == nil {
+		t.Fatal("replaced accounting policy after traffic listener start")
+	}
+	conn, err := net.DialTimeout("tcp", e.runtime.Addr().String(), time.Second)
+	if err != nil {
+		t.Fatalf("Engine listener is not ready: %v", err)
+	}
+	_ = conn.Close()
+	stopCtx, stopCancel := context.WithTimeout(context.Background(), time.Second)
+	defer stopCancel()
+	if err := n.Stop(stopCtx); err != nil {
+		t.Fatal(err)
+	}
+	if err := n.Stop(stopCtx); err != nil {
+		t.Fatalf("repeated stop: %v", err)
+	}
+}
+
+func TestRuntimeEngineStartReturnsListenerConflict(t *testing.T) {
+	dir := t.TempDir()
+	const nodeID = "00000000-0000-0000-0000-000000000012"
+	certPath, keyPath, caPath := writeRuntimeIdentity(t, dir, nodeID)
+	occupied, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer occupied.Close()
+	configPath := filepath.Join(dir, "engine.json")
+	config := `{"qualification_only":true,"evidence_file":"` + filepath.Join(dir, "events.jsonl") + `","node_id":"` + nodeID + `","role":"destination","certificate":"` + certPath + `","private_key":"` + keyPath + `","trust_bundle":"` + caPath + `","listen":"` + occupied.Addr().String() + `","version":1,"rule_id":"rule","rule_revision":1,"path_generation":1,"hop_index":0,"target":"127.0.0.1:9","execution_point":true}`
+	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	e, err := NewRuntimeEngine(configPath, nodeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.Start(context.Background()); err == nil {
+		t.Fatal("expected bind conflict to fail synchronously")
+	}
+}
+
+func writeRuntimeIdentity(t *testing.T, dir, nodeID string) (string, string, string) {
+	t.Helper()
+	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	caTemplate := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "vortex-test-ca"}, NotBefore: time.Now().Add(-time.Minute), NotAfter: time.Now().Add(time.Hour), IsCA: true, BasicConstraintsValid: true, KeyUsage: x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature}
+	caDER, err := x509.CreateCertificate(rand.Reader, caTemplate, caTemplate, &caKey.PublicKey, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	uri, err := url.Parse("urn:vortex:node:" + nodeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	leafTemplate := &x509.Certificate{SerialNumber: big.NewInt(2), Subject: pkix.Name{CommonName: nodeID}, NotBefore: time.Now().Add(-time.Minute), NotAfter: time.Now().Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}, URIs: []*url.URL{uri}}
+	leafDER, err := x509.CreateCertificate(rand.Reader, leafTemplate, caTemplate, &key.PublicKey, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	certPath, keyPath, caPath := filepath.Join(dir, "node.pem"), filepath.Join(dir, "node-key.pem"), filepath.Join(dir, "ca.pem")
+	writePEM := func(path, kind string, der []byte) {
+		t.Helper()
+		if err := os.WriteFile(path, pem.EncodeToMemory(&pem.Block{Type: kind, Bytes: der}), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writePEM(certPath, "CERTIFICATE", leafDER)
+	writePEM(keyPath, "PRIVATE KEY", keyDER)
+	writePEM(caPath, "CERTIFICATE", caDER)
+	return certPath, keyPath, caPath
+}

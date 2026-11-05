@@ -190,3 +190,28 @@ signer remainder handoff), with active uncommitted contract/store work. Durable
 integration must use a coherent committed baseline; no uncommitted files from
 that worktree were copied or overwritten. D-04 adaptive issuance/idle proof and
 full cross-layer attack verification remain part of the active goal.
+
+## Durable baseline integration (2026-11-05)
+
+Integrated committed main baseline fef53edf5a383765cc5e0750a4b79a137c98e0ee
+into the isolated Phase 4 branch, preserving the owner workspace changes.
+Resolved the CreditGate merge to retain observation fields and durable sink/fault
+state, and carry FlowKey/RuleID into every session. Propagated the source-only
+awaitOpen flag through the shared session bridge; exit sessions are already
+authorized and do not consume OPEN_OK. CreditBook pins the trusted RuleID on
+both initial admission and existing-session policy transitions.
+
+Expanded the two-path policy-transition regression to assert durable reserve
+and settlement records: new usage belongs to each path's new snapshot while
+the unresolved old batch remains Unknown under its original snapshot.
+
+Validation on this integration tree: Engine full go test -race ./... PASS;
+Agent/Hub go test -race ./agent/... ./hub/... PASS; go vet for both scopes PASS.
+This establishes a merged implementation baseline and local regression only,
+not dedicated-host performance or D-04 dynamic-policy qualification.
+
+A fresh read of dedicated-host formal-c6a0761 reports current-stage=complete,
+formal-exit=0 and qualification-gate status=pass, reasons=[], trials=3,
+warmup_seconds=300, with remote HEAD c6a0761. That performance evidence
+remains scoped to c6a0761 and must not be attributed to this integration tree.
+D-04 adaptive demand/idle policy and complete attack coverage remain open.

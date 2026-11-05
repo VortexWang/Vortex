@@ -1,0 +1,1 @@
+{"schema":1,"status":"passed","commit":"3aed10a2344231786d066558ed15a339d1770a5e","tests":"go test ./agent/... ./hub ./test/phase5","vet":"go vet ./agent/... ./hub ./test/phase5","scope":"registration-mtls-reconcile-upgrade"}

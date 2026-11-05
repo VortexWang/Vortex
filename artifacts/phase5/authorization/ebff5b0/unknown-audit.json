@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "commit": "ebff5b001b9a6d4323c042e6bd3d269be697aa70",
+  "snapshots": [
+    {
+      "environment": "docker",
+      "role": "agent",
+      "sha256": "0d4285e03bd0d06391802a6264ac1aa86e08ba663a5d0fa9e232ae6703a8f261",
+      "unknown_upper_bound": 128,
+      "transport_state": "acknowledged",
+      "liability_state": "unresolved",
+      "known_consumption": 0
+    },
+    {
+      "environment": "docker",
+      "role": "hub",
+      "sha256": "789af9ed1fcc943dfc26792558f08ef4b7276c87204695f07f48f5dfa2f1e72d",
+      "unknown_upper_bound": 128,
+      "transport_state": "received",
+      "liability_state": "unresolved",
+      "known_consumption": 0
+    },
+    {
+      "environment": "actions",
+      "role": "agent",
+      "sha256": "df1a5fc23b1c69ab41f4d135f7efc5ff54479d22a16e9fc4fb2f34ce7dfb20b5",
+      "unknown_upper_bound": 128,
+      "transport_state": "acknowledged",
+      "liability_state": "unresolved",
+      "known_consumption": 0
+    },
+    {
+      "environment": "actions",
+      "role": "hub",
+      "sha256": "b69a80c95c2a905462f63548400480b128981b962834c8f499249e98fa4b6308",
+      "unknown_upper_bound": 128,
+      "transport_state": "received",
+      "liability_state": "unresolved",
+      "known_consumption": 0
+    }
+  ],
+  "scope": "typed-unknown-lost-ack-restart",
+  "plan_complete": false
+}

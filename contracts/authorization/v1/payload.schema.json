@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vortex.invalid/contracts/authorization/v1/payload.schema.json",
+  "title": "VORTEX Authorization Update 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "update_id", "node_id", "boot_id", "signer_epoch", "path_generation", "fencing_generation_floor", "issued_at", "backend_heartbeat_at", "autonomy_deadline", "authorizations", "revocations", "restrictions"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "update_id": {"type": "string", "format": "uuid"},
+    "node_id": {"type": "string", "format": "uuid"},
+    "boot_id": {"type": "string", "format": "uuid"},
+    "signer_epoch": {"type": "integer", "minimum": 1},
+    "path_generation": {"type": "integer", "minimum": 1},
+    "fencing_generation_floor": {"type": "integer", "minimum": 1},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "backend_heartbeat_at": {"type": "string", "format": "date-time"},
+    "autonomy_deadline": {"type": "string", "format": "date-time"},
+    "authorizations": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["authorization_id", "parent_authorization_id", "source_id", "kind", "rule_id", "rule_revision", "path_generation", "issued_at", "not_before", "expires_at", "hard_deadline"],
+        "properties": {
+          "authorization_id": {"type": "string", "format": "uuid"},
+          "parent_authorization_id": {"type": "string", "format": "uuid"},
+          "source_id": {"type": "string", "format": "uuid"},
+          "kind": {"enum": ["runtime_lease", "share_lease", "credit_grant"]},
+          "rule_id": {"type": "string", "minLength": 1, "maxLength": 128},
+          "rule_revision": {"type": "integer", "minimum": 1},
+          "path_generation": {"type": "integer", "minimum": 1},
+          "issued_at": {"type": "string", "format": "date-time"},
+          "not_before": {"type": "string", "format": "date-time"},
+          "expires_at": {"type": "string", "format": "date-time"},
+          "hard_deadline": {"type": "string", "format": "date-time"},
+          "billing_snapshot_id": {"type": "string", "format": "uuid"},
+          "amount_bytes": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+          "rate_bps": {"type": "integer", "minimum": 1, "maximum": 1000000000000},
+          "connections": {"type": "integer", "minimum": 1, "maximum": 1000000}
+        },
+        "allOf": [
+          {"if": {"properties": {"kind": {"const": "credit_grant"}}, "required": ["kind"]}, "then": {"required": ["billing_snapshot_id", "amount_bytes"]}},
+          {"if": {"properties": {"kind": {"const": "share_lease"}}, "required": ["kind"]}, "then": {"required": ["rate_bps", "connections"]}}
+        ]
+      }
+    },
+    "revocations": {"type": "array", "maxItems": 4096, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}},
+    "restrictions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["existing_rules_only", "existing_shares_only", "existing_delegated_balances_only", "new_rules", "new_ports", "dns_changes", "registrations", "cross_node_rebalance"],
+      "properties": {
+        "existing_rules_only": {"const": true},
+        "existing_shares_only": {"const": true},
+        "existing_delegated_balances_only": {"const": true},
+        "new_rules": {"const": false},
+        "new_ports": {"const": false},
+        "dns_changes": {"const": false},
+        "registrations": {"const": false},
+        "cross_node_rebalance": {"const": false}
+      }
+    }
+  }
+}

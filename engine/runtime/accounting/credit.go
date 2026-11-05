@@ -2,6 +2,8 @@ package accounting
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/bits"
@@ -70,13 +72,19 @@ type CreditGate struct {
 	requests     map[string]grantRecord
 	grantOwners  map[string]string
 	sessions     map[*creditSession]struct{}
+	usageSink    core.UsageSink
+	faulted      bool
 }
 
 func NewCreditGate(c CreditConfig) (*CreditGate, error) {
+	return NewCreditGateWithUsage(c, nil)
+}
+
+func NewCreditGateWithUsage(c CreditConfig, sink core.UsageSink) (*CreditGate, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
-	return &CreditGate{cfg: c, requests: make(map[string]grantRecord), grantOwners: make(map[string]string), sessions: make(map[*creditSession]struct{}), state: CreditState{SnapshotID: c.SnapshotID, Budget: c.Budget, Unissued: c.Budget}}, nil
+	return &CreditGate{cfg: c, usageSink: sink, requests: make(map[string]grantRecord), grantOwners: make(map[string]string), sessions: make(map[*creditSession]struct{}), state: CreditState{SnapshotID: c.SnapshotID, Budget: c.Budget, Unissued: c.Budget}}, nil
 }
 func (g *CreditGate) State() CreditState {
 	g.mu.Lock()
@@ -116,7 +124,7 @@ func (g *CreditGate) Open(ctx context.Context, f core.Flow) (core.Session, error
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
-	if len(g.sessions) >= 4096 || f.Key == "" || g.state.Unissued+g.state.Available == 0 && g.state.Held == 0 {
+	if g.faulted || len(g.sessions) >= 4096 || f.Key == "" || g.state.Unissued+g.state.Available == 0 && g.state.Held == 0 {
 		g.state.Denials++
 		return nil, core.ErrDenied
 	}
@@ -125,16 +133,18 @@ func (g *CreditGate) Open(ctx context.Context, f core.Flow) (core.Session, error
 	if g.cfg.Observe {
 		g.observations.PeakSessions = max(g.observations.PeakSessions, g.state.Sessions)
 	}
-	session := &creditSession{gate: g, next: [2]int64{g.cfg.InitialBlock, g.cfg.InitialBlock}}
+	session := &creditSession{gate: g, flowKey: f.Key, ruleID: f.RuleID, next: [2]int64{g.cfg.InitialBlock, g.cfg.InitialBlock}}
 	g.sessions[session] = struct{}{}
 	return session, nil
 }
 
 type creditSession struct {
-	gate   *CreditGate
-	closed bool
-	idle   [2]int64
-	next   [2]int64
+	gate    *CreditGate
+	flowKey string
+	ruleID  string
+	closed  bool
+	idle    [2]int64
+	next    [2]int64
 }
 
 func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) (*core.Batch, error) {
@@ -150,7 +160,7 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 	} else if d != core.LeftToRight {
 		return nil, core.ErrInvalidUsage
 	}
-	if s.closed || n < 1 || n > g.cfg.MaxBlock {
+	if g.faulted || s.closed || n < 1 || n > g.cfg.MaxBlock {
 		return nil, core.ErrDenied
 	}
 	if s.idle[i] < n {
@@ -200,9 +210,37 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 		g.observations.Reservations++
 	}
 	s.idle[i] -= n
-	return core.NewBatch(n, func(_ context.Context, o core.Outcome) error {
+	usageID := ""
+	if g.usageSink != nil {
+		var err error
+		usageID, err = usageBatchID()
+		if err != nil {
+			g.faulted = true
+			s.idle[i] += n
+			return nil, fmt.Errorf("credit: reservation identity unavailable; gate frozen: %w", err)
+		}
+		if err := g.usageSink.ReserveUsage(ctx, core.UsageRecord{BatchID: usageID, FlowKey: s.flowKey, RuleID: s.ruleID, SnapshotID: g.cfg.SnapshotID, Direction: direction(i), Reserved: n}); err != nil {
+			g.faulted = true
+			g.state.Held -= n
+			g.state.Unknown += n
+			return nil, fmt.Errorf("credit: durable reservation failed; gate frozen: %w", err)
+		}
+	}
+	return core.NewBatch(n, func(commitCtx context.Context, o core.Outcome) error {
 		g.mu.Lock()
 		defer g.mu.Unlock()
+		if g.usageSink != nil {
+			used := o.Used
+			if o.Resolution == core.Unknown {
+				used = n
+			}
+			if err := g.usageSink.SettleUsage(commitCtx, core.UsageRecord{BatchID: usageID, FlowKey: s.flowKey, RuleID: s.ruleID, SnapshotID: g.cfg.SnapshotID, Direction: direction(i), Resolution: o.Resolution, Reserved: n, Used: used}); err != nil {
+				g.faulted = true
+				g.state.Held -= n
+				g.state.Unknown += n
+				return fmt.Errorf("credit: durable usage persistence failed; authority frozen: %w", err)
+			}
+		}
 		if o.Resolution == core.Unknown {
 			g.state.Held -= n
 			g.state.Unknown += n
@@ -219,6 +257,24 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 		}
 		return nil
 	})
+}
+
+func direction(index int) core.Direction {
+	if index == 1 {
+		return core.RightToLeft
+	}
+	return core.LeftToRight
+}
+
+func usageBatchID() (string, error) {
+	var id [16]byte
+	if _, err := rand.Read(id[:]); err != nil {
+		return "", err
+	}
+	id[6] = (id[6] & 0x0f) | 0x40
+	id[8] = (id[8] & 0x3f) | 0x80
+	encoded := hex.EncodeToString(id[:])
+	return encoded[:8] + "-" + encoded[8:12] + "-" + encoded[12:16] + "-" + encoded[16:20] + "-" + encoded[20:], nil
 }
 func (s *creditSession) Close() error {
 	g := s.gate

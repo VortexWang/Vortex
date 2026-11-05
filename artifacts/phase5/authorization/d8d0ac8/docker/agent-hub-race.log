@@ -1,0 +1,31 @@
+ok  	vortex/contracts	1.006s
+2026/11/05 22:17:25 ERROR vlink inbound handshake failed err="context canceled"
+2026/11/05 22:17:26 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/05 22:17:26 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/05 22:17:26 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/05 22:17:26 INFO relay target connected target=127.0.0.1 port=46005
+2026/11/05 22:17:26 INFO relay OPEN authorized stream_id=3 network=1
+2026/11/05 22:17:26 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/05 22:17:30 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/05 22:17:30 INFO udp link drop summary link_id=43ac435f073ade9f9a6a54d1bda0847f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/05 22:17:30 INFO udp link drop summary link_id=3881b9b36a93d26fabff04b80a11a27b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/05 22:17:30 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/05 22:17:30 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/05 22:17:30 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/05 22:17:30 INFO relay target connected target=127.0.0.1 port=39198
+2026/11/05 22:17:30 INFO relay OPEN authorized stream_id=3 network=2
+2026/11/05 22:17:30 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/05 22:17:34 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/05 22:17:34 ERROR relay target bridge failed stream_id=3 err="database or disk is full (13)"
+2026/11/05 22:17:34 INFO udp link drop summary link_id=835993a5dd21eddbbf752db754dbe5b0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/05 22:17:34 INFO udp link drop summary link_id=e4e27e3f31ba4e85b5a93a931ac212e7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- FAIL: TestControlReportsNewUsageWithoutReconnecting (0.27s)
+    usage_handoff_test.go:258: EOF
+FAIL
+FAIL	vortex/agent	16.683s
+ok  	vortex/agent/identity	1.146s
+ok  	vortex/agent/store	9.874s
+ok  	vortex/agent/upgrade	1.627s
+ok  	vortex/hub	1.363s
+ok  	vortex/test/phase5	1.346s
+FAIL

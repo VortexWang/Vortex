@@ -192,7 +192,14 @@ func TestPolicyTransitionPreservesBothPathsAndOldUnknownLiability(t *testing.T) 
 		}
 	}
 	cfg.Active = "path-4-policy-1"
-	book, err := NewCreditBook(cfg)
+	var reserved, settled []core.UsageRecord
+	book, err := NewCreditBookWithUsage(cfg, usageSink{
+		reserve: func(_ context.Context, record core.UsageRecord) error {
+			reserved = append(reserved, record)
+			return nil
+		},
+		settle: func(_ context.Context, record core.UsageRecord) error { settled = append(settled, record); return nil },
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,6 +238,19 @@ func TestPolicyTransitionPreservesBothPathsAndOldUnknownLiability(t *testing.T) 
 	}
 	if err := pending.MarkUnknown(context.Background()); err != nil {
 		t.Fatal(err)
+	}
+	if len(reserved) != 3 || len(settled) != 3 {
+		t.Fatalf("missing durable records: reserved=%+v settled=%+v", reserved, settled)
+	}
+	for _, records := range [][]core.UsageRecord{reserved, settled} {
+		for _, record := range records {
+			if record.RuleID != "rule" || record.BatchID == "" {
+				t.Fatalf("lost pinned identity: %+v", record)
+			}
+		}
+	}
+	if settled[0].SnapshotID != "path-4-policy-2" || settled[1].SnapshotID != "path-5-policy-2" || settled[2].SnapshotID != "path-4-policy-1" || settled[2].Resolution != core.Unknown || settled[2].Reserved != 100 {
+		t.Fatalf("durable policy/path ownership changed: %+v", settled)
 	}
 	state := book.State()
 	if state.Active != "path-5-policy-2" {

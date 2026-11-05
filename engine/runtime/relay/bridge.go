@@ -116,13 +116,21 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 		if s.Dial == nil {
 			return nil, errors.New("relay: target dialer is not configured")
 		}
+		if s.Gate == nil {
+			return nil, engineaccounting.ErrDenied
+		}
+		session, err := s.Gate.Open(ctx, engineaccounting.Flow{Key: stream.FlowKey()})
+		if err != nil {
+			return nil, err
+		}
 		conn, err := s.Dial(ctx, request.Network, decision.Target)
 		if err != nil {
+			_ = session.Close()
 			slog.Error("relay target dial failed", "target", decision.Target.Host, "port", decision.Target.Port, "err", err)
 			return nil, err
 		}
 		slog.Info("relay target connected", "target", decision.Target.Host, "port", decision.Target.Port)
-		return &connResource{conn: conn}, nil
+		return &connResource{conn: conn, session: session}, nil
 	})
 	if err != nil {
 		slog.Error("relay OPEN handling failed", "stream_id", stream.ID, "err", err)
@@ -156,7 +164,7 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	case *connResource:
-		if err := BridgeConnWithGate(ctx, stream, typed.conn, s.Gate); err != nil && ctx.Err() == nil {
+		if err := bridgeConnWithSession(ctx, stream, typed.conn, typed.session, nil, false); err != nil && ctx.Err() == nil {
 			slog.Error("relay target bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	default:
@@ -358,7 +366,16 @@ func bridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	if err != nil {
 		return err
 	}
+	return bridgeConnWithSession(ctx, stream, conn, session, onFirstTargetByte, awaitOpen)
+}
+
+func bridgeConnWithSession(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, session engineaccounting.Session, onFirstTargetByte func(), awaitOpen bool) error {
+	if session == nil {
+		conn.Close()
+		return engineaccounting.ErrDenied
+	}
 	defer session.Close()
+	defer conn.Close()
 	bridgeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	if stream.Network == vlink.StreamUDP {
@@ -634,11 +651,20 @@ func (r *streamResource) Close() error {
 	return r.stream.CloseWrite(context.Background())
 }
 
-type connResource struct{ conn net.Conn }
+type connResource struct {
+	conn    net.Conn
+	session engineaccounting.Session
+}
 
 func (r *connResource) Close() error {
 	if r == nil || r.conn == nil {
 		return nil
 	}
-	return r.conn.Close()
+	err := r.conn.Close()
+	if r.session != nil {
+		if closeErr := r.session.Close(); err == nil {
+			err = closeErr
+		}
+	}
+	return err
 }

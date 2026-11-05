@@ -1,6 +1,8 @@
 package apply
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"sync"
 )
@@ -27,12 +29,30 @@ type Transaction struct {
 	State      State
 }
 type Manager struct {
-	mu     sync.Mutex
-	tx     map[[16]byte]Transaction
-	active uint64
+	instance string
+	mu       sync.Mutex
+	tx       map[[16]byte]Transaction
+	active   uint64
 }
 
-func NewManager() *Manager { return &Manager{tx: make(map[[16]byte]Transaction)} }
+func NewManager() *Manager {
+	var id [16]byte
+	if _, err := rand.Read(id[:]); err != nil {
+		panic(err)
+	}
+	return &Manager{instance: hex.EncodeToString(id[:]), tx: make(map[[16]byte]Transaction)}
+}
+
+// InstanceID identifies this execution lifetime, not the Agent boot or tx ID.
+func (m *Manager) InstanceID() string { return m.instance }
+
+// Query reports retained execution state. Absence is not proof of inactivity.
+func (m *Manager) Query(id [16]byte) (Transaction, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	t, ok := m.tx[id]
+	return t, ok
+}
 func (m *Manager) Prepare(id [16]byte, gen uint64) (Transaction, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -40,6 +60,9 @@ func (m *Manager) Prepare(id [16]byte, gen uint64) (Transaction, error) {
 		return Transaction{}, ErrConflict
 	}
 	if old, ok := m.tx[id]; ok {
+		if old.Generation != gen {
+			return Transaction{}, ErrConflict
+		}
 		return old, nil
 	}
 	if gen <= m.active {
@@ -56,7 +79,10 @@ func (m *Manager) Commit(id [16]byte, uncertain bool) (Transaction, error) {
 	if !ok {
 		return Transaction{}, ErrConflict
 	}
-	if t.State == Active || t.State == ActivationUnknown {
+	if t.State == Active {
+		return t, nil
+	}
+	if t.State == ActivationUnknown {
 		return t, ErrUnknown
 	}
 	if t.State != Prepared {
@@ -85,7 +111,7 @@ func (m *Manager) Abort(id [16]byte) (Transaction, error) {
 	if t.State == Aborted || t.State == Released {
 		return t, nil
 	}
-	if t.State == Active {
+	if t.State == Active || t.State == ActivationUnknown || t.State == Committing {
 		return Transaction{}, ErrConflict
 	}
 	t.State = Aborted

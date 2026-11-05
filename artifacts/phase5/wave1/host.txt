@@ -1,0 +1,4 @@
+commit: 9e67f96688fc125df59c3fac47c1de91d94696a8
+go: go version go1.27.3 darwin/arm64
+arch: arm64
+sqlite module: modernc.org/sqlite v1.61.1

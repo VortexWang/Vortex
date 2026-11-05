@@ -1,0 +1,7 @@
+ok  	vortex/agent	4.803s
+ok  	vortex/agent/identity	0.691s
+ok  	vortex/agent/store	1.798s
+ok  	vortex/agent/upgrade	2.285s
+ok  	vortex/hub	1.760s
+ok  	vortex/test/phase5	2.891s
+?   	vortex/cmd/vortex-node	[no test files]

@@ -959,18 +959,14 @@
     {
       "id": "AGT-001",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "AGT-002",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -978,8 +974,7 @@
       "id": "AGT-003",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
@@ -987,244 +982,263 @@
       "id": "AGT-004",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "AGT-005",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "AGT-006",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "AGT-007",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },
     {
       "id": "AGT-008",
-      "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
-      ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "contracts": [],
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "decision": "not_applicable",
+      "reason": "Binary upgrade lifecycle has no normative contract in the current interface catalog; it is an Agent-local installer operation."
     },
     {
       "id": "AGT-012",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "AGT-009",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "AGT-010",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "AGT-011",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-001",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-002",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-003",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-004",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-005",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-006",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-007",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-008",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-009",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-010",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-011",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-012",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-013",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-014",
       "contracts": [
-        "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.authorization.v1",
+        "vortex.control.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-015",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-016",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-017",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
         "vortex.database"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "HUB-018",
       "contracts": [
+        "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.runtime-config",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
     },
     {
       "id": "BE-001",
@@ -2199,8 +2213,8 @@
     {
       "id": "SUP-AGENT-001",
       "contracts": [
-        "vortex.runtime-config",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     },

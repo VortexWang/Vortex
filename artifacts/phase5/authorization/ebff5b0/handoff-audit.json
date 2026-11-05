@@ -1,0 +1,259 @@
+{
+  "status": "passed",
+  "commit": "ebff5b001b9a6d4323c042e6bd3d269be697aa70",
+  "scope": "protocol-backend-ack-and-autonomous-retention",
+  "snapshots": [
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "agent",
+      "sha256": "f4d5f4cafc515f1873a02f717e5b36ccc1fce3300ed6c004621560c950c8be41"
+    },
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "backend",
+      "sha256": "edfc2337130a96d9eb7f33b5ae313a49a3ca9f27547ee9fdf3503dfa08bac8f5"
+    },
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "hub",
+      "sha256": "e069caaddcdcd465aca50137b1f698ef2ef6fdf3fc83447bd1e5265e6b751245"
+    },
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "agent",
+      "sha256": "283a8ae0ca90d90af6485eb2149e1f136033cba88b261b3817e8dc4716c60a75"
+    },
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "backend",
+      "sha256": "b9453cc4ce450a08bd093789d57db7241517ec2280e7fd423e3b62b54f1df222"
+    },
+    {
+      "environment": "docker",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "hub",
+      "sha256": "84b602622384577b016d7e865e20441d8297c5da19ac73b8b150fb194fba2d67"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "agent",
+      "sha256": "7e7e7a5553487e4ac44e3cb9768aa3fc0456d3b1d2980c08c2a1a502120c4ece"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "backend",
+      "sha256": "5cea93bfdcf0fe3accf18af3d15a6cd87cb55da0b65fa986bc58a81a6783ba6e"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "hub",
+      "sha256": "b15c66335c5e6978b43ad792d027a82b2871db827a58b8f111157cb7a32e8d7d"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "agent",
+      "sha256": "1d43b016ba5af49fcc5ab9c4b78a6ba1a408d4d73c772a90a80e7960eaa7be8c"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "backend",
+      "sha256": "cdce94faddc6c94425c32ed919b38ccae4a66a266164a6b3659d08b7b4d97496"
+    },
+    {
+      "environment": "docker",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "hub",
+      "sha256": "e495a214b88c6d8aed49730721a3a88104b740b82b731effaaf5b97a98c31767"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 1,
+      "role": "agent",
+      "sha256": "787f93f0fc9d19225127e8647eeb1bddc5a357e9789a0187d48f29b91eda1696"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 1,
+      "role": "backend",
+      "sha256": "0655c9f7238f75a4e224429f73479f2f8f1dd6e856e1aeaf6c2ddd830313246b"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 1,
+      "role": "hub",
+      "sha256": "29405ed616c8a0a285004a229369ff9bf9a56deb18f9b2e9242826ad63b69126"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 2,
+      "role": "agent",
+      "sha256": "1f634305309ed504bf5462ee0049bd9ec2cc8927c1ffcc09a1271acd4459daa9"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 2,
+      "role": "backend",
+      "sha256": "52d21ff33ee55669c8aaeb0f00f333e759da1c87484f3b9ea904f4a3b113da91"
+    },
+    {
+      "environment": "docker",
+      "kind": "runtime",
+      "network": 2,
+      "role": "hub",
+      "sha256": "8fc6ed554072402952772531633e0bea579aadf7df7f53138aa8ca7cc3bf846b"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "agent",
+      "sha256": "af2d3eec96630ad134550f610d02262c5ec0f7debe792861771707f6bb60502c"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "backend",
+      "sha256": "a27fc6aeac39fdae7e3040241a50ab7a2b35f72e85cc566f7e30f2b92cbf4d7f"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "online-lost-ack",
+      "role": "hub",
+      "sha256": "0fb7f3233c195e79dabe9bf6feee9a06d9119822583caabf492f44fb6364e2e6"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "agent",
+      "sha256": "f402be9a2ff24fe0ab6a8eafe1b2f9e1b8b67fbfcde62fda96652ba0f7de8868"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "backend",
+      "sha256": "9cc76991c060d187f4f751bd136b08281ce1bdd3f1f0907e2dc10b40f0f4b09b"
+    },
+    {
+      "environment": "actions",
+      "kind": "known",
+      "mode": "autonomous",
+      "role": "hub",
+      "sha256": "0feece2a52d72d69eb7fbfb8bbbb48f4f305493fdc483c06c3f2e455097b9576"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "agent",
+      "sha256": "19f4740807d88dac70ba5804e7260011a44da0fb99e5f0b391a0480b62deeab7"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "backend",
+      "sha256": "8610e4f57a6496ac8fe2a39bee5b243ee4dde1aedf826d3984bf7624bc2c601c"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "online-lost-ack",
+      "role": "hub",
+      "sha256": "6fdc8caabda91515d429a1c9368854dc4459bb1f63e145edecb2d2f5c51859b2"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "agent",
+      "sha256": "043150b4857429da6aca1bf554edc1f4240824efe1d80739eff49334c6d7ab95"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "backend",
+      "sha256": "09c900ab0cf7660dcf7073403cff6a52007a32dd8317ea4c5cfa31e90defe9dc"
+    },
+    {
+      "environment": "actions",
+      "kind": "unknown",
+      "mode": "autonomous",
+      "role": "hub",
+      "sha256": "5f8a92b32566dc234fe8c65cfa568abf3485765c3bae20504c0c4efb306c5e66"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 1,
+      "role": "agent",
+      "sha256": "31645d72e63af5230b01e7440a9586cdbe55c183b3a4b47b7f3d4a0f92151691"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 1,
+      "role": "backend",
+      "sha256": "95f9df433904047c7ac804d3e68ffeb08af6372245962d78454044ecbf60de26"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 1,
+      "role": "hub",
+      "sha256": "790a325b00412e11dd44cfac46943e987812a1a4fe2904693814e1121ac04ecd"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 2,
+      "role": "agent",
+      "sha256": "0d81cfb0e46b0edd9eaae4b23bc930efd0c0d0bd1bda5257af07f787ca25d85a"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 2,
+      "role": "backend",
+      "sha256": "12c9649d6adda18f99587d61e400901779700a16434c7d01d04b57b3a31929d3"
+    },
+    {
+      "environment": "actions",
+      "kind": "runtime",
+      "network": 2,
+      "role": "hub",
+      "sha256": "f009204bb9ca443832a22718024cbd3ddacbf96beaf212f2c6a4179471b1808b"
+    }
+  ]
+}

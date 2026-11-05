@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
 var (
@@ -23,7 +24,33 @@ const (
 )
 
 type Flow struct {
-	Key string
+	Key    string
+	RuleID string
+}
+
+type UsageRecord struct {
+	BatchID         string
+	FlowKey         string
+	RuleID          string
+	SnapshotID      string
+	AuthorizationID string
+	RuleRevision    uint64
+	PathGeneration  uint64
+	Direction       Direction
+	Resolution      Resolution
+	Reserved        int64
+	Used            int64
+	Earliest        time.Time
+	Latest          time.Time
+	TrustedTime     bool
+	ExistingSession bool
+}
+
+// UsageSink is implemented by the Agent. Engine calls it before settling a
+// reservation, keeping durable authority outside the Engine module.
+type UsageSink interface {
+	ReserveUsage(context.Context, UsageRecord) error
+	SettleUsage(context.Context, UsageRecord) error
 }
 
 // Gate admits a flow and returns a session policy. Gate implementations may

@@ -2,10 +2,111 @@ package accounting
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	core "vortex/engine/accounting"
 )
+
+type usageSinkFunc func(context.Context, core.UsageRecord) error
+type usageSink struct {
+	reserve func(context.Context, core.UsageRecord) error
+	settle  func(context.Context, core.UsageRecord) error
+}
+
+func (s usageSink) ReserveUsage(ctx context.Context, record core.UsageRecord) error {
+	if s.reserve == nil {
+		return nil
+	}
+	return s.reserve(ctx, record)
+}
+func (s usageSink) SettleUsage(ctx context.Context, record core.UsageRecord) error {
+	if s.settle != nil {
+		return s.settle(ctx, record)
+	}
+	return nil
+}
+
+func (f usageSinkFunc) SettleUsage(ctx context.Context, record core.UsageRecord) error {
+	return f(ctx, record)
+}
+func (f usageSinkFunc) ReserveUsage(context.Context, core.UsageRecord) error { return nil }
+
+func TestCreditGatePersistsUsageBeforeSettlingReservation(t *testing.T) {
+	var records []core.UsageRecord
+	g, err := NewCreditGateWithUsage(CreditConfig{SnapshotID: "snapshot", Budget: 256, InitialBlock: 64, MaxBlock: 64, GrantTarget: 64, RenewPercent: 30}, usageSinkFunc(func(_ context.Context, record core.UsageRecord) error {
+		records = append(records, record)
+		return nil
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := g.Open(context.Background(), core.Flow{Key: "opaque-flow", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := session.Reserve(context.Background(), core.LeftToRight, 32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := batch.Commit(context.Background(), 20); err != nil {
+		t.Fatal(err)
+	}
+	if state := g.State(); state.Used != 20 || state.Unknown != 0 {
+		t.Fatalf("credit settled before/without durable use: %+v", state)
+	}
+	if len(records) != 1 || records[0].BatchID == "" || records[0].SnapshotID != "snapshot" || records[0].RuleID != "rule-1" || records[0].Used != 20 {
+		t.Fatalf("usage record=%+v", records)
+	}
+}
+
+func TestCreditGateFreezesWhenDurableUsageWriteFails(t *testing.T) {
+	failure := errors.New("disk full")
+	g, err := NewCreditGateWithUsage(CreditConfig{SnapshotID: "snapshot", Budget: 256, InitialBlock: 64, MaxBlock: 64, GrantTarget: 64, RenewPercent: 30}, usageSinkFunc(func(context.Context, core.UsageRecord) error { return failure }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := g.Open(context.Background(), core.Flow{Key: "flow-1", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := session.Reserve(context.Background(), core.LeftToRight, 32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := batch.Commit(context.Background(), 20); !errors.Is(err, failure) {
+		t.Fatalf("durability error=%v", err)
+	}
+	state := g.State()
+	if state.Unknown != 32 || state.Used != 0 {
+		t.Fatalf("failed write did not retain the full upper bound: %+v", state)
+	}
+	if _, err := g.Open(context.Background(), core.Flow{Key: "new", RuleID: "rule-1"}); !errors.Is(err, core.ErrDenied) {
+		t.Fatalf("faulted gate admitted new flow: %v", err)
+	}
+	if _, err := session.Reserve(context.Background(), core.LeftToRight, 1); !errors.Is(err, core.ErrDenied) {
+		t.Fatalf("faulted gate allowed existing flow to produce unrecorded usage: %v", err)
+	}
+}
+
+func TestCreditGateDoesNotReturnWritableBatchWhenPrewriteFails(t *testing.T) {
+	failure := errors.New("sqlite full")
+	g, err := NewCreditGateWithUsage(CreditConfig{SnapshotID: "snapshot", Budget: 256, InitialBlock: 64, MaxBlock: 64, GrantTarget: 64, RenewPercent: 30}, usageSink{reserve: func(context.Context, core.UsageRecord) error { return failure }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := g.Open(context.Background(), core.Flow{Key: "flow-1", RuleID: "rule-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if batch, err := session.Reserve(context.Background(), core.LeftToRight, 32); err == nil || batch != nil {
+		t.Fatalf("prewrite failure returned writable batch=%v err=%v", batch, err)
+	}
+	state := g.State()
+	if state.Unknown != 32 || state.Held != 32 || state.Budget != state.Unissued+state.PendingGrant+state.UnknownGrant+state.Available+state.Held+state.Used+state.Unknown {
+		t.Fatalf("prewrite failure broke conservative accounting: %+v", state)
+	}
+}
 
 func creditFixture(t *testing.T, budget int64) *CreditGate {
 	t.Helper()

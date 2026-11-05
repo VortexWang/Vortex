@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "commit": "04bd2bf5647dc0eb280e519f5281105e78b154f3",
+  "snapshots": [
+    {
+      "environment": "docker",
+      "fixture": "runtime-1-ledgers",
+      "role": "agent",
+      "sha256": "8a5de0ee74de82d2ab40c835d142a1d96b72786067d75cd1d6e4a4b71e3a7d0f",
+      "known_usage_batches": 2,
+      "issued": 8192,
+      "remaining": 8146,
+      "used": 46,
+      "issuer": "hub"
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-1-ledgers",
+      "role": "hub",
+      "sha256": "bde374edac05c295de6237a9e2e7fa79cd6d192b81aab79ef5147966f80bc762",
+      "known_usage_batches": 2,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-2-ledgers",
+      "role": "agent",
+      "sha256": "80ebf9bdc779ea334853f3ed11067ad678565b38ecffdb337d294f5158e930b7",
+      "known_usage_batches": 2,
+      "issued": 8192,
+      "remaining": 8146,
+      "used": 46,
+      "issuer": "hub"
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-2-ledgers",
+      "role": "hub",
+      "sha256": "f07f837792a55407e9dd3649b7b146005047cdd5d0cc257605d9ccfab634fb31",
+      "known_usage_batches": 2,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-1-ledgers",
+      "role": "agent",
+      "sha256": "93e821c7684149f5f5acd640a6724275e4d862b6d4b9ddebec8c48e7d85e6ac8",
+      "known_usage_batches": 2,
+      "issued": 8192,
+      "remaining": 8146,
+      "used": 46,
+      "issuer": "hub"
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-1-ledgers",
+      "role": "hub",
+      "sha256": "2e57e214d493dae982ba44c7cba715e659046e9ec7e2794867552945b13a8310",
+      "known_usage_batches": 2,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-2-ledgers",
+      "role": "agent",
+      "sha256": "e1c2493f7066601a4b24e767666c9b97b57b404e7880d796a47d8665710093ce",
+      "known_usage_batches": 2,
+      "issued": 8192,
+      "remaining": 8146,
+      "used": 46,
+      "issuer": "hub"
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-2-ledgers",
+      "role": "hub",
+      "sha256": "730876207a3d48b796cfb99d8e9efec4d36258a60f6dcd4b8ad03b3979749e9f",
+      "known_usage_batches": 2,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+package agent
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"math"
+	"time"
+	"unicode/utf8"
+
+	"vortex/contracts"
+)
+
+const authorizationSchemaVersion = "1.0.0"
+
+type authorizationPayload struct {
+	SchemaVersion          string                    `json:"schema_version"`
+	UpdateID               string                    `json:"update_id"`
+	NodeID                 string                    `json:"node_id"`
+	BootID                 string                    `json:"boot_id"`
+	SignerEpoch            uint64                    `json:"signer_epoch"`
+	PathGeneration         uint64                    `json:"path_generation"`
+	FencingGenerationFloor uint64                    `json:"fencing_generation_floor"`
+	IssuedAt               time.Time                 `json:"issued_at"`
+	BackendHeartbeatAt     time.Time                 `json:"backend_heartbeat_at"`
+	AutonomyDeadline       time.Time                 `json:"autonomy_deadline"`
+	Authorizations         []authorizationRecord     `json:"authorizations"`
+	Revocations            []string                  `json:"revocations"`
+	Restrictions           authorizationRestrictions `json:"restrictions"`
+}
+
+type authorizationRecord struct {
+	AuthorizationID       string    `json:"authorization_id"`
+	ParentAuthorizationID string    `json:"parent_authorization_id"`
+	SourceID              string    `json:"source_id"`
+	Kind                  string    `json:"kind"`
+	RuleID                string    `json:"rule_id"`
+	RuleRevision          uint64    `json:"rule_revision"`
+	PathGeneration        uint64    `json:"path_generation"`
+	IssuedAt              time.Time `json:"issued_at"`
+	NotBefore             time.Time `json:"not_before"`
+	ExpiresAt             time.Time `json:"expires_at"`
+	HardDeadline          time.Time `json:"hard_deadline"`
+	BillingSnapshotID     string    `json:"billing_snapshot_id,omitempty"`
+	AmountBytes           *uint64   `json:"amount_bytes,omitempty"`
+	RateBPS               *uint64   `json:"rate_bps,omitempty"`
+	Connections           *uint64   `json:"connections,omitempty"`
+}
+
+type authorizationRestrictions struct {
+	ExistingRulesOnly             *bool `json:"existing_rules_only"`
+	ExistingSharesOnly            *bool `json:"existing_shares_only"`
+	ExistingDelegatedBalancesOnly *bool `json:"existing_delegated_balances_only"`
+	NewRules                      *bool `json:"new_rules"`
+	NewPorts                      *bool `json:"new_ports"`
+	DNSChanges                    *bool `json:"dns_changes"`
+	Registrations                 *bool `json:"registrations"`
+	CrossNodeRebalance            *bool `json:"cross_node_rebalance"`
+}
+
+type authorizationRequired struct {
+	SchemaVersion          *string          `json:"schema_version"`
+	UpdateID               *string          `json:"update_id"`
+	NodeID                 *string          `json:"node_id"`
+	BootID                 *string          `json:"boot_id"`
+	SignerEpoch            *uint64          `json:"signer_epoch"`
+	PathGeneration         *uint64          `json:"path_generation"`
+	FencingGenerationFloor *uint64          `json:"fencing_generation_floor"`
+	IssuedAt               *string          `json:"issued_at"`
+	BackendHeartbeatAt     *string          `json:"backend_heartbeat_at"`
+	AutonomyDeadline       *string          `json:"autonomy_deadline"`
+	Authorizations         *json.RawMessage `json:"authorizations"`
+	Revocations            *json.RawMessage `json:"revocations"`
+	Restrictions           *json.RawMessage `json:"restrictions"`
+}
+
+func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generation uint64) (authorizationPayload, error) {
+	var result authorizationPayload
+	if len(payload) == 0 || len(payload) > 1<<20 || !utf8.Valid(payload) {
+		return result, fmt.Errorf("invalid_authorization: payload must be 1..1048576 bytes")
+	}
+	if len(contracts.AuthorizationPayloadSchema) == 0 {
+		return result, fmt.Errorf("invalid_authorization: frozen schema is unavailable")
+	}
+	if err := rejectDuplicateJSONKeys(payload); err != nil {
+		return result, fmt.Errorf("invalid_authorization: %w", err)
+	}
+	var required authorizationRequired
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&required); err != nil {
+		return result, fmt.Errorf("invalid_authorization: %w", err)
+	}
+	if required.SchemaVersion == nil || required.UpdateID == nil || required.NodeID == nil || required.BootID == nil || required.SignerEpoch == nil || required.PathGeneration == nil || required.FencingGenerationFloor == nil || required.IssuedAt == nil || required.BackendHeartbeatAt == nil || required.AutonomyDeadline == nil || required.Authorizations == nil || required.Revocations == nil || required.Restrictions == nil {
+		return result, fmt.Errorf("invalid_authorization: required field is missing")
+	}
+	decoder = json.NewDecoder(bytes.NewReader(payload))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&result); err != nil {
+		return result, fmt.Errorf("invalid_authorization: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return result, fmt.Errorf("invalid_authorization: multiple JSON values")
+	}
+	if result.SchemaVersion != authorizationSchemaVersion || result.NodeID != nodeID || result.BootID != bootID || result.PathGeneration != generation || generation == 0 {
+		return result, fmt.Errorf("identity_mismatch: authorization schema, node, boot or path generation mismatch")
+	}
+	if !canonicalUUID(result.UpdateID) || !canonicalUUID(result.NodeID) || !canonicalUUID(result.BootID) || result.SignerEpoch == 0 || result.FencingGenerationFloor == 0 || result.Authorizations == nil || result.Revocations == nil || len(result.Authorizations) > 4096 || len(result.Revocations) > 4096 {
+		return result, fmt.Errorf("invalid_authorization: identity, epoch or collection bound is invalid")
+	}
+	r := result.Restrictions
+	if r.ExistingRulesOnly == nil || r.ExistingSharesOnly == nil || r.ExistingDelegatedBalancesOnly == nil || r.NewRules == nil || r.NewPorts == nil || r.DNSChanges == nil || r.Registrations == nil || r.CrossNodeRebalance == nil || !*r.ExistingRulesOnly || !*r.ExistingSharesOnly || !*r.ExistingDelegatedBalancesOnly || *r.NewRules || *r.NewPorts || *r.DNSChanges || *r.Registrations || *r.CrossNodeRebalance {
+		return result, fmt.Errorf("invalid_authorization: restricted-autonomy flags violate the frozen contract")
+	}
+	if result.BackendHeartbeatAt.IsZero() || result.AutonomyDeadline.IsZero() || result.IssuedAt.IsZero() || !result.AutonomyDeadline.After(result.BackendHeartbeatAt) || result.AutonomyDeadline.After(result.BackendHeartbeatAt.Add(12*time.Hour)) || result.IssuedAt.Before(result.BackendHeartbeatAt) || result.IssuedAt.After(result.AutonomyDeadline) {
+		return result, fmt.Errorf("invalid_authorization: heartbeat or autonomy time bounds are invalid")
+	}
+	ids := make(map[string]struct{}, len(result.Authorizations))
+	var rawAuthorizations []map[string]json.RawMessage
+	if err := json.Unmarshal(*required.Authorizations, &rawAuthorizations); err != nil {
+		return result, fmt.Errorf("invalid_authorization: invalid authorization records")
+	}
+	for i, a := range result.Authorizations {
+		for _, field := range []string{"authorization_id", "parent_authorization_id", "source_id", "kind", "rule_id", "rule_revision", "path_generation", "issued_at", "not_before", "expires_at", "hard_deadline"} {
+			value, present := rawAuthorizations[i][field]
+			if !present || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] requires %s", i, field)
+			}
+		}
+		for _, field := range []string{"billing_snapshot_id", "amount_bytes", "rate_bps", "connections"} {
+			if value, present := rawAuthorizations[i][field]; present && bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] has null %s", i, field)
+			}
+		}
+		if _, present := rawAuthorizations[i]["billing_snapshot_id"]; present && !canonicalUUID(a.BillingSnapshotID) ||
+			a.AmountBytes != nil && (*a.AmountBytes == 0 || *a.AmountBytes > math.MaxInt64) ||
+			a.RateBPS != nil && (*a.RateBPS == 0 || *a.RateBPS > 1_000_000_000_000) ||
+			a.Connections != nil && (*a.Connections == 0 || *a.Connections > 1_000_000) {
+			return result, fmt.Errorf("invalid_authorization: authorization[%d] optional limit or identity is invalid", i)
+		}
+		if !canonicalUUID(a.AuthorizationID) || !canonicalUUID(a.ParentAuthorizationID) || !canonicalUUID(a.SourceID) || a.RuleID == "" || len([]byte(a.RuleID)) > 128 || a.RuleRevision == 0 || a.PathGeneration != result.PathGeneration || a.IssuedAt.IsZero() || a.IssuedAt.Before(result.IssuedAt) || a.NotBefore.Before(a.IssuedAt) || !a.ExpiresAt.After(a.NotBefore) || a.ExpiresAt.After(a.HardDeadline) || a.HardDeadline.After(result.AutonomyDeadline) || a.ExpiresAt.Sub(a.IssuedAt) > 300*time.Second {
+			return result, fmt.Errorf("invalid_authorization: authorization[%d] identity, scope or time bound is invalid", i)
+		}
+		if _, exists := ids[a.AuthorizationID]; exists {
+			return result, fmt.Errorf("invalid_authorization: duplicate authorization_id")
+		}
+		ids[a.AuthorizationID] = struct{}{}
+		switch a.Kind {
+		case "runtime_lease":
+		case "share_lease":
+			if a.RateBPS == nil || *a.RateBPS == 0 || *a.RateBPS > 1_000_000_000_000 || a.Connections == nil || *a.Connections == 0 || *a.Connections > 1_000_000 {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] share limits are invalid", i)
+			}
+		case "credit_grant":
+			if !canonicalUUID(a.BillingSnapshotID) || a.AmountBytes == nil || *a.AmountBytes == 0 || *a.AmountBytes > math.MaxInt64 {
+				return result, fmt.Errorf("invalid_authorization: authorization[%d] grant limits are invalid", i)
+			}
+		default:
+			return result, fmt.Errorf("invalid_authorization: authorization[%d] kind is unsupported", i)
+		}
+	}
+	seenRevocations := make(map[string]struct{}, len(result.Revocations))
+	for _, id := range result.Revocations {
+		if !canonicalUUID(id) {
+			return result, fmt.Errorf("invalid_authorization: revocation id is invalid")
+		}
+		if _, exists := seenRevocations[id]; exists {
+			return result, fmt.Errorf("invalid_authorization: duplicate revocation id")
+		}
+		seenRevocations[id] = struct{}{}
+	}
+	return result, nil
+}
+
+func rejectDuplicateJSONKeys(payload []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	decoder.UseNumber()
+	if err := consumeJSONValue(decoder); err != nil {
+		return err
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		return fmt.Errorf("multiple JSON values")
+	}
+	return nil
+}
+
+func consumeJSONValue(decoder *json.Decoder) error {
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delimiter, ok := token.(json.Delim)
+	if !ok {
+		return nil
+	}
+	switch delimiter {
+	case '{':
+		seen := make(map[string]struct{})
+		for decoder.More() {
+			keyToken, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			key, ok := keyToken.(string)
+			if !ok {
+				return fmt.Errorf("object key is not a string")
+			}
+			if _, exists := seen[key]; exists {
+				return fmt.Errorf("duplicate object key %q", key)
+			}
+			seen[key] = struct{}{}
+			if err := consumeJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+		_, err = decoder.Token()
+		return err
+	case '[':
+		for decoder.More() {
+			if err := consumeJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+		_, err = decoder.Token()
+		return err
+	default:
+		return fmt.Errorf("unexpected JSON delimiter %q", delimiter)
+	}
+}

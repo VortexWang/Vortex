@@ -1,0 +1,1 @@
+{"schema":1,"status":"passed","commit":"4c408566a9dddb570c8d5f3d8304f893eac89491","tests":"go test ./agent/... ./hub ./test/phase5 ./cmd/vortex-node","vet":"go vet ./agent/... ./hub ./test/phase5 ./cmd/vortex-node","scope":"registration-mtls-reconcile-upgrade"}

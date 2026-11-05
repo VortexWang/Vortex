@@ -1,0 +1,108 @@
+{
+  "status": "passed",
+  "commit": "ebff5b001b9a6d4323c042e6bd3d269be697aa70",
+  "scope": "finite-runtime-renewal-fixture",
+  "plan_complete": false,
+  "snapshots": [
+    {
+      "environment": "docker",
+      "fixture": "runtime-1-ledgers",
+      "role": "agent",
+      "sha256": "787f93f0fc9d19225127e8647eeb1bddc5a357e9789a0187d48f29b91eda1696",
+      "known_usage_batches": 4,
+      "issued": 8192,
+      "remaining": 8100,
+      "used": 92,
+      "same_session_renewal": true,
+      "post_expiry_batches": 2,
+      "issuer": "hub",
+      "session_slot_state": "closed",
+      "retained_slot_requires_recovery": false
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-1-ledgers",
+      "role": "hub",
+      "sha256": "29405ed616c8a0a285004a229369ff9bf9a56deb18f9b2e9242826ad63b69126",
+      "known_usage_batches": 4,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-2-ledgers",
+      "role": "agent",
+      "sha256": "1f634305309ed504bf5462ee0049bd9ec2cc8927c1ffcc09a1271acd4459daa9",
+      "known_usage_batches": 4,
+      "issued": 8192,
+      "remaining": 8100,
+      "used": 92,
+      "same_session_renewal": true,
+      "post_expiry_batches": 2,
+      "issuer": "hub",
+      "session_slot_state": "open",
+      "retained_slot_requires_recovery": true
+    },
+    {
+      "environment": "docker",
+      "fixture": "runtime-2-ledgers",
+      "role": "hub",
+      "sha256": "8fc6ed554072402952772531633e0bea579aadf7df7f53138aa8ca7cc3bf846b",
+      "known_usage_batches": 4,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-1-ledgers",
+      "role": "agent",
+      "sha256": "31645d72e63af5230b01e7440a9586cdbe55c183b3a4b47b7f3d4a0f92151691",
+      "known_usage_batches": 4,
+      "issued": 8192,
+      "remaining": 8100,
+      "used": 92,
+      "same_session_renewal": true,
+      "post_expiry_batches": 2,
+      "issuer": "hub",
+      "session_slot_state": "closed",
+      "retained_slot_requires_recovery": false
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-1-ledgers",
+      "role": "hub",
+      "sha256": "790a325b00412e11dd44cfac46943e987812a1a4fe2904693814e1121ac04ecd",
+      "known_usage_batches": 4,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-2-ledgers",
+      "role": "agent",
+      "sha256": "0d81cfb0e46b0edd9eaae4b23bc930efd0c0d0bd1bda5257af07f787ca25d85a",
+      "known_usage_batches": 4,
+      "issued": 8192,
+      "remaining": 8100,
+      "used": 92,
+      "same_session_renewal": true,
+      "post_expiry_batches": 2,
+      "issuer": "hub",
+      "session_slot_state": "closed",
+      "retained_slot_requires_recovery": false
+    },
+    {
+      "environment": "actions",
+      "fixture": "runtime-2-ledgers",
+      "role": "hub",
+      "sha256": "f009204bb9ca443832a22718024cbd3ddacbf96beaf212f2c6a4179471b1808b",
+      "known_usage_batches": 4,
+      "initial": 12288,
+      "issued": 8192,
+      "remaining": 4096
+    }
+  ]
+}

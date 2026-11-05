@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: Phase 5 discussion pending
-status: planning
-stopped_at: Phase 5 context gathered; ready for research and planning
-last_updated: "2026-11-05T05:13:32.754Z"
+current_plan: 4
+status: executing
+stopped_at: 05-04 executing; atomic S/R handoff and execution-instance recovery implemented; integrated boot recovery remains open
+last_updated: "2026-11-05T22:24:05.531Z"
 last_activity: 2026-11-05
-last_activity_desc: Phase 4 live-boundary and early TCP fixes verified; D-04 scan and pool/mux latency passed; durable integration and final performance remain open
-state_head: d30eb254f77901754bacb5dd12772c531f792480
+last_activity_desc: 05-04 executing; S/R and fault regressions implemented; final paired verification pending
+state_head: 0e462c71ca9a7b6bf006faeeabbff8fe97759fba
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 28
-  completed_plans: 28
+  total_plans: 33
+  completed_plans: 32
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-Current Plan: Phase 5 discussion pending
-Total Plans in Phase: TBD
-Status: Planning
-Last activity: 2026-11-05 — Phase 4 implementation closed by owner decision; qualification gaps carried forward
+Current Plan: 4
+Total Plans in Phase: 5
+Status: Executing
+Last activity: 2026-11-05 — Plan 05-03 complete; control 1.2.0, durable grants, typed unknown handoff and online/autonomous ACK verified on ebff5b0. Ready for 05-04.
 
-Progress: ░░░░░░░░░░ [████░░░░░░] 38%
+Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 remains in progress.
 
 ## Performance Metrics
 
@@ -54,9 +54,17 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 - Last 5 plans: -
 - Trend: Not enough data
 
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 05 P03 | multi-session | 4 tasks | 61 files (source/governance; evidence excluded) |
+
 ## Accumulated Context
 
 ### Decisions
+
+- 2026-11-05 owner decision: Phase 4 qualification and optimization continue on gsd/phase-4-optimization-closure; main proceeds with Phase 5. Historical Phase 4 gaps do not block main progression or automatically reopen Phase 4. Final acceptance findings remain truthful.
 
 - V1.11 is a product reference, not a frozen acceptance baseline; current owner decisions govern.
 - The user approved Vegeta in place of k6; CR-001 records the tooling and acceptance impact without altering the frozen source.
@@ -92,11 +100,11 @@ Progress: ░░░░░░░░░░ [████░░░░░░] 38%
 
 ## Session Continuity
 
-Last session: 2026-11-05T05:13:32.199Z
-Stopped at: Phase 5 context gathered; ready for research and planning
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-CONTEXT.md
+Last session: 2026-11-05T22:23:43.770Z
+Stopped at: Completed 05-03; ready for 05-04 ledger handoff and activation recovery
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-PLAN.md
 
-### Latest qualification review
+### Historical qualification review (not a main-workflow gate)
 
 D-04 review completed, candidates not locked. Standard performance workload still has no production authorization
 Gate; optional finite source credit is separate from the memory event recorder; NFR-039/040/044 runtime behavior
