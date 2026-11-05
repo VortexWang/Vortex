@@ -1,0 +1,11 @@
+{
+  "run_id": 41980884591,
+  "url": "https://github.com/VortexWang/Vortex/actions/runs/41980884591",
+  "head_sha": "5f3461957726cc28a1f0c22df9e7df5ad1550b41",
+  "status": "success",
+  "runner": "ubuntu-24.04 amd64",
+  "checks": [
+    "make phase5-wave1-check",
+    "make phase5-wave2-check"
+  ]
+}
