@@ -8,31 +8,6 @@ export BACKEND="$mode" QUALIFICATION_DIR="$qual" PHASE4_FORMAL="${PHASE4_FORMAL:
 
 "$root/tools/phase4/topology-smoke.sh"
 
-# topology-smoke intentionally tears down its echo target on exit. Start a
-# fresh target for the formal workload so target metrics remain available for
-# the complete run and final accounting reconciliation.
-target_pid=
-if [ "$mode" = native ]; then
-  python3 "$root/tools/phase4/echo_target.py" --host 127.0.0.1 >"$qual/echo-target-formal.log" 2>&1 &
-  target_pid=$!
-  trap 'if [ -n "$target_pid" ]; then kill "$target_pid" 2>/dev/null || true; fi' EXIT INT TERM
-  python3 - "$qual/target-start.json" <<'PY'
-import json, sys, time, urllib.request
-for attempt in range(60):
-    try:
-        with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
-            stats = json.load(response)
-        break
-    except (OSError, ValueError):
-        if attempt == 59:
-            raise
-        time.sleep(0.5)
-with open(sys.argv[1], "w", encoding="utf-8") as output:
-    json.dump(stats, output, sort_keys=True)
-    output.write("\n")
-PY
-fi
-
 for name in source relay-1 relay-2 relay-3 destination; do
   test -s "$qual/logs/$name.log"
   grep -q 'OPEN authorized' "$qual/logs/$name.log"
@@ -43,17 +18,6 @@ for name in source relay-1 relay-2 relay-3 destination; do
 done
 test "$(cat "$qual/client.out")" = "vortex-three-relay-smoke"
 test "$(cat "$qual/udp-client.out")" = "vortex-three-relay-udp-smoke"
-
-if [ "$mode" = native ]; then
-  python3 - "$qual/target-final.json" <<'PY'
-import json, sys, urllib.request
-with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:
-    stats = json.load(response)
-with open(sys.argv[1], "w", encoding="utf-8") as output:
-    json.dump(stats, output, sort_keys=True)
-    output.write("\n")
-PY
-fi
 
 # Refresh commit, generated-config, and semantic-manifest identity for every
 # run; comparison must never combine workload evidence from different SHAs.
@@ -88,14 +52,7 @@ with open(start_file, encoding="utf-8") as source:
     start = json.load(source)
 with open(final_file, encoding="utf-8") as source:
     final = json.load(source)
-# On native qualification the workload's metrics client samples the target
-# service during the run. Prefer that same target_total snapshot because the
-# smoke teardown and formal target restart can otherwise race port reuse and
-# leave standalone start/final files unchanged.
-if os.getenv("BACKEND") == "native" and isinstance(workload.get("target_total"), dict):
-    target = workload["target_total"]
-else:
-    target = {key: final[key] - start[key] for key in final}
+target = {key: final[key] - start[key] for key in final}
 container_kernel_drops = {}
 for name in ("source", "destination", "target"):
     first = Path(out_dir, "kernel-" + name + "-start.json")
@@ -108,11 +65,8 @@ for name in ("source", "destination", "target"):
         container_kernel_drops[name] = delta
 smoke_tcp = len(b"vortex-three-relay-smoke")
 smoke_udp = len(b"vortex-three-relay-udp-smoke")
-expected_left = (smoke_tcp + smoke_udp + target["tcp_bytes_received"] +
-                 target["udp_bytes_received"] + 1200 * container_kernel_drops.get("target", 0))
-expected_right = (smoke_tcp + smoke_udp + target["tcp_bytes_sent"] +
-                  target["udp_bytes_sent"] - returned["right_to_left"] -
-                  1200 * container_kernel_drops.get("destination", 0))
+expected_left = target["tcp_bytes_received"] + target["udp_bytes_received"] + 1200 * container_kernel_drops.get("target", 0)
+expected_right = target["tcp_bytes_sent"] + target["udp_bytes_sent"] - returned["right_to_left"] - 1200 * container_kernel_drops.get("destination", 0)
 expected = {"left_to_right": expected_left, "right_to_left": expected_right}
 if count < 4 or dict(totals) != expected:
     raise SystemExit(f"accounting mismatch: events={count} totals={dict(totals)} expected={expected}")

@@ -29,3 +29,13 @@ WriteDataFrames, and CloseWrite and rejects DATA after FIN. The regression test,
 test suite pass. Deploy the new clean SHA and rerun comparison and final gate
 before claiming the performance gate is complete; restore temporary UDP socket
 buffer sysctls afterward.
+
+## Dedicated-host outcome
+
+The performance gate now passes on retained clean `fe2a4ba` measurements after
+correcting the independent TLS evaluator's nested UDP-loss field lookup.
+All three runtime trials, the warmup, and independent comparison passed; the
+runtime/TLS mixed ratio is 73.78%, with zero UDP loss. The report identifies its
+corrected evaluator separately from the tested commit. See `EVIDENCE.md` for
+provenance, exact metrics, reverted target-lifecycle debugging changes, and
+remaining Phase 4 scope. Both temporary socket buffer limits are restored.

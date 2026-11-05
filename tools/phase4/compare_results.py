@@ -44,6 +44,7 @@ if len(segments) != 5: raise SystemExit("missing segment RTT evidence")
 rtt_sum = sum(s["median_ms"] for s in segments.values())
 report = {
     "schema": 1, "commit": rhost["commit"],
+    "report_evaluator_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     "runtime_environment": rhost.get("runtime_environment"),
     "dirty": any(h["dirty"] for h in (rhost, chost, thost)),
     "semantic_manifest_sha256": rhost["semantic_manifest_sha256"],
@@ -79,7 +80,7 @@ report = {
         tls_mixed["mixed"].get("udp_sent", 0) * 1200 * 8 /
             max(tls_mixed.get("duration_seconds_per_phase", 0), 0.001) / 1_000_000 >= 99 and
         same_workload_ratio >= 0.70 and
-        tls_mixed.get("udp_loss", 1) <= 0.001 and
+        tls_mixed["mixed"].get("udp_loss", 1) <= 0.001 and
         not rhost.get("dirty", True) and
         not chost.get("dirty", True) and not thost.get("dirty", True) and
         not actual["mixed"].get("errors") and not tls_mixed["mixed"].get("errors")
