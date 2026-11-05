@@ -88,7 +88,14 @@ with open(start_file, encoding="utf-8") as source:
     start = json.load(source)
 with open(final_file, encoding="utf-8") as source:
     final = json.load(source)
-target = {key: final[key] - start[key] for key in final}
+# On native qualification the workload's metrics client samples the target
+# service during the run. Prefer that same target_total snapshot because the
+# smoke teardown and formal target restart can otherwise race port reuse and
+# leave standalone start/final files unchanged.
+if os.getenv("BACKEND") == "native" and isinstance(workload.get("target_total"), dict):
+    target = workload["target_total"]
+else:
+    target = {key: final[key] - start[key] for key in final}
 container_kernel_drops = {}
 for name in ("source", "destination", "target"):
     first = Path(out_dir, "kernel-" + name + "-start.json")
