@@ -20,6 +20,11 @@ jobs:
         with:
           go-version: '1.27.3'
           cache: false
+      - name: Install Protoc
+        uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
+        with:
+          version: "36.2"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Wave 1 check
         run: make phase5-wave1-check
       - name: Run Wave 2 check
