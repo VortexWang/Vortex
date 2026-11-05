@@ -2,6 +2,42 @@ package apply
 
 import "testing"
 
+func TestTransactionIdentityAndUnknownAbort(t *testing.T) {
+	m := NewManager()
+	id := [16]byte{1}
+	if _, err := m.Prepare(id, 1); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.Prepare(id, 2); err != ErrConflict {
+		t.Fatalf("generation reuse: %v", err)
+	}
+	if _, err := m.Commit(id, true); err != ErrUnknown {
+		t.Fatalf("commit: %v", err)
+	}
+	if _, err := m.Abort(id); err != ErrConflict {
+		t.Fatalf("unknown abort: %v", err)
+	}
+	if _, err := m.Release(id, false); err != ErrConflict {
+		t.Fatalf("unknown release: %v", err)
+	}
+}
+
+func TestActiveCommitIsIdempotent(t *testing.T) {
+	m := NewManager()
+	id := [16]byte{2}
+	if _, err := m.Prepare(id, 1); err != nil {
+		t.Fatal(err)
+	}
+	first, err := m.Commit(id, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := m.Commit(id, false)
+	if err != nil || first != second {
+		t.Fatalf("first=%+v second=%+v err=%v", first, second, err)
+	}
+}
+
 func TestIdempotentUnknownAndFencing(t *testing.T) {
 	m := NewManager()
 	var id [16]byte

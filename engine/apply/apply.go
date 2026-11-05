@@ -40,6 +40,9 @@ func (m *Manager) Prepare(id [16]byte, gen uint64) (Transaction, error) {
 		return Transaction{}, ErrConflict
 	}
 	if old, ok := m.tx[id]; ok {
+		if old.Generation != gen {
+			return Transaction{}, ErrConflict
+		}
 		return old, nil
 	}
 	if gen <= m.active {
@@ -56,7 +59,10 @@ func (m *Manager) Commit(id [16]byte, uncertain bool) (Transaction, error) {
 	if !ok {
 		return Transaction{}, ErrConflict
 	}
-	if t.State == Active || t.State == ActivationUnknown {
+	if t.State == Active {
+		return t, nil
+	}
+	if t.State == ActivationUnknown {
 		return t, ErrUnknown
 	}
 	if t.State != Prepared {
@@ -85,7 +91,7 @@ func (m *Manager) Abort(id [16]byte) (Transaction, error) {
 	if t.State == Aborted || t.State == Released {
 		return t, nil
 	}
-	if t.State == Active {
+	if t.State == Active || t.State == ActivationUnknown || t.State == Committing {
 		return Transaction{}, ErrConflict
 	}
 	t.State = Aborted

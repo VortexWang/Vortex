@@ -2,11 +2,13 @@ package agent
 
 import (
 	"context"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"vortex/agent/store"
 )
@@ -29,9 +31,15 @@ type Applier interface {
 type Reconciler struct {
 	Store *store.Store
 	Apply Applier
+	mu    sync.Mutex
 }
 
-func (r Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64, generation uint64, commitUnknown bool) error {
+func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64, generation uint64, commitUnknown bool) error {
+	if r == nil {
+		return fmt.Errorf("agent: reconciler dependencies are required")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if r.Store == nil || r.Apply == nil {
 		return fmt.Errorf("agent: reconciler dependencies are required")
 	}
@@ -52,6 +60,8 @@ func (r Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64
 		if version < applied {
 			return ErrStaleRevision
 		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
 	}
 	if previous, err := r.Store.GetConfigResult(ctx, txID); err == nil {
 		if previous.Version != version {
@@ -65,9 +75,13 @@ func (r Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64
 		case "aborted", "prepare-failed", "commit-failed":
 			return ErrConfigConflict
 		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
 	}
 	if _, err := r.Apply.Prepare(id, generation); err != nil {
-		_ = r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error())
+		if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error()); saveErr != nil {
+			return errors.Join(err, saveErr)
+		}
 		return err
 	}
 	if err := r.Store.SaveConfigResult(ctx, txID, version, "prepared", ""); err != nil {
@@ -86,7 +100,7 @@ func (r Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64
 	}
 	if err != nil {
 		state := "activation-unknown"
-		if !commitUnknown {
+		if errors.Is(err, ErrConfigConflict) {
 			state = "commit-failed"
 		}
 		if saveErr := r.Store.SaveConfigResult(ctx, txID, version, state, err.Error()); saveErr != nil {

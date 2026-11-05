@@ -2,7 +2,12 @@ module vortex
 
 go 1.27.3
 
-require modernc.org/sqlite v1.61.1
+require (
+	modernc.org/sqlite v1.61.1
+	vortex/engine v0.0.0
+)
+
+replace vortex/engine => ./engine
 
 require (
 	github.com/dustin/go-humanize v1.1.0 // indirect
