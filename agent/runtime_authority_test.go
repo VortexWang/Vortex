@@ -12,6 +12,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"math/big"
 	"net"
@@ -19,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 
@@ -106,6 +108,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			dir := t.TempDir()
 			identities := runtimeIdentities(t, dir, controlTestNodeID, peerID)
 			var targets atomic.Int64
+			var targetBytes atomic.Int64
 			var targetAddr string
 			if network == 1 {
 				listener, err := net.Listen("tcp", "127.0.0.1:0")
@@ -127,6 +130,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 							for {
 								n, err := c.Read(b)
 								if n > 0 {
+									targetBytes.Add(int64(n))
 									if _, err := c.Write(b[:n]); err != nil {
 										return
 									}
@@ -153,6 +157,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 							return
 						}
 						targets.Add(1)
+						targetBytes.Add(int64(n))
 						_, _ = pc.WriteTo(b[:n], a)
 					}
 				}()
@@ -167,7 +172,17 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := os.WriteFile(path, raw, 0600); err != nil {
 				t.Fatal(err)
 			}
-			s, err := store.Open(filepath.Join(dir, "agent.db"), "agent")
+			agentDB := filepath.Join(dir, "agent.db")
+			fullDiskRoot := os.Getenv("VORTEX_TEST_FULL_DISK_DIR")
+			if fullDiskRoot != "" {
+				diskDir, err := os.MkdirTemp(fullDiskRoot, "node-")
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() { os.RemoveAll(diskDir) })
+				agentDB = filepath.Join(diskDir, "agent.db")
+			}
+			s, err := store.Open(agentDB, "agent")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -292,6 +307,41 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				case <-time.After(time.Millisecond):
 				}
 			}
+			if fullDiskRoot != "" {
+				filler := fillRuntimeDisk(t, filepath.Dir(agentDB))
+				probeErr := s.AppendEvent(ctx, "full-disk-probe", "probe", []byte("must fail durably"))
+				var sqliteErr interface{ Code() int }
+				if !errors.As(probeErr, &sqliteErr) || sqliteErr.Code()&255 != 13 {
+					t.Fatalf("expected SQLITE_FULL, got %v", probeErr)
+				}
+				if network == 1 {
+					err = stream.WriteData(ctx, []byte("must-not-reach-target"))
+				} else {
+					_, err = stream.WriteDgram(ctx, []byte("must-not-reach-target"))
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+				frame, readErr := stream.Receive(ctx)
+				if ctx.Err() != nil {
+					t.Fatal(ctx.Err())
+				}
+				if readErr == nil && frame.Type != vlink.FrameRST {
+					frame.Release()
+					t.Fatal("full disk did not reset runtime stream")
+				}
+				frame.Release()
+				if targetBytes.Load() != int64(len(message)) {
+					t.Fatalf("unrecordable traffic reached target: %d", targetBytes.Load())
+				}
+				if err := os.Remove(filler); err != nil {
+					t.Fatal(err)
+				}
+				blocked := open()
+				if err := blocked.WaitOpen(ctx); err == nil {
+					t.Fatal("disk recovery silently reopened faulted gate")
+				}
+			}
 			_ = stream.Reset(ctx, 0)
 			if err := node.Stop(ctx); err != nil {
 				t.Fatal(err)
@@ -310,7 +360,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatal(err)
 			}
 			assertRawLedger(t, filepath.Join(dir, "hub.db"), 2)
-			saveRuntimeLedger(t, network, dir)
+			saveRuntimeLedger(t, network, agentDB, filepath.Join(dir, "hub.db"))
 		})
 	}
 }
@@ -332,7 +382,7 @@ func assertRawLedger(t *testing.T, path string, want int) {
 	}
 }
 
-func saveRuntimeLedger(t *testing.T, network uint8, dir string) {
+func saveRuntimeLedger(t *testing.T, network uint8, agentDB, hubDB string) {
 	t.Helper()
 	out := os.Getenv("PHASE5_AUTHORIZATION_EVIDENCE_DIR")
 	if out == "" {
@@ -342,8 +392,8 @@ func saveRuntimeLedger(t *testing.T, network uint8, dir string) {
 		t.Fatal(err)
 	}
 	checksums := map[string]string{}
-	for _, name := range []string{"agent", "hub"} {
-		raw, err := os.ReadFile(filepath.Join(dir, name+".db"))
+	for name, path := range map[string]string{"agent": agentDB, "hub": hubDB} {
+		raw, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -371,4 +421,30 @@ func saveRuntimeLedger(t *testing.T, network uint8, dir string) {
 	if err := os.WriteFile(filepath.Join(out, fmt.Sprintf("runtime-%d-ledgers.json", network)), encoded, 0644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// fillRuntimeDisk is enabled only for an explicitly provided small isolated
+// filesystem. Never fill an ordinary host filesystem during a default test.
+func fillRuntimeDisk(t *testing.T, dir string) string {
+	t.Helper()
+	path := filepath.Join(dir, "filler")
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.Remove(path) })
+	block := make([]byte, 64*1024)
+	for written := 0; written < 16*1024*1024; written += len(block) {
+		_, err = f.Write(block)
+		if err != nil {
+			f.Close()
+			if !errors.Is(err, syscall.ENOSPC) {
+				t.Fatalf("unexpected disk failure: %v", err)
+			}
+			return path
+		}
+	}
+	f.Close()
+	t.Fatal("full disk fixture must be an isolated filesystem of at most 16 MiB")
+	return ""
 }

@@ -38,7 +38,13 @@ jobs:
         run: make phase5-wave1-check
       - name: Run Wave 2 check
         run: make phase5-wave2-check
+      - name: Prepare isolated full-disk fixture
+        run: |
+          sudo mkdir -p /tmp/vortex-full-disk
+          sudo mount -t tmpfs -o size=4m,mode=1777 tmpfs /tmp/vortex-full-disk
       - name: Run incremental durable authorization regression
+        env:
+          VORTEX_TEST_FULL_DISK_DIR: /tmp/vortex-full-disk
         run: make phase5-authorization-check
       - name: Retain authorization regression evidence
         if: always()

@@ -12,9 +12,11 @@ case "$sha" in *[!0-9a-f]*|'') echo 'invalid source SHA' >&2; exit 1;; esac
 finish() {
   code=$?
   trap - EXIT
+  full_disk=false
+  [ -z "${VORTEX_TEST_FULL_DISK_DIR:-}" ] || full_disk=true
   status=failed
   [ "$code" -ne 0 ] || status=passed
-  printf '{"schema":1,"status":"%s","commit":"%s","scope":"incremental-durable-credit-gate","plan_complete":false}\n' "$status" "$sha" > "$out/report.json"
+  printf '{"schema":1,"status":"%s","commit":"%s","scope":"incremental-durable-credit-gate","plan_complete":false,"full_disk_requested":%s}\n' "$status" "$sha" "$full_disk" > "$out/report.json"
   cat "$out/report.json"
   exit "$code"
 }
