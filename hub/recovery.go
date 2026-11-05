@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"vortex/agent/store"
+	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 // LedgerBackend is the authenticated, durable backend boundary. Phase 5 uses
@@ -48,4 +49,17 @@ func (i *Issuer) ReplayLedger(ctx context.Context, backend LedgerBackend) error 
 		}
 	}
 	return nil
+}
+
+// RecoveryUpdate includes post-handoff revocations independently of new grants.
+// Callers deliver it before requesting successor issues on the control stream.
+func (i *Issuer) RecoveryUpdate(ctx context.Context, handoff, node, boot string, generation uint64) (*controlv1.AuthorizationUpdate, error) {
+	if i == nil || i.Store == nil || i.Clock == nil {
+		return nil, fmt.Errorf("hub: recovery issuer unavailable")
+	}
+	result, err := i.Store.RecoveryAuthorization(ctx, handoff, node, boot, generation, i.Clock())
+	if err != nil {
+		return nil, err
+	}
+	return &controlv1.AuthorizationUpdate{Generation: result.Generation, Payload: result.Payload}, nil
 }

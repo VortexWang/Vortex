@@ -68,9 +68,13 @@ def audit(out):
         assert db.execute("select unknown_upper_bound,liability_state from unknown_usage_batches where batch_id='held-old'").fetchone() == ('512','unresolved')
         assert db.execute("select count(distinct path_generation) from authorization_records").fetchone()[0] == 1
         assert db.execute("select count(distinct signer_epoch) from authorization_records").fetchone()[0] == 2
+        assert db.execute("select count(*) from authorization_records where state='active'").fetchone()[0] == 0
     inspect(snapshot(out, 'epoch', 'agent'), epoch)
     inspect(snapshot(out, 'epoch', 'hub'), lambda db: None)
-    inspect(snapshot(out, 'restart', 'hub'), lambda db: None)
+    def recovered_hub(db):
+        assert db.execute("select count(*) from durable_events where kind='node-boot-recovery'").fetchone()[0] >= 1
+        assert db.execute("select unknown_upper_bound,liability_state from unknown_usage_batches where batch_id='interrupted-write'").fetchone() == ('512', 'unresolved')
+    inspect(snapshot(out, 'restart', 'hub'), recovered_hub)
     log = (out / 'recovery-race.log').read_text()
     names = ('TestHandoffFullDiskDoesNotPartiallyTransfer', 'TestHandoffSIGKILLRecovery',
              'TestRecoveryReplaysDurablePrefixAndTailAfterLostACK',

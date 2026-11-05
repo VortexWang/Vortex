@@ -36,3 +36,9 @@ Status: executing; no SUMMARY or completion claimed.
 ### Earlier incremental pair
 
 Commit `fef53edf5a383765cc5e0750a4b79a137c98e0ee`: local clean Docker recovery gate passed; Actions `42126935831` succeeded. Raw evidence is archived under `artifacts/phase5/recovery/fef53ed/{docker,actions}`. This pair predates the integrated boot/authorization 1.1.0 implementation and is not its acceptance evidence.
+
+## Final integration refinements
+
+- Restart tracer now uses the actual mTLS gRPC config/authorization path on both process lifetimes. Prepared activation retries on a bounded 100 ms timer while boot-local conservative time reaches NotBefore. Initial usage replay cannot end the configuration stream before final activation.
+- A durable post-handoff control outbox carries revocations independently of new grants, including the all-delegations-revoked case. Revocation-only updates cannot reopen issuer/time authority; their receipt retains unknown liabilities. mTLS regression covers two handoffs, successor allocation and revocation with no new grant.
+- `614b4f6` Docker full gate passed. Actions run `42130468946` failed the preflight on the untracked-file preflight before tests (file identities were not logged); it is not acceptance evidence. Gate diagnostics now list untracked build inputs, while unrelated root files outside the build-input directories do not count as source changes. The next pair must pass on the final source SHA.

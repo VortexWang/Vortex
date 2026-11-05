@@ -183,6 +183,8 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if usageInterval <= 0 {
 		usageInterval = 10 * time.Second
 	}
+	activationTicker := time.NewTicker(100 * time.Millisecond)
+	defer activationTicker.Stop()
 	ticker := time.NewTicker(usageInterval)
 	defer ticker.Stop()
 	if errors.Is(initialSendErr, io.EOF) {
@@ -193,6 +195,11 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-activationTicker.C:
+			if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
+				return err
+			}
+			continue
 		case <-ticker.C:
 			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
@@ -250,30 +257,10 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
 				return err
 			}
-			if c.Reconciler != nil {
-				prepared, err := c.Node.Store.PreparedConfigs(ctx)
-				if err != nil {
-					return err
-				}
-				for _, record := range prepared {
-					err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
-					if err != nil && !errors.Is(err, ErrActivationPending) {
-						return err
-					}
-					stored, err := c.Node.Store.GetConfigResult(ctx, record.TransactionID)
-					if err != nil {
-						return err
-					}
-					sequence, err := c.Node.Store.NextControlSequence(ctx)
-					if err != nil {
-						return err
-					}
-					if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ApplyResult{ApplyResult: c.Reconciler.readApplyResult(ctx, stored)}}); err != nil {
-						return err
-					}
-					lastNodeSequence = sequence
-				}
+			if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
+				return err
 			}
+
 		case *controlv1.ControlMessage_UsageAck:
 			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
@@ -550,4 +537,36 @@ func (c *ControlClient) sendRecoveryEvents(ctx context.Context, stream controlv1
 			after = event.ID
 		}
 	}
+}
+
+func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.NodeControl_ConnectClient, last *uint64) error {
+	if c.Reconciler == nil {
+		return nil
+	}
+	prepared, err := c.Node.Store.PreparedConfigs(ctx)
+	if err != nil {
+		return err
+	}
+	for _, record := range prepared {
+		err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
+		if errors.Is(err, ErrActivationPending) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		stored, err := c.Node.Store.GetConfigResult(ctx, record.TransactionID)
+		if err != nil {
+			return err
+		}
+		sequence, err := c.Node.Store.NextControlSequence(ctx)
+		if err != nil {
+			return err
+		}
+		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ApplyResult{ApplyResult: c.Reconciler.readApplyResult(ctx, stored)}}); err != nil {
+			return err
+		}
+		*last = sequence
+	}
+	return nil
 }

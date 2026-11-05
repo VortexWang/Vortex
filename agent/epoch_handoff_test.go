@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"path/filepath"
@@ -152,6 +153,32 @@ func TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor(t *testing.
 	bad, _ := json.Marshal(body)
 	if _, err = validateAuthorizationUpdate(bad, node.NodeID, node.BootID, 4); err == nil {
 		t.Fatal("legacy handoff accepted")
+	}
+	// Revoke every delegation during the next handoff. Recovery must still
+	// deliver revocations even though issuing a successor grant is impossible.
+	revoke := store.HandoffRequest{ID: "550e8400-e29b-41d4-a716-446655440801", HubID: d.HubID, FromEpoch: 2, ToEpoch: 3, Heartbeat: time.Now().UTC(), RevokeDelegations: []string{d.ID}}
+	if _, err = hs.HandoffHub(ctx, revoke, clock()); err != nil {
+		t.Fatal(err)
+	}
+	revokeUpdate, err := issuer.RecoveryUpdate(ctx, revoke.ID, node.NodeID, node.BootID, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Replay the outbox after materialization: content must be byte-identical.
+	replayUpdate, err := issuer.RecoveryUpdate(ctx, revoke.ID, node.NodeID, node.BootID, 4)
+	if err != nil || !bytes.Equal(revokeUpdate.Payload, replayUpdate.Payload) {
+		t.Fatal("recovery outbox changed", err)
+	}
+	revokeLn := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) { return revokeUpdate, nil }}, serverTLS)
+	if err = client.Connect(ctx, revokeLn.Addr().String()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.CheckStoredAuthorization(ctx, use); err == nil {
+		t.Fatal("revocation did not stop successor authorization")
+	}
+	balance, err = s.AuditAuthorizationBalance(ctx, node.NodeID, old)
+	if err != nil || balance.Unknown != 512 {
+		t.Fatalf("revocation released debt %+v %v", balance, err)
 	}
 	if err = s.Close(); err != nil {
 		t.Fatal(err)

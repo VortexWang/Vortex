@@ -380,6 +380,11 @@ CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id)
 );
+CREATE TABLE IF NOT EXISTS hub_recovery_updates (
+ handoff_id TEXT NOT NULL,node_id TEXT NOT NULL,boot_id TEXT NOT NULL,path_generation TEXT NOT NULL,
+ payload BLOB NOT NULL,payload_sha256 BLOB NOT NULL,
+ PRIMARY KEY(handoff_id,node_id,boot_id,path_generation)
+);
 CREATE TABLE IF NOT EXISTS authorization_handoffs (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, from_epoch TEXT NOT NULL,
  to_epoch TEXT NOT NULL, transfer_id TEXT NOT NULL,
@@ -427,7 +432,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '13')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {
@@ -726,7 +731,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 			return err
 		}
 	}
-	if !update.BackendHeartbeat.IsZero() || !update.AutonomyDeadline.IsZero() {
+	if (len(records) > 0 || len(update.Handoffs) > 0 || len(revocations) == 0) && (!update.BackendHeartbeat.IsZero() || !update.AutonomyDeadline.IsZero()) {
 		if err := persistAuthorizationHeartbeat(ctx, tx, update.BackendHeartbeat, update.AutonomyDeadline); err != nil {
 			if !errors.Is(err, ErrAuthorityHandoffRequired) || len(update.Handoffs) == 0 {
 				return err

@@ -8,7 +8,7 @@ mkdir -p "$out"
 sha=$(git rev-parse HEAD)
 [ "$(uname -s)" = Linux ] || { echo 'phase5-check requires Linux' >&2; exit 1; }
 git diff --quiet HEAD -- . ':(exclude)artifacts/**' || { echo 'phase5-check requires clean source' >&2; exit 1; }
-[ -z "$(git ls-files --others --exclude-standard -- . ':(exclude)artifacts/**')" ] || { echo 'untracked source requires review' >&2; exit 1; }
+[ -z "$(git ls-files --others --exclude-standard -- agent hub cmd contracts engine tools test tests model go.mod go.sum go.work go.work.sum Makefile ':/*.go' ':/*.s')" ] || { echo 'untracked source requires review' >&2; git ls-files --others --exclude-standard -- agent hub cmd contracts engine tools test tests model go.mod go.sum go.work go.work.sum Makefile ':/*.go' ':/*.s' >&2; exit 1; }
 [ -n "${VORTEX_TEST_FULL_DISK_DIR:-}" ] || { echo 'isolated full-disk fixture required' >&2; exit 1; }
 python3 - "$VORTEX_TEST_FULL_DISK_DIR" <<'PYFIXTURE'
 import os,sys

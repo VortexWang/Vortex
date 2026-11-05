@@ -95,22 +95,24 @@ func TestRuntimeRestartWorker(t *testing.T) {
 	issuer := &hub.Issuer{Store: hs, HubID: d.HubID, Clock: clock}
 	auth, err := issuer.Issue(ctx, d.ID, n.NodeID, n.BootID, newID(), 8192, time.Minute)
 	must(err)
-	client := &ControlClient{Node: n, Reconciler: reconciler}
-	must(client.applyAuthorizationUpdateFrom(ctx, auth, d.HubID))
+	serverTLS, clientTLS, _ := controlTLS(t, n.NodeID)
+	server := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, ConfigUpdate: update, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) { return auth, nil }}, serverTLS)
+	client := &ControlClient{Node: n, Reconciler: reconciler, TLS: clientTLS}
+	must(client.Connect(ctx, server.Addr().String()))
 	payload, err := validateAuthorizationUpdate(auth.Payload, n.NodeID, n.BootID, 4)
 	must(err)
-	must(n.clock.observe(payload.IssuedAt, n.bootStarted, time.Now()))
-	// Conservative bootstrap lower bound must reach NotBefore.
+	result, err := s.GetConfigResult(ctx, hex.EncodeToString(txid))
+	must(err)
+	if result.State != "active" || !e.activated.Load() {
+		t.Fatalf("authenticated prepared request did not activate: %+v", result)
+	}
+	// Bootstrap bounds still conservatively cover the whole first connection.
 	for {
 		low, _, ok := n.TrustedTime()
 		if ok && !low.Before(payload.IssuedAt) {
 			break
 		}
 		time.Sleep(time.Millisecond)
-	}
-	final := reconciler.ApplyRuntimeConfig(ctx, n.NodeID, update)
-	if final.State != "active" || !e.activated.Load() {
-		t.Fatalf("prepared did not activate: %+v", final)
 	}
 	var grant string
 	for _, r := range payload.Authorizations {
@@ -123,18 +125,17 @@ func TestRuntimeRestartWorker(t *testing.T) {
 		_, err = s.ReserveAuthorizedUsage(ctx, store.UsageReservation{NodeID: n.NodeID, BootID: n.BootID, AuthorizationID: grant, BatchID: "interrupted-write", SnapshotID: d.BillingSnapshotID, FlowKey: "interrupted-flow", RuleID: d.RuleID, Direction: "egress", Reserved: 512}, store.AuthorizationUse{NodeID: n.NodeID, BootID: n.BootID, AuthorizationID: grant, Kind: "credit_grant", RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, BillingSnapshotID: d.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted})
 		must(err)
 	} else {
-		unknown, err := s.PendingUnknownUsage(ctx, n.NodeID)
+		db, err := sql.Open("sqlite", filepath.Join(dir, "agent.db"))
 		must(err)
-		found := false
-		for _, record := range unknown {
-			if record.BatchID == "interrupted-write" && record.Upper == 512 {
-				found = true
-			}
-		}
-		if !found {
-			t.Fatalf("old debt lost %+v", unknown)
+		var upper, liability string
+		err = db.QueryRow(`SELECT unknown_upper_bound,liability_state FROM unknown_usage_batches WHERE batch_id='interrupted-write'`).Scan(&upper, &liability)
+		must(err)
+		must(db.Close())
+		if upper != "512" || liability != "unresolved" {
+			t.Fatalf("old liability changed after transport ACK: %s %s", upper, liability)
 		}
 	}
+
 	ready, _ := json.Marshal(runtimeRestartReady{n.BootID, e.runtime.Addr().String(), hex.EncodeToString(txid), grant, d.SourceID})
 	fmt.Printf("restart-ready:%s\n", ready)
 	var input [1]byte
