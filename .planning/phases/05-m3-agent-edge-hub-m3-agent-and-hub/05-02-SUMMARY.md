@@ -42,6 +42,12 @@ coverage:
       - kind: unit
         ref: agent/identity/identity_test.go#TestAttachKeyRejectsKeyThatDoesNotMatchCSR
         status: pass
+      - kind: unit
+        ref: agent/identity/identity_test.go#TestCredentialRotationValidatesBeforeOverlapAndExpiresOldCredential
+        status: pass
+      - kind: integration
+        ref: agent/control_test.go#TestPersistCredentialStoresNodeIdentityAndExpiry
+        status: pass
     human_judgment: false
   - id: D2
     description: TLS 1.3 mutual-authenticated control ACKs are correlated and durably persisted.
@@ -60,10 +66,16 @@ coverage:
         ref: agent/reconcile_test.go#TestReconcilerPersistsActivationUnknownBeforeReturning
         status: pass
       - kind: unit
+        ref: agent/store/store_test.go#TestControlSequenceAndStateSurviveReopen
+        status: pass
+      - kind: unit
         ref: agent/upgrade/upgrade_test.go#TestDrainReceivesBoundedContext
         status: pass
       - kind: unit
         ref: agent/upgrade/upgrade_test.go#TestIrreversibleMigrationBlocksRollback
+        status: pass
+      - kind: unit
+        ref: agent/upgrade/upgrade_test.go#TestHealthFailureRestoresCompatibilitySnapshotBeforeRollback
         status: pass
     human_judgment: false
   - id: D4
@@ -98,9 +110,9 @@ Added a testable Agent identity and control slice: one-time CSR enrollment, node
 
 ## Accomplishments
 
-- Enrollment tokens are single-use under concurrent redemption; CSR identity and local private key are checked before credentials are accepted. Private-key file and containing directory permissions are enforced.
-- Agent control uses TLS 1.3 mutual authentication and persists only a correlated acknowledgement. Config transaction IDs are validated without truncation, and unknown Commit outcomes are stored as `activation-unknown` before return.
-- Upgrade hooks verify an Ed25519 artifact signature and binary/disk/config preflight, pass a deadline-bounded drain context, and prevent rollback after an irreversible migration.
+- Enrollment tokens are single-use under concurrent redemption; invalid CSR attempts do not consume the token. CSR identity and local private key are checked before credentials are accepted. Private-key file and containing directory permissions are enforced. Validated credential rotation retains both certificates during overlap, and Agent storage persists the current certificate.
+- Agent control uses TLS 1.3 mutual authentication, selects only configured same-region Hub endpoints, and persists sequence, applied version, heartbeat and correlated acknowledgement. Config transaction IDs are validated without truncation; transaction intent and per-object results are durable, and unknown Commit outcomes remain `activation-unknown` across retries.
+- Upgrade hooks verify an Ed25519 artifact signature and binary/disk/config preflight, pass a deadline-bounded drain context, restore a compatibility snapshot before rollback, and prevent rollback after an irreversible migration.
 - The Wave 2 check is used by local and Actions workflows. A pinned Protoc 36.2 setup step fixes the existing Wave 1 workflow prerequisite.
 
 ## Task Commits
@@ -110,11 +122,13 @@ Added a testable Agent identity and control slice: one-time CSR enrollment, node
 3. **Hardening: serialize one-time enrollment redemption** - `1c8296a`.
 4. **CI prerequisite: install pinned protoc** - `f618e14`.
 5. **Hardening: enforce credential file permissions** - `5f34619`.
+6. **Hardening: preserve enrollment token after invalid CSR** - `3153797`.
+7. **Complete control state, object reconciliation and upgrade recovery** - `a5bff0b`.
 
 ## Files Created/Modified
 
 - `agent/identity/` - CSR enrollment, CA signing, credential persistence, TLS config and detached-signature verification.
-- `agent/control.go`, `agent/reconcile.go` - mTLS control client and durable config reconciliation.
+- `agent/control.go`, `agent/credential.go`, `agent/reconcile.go` - regional mTLS control, credential persistence and durable config reconciliation.
 - `agent/upgrade/` - signed preflight, bounded drain, health rollback and irreversible migration guard.
 - `agent/store/store.go`, `hub/testhub.go` - durable config result query and TLS test listener.
 - `tools/phase5/wave2_check.sh`, `Makefile`, `.github/workflows/phase5.yml` - repeatable Wave 2 checks across local and CI.
@@ -131,24 +145,24 @@ Added a testable Agent identity and control slice: one-time CSR enrollment, node
 
 **1. [Rule 1 - correctness] Harden identity, acknowledgement, transaction and drain boundaries**
 - **Found during:** Wave 2 review
-- **Issue:** Token redemption could race; key/certificate mismatch was not rejected; ACK correlation and transaction ID truncation were not guarded; drain had no enforced deadline.
-- **Fix:** Serialize redemption, validate key/cert and ACK identity, parse exact 16-byte hex transaction IDs, and provide a timeout context to drain hooks.
-- **Files modified:** `agent/identity/`, `agent/control.go`, `agent/reconcile.go`, `agent/upgrade/`, tests.
+- **Issue:** Token redemption could race; key/certificate mismatch was not rejected; ACK correlation, transaction IDs, persisted Commit intent, per-object results and upgrade-state rollback were not fully guarded.
+- **Fix:** Serialize redemption, validate credentials and ACK identity, add same-region reconnect and durable control state, persist transaction/object outcomes, and restore compatible state before bounded rollback.
+- **Files modified:** `agent/identity/`, `agent/control.go`, `agent/credential.go`, `agent/reconcile.go`, `agent/store/`, `agent/upgrade/`, `hub/`, tests.
 - **Verification:** focused race tests, `go test ./...`, `go vet ./...`, and `make phase5-wave2-check` passed.
-- **Committed in:** `1c8296a`, `5f34619`.
+- **Committed in:** `1c8296a`, `5f34619`, `3153797`, `a5bff0b`.
 
 **2. [Rule 2 - missing critical] Restore missing Protoc setup in Phase 5 Actions**
 - **Found during:** same-SHA Actions run
 - **Issue:** Wave 1 workflow failed because `protoc` was absent, so Wave 2 never ran.
 - **Fix:** Added the pinned `arduino/setup-protoc` action at commit `c65c819552d16ad3c9b72d9dfd5ba5237b9c906b` and version 36.2.
-- **Verification:** Actions run `41980884591` succeeded for Wave 1 and Wave 2 on SHA `5f34619`.
+- **Verification:** Actions run `41985997445` succeeded for Wave 1 and Wave 2 on SHA `a5bff0b`.
 - **Committed in:** `f618e14`.
 
 **Total deviations:** 2 auto-fixed. **Impact:** Both corrections close verification and identity safety gaps within the planned scope.
 
 ## Issues Encountered
 
-The first Actions run (`41980275603`) stopped at Wave 1 because `protoc` was not installed. The workflow prerequisite was fixed and the following same-SHA run passed.
+The first Actions run (`41980275603`) stopped at Wave 1 because `protoc` was not installed. The workflow prerequisite was fixed. Final native, Docker and Actions Wave 2 reports all reference SHA `a5bff0b`.
 
 ## User Setup Required
 

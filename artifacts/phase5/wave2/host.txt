@@ -1,3 +1,0 @@
-commit: 9c14bdba26e11c37573f26b5ab8a7047e5380331
-go: go version go1.27.3 darwin/arm64
-arch: arm64
