@@ -38,6 +38,38 @@ type Enroller struct {
 	mu     sync.Mutex
 }
 
+type CredentialSet struct {
+	Active        Credential
+	Previous      *Credential
+	PreviousUntil time.Time
+}
+
+// Rotate validates the replacement before making it active and retaining the prior credential for overlap.
+func (s CredentialSet) Rotate(next Credential, now time.Time, overlap time.Duration, validate func(Credential) error) (CredentialSet, error) {
+	if s.Active.Leaf == nil || next.Leaf == nil || s.Active.NodeID == "" || next.NodeID != s.Active.NodeID {
+		return s, errors.New("identity: replacement credential identity mismatch")
+	}
+	if overlap <= 0 || validate == nil {
+		return s, errors.New("identity: positive overlap and validation callback required")
+	}
+	if err := validate(next); err != nil {
+		return s, fmt.Errorf("identity: replacement validation failed: %w", err)
+	}
+	if now.Before(next.Leaf.NotBefore) || !now.Before(next.Leaf.NotAfter) {
+		return s, errors.New("identity: replacement credential is outside validity interval")
+	}
+	old := s.Active
+	return CredentialSet{Active: next, Previous: &old, PreviousUntil: now.Add(overlap)}, nil
+}
+
+func (s CredentialSet) ValidCredentials(now time.Time) []Credential {
+	credentials := []Credential{s.Active}
+	if s.Previous != nil && now.Before(s.PreviousUntil) && now.Before(s.Previous.Leaf.NotAfter) {
+		credentials = append(credentials, *s.Previous)
+	}
+	return credentials
+}
+
 func (e *Enroller) Redeem(token, nodeID string, csrDER []byte, now time.Time, ttl time.Duration) (Credential, error) {
 	if e == nil || e.CA == nil || token == "" {
 		return Credential{}, errors.New("identity: invalid or consumed enrollment token")
@@ -194,6 +226,10 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 	if roots == nil {
 		return nil, errors.New("identity: trust pool required")
 	}
+	now := time.Now()
+	if now.Before(c.Leaf.NotBefore) || !now.Before(c.Leaf.NotAfter) {
+		return nil, errors.New("identity: local credential is outside validity interval")
+	}
 	conf := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{c.Certificate}, RootCAs: roots, ClientCAs: roots, ServerName: c.NodeID}
 	if server {
 		conf.ClientAuth = tls.RequireAndVerifyClientCert
@@ -212,4 +248,23 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 		return nil
 	}
 	return conf, nil
+}
+
+func TLSConfigSet(set CredentialSet, roots *x509.CertPool, revoked func(*x509.Certificate) bool, server bool, now time.Time) (*tls.Config, error) {
+	credentials := set.ValidCredentials(now)
+	if len(credentials) == 0 {
+		return nil, errors.New("identity: no currently valid credentials")
+	}
+	config, err := TLSConfig(credentials[0], roots, revoked, server)
+	if err != nil {
+		return nil, err
+	}
+	config.Certificates = make([]tls.Certificate, 0, len(credentials))
+	for _, credential := range credentials {
+		if credential.Leaf == nil || credential.Certificate.PrivateKey == nil {
+			return nil, errors.New("identity: incomplete overlapping credential")
+		}
+		config.Certificates = append(config.Certificates, credential.Certificate)
+	}
+	return config, nil
 }

@@ -16,12 +16,18 @@ type ControlClient struct {
 	MaxAttempts int
 }
 
+type HubEndpoint struct {
+	Region  string
+	Address string
+}
+
 type controlWire struct {
-	Type    string `json:"type"`
-	NodeID  string `json:"node_id"`
-	BootID  string `json:"boot_id"`
-	ID      string `json:"id"`
-	Version uint64 `json:"version"`
+	Type     string `json:"type"`
+	NodeID   string `json:"node_id"`
+	BootID   string `json:"boot_id"`
+	ID       string `json:"id"`
+	Version  uint64 `json:"version"`
+	Sequence uint64 `json:"sequence"`
 }
 
 func (c *ControlClient) Connect(ctx context.Context, address string) error {
@@ -60,12 +66,42 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	return fmt.Errorf("agent: control reconnect exhausted: %w", last)
 }
 
+// ConnectRegion retries only endpoints explicitly assigned to the requested region.
+func (c *ControlClient) ConnectRegion(ctx context.Context, region string, endpoints []HubEndpoint) error {
+	var candidates []string
+	for _, endpoint := range endpoints {
+		if endpoint.Region == region && endpoint.Address != "" {
+			candidates = append(candidates, endpoint.Address)
+		}
+	}
+	if len(candidates) == 0 {
+		return fmt.Errorf("agent: no Hub endpoints configured for region %q", region)
+	}
+	var last error
+	for i, address := range candidates {
+		if err := c.Connect(ctx, address); err == nil {
+			return nil
+		} else {
+			last = err
+		}
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		_ = i
+	}
+	return fmt.Errorf("agent: all Hub endpoints in region %q failed: %w", region, last)
+}
+
 func (c *ControlClient) exchange(ctx context.Context, conn net.Conn) error {
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
 	}
-	id := "hello-" + c.Node.BootID
-	if err := json.NewEncoder(conn).Encode(controlWire{Type: "hello", NodeID: c.Node.NodeID, BootID: c.Node.BootID, ID: id, Version: 1}); err != nil {
+	sequence, err := c.Node.Store.NextControlSequence(ctx)
+	if err != nil {
+		return err
+	}
+	id := fmt.Sprintf("hello-%s-%d", c.Node.BootID, sequence)
+	if err := json.NewEncoder(conn).Encode(controlWire{Type: "hello", NodeID: c.Node.NodeID, BootID: c.Node.BootID, ID: id, Version: 1, Sequence: sequence}); err != nil {
 		return err
 	}
 	var ack controlWire
@@ -75,10 +111,10 @@ func (c *ControlClient) exchange(ctx context.Context, conn net.Conn) error {
 	if ack.Type != "ack" && ack.Type != "config" {
 		return fmt.Errorf("agent: control rejected: %s", ack.Type)
 	}
-	if ack.ID != id || ack.Version < 1 {
+	if ack.ID != id || ack.Sequence != sequence || ack.Version < 1 {
 		return fmt.Errorf("agent: control acknowledgement does not match request")
 	}
-	if err := c.Node.Store.RecordReceipt(ctx, ack.ID, ack.Version); err != nil {
+	if err := c.Node.Store.PersistControlAck(ctx, ack.ID, ack.Sequence, ack.Version, time.Now().UTC()); err != nil {
 		return err
 	}
 	return nil

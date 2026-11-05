@@ -30,6 +30,8 @@ type ConfigResult struct {
 	Reason        string
 }
 
+type ObjectResult struct{ ObjectID, State, Reason string }
+
 func Open(path, owner string) (*Store, error) {
 	if path == "" || owner == "" {
 		return nil, fmt.Errorf("store: path and owner are required")
@@ -91,6 +93,19 @@ CREATE TABLE IF NOT EXISTS config_results (
   reason TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
 );
+		CREATE TABLE IF NOT EXISTS agent_state (
+		  key TEXT PRIMARY KEY NOT NULL,
+		  value TEXT NOT NULL,
+		  updated_at TEXT NOT NULL
+		);
+CREATE TABLE IF NOT EXISTS config_object_results (
+  transaction_id TEXT NOT NULL,
+  object_id TEXT NOT NULL,
+  state TEXT NOT NULL,
+  reason TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(transaction_id, object_id)
+);
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')
   ON CONFLICT(key) DO NOTHING;
 `)
@@ -127,6 +142,75 @@ func (s *Store) RecordReceipt(ctx context.Context, messageID string, sequence ui
 	return err
 }
 
+func (s *Store) NextControlSequence(ctx context.Context) (uint64, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	var current uint64
+	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = 'control_sequence'`).Scan(&current)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+	current++
+	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return current, nil
+}
+
+func (s *Store) PersistControlAck(ctx context.Context, messageID string, sequence, appliedVersion uint64, heartbeat time.Time) error {
+	if messageID == "" || sequence == 0 {
+		return fmt.Errorf("store: control acknowledgement identity is required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO control_receipts(message_id, sequence, received_at) VALUES (?, ?, ?) ON CONFLICT(message_id) DO NOTHING`, messageID, sequence, time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	for key, value := range map[string]string{
+		"control_sequence":  fmt.Sprint(sequence),
+		"applied_version":   fmt.Sprint(appliedVersion),
+		"backend_heartbeat": heartbeat.UTC().Format(time.RFC3339Nano),
+	} {
+		_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, key, value, time.Now().UTC().Format(time.RFC3339Nano))
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func (s *Store) AgentState(ctx context.Context, key string) (string, error) {
+	var value string
+	err := s.db.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = ?`, key).Scan(&value)
+	return value, err
+}
+
+func (s *Store) Credential(ctx context.Context, nodeID string) ([]byte, time.Time, error) {
+	var cert []byte
+	var validUntil string
+	var revoked int
+	err := s.db.QueryRowContext(ctx, `SELECT certificate, valid_until, revoked FROM credentials WHERE node_id = ?`, nodeID).Scan(&cert, &validUntil, &revoked)
+	if err != nil {
+		return nil, time.Time{}, err
+	}
+	if revoked != 0 {
+		return nil, time.Time{}, fmt.Errorf("store: credential revoked")
+	}
+	valid, err := time.Parse(time.RFC3339Nano, validUntil)
+	return cert, valid, err
+}
+
 func (s *Store) SaveCredential(ctx context.Context, nodeID string, certificate []byte, validUntil time.Time) error {
 	if nodeID == "" || len(certificate) == 0 {
 		return fmt.Errorf("store: credential identity and certificate are required")
@@ -149,6 +233,44 @@ func (s *Store) GetConfigResult(ctx context.Context, transactionID string) (Conf
 	err := s.db.QueryRowContext(ctx, `SELECT version, state, reason FROM config_results WHERE transaction_id = ?`, transactionID).
 		Scan(&result.Version, &result.State, &result.Reason)
 	return result, err
+}
+
+func (s *Store) SaveObjectResults(ctx context.Context, transactionID string, results []ObjectResult) error {
+	if transactionID == "" {
+		return fmt.Errorf("store: transaction id required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, result := range results {
+		if result.ObjectID == "" || result.State == "" {
+			return fmt.Errorf("store: object result identity and state required")
+		}
+		_, err := tx.ExecContext(ctx, `INSERT INTO config_object_results(transaction_id, object_id, state, reason, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(transaction_id, object_id) DO UPDATE SET state=excluded.state, reason=excluded.reason, updated_at=excluded.updated_at`, transactionID, result.ObjectID, result.State, result.Reason, time.Now().UTC().Format(time.RFC3339Nano))
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func (s *Store) GetObjectResults(ctx context.Context, transactionID string) ([]ObjectResult, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT object_id, state, reason FROM config_object_results WHERE transaction_id = ? ORDER BY object_id`, transactionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []ObjectResult
+	for rows.Next() {
+		var result ObjectResult
+		if err := rows.Scan(&result.ObjectID, &result.State, &result.Reason); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	return results, rows.Err()
 }
 
 func (s *Store) EventCount(ctx context.Context) (int, error) {

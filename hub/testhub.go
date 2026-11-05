@@ -13,11 +13,12 @@ import (
 )
 
 type Message struct {
-	Type    string `json:"type"`
-	NodeID  string `json:"node_id,omitempty"`
-	BootID  string `json:"boot_id,omitempty"`
-	Version uint64 `json:"version,omitempty"`
-	ID      string `json:"id,omitempty"`
+	Type     string `json:"type"`
+	NodeID   string `json:"node_id,omitempty"`
+	BootID   string `json:"boot_id,omitempty"`
+	Version  uint64 `json:"version,omitempty"`
+	Sequence uint64 `json:"sequence,omitempty"`
+	ID       string `json:"id,omitempty"`
 }
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
@@ -54,11 +55,11 @@ func (s *TestServer) handle(ctx context.Context, conn net.Conn) {
 		if in.ID == "" {
 			in.ID = fmt.Sprintf("%s-%s-%d", in.Type, in.NodeID, in.Version)
 		}
-		if err := s.Store.RecordReceipt(ctx, in.ID, in.Version); err != nil {
+		if err := s.Store.RecordReceipt(ctx, in.ID, in.Sequence); err != nil {
 			_ = enc.Encode(Message{Type: "error", ID: in.ID})
 			return
 		}
-		out := Message{Type: "ack", ID: in.ID, Version: in.Version}
+		out := Message{Type: "ack", ID: in.ID, Version: in.Version, Sequence: in.Sequence}
 		if strings.EqualFold(in.Type, "hello") {
 			out.Type = "config"
 		}

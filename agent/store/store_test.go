@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestDurableEventSurvivesReopen(t *testing.T) {
@@ -48,5 +49,34 @@ func TestReceiptIsIdempotent(t *testing.T) {
 	}
 	if err := s.RecordReceipt(context.Background(), "m-1", 1); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestControlSequenceAndStateSurviveReopen(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "agent.db")
+	s, err := Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if sequence, err := s.NextControlSequence(ctx); err != nil || sequence != 1 {
+		t.Fatalf("sequence=%d err=%v", sequence, err)
+	}
+	if err := s.PersistControlAck(ctx, "ack-1", 1, 7, time.Now().UTC()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if sequence, err := s.NextControlSequence(ctx); err != nil || sequence != 2 {
+		t.Fatalf("reopened sequence=%d err=%v", sequence, err)
+	}
+	if version, err := s.AgentState(ctx, "applied_version"); err != nil || version != "7" {
+		t.Fatalf("version=%q err=%v", version, err)
 	}
 }

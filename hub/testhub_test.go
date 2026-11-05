@@ -31,7 +31,7 @@ func TestProtocolTestHubPersistsHelloReceipt(t *testing.T) {
 	}
 	defer conn.Close()
 	enc := json.NewEncoder(conn)
-	if err := enc.Encode(Message{Type: "hello", NodeID: "n1", BootID: "b1", ID: "m1", Version: 1}); err != nil {
+	if err := enc.Encode(Message{Type: "hello", NodeID: "n1", BootID: "b1", ID: "m1", Version: 1, Sequence: 7}); err != nil {
 		t.Fatal(err)
 	}
 	conn.SetReadDeadline(time.Now().Add(time.Second))
@@ -40,7 +40,7 @@ func TestProtocolTestHubPersistsHelloReceipt(t *testing.T) {
 		t.Fatalf("ack: %v", err)
 	}
 	var ack Message
-	if err := json.Unmarshal(line, &ack); err != nil || ack.Type != "config" || ack.ID != "m1" {
+	if err := json.Unmarshal(line, &ack); err != nil || ack.Type != "config" || ack.ID != "m1" || ack.Sequence != 7 {
 		t.Fatalf("ack=%+v err=%v", ack, err)
 	}
 	deadline := time.Now().Add(time.Second)

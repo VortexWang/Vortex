@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"os"
 	"sync"
 	"testing"
@@ -161,6 +162,69 @@ func TestInvalidCSRDoesNotConsumeEnrollmentToken(t *testing.T) {
 	}
 	if _, err := enroller.Redeem("retry", "node-retry", csr, now, time.Hour); err != nil {
 		t.Fatalf("token consumed by invalid CSR: %v", err)
+	}
+}
+
+func TestCredentialRotationValidatesBeforeOverlapAndExpiresOldCredential(t *testing.T) {
+	now := time.Now().UTC()
+	ca, caDER, err := NewCA(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	makeCredential := func() Credential {
+		key, csr, err := GenerateCSR("node-rotate")
+		if err != nil {
+			t.Fatal(err)
+		}
+		cred, err := ca.SignCSR(csr, "node-rotate", now, time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cred, err = AttachKey(cred, key, caDER)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return cred
+	}
+	old, next := makeCredential(), makeCredential()
+	set := CredentialSet{Active: old}
+	if _, err := set.Rotate(next, now, time.Minute, func(Credential) error { return errors.New("revoked") }); err == nil {
+		t.Fatal("invalid replacement accepted")
+	}
+	rotated, err := set.Rotate(next, now, time.Minute, func(Credential) error { return nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rotated.ValidCredentials(now)) != 2 {
+		t.Fatal("old credential not retained during overlap")
+	}
+	if len(rotated.ValidCredentials(now.Add(time.Minute))) != 1 {
+		t.Fatal("old credential retained after overlap")
+	}
+}
+
+func TestTLSConfigRejectsExpiredLocalCredential(t *testing.T) {
+	now := time.Now().UTC()
+	ca, _, err := NewCA(now.Add(-3 * time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, csr, err := GenerateCSR("node-expired")
+	if err != nil {
+		t.Fatal(err)
+	}
+	credential, err := ca.SignCSR(csr, "node-expired", now.Add(-2*time.Hour), time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	credential, err = AttachKey(credential, key, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pool := x509.NewCertPool()
+	pool.AddCert(ca.Certificate)
+	if _, err := TLSConfig(credential, pool, nil, false); err == nil {
+		t.Fatal("expired local credential accepted")
 	}
 }
 

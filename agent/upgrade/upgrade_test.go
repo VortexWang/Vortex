@@ -13,7 +13,7 @@ func hooks(failedHealth bool, rolledBack *bool) Hooks {
 	check := func(context.Context) error { return nil }
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 	artifact := []byte("signed upgrade artifact")
-	return Hooks{Artifact: artifact, Signature: ed25519.Sign(priv, artifact), PublicKey: pub, VerifyBinary: check, VerifyDisk: check, VerifyConfig: check, Drain: func(context.Context, time.Duration) error { return nil }, Activate: func(context.Context) error { return nil }, Health: func(context.Context) error {
+	return Hooks{Artifact: artifact, Signature: ed25519.Sign(priv, artifact), PublicKey: pub, VerifyBinary: check, VerifyDisk: check, VerifyConfig: check, Drain: func(context.Context, time.Duration) error { return nil }, Snapshot: func(context.Context) ([]byte, error) { return []byte("compatible-state"), nil }, RestoreSnapshot: func(context.Context, []byte) error { return nil }, Activate: func(context.Context) error { return nil }, Health: func(context.Context) error {
 		if failedHealth {
 			return errors.New("bad health")
 		}
@@ -49,5 +49,28 @@ func TestDrainReceivesBoundedContext(t *testing.T) {
 	}
 	if time.Since(start) > time.Second {
 		t.Fatal("drain exceeded bounded timeout")
+	}
+}
+
+func TestHealthFailureRestoresCompatibilitySnapshotBeforeRollback(t *testing.T) {
+	var rb bool
+	var restored bool
+	h := hooks(true, &rb)
+	h.RestoreSnapshot = func(_ context.Context, snapshot []byte) error {
+		if string(snapshot) != "compatible-state" {
+			t.Fatalf("snapshot=%q", snapshot)
+		}
+		restored = true
+		return nil
+	}
+	h.Rollback = func(context.Context) error {
+		if !restored {
+			t.Fatal("rollback preceded state restore")
+		}
+		rb = true
+		return nil
+	}
+	if err := Run(context.Background(), h, time.Second); err == nil || !restored || !rb {
+		t.Fatalf("err=%v restored=%v rollback=%v", err, restored, rb)
 	}
 }

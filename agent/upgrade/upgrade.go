@@ -18,6 +18,8 @@ type Hooks struct {
 	VerifyDisk            func(context.Context) error
 	VerifyConfig          func(context.Context) error
 	Drain                 func(context.Context, time.Duration) error
+	Snapshot              func(context.Context) ([]byte, error)
+	RestoreSnapshot       func(context.Context, []byte) error
 	Health                func(context.Context) error
 	Activate              func(context.Context) error
 	Rollback              func(context.Context) error
@@ -36,11 +38,15 @@ func Run(ctx context.Context, h Hooks, drainTimeout time.Duration) error {
 			return fmt.Errorf("upgrade: %s preflight: %w", name, err)
 		}
 	}
-	if h.Drain == nil || h.Health == nil || h.Activate == nil || h.Rollback == nil {
+	if h.Drain == nil || h.Snapshot == nil || h.RestoreSnapshot == nil || h.Health == nil || h.Activate == nil || h.Rollback == nil {
 		return errors.New("upgrade: complete hooks required")
 	}
 	if drainTimeout <= 0 {
 		return errors.New("upgrade: positive drain timeout required")
+	}
+	snapshot, err := h.Snapshot(ctx)
+	if err != nil {
+		return fmt.Errorf("upgrade: compatibility snapshot: %w", err)
 	}
 	drainCtx, cancel := context.WithTimeout(ctx, drainTimeout)
 	defer cancel()
@@ -53,6 +59,9 @@ func Run(ctx context.Context, h Hooks, drainTimeout time.Duration) error {
 	if err := h.Health(ctx); err != nil {
 		if h.IrreversibleMigration {
 			return errors.Join(ErrIncompatible, err)
+		}
+		if restoreErr := h.RestoreSnapshot(ctx, snapshot); restoreErr != nil {
+			return errors.Join(err, fmt.Errorf("upgrade: restore compatibility snapshot: %w", restoreErr))
 		}
 		if rollbackErr := h.Rollback(ctx); rollbackErr != nil {
 			return errors.Join(err, rollbackErr)

@@ -3,11 +3,21 @@ package agent
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"vortex/agent/store"
 )
+
+var (
+	ErrStaleRevision     = errors.New("agent: stale configuration revision")
+	ErrConfigConflict    = errors.New("agent: configuration transaction conflict")
+	ErrActivationUnknown = errors.New("agent: configuration activation unknown")
+)
+
+type ObjectResult = store.ObjectResult
 
 type Applier interface {
 	Prepare([16]byte, uint64) (any, error)
@@ -34,11 +44,47 @@ func (r Reconciler) ApplyConfig(ctx context.Context, txID string, version uint64
 	}
 	var id [16]byte
 	copy(id[:], decoded)
+	if current, err := r.Store.AgentState(ctx, "applied_version"); err == nil {
+		applied, parseErr := strconv.ParseUint(current, 10, 64)
+		if parseErr != nil {
+			return fmt.Errorf("agent: stored applied version invalid")
+		}
+		if version < applied {
+			return ErrStaleRevision
+		}
+	}
+	if previous, err := r.Store.GetConfigResult(ctx, txID); err == nil {
+		if previous.Version != version {
+			return ErrConfigConflict
+		}
+		switch previous.State {
+		case "active":
+			return nil
+		case "activation-unknown", "commit-requested":
+			return ErrActivationUnknown
+		case "aborted", "prepare-failed", "commit-failed":
+			return ErrConfigConflict
+		}
+	}
 	if _, err := r.Apply.Prepare(id, generation); err != nil {
 		_ = r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error())
 		return err
 	}
-	if _, err := r.Apply.Commit(id, commitUnknown); err != nil {
+	if err := r.Store.SaveConfigResult(ctx, txID, version, "prepared", ""); err != nil {
+		_, _ = r.Apply.Abort(id)
+		return err
+	}
+	if err := r.Store.SaveConfigResult(ctx, txID, version, "commit-requested", ""); err != nil {
+		_, _ = r.Apply.Abort(id)
+		return err
+	}
+	result, err := r.Apply.Commit(id, commitUnknown)
+	if results, ok := result.([]ObjectResult); ok && len(results) > 0 {
+		if saveErr := r.Store.SaveObjectResults(ctx, txID, results); saveErr != nil {
+			return saveErr
+		}
+	}
+	if err != nil {
 		state := "activation-unknown"
 		if !commitUnknown {
 			state = "commit-failed"

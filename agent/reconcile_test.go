@@ -2,14 +2,34 @@ package agent
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"vortex/agent/store"
 )
 
 type fakeApplier struct{}
+
+type persistedApplier struct {
+	t     *testing.T
+	store *store.Store
+}
+
+func (persistedApplier) Prepare([16]byte, uint64) (any, error) { return struct{}{}, nil }
+func (a persistedApplier) Commit(id [16]byte, uncertain bool) (any, error) {
+	result, err := a.store.GetConfigResult(context.Background(), hex.EncodeToString(id[:]))
+	if err != nil || result.State != "commit-requested" {
+		a.t.Fatalf("Commit issued before durable intent: result=%+v err=%v", result, err)
+	}
+	if uncertain {
+		return nil, errors.New("commit result unknown")
+	}
+	return []ObjectResult{{ObjectID: "rule-1", State: "active"}}, nil
+}
+func (persistedApplier) Abort([16]byte) (any, error) { return struct{}{}, nil }
 
 func (fakeApplier) Prepare([16]byte, uint64) (any, error) { return struct{}{}, nil }
 func (fakeApplier) Commit(_ [16]byte, uncertain bool) (any, error) {
@@ -26,7 +46,7 @@ func TestReconcilerPersistsActivationUnknownBeforeReturning(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer s.Close()
-	r := Reconciler{Store: s, Apply: fakeApplier{}}
+	r := Reconciler{Store: s, Apply: persistedApplier{t: t, store: s}}
 	if err := r.ApplyConfig(context.Background(), "00112233445566778899aabbccddeeff", 2, 1, true); err == nil {
 		t.Fatal("expected unknown commit result")
 	}
@@ -36,5 +56,18 @@ func TestReconcilerPersistsActivationUnknownBeforeReturning(t *testing.T) {
 	}
 	if err := r.ApplyConfig(context.Background(), "10112233445566778899aabbccddeeff", 3, 2, false); err != nil {
 		t.Fatal(err)
+	}
+	objects, err := s.GetObjectResults(context.Background(), "10112233445566778899aabbccddeeff")
+	if err != nil || len(objects) != 1 || objects[0].ObjectID != "rule-1" {
+		t.Fatalf("objects=%+v err=%v", objects, err)
+	}
+	if err := r.ApplyConfig(context.Background(), "00112233445566778899aabbccddeeff", 2, 1, false); !errors.Is(err, ErrActivationUnknown) {
+		t.Fatalf("replay unknown transaction err=%v", err)
+	}
+	if err := s.PersistControlAck(context.Background(), "version-4", 4, 4, time.Now().UTC()); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.ApplyConfig(context.Background(), "20112233445566778899aabbccddeeff", 1, 3, false); !errors.Is(err, ErrStaleRevision) {
+		t.Fatalf("stale revision err=%v", err)
 	}
 }
