@@ -27,6 +27,17 @@ type Credential struct {
 	Leaf        *x509.Certificate
 }
 
+func CredentialFromTLS(nodeID string, certificate tls.Certificate, leaf *x509.Certificate, key *ecdsa.PrivateKey) (Credential, error) {
+	if nodeID == "" || leaf == nil || key == nil || len(certificate.Certificate) == 0 || !bytes.Equal(certificate.Certificate[0], leaf.Raw) {
+		return Credential{}, errors.New("identity: incomplete TLS credential")
+	}
+	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != nodeID || leaf.Subject.CommonName != nodeID {
+		return Credential{}, errors.New("identity: TLS credential node SAN mismatch")
+	}
+	certificate.Leaf = leaf
+	return Credential{NodeID: nodeID, PrivateKey: key, Certificate: certificate, Leaf: leaf}, nil
+}
+
 type CA struct {
 	Certificate *x509.Certificate
 	Key         *ecdsa.PrivateKey
@@ -184,6 +195,13 @@ func AttachKey(c Credential, key *ecdsa.PrivateKey, caDER []byte) (Credential, e
 }
 
 func SaveFiles(directory string, credential Credential, caDER []byte) error {
+	if err := SaveVersionFiles(directory, credential); err != nil {
+		return err
+	}
+	return SaveActiveFiles(directory, credential, caDER)
+}
+
+func SaveVersionFiles(directory string, credential Credential) error {
 	if credential.Leaf == nil || credential.Certificate.PrivateKey == nil {
 		return errors.New("identity: incomplete credential")
 	}
@@ -199,17 +217,112 @@ func SaveFiles(directory string, credential Credential, caDER []byte) error {
 	}
 	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: credential.Leaf.Raw})
-	keyPath := filepath.Join(directory, "runtime-key.pem")
-	if err := os.WriteFile(keyPath, keyPEM, 0600); err != nil {
+	files := []struct {
+		name string
+		data []byte
+		mode os.FileMode
+	}{{"runtime-key-" + credential.Leaf.SerialNumber.String() + ".pem", keyPEM, 0600}, {"runtime-cert-" + credential.Leaf.SerialNumber.String() + ".pem", certPEM, 0644}}
+	for _, file := range files {
+		if err := atomicCredentialFile(directory, file.name, file.data, file.mode); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func SaveActiveFiles(directory string, credential Credential, caDER []byte) error {
+	if credential.Leaf == nil || credential.Certificate.PrivateKey == nil || len(caDER) == 0 {
+		return errors.New("identity: incomplete active credential")
+	}
+	if err := os.MkdirAll(directory, 0700); err != nil {
 		return err
 	}
-	if err := os.Chmod(keyPath, 0600); err != nil {
+	if err := os.Chmod(directory, 0700); err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(directory, "runtime-cert.pem"), certPEM, 0644); err != nil {
+	keyDER, err := x509.MarshalPKCS8PrivateKey(credential.Certificate.PrivateKey)
+	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(directory, "trust-ca.pem"), pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caDER}), 0644)
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: credential.Leaf.Raw})
+	files := []struct {
+		name string
+		data []byte
+		mode os.FileMode
+	}{{"runtime-key.pem", keyPEM, 0600}, {"runtime-cert.pem", certPEM, 0644}, {"trust-ca.pem", pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caDER}), 0644}}
+	for _, file := range files {
+		if err := atomicCredentialFile(directory, file.name, file.data, file.mode); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// PruneVersionFiles removes private keys and certificates that are no longer
+// covered by the durable active/overlap set. Alias files are retained.
+func PruneVersionFiles(directory string, keepSerials map[string]struct{}) error {
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		name := entry.Name()
+		var serial string
+		switch {
+		case strings.HasPrefix(name, "runtime-key-") && strings.HasSuffix(name, ".pem"):
+			serial = strings.TrimSuffix(strings.TrimPrefix(name, "runtime-key-"), ".pem")
+		case strings.HasPrefix(name, "runtime-cert-") && strings.HasSuffix(name, ".pem"):
+			serial = strings.TrimSuffix(strings.TrimPrefix(name, "runtime-cert-"), ".pem")
+		default:
+			continue
+		}
+		if _, keep := keepSerials[serial]; keep {
+			continue
+		}
+		if err := os.Remove(filepath.Join(directory, name)); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+	}
+	dir, err := os.Open(directory)
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+	return dir.Sync()
+}
+
+func atomicCredentialFile(directory, name string, data []byte, mode os.FileMode) error {
+	file, err := os.CreateTemp(directory, ".credential-*")
+	if err != nil {
+		return err
+	}
+	temporary := file.Name()
+	defer os.Remove(temporary)
+	if err := file.Chmod(mode); err != nil {
+		_ = file.Close()
+		return err
+	}
+	if _, err := file.Write(data); err != nil {
+		_ = file.Close()
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		_ = file.Close()
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+	if err := os.Rename(temporary, filepath.Join(directory, name)); err != nil {
+		return err
+	}
+	dir, err := os.Open(directory)
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+	return dir.Sync()
 }
 
 func VerifyDetachedSignature(publicKey ed25519.PublicKey, payload, signature []byte) error {

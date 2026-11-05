@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"vortex/agent/identity"
 	"vortex/agent/store"
@@ -15,5 +16,5 @@ func PersistCredential(ctx context.Context, db *store.Store, credential identity
 	if len(credential.Leaf.DNSNames) != 1 || credential.Leaf.DNSNames[0] != credential.NodeID {
 		return fmt.Errorf("agent: runtime credential node SAN mismatch")
 	}
-	return db.SaveCredential(ctx, credential.NodeID, credential.Leaf.Raw, credential.Leaf.NotAfter)
+	return db.SaveCredentialRotation(ctx, credential.NodeID, credential.Leaf.Raw, credential.Leaf.NotAfter, nil, time.Time{}, time.Time{})
 }

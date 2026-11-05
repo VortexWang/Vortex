@@ -82,7 +82,8 @@ func TestTLSHelloBindsCertificateIdentity(t *testing.T) {
 	pool := x509.NewCertPool()
 	pool.AddCert(ca.Certificate)
 	serverConfig := &tls.Config{MinVersion: tls.VersionTLS13, Certificates: []tls.Certificate{issue("hub")}, ClientCAs: pool, ClientAuth: tls.RequireAndVerifyClientCert}
-	clientConfig := &tls.Config{MinVersion: tls.VersionTLS13, Certificates: []tls.Certificate{issue("node-1")}, RootCAs: pool, ServerName: "hub"}
+	nodeCertificate := issue("node-1")
+	clientConfig := &tls.Config{MinVersion: tls.VersionTLS13, Certificates: []tls.Certificate{nodeCertificate}, RootCAs: pool, ServerName: "hub"}
 	s, err := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
 	if err != nil {
 		t.Fatal(err)
@@ -95,7 +96,8 @@ func TestTLSHelloBindsCertificateIdentity(t *testing.T) {
 	defer ln.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go func() { _ = (&TestServer{Store: s}).ServeTLS(ctx, ln, serverConfig) }()
+	server := &TestServer{Store: s}
+	go func() { _ = server.ServeTLS(ctx, ln, serverConfig) }()
 	for _, tc := range []struct{ node, want string }{{"node-1", "config"}, {"node-2", "error"}} {
 		conn, err := tls.Dial("tcp", ln.Addr().String(), clientConfig)
 		if err != nil {
@@ -116,5 +118,26 @@ func TestTLSHelloBindsCertificateIdentity(t *testing.T) {
 	}
 	if count, err := s.ReceiptCount(ctx); err != nil || count != 1 {
 		t.Fatalf("receipts=%d err=%v", count, err)
+	}
+	nodeLeaf, err := x509.ParseCertificate(nodeCertificate.Certificate[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	server.Revoke(nodeLeaf.SerialNumber.String())
+	conn, err := tls.Dial("tcp", ln.Addr().String(), clientConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(time.Second))
+	if err := json.NewEncoder(conn).Encode(Message{Type: "hello", NodeID: "node-1", BootID: "boot", ID: "revoked-node", Sequence: 2, Version: 1}); err != nil {
+		t.Fatal(err)
+	}
+	var response Message
+	if err := json.NewDecoder(conn).Decode(&response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Type != "error" {
+		t.Fatalf("revoked certificate response=%s, want error", response.Type)
 	}
 }

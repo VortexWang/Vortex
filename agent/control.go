@@ -13,18 +13,24 @@ import (
 type ControlClient struct {
 	Node        *Node
 	TLS         *tls.Config
+	TLSProvider func() (*tls.Config, error)
 	MaxAttempts int
 	RetryMin    time.Duration
 	RetryMax    time.Duration
+	Interval    time.Duration
 }
 
 // Run reconnects after failed or completed one-shot control exchanges until
 // the caller cancels. Each exchange uses a new durable sequence number.
 func (c *ControlClient) Run(ctx context.Context, address string) error {
-	if c == nil || c.Node == nil || c.TLS == nil || address == "" {
+	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
 	minimum, maximum := c.retryBounds()
+	interval := c.Interval
+	if interval <= 0 {
+		interval = 30 * time.Second
+	}
 	delay := minimum
 	for {
 		err := c.Connect(ctx, address)
@@ -32,7 +38,7 @@ func (c *ControlClient) Run(ctx context.Context, address string) error {
 			return ctx.Err()
 		}
 		if err == nil {
-			delay = minimum
+			delay = interval
 		} else if delay < maximum {
 			delay *= 2
 			if delay > maximum {
@@ -64,7 +70,7 @@ type controlWire struct {
 }
 
 func (c *ControlClient) Connect(ctx context.Context, address string) error {
-	if c == nil || c.Node == nil || c.TLS == nil {
+	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) {
 		return fmt.Errorf("agent: control client is incomplete")
 	}
 	attempts := c.MaxAttempts
@@ -83,7 +89,12 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			case <-timer.C:
 			}
 		}
-		dialer := tls.Dialer{Config: c.TLS.Clone()}
+		tlsConfig, configErr := c.tlsConfig()
+		if configErr != nil {
+			last = configErr
+			continue
+		}
+		dialer := tls.Dialer{Config: tlsConfig}
 		conn, err := dialer.DialContext(ctx, "tcp", address)
 		if err != nil {
 			last = err
@@ -97,6 +108,23 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		last = err
 	}
 	return fmt.Errorf("agent: control reconnect exhausted: %w", last)
+}
+
+func (c *ControlClient) tlsConfig() (*tls.Config, error) {
+	if c.TLSProvider != nil {
+		config, err := c.TLSProvider()
+		if err != nil {
+			return nil, err
+		}
+		if config == nil {
+			return nil, fmt.Errorf("agent: TLS provider returned no configuration")
+		}
+		return config.Clone(), nil
+	}
+	if c.TLS == nil {
+		return nil, fmt.Errorf("agent: TLS configuration is required")
+	}
+	return c.TLS.Clone(), nil
 }
 
 // ConnectRegion retries only endpoints explicitly assigned to the requested region.

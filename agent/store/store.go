@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"crypto/x509"
 	"database/sql"
 	"fmt"
 	"time"
@@ -31,6 +32,12 @@ type ConfigResult struct {
 }
 
 type ObjectResult struct{ ObjectID, State, Reason string }
+
+type CredentialVersion struct {
+	Certificate  []byte
+	ValidUntil   time.Time
+	OverlapUntil time.Time
+}
 
 var ErrCredentialRevoked = fmt.Errorf("store: credential revoked")
 
@@ -87,6 +94,16 @@ CREATE TABLE IF NOT EXISTS credentials (
   valid_until TEXT NOT NULL,
   revoked INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS credential_versions (
+  node_id TEXT NOT NULL,
+  serial TEXT NOT NULL,
+  certificate BLOB NOT NULL,
+  valid_until TEXT NOT NULL,
+  overlap_until TEXT NOT NULL DEFAULT '',
+  revoked INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(node_id, serial)
 );
 CREATE TABLE IF NOT EXISTS config_results (
   transaction_id TEXT PRIMARY KEY NOT NULL,
@@ -269,11 +286,141 @@ func (s *Store) SaveCredential(ctx context.Context, nodeID string, certificate [
 	return nil
 }
 
+func (s *Store) SaveCredentialRotation(ctx context.Context, nodeID string, activeDER []byte, activeUntil time.Time, previousDER []byte, previousUntil, overlapUntil time.Time) error {
+	if nodeID == "" || len(activeDER) == 0 || activeUntil.IsZero() {
+		return fmt.Errorf("store: active credential identity, certificate and expiry are required")
+	}
+	active, err := x509.ParseCertificate(activeDER)
+	if err != nil {
+		return fmt.Errorf("store: parse active certificate: %w", err)
+	}
+	if active.Subject.CommonName != nodeID || len(active.DNSNames) != 1 || active.DNSNames[0] != nodeID {
+		return fmt.Errorf("store: active credential identity mismatch")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if len(previousDER) > 0 {
+		previous, parseErr := x509.ParseCertificate(previousDER)
+		if parseErr != nil {
+			return fmt.Errorf("store: parse previous certificate: %w", parseErr)
+		}
+		if previous.Subject.CommonName != nodeID || len(previous.DNSNames) != 1 || previous.DNSNames[0] != nodeID || previousUntil.IsZero() || overlapUntil.IsZero() || overlapUntil.After(previousUntil) {
+			return fmt.Errorf("store: previous credential overlap is invalid")
+		}
+		if previous.SerialNumber.Cmp(active.SerialNumber) == 0 {
+			return fmt.Errorf("store: active and previous credential serials must differ")
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE credential_versions SET revoked=1, updated_at=? WHERE node_id=? AND serial<>? AND serial<>?`, time.Now().UTC().Format(time.RFC3339Nano), nodeID, active.SerialNumber.String(), previous.SerialNumber.String()); err != nil {
+			return err
+		}
+		result, execErr := tx.ExecContext(ctx, `INSERT INTO credential_versions(node_id, serial, certificate, valid_until, overlap_until, revoked, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?) ON CONFLICT(node_id, serial) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, overlap_until=excluded.overlap_until, updated_at=excluded.updated_at WHERE credential_versions.revoked=0`, nodeID, previous.SerialNumber.String(), previousDER, previousUntil.UTC().Format(time.RFC3339Nano), overlapUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
+		if execErr != nil {
+			return execErr
+		}
+		changed, execErr := result.RowsAffected()
+		if execErr != nil {
+			return execErr
+		}
+		if changed == 0 {
+			return ErrCredentialRevoked
+		}
+	} else {
+		if _, err := tx.ExecContext(ctx, `UPDATE credential_versions SET revoked=1, updated_at=? WHERE node_id=? AND serial<>?`, time.Now().UTC().Format(time.RFC3339Nano), nodeID, active.SerialNumber.String()); err != nil {
+			return err
+		}
+	}
+	result, err := tx.ExecContext(ctx, `INSERT INTO credential_versions(node_id, serial, certificate, valid_until, overlap_until, revoked, updated_at) VALUES (?, ?, ?, ?, '', 0, ?) ON CONFLICT(node_id, serial) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, overlap_until='', updated_at=excluded.updated_at WHERE credential_versions.revoked=0`, nodeID, active.SerialNumber.String(), activeDER, activeUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed == 0 {
+		return ErrCredentialRevoked
+	}
+	result, err = tx.ExecContext(ctx, `INSERT INTO credentials(node_id, certificate, valid_until, revoked, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(node_id) DO UPDATE SET certificate=excluded.certificate, valid_until=excluded.valid_until, updated_at=excluded.updated_at WHERE credentials.revoked=0`, nodeID, activeDER, activeUntil.UTC().Format(time.RFC3339Nano), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return err
+	}
+	changed, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed == 0 {
+		return ErrCredentialRevoked
+	}
+	return tx.Commit()
+}
+
+func (s *Store) CredentialVersions(ctx context.Context, nodeID string, now time.Time) ([][]byte, error) {
+	versions, err := s.CredentialVersionRecords(ctx, nodeID, now)
+	if err != nil {
+		return nil, err
+	}
+	result := make([][]byte, 0, len(versions))
+	for _, version := range versions {
+		result = append(result, version.Certificate)
+	}
+	return result, nil
+}
+
+func (s *Store) CredentialVersionRecords(ctx context.Context, nodeID string, now time.Time) ([]CredentialVersion, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT certificate, valid_until, overlap_until FROM credential_versions WHERE node_id=? AND revoked=0 ORDER BY CASE WHEN overlap_until='' THEN 0 ELSE 1 END, updated_at DESC`, nodeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []CredentialVersion
+	for rows.Next() {
+		var certificate []byte
+		var validUntil, overlapUntil string
+		if err := rows.Scan(&certificate, &validUntil, &overlapUntil); err != nil {
+			return nil, err
+		}
+		valid, err := time.Parse(time.RFC3339Nano, validUntil)
+		if err != nil {
+			return nil, err
+		}
+		if !now.Before(valid) {
+			continue
+		}
+		if overlapUntil != "" {
+			overlap, err := time.Parse(time.RFC3339Nano, overlapUntil)
+			if err != nil {
+				return nil, err
+			}
+			if !now.Before(overlap) {
+				continue
+			}
+		}
+		version := CredentialVersion{Certificate: certificate, ValidUntil: valid}
+		if overlapUntil != "" {
+			version.OverlapUntil, err = time.Parse(time.RFC3339Nano, overlapUntil)
+			if err != nil {
+				return nil, err
+			}
+		}
+		results = append(results, version)
+	}
+	return results, rows.Err()
+}
+
 func (s *Store) RevokeCredential(ctx context.Context, nodeID string) error {
 	if nodeID == "" {
 		return fmt.Errorf("store: node identity required for revocation")
 	}
-	result, err := s.db.ExecContext(ctx, `UPDATE credentials SET revoked=1, updated_at=? WHERE node_id=?`, time.Now().UTC().Format(time.RFC3339Nano), nodeID)
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	updated := time.Now().UTC().Format(time.RFC3339Nano)
+	result, err := tx.ExecContext(ctx, `UPDATE credentials SET revoked=1, updated_at=? WHERE node_id=?`, updated, nodeID)
 	if err != nil {
 		return err
 	}
@@ -284,7 +431,37 @@ func (s *Store) RevokeCredential(ctx context.Context, nodeID string) error {
 	if changed == 0 {
 		return sql.ErrNoRows
 	}
-	return nil
+	if _, err := tx.ExecContext(ctx, `UPDATE credential_versions SET revoked=1, updated_at=? WHERE node_id=?`, updated, nodeID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) RevokeCredentialVersion(ctx context.Context, nodeID, serial string) error {
+	if nodeID == "" || serial == "" {
+		return fmt.Errorf("store: node identity and certificate serial are required for revocation")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	updated := time.Now().UTC().Format(time.RFC3339Nano)
+	result, err := tx.ExecContext(ctx, `UPDATE credential_versions SET revoked=1, updated_at=? WHERE node_id=? AND serial=?`, updated, nodeID, serial)
+	if err != nil {
+		return err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changed == 0 {
+		return sql.ErrNoRows
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE credentials SET revoked=1, updated_at=? WHERE node_id=? AND certificate=(SELECT certificate FROM credential_versions WHERE node_id=? AND serial=?)`, updated, nodeID, nodeID, serial); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *Store) SaveConfigResult(ctx context.Context, transactionID string, version uint64, state, reason string) error {

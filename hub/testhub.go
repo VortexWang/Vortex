@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
+	"sync"
 
 	"vortex/agent/store"
 )
@@ -22,7 +24,27 @@ type Message struct {
 }
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
-type TestServer struct{ Store *store.Store }
+type TestServer struct {
+	Store   *store.Store
+	mu      sync.RWMutex
+	revoked map[string]struct{}
+}
+
+func (s *TestServer) Revoke(serial string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.revoked == nil {
+		s.revoked = make(map[string]struct{})
+	}
+	s.revoked[serial] = struct{}{}
+}
+
+func (s *TestServer) isRevoked(cert *x509.Certificate) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	_, ok := s.revoked[cert.SerialNumber.String()]
+	return ok
+}
 
 func (s *TestServer) Serve(ctx context.Context, ln net.Listener) error {
 	defer ln.Close()
@@ -54,7 +76,7 @@ func (s *TestServer) handle(ctx context.Context, conn net.Conn) {
 		}
 		if tlsConn, ok := conn.(*tls.Conn); ok {
 			state := tlsConn.ConnectionState()
-			if in.Type != "hello" || in.BootID == "" || len(state.PeerCertificates) == 0 || len(state.PeerCertificates[0].DNSNames) != 1 || state.PeerCertificates[0].DNSNames[0] != in.NodeID {
+			if in.Type != "hello" || in.BootID == "" || len(state.PeerCertificates) == 0 || len(state.PeerCertificates[0].DNSNames) != 1 || state.PeerCertificates[0].DNSNames[0] != in.NodeID || s.isRevoked(state.PeerCertificates[0]) {
 				_ = enc.Encode(Message{Type: "error", ID: in.ID})
 				return
 			}

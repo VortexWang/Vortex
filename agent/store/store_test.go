@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"vortex/agent/identity"
 )
 
 func TestDurableEventSurvivesReopen(t *testing.T) {
@@ -127,5 +129,47 @@ func TestRevokedCredentialCannotBeReplacedByOrdinarySave(t *testing.T) {
 	}
 	if _, _, err := s.Credential(ctx, "node-1"); err != ErrCredentialRevoked {
 		t.Fatalf("revoked credential became readable: %v", err)
+	}
+}
+
+func TestRevokedCredentialCannotBeReactivatedByRotation(t *testing.T) {
+	ctx := context.Background()
+	s, err := Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	now := time.Now().UTC()
+	ca, _, err := identity.NewCA(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	issue := func() identity.Credential {
+		key, csr, err := identity.GenerateCSR("node-1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		credential, err := ca.SignCSR(csr, "node-1", now, time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		credential, err = identity.AttachKey(credential, key, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return credential
+	}
+	oldCredential, nextCredential := issue(), issue()
+	if err := s.SaveCredentialRotation(ctx, "node-1", oldCredential.Leaf.Raw, oldCredential.Leaf.NotAfter, nil, time.Time{}, time.Time{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.RevokeCredential(ctx, "node-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveCredentialRotation(ctx, "node-1", nextCredential.Leaf.Raw, nextCredential.Leaf.NotAfter, oldCredential.Leaf.Raw, oldCredential.Leaf.NotAfter, now.Add(5*time.Minute)); err != ErrCredentialRevoked {
+		t.Fatalf("rotation reactivated revoked identity: %v", err)
+	}
+	if _, _, err := s.Credential(ctx, "node-1"); err != ErrCredentialRevoked {
+		t.Fatalf("revoked identity became readable after rejected rotation: %v", err)
 	}
 }
