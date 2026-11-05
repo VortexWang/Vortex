@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 )
 
 func (s *Store) migrateDemandDenialState() error {
@@ -86,6 +87,9 @@ func (s *Store) DenyDemand(ctx context.Context, node, boot, hub, id, reason stri
 	}
 	if state == "denied" {
 		return tx.Commit()
+	}
+	if err := recordDemandRetryTx(ctx, tx, raw, reason, time.Now()); err != nil {
+		return err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_demands SET state='denied',denial_reason=? WHERE request_id=? AND state='pending'`, reason, id); err != nil {
 		return err

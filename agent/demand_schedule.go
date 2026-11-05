@@ -33,6 +33,6 @@ func (n *Node) PrepareAdaptiveDemand(ctx context.Context, c AdaptiveDemandConfig
 	if estimate.RequestBytes == 0 {
 		return store.IssueRequest{}, estimate, nil
 	}
-	request, err := n.Store.PrepareDemand(ctx, c.Scope, estimate.RequestBytes, c.TTL)
+	request, err := n.Store.PrepareAutomaticDemand(ctx, c.Scope, estimate.RequestBytes, c.TTL)
 	return request, estimate, err
 }

@@ -20,7 +20,7 @@ func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1
 		if _, _, err := c.Node.PrepareAdaptiveDemand(ctx, config); err != nil {
 			// Boot trust must first be established by authenticated time. Do
 			// not issue cold authority based solely on the process wall clock.
-			if errors.Is(err, store.ErrAuthorityTimeUncertain) {
+			if errors.Is(err, store.ErrAuthorityTimeUncertain) || errors.Is(err, store.ErrDemandRetryDeferred) {
 				continue
 			}
 			return err

@@ -23,6 +23,16 @@ type DemandScope struct {
 // the original request, including amount and TTL, until its response is durably
 // installed. Timeout, expiry and a larger new estimate cannot retire it.
 func (s *Store) PrepareDemand(ctx context.Context, scope DemandScope, amount uint64, ttl time.Duration) (IssueRequest, error) {
+	return s.prepareDemand(ctx, scope, amount, ttl, false)
+}
+
+// PrepareAutomaticDemand enforces durable refusal backoff. Explicit preparation
+// remains available for a trusted caller supplying a newly reduced request.
+func (s *Store) PrepareAutomaticDemand(ctx context.Context, scope DemandScope, amount uint64, ttl time.Duration) (IssueRequest, error) {
+	return s.prepareDemand(ctx, scope, amount, ttl, true)
+}
+
+func (s *Store) prepareDemand(ctx context.Context, scope DemandScope, amount uint64, ttl time.Duration, automatic bool) (IssueRequest, error) {
 	var result IssueRequest
 	if s.owner != "agent" || amount == 0 || amount > math.MaxInt64 || ttl < time.Second || ttl > 300*time.Second || ttl%time.Second != 0 || scope.RuleID == "" || len(scope.RuleID) > 128 || scope.SignerEpoch == 0 || scope.RuleRevision == 0 || scope.PathGeneration == 0 {
 		return result, ErrAuthorizationDenied
@@ -54,6 +64,11 @@ func (s *Store) PrepareDemand(ctx context.Context, scope DemandScope, amount uin
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return result, err
+	}
+	if automatic {
+		if err := checkDemandRetryTx(ctx, tx, key, time.Now()); err != nil {
+			return IssueRequest{}, err
+		}
 	}
 	var pending int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM authorization_demands WHERE state='pending'`).Scan(&pending); err != nil {
@@ -155,7 +170,8 @@ func completeDemandTx(ctx context.Context, tx *sql.Tx, requestID, grantID string
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_demands SET state='applied',grant_id=? WHERE request_id=? AND state='pending'`, grantID, requestID); err != nil {
 		return err
 	}
-	return nil
+	_, err = tx.ExecContext(ctx, `DELETE FROM demand_retry WHERE scope=?`, key)
+	return err
 }
 
 // Called inside authorization installation: malformed or mismatched responses

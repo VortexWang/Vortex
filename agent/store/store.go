@@ -248,6 +248,10 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS demand_retry (
+ scope BLOB PRIMARY KEY NOT NULL, reason TEXT NOT NULL,
+ failures INTEGER NOT NULL, denied_at TEXT NOT NULL, retry_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS demand_consumption (
  scope BLOB NOT NULL, slot INTEGER NOT NULL CHECK(slot>=0 AND slot<60),
  second INTEGER NOT NULL, bytes TEXT NOT NULL, PRIMARY KEY(scope,slot)
@@ -430,7 +434,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '15')
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '16')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {

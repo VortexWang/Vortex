@@ -416,3 +416,25 @@ backoff, production configuration wiring, safe idle shrink/reclaim, workload
 scans with real durable issuer, full attack matrix and same-SHA native evidence.
 The additional settlement transaction work has not yet been performance
 qualified; c6a0761 performance cannot be reused for this implementation.
+
+## Durable refusal backoff
+
+Schema 16 persists refusal reason, streak and retry time per immutable demand
+scope. Automatic preparation checks it in the same transaction as coalescing
+and request creation. Funding denial uses 1,2,4,8,16,32,60-second capped backoff;
+invalid/expired immutable scope stops automatic requests until provisioning
+changes. Existing pending requests still replay exactly. Trusted explicit
+preparation can submit a reduced request without redefining a pending one.
+
+Denial-state update and retry-state update commit together. Duplicate denial
+does not increment the streak or postpone the deadline. Only a newly completed
+success clears refusal history; old success replay cannot clear a newer denial.
+Clock rollback fails closed. Scheduling treats deferred retry as a normal skip
+so usage/control processing continues. These retry guards do not constitute
+D-04 parameter lock and are not the 200 ms data-path wait.
+
+Tests cover restart, duplicate denial, pending coalescing during cooldown,
+expired-scope suppression, cap/rollback, plus real mTLS replay of old success
+after a newer denial. Full Agent/Hub race and vet PASS; additional mTLS
+anti-replay targeted race PASS. Remaining waiting/idle/workload/qualification
+requirements are unchanged and still open.

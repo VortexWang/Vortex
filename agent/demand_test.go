@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -100,6 +101,12 @@ func TestDemandCompletesOnlyFromBoundTLSIssuer(t *testing.T) {
 		t.Fatal(err)
 	}
 	transport() // only 4 MiB remains at the issuer: definitive denial
+	if err := serve(d.HubID); err != nil {
+		t.Fatal(err)
+	} // old successful response
+	if _, err := as.PrepareAutomaticDemand(ctx, scope, 8<<20, time.Minute); !errors.Is(err, store.ErrDemandRetryDeferred) {
+		t.Fatalf("old success erased later refusal cooldown: %v", err)
+	}
 	smaller, err := as.PrepareDemand(ctx, scope, 4<<20, time.Minute)
 	if err != nil || smaller.ID == oversized.ID {
 		t.Fatalf("wire denial did not retire request: %+v %v", smaller, err)
