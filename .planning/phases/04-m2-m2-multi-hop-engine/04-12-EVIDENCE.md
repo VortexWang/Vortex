@@ -1655,3 +1655,27 @@ renewal starvation despite adequate aggregate credit; per-grant confirmation
 and a bounded, scope-safe fix remain required. Do not weaken the deadline or
 hide this failing test. Local raw logs retained under
 artifacts/phase4/continuous-regression. D-04 remains unlocked.
+
+## Confirmed fragmented credit; bounded fragment admission primitive
+
+ReadDemandLedger now additionally reports LargestGrant, calculated only after
+all existing scope/time/authority filters. It does not change summed Available
+or renewal policy. The continuous TCP failure reproduced with Available=1644,
+LargestGrant=1096 and a 1500-byte write, no pending demands, and no unknown or
+reserved balance. A deterministic Store fixture independently proves two valid
+1096-byte grants sum to 2192 yet cannot satisfy the single-grant reservation.
+
+Added one-shot ReserveRuntimeUsageUpTo (1..4 MiB requested), reusing session,
+lineage, lease, connection, rate and durable reservation checks. It admits at
+least one byte up to the available grant tail and returns the exact grant and
+amount. Reusing its allocation identity is rejected; ambiguous errors must be
+recovered, never treated as fresh permission. No funds are created and no
+renewal threshold is changed. Fragment collection/rollback and whole-write
+settlement must still be implemented in Agent before this can fix traffic.
+
+Targeted Store race tests PASS 3.794s, including fragmented reservation, exact
+identity, one-shot replay rejection, short-write unused returns and preservation
+of a large preexisting unknown liability. The continuous regression remains
+expected to fail until allocator integration is complete. D-04 stays unlocked.
+Full Store race regression also PASS 16.353s; this does not supersede the failing
+continuous runtime regression or establish native evidence for the new API.

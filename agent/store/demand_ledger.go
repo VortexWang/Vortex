@@ -55,7 +55,8 @@ func recordDemandConsumptionTx(ctx context.Context, tx *sql.Tx, node, grant stri
 	return err
 }
 
-type DemandLedger struct{ Available, MinuteBytes uint64 }
+// LargestGrant is diagnostic planning data, never permission to write.
+type DemandLedger struct{ Available, MinuteBytes, LargestGrant uint64 }
 
 // ReadDemandLedger is a planning snapshot, never a capability to write. It sums
 // only still-valid credit in exactly this immutable scope. Held/unknown bytes
@@ -131,6 +132,9 @@ func (s *Store) ReadDemandLedger(ctx context.Context, scope DemandScope, now Iss
 			return DemandLedger{}, ErrAuthorizationDenied
 		}
 		result.Available += remaining
+		if remaining > result.LargestGrant {
+			result.LargestGrant = remaining
+		}
 	}
 	key, err := json.Marshal(scope)
 	if err != nil {

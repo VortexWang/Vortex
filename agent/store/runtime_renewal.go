@@ -198,6 +198,23 @@ func (s *Store) reserveRuntimeFundingRange(ctx context.Context, r UsageReservati
 	return r, nil
 }
 
+// ReserveRuntimeUsageUpTo durably admits a positive fragment no larger than
+// the requested write. The caller must collect the full write before granting
+// Engine permission, and return all proven-unused fragments on admission failure.
+// This is a one-shot identity: ambiguous errors require recovery, never replay.
+func (s *Store) ReserveRuntimeUsageUpTo(ctx context.Context, r UsageReservation, scope AuthorizationUse) (UsageReservation, error) {
+	if s.owner != "agent" || r.Reserved == 0 || r.Reserved > 4<<20 {
+		return UsageReservation{}, ErrAuthorizationDenied
+	}
+	bounds := &fundingBlockRange{minimum: 1, preferred: r.Reserved}
+	id, err := s.reserveRuntimeUsage(ctx, r, scope, false, bounds)
+	if err != nil {
+		return UsageReservation{}, err
+	}
+	r.AuthorizationID, r.Reserved = id, bounds.allocated
+	return r, nil
+}
+
 type fundingBlockRange struct {
 	minimum, preferred, allocated uint64
 	idle                          []UsageReservation
@@ -264,7 +281,7 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	var blockSession, blockDirection sql.NullString
 	err = tx.QueryRowContext(ctx, `SELECT h.authorization_id,b.session_id,b.direction FROM authorization_usage_holds h LEFT JOIN runtime_funding_blocks b ON b.node_id=h.node_id AND b.batch_id=h.batch_id WHERE h.node_id=? AND h.batch_id=?`, scope.NodeID, r.BatchID).Scan(&heldID, &blockSession, &blockDirection)
 	if err == nil {
-		if bounds != nil && bounds.admit {
+		if bounds != nil && (bounds.admit || !fundingBlock) {
 			return "", ErrUsageBatchConflict
 		}
 		// Allocation identities never serve as ordinary write admission.
