@@ -2450,3 +2450,20 @@ semantics; they cannot be reused as final version-2 qualification.
 This closes the enumerated stale-revision/stale-generation slice for TCP/UDP;
 P4-Q2 overall stays open for the remaining identity/HELLO, configuration and
 path/fault matrix evidence. Existing later-stage handoff ownership is unchanged.
+
+## P4-Q2 HELLO binding regression
+
+Added ten signed-transcript mutation cases for both peers' node ID, boot ID,
+generation, nonce and capabilities. Each mutation updates mirrored fields too:
+HelloTranscript still accepts structural consistency, but the original signature
+must fail. This prevents a structural parser rejection from being mistaken for
+cryptographic binding evidence. Added genuine mutual TLS over net.Pipe with a
+trusted client certificate but unrelated HELLO signing key; server rejects the
+signature before VerifyPeer, client does not complete. Targeted race repeated
+three times PASS 1.568s. No production behavior changed.
+Existing tests separately cover exporter/direction binding, TLS 1.3 mutual
+identity, canonical SAN, freshness lease/replay and verifier rejection.
+Scope: handshake/library security regressions, not five-process hostile identity
+injection or complete NFR-006. Native Ubuntu/Actions evidence still needed for
+this new test commit. Initial command used the wrong relative directory and
+created no file; only subsequent named test execution is counted.
