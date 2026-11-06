@@ -4,12 +4,12 @@ milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 6
-status: ready_to_execute
-stopped_at: Phase 5 gap planning complete; next 05-06 exact lifecycle proposal
-last_updated: "2026-11-06T01:48:41.107Z"
+status: executing
+stopped_at: 05-06 Task 2 exact lifecycle proposal approval checkpoint
+last_updated: "2026-11-06T02:16:50.888362+00:00"
 last_activity: 2026-11-06
-last_activity_desc: Phase 5 gap plans 05-06 through 05-14 checked inline; implementation remains pending
-state_head: 5adbde9a26c60c14bb93cc77de1f47e0f0c1e185
+last_activity_desc: 05-06 candidate Task 1 tested and committed; exact owner approval pending
+state_head: cf2ef60872c02c97aae770762cd6b04ad31bb79c
 progress:
   total_phases: 8
   completed_phases: 4
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 
 ## Current Position
 
-Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — READY TO EXECUTE
+Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
 Current Plan: 6
 Total Plans in Phase: 14
-Status: Ready to execute — nine gap plans checked; implementation gaps_found remains
-Last activity: 2026-11-06 — Gap planning complete: 05-06..05-14, 34 requirement IDs and 19 decisions covered. New execution/UAT pending.
+Status: Executing — 05-06 Task 1 complete; Task 2 owner decision pending
+Last activity: 2026-11-06 — 05-06 candidate proposal tested and committed; 13 candidate methods passed; formal contracts unchanged.
 
-Progress: Phase 5 [████░░░░░░] 5/14 plans executed; 9 gap plans ready in Waves 5..13. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [████░░░░░░] 5/14 plans executed; 05-06 at Task 2 approval checkpoint, 05-07..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 
@@ -102,8 +102,8 @@ Progress: Phase 5 [████░░░░░░] 5/14 plans executed; 9 gap pl
 ## Session Continuity
 
 Last session: 2026-11-05
-Stopped at: Gap planning complete; next $gsd-execute-phase 5 --gaps-only, starting 05-06 proposal preparation
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-06-PLAN.md
+Stopped at: 05-06 exact proposal approval checkpoint; resume Task2/3 after owner decision
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-06-CHECKPOINT.md
 
 ### Historical qualification review (not a main-workflow gate)
 
