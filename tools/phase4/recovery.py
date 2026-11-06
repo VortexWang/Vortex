@@ -9,6 +9,17 @@ env=dict(os.environ,QUALIFICATION_DIR=str(out),TRANSPORT_MODE='mux')
 procs={};handles=[];backend=args.backend
 roles=['source','relay-1','relay-2','relay-3','destination','relay-2b']
 def run(cmd,**kw):return subprocess.run(cmd,check=True,env=env,**kw)
+def openssl_binary():
+ candidates=[]
+ if os.getenv('OPENSSL_BIN'): candidates.append(os.environ['OPENSSL_BIN'])
+ candidates.extend(['openssl','/opt/homebrew/opt/openssl@3/bin/openssl','/usr/local/opt/openssl@3/bin/openssl'])
+ for binary in candidates:
+  try:
+   subprocess.run([binary,'genpkey','-algorithm','ED25519','-out',os.devnull],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+   return binary
+  except (OSError,subprocess.CalledProcessError):
+   continue
+ raise RuntimeError('recovery requires an OpenSSL build with Ed25519 support; set OPENSSL_BIN')
 def waitfor(fn,timeout=30):
  deadline=time.monotonic()+timeout
  while time.monotonic()<deadline:
@@ -55,10 +66,11 @@ try:
  # The spare has its own authenticated node identity and preserves all hops.
  spare_id='00000000-0000-0000-0000-000000000006'
  certs=out/'certs';key=certs/'relay-2b-key.pem';cert=certs/'relay-2b.pem'
- run(['openssl','genpkey','-algorithm','ED25519','-out',str(key)],stderr=subprocess.DEVNULL)
- run(['openssl','req','-new','-key',str(key),'-out',str(certs/'spare.csr'),'-subj','/CN=relay-2b'],stderr=subprocess.DEVNULL)
+ openssl=openssl_binary()
+ run([openssl,'genpkey','-algorithm','ED25519','-out',str(key)],stderr=subprocess.DEVNULL)
+ run([openssl,'req','-new','-key',str(key),'-out',str(certs/'spare.csr'),'-subj','/CN=relay-2b'],stderr=subprocess.DEVNULL)
  (certs/'spare.ext').write_text('subjectAltName=DNS:vortex,URI:urn:vortex:node:'+spare_id+'\nextendedKeyUsage=clientAuth,serverAuth\n')
- run(['openssl','x509','-req','-in',str(certs/'spare.csr'),'-CA',str(certs/'ca.pem'),'-CAkey',str(certs/'ca-key.pem'),'-CAcreateserial','-out',str(cert),'-days','2','-extfile',str(certs/'spare.ext')],stderr=subprocess.DEVNULL)
+ run([openssl,'x509','-req','-in',str(certs/'spare.csr'),'-CA',str(certs/'ca.pem'),'-CAkey',str(certs/'ca-key.pem'),'-CAcreateserial','-out',str(cert),'-days','2','-extfile',str(certs/'spare.ext')],stderr=subprocess.DEVNULL)
  cfg['relay-2b']=copy.deepcopy(cfg['relay-2']);c=cfg['relay-2b'];c['node_id']=spare_id;c['listen']='127.0.0.1:19446' if backend=='native' else '0.0.0.0:9446';c['certificate']=str(cert) if backend=='native' else '/certs/relay-2b.pem';c['private_key']=str(key) if backend=='native' else '/certs/relay-2b-key.pem';c['evidence_file']=str(out/'events-relay-2b.jsonl');(out/'events-relay-2b.jsonl').write_text('')
  startup_hashes={}
  for r,c in cfg.items():

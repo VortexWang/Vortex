@@ -45,16 +45,30 @@ case "$mode" in
 esac
 
 cd "$out"
-openssl genpkey -algorithm ED25519 -out certs/ca-key.pem
-openssl req -x509 -new -key certs/ca-key.pem -out certs/ca.pem -days 2 -subj '/CN=VORTEX qualification CA'
+openssl_bin=${OPENSSL_BIN:-openssl}
+openssl_probe="$out/.vortex-ed25519-probe.pem"
+if ! "$openssl_bin" genpkey -algorithm ED25519 -out "$openssl_probe" >/dev/null 2>&1; then
+  openssl_bin=
+  for candidate in /opt/homebrew/opt/openssl@3/bin/openssl /usr/local/opt/openssl@3/bin/openssl; do
+    if [ -x "$candidate" ] && "$candidate" genpkey -algorithm ED25519 -out "$openssl_probe" >/dev/null 2>&1; then
+      openssl_bin=$candidate
+      break
+    fi
+  done
+fi
+rm -f "$openssl_probe"
+[ -n "$openssl_bin" ] || { echo 'qualification requires an OpenSSL build with Ed25519 support; set OPENSSL_BIN' >&2; exit 1; }
+export OPENSSL_BIN="$openssl_bin"
+"$openssl_bin" genpkey -algorithm ED25519 -out certs/ca-key.pem
+"$openssl_bin" req -x509 -new -key certs/ca-key.pem -out certs/ca.pem -days 2 -subj '/CN=VORTEX qualification CA'
 
 ids='source=00000000-0000-0000-0000-000000000001 relay-1=00000000-0000-0000-0000-000000000002 relay-2=00000000-0000-0000-0000-000000000003 relay-3=00000000-0000-0000-0000-000000000004 destination=00000000-0000-0000-0000-000000000005'
 for item in $ids; do
   name=${item%%=*}; id=${item#*=}
-  openssl genpkey -algorithm ED25519 -out "certs/$name-key.pem"
-  openssl req -new -key "certs/$name-key.pem" -out "certs/$name.csr" -subj "/CN=$name"
+  "$openssl_bin" genpkey -algorithm ED25519 -out "certs/$name-key.pem"
+  "$openssl_bin" req -new -key "certs/$name-key.pem" -out "certs/$name.csr" -subj "/CN=$name"
   printf 'subjectAltName=DNS:vortex,URI:urn:vortex:node:%s\nextendedKeyUsage=clientAuth,serverAuth\n' "$id" > "certs/$name.ext"
-  openssl x509 -req -in "certs/$name.csr" -CA certs/ca.pem -CAkey certs/ca-key.pem -CAcreateserial -out "certs/$name.pem" -days 2 -extfile "certs/$name.ext"
+  "$openssl_bin" x509 -req -in "certs/$name.csr" -CA certs/ca.pem -CAkey certs/ca-key.pem -CAcreateserial -out "certs/$name.pem" -days 2 -extfile "certs/$name.ext"
 done
 
 json() {
