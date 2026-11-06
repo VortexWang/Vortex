@@ -1039,3 +1039,22 @@ renewal slice. It does not prove arbitrary long-run latency, eliminate every
 possible timeout, implement durable session blocks, cover the complete attack
 matrix, supply production backend transport, or lock D-04 parameters. Broader
 qualification and grant-return contract approval remain separate open work.
+
+## Runtime reservation mutation/replay attack matrix
+
+TestRuntimeReservationScopeAndReplayAttacksAreAtomic exercises 12 mutations
+against an existing funded, unresolved reservation: node, boot, session, flow,
+snapshot, rule, revision, path generation, invalid direction, zero amount,
+changed replay amount and changed replay direction. Each must fail without
+changing source balance, durable rate tokens/tick, hold/reservation row counts
+or selected session authority. The original request must still replay once
+without another debit. After explicit session close the same request is denied,
+and its unresolved hold stays occupied rather than being refunded.
+
+Targeted race PASS (2.834s); full Store uncached race PASS (11.149s); Store vet
+and diff check PASS. These are local Store-seam attack assertions, not remote
+OPEN, cross-tenant multi-hop or native hostile campaign evidence. No production
+logic, frozen contract or parameter default changed. Durable session blocks
+remain unimplemented: their implementation must preserve these per-session
+identity and replay invariants as well as crash upper-bound freezing, revocation
+and per-write rate enforcement.
