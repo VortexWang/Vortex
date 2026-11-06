@@ -3,6 +3,8 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
+# Version 2 admits a valid nonzero stale-version attack probe.
+export PHASE4_POLICY_VERSION="${PHASE4_POLICY_VERSION:-2}"
 qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 export BACKEND="$mode" QUALIFICATION_DIR="$qual" PHASE4_FORMAL="${PHASE4_FORMAL:-0}"
 

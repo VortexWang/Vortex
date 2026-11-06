@@ -4,8 +4,11 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
+# Version 2 admits a valid nonzero stale-version attack probe.
+export PHASE4_POLICY_VERSION="${PHASE4_POLICY_VERSION:-2}"
 runtime=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 out=${COMPARISON_DIR:-$root/artifacts/phase4/comparison/$mode}
+[ "$PHASE4_POLICY_VERSION" = 2 ] || { echo "comparison attack matrix requires PHASE4_POLICY_VERSION=2 for qualification and comparison" >&2; exit 2; }
 mkdir -p "$out" "$root/artifacts/phase4"
 out=$(CDPATH= cd -- "$out" && pwd)
 rm -f "$out"/fault-ready "$out"/fault-injected "$out"/forged-open.json "$out"/middle-hop-fault.json "$out"/comparison.json "$out"/rtt-*.json

@@ -299,7 +299,8 @@ UDP. The output covers 16 named OPEN cases plus UDP link loss; it is not a full
 identity-handshake/security qualification. The directory must not exist.
 
 The expanded `attack_gate.py` deliberately rejects the previous 12-case report.
-When using `comparison.sh`, generate both the original qualification run and
+`qualification.sh` and `comparison.sh` now default to version 2. When overriding
+configuration, generate both the original qualification run and
 its comparison with `PHASE4_POLICY_VERSION=2`; preserve that value across warmup
 and all trials so their semantics match. The generator still defaults to 1 for
 existing non-attack fixtures. A full attack probe against version 1 fails with
