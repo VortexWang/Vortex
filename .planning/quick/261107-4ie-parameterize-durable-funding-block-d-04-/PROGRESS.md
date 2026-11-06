@@ -33,3 +33,5 @@ Exact detached verification worktree `/private/tmp/vortex-phase4-2543fb7-verific
 - source credit SHA256: `de4b74fc76204b6914b8c70a587457dcb5735600a9b0566672cdcaf76315f886`
 
 Local Engine `go test -race ./...` passed (cached where applicable). Root `go test ./...; go vet ./...` is still running in local session 72562; inspect its result before claiming a pass. No Actions run for 2543fb7 has been established.
+
+Root session 72562 subsequently completed successfully: all root module tests passed (agent 202.223s), followed by go vet exit zero. New `audit_d04_timeline.py` independently checks every sampled source-conservation equation, stable snapshot/budget, nondecreasing used bytes, bounded dynamic target and (when requested) a separately recorded 65-second idle window, observed target growth/shrink and final settlement. Its negative tests reject corrupt interior samples and missing idle/sampling evidence; all 31 Phase 4 Python tests pass. This auditor runs after the existing remote scan and does not alter its source SHA or hot path. It does not prove issuer credit return.
