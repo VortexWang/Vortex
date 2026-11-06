@@ -1,0 +1,16 @@
+=== RUN   TestNodeCommandsDrain
+=== RUN   TestNodeCommandsDrain/commands-grace
+2026/11/06 09:16:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:54 INFO udp link drop summary link_id=f4595c35505fd0fa687e6e090f4a1b90 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestNodeCommandsDrain/commands-force
+2026/11/06 09:16:55 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:55 INFO udp link drop summary link_id=97e1463eb9771966bd952cccbdf71733 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestNodeCommandsDrain/commands-restart
+2026/11/06 09:16:55 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:55 INFO udp link drop summary link_id=f2d9fc97462b80c4ea440fd0fb0f18ee window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestNodeCommandsDrain (2.29s)
+    --- PASS: TestNodeCommandsDrain/commands-grace (0.32s)
+    --- PASS: TestNodeCommandsDrain/commands-force (0.32s)
+    --- PASS: TestNodeCommandsDrain/commands-restart (0.61s)
+PASS
+ok  	vortex/test/phase5	2.297s

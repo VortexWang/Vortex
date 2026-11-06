@@ -1,0 +1,7 @@
+{
+  "source_sha": "8566b1eeb18b3fed452630e0137675d2b3662dcc",
+  "docker": "passed",
+  "actions": "failed-at-wave1",
+  "paired_pass": false,
+  "superseded_by": "5ca72e06898f20d105c099e60f83defa1ebf5c5f"
+}

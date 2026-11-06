@@ -1,0 +1,8 @@
+{
+  "source_sha": "5ca72e06898f20d105c099e60f83defa1ebf5c5f",
+  "clean_checkout": true,
+  "host": "macOS-26.6.2-arm64-arm-64bit",
+  "architecture": "arm64",
+  "docker_server": "29.8.2",
+  "systemd": "unavailable on macOS; Ubuntu result separate"
+}

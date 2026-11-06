@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "source_sha": "5ca72e06898f20d105c099e60f83defa1ebf5c5f",
+  "scope": "05-11-signed-service-upgrade",
+  "production_backend_authority": false,
+  "docker": {
+    "architecture": "arm64",
+    "report": "docker/report.json",
+    "deployment": "deployment-docker/report.json"
+  },
+  "actions": {
+    "architecture": "amd64",
+    "run_id": 42193600373,
+    "url": "https://github.com/VortexWang/Vortex/actions/runs/42193600373",
+    "report": "actions/report.json",
+    "deployment": "actions/deployment/report.json",
+    "systemd_unit_verify": "passed"
+  },
+  "systemd_live_daemon_upgrade": "not_run; actual OS-process service controller used in acceptance tracer"
+}

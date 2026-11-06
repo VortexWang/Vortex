@@ -1,0 +1,22 @@
+=== RUN   TestUpgradeProcessRollback
+=== RUN   TestUpgradeProcessRollback/upgrade-healthy
+2026/11/06 09:16:58 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:58 INFO udp link drop summary link_id=0caaf516ae58eff418d125e9ceca5e79 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 09:16:58 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:58 INFO udp link drop summary link_id=649ef8b9d61cfd88af519d94b6839f0a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    upgrade_process_test.go:45: real node healthy verified fresh boot a8339559-9705-f646-8156-d03a47cac42d, FULL/WAL, current authority and TCP response; unknown512 retained
+=== RUN   TestUpgradeProcessRollback/upgrade-rollback
+2026/11/06 09:16:58 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:16:59 INFO udp link drop summary link_id=3051c8337be9f7f2c45eff32336dd098 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    upgrade_process_test.go:204: config 1 fence9 active 
+    upgrade_process_test.go:213: authorization boot=e0a8db5d-3204-dd6b-b485-9c141bda41e6 runtime_lease active 7a401e5a-3f90-403a-b74d-c46450c1d597
+    upgrade_process_test.go:213: authorization boot=e0a8db5d-3204-dd6b-b485-9c141bda41e6 share_lease active 18c2ce21-9c53-49b3-aaeb-c3b25766f4c4
+    upgrade_process_test.go:213: authorization boot=e0a8db5d-3204-dd6b-b485-9c141bda41e6 credit_grant active 859b1b7f-1118-4d9c-89a5-4c1a42ebb6c9
+2026/11/06 09:17:05 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 09:17:05 INFO udp link drop summary link_id=4dacd81e4ac99cde26e73bfd9d0132d3 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    upgrade_process_test.go:45: real node rolled-back verified fresh boot 5d9bebe5-e1b3-2bf7-1305-f64153014890, FULL/WAL, current authority and TCP response; unknown512 retained
+--- PASS: TestUpgradeProcessRollback (9.19s)
+    --- PASS: TestUpgradeProcessRollback/upgrade-healthy (0.90s)
+    --- PASS: TestUpgradeProcessRollback/upgrade-rollback (6.79s)
+PASS
+ok  	vortex/test/phase5	9.189s

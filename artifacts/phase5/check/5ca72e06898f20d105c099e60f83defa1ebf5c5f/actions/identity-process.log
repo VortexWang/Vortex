@@ -1,0 +1,7 @@
+=== RUN   TestIdentityProcessRotation
+2026/11/06 09:20:59 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    identity_process_test.go:21: rotated serial 363398190409117387849599154979524457 -> 1214188603467114710337582581438926982 with boot=0dc77fb1-8dbe-e636-66c5-5421280bb085 generation=4; old TCP preserved
+2026/11/06 09:21:04 INFO udp link drop summary link_id=045ffaccb53f1eb2651d77e7545a4a31 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestIdentityProcessRotation (6.26s)
+PASS
+ok  	vortex/test/phase5	6.268s

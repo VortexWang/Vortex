@@ -46,7 +46,7 @@ period of at least50s. Do not place SQLite/WAL on NFS or shared cross-host stora
 A kill/restart creates a new boot and preserves prior ledger/unknown debt; it
 cannot revive old authorization. No deployment mode puts traffic in Hub/backend.
 
-## External signed service upgrade (05-11, integration in progress)
+## External signed service upgrade (05-11)
 
 Use a separate trusted `/usr/local/libexec/vortex-node-upgrader` invocation,
 never a goroutine of the process being replaced. The node service executable
@@ -77,4 +77,5 @@ original/current cgroups unpopulated. Missing/uncertain proof retains the same
 transaction as unknown. A failed candidate is stopped before old binary restart;
 old service must also pass current-authority traffic health. `--recover` queries the
 existing durable transaction; unresolved activation remains an explicit error.
-Full05-11 failure/deployment acceptance is still pending; see05-11-EVIDENCE.md.
+05-11 actual OS-process upgrade/rollback and paired gates passed; systemd unit
+verification is separate from a live systemd boot. See05-11-EVIDENCE.md.

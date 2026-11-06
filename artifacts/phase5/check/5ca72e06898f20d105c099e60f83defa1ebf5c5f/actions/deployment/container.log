@@ -1,0 +1,5 @@
+=== RUN   TestNodeContainerLifecycle
+    node_container_test.go:127: non-root PID1 SIGTERM exit0; fresh boots f022cefb-0eb6-cdbe-4adf-e1144490e9e3 0707046f-18c6-1ee7-390a-f32e2dbc81b4 f6a622d5-9bfa-4df4-d5a3-96174a436435; unknown512 preserved
+--- PASS: TestNodeContainerLifecycle (1.87s)
+PASS
+ok  	vortex/test/phase5	1.876s

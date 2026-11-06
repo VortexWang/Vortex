@@ -1,0 +1,28 @@
+go: downloading golang.org/x/sys v0.49.0
+go: downloading modernc.org/sqlite v1.61.1
+go: downloading google.golang.org/grpc v1.85.0
+go: downloading golang.org/x/net v0.60.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1
+go: downloading golang.org/x/text v0.42.0
+go: downloading modernc.org/libc v1.79.0
+go: downloading modernc.org/mathutil v1.7.1
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/dustin/go-humanize v1.1.0
+go: downloading modernc.org/memory v1.12.1
+go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+ok  	vortex/agent	23.437s
+ok  	vortex/agent/identity	0.031s
+ok  	vortex/agent/store	5.640s
+ok  	vortex/agent/upgrade	0.472s
+?   	vortex/cmd/modelcheck	[no test files]
+ok  	vortex/cmd/vortex-node	0.128s
+?   	vortex/cmd/vortex-test-hub	[no test files]
+ok  	vortex/contracts	0.008s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/hub	0.448s
+ok  	vortex/model	0.003s
+?   	vortex/test/netns/fixture	[no test files]
+ok  	vortex/test/phase5	51.004s
+ok  	vortex/tests/phase1	0.008s
+?   	vortex/tools/phase1	[no test files]
+?   	vortex/tools/phase4	[no test files]
