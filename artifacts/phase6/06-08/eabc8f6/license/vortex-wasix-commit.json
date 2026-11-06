@@ -1,0 +1,113 @@
+{
+  "sha": "fc94d603e92e2597fc605261127e9aabcf0a30b1",
+  "node_id": "C_kwDOKeQqwdoAKGZjOTRkNjAzZTkyZTI1OTdmYzYwNTI2MTEyN2U5YWFiY2YwYTMwYjE",
+  "commit": {
+    "author": {
+      "name": "Anuraag Agrawal",
+      "email": "anuraaga@gmail.com",
+      "date": "2023-10-23T13:58:06Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2023-10-23T13:58:06Z"
+    },
+    "message": "Force only minimal flags for now (#4)",
+    "tree": {
+      "sha": "1ef69b56874a614b95f6b203d2f7c6f99c4ba6ec",
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/trees/1ef69b56874a614b95f6b203d2f7c6f99c4ba6ec"
+    },
+    "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/commits/fc94d603e92e2597fc605261127e9aabcf0a30b1",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJlNnvuCRBK7hj4Ov3rIwAAzLsIAJnYVcRRnEV+Yed1A+adyR0q\nWl78+kx+50I4iPRej26AWGEa5jC2uUbl5AXC/ANWa2meBBvKBWxibeZwdvlHZ+9x\ntUwqDsQ/HkO3Ky2/8TuctKYv3cFmD5edq31FNPCmNARKubTGfuSYQ8NukY9Qq8v+\nw/WnduYBmRnW7RdY+pWHYOfd371YNmO04iJK4N8Tb9yGx9FJUb/y2mrzctSoMLnR\n96GtStdsdvrIXw0h+Px4w9s1HUgiGnEzbGgnNNCCCT+2OcVsksh4A0zyzoyoehFA\n5d/6da+nQMSe6a7BM8/IJ7QPaFnXgPLKMRmC+4Gol3FEXUkD6vqq/R43dOX3Z70=\n=CBZt\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 1ef69b56874a614b95f6b203d2f7c6f99c4ba6ec\nparent 3d17cc4eb668d196c52c9fafbe22728455a5aa9d\nauthor Anuraag Agrawal <anuraaga@gmail.com> 1698069486 +0900\ncommitter GitHub <noreply@github.com> 1698069486 +0900\n\nForce only minimal flags for now (#4)\n\n",
+      "verified_at": "2024-01-16T19:59:59Z"
+    }
+  },
+  "url": "https://api.github.com/repos/wasilibs/wasix-sdk/commits/fc94d603e92e2597fc605261127e9aabcf0a30b1",
+  "html_url": "https://github.com/wasilibs/wasix-sdk/commit/fc94d603e92e2597fc605261127e9aabcf0a30b1",
+  "comments_url": "https://api.github.com/repos/wasilibs/wasix-sdk/commits/fc94d603e92e2597fc605261127e9aabcf0a30b1/comments",
+  "author": {
+    "login": "anuraaga",
+    "id": 198344,
+    "node_id": "MDQ6VXNlcjE5ODM0NA==",
+    "avatar_url": "https://avatars.githubusercontent.com/u/198344?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/anuraaga",
+    "html_url": "https://github.com/anuraaga",
+    "followers_url": "https://api.github.com/users/anuraaga/followers",
+    "following_url": "https://api.github.com/users/anuraaga/following{/other_user}",
+    "gists_url": "https://api.github.com/users/anuraaga/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/anuraaga/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/anuraaga/subscriptions",
+    "organizations_url": "https://api.github.com/users/anuraaga/orgs",
+    "repos_url": "https://api.github.com/users/anuraaga/repos",
+    "events_url": "https://api.github.com/users/anuraaga/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/anuraaga/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "3d17cc4eb668d196c52c9fafbe22728455a5aa9d",
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/commits/3d17cc4eb668d196c52c9fafbe22728455a5aa9d",
+      "html_url": "https://github.com/wasilibs/wasix-sdk/commit/3d17cc4eb668d196c52c9fafbe22728455a5aa9d"
+    }
+  ],
+  "stats": {
+    "total": 9,
+    "additions": 3,
+    "deletions": 6
+  },
+  "files": [
+    {
+      "sha": "f47b6c28694056dc166e973c01d183b73128f810",
+      "filename": "Dockerfile",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "blob_url": "https://github.com/wasilibs/wasix-sdk/blob/fc94d603e92e2597fc605261127e9aabcf0a30b1/Dockerfile",
+      "raw_url": "https://github.com/wasilibs/wasix-sdk/raw/fc94d603e92e2597fc605261127e9aabcf0a30b1/Dockerfile",
+      "contents_url": "https://api.github.com/repos/wasilibs/wasix-sdk/contents/Dockerfile?ref=fc94d603e92e2597fc605261127e9aabcf0a30b1",
+      "patch": "@@ -23,7 +23,7 @@ COPY wasix-sysroot /wasix-sysroot\n \n ADD wasix-sdk.cmake /usr/share/cmake/wasix-sdk.cmake\n ENV CMAKE_TOOLCHAIN_FILE /usr/share/cmake/wasix-sdk.cmake\n-ADD WASIX.cmake /usr/share/cmake/Modules/Platform/WASI.cmake\n+ADD WASIX.cmake /usr/share/cmake/Modules/Platform/WASIX.cmake\n \n ENV CC clang-${LLVM_VERSION}\n ENV CXX clang++-${LLVM_VERSION}\n@@ -32,6 +32,6 @@ ENV AR llvm-ar-${LLVM_VERSION}\n ENV RANLIB llvm-ranlib-${LLVM_VERSION}\n ENV NM llvm-nm-${LLVM_VERSION}\n \n-ENV CFLAGS \"--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot -pthread -mthread-model posix -ftls-model=local-exec -fno-trapping-math -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_PROCESS_CLOCKS\"\n+ENV CFLAGS \"--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot\"\n ENV CXXFLAGS $CFLAGS -fno-exceptions\n-ENV LDFLAGS --target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot -lwasi-emulated-mman -lwasi-emulated-process-clocks -lwasi-emulated-getpid -Wl,--shared-memory -Wl,--max-memory=4294967296 -Wl,--import-memory -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=__stack_pointer -Wl,--export=__data_end -Wl,--export=__wasm_init_tls -Wl,--export=__wasm_signal -Wl,--export=__tls_size -Wl,--export=__tls_align -Wl,--export=__tls_base\n+ENV LDFLAGS --target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot"
+    },
+    {
+      "sha": "bfc0a69a1d0778b302dbc5f1679a7235d4fc8f95",
+      "filename": "wasix-sdk.cmake",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 3,
+      "changes": 3,
+      "blob_url": "https://github.com/wasilibs/wasix-sdk/blob/fc94d603e92e2597fc605261127e9aabcf0a30b1/wasix-sdk.cmake",
+      "raw_url": "https://github.com/wasilibs/wasix-sdk/raw/fc94d603e92e2597fc605261127e9aabcf0a30b1/wasix-sdk.cmake",
+      "contents_url": "https://api.github.com/repos/wasilibs/wasix-sdk/contents/wasix-sdk.cmake?ref=fc94d603e92e2597fc605261127e9aabcf0a30b1",
+      "patch": "@@ -3,9 +3,6 @@\n # This is arbitrary, AFAIK, for now.\n cmake_minimum_required(VERSION 3.4.0)\n \n-set(COMPILE_FLAGS \"-O2 -pthread -mthread-model posix -ftls-model=local-exec -fno-trapping-math -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_PROCESS_CLOCKS -fno-exceptions\")\n-set(LINK_FLAGS \"-lwasi-emulated-mman -lwasi-emulated-process-clocks -lwasi-emulated-getpid -fno-exceptions -Wl,--shared-memory -Wl,--max-memory=4294967296 -Wl,--import-memory -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=__stack_pointer -Wl,--export=__data_end -Wl,--export=__wasm_init_tls -Wl,--export=__wasm_signal -Wl,--export=__tls_size -Wl,--export=__tls_align -Wl,--export=__tls_base\")\n-\n # To make sure it recognizes the WASI platform\n list(APPEND CMAKE_MODULE_PATH /usr/share/cmake/Modules)\n "
+    }
+  ]
+}
