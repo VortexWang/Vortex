@@ -100,7 +100,13 @@ def verify(archive, binary, platform_key, pinned):
                 blocked.append(dict(component=row["component"], module=row["module"],
                                     version=row["version"], sum=row["sum"], license=license_id,
                                     files=row["files"]))
+    auxiliary = review["auxiliary_source_review"]
+    for name, expected_digest in auxiliary["evidence_files"].items():
+        if digest(ROOT / name) != expected_digest:
+            raise ValueError(f"auxiliary linked-source evidence changed: {name}")
+    if not set(auxiliary["licenses"]) <= allowed:
+        raise ValueError("unapproved auxiliary linked-source license")
     gaps = review.get("provenance_gaps", [])
     return dict(status="blocked" if blocked or gaps else "passed", linked_modules=len(actual), artifact=artifact,
                 approved_exceptions=matched, license_findings=blocked, provenance_gaps=gaps,
-                usage=USAGE, scope=review["scope"])
+                auxiliary_source_status=auxiliary["status"], usage=USAGE, scope=review["scope"])

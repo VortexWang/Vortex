@@ -5,6 +5,8 @@ from pathlib import Path
 import unittest
 
 from sqlc_license_check import exception_matches
+from compare_wasm_archive import normalized, ar_members
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -51,6 +53,35 @@ class ExactToolLicenseException(unittest.TestCase):
         approval["status"] = "approved"
         approval["decision"] = "B"
         self.assertFalse(self.matches(approval=approval))
+
+
+class WasmSourceComparison(unittest.TestCase):
+    @staticmethod
+    def module(code=b"one", producer=b"clang-A", extra=b""):
+        name = b"\x09producers"
+        return b"\0asm\x01\0\0\0" + bytes([10, len(code)]) + code + bytes([0, len(name + producer)]) + name + producer + extra
+
+    def test_only_compiler_producer_string_may_differ(self):
+        self.assertEqual(normalized(self.module(producer=b"clang-A")), normalized(self.module(producer=b"clang-B")))
+        self.assertNotEqual(normalized(self.module(code=b"one")), normalized(self.module(code=b"two")))
+
+    def test_every_other_section_and_section_order_remains_significant(self):
+        for section_id in (1, 2, 3, 11, 12):
+            extra = bytes([section_id, 1, 0])
+            self.assertNotEqual(normalized(self.module()), normalized(self.module(extra=extra)))
+        for name in (b"linking", b"reloc.CODE", b"target_features"):
+            payload = bytes([len(name)]) + name
+            extra = bytes([0, len(payload)]) + payload
+            self.assertNotEqual(normalized(self.module()), normalized(self.module(extra=extra)))
+
+    def test_archive_duplicate_members_are_preserved(self):
+        def member(payload):
+            header = f"{'same.o/':<16}{0:<12}{0:<6}{0:<6}{644:<8}{len(payload):<10}`\n".encode()
+            return header + payload + (b"\n" if len(payload) % 2 else b"")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "lib.a"
+            path.write_bytes(b"!<arch>\n" + member(b"one") + member(b"two"))
+            self.assertEqual(list(ar_members(path)), [("same.o", b"one"), ("same.o", b"two")])
 
 
 if __name__ == "__main__":

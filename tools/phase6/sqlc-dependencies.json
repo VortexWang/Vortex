@@ -572,14 +572,58 @@
       "reason": "Declarations-only header, no regex C implementations, function calls or data in cparser sources; not asserted as linked regex implementation"
     }
   ],
-  "provenance_gaps": [
-    {
-      "component": "libpg_query embedded WASM WASIX sysroot",
-      "asset_sha256": "a49afdfd4f711aca1510c17b062036f45dcf07ad5363d16a586f9a9980c1dec5",
-      "sdk_commit": "fc94d603e92e2597fc605261127e9aabcf0a30b1",
-      "source": "https://github.com/wasilibs/wasix-sdk/blob/fc94d603e92e2597fc605261127e9aabcf0a30b1/.github/workflows/docker.yml",
-      "missing": "Workflow downloads prebuilt wasix-org/wasix-libc Actions run 6268266259; official run endpoint now returns 404, so the exact linked sysroot source/license closure is not established. SDK root MIT is not evidence for all linked libc/compiler runtime files.",
-      "resolution": "Recover exact sysroot source/license manifest or a reviewed reproducible asset; do not approve unknown licenses via CR-003 or CR-004."
+  "provenance_gaps": [],
+  "auxiliary_source_review": {
+    "status": "reconstructed-and-reviewed",
+    "sdk_image": "sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae",
+    "source_commit": "d0362cb23d5a6bdba3ddb2e04748ebb55b48cd00",
+    "licenses": [
+      "MIT",
+      "BSD-2-Clause",
+      "Public-Domain",
+      "Apache-2.0"
+    ],
+    "upstream_expressions": [
+      "MIT OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception",
+      "CC0-1.0 public-domain dedication",
+      "Apache-2.0 WITH LLVM-exception"
+    ],
+    "compliance_basis": "Select the explicit MIT option for WASI changes, preserve BSD notices, classify the old allocator only from its explicit public-domain dedication, and comply with the full already-allowed Apache-2.0 base obligations for LLVM without relying on optional exception relief. No new global license permission.",
+    "archive_members": 1232,
+    "all_non_producer_sections_matched": 1086,
+    "builtins_exact_matches": 146,
+    "selected_libc_objects": 107,
+    "selected_compiler_rt_objects": 13,
+    "evidence_files": {
+      "artifacts/phase6/06-08/eabc8f6/license/source-recovery-final.json": "62146c725f1f5935a87c7f86f3bbab4704f40a4df7f6e615dc5f378f69fcba92",
+      "artifacts/phase6/06-08/eabc8f6/license/runtime-object-recovery.json": "ffa8527b5f9bfaa1276db4cef5820f130e56ea15baa018d4da0a3e7a5bc06969",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-object-source-comparison.json": "b1f79bfa8feeb1a1baddc57607f5d70ab7314f58ce12846dfb024eb2edcf0da8",
+      "artifacts/phase6/06-08/eabc8f6/license/linked-libc-review.json": "bc4674aa9d4f91025c0b182bd4f9f30288cfbcbc93c2e905b2933293ff92b38d",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-sources.json": "ad6354bf7884ede48ddf67ec2221451be725a9f4b49713d6f9ac40c54dd381f1",
+      "artifacts/phase6/06-08/eabc8f6/license/libpgquery-link.map": "082f49ffec2f9a688ec9091da29677aba6ca0e71ecd1ec9e1ee6befac73ee412",
+      "artifacts/phase6/06-08/eabc8f6/license/libpgquery-build-audit.sh": "dbdb4b37ccb094b26dcefef201573592395bab9eb76419553743e553f6f8322c",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-audit.mk": "8c583e819799cfa27e198f21b6aa179d64775ce16ea39d62805f43c0f888ce93",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-LICENSE": "da1128117561950db9e04201ce9ac3f0bd9e3baf852289211608b73098d51ac0",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-LICENSE-APACHE-LLVM": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-libc-bottom-half_cloudlibc_LICENSE": "c8b789cf5a746611e6300a0cc7750dbf92b61912a709d04e639245f7290656d0",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-libc-top-half_musl_COPYRIGHT": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+      "artifacts/phase6/06-08/eabc8f6/license/libc-candidate-dlmalloc_src_malloc.c": "0f29a4b5ccc92e01c7cc29e7f9834aa3141162421df3fbd3591a8d64e766bb37",
+      "artifacts/phase6/06-08/eabc8f6/license/vortex-llvm12-runtime-LICENSE.txt": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/addtf3.c": "6b97db1d7b094e38dfc5d6fb80d10b500cb7030608097553e26efa42030ad14b",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/ashlti3.c": "a64c6e69e79fc6c02756b0681c0183d4d9197f38389ef2d06ccd112864ea7a71",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/comparetf2.c": "006b60d39d0421d991ae715f520870811a97e49a0394aed2de6cef0d38bc3db2",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/extenddftf2.c": "229f6e1f7c95aaa14885de91fe3741db7f702b8594a024417fd4fe4a5eb99669",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fixtfsi.c": "98e3b3203d719877ccc978b75060d0e0e981e56283ae9fee4e6213728249ed23",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fixunstfsi.c": "d0a7700ea19349e68893cddd263d30e74ab3af9b50ee4b430f168461aa8a82e1",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/floatsitf.c": "126e52128913d3d37f023c5ea96e55b15edc05dd8ffac2eae471399613d6ca0f",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/floatunsitf.c": "a0cbd7832856130fb8dcb4b6ed26db72b5f8bf37330e0d6255f24d954bfdec8f",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fp_mode.c": "34fc2bffb0c62e59adf250cf1c6b00de9ca405b99c5f85d2b664d2063becb32f",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/lshrti3.c": "dc92e7ca3501ad010be6e52b91906ab5fc92238b01b06fdf4398aaba184ea1ad",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/multf3.c": "f53b16042b09619f6387859ee865291eecbec16c855f5f454beec640dbbc6d40",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/multi3.c": "b2e133764668e78119f7c76facbb11f0b4b7c0c6b279fb0b97a589da11d1d060",
+      "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/subtf3.c": "5bd836c66e3bddb2c6cfca7ad44fb929a3768dbcd66da488b6fe66fcabe509c4"
     }
-  ]
+  }
 }
