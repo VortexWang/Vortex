@@ -1823,3 +1823,5 @@ Local development run passed both cases at /private/tmp/vortex-process-tcpudp-
 conserved (actual directory name has no newline). Report generation now requires
 explicit PASS markers for both cases; missing/skipped tests fail closed.
 This is functional evidence, not UDP offered-load or sustained qualification.
+
+Clean local TCP+UDP process rerun PASS at 711dbb3109d18d17dcb8b7b1b9df9681c1824b1b; both explicit test markers verified. Report SHA-256 0d299516971b1e79951df37197308da3454d9f9d82d37f53f04b41c178735ebb. Evidence: /private/tmp/vortex-process-protocols-clean. Native UDP remains pending.

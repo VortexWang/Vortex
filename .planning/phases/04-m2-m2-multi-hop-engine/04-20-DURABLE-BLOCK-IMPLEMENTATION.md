@@ -235,3 +235,21 @@ failed tail return faults the gate and retains the tail for recovery.
 
 Native concurrency and full fault qualification are still required. The queue
 bounds/grouping interval are experimental, not selected D-04 parameters.
+
+## Fragmented-grant integration clarification
+
+A durable funding block still belongs to one immutable grant. The experimental
+allocator can now collect a bounded composite write from ordinary per-grant
+reservations after whole-block denial. It never merges authorization identities
+into a block or omits transactional lease/rate validation. Each child retains
+its own hold and settlement identity; only a fully funded composite is exposed
+to Engine. Admission failures return proven-unused children, while ambiguous
+holds and unknown writes remain frozen. Thus the fallback is another fully
+authorized path, not permission granted after a failed check. See 04-12 evidence
+for the fragmented-balance regression and crash coverage.
+
+Node and protocol-test Hub binaries now expose explicit fixture startup options.
+Independent TCP/UDP process tests reconcile source funding and all three usage
+ledgers. They remain short, single-stream tests; neither these tests nor the
+older process-local parameter scanner locks D-04. Multi-hop/concurrent/sustained
+workloads, same-SHA host evidence and the parameter review remain required.
