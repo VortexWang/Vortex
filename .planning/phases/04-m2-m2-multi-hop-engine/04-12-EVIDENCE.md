@@ -1977,3 +1977,21 @@ Regression checks cover own-transaction revocation, rollback/commit visibility
 across transactions, and cancelled read followed by successful fresh reuse.
 Local full Store race PASS 19.145s; Agent/Hub vet and diff checks PASS. Dedicated
 host performance and process comparisons still required before claiming benefit.
+
+Clean 4e7d849b277cc5cb01892f6f5319e4d281447bf4 dedicated-host retest:
+single TCP PASS 10.25s, UDP PASS 10.27s, concurrent TCP FAIL 0.39s at stream 9
+round 0 (RST 0008), overall FAIL 20.921s. First logged admission failure again
+waits approximately 199ms at begin-transaction. Artifact process-4e7d849 report
+SHA-256 583141191c348b51b67a55244f63f99640dc6d8eed471e24576766a93cb6f863;
+test.log b4bdb68df0f1360d5c4b9cdf35ac130e2ba8517e161a1c90a11a7e4b7fbc4526.
+
+Sequential (not concurrent with process tests) matching instrumented 5s ordinary
+1200-byte benchmark PASS: 907 iterations, 6,142,366 ns/op, 79,416 B/op, 2,413
+allocations/op. Prior single sample was 6,825,069 ns/op; this is not repeated
+statistical evidence of improvement, and allocations increased. Profile 6.42s,
+7.12s CPU samples: prepareV2 2.54s (35.67%). Remaining SQL preparation is still
+substantial; caching one read has not solved concurrent qualification. Keep both
+results. Artifacts store-profile-4e7d849, benchmark.log SHA-256
+43ba0c1e23e0cab1a195ed88ff8c179a145da3f9ed9ff4f305b35e1854eba272;
+cpu.pprof 7dc288bead3650f4240b933761fae4b81381dd84b37ce4b0b0105988ecfaaf29.
+Local Hub and node/test-hub CLI tests also PASS. No D-04 default is locked.
