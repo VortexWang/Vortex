@@ -397,6 +397,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	d := store.HubDelegation{ID: regionalBoot, HubID: regionalFirst, SourceID: regionalFirst, RuntimeSourceID: regionalSecond, ShareSourceID: regionalNode, NodeID: regionalNode, BootID: regionalBoot, BillingSnapshotID: regionalBoot, RuleID: cfg.RuleID, RuleRevision: 2, PathGeneration: 4, FencingFloor: 9, SignerEpoch: 1, RawBytes: 16384, RateBPS: 10000000, Connections: 2, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(time.Hour)}
 	if renewalMode != "" {
 		d.RawBytes = 65536
+		if renewalMode == "quota-exhausted" {
+			d.RawBytes = 8192
+		}
 		for i, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
 			d.ShareReferences = append(d.ShareReferences, store.ShareReference{ID: fmt.Sprintf("550e8400-e29b-41d4-a716-%012d", 970+i), SourceID: source, IssuerID: d.HubID, NodeID: d.NodeID, SignerEpoch: 1, Generation: 1, Revision: 1, RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, RateBPS: d.RateBPS, Connections: d.Connections, NotBefore: d.ValidFrom, ExpiresAt: d.ExpiresAt, HardDeadline: d.HardDeadline})
 		}
@@ -423,6 +426,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	os.WriteFile(allocationPath, allocation, 0600)
 	addresses := []string{regionalPort(t), regionalPort(t)}
 	var first *exec.Cmd
+	var restartHub func()
 	for i, id := range []string{regionalFirst, regionalSecond} {
 		cert, key := processCredential(t, dir, id, ca, der)
 		dbPath := filepath.Join(dir, fmt.Sprintf("hub%d.db", i))
@@ -431,6 +435,11 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			args = append(args, "--test-delegation-template", allocationPath, "--test-config-update", updatePath)
 			if renewalMode == "lost-result" {
 				args = append(args, "--test-drop-first-renewal-reply")
+			}
+			if renewalMode == "hub-restart" || renewalMode == "node-restart" {
+				restartArgs := append([]string(nil), args...)
+				restartHub = func() { first = start("vortex-test-hub", restartArgs...) }
+				args = append(args, "--test-hold-renewal-replies")
 			}
 		} else {
 			s, e := store.Open(dbPath, "hub")
@@ -454,6 +463,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	for i, id := range []string{regionalFirst, regionalSecond} {
 		hubs = append(hubs, map[string]string{"hub_id": id, "endpoint": addresses[i], "server_name": id})
 	}
+	if renewalMode == "hub-restart" || renewalMode == "node-restart" {
+		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
+	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
 	if renewalMode != "" {
 		lifecycle["renew_percent"] = 30
@@ -463,7 +475,8 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
-	start("vortex-node", "--node-id", regionalNode, "--db", nodePath, "--engine-config", enginePath, "--control-config", controlPath, "--hub-name", regionalFirst, "--enrollment-hub", addresses[0], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m")
+	nodeArgs := []string{"--node-id", regionalNode, "--db", nodePath, "--engine-config", enginePath, "--control-config", controlPath, "--hub-name", regionalFirst, "--enrollment-hub", addresses[0], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m"}
+	nodeProcess := start("vortex-node", nodeArgs...)
 	db, e := sql.Open("sqlite", nodePath)
 	if e != nil {
 		t.Fatal(e)
@@ -538,7 +551,18 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		}
 	}
 	if renewalMode != "" {
-		schedulerRenewalTraffic(t, ctx, db, dir, cfg, mux, stream, exchange)
+		fault := func() bool {
+			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
+				killProcess(t, first)
+				if renewalMode == "hub-restart" {
+					restartHub()
+				} else {
+					killProcess(t, nodeProcess)
+					nodeProcess = start("vortex-node", nodeArgs...)
+				}
+			})
+		}
+		schedulerRenewalTraffic(t, ctx, db, dir, cfg, mux, stream, exchange, fault)
 		return
 	}
 	exchange("before-control-switch")

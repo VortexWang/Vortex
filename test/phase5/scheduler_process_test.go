@@ -27,18 +27,21 @@ func TestSchedulerProcessRenewal(t *testing.T) {
 			t.Fatalf("build %s: %v\n%s", name, err, out)
 		}
 	}
-	for _, scenario := range []string{"low-water-tcp-udp", "lost-result"} {
+	for _, scenario := range []string{"low-water-tcp-udp", "lost-result", "hub-restart", "node-restart", "quota-exhausted", "write-failure"} {
 		t.Run(scenario, func(t *testing.T) { regionalTrafficContinuity(t, binaries, scenario) })
 	}
 }
 
-func schedulerRenewalTraffic(t *testing.T, ctx context.Context, db *sql.DB, dir string, cfg config.Config, mux *vlink.MuxLink, tcp *vlink.MuxStream, exchange func(string)) {
+func schedulerRenewalTraffic(t *testing.T, ctx context.Context, db *sql.DB, dir string, cfg config.Config, mux *vlink.MuxLink, tcp *vlink.MuxStream, exchange func(string), fault func() bool) {
 	t.Helper()
 	payload := strings.Repeat("r", 512)
 	// Six request+echo pairs consume 6144 of the initial 8192-byte grant.
 	// The original TCP stream stays open while the control loop renews it.
 	for i := 0; i < 6; i++ {
 		exchange(payload)
+	}
+	if fault() {
+		return
 	}
 	for {
 		var installed int

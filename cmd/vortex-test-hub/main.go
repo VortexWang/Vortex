@@ -35,6 +35,7 @@ func main() {
 	updatePath := flag.String("test-config-update", "", "test-only RuntimeConfigUpdate JSON fixture")
 	reportPath := flag.String("test-report-output", "", "test-only latest observational node report; overwritten atomically")
 	dropRenewal := flag.Bool("test-drop-first-renewal-reply", false, "test-only lost renewal result after durable commit")
+	holdRenewal := flag.Bool("test-hold-renewal-replies", false, "test-only crash barrier: retain results without sending replies")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
@@ -131,6 +132,7 @@ func main() {
 		if template.ShareReferences != nil {
 			server.RenewalIssuer = issuer
 			server.DropFirstRenewalReply = *dropRenewal
+			server.HoldRenewalReplies = *holdRenewal
 		}
 		server.AuthorizationUpdate = func(node, boot string) (*controlv1.AuthorizationUpdate, error) {
 			d := sessionDelegation(node, boot)

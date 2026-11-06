@@ -1039,6 +1039,10 @@ func (s *Store) ensureColumn(table, name, declaration string) error {
 	return nil
 }
 
+var ErrEventConflict = errors.New("store: durable event identity conflicts with prior content")
+
+// AppendEvent accepts exact replay after reconnect or restart. An identity
+// cannot overwrite an earlier event's owner, kind or payload.
 func (s *Store) AppendEvent(ctx context.Context, eventID, kind string, payload []byte) error {
 	if eventID == "" || kind == "" {
 		return fmt.Errorf("store: event id and kind are required")
@@ -1048,6 +1052,18 @@ func (s *Store) AppendEvent(ctx context.Context, eventID, kind string, payload [
 		return fmt.Errorf("store: begin: %w", err)
 	}
 	defer tx.Rollback()
+	var oldOwner, oldKind string
+	var oldPayload []byte
+	err = tx.QueryRowContext(ctx, `SELECT owner,kind,payload FROM durable_events WHERE event_id=?`, eventID).Scan(&oldOwner, &oldKind, &oldPayload)
+	if err == nil {
+		if oldOwner != s.owner || oldKind != kind || !bytes.Equal(oldPayload, payload) {
+			return ErrEventConflict
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO durable_events(event_id, owner, kind, payload, created_at) VALUES (?, ?, ?, ?, ?)`, eventID, s.owner, kind, payload, time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
 		return fmt.Errorf("store: event: %w", err)

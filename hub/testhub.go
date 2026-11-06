@@ -50,6 +50,7 @@ type TestServer struct {
 	RenewalIssuer       *Issuer
 	// Test-only lost-response fault; the durable issuer has already committed.
 	DropFirstRenewalReply bool
+	HoldRenewalReplies    bool // test-only crash barrier after durable commit
 	mu                    sync.RWMutex
 	revoked               map[string]struct{}
 	reports               map[string]NodeReportSnapshot
@@ -244,7 +245,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return fmt.Errorf("test hub: stale renewal session")
 			}
 			result, err := s.RenewalIssuer.Renew(ctx, first.GetNodeId(), first.GetBootId(), body.RenewalRequest)
-			drop := err == nil && s.DropFirstRenewalReply
+			drop := err == nil && (s.DropFirstRenewalReply || s.HoldRenewalReplies)
 			if drop {
 				s.DropFirstRenewalReply = false
 			}
