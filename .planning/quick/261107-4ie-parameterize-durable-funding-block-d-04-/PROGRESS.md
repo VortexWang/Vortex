@@ -83,3 +83,7 @@ Prepared /tmp/vortex-phase4-delay-followup.sh on the authorized host; queue PID2
 ## Provisional formal profile queued after delay scan
 
 Queue PID211765 runs /tmp/vortex-phase4-formal-provisional.sh, waiting on delay queue PID210971 and requiring all9 recorded delay trial exit codes before starting. It uses clean0c2ba71,256KiB initial blocks,30s horizon,375000000-byte ceiling,50% waterline,Observe=true. This is a provisional candidate measurement, not a D-04 lock or production default. Output: /root/Vortex-phase4-final-0c2ba71/artifacts/phase4/formal-provisional-256k-30s-50pct. It runs300s semantic warmup,3×300s runtime trials,300s independent TLS comparison and the unchanged formal gate with warmup_seconds=300. Socket limits save/restore via EXIT trap. Log /tmp/vortex-phase4-formal-provisional.log. If final comparative review selects another profile, obtain formal evidence for that profile.
+
+## Independent byte-accounting cross-check
+
+Extended full-factorial auditor to compare every per-flow directional amount against target start/final byte deltas, the accounting report and source committed usage. It validates required88TCP/2UDP identities for16streams+50short samples+5warmups+smoke, exact TCP echo, counter types and nondecreasing target counters. All23currently downloaded dynamic trials pass. Negative tests reject altered target/source counters and omitted flows;35Phase4Python tests pass. This is additional proof from existing raw JSON, not a changed workload or premature full-matrix pass.
