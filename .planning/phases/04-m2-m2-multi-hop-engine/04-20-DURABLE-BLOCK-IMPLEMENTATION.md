@@ -97,3 +97,19 @@ exclusive allocator, write-admission barrier, bounded flush scheduling or Engine
 integration in steps 2/4/6. Until those exist, the API is not used for forwarding.
 Tests currently simulate transaction failure and close/reopen recovery; actual
 process kill, disk-full and native block runtime qualification remain required.
+
+## Write admission progress
+
+AdmitRuntimeFundingBlockWrite validates the current durable session, exact block
+residual and metadata, held and current grant, runtime/share leases, connection
+count and shared rate bucket in one transaction. It reads current lease IDs from
+the session; caller-supplied replacement IDs cannot substitute authority. No
+credit is debited again. Control updates committed first are visible to the
+next admission, matching the existing per-write transaction ordering.
+
+This is an admission primitive, not a concurrent child allocator. Every call
+spends rate again; ambiguous commit errors must fault the caller. The exclusive
+Agent allocator still must bound aggregate in-flight subwrites and serialize
+checkpoints with allocation. The persistent rate bucket still writes per
+admission, so this step does not establish a throughput improvement or meet
+the measured D-04 performance requirement. Runtime wiring remains disabled.

@@ -1152,3 +1152,26 @@ SQLITE_FULL or multi-hop runtime behavior. No runtime caller enables this API.
 Exclusive suballocation, per-write admission/control-update serialization,
 bounded flush scheduling and native qualification are still required before
 D-04 can be locked. The goal and full Phase 4 qualification remain open.
+
+## Funding-block write admission and finite attack slice
+
+Added AdmitRuntimeFundingBlockWrite: a single transaction validates exact block
+identity/residual, current open session, current and held grants, runtime/share
+leases, immutable grant family, connection count and shared durable rate. It
+uses the session's persisted lease IDs, not caller replacement IDs. Admission
+spends rate only, without debiting already-reserved block funds a second time.
+
+Sixteen local rejection cases PASS: boot, flow, snapshot, direction, grant,
+session, revision, path, residual, untrusted time, expiration, closed session,
+revoked grant/runtime/share, and resolved block. Each checks unchanged funding
+and no rate bucket creation. A separate test mixes block and ordinary writes
+and proves the shared rate cap remains enforced without double funding debit.
+Targeted race PASS 3.253s; full Store race PASS 13.379s; Agent/Hub go vet and
+diff checks PASS. The new API has no runtime caller, so this turn's validation
+is Store scope; the previous full Agent/Hub run remains scoped to d8929c4.
+
+No concurrent child allocator or Engine wiring is claimed. This API charges
+rate on each call, not idempotent admission retries; ambiguous commit errors
+must fault the allocator. SQLite rate persistence still costs a write for each
+admission. Native performance, full multi-hop hostile coverage, and D-04 lock
+remain open.
