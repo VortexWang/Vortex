@@ -2355,3 +2355,17 @@ replay query was finishing: CLI panicked on normal context cancellation.
 Preserved artifacts/phase4/process-33618c8. Treat canceled startup replay as
 normal signal shutdown, retaining panic on other errors. Targeted Agent control
 race PASS 5.767s. Full native rerun required after cancellation fix.
+
+Native clean 30ce16c2177b56029db12eadc0cf25f4ba4d8bfb: all four process
+cases PASS, exit 0, suite 76.797s; extended renewal/restart/replay PASS 44.76s.
+Read-only SQLite inspection confirms Agent 8192 hub_acked, Hub 8192 ledgered,
+Hub backend receipts 8192, protocol backend 8192 ledgered. Original exact-byte
+and payload reconciliation plus source conservation assertions pass.
+Artifacts: artifacts/phase4/process-30ce16c (extended process-2128838766).
+report.json SHA256: 1aee0b7fb561ae132db468c1bf6315472c39c20ec02ca3a6277fd88bdc3d5a4b
+ test.log SHA256: fc5f2066f0fe18c871ada61db8c5394814a2422f0a8d56ba8c44250dcaa10e87
+Local full race suites Store/Hub/fixture PASS 19.996s/2.546s/2.791s.
+This closes the observed fixed-heartbeat fixture accounting gap, not full D-04:
+report performance_qualified=false and certificate_renewal_exercised=false;
+five-process durable integration, attack/fault matrix, parameter scan and same-SHA
+formal qualification remain outstanding. No authority deadline or rate relaxed.
