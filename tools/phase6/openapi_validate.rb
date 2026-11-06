@@ -31,6 +31,9 @@ begin
     end
   end
   visit.call(doc)
+  doc.fetch('components').fetch('schemas').each_key do |name|
+    check(!name.match?(/secret|credential|runtime|vlink|wire|privatekey/i), "internal schema #{name}")
+  end
   error = doc.dig('components', 'schemas', 'ApiError')
   check(error && %w[code message request_id].all? { |k| error.fetch('required', []).include?(k) }, 'stable error envelope missing')
   paths = doc['paths']
@@ -38,6 +41,7 @@ begin
   ids = []
   paths.each do |path, item|
     check(path.start_with?('/api/v1/'), "unversioned path #{path}")
+    check(!path.match?(/runtime|vlink|private-key|credential|wire/i), "internal route #{path}")
     item.each do |method, op|
       next if method == 'parameters' || method.start_with?('x-')
       check(%w[get post put patch delete].include?(method), "unsupported method #{method}")

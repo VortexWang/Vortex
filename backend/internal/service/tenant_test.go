@@ -495,3 +495,42 @@ func TestRestrictionAuditRollback(t *testing.T) {
 		t.Fatal("clear/history/desired/operation/task/outbox did not roll back together")
 	}
 }
+
+func TestRestrictionAllCausesAccountState(t *testing.T) {
+	for _, state := range []string{"suspended", "banned"} {
+		t.Run(state, func(t *testing.T) {
+			pool := testutil.Postgres(t)
+			ctx := context.Background()
+			tenant := seedTenant(t, pool)
+			m := mutation()
+			if _, err := pool.Exec(ctx, "INSERT INTO resource_ownership(resource_id,resource_kind,owner_kind,owner_tenant_id) VALUES($1,'node','tenant',$2)", m.ResourceID, tenant); err != nil {
+				t.Fatal(err)
+			}
+			tracer := service.Tracer{Pool: pool}
+			op, err := tracer.Mutate(ctx, policyScope(t, tenant, auth.Owner, policy.Mutate), m)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = tracer.Reconcile(ctx, tenant, op.ID, service.Receipt{Revision: 1, Generation: 1, State: "succeeded", Payload: []byte("confirmed")}); err != nil {
+				t.Fatal(err)
+			}
+			s := service.TenantService{Pool: pool}
+			if err = s.SetAccountState(ctx, policyScope(t, tenant, auth.PlatformAdmin, policy.ManageAccess), state, 1, uuid.NewString()); err != nil {
+				t.Fatal(err)
+			}
+			r := service.Restriction{Cause: "manual", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: time.Now().Add(-time.Minute)}
+			admin := policyScope(t, tenant, auth.PlatformAdmin, policy.Restrict)
+			if err = s.ChangeRestriction(ctx, admin, r, uuid.NewString()); err != nil {
+				t.Fatal(err)
+			}
+			r.ClearedAt = time.Now()
+			if err = s.ChangeRestriction(ctx, admin, r, uuid.NewString()); err != nil {
+				t.Fatal(err)
+			}
+			var count int
+			if err = pool.QueryRow(ctx, "SELECT count(*) FROM operations WHERE tenant_id=$1", tenant).Scan(&count); err != nil || count != 1 {
+				t.Fatal("business clear restored inactive platform account", count, err)
+			}
+		})
+	}
+}

@@ -68,7 +68,7 @@ for producer in ([host] if host else ['docker','actions']):
     require('--- SKIP:' not in log and '\nFAIL' not in log and 'WARNING: DATA RACE' not in log, 'failed/skipped/racy tests')
     for plan in order[:order.index(through)+1]:
         for target in tests[plan]:
-            require(len(re.findall(r'--- PASS: '+target+r'[^\n]*',log))>=2, producer+' normal/race test evidence missing '+target)
+            require(len(re.findall(r'--- PASS: '+target+r' \([^\n]*',log))>=2, producer+' normal/race test evidence missing '+target)
     require('OpenAPI lint passed:' in (folder/'openapi.log').read_text(), 'lint not passed')
     require('two clean generations and committed source match byte-for-byte' in (folder/'dependencies.log').read_text(), 'sqlc deterministic evidence missing')
 print('manifest passed: 96 owners; '+('paired Docker/Actions' if not host else host+' producer only; pairing pending'))
