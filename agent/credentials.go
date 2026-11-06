@@ -117,6 +117,9 @@ func (m *CredentialManager) TLSConfig() (*tls.Config, error) {
 	}
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+	if m.revoked != nil && m.revoked(m.set.Active.Leaf) {
+		return nil, errors.New("agent credentials: active identity revoked")
+	}
 	config, err := identity.TLSConfigSet(m.set, m.roots, m.revoked, false, time.Now())
 	if err != nil {
 		return nil, err

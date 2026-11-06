@@ -143,8 +143,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	}
 	// Test-only peer observation, never financial authority. Retain the actual
 	// TLS serial so process rotation tests can audit a newly connected stream.
-	if err := s.Store.AppendEvent(ctx, receiptID+"/identity", "control-identity", []byte(certificate.SerialNumber.String())); err != nil {
-		return err
+	if s.HubID != "" {
+		if err := s.Store.AppendEvent(ctx, receiptID+"/identity", "control-identity", []byte(certificate.SerialNumber.String())); err != nil {
+			return err
+		}
 	}
 	if s.HubID == "" && s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
 		return nil
