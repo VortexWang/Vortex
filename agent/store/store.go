@@ -21,6 +21,7 @@ type Store struct {
 	db                *sql.DB
 	owner             string
 	runtimeStatements map[string]*sql.Stmt
+	runtimeQueue      runtimeTransactionQueue
 }
 
 type Info struct {

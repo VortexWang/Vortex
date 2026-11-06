@@ -31,20 +31,34 @@ type runtimeTransaction struct {
 	wait     time.Duration
 	caller   uintptr
 	reported sync.Once
+	conn     *sql.Conn
+	release  func()
+	released sync.Once
 }
 
 func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
 	started := time.Now()
 	caller, _, _, _ := runtime.Caller(1)
-	tx, err := s.db.BeginTx(ctx, opts)
+	release, err := s.runtimeQueue.acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		release()
+		return nil, err
+	}
+	tx, err := conn.BeginTx(ctx, opts)
 	wait := time.Since(started)
 	if err != nil {
+		_ = conn.Close()
+		release()
 		if wait >= 25*time.Millisecond {
 			slog.Warn("runtime transaction wait failed", "operation", runtimeOperation(caller), "wait", wait, "error", err)
 		}
 		return nil, err
 	}
-	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt), started: time.Now(), wait: wait, caller: caller}, nil
+	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt), started: time.Now(), wait: wait, caller: caller, conn: conn, release: release}, nil
 }
 
 func (tx *runtimeTransaction) statement(ctx context.Context, query string) *sql.Stmt {
@@ -101,11 +115,22 @@ func (tx *runtimeTransaction) report(operation string, err error) {
 }
 func (tx *runtimeTransaction) Commit() error {
 	err := tx.Tx.Commit()
+	tx.finish()
 	tx.report("commit", err)
 	return err
 }
 func (tx *runtimeTransaction) Rollback() error {
 	err := tx.Tx.Rollback()
+	tx.finish()
 	tx.report("rollback", err)
 	return err
+}
+
+// Conn.Close waits for an automatic rollback or an in-flight operation to finish.
+// Do not hand the FIFO slot onward merely because Tx reports ErrTxDone.
+func (tx *runtimeTransaction) finish() {
+	tx.released.Do(func() {
+		_ = tx.conn.Close()
+		tx.release()
+	})
 }

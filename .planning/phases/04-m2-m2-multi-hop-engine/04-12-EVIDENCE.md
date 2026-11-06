@@ -2084,3 +2084,15 @@ releasing the queue before the underlying transaction actually finishes.
 Artifacts process-8b868da report SHA-256
 567bb68e510cfa0b4160aab97d1f49af5a32f5cbadf9d524aced057eb685c55a;
 test.log 58c3a9655854dff9f716c015bf4bd8d133933396eb1a6a74baf7b06291afb963.
+
+## FIFO runtime transaction admission
+
+Implemented an explicit cancellation-aware FIFO ahead of runtime DB acquisition,
+with at most 4096 waiting requests. Only its current owner competes in sql.DB's
+pool; control operations retain their existing direct pool access. Each runtime
+transaction owns a sql.Conn and releases its FIFO slot only after Conn.Close,
+which waits for outstanding database work including automatic rollback. Release
+is idempotent. No database connection count, deadline, authorization predicate
+or durability setting changed. Added FIFO/canceled-waiter/double-release and
+canceled-transaction rollback visibility tests. Full Store race PASS 18.572s;
+Agent/Hub vet/diff checks PASS. Native concurrency effect remains unverified.
