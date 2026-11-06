@@ -1,27 +1,44 @@
 {
-  "status": "blocked",
-  "source_commit": "838c7391561d945f6e006f1a2dd7460c3fe89e84",
+  "status": "passed",
+  "source_commit": "7d43e1d26420db23aaa97121d7ba28bdfc8a1beb",
+  "source_tree": "482019f1a5d49ea7243e0f9c500a853a648a4a41",
   "docker": {
-    "commit": "838c7391561d945f6e006f1a2dd7460c3fe89e84",
+    "commit": "7d43e1d26420db23aaa97121d7ba28bdfc8a1beb",
     "result": 0,
-    "source": "/tmp/vortex-phase6-clean.WOZLfl/source",
-    "source_clean": true,
-    "actions": "not_run"
+    "source_clean_before": true,
+    "source_clean_after": true,
+    "architecture": "native linux/arm64 via OrbStack",
+    "suites": [
+      "complete backend normal",
+      "complete backend race"
+    ],
+    "real_process_passes": 2,
+    "skipped_tests": 0,
+    "evidence": "artifacts/phase6/06-08/7d43e1d2/docker"
   },
   "dependency_gate": {
-    "exit_code": 1,
-    "status": "blocked",
-    "approved_exception": "CR-003",
-    "pending_decision": "CR-004",
-    "findings": [
-      "MIT-0",
-      "GPL-2.0-or-later WITH Bison-exception-2.2"
+    "exit_code": 0,
+    "status": "passed",
+    "approved_exceptions": [
+      "CR-003",
+      "CR-004"
     ],
+    "owner_cr004_response": "a",
+    "generator_linked_modules": 42,
+    "backend_compiled_modules": 24,
+    "official_generator_artifacts_verified": 3,
+    "negative_closure_checks": 7,
+    "matcher_tests": 15,
+    "findings": [],
     "unresolved_source_gaps": [],
-    "evidence": "artifacts/phase6/06-08/838c7391/license"
+    "evidence": "artifacts/phase6/06-08/7d43e1d2/license"
   },
+  "prior_source_review": "artifacts/phase6/06-08/eabc8f6/license/source-recovery-final.json",
+  "prior_blocked_gate": "artifacts/phase6/06-08/838c7391/license",
   "actions": "not_run",
+  "native_amd64_execution": "not_run",
   "caller_checkout_clean": false,
-  "source_balances": "not produced until 06-05; WINDOWS entry 1 remains open",
-  "hub_signer": "blocked; epoch zero; funded forwarding not tested"
+  "source_balances": "not produced until 06-05; WINDOWS entry 1 remains open for 06-05/06-11",
+  "hub_signer": "blocked; epoch zero; funded forwarding not tested",
+  "scope": "06-08 tenant/repository authority, migration, cache reconstruction and exact internal generator license gate; not final Phase 6 or release acceptance"
 }
