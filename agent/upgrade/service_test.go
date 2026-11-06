@@ -160,3 +160,42 @@ func TestServiceStaleActiveLinkCannotBeOverwritten(t *testing.T) {
 		t.Fatal("stale installer replaced current selection")
 	}
 }
+
+func TestSystemdServiceRejectsCommandInjectionAndUnselectedRelease(t *testing.T) {
+	for _, unit := range []string{"--root=/tmp/x.service", "node;touch.service", "node\n.service", "../node.service", ""} {
+		s := &SystemdService{Unit: unit, ActiveLink: "/tmp/current"}
+		if err := s.validate(); err == nil {
+			t.Fatalf("accepted unit %q", unit)
+		}
+	}
+	root := t.TempDir()
+	selected := filepath.Join(root, "selected")
+	other := filepath.Join(root, "other")
+	os.WriteFile(selected, []byte("selected"), 0700)
+	os.WriteFile(other, []byte("other"), 0700)
+	active := filepath.Join(root, "current")
+	os.Symlink(selected, active)
+	s := &SystemdService{Unit: "vortex-node.service", ActiveLink: active}
+	if err := s.Start(context.Background(), other); err == nil {
+		t.Fatal("unselected release reached service manager")
+	}
+}
+
+func TestForwardingProbeCannotUseQualificationOrInventEmptyRule(t *testing.T) {
+	for _, p := range []ForwardingProbe{{}, {Request: []byte("health"), Response: []byte("health")}} {
+		if err := p.Check(context.Background()); err == nil {
+			t.Fatal("invalid probe reached network")
+		}
+	}
+}
+
+func TestServiceReleaseTargetCannotEscapeThroughDirectorySymlink(t *testing.T) {
+	f := newInstallerFixture(t)
+	outside := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(f.root, "releases", "escape")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.installer.resolveTarget("releases/escape/vortex-node"); err == nil {
+		t.Fatal("release target escaped trusted installer root")
+	}
+}

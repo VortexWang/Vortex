@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -280,7 +281,7 @@ func regionalTCPContinuity(t *testing.T, binaries string) { regionalTrafficConti
 
 func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
 	dir := t.TempDir()
 	now := time.Now().UTC()
@@ -293,11 +294,15 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	nodeCert, nodeKey := processCredential(t, dir, regionalNode, ca, der)
 	start := func(name string, args ...string) *exec.Cmd {
 		t.Helper()
-		out, e := os.CreateTemp(dir, name+"-*.log")
+		out, e := os.CreateTemp(dir, filepath.Base(name)+"-*.log")
 		if e != nil {
 			t.Fatal(e)
 		}
-		cmd := exec.CommandContext(ctx, filepath.Join(binaries, name), args...)
+		executable := name
+		if !filepath.IsAbs(name) {
+			executable = filepath.Join(binaries, name)
+		}
+		cmd := exec.CommandContext(ctx, executable, args...)
 		cmd.Stdout = out
 		cmd.Stderr = out
 		if e = cmd.Start(); e != nil {
@@ -444,10 +449,12 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			if renewalMode == "expiry-with-pending-result" {
 				args = append(args, "--test-hold-renewal-replies")
 			}
-			if renewalMode == "hub-restart" || renewalMode == "node-restart" {
+			if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "upgrade-") {
 				restartArgs := append([]string(nil), args...)
 				restartHub = func() { first = start("vortex-test-hub", restartArgs...) }
-				args = append(args, "--test-hold-renewal-replies")
+				if !strings.HasPrefix(renewalMode, "upgrade-") {
+					args = append(args, "--test-hold-renewal-replies")
+				}
 			}
 		} else {
 			s, e := store.Open(dbPath, "hub")
@@ -471,11 +478,11 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	for i, id := range []string{regionalFirst, regionalSecond} {
 		hubs = append(hubs, map[string]string{"hub_id": id, "endpoint": addresses[i], "server_name": id})
 	}
-	if renewalMode == "hub-restart" || renewalMode == "node-restart" {
+	if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "upgrade-") {
 		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
 	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") {
 		lifecycle["renew_percent"] = 30
 		lifecycle["renew_retry_min_ms"] = 1000
 	}
@@ -483,7 +490,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
-	if strings.HasPrefix(renewalMode, "commands-") {
+	if strings.HasPrefix(renewalMode, "commands-") || strings.HasPrefix(renewalMode, "upgrade-") {
 		seed, err := store.Open(nodePath, "agent")
 		if err != nil {
 			t.Fatal(err)
@@ -601,7 +608,88 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
 	}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") {
+	if strings.HasPrefix(renewalMode, "upgrade-") {
+		freshConfig := func() {
+			// Protocol-test backend explicitly supplies fresh fenced configuration for
+			// each replacement boot; replaying the old closed transaction must fail.
+			var applied uint64
+			if err := db.QueryRowContext(ctx, "SELECT value FROM agent_state WHERE key='applied_version'").Scan(&applied); err != nil {
+				t.Fatal(err)
+			}
+			var floor uint64
+			if err := db.QueryRowContext(ctx, "SELECT COALESCE(MAX(CAST(fencing_generation AS INTEGER)),9) FROM config_results").Scan(&floor); err != nil {
+				t.Fatal(err)
+			}
+			var payload map[string]any
+			if err := json.Unmarshal(runtimePayload, &payload); err != nil {
+				t.Fatal(err)
+			}
+			payload["version"] = applied + 1
+			raw, err := json.Marshal(payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+			sum := sha256.Sum256(raw)
+			tx := make([]byte, 16)
+			if _, err = rand.Read(tx); err != nil {
+				t.Fatal(err)
+			}
+			next := &controlv1.RuntimeConfigUpdate{Version: applied + 1, ExpectedVersion: applied, Payload: raw, PayloadSha256: sum[:], TransactionId: tx, FencingGeneration: floor + 1}
+			encoded, err := json.Marshal(next)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(updatePath, encoded, 0600); err != nil {
+				t.Fatal(err)
+			}
+			killProcess(t, first)
+			// The protocol-test backend explicitly provisions separate funded sources
+			// and trusted root anchors. Never reuse/refund prior boot's occupied shares.
+			fresh := d
+			fresh.ShareReferences = append([]store.ShareReference(nil), d.ShareReferences...)
+			makeID := func() string {
+				raw := make([]byte, 16)
+				if _, err := rand.Read(raw); err != nil {
+					t.Fatal(err)
+				}
+				id := hex.EncodeToString(raw)
+				return id[:8] + "-" + id[8:12] + "-" + id[12:16] + "-" + id[16:20] + "-" + id[20:]
+			}
+			fresh.ID = makeID()
+			fresh.SourceID = makeID()
+			fresh.RuntimeSourceID = makeID()
+			fresh.ShareSourceID = makeID()
+			sources := []string{fresh.SourceID, fresh.RuntimeSourceID, fresh.ShareSourceID}
+			for i := range fresh.ShareReferences {
+				fresh.ShareReferences[i].ID = makeID()
+				fresh.ShareReferences[i].SourceID = sources[i]
+			}
+			for _, entry := range []struct{ path, owner string }{{nodePath, "agent"}, {filepath.Join(dir, "hub0.db"), "hub"}} {
+				writer, err := store.Open(entry.path, entry.owner)
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, root := range fresh.ShareReferences {
+					if err = writer.InstallShareSourceAnchor(ctx, fresh.NodeID, regionalBoot, root); err != nil {
+						writer.Close()
+						t.Fatal(err)
+					}
+				}
+				writer.Close()
+			}
+			encoded, err = json.Marshal(fresh)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(allocationPath, encoded, 0600); err != nil {
+				t.Fatal(err)
+			}
+			restartHub()
+		}
+		exerciseUpgradeProcess(t, ctx, binaries, renewalMode, nodePath, peer, nodeArgs, nodeProcess, exchange, func(path string, args ...string) *exec.Cmd { freshConfig(); return start(path, args...) })
+		return
+	}
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") {
 		fault := func() bool {
 			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
 				killProcess(t, first)

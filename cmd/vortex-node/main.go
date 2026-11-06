@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"flag"
@@ -12,6 +14,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"syscall"
 	"time"
@@ -96,6 +99,20 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	if err != nil {
 		return err
 	}
+	executable, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	if runtime.GOOS == "linux" {
+		executable = "/proc/self/exe"
+	}
+	binary, err := os.ReadFile(executable)
+	if err != nil {
+		return err
+	}
+	buildDigest := sha256.Sum256(binary)
+	n.SetBuildSHA256(hex.EncodeToString(buildDigest[:]))
+
 	var regional agent.RegionalConfig
 	if *controlConfig != "" {
 		if *hubAddr != "" {

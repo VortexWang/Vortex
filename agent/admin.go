@@ -24,6 +24,8 @@ type OperationalEngine interface {
 	Stats() relay.Stats
 }
 type NodeStatus struct {
+	BuildSHA256    string `json:"build_sha256,omitempty"`
+	DurableStore   bool   `json:"durable_store"`
 	NodeID         string `json:"node_id"`
 	BootID         string `json:"boot_id"`
 	AppliedVersion string `json:"applied_config_version"`
@@ -50,6 +52,7 @@ func (n *Node) Status(ctx context.Context) (NodeStatus, error) {
 		status.AppliedVersion = version
 	}
 	n.statusMu.RLock()
+	status.BuildSHA256 = n.buildSHA256
 	observer := n.hubModeObserver
 	n.statusMu.RUnlock()
 	if observer != nil {
@@ -59,6 +62,11 @@ func (n *Node) Status(ctx context.Context) (NodeStatus, error) {
 		}
 	}
 
+	info, err := n.Store.Info(ctx)
+	if err != nil {
+		return status, err
+	}
+	status.DurableStore = info.JournalMode == "wal" && info.Synchronous == "2"
 	return status, nil
 }
 func (n *Node) Drain(ctx context.Context) error {
@@ -192,6 +200,7 @@ func AdminCall(ctx context.Context, path, command string, timeout time.Duration)
 	if !filepath.IsAbs(path) || len(path) > 100 {
 		return NodeStatus{}, errors.New("agent: invalid admin socket path")
 	}
+	var socketOwner uint32
 	for _, entry := range []struct {
 		path   string
 		mode   os.FileMode
@@ -202,8 +211,13 @@ func AdminCall(ctx context.Context, path, command string, timeout time.Duration)
 			return NodeStatus{}, err
 		}
 		owner, ok := info.Sys().(*syscall.Stat_t)
-		if !ok || owner.Uid != uint32(os.Geteuid()) || info.Mode().Perm() != entry.mode || (entry.socket && info.Mode()&os.ModeSocket == 0) || (!entry.socket && !info.IsDir()) {
+		if !ok || (owner.Uid != uint32(os.Geteuid()) && os.Geteuid() != 0) || info.Mode().Perm() != entry.mode || (entry.socket && info.Mode()&os.ModeSocket == 0) || (!entry.socket && !info.IsDir()) {
 			return NodeStatus{}, errors.New("agent: insecure admin socket boundary")
+		}
+		if !entry.socket {
+			socketOwner = owner.Uid
+		} else if socketOwner != owner.Uid {
+			return NodeStatus{}, errors.New("agent: mismatched admin socket owner")
 		}
 	}
 	conn, err := (&net.Dialer{}).DialContext(ctx, "unix", path)
@@ -288,4 +302,10 @@ func decodeAdminRequest(raw []byte, request *adminRequest) error {
 		return errors.New("trailing input")
 	}
 	return nil
+}
+
+func (n *Node) SetBuildSHA256(digest string) {
+	n.statusMu.Lock()
+	n.buildSHA256 = digest
+	n.statusMu.Unlock()
 }

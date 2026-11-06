@@ -224,7 +224,7 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 	if err := i.writeState(state); err != nil {
 		return err
 	}
-	drainCtx, cancelDrain := context.WithDeadline(ctx, state.DrainDeadline)
+	drainCtx, cancelDrain := context.WithDeadline(ctx, state.DrainDeadline.Add(15*time.Second))
 	drainErr := i.Drain(drainCtx)
 	cancelDrain()
 	if drainErr != nil {
@@ -525,6 +525,22 @@ func (i *Installer) resolveTarget(target string) (string, error) {
 	relative, err := filepath.Rel(root, resolved)
 	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("upgrade: release target escapes upgrade root")
+	}
+	// Release and transaction directories are installer-owned. Reject nested
+	// symlinks rather than permitting an existing target to escape lexically valid paths.
+	current := root
+	for _, component := range strings.Split(relative, string(filepath.Separator)) {
+		current = filepath.Join(current, component)
+		info, err := os.Lstat(current)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return "", errors.New("upgrade: symlink inside release target")
+		}
 	}
 	return resolved, nil
 }

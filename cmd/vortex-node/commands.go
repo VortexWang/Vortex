@@ -25,6 +25,10 @@ func runCommand(ctx context.Context, args []string, out, diagnostics io.Writer) 
 		fmt.Fprintln(diagnostics, "deprecated: use 'vortex-node run' explicitly")
 	}
 	switch command {
+	case "upgrade":
+		return upgradeNode(ctx, args, out, diagnostics)
+	case "upgrade-preflight":
+		return upgradePreflight(ctx, args, out, diagnostics)
 	case "run":
 		return runNode(ctx, args, out, diagnostics)
 	case "enroll":

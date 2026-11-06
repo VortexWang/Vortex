@@ -13,6 +13,7 @@ import (
 	"time"
 	"vortex/agent"
 	"vortex/agent/identity"
+	"vortex/agent/store"
 	"vortex/hub"
 )
 
@@ -81,5 +82,29 @@ func TestEnrollCommandUsesLocalCSRAndRejectsSecondWriter(t *testing.T) {
 	}
 	if err = runCommand(ctx, args, &out, &diagnostics); err == nil {
 		t.Fatal("duplicate enroll replaced active credential")
+	}
+}
+
+func TestUpgradePreflightReadsExistingSchemaWithoutMigrating(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "agent.db")
+	db, err := store.Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	var out, diagnostics bytes.Buffer
+	if err = runCommand(context.Background(), []string{"upgrade-preflight", "--db", path}, &out, &diagnostics); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), `"read_only":true`) || !strings.Contains(out.String(), `"schema":16`) {
+		t.Fatal(out.String())
+	}
+	missing := filepath.Join(root, "absent.db")
+	if err = runCommand(context.Background(), []string{"upgrade-preflight", "--db", missing}, &out, &diagnostics); err == nil {
+		t.Fatal("created missing preflight DB")
+	}
+	if _, err = os.Stat(missing); !os.IsNotExist(err) {
+		t.Fatal("preflight created missing database")
 	}
 }

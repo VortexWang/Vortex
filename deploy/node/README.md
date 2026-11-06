@@ -45,3 +45,36 @@ configuration/CA read-only; bind the same flags used by systemd. Set a stop grac
 period of at least50s. Do not place SQLite/WAL on NFS or shared cross-host storage.
 A kill/restart creates a new boot and preserves prior ledger/unknown debt; it
 cannot revive old authorization. No deployment mode puts traffic in Hub/backend.
+
+## External signed service upgrade (05-11, integration in progress)
+
+Use a separate trusted `/usr/local/libexec/vortex-node-upgrader` invocation,
+never a goroutine of the process being replaced. The node service executable
+`/usr/local/bin/vortex-node` must resolve through `/opt/vortex-node/current`;
+that selector uses relative release targets inside the private installer root.
+The helper runs `vortex-node upgrade` with fixed argv through the supplied
+oneshot unit. The normal node service remains non-root. Root may inspect its
+private socket only when directory/socket owner match and modes remain0700/0600.
+
+Provision raw32-byte pinned Ed25519 public key, raw64-byte detached signature,
+expected SHA256 and a stable transaction UUID. The signed candidate and old binary
+must both support read-only `upgrade-preflight --db ...` for schema16 before any
+drain. Automatic schema migration is deliberately not supported in this path;
+older releases without preflight require a separately reviewed initial deployment.
+No Agent/Hub DB, WAL, credentials, fencing or financial records are snapshotted or
+restored. Current implementation snapshots an explicit no-settings-changed marker.
+
+The private upgrade-probe.json specifies an already authorized VLink peer identity,
+existing rule/revision/path and bounded application request/expected response
+(base64 bytes in JSON). It does not create a rule, target or quota. Its TLS+HELLO
+OPEN and TCP exchange must pass the receiving node's ordinary authority/accounting
+gate. Only existing controlled local health targets should be used; probes consume
+real budget. Fresh boot, executable digest, FULL/WAL, current control and applied
+configuration are checked before the traffic exchange.
+
+Service stop requires systemd inactive/failed, zero MainPID/ControlPID and both
+original/current cgroups unpopulated. Missing/uncertain proof retains the same
+transaction as unknown. A failed candidate is stopped before old binary restart;
+old service must also pass current-authority traffic health. `--recover` queries the
+existing durable transaction; unresolved activation remains an explicit error.
+Full05-11 failure/deployment acceptance is still pending; see05-11-EVIDENCE.md.

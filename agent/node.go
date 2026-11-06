@@ -22,6 +22,7 @@ func (NoopEngine) Start(context.Context) error { return nil }
 func (NoopEngine) Stop(context.Context) error  { return nil }
 
 type Node struct {
+	buildSHA256     string
 	statusMu        sync.RWMutex
 	hubModeObserver func() string
 	bootStarted     time.Time

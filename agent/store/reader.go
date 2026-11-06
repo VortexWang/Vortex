@@ -53,3 +53,10 @@ func ledgerDSN(path string, reader bool) (string, error) {
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
+
+// SchemaVersion is a read-only upgrade preflight observation, not migration.
+func (s *Store) SchemaVersion(ctx context.Context) (uint64, error) {
+	var version uint64
+	err := s.db.QueryRowContext(ctx, "SELECT value FROM schema_meta WHERE key='schema_version'").Scan(&version)
+	return version, err
+}

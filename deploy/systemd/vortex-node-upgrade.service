@@ -1,0 +1,17 @@
+[Unit]
+Description=VORTEX signed node upgrade coordinator
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Separate privileged coordinator; node remains non-root. No database writer.
+User=root
+UMask=0077
+EnvironmentFile=/etc/vortex-node/upgrade.env
+ExecStart=/usr/local/libexec/vortex-node-upgrader upgrade --root /opt/vortex-node --active-link /opt/vortex-node/current --db /var/lib/vortex-node/agent.db --admin-socket /run/vortex-node/admin.sock --unit vortex-node.service --artifact ${VORTEX_UPGRADE_ARTIFACT} --signature ${VORTEX_UPGRADE_SIGNATURE} --public-key /etc/vortex-node/upgrade-ed25519.pub --sha256 ${VORTEX_UPGRADE_SHA256} --transaction-id ${VORTEX_UPGRADE_TRANSACTION_ID} --probe /etc/vortex-node/upgrade-probe.json --drain-timeout 30s --health-timeout 20s
+TimeoutStartSec=180s
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/vortex-node
+ReadOnlyPaths=/var/lib/vortex-node /etc/vortex-node

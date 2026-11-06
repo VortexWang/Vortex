@@ -23,9 +23,11 @@ if command -v systemd-analyze >/dev/null 2>&1; then
  for target in sysinit basic shutdown; do
   printf '[Unit]\nDescription=Verification target\n' > "$verify/usr/lib/systemd/system/$target.target"
  done
- cp deploy/systemd/vortex-node.service "$verify/etc/systemd/system/"
+ cp deploy/systemd/vortex-node.service deploy/systemd/vortex-node-upgrade.service "$verify/etc/systemd/system/"
+ mkdir -p "$verify/usr/local/libexec"
+ cp "$out/vortex-node-linux-amd64" "$verify/usr/local/libexec/vortex-node-upgrader"
  cp "$out/vortex-node-linux-amd64" "$verify/usr/local/bin/vortex-node"
- systemd-analyze verify --man=no --root="$verify" vortex-node.service > "$out/systemd-verify.log" 2>&1
+ systemd-analyze verify --man=no --root="$verify" vortex-node.service vortex-node-upgrade.service > "$out/systemd-verify.log" 2>&1
 else
  echo 'unavailable on this host; verify on Ubuntu Actions' > "$out/systemd-verify.log"
 fi
