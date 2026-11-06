@@ -1058,3 +1058,30 @@ logic, frozen contract or parameter default changed. Durable session blocks
 remain unimplemented: their implementation must preserve these per-session
 identity and replay invariants as well as crash upper-bound freezing, revocation
 and per-write rate enforcement.
+
+## Delayed durable demand responses across active TCP/UDP sessions
+
+TestRuntimeDelayedDurableAdaptiveRenewal adds eight real consumption-triggered
+renewals per transport with a deterministic test-server response barrier. The
+Hub resolves and commits each demand before announcing the barrier; its issuer
+transaction is no longer held while the response is withheld. The test verifies
+Hub issuance has advanced but Agent initial credit and committed consumption
+have not, with zero holds/unknown usage, and exactly one original pending demand.
+A changed 8192-byte estimate cannot replace that request. Releasing the barrier
+allows installation and another metered exchange on the same business stream.
+Final usage/outbox/ledger assertions are shared with the continuous fixture.
+
+The callback is an explicit protocol TestServer hook, not production message
+or grant semantics. Cancellation unblocks both barrier directions. Snapshot
+labels include delay mode so evidence cannot overwrite ordinary runs.
+Targeted local race PASS (30.760s); full Agent/Hub race PASS (Agent 184.662s,
+Store 12.281s, Hub 2.795s), vet/diff PASS. This tests delayed delivery and durable
+coalescing; business writes deliberately resume after delivery, so it does not
+prove latency or availability while traffic waits on missing authority.
+
+04-20-DURABLE-BLOCK-IMPLEMENTATION.md records the concrete remaining block
+implementation boundaries. Existing pre-write reservation also consumes rate,
+so merely enlarging it is not a correct block allocator. Funding holds, bounded
+partial checkpoints, concurrent suballocation, revocation/time validation and
+old-boot unknown recovery must be integrated before measuring block candidates.
+No block implementation, parameter lock or Phase 4 completion is claimed.

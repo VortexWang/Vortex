@@ -39,6 +39,9 @@ type TestServer struct {
 	// DropDemandResponse injects a disconnect after durable resolution but
 	// before any response is sent. Only for protocol recovery tests.
 	DropDemandResponse bool
+	// BeforeDemandResponse is a test-only delivery barrier after durable issue.
+	// It does not run inside the issuer transaction and cannot grant authority.
+	BeforeDemandResponse func(context.Context) error
 	controlv1.UnimplementedNodeControlServer
 	Store               *store.Store
 	ConfigUpdate        *controlv1.RuntimeConfigUpdate
@@ -183,6 +186,11 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			authorization, denied, err := s.DemandIssuer.ResolveDemand(ctx, first.GetNodeId(), first.GetBootId(), body.CreditDemand)
 			if err != nil {
 				return err
+			}
+			if s.BeforeDemandResponse != nil {
+				if err := s.BeforeDemandResponse(ctx); err != nil {
+					return err
+				}
 			}
 			if s.DropDemandResponse {
 				return fmt.Errorf("test hub: injected loss after durable demand resolution")

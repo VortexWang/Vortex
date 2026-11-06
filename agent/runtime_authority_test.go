@@ -116,7 +116,11 @@ func TestRuntimeLongLivedDurableAdaptiveRenewal(t *testing.T) {
 	runDurableRuntimeAuthority(t, 32)
 }
 
-func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
+func TestRuntimeDelayedDurableAdaptiveRenewal(t *testing.T) {
+	runDurableRuntimeAuthority(t, 8, true)
+}
+
+func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse ...bool) {
 	t.Helper()
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
@@ -558,7 +562,25 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 			if renewalRounds > 0 {
 				// Keep one real control connection and the original business stream
 				// alive across repeated consumption-driven durable renewals.
-				continuousHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: renewalRounds}, serverTLS)
+				issued := make(chan struct{}, 1)
+				release := make(chan struct{})
+				var barrier func(context.Context) error
+				if len(delayResponse) > 0 && delayResponse[0] {
+					barrier = func(ctx context.Context) error {
+						select {
+						case issued <- struct{}{}:
+						case <-ctx.Done():
+							return ctx.Err()
+						}
+						select {
+						case <-release:
+							return nil
+						case <-ctx.Done():
+							return ctx.Err()
+						}
+					}
+				}
+				continuousHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: renewalRounds, BeforeDemandResponse: barrier}, serverTLS)
 				controlDone := make(chan error, 1)
 				go func() {
 					controlDone <- (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, continuousHub.Addr().String())
@@ -572,10 +594,42 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 
 					// The first old grant has expired with 1096 unused bytes.
 					// Those bytes must not count toward the next usable target.
+					previousIssued := expectedIssued
 					if round == 0 {
 						expectedIssued += 4096
 					} else {
 						expectedIssued += 3000
+					}
+					if barrier != nil {
+						select {
+						case <-issued:
+						case <-ctx.Done():
+							t.Fatal(ctx.Err())
+						}
+						hubBalance, err := hs.AuditHubDelegation(ctx, delegation.ID)
+						if err != nil || hubBalance.Issued != expectedIssued {
+							t.Fatalf("delayed issue not funded: %+v %v", hubBalance, err)
+						}
+						agentBalance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+						if err != nil || agentBalance.Initial != previousIssued || agentBalance.Committed != uint64((round+2)*2*len(message)) || agentBalance.Reserved != 0 || agentBalance.Unknown != 0 {
+							t.Fatalf("undelivered grant changed Agent: %+v %v", agentBalance, err)
+						}
+						requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+						if err != nil || len(requests) != 1 || requests[0].RawBytes != expectedIssued-previousIssued {
+							t.Fatalf("delayed request identity: %+v %v", requests, err)
+						}
+						retained, err := s.PrepareDemand(ctx, demandScope, 8192, time.Minute)
+						if err != nil || retained != requests[0] {
+							t.Fatalf("delay permitted replacement: %+v %v", retained, err)
+						}
+						if targetBytes.Load() != int64((round+2)*len(message)) {
+							t.Fatal("target bytes changed while grant withheld")
+						}
+						select {
+						case release <- struct{}{}:
+						case <-ctx.Done():
+							t.Fatal(ctx.Err())
+						}
 					}
 					for {
 						low, high, trusted := node.TrustedTime()
@@ -687,7 +741,7 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 				saveRuntimeLedger(t, network, agentDB, hubDB)
 				saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			} else {
-				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d-rounds-%d-delay-%t", network, renewalRounds, len(delayResponse) > 0 && delayResponse[0]), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			}
 		})
 	}
