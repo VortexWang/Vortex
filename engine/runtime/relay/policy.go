@@ -15,7 +15,16 @@ func StaticPolicy(cfg config.Config) (vlink.OpenPolicy, error) { return staticPo
 
 // AgentPolicy delegates runtime and quota admission to the mandatory Gate,
 // called by Service before dialing. This policy still enforces local topology.
-func AgentPolicy(cfg config.Config) (vlink.OpenPolicy, error) { return staticPolicy(cfg, true) }
+func AgentPolicy(cfg config.Config) (vlink.OpenPolicy, error) {
+	// The external policy defers authorization to Service.Gate. Today that gate
+	// is invoked only for target connections, not the stream-to-stream branch.
+	// Do not manufacture an authorized relay snapshot until forwarding has its
+	// own mandatory Agent admission and per-write policy integration.
+	if cfg.Role != config.RoleDestination || !cfg.ExecutionPoint {
+		return vlink.OpenPolicy{}, fmt.Errorf("relay: Agent policy requires a destination execution point")
+	}
+	return staticPolicy(cfg, true)
+}
 func staticPolicy(cfg config.Config, external bool) (vlink.OpenPolicy, error) {
 	local, err := vlink.ParseNodeID(cfg.NodeID)
 	if err != nil {

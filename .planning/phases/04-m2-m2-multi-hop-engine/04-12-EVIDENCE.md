@@ -2392,3 +2392,19 @@ combined checkpoint/coordinator/SIGKILL race suite repeated three times PASS
 bef3900311d24cdebeff1479c3a46ee6a51736467804985682e55ff40f9d4200.
 Local complete Store race suite PASS 19.949s. These are fault regression results,
 not parameter-lock or formal performance qualification evidence.
+
+## Multi-hop durable integration boundary audit
+
+Verified current Runtime accepts static destination only. More critically,
+Service's forwarding branch bypasses Gate.Open and per-write reservation; only
+the target branch invokes the injected durable gate. Therefore enabling relay
+roles by removing Runtime's guard is unsafe. AgentPolicy now independently
+rejects source/relay and non-execution destinations, including qualification
+flags, until their mandatory admission integration exists. This guards the
+external-policy seam; it does not add multi-hop support or change the standalone
+StaticPolicy diagnostic path. Twelve role/execution/diagnostic combinations
+covered; targeted Engine policy race tests PASS 1.481s. Added concrete integration
+prerequisites to 04-12-PLAN, including avoiding duplicated billing at every hop.
+Local Agent Runtime/authority race regressions PASS 10.456s; full Engine
+runtime subtree race suite PASS (accounting/config/link/relay/topology).
+No native five-process claim is made from this boundary change.
