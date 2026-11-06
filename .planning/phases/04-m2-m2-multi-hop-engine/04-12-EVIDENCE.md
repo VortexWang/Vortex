@@ -2514,3 +2514,28 @@ successful waiting. Next fix measurement to distinguish transient shortage,
 wait success/timeout and final refusal; do not silently ignore the existing
 settlement gate or claim performance qualification. Native Linux, candidates,
 delay/failure matrix and dynamic-target integration remain outstanding.
+
+## Delayed issuer wait/refusal evidence correction
+
+97cc918 counts logical delayed Reserve outcomes independently of inner shortage
+probes. CreditState.waits records attempts, shortfalls, waits, wait_succeeded,
+timed_out, cancelled and final_failures. The legacy denials counter still counts
+final failures; successful waiting no longer increments it. Direct synchronous
+CreditGate semantics unchanged. Timeout/cancellation tests assert final failures
+remain visible; no rejection is erased after the fact. Race suites for accounting,
+relay and command PASS 2.016s/1.869s/2.274s. Missing formal trial ID now fails before
+starting a workload, not after spending resources on a run without an identity.
+
+Clean 97cc918518a23eb6e797a4bc3fe3acaba1ba6c39 local macOS five-process
+40ms delayed-issuer diagnostic exits 0, runtime_correctness=pass. 148121 Reserve
+attempts; one shortage, one wait, one wait success; zero timeout/cancel/final
+failure/denials. 31 grants, 2,940,317,448 total source used equals the two exact
+1,470,158,724-byte target/accounting directions. Pending/unknown/held/sessions
+all zero; source conserved and settled. UDP 99.8352 Mbps, zero loss.
+
+Raw directory /private/tmp/vortex-delay-waits-20261106; retained summary and
+checksums 04-25-DELAYED-ISSUER.json. Four TCP streams, two-second phases on
+macOS: performance_qualification remains not-qualified, D-04 pending-review.
+This proves wiring and outcome classification, not a candidate matrix result.
+Native dedicated-host delay/failure trials and bounded in-flight peak occupancy
+remain required before parameter lock.

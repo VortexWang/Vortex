@@ -1,0 +1,93 @@
+{
+  "commit": "97cc918518a23eb6e797a4bc3fe3acaba1ba6c39",
+  "dirty": false,
+  "scope": "local macOS five-process 40ms delayed process-local issuer; not formal qualification",
+  "report": {
+    "accounting": {
+      "left_to_right": 1470158724,
+      "right_to_left": 1470158724
+    },
+    "authorization_mode": "runtime-authority",
+    "classified_drops": {
+      "kernel_rcvbuf_driver_scope": 0,
+      "oversized": 0,
+      "queue_full": 0,
+      "receive_queue_full": 0,
+      "source_capacity": 0,
+      "source_queue_full": 0,
+      "window_full": 0
+    },
+    "commit": "97cc918518a23eb6e797a4bc3fe3acaba1ba6c39",
+    "d_04": {
+      "status": "pending-review"
+    },
+    "dirty": false,
+    "end_to_end_received_bytes": 1470158724,
+    "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+    "nfr_003": {
+      "mixed_tcp_mbps": 2732.5041900053566,
+      "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+      "status": "not-qualified",
+      "tcp_only_retention": 0.8980809114791409
+    },
+    "nfr_005": {
+      "loss_threshold_met": true,
+      "reason": "Short diagnostic run; host and duration qualification remain open",
+      "status": "not-qualified",
+      "udp_loss": 0.0
+    },
+    "nfr_006": {
+      "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+      "status": "not-qualified"
+    },
+    "nfr_007": {
+      "reason": "independent path latency baseline is missing",
+      "status": "not-qualified"
+    },
+    "performance_qualification": "not-qualified",
+    "qualification_metrics": {
+      "duration_seconds": 2.0,
+      "mixed_tcp_mbps": 2732.5041900053566,
+      "source_credit_conserved": true,
+      "source_credit_settled": true,
+      "tcp_streams": 4,
+      "udp_loss": 0.0,
+      "udp_offered_mbps": 99.8352
+    },
+    "returned_reservations": {},
+    "runtime_correctness": "pass",
+    "schema": 1,
+    "semantic_manifest_sha256": "44e671e9f2f71bf85309705e7f84f40473eee425b9915382402c8ce8585c2069",
+    "trial_id": "delay-40ms-diagnostic"
+  },
+  "credit": {
+    "waits": {
+      "attempts": 148121,
+      "shortfalls": 1,
+      "waits": 1,
+      "wait_succeeded": 1,
+      "timed_out": 0,
+      "cancelled": 0,
+      "final_failures": 0
+    },
+    "snapshot_id": "phase4-formal/source/path-2/policy-2",
+    "pending_grant_bytes": 0,
+    "unknown_grant_bytes": 0,
+    "grant_records": 31,
+    "budget_bytes": 1099511627776,
+    "unissued_bytes": 1096482815952,
+    "available_bytes": 88494376,
+    "held_bytes": 0,
+    "used_bytes": 2940317448,
+    "unknown_bytes": 0,
+    "grants": 31,
+    "denials": 0,
+    "sessions": 0
+  },
+  "raw_directory": "/private/tmp/vortex-delay-waits-20261106",
+  "sha256": {
+    "report.json": "f7958fa60084b1d8ee56dfbb4a3a89714b206d18e84443160fb251d237f3ee5b",
+    "events-source.jsonl.credit.json": "992ad88a17afce79853b79ef9b5a8ee8b1bfed5752db98946222cf76c80cb429",
+    "mixed-workload.json": "8b416f13c8a22cbccfcefb6c6973ab638a72027d2350b387dfa35ffbcea15001"
+  }
+}
