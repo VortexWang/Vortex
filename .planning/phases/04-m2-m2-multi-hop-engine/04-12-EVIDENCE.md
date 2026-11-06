@@ -2288,3 +2288,16 @@ The clock choice is immutable within a Store instance. No burst/deadline change.
 Tests cover broad absolute intervals, same-time burst denial, drift allowance,
 untrusted absolute time, reopen debt and domain/boot downgrade. Full Store race
 PASS 19.988s; native runtime validation still required.
+
+Clean b52ff8174f88c150e794d75508aa3b9306bd7ef4 native suite: short TCP/UDP/
+concurrent PASS. Extended case transferred all 12,288,000 bytes in 23.318s
+(4096 round trips, p50 91.249ms/p95 122.916ms/p99 142.083ms), then FAILED at
+60s waiting for ACK drain; overall 92.065s FAIL. This clears the observed
+~1MiB forwarding starvation for this run but does not qualify the whole flow.
+Read-only final DB: Agent 8192 pending batches; Hub and protocol backend each
+1549 ledgered batches. No Agent batch acknowledged yet. Next investigate control
+stream send/receive backpressure and usage ACK delivery, not extend the timeout.
+Performance remains unqualified; 4.216Mbps bidirectional request-response payload
+is not the required steady-load throughput. Artifacts process-b52ff81 report
+SHA-256 4188e5b4f22bcec5f2adca8e2d93d66294afd8cf56de049aa409251b1290c2df;
+test.log 721793767e4c3be57e96695a1a35a9bb54c072e6b87bfd5f31c6c2edeceb73ed.
