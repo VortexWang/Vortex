@@ -1,7 +1,8 @@
 # Durable session block implementation boundaries
 
-Status: funding reservation Store API implemented; consumption/checkpoint/runtime
-integration still required. No parameter lock or wire change.
+Status: funding/checkpoint/admission Store APIs and an experimental Agent gate
+implemented. Real runtime renewal, idle bounds and qualification still required.
+No parameter lock or wire change.
 Execution context: 04-12. This note specifies the next production change, not
 an alternative acceptance criterion or a claim of integrated block forwarding.
 
@@ -113,3 +114,23 @@ Agent allocator still must bound aggregate in-flight subwrites and serialize
 checkpoints with allocation. The persistent rate bucket still writes per
 admission, so this step does not establish a throughput improvement or meet
 the measured D-04 performance requirement. Runtime wiring remains disabled.
+
+## Experimental Agent allocator progress
+
+NewExperimentalFundingBlockGate is an explicit opt-in constructor implementing
+the Engine accounting.Gate/Session interfaces. It owns one block per direction,
+serializes allocation/admission/checkpoint operations and tracks aggregate
+in-flight upper bounds. Concurrent writes wait for capacity, with cancellation.
+Known short writes checkpoint actual usage; returned child reservations only
+restore in-memory availability. Close prevents admission immediately and releases
+unused tails only after that direction's outstanding callbacks finish. An
+unknown write freezes the entire residual, faults the gate, and prevents further
+recycling; failed checkpoints retain the durable upper bound for boot recovery.
+
+This first adapter checkpoints each completed write, so it has no delayed known
+usage to flush. It still persists rate on every admission. Production runtime
+defaults remain unchanged. It has not yet been exercised with real VLink traffic,
+automatic renewal, delayed responses or the native multi-hop attack matrix.
+Bounded idle block return, adaptive block sizing under partially available
+credit, and renewed-authority retry integration remain required. No candidate
+performance or final D-04 parameter claim follows from interface-level tests.

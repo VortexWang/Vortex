@@ -1175,3 +1175,28 @@ rate on each call, not idempotent admission retries; ambiguous commit errors
 must fault the allocator. SQLite rate persistence still costs a write for each
 admission. Native performance, full multi-hop hostile coverage, and D-04 lock
 remain open.
+
+## Experimental Agent funding-block gate
+
+Added explicit NewExperimentalFundingBlockGate implementing the existing Engine
+accounting interfaces. Per-session mutex ownership bounds aggregate concurrent
+reservations by each direction's durable residual. Capacity wait supports
+cancellation. Each confirmed write checkpoints actual bytes into the existing
+UsageBatch protobuf/outbox; short-write tails stay available inside the hold.
+Close forbids new admission and waits for outstanding callbacks before returning
+the corresponding unused tail. Unknown outcomes freeze the full residual and
+fault the gate. Checkpoint failures leave the durable bound for boot recovery.
+
+Interface-level tests PASS: 16 concurrent short writes with exact ledger and
+protobuf outbox totals; independent directions and close-before-resolution
+without premature refund; unknown residual freeze and admission stop; canceled
+capacity wait without over-allocation. Targeted race PASS 2.426s. Full local
+Agent/Hub race PASS (Agent 178.288s, Hub 2.077s; Store/identity/upgrade cached).
+Agent/Hub vet and diff checks PASS.
+
+The default Node runtime still installs the per-write gate. This is explicit
+experimental integration at the Engine accounting interface, not verified real
+VLink transport or native performance. Every outcome currently checkpoints
+immediately and every admission persists rate. Adaptive funding size, idle
+return, renewed-authority wait/retry, real TCP/UDP renewal, the complete hostile
+matrix and dedicated-host qualification remain open. No D-04 lock is claimed.
