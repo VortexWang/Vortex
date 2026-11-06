@@ -26,13 +26,20 @@ func (s *Store) SealIdleGrant(ctx context.Context, scope DemandScope, grantID st
 		return err
 	}
 	defer tx.Rollback()
+	if err := sealGrantTx(ctx, tx, scope, grantID, key); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func sealGrantTx(ctx context.Context, tx *sql.Tx, scope DemandScope, grantID string, key []byte) error {
 	var previous []byte
-	err = tx.QueryRowContext(ctx, `SELECT scope FROM sealed_grants WHERE node_id=? AND grant_id=?`, scope.NodeID, grantID).Scan(&previous)
+	err := tx.QueryRowContext(ctx, `SELECT scope FROM sealed_grants WHERE node_id=? AND grant_id=?`, scope.NodeID, grantID).Scan(&previous)
 	if err == nil {
 		if !bytes.Equal(previous, key) {
 			return ErrAuthorizationUpdateConflict
 		}
-		return tx.Commit()
+		return nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -59,5 +66,5 @@ func (s *Store) SealIdleGrant(ctx context.Context, scope DemandScope, grantID st
 	if _, err := tx.ExecContext(ctx, `INSERT INTO sealed_grants(node_id,grant_id,scope) VALUES(?,?,?)`, scope.NodeID, grantID, key); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }

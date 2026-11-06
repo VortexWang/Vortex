@@ -572,3 +572,24 @@ Not yet an automatic shrink/reclaim controller: lifecycle observation must be
 combined atomically with grant fencing, preserved warm allowance and final
 proof dispatch before enabling timed policy. No parameter lock or performance
 claim is made by these tests.
+
+## Atomic conservative idle timer and grant fence
+
+SealGrantAfterIdle now checks the persisted conservative idle interval, audits
+reserved liability and seals the exact scoped grant in one transaction. Session,
+hold and demand activity triggers invalidate the observation before a later
+seal can consume it. Clock rollback or malformed timestamps durably invalidate
+the interval; clock recovery cannot resurrect the old timer. Threshold remains
+caller-supplied, not a locked D-04 default. No credit is returned to the issuer.
+
+Tests cover the earliest-bound threshold (latest alone cannot authorize sealing),
+activity wholly between scans, successful fence plus conserved unused proof,
+post-fence admission denial, and rollback/recovery starting a fresh interval.
+Agent packages passed full race tests; the initial combined command exited 1
+because an incorrect ./edge-hub/... path does not exist. Corrected ./hub/... race
+and go vet ./agent/... ./hub/... passed. git diff --check passed.
+
+This is local lifecycle groundwork only. Warm allowance shrink, authenticated
+proof delivery and one-time issuer reconciliation, durable adaptive performance,
+full attack qualification and D-04 parameter lock remain open. Historical native
+and throughput evidence is not evidence for this new SHA.
