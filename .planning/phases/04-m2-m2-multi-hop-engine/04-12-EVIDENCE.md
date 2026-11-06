@@ -1739,3 +1739,22 @@ startup. Local race plus fragment identity tests repeated three times PASS
 Native full non-race Agent/Hub regression and vet were launched at a128471;
 results pending. Existing continuous race timeouts remain unresolved. These
 functional successes do not constitute sustained multi-stream D-04 qualification.
+
+## Native full composite regression and binary block-mode entry
+
+Dedicated host full uncached `go test ./agent/... ./hub/... -count=1` at clean
+a1284717a194fc86d77d7e25db339283d3c4763a PASS: Agent 219.089s, Store 8.280s,
+identity 0.027s, upgrade 0.248s, Hub 0.232s. Vet exit 0. Remote full.log SHA-256
+a5fe732642ffb9232a47f469fad93dfc2655f43e109fea622d0d0e5391dbde9a,
+vet.log SHA-256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.
+This native evidence excludes later test/CLI changes and is non-race.
+
+The node binary now supports explicit --experimental-funding-block-bytes, default
+zero preserving per-write mode. Node.EnableExperimentalFundingBlocks derives
+scope from its own loaded RuntimeEngine, uses its trusted clock and refuses
+non-runtime nodes, zero/over-4MiB API sizes and replacement after Start. Existing
+real block-runtime tests now use this same startup entry. Continuous TCP/UDP
+plus size/live-replacement boundary checks PASS locally 14.049s; vet/diff PASS.
+No authority is granted by this option and no wire schema changed. README makes
+clear that current d04_run.py does not yet drive this durable process entry.
+Multi-process sustained workload and parameter lock remain outstanding.

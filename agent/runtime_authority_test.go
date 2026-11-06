@@ -239,11 +239,12 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal(err)
 			}
 			if blockMode {
-				gate, err := node.NewExperimentalFundingBlockGate(e.scope, node.TrustedTime, 2048)
-				if err != nil {
-					t.Fatal(err)
+				for _, invalid := range []uint64{0, (4 << 20) + 1} {
+					if err := node.EnableExperimentalFundingBlocks(invalid); err == nil {
+						t.Fatalf("invalid block size accepted: %d", invalid)
+					}
 				}
-				if err := e.SetAccountingGate(gate); err != nil {
+				if err := node.EnableExperimentalFundingBlocks(2048); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -251,6 +252,11 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal(err)
 			}
 			defer node.Stop(context.Background())
+			if blockMode {
+				if err := node.EnableExperimentalFundingBlocks(1024); err == nil {
+					t.Fatal("live allocator replacement accepted")
+				}
+			}
 			clientConfig := identities[peerID]
 			clientConfig.Role = config.RoleSource
 			clientConfig.Peer = e.runtime.Addr().String()

@@ -30,6 +30,7 @@ func main() {
 	caPath := flag.String("tls-ca", "", "trusted Hub CA PEM")
 	hubName := flag.String("hub-name", "", "Hub certificate DNS identity")
 	engineConfig := flag.String("engine-config", "", "Engine runtime JSON configuration")
+	fundingBlockBytes := flag.Uint64("experimental-funding-block-bytes", 0, "experimental durable funding block size, 1..4194304; zero retains per-write mode")
 	demandConfig := flag.String("credit-demand-config", "", "explicit control 1.3.0 adaptive demand candidate JSON configuration")
 	credentialDir := flag.String("credential-dir", "credentials", "directory for locally generated node credentials")
 	renewBefore := flag.Duration("renew-before", 24*time.Hour, "renew runtime certificate before expiry")
@@ -54,6 +55,11 @@ func main() {
 	n, err := agent.New(*nodeID, s, engine)
 	if err != nil {
 		fatal(err)
+	}
+	if *fundingBlockBytes != 0 {
+		if err := n.EnableExperimentalFundingBlocks(*fundingBlockBytes); err != nil {
+			fatal(err)
+		}
 	}
 	var adaptiveDemands []agent.AdaptiveDemandConfig
 	var demandInterval time.Duration

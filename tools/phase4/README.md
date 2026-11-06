@@ -231,3 +231,20 @@ billing-snapshot switching or lock D-04. Existing
 qualification fixtures set `qualification_only` explicitly and use the bounded
 in-process evidence Gate; ordinary source configs require a positive funded
 `source_credit` or active `source_credit_book` snapshot.
+
+### Experimental durable Agent block mode
+
+The Agent binary accepts `--experimental-funding-block-bytes N` together with
+`--engine-config`. Zero (the default) keeps per-write accounting; explicit
+positive values are bounded at 4 MiB. Candidate scan sizes remain 65536, 262144
+and 1048576 bytes, not approved production defaults. The gate derives its scope
+from the loaded Engine configuration and cannot be replaced after runtime start.
+Use `--credit-demand-config` for the existing explicit control 1.3.0 adaptive
+policy. Neither option creates credit: persisted, authenticated grant/runtime/
+share authority remains mandatory, and node recovery precedes traffic startup.
+
+This exposes the durable allocator for independent-process workloads. Existing
+`d04_run.py` still measures the process-local issuer and does not automatically
+use this option; it cannot qualify durable Hub performance. Required follow-up
+is a same-SHA multi-process durable workload with raw ledger reconciliation,
+16 streams, actual UDP offered load and the controlled candidate matrix.
