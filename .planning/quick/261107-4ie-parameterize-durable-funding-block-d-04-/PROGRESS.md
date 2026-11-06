@@ -73,3 +73,9 @@ The timeline auditor now optionally recomputes the exact consumption-derived tar
 Added 04-44-D04-PARAMETER-REVIEW.md. It records the 27-case durable matrix and independent audit, dynamic factor definitions, formula/idle/occupancy criteria and explicit limits. Decision remains `locked=false`; target seconds are reviewed as horizons under explicit byte ceilings, not as unbounded measured-throughput grants. Issuer timing is process-local and does not prove durable Hub wait or grant return.
 
 The exact-head Phase 4 CI completed successfully. The unrelated Phase 5 wave1 run failed in the intentionally full-disk regression after SQLITE_FULL caused continuous durable runtime tests to time out; logs and authorization artifact are retained under artifacts/phase4/ci-0c2ba71/phase5. No race report was emitted. This is recorded as Phase 5 follow-up, not a Phase 4 pass or blocker.
+
+## Sequential delay-pressure follow-up queued
+
+At matrix PID196261 elapsed1h06m, the source job was confirmed live (child200946) and had reached factorial07. The independent auditor had19 completed trials with no failures, including exact cold-start consumption formula checks. These are partial observations; do not claim81 completed.
+
+Prepared /tmp/vortex-phase4-delay-followup.sh on the authorized host; queue PID210971 waits for live matrix PID196261, then requires the final matrix summary before launching any load. It uses the separate clean0c2ba71 worktree,256KiB initial blocks,30s horizon,8MiB floor,375000000-byte ceiling,600ms accepted renewal response,200ms unchanged reservation deadline,20/30/50% waterlines×3repeats,16TCP/100MbpsUDP,50short flows and65s idle. Raw failures are retained per trial; socket limits are saved/restored with EXIT trap. Log /tmp/vortex-phase4-delay-followup.log. Do not restart the matrix or run another native load concurrently. Formal chosen-profile duration tests remain after comparative review.

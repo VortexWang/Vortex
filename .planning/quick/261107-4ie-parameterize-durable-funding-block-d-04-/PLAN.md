@@ -24,3 +24,7 @@ objective: Parameterize durable funding-block D-04 qualification workload and ru
 ## CI evidence repair within scope
 
 Repair benchmark result parsing when Go benchmark names and metrics are separated by structured logs; preserve raw logs and numeric criteria. Pin the Phase 4 PR checkout to its actual head SHA so CI metadata and host evidence identify the tested source. The pre-existing VLink frozen-contract mismatch remains a separately recorded owner-review debt; do not alter approvals.
+
+## Remaining native qualification sequence
+
+After the live full-factorial job ends, run repeated dynamic-target 600ms renewal-response experiments for all three waterlines (256KiB block,30s horizon,8MiB floor), retaining errors/timeouts as failed availability observations. Do not increase the 200ms reservation wait. Use a separate clean 0c2ba71 worktree and preserve/restore socket settings. A provisional profile may receive formal-duration evidence before review, but remains unlocked until the full comparative matrix is audited. No native performance workloads run concurrently.
