@@ -1852,3 +1852,28 @@ Failure teardown now gracefully stops Node then Hub before canceling their paren
 context, preserving final logs instead of immediately killing them on t.Fatal.
 Unexpected frames report stream, round, type and payload before buffer release,
 to diagnose the unresolved native UDP reset on the next clean-SHA attempt.
+
+## Native b9fc9b2 concurrency failure and syscall diagnostic
+
+Clean b9fc9b211954d4b66a1fc0471f72573d5d37cc95 dedicated-host process run
+passed single-stream TCP and UDP, but 16-stream TCP failed at stream 7 round 0
+with RST payload 0008. Node logs show admission reaching approximately 199ms
+at begin-transaction (and one at reserve-usage). Overall remains FAIL. Report
+SHA-256 95f790b1ed5604718c6fbc2ab3aae9889c416756d552f4d357019cd8fed83edc;
+test.log SHA-256 641cde3b2beacc7c84799738cb2c85aee38fd8203726f982ac5943b90b6fa6a7.
+Artifacts: artifacts/phase4/process-b9fc9b2. This run's UDP pass does not explain
+or erase the previous UDP reset. Waiting for the single Store connection is
+confirmed; attributing that wait exclusively to FULL fsync is not justified.
+
+A diagnostic strace -D -f -c run over the same node binary failed concurrency
+again (0.494s). Selected syscall accounting: 161 fsync calls, 0.005613s summed
+syscall time (34us average); 1714 pwrite64, 0.009766s; 1032 fcntl, 0.008974s.
+These are traced syscall timings, not wall latency distributions or proof of
+power-loss durability. They do not support claiming fsync alone accounts for
+the 200ms wait. CPU/SQL processing and serialization still need profiling.
+Artifacts: artifacts/phase4/transaction-trace-detached-b9fc9b2.
+The earlier non-detached tracing wrapper interfered with shutdown and produced
+no usable summary; its surviving test node PID 127348 was explicitly terminated
+and confirmed absent before repeating. That failed diagnostic is preserved at
+artifacts/phase4/transaction-trace-b9fc9b2, never counted as qualification.
+No production deadline, SQLite FULL setting or D-04 candidate was changed.
