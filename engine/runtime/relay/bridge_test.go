@@ -179,6 +179,91 @@ func authenticatedPair(t *testing.T, ctx context.Context) (*vlink.MuxLink, *vlin
 	return left, r.mux
 }
 
+func TestBridgeOpeningConnBuffersTCPUntilRemoteAuthorization(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	client, server := authenticatedPair(t, ctx)
+	defer client.Close(nil)
+	defer server.Close(nil)
+	out, err := client.Open(ctx, vlink.OpenRequest{RuleID: [16]byte{1}, RuleRevision: 1, PathGeneration: 1, Network: uint8(vlink.StreamTCP), ClientAddress: []byte{127, 0, 0, 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	in, err := server.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	local, application := net.Pipe()
+	defer application.Close()
+	payload := bytes.Repeat([]byte("early-data"), 4096)
+	sourceGate, err := memory.NewCreditGate(memory.CreditConfig{SnapshotID: "source", Budget: int64(len(payload)) * 2, InitialBlock: 64, MaxBlock: 64 * 1024, GrantTarget: 64 * 1024, RenewPercent: 30})
+	if err != nil {
+		t.Fatal(err)
+	}
+	bridgeDone := make(chan error, 1)
+	go func() { bridgeDone <- BridgeOpeningConn(ctx, out, local, sourceGate, nil) }()
+
+	writeDone := make(chan error, 1)
+	go func() {
+		_, writeErr := application.Write(payload)
+		writeDone <- writeErr
+	}()
+	select {
+	case err := <-writeDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-ctx.Done():
+		t.Fatal("client prefix was not accepted while OPEN was pending")
+	}
+	probeCtx, probeCancel := context.WithTimeout(ctx, 50*time.Millisecond)
+	_, err = in.Receive(probeCtx)
+	probeCancel()
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("remote stream exposed early DATA before authorization: %v", err)
+	}
+
+	target, targetPeer := net.Pipe()
+	defer targetPeer.Close()
+	defer target.Close()
+	serverGate, err := memory.NewCreditGate(memory.CreditConfig{SnapshotID: "destination", Budget: int64(len(payload)) * 2, InitialBlock: 64, MaxBlock: 64 * 1024, GrantTarget: 64 * 1024, RenewPercent: 30})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := server.AuthorizeRemote(ctx, in.ID, func(context.Context, vlink.NodeID, vlink.OpenRequest) (io.Closer, error) { return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	targetDone := make(chan error, 1)
+	go func() { targetDone <- BridgeConnWithGate(ctx, in, target, serverGate) }()
+	got := make([]byte, len(payload))
+	if _, err := io.ReadFull(targetPeer, got); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, payload) {
+		t.Fatal("authorized early DATA payload changed")
+	}
+
+	_ = out.Reset(context.Background(), 0)
+	_ = application.Close()
+	_ = targetPeer.Close()
+	select {
+	case <-bridgeDone:
+	case <-ctx.Done():
+		t.Fatal("opening bridge did not stop")
+	}
+	select {
+	case <-targetDone:
+	case <-ctx.Done():
+		t.Fatal("target bridge did not stop")
+	}
+	if state := sourceGate.State(); state.Used != int64(len(payload)) || state.Held != 0 || state.Unknown != 0 || state.Sessions != 0 {
+		t.Fatalf("source early-data accounting=%+v", state)
+	}
+	if state := serverGate.State(); state.Used != int64(len(payload)) || state.Held != 0 || state.Unknown != 0 || state.Sessions != 0 {
+		t.Fatalf("destination early-data accounting=%+v", state)
+	}
+}
+
 func TestSourceFirstTargetByteObserverIgnoresClientRequest(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

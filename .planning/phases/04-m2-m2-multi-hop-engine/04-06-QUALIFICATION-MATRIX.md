@@ -30,6 +30,13 @@ NFR-006 coverage, durable authority and final same-build formal performance
 remain open. The older matrix and incremental notes below retain their
 historical context and do not override this reconciliation.
 
+The runtime bridge early-data slice is now covered on the current branch by an
+authenticated delayed-authorization test. Before remote authorization, the
+bounded TCP prefix remains unavailable to the remote stream; after authorization
+the exact payload reaches the target and both accounting gates settle. UDP
+continues to require OPEN/OPEN_OK. This updates the implementation boundary,
+not the controlled-RTT or formal NFR-007 qualification status.
+
 ## Historical matrix
 
 04-11 added a reproducible 27-case D-04 matrix and fail-closed qualification

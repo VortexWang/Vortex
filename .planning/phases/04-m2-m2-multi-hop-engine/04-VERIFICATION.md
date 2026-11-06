@@ -15,6 +15,20 @@ Implementation is closed; qualification remains gaps_found. Persistent Agent/Hub
 and production backend work belong to Phase 5/6, not Phase 4 closure blockers.
 No previous failed check is promoted to pass.
 
+## Bounded early TCP DATA increment — 2026-11-06
+
+The runtime bridge now has an authenticated delayed-authorization regression
+at `engine/runtime/relay/bridge_test.go`:
+`TestBridgeOpeningConnBuffersTCPUntilRemoteAuthorization`. It sends a bounded
+TCP prefix while OPEN is pending, verifies the remote stream exposes no DATA
+before authorization, then authorizes the stream and verifies exact delivery to
+the target with zero held, unknown, or open-session accounting on both sides.
+The low-level VLink tests continue to enforce strict UDP OPEN/OPEN_OK gating.
+
+This closes the finite implementation/evidence slice for authorized early TCP
+DATA. It does not provide the controlled pool/mux RTT timeline, dedicated-host
+resource evidence, or formal NFR-007 qualification; those remain open.
+
 ## Clean Docker runtime-authority evidence — 2026-11-06
 
 The clean `e5bcb03f146ff2dba0400e4a03e43efcadc8027d` build passed the bounded

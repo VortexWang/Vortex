@@ -103,6 +103,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261106-t8z | Add delayed late-accepted renewal recovery evidence | 2026-11-06 | pending | complete | [261106-t8z-add-delayed-late-accepted-renewal-recove](./quick/261106-t8z-add-delayed-late-accepted-renewal-recove/) |
 | 261106-vxa | Add bounded D-04 renewal/occupancy observations | 2026-11-06 | 786183f | complete | [261106-vxa-phase-4-d-04-text](./quick/261106-vxa-phase-4-d-04-text/) |
 | 261106-w6d | Surface D-04 observations in trial summaries | 2026-11-06 | b96b1fe | complete | [261106-w6d-d-04-d04-result-python-text](./quick/261106-w6d-d-04-d04-result-python-text/) |
+| 261106-wd1 | Add delayed-authorization early TCP DATA regression | 2026-11-06 | pending | complete | [261106-wd1-runtime-bridge-bounded-early-tcp-data-ud](./quick/261106-wd1-runtime-bridge-bounded-early-tcp-data-ud/) |
 
 
 ## Session Continuity
