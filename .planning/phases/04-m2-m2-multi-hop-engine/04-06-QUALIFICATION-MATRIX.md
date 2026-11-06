@@ -8,6 +8,21 @@ Phase 4 实现范围已关闭，P4-Q1..Q5 资格缺口保留；持久化与生�
 
 ## Prior result: Plan 04-12
 
+## Current Q2/Q3 evidence — 2026-11-06
+
+The final branch SHA `fdaea8f` now has a single auditable Q2/Q3 evidence
+bundle. The Docker comparison and recovery runs cover the configured forged
+OPEN, bypass, integrity, generation, drain, primary/active failure and spare
+restart cases. Docker snapshot and finite TCP/UDP credit runs cover immutable
+snapshot affinity, exact source conservation, exhaustion denial and no held or
+unknown leakage. Targeted Engine race tests pass for identity, policy, share,
+snapshot, grant, renewal, route and bounded UDP behavior. See
+`04-39-Q2-Q3-COVERAGE-EVIDENCE.md` for output paths and scope.
+
+These results close the finite current-configuration checklist only. They do
+not establish exhaustive security coverage, production Agent/Hub persistence,
+or full NFR-039/NFR-040/NFR-044 acceptance; those boundaries remain explicit.
+
 See [04-12-EVIDENCE.md](04-12-EVIDENCE.md) for the authoritative current status:
 21 D-04 static trials complete; 91e409e pool/mux latency gate passes; finite
 runtime safety probes and native race pass. Production D-04 lock, complete
