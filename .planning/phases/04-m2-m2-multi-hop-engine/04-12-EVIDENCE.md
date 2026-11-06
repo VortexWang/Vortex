@@ -1475,3 +1475,20 @@ writes, returns and later unknown residual conservation. Real ordinary/delayed
 TCP/UDP block renewal race PASS 29.820s; vet/diff PASS. Native concurrency and
 full regression remain required; one-millisecond/64-request bounds are not
 D-04 parameter selections.
+
+## Native queue concurrency test 0df7bb1 — still failed
+
+Clean 0df7bb1896b599351f83cec9a334783890d06591 ran 20 repetitions of
+TestFundingBlockGateConcurrentShortWritesAndClose on the dedicated host.
+All 20 failed (0 pass), total 12.624s, with admission context deadlines.
+Raw logs, SHA, clean status and exit code remain remotely under
+artifacts/phase4/concurrency-0df7bb1. This is not a qualified throughput gain:
+the 200 ms requirement remains unmet. No later full-suite run was started.
+
+Grouping admission alone leaves per-child synchronous checkpoints and small
+block-capacity waves serialized. Further work must group durable checkpoints
+without acknowledging a child before its used bytes and residual are durably
+committed. Simply returning success for memory-only consumption would violate
+the existing accounting.Batch resolver boundary and is not an acceptable fix.
+The queue implementation remains experimental; D-04 and native concurrency
+qualification remain open.
