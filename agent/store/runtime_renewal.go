@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"sort"
 	"strconv"
 	"time"
@@ -139,18 +140,27 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 // ReserveRuntimeUsage renews the live session's authority and pre-reserves
 // bytes atomically. Its snapshot and initial ownership are immutable; changing
 // the selected IDs never moves old usage holds or refunds their liabilities.
-func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse) (string, error) {
+func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse) (result string, resultErr error) {
+	started := time.Now()
+	stage := "validate"
+	defer func() {
+		if resultErr != nil && (errors.Is(resultErr, context.DeadlineExceeded) || errors.Is(resultErr, context.Canceled)) {
+			resultErr = fmt.Errorf("store: runtime reservation stage=%s elapsed=%s: %w", stage, time.Since(started), resultErr)
+		}
+	}()
 	if scope.SessionID == "" || r.NodeID != scope.NodeID || r.BootID != scope.BootID || r.SnapshotID != scope.BillingSnapshotID || r.RuleID != scope.RuleID || r.BatchID == "" || r.Reserved == 0 || (r.Direction != "egress" && r.Direction != "ingress") {
 		return "", ErrAuthorizationDenied
 	}
 	if !scope.TrustedTime {
 		return "", ErrAuthorityTimeUncertain
 	}
+	stage = "begin-transaction"
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return "", err
 	}
 	defer tx.Rollback()
+	stage = "read-session"
 	var boot, flow, source, state, grantID, runtimeID, shareID, firstGrant, firstRuntime, firstShare string
 	if err := tx.QueryRowContext(ctx, `SELECT boot_id,flow_key,source_id,state,grant_id,runtime_lease_id,share_lease_id,initial_grant_id,initial_runtime_lease_id,initial_share_lease_id FROM runtime_sessions WHERE node_id=? AND session_id=?`, scope.NodeID, scope.SessionID).Scan(&boot, &flow, &source, &state, &grantID, &runtimeID, &shareID, &firstGrant, &firstRuntime, &firstShare); err != nil {
 		return "", err
@@ -158,6 +168,7 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	if state != "open" || boot != scope.BootID || flow != r.FlowKey {
 		return "", ErrAuthorizationDenied
 	}
+	stage = "read-lineage"
 	var initial runtimeChoices
 	for _, entry := range []struct {
 		id     string
@@ -171,6 +182,7 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	if initial.grant.BillingSnapshotID != scope.BillingSnapshotID || initial.grant.RuleID != scope.RuleID || initial.grant.RuleRevision != scope.RuleRevision || initial.grant.PathGeneration != scope.PathGeneration || initial.share.SourceID != source {
 		return "", ErrAuthorizationDenied
 	}
+	stage = "read-current-authority"
 	for _, id := range []string{grantID, runtimeID, shareID} {
 		_, state, err := readAuthorizationTx(ctx, tx, scope.NodeID, id)
 		if err != nil {
@@ -182,6 +194,7 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	}
 	// An outstanding retry keeps its original grant identity even when another
 	// direction already renewed this session. It cannot debit or migrate twice.
+	stage = "read-existing-hold"
 	var heldID string
 	err = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, scope.NodeID, r.BatchID).Scan(&heldID)
 	if err == nil {
@@ -199,10 +212,12 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		scope.ShareLeaseID = shareID
 		scope.ExistingSession = true
 		scope.SessionID = ""
+		stage = "reserve-usage"
 		id, err := reserveAuthorizedUsageTx(ctx, tx, r, scope)
 		if err != nil {
 			return "", err
 		}
+		stage = "commit"
 		if err := tx.Commit(); err != nil {
 			return "", err
 		}
@@ -212,10 +227,12 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		return "", err
 	}
 	scope.ExistingSession = true
+	stage = "select-authority"
 	chosen, err := selectRuntimeAuthorityTx(ctx, tx, scope, r.Reserved, &initial)
 	if err != nil {
 		return "", err
 	}
+	stage = "check-session-limit"
 	var count uint64
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM runtime_sessions WHERE node_id=? AND source_id=? AND state='open'`, scope.NodeID, source).Scan(&count); err != nil {
 		return "", err
@@ -223,6 +240,7 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	if count > chosen.share.Connections {
 		return "", ErrAuthorizationDenied
 	}
+	stage = "update-session"
 	if _, err := tx.ExecContext(ctx, `UPDATE runtime_sessions SET grant_id=?,runtime_lease_id=?,share_lease_id=? WHERE node_id=? AND session_id=? AND state='open'`, chosen.grant.AuthorizationID, chosen.runtime.AuthorizationID, chosen.share.AuthorizationID, scope.NodeID, scope.SessionID); err != nil {
 		return "", err
 	}
@@ -231,10 +249,12 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	scope.RuntimeLeaseID = chosen.runtime.AuthorizationID
 	scope.ShareLeaseID = chosen.share.AuthorizationID
 	r.AuthorizationID = chosen.grant.AuthorizationID
+	stage = "reserve-usage"
 	id, err := reserveAuthorizedUsageTx(ctx, tx, r, scope)
 	if err != nil {
 		return "", err
 	}
+	stage = "commit"
 	if err := tx.Commit(); err != nil {
 		return "", err
 	}

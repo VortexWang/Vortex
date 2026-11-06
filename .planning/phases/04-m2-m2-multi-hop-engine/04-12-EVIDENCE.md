@@ -942,3 +942,31 @@ requires fallback to a funded original grant while keeping the newer runtime
 and share leases; exact conservation is asserted. Full local Agent/Hub race
 PASS (Agent 48.384s), updated Store uncached race PASS, vet/diff PASS. Native
 repetition of this new change is pending; the timeout issue remains open.
+
+## Native 7ff8320 and bounded stage diagnostics
+
+Clean 7ff8320 first passed continuous TCP/UDP race (37.791s), full Agent/Hub
+race (Agent 89.317s, Store 38.162s) and vet. The subsequent three full TCP/UDP
+repetitions passed twice, then failed on UDP renewal round 7 with RST and
+`store: durable authorization does not permit this operation: context deadline
+exceeded` (combined command 112.886s, exit 1). The on-demand candidate reads
+therefore do not establish closure of the intermittent timeout.
+
+Added error context to ReserveRuntimeUsage only for deadline/cancellation
+errors: operation stage and elapsed time, preserving the original wrapped
+error and all timeout/authorization behavior. Stages distinguish transaction
+acquisition, session/lineage/current authority reads, existing hold lookup,
+authority selection, session limit/update, reservation and commit. No timeout
+increase or accounting bypass is introduced.
+
+The instrumented uncommitted source was sent to the same native worktree for
+explicitly diagnostic UDP-only repetitions: 3/3 and then 6/6 passed. No timeout
+stage was captured. These diagnostic runs do not overturn the clean-SHA full
+sequence failure or establish a fix. Local Store uncached race and vet PASS.
+The native diagnostic source was downloaded and byte-compared with the local
+source; logs and successful initial ledger snapshots are archived at
+artifacts/phase4/continuous-7ff8320-results/results.tar.gz with remote-verified
+SHA-256 344eb2ada3a066d991f7201ad69fac4e1480f0d7848ffa45eed6522a9dc9b54d.
+Host socket maxima remained 212992. D-04 timeout investigation stays open;
+next diagnostic should retain complete TCP/UDP ordering and inspect the failing
+reservation stage instead of treating more passing UDP-only runs as closure.
