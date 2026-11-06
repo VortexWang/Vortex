@@ -2539,3 +2539,28 @@ macOS: performance_qualification remains not-qualified, D-04 pending-review.
 This proves wiring and outcome classification, not a candidate matrix result.
 Native dedicated-host delay/failure trials and bounded in-flight peak occupancy
 remain required before parameter lock.
+
+## P4-Q4 dedicated-host delayed issuer waterlines
+
+Clean 5239ba54fe5e2a05f4718f87aa304bc7e8b8baa5, Ubuntu 24.04.5 x86_64:
+three independent five-process trials with 40ms process-local response delay,
+256KiB initial / 4MiB max blocks, 375000000-byte fixed target (100Mbps×30s),
+16 TCP streams, 15s baseline and mixed phases, actual ~100Mbps UDP.
+Waterline 20/30/50%: all exit 0, runtime_correctness pass, source conservation
+and settlement pass, zero UDP loss. Mixed TCP 999.498/1000.048/1001.490 Mbps;
+actual UDP 99.97056/99.96416/99.95904 Mbps. Grants 30/35/49. Every trial has one
+shortfall and successful wait, no timeout/cancel/final refusal; final pending,
+unknown, held and sessions all zero. Source used matches exact directional
+accounting in each report. Final available is not peak/average occupancy.
+
+Results and raw report/credit/workload hashes in 04-26-NATIVE-DELAY-WATERLINES.json;
+remote raw artifacts/phase4/delay-scan-5239ba5 plus launcher /root/phase4-delay-scan-5239ba5.sh.
+Launcher exit 0; rmem_max/wmem_max restored to 212992 from 67108864 and live
+sysctl verified both. Defaults unchanged. Full local runtime subtree + relay
+command race passed on the same source. No Actions or formal performance claim.
+
+One trial per waterline does not establish statistical superiority. At 40ms,
+all waterlines replenish without steady-state stalls; 50% adds issuance without
+a demonstrated material throughput gain. Need delay/failure pressure, repetitions,
+dynamic target and occupancy evidence before lock; performance_qualification
+remains not-qualified. No persistent Agent/Hub work pulled into Phase 4.
