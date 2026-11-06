@@ -1229,3 +1229,37 @@ One second is an experimental value, not D-04 parameter selection. These are
 Agent interface/Store tests, not live VLink or dedicated-host qualification.
 Full block-mode hostile coverage, actual renewal transport and performance
 remain open. Local hold return is not the unapproved control 1.4.0 Hub return.
+
+## Real block-mode VLink renewal and directional fragmentation fix
+
+The existing actual TCP/UDP VLink fixture now explicitly installs the block gate
+before Engine start. Each mode covers initial signed authority, rejected OPEN
+attacks and connection-limit denial, real bidirectional traffic, lost-response
+demand replay, original authority expiry, two continuous renewals and final
+Agent/Hub/protocol-backend ledger reconciliation. A second mode delays each
+renewal response after durable Hub issuance and verifies unchanged Agent credit
+and stable pending-demand identity before delivery. Snapshot filenames include
+block mode to prevent overwriting per-write evidence.
+
+First execution failed both transports: idle opposite-direction funding stranded
+bytes needed to fund the response. The allocator now returns only proven-idle,
+non-poisoned same-session blocks before retrying authoritative funding. A direct
+regression proves in-flight opposite-direction funds are not reclaimed.
+
+Two sequencing assumptions also failed: held idle credit can make a renewal
+request larger than 3000 bytes (still bounded by its configured 4096-byte target),
+and a proactive next grant may arrive before the prior round finishes waiting
+for idle tails. The fixture now reads actual funded issuance, enforces per-round
+3000..4096 bounds (first round exactly 4096), excludes the expired initial 1096
+bytes from usable credit, and verifies exact final Agent/Hub issuance, known
+payload consumption, zero reserved/unknown balance and source conservation.
+Intermediate monotonic issuance does not weaken the final exact assertions.
+This timing/occupancy behavior still needs measurement for D-04 selection.
+
+Ordinary target race PASS 16.883s; delayed target PASS 16.965s. After the proactive
+delivery sequencing fix, both modes repeated three times PASS 87.281s (12 total
+TCP/UDP subcases). Final full local Agent/Hub race PASS (Agent 214.264s; other
+packages cached), vet/diff PASS. Initial failures and passing raw logs are kept
+in artifacts/phase4/block-integration-local with checksums.json. These are local
+results, not dedicated-host performance or the complete hostile matrix. Native
+block qualification, long-run/fault coverage and D-04 parameter lock remain open.

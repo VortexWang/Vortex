@@ -120,7 +120,19 @@ func TestRuntimeDelayedDurableAdaptiveRenewal(t *testing.T) {
 	runDurableRuntimeAuthority(t, 8, true)
 }
 
+func TestRuntimeFundingBlockDelayedDurableRenewal(t *testing.T) {
+	runDurableRuntimeAuthorityMode(t, 2, true, true)
+}
+
+func TestRuntimeFundingBlockDurableRenewal(t *testing.T) {
+	runDurableRuntimeAuthorityMode(t, 2, true)
+}
+
 func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse ...bool) {
+	runDurableRuntimeAuthorityMode(t, renewalRounds, false, delayResponse...)
+}
+
+func runDurableRuntimeAuthorityMode(t *testing.T, renewalRounds int, blockMode bool, delayResponse ...bool) {
 	t.Helper()
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
@@ -217,6 +229,15 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 			node, err := New(controlTestNodeID, s, e)
 			if err != nil {
 				t.Fatal(err)
+			}
+			if blockMode {
+				gate, err := node.NewExperimentalFundingBlockGate(e.scope, node.TrustedTime, 2048)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := e.SetAccountingGate(gate); err != nil {
+					t.Fatal(err)
+				}
 			}
 			if err := node.Start(ctx); err != nil {
 				t.Fatal(err)
@@ -445,7 +466,10 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 					if err != nil {
 						t.Fatal(err)
 					}
-					if b.Committed == committed && b.Initial == initial {
+					// A proactively delivered next grant may arrive before an idle
+					// tail returns. Final totals are checked against Hub below.
+					issuedMatches := b.Initial == initial || (blockMode && b.Initial > initial && b.Initial <= delegation.RawBytes)
+					if b.Committed == committed && issuedMatches && (!blockMode || b.Reserved == 0) {
 						return
 					}
 					select {
@@ -600,6 +624,27 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 					} else {
 						expectedIssued += 3000
 					}
+					if blockMode {
+						for {
+							funded, err := hs.AuditHubDelegation(ctx, delegation.ID)
+							if err != nil {
+								t.Fatal(err)
+							}
+							if funded.Issued > previousIssued {
+								delta := funded.Issued - previousIssued
+								if delta < 3000 || delta > 4096 || (round == 0 && delta != 4096) {
+									t.Fatalf("unexpected block renewal size: %d", delta)
+								}
+								expectedIssued = funded.Issued
+								break
+							}
+							select {
+							case <-ctx.Done():
+								t.Fatal(ctx.Err())
+							case <-time.After(time.Millisecond):
+							}
+						}
+					}
 					if barrier != nil {
 						select {
 						case <-issued:
@@ -637,7 +682,11 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 						if err != nil {
 							t.Fatal(err)
 						}
-						if ledger.Available == 4096 {
+						wantAvailable := uint64(4096)
+						if blockMode {
+							wantAvailable = expectedIssued - uint64((round+2)*2*len(message)) - 1096
+						}
+						if ledger.Available == wantAvailable {
 							break
 						}
 						select {
@@ -726,6 +775,10 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 			if err != nil || balance.Initial != delegation.RawBytes || balance.Remaining != delegation.RawBytes-expectedIssued || balance.Issued != expectedIssued {
 				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
 			}
+			agentFinal, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+			if err != nil || agentFinal.Initial != expectedIssued || agentFinal.Committed != uint64((renewalRounds+2)*2*len(message)) || agentFinal.Reserved != 0 || agentFinal.Unknown != 0 || agentFinal.Initial != agentFinal.Remaining+agentFinal.Committed {
+				t.Fatalf("final Agent/Hub funding reconciliation: %+v expected=%d err=%v", agentFinal, expectedIssued, err)
+			}
 			if err := s.Close(); err != nil {
 				t.Fatal(err)
 			}
@@ -737,7 +790,9 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 			}
 			assertRawLedger(t, hubDB, 4+2*renewalRounds)
 			assertRawLedger(t, backendDB, 4+2*renewalRounds)
-			if renewalRounds == 0 {
+			if blockMode {
+				saveLedgerFiles(t, fmt.Sprintf("runtime-block-%d-rounds-%d-delay-%t", network, renewalRounds, len(delayResponse) > 0 && delayResponse[0]), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+			} else if renewalRounds == 0 {
 				saveRuntimeLedger(t, network, agentDB, hubDB)
 				saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			} else {

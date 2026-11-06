@@ -155,3 +155,32 @@ Tests cover old-expiry replacement with known usage pinned to the renewed grant,
 idle release without premature in-flight refund, and exact final scoped-credit
 consumption below the configured target. Real VLink, delayed/lost Hub response,
 performance and full hostile qualification still remain to be run in this mode.
+
+## Real VLink integration progress
+
+The existing real TCP/UDP + mTLS control renewal fixture now explicitly installs
+the experimental gate before Engine start. Both ordinary and delayed-response
+block modes execute two continuous renewals after initial issue, lost-response
+replay and initial-authority expiry. Agent, Hub and protocol backend usage
+ledgers still reconcile; tests wait for local idle tails before final checks.
+
+Integration exposed direction fragmentation: an idle opposite-direction block
+could retain the credit needed for the next response. Allocation denial now
+returns only proven-idle, non-poisoned blocks from the same session before
+retrying the existing authoritative funding call. A regression proves that an
+in-flight opposite block is never reclaimed.
+
+Block occupancy can also change renewal size: demand prepared while unused
+credit is held can issue up to the configured 4096-byte target; idle return then
+raises usable credit above that target. The fixture records actual funded
+issuance, checks its per-round bounds and exact conservation, rather than
+assuming every later renewal is exactly 3000 bytes. This occupancy/timing effect
+remains part of D-04 measurement; it is not evidence for selecting parameters.
+
+The real fixture additionally permits proactive delivery of the next valid
+grant while the previous round waits for idle-tail return. Intermediate waits
+accept that monotonic issuance; final assertions still require exact Agent/Hub
+issued totals, exact metered payload bytes, zero unresolved/unknown balance and
+source conservation. Three repetitions of both ordinary and delayed modes
+passed after this sequencing correction. This is 12 TCP/UDP subcases, not the
+complete attack or sustained-load matrix.

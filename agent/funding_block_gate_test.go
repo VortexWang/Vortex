@@ -302,3 +302,36 @@ func TestFundingBlockGateRefreshesExpiredIdleAuthority(t *testing.T) {
 		t.Fatal("new usage did not bind renewed grant")
 	}
 }
+
+func TestFundingBlockGateReclaimsOnlyIdleOppositeDirection(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.size = 4096
+	ctx := context.Background()
+	first, err := s.Reserve(ctx, accounting.LeftToRight, 1500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Reserve(ctx, accounting.RightToLeft, 1500); err == nil {
+		t.Fatal("reclaimed in-flight funding")
+	}
+	if b := fundingBalance(t, n); b.Reserved != 4096 || b.Remaining != 0 {
+		t.Fatalf("inflight changed: %+v", b)
+	}
+	if err := first.Commit(ctx, 1500); err != nil {
+		t.Fatal(err)
+	}
+	second, err := s.Reserve(ctx, accounting.RightToLeft, 1500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := second.Commit(ctx, 1500); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if b := fundingBalance(t, n); b.Committed != 3000 || b.Remaining != 1096 || b.Reserved != 0 {
+		t.Fatalf("reclaim conservation: %+v", b)
+	}
+}

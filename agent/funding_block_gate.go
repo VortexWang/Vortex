@@ -125,9 +125,25 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		r := store.UsageReservation{NodeID: s.inner.gate.node.NodeID, BootID: s.inner.gate.node.BootID, BatchID: id, FlowKey: s.inner.flowKey, RuleID: use.RuleID, SnapshotID: use.BillingSnapshotID, Direction: dir, Reserved: s.size}
 		grant, err := s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
+		reclaimed := false
+		if errors.Is(err, store.ErrAuthorizationDenied) {
+			// The opposite direction may hold proven-unused credit from this
+			// same session. Return it before requesting more funding; never
+			// reclaim in-flight or uncertain bounds.
+			for otherDirection, other := range s.blocks {
+				if otherDirection == direction || other.inFlight != 0 || other.poisoned {
+					continue
+				}
+				if releaseErr := s.release(ctx, other); releaseErr != nil {
+					return nil, nil, s.fail(releaseErr)
+				}
+				delete(s.blocks, otherDirection)
+				reclaimed = true
+			}
+		}
 		// A target is a bounded preference, not a requirement to strand usable
 		// scoped credit. Both attempts retain the same authority checks.
-		if errors.Is(err, store.ErrAuthorizationDenied) && r.Reserved > uint64(n) {
+		if errors.Is(err, store.ErrAuthorizationDenied) && (reclaimed || r.Reserved > uint64(n)) {
 			r.Reserved = uint64(n)
 			grant, err = s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
 		}
