@@ -182,3 +182,56 @@ Both raw recovery sets were independently re-audited (five snapshots/ten faults)
 and both have 30 required share/renewal race passes. Evidence, pair manifest and
 cross-workflow failure excerpts are retained under its SHA directory. The earlier
 `adaa388` pair remains retained separately; no result is attributed to another SHA.
+
+## Increment: live finite renewal — 36d244b (partial, not plan completion)
+
+Source `36d244b7747dd3e16089e4fd76ee56ad66bbddbd` passed the full
+`make phase5-check` in clean pinned Go 1.27.3 Linux arm64 Docker and
+[Actions 42165803700](https://github.com/VortexWang/Vortex/actions/runs/42165803700)
+Linux amd64. Raw logs, five recovery SQLite snapshots per environment,
+independent re-audits, pair metadata and hashes are retained at
+`artifacts/phase5/check/36d244b7747dd3e16089e4fd76ee56ad66bbddbd/`.
+Both environments have 54 named share/renewal race passes (18 tests repeated
+three times), two required actual-binary renewal scenarios, and independent
+recovery audits passing five snapshots/ten fault cases. Missing or skipped
+required process scenarios fail the gate.
+
+| Behavior | Implementation / evidence | Boundary |
+|---|---|---|
+| Low-water/TTL trigger | `Store.DueRenewals`, `PersistTriggeredRenewal`, `ControlClient.queueDueRenewals` | Current boot, installed rule, existing finite delegation, trusted time and separately provisioned share roots only; bounded scans and one unresolved lineage |
+| Current authenticated transport | `sendPendingRenewals`, `acceptRenewalResult`, `Issuer.Renew` | Negotiated renewal-v1 on the existing control 1.3 stream; session fencing; exact durable ID/hash replay; no issuer transfer on reconnect |
+| Durable terminal result | `Store.RenewHubAuthorization` | Successful debit, issue and response commit together; refusals commit without authority; changed requests conflict and legacy issuance cannot bypass a terminal result |
+| Atomic local schema upgrade | `migrateRenewalAuthority`, schema 16 | FULL transaction adds renewal outcome/trigger and anchored-share schema; injected marker failure rolls back tables/columns and retains original funds; reopen preserves legacy results |
+| Actual TCP/UDP continuation | `TestSchedulerProcessRenewal/low-water-tcp-udp` | Initial 8192 bytes; total issued 16384; committed 14336; remaining 2048; unknown/reserved zero at audit; Hub finite 65536 = remaining 49152 + issued 16384 |
+| Lost response | `TestSchedulerProcessRenewal/lost-result` | First committed renewal response deliberately dropped; same request replay yields exactly two total issues (initial plus one renewal), with the same source conservation |
+
+Renewal is opt-in through the already approved runtime lifecycle renewal knobs.
+When enabled, omitted companion values default to 30 percent / one-second retry;
+status-only configurations retain their existing negotiation. The protocol backend
+fixture explicitly seeds finite source anchors before launching the real node and
+test Hub. It is not production backend provisioning, a performance qualification,
+or evidence that a node may create funding from a received template.
+
+An initial repeated process run exposed a short denial after installation:
+clock quantization could project below the just-authenticated issue lower bound,
+and installation was marked before the clock observation. `AuthorityClock.project`
+now retains the authenticated lower bound while continuity holds, and the renewal
+journal is marked installed only after validated authority and clock observation.
+`TestAuthorityClockNeverRetreatsBelowAuthenticatedIssue` covers zero/short elapsed
+intervals; time expiry and contradiction checks remain enforced. After this fix,
+the two renewal scenarios and all five regional process scenarios passed ten
+consecutive native repetitions. Native development logs are explicitly marked
+precommit/dirty-checkout evidence and do not substitute for the clean Linux pair.
+Root/Engine tests, Agent/Hub race and vet also passed.
+
+Still open for 05-08: renewal-specific SIGKILL/restart, revocation/old-session and
+disk/time failure combinations on live traffic; authenticated contiguous
+confirmation and >=7-day settled-record cleanup with indefinite dispute/unknown
+retention. Existing generic recovery fault passes do not establish those new
+renewal combinations. No SUMMARY, G05-01 closure or phase completion is claimed.
+
+Other workflows on this SHA remain separate: Phase 2 passed; Phase 1 run
+42165803746 failed only the existing VLink review hash (other listed checks passed),
+and Phase 3 run 42165803707 failed benchmark metric extraction despite raw Go
+benchmark PASS. Current excerpts are retained under `cross-workflow/`; neither
+historical problem was hidden or approval hashes changed in this increment.

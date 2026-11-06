@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "commit": "36d244b7747dd3e16089e4fd76ee56ad66bbddbd",
+  "status": "passed",
+  "scope": "incremental-live-finite-renewal",
+  "actions_run": 42165803700,
+  "full_plan_complete": false,
+  "production_backend_authority": false,
+  "docker": {
+    "report_sha256": "f48d6adac032ba57d5802eb65add8ac1afaf2892805688a295c018c286e1e4e5",
+    "share_renewal_race_passes": 54,
+    "renewal_process_cases": 2,
+    "independent_recovery_audit": "passed"
+  },
+  "actions": {
+    "report_sha256": "f48d6adac032ba57d5802eb65add8ac1afaf2892805688a295c018c286e1e4e5",
+    "share_renewal_race_passes": 54,
+    "renewal_process_cases": 2,
+    "independent_recovery_audit": "passed"
+  }
+}

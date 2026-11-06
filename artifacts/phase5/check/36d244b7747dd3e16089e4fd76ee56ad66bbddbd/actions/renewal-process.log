@@ -1,0 +1,14 @@
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 05:04:41 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 05:04:42 INFO udp link drop summary link_id=91a2d4704a8d3d84b47198ef9a3fae39 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 05:04:42 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 05:04:45 INFO udp link drop summary link_id=3dce72855f9dbbc7c8245192c68e9527 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.15s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.22s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.29s)
+PASS
+ok  	vortex/test/phase5	5.160s

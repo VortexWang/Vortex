@@ -1,0 +1,262 @@
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:57:42 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:57:42 INFO udp link drop summary link_id=b773b6f1ae1e81a1c6e3087e8bfd8e66 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.82s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (3.18s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.11s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.10s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.09s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.11s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:57:44 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:57:45 INFO udp link drop summary link_id=6856df106fd9470be62920c0d0544c31 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:57:45 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:57:47 INFO udp link drop summary link_id=ca8d7abb49039543a15c9f1ae939994c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.10s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.81s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.23s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:57:56 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:57:56 INFO udp link drop summary link_id=ade405dfe60b4ef136fb18d51fdce8ba window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.28s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.76s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.12s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.12s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.15s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:57:58 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:57:59 INFO udp link drop summary link_id=e552d4f3bbef2ad5d88d9e05d94852a8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:57:59 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:01 INFO udp link drop summary link_id=75de2181e06abe7c260fd035e128c44c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.08s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.85s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:58:11 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:58:11 INFO udp link drop summary link_id=96c281fd409a22c4fda5965cd6048637 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.36s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.84s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.14s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.12s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.12s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.15s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:58:13 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:14 INFO udp link drop summary link_id=58eeb56374c97a28341bf4c02fb9ec5a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:58:14 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:16 INFO udp link drop summary link_id=aa3aa18949f226c78b47cc02613e6820 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (4.97s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.86s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.14s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:58:25 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:58:25 INFO udp link drop summary link_id=971f16a66412ee89f787ff7353bc41e2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.35s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.86s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.13s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.13s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:58:27 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:28 INFO udp link drop summary link_id=35540b7073557bdc96c408b472ca962a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:58:28 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:30 INFO udp link drop summary link_id=ed9f6d6c86908cb2b83f6c62cab6d030 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.13s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.91s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:58:40 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:58:40 INFO udp link drop summary link_id=21ff5c597cc764cfb604fb7435371f28 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.36s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.85s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.12s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.15s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:58:41 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:42 INFO udp link drop summary link_id=c836edafb1b99064ecfca559df001714 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:58:43 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:45 INFO udp link drop summary link_id=c1a0a6983b2bbd6059e9453b059c5cd2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.10s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.89s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:58:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:58:54 INFO udp link drop summary link_id=4eccbc8f67c42a858ada4d4aa7ff9428 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.32s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.85s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.12s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.13s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:58:56 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:57 INFO udp link drop summary link_id=8cb7197657f699926818ffef4a43df89 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:58:57 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:58:59 INFO udp link drop summary link_id=dfd3910b57c7a492c12d6bf9220f305b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.14s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.90s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:59:08 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:59:08 INFO udp link drop summary link_id=327b86c8acfc67c00dc5161fa6232fb1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.35s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.84s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.13s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.15s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:59:10 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:11 INFO udp link drop summary link_id=d948c3542a7af08bd4f9d723b5da9e0d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:59:11 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:14 INFO udp link drop summary link_id=b5344f93bf68f876bc6b4ca42ecb68f7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.13s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.92s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:59:23 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:59:23 INFO udp link drop summary link_id=eaf79adad4e7f2be70400a75f42b7603 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.30s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.84s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.12s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.11s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.13s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:59:25 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:26 INFO udp link drop summary link_id=c97d132cb0a378e8e5eba42102dca6d1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:59:26 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:28 INFO udp link drop summary link_id=aa937e424b379e5e8ecfe60780a3c07d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.09s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.90s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.24s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:59:37 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:59:37 INFO udp link drop summary link_id=05e74b37ac36850ae4dd45b5e04d59c4 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.32s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.83s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.13s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.13s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:59:39 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:40 INFO udp link drop summary link_id=1397a6d32ee72fc00b4b1d0754c019bd window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:59:40 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:42 INFO udp link drop summary link_id=02fbfe504a4721d4344b981803dff1c9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.10s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.89s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 12:59:52 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 12:59:52 INFO udp link drop summary link_id=48c2d5c84e9da3a2ab21b33610435dd2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (9.36s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (2.86s)
+    --- PASS: TestRegionalProcessFailover/silent-established (3.12s)
+    --- PASS: TestRegionalProcessFailover/autonomous (1.13s)
+    --- PASS: TestRegionalProcessFailover/recovering (1.13s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.15s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 12:59:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:55 INFO udp link drop summary link_id=4986f2b8edc70436949c5b83b3438ab7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 12:59:55 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 12:59:57 INFO udp link drop summary link_id=c829cb3241855a83fa4feee0839143ef window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (5.11s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.90s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.26s)
+PASS
+ok  	vortex/test/phase5	146.663s

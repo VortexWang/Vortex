@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "scope": "precommit-native-development-regression",
+  "source_committed_as": "36d244b7747dd3e16089e4fd76ee56ad66bbddbd",
+  "clean_checkout": false,
+  "unrelated_owner_changes_preserved": true,
+  "linux_acceptance": false
+}
