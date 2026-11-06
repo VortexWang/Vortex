@@ -24,6 +24,7 @@ const authorizationRecordQuery = `SELECT authorization_id,parent_authorization_i
 // Preparing on the DB after BeginTx would deadlock our single connection pool.
 type runtimeTransaction struct {
 	*sql.Tx
+	store    *Store
 	parents  map[string]*sql.Stmt
 	mu       sync.Mutex
 	bound    map[string]*sql.Stmt
@@ -58,7 +59,7 @@ func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runti
 		}
 		return nil, err
 	}
-	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt), started: time.Now(), wait: wait, caller: caller, conn: conn, release: release}, nil
+	return &runtimeTransaction{Tx: tx, store: s, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt), started: time.Now(), wait: wait, caller: caller, conn: conn, release: release}, nil
 }
 
 func (tx *runtimeTransaction) statement(ctx context.Context, query string) *sql.Stmt {

@@ -89,5 +89,8 @@ func (n *Node) EnableExperimentalFundingBlocks(blockBytes uint64) error {
 	if err != nil {
 		return err
 	}
-	return e.SetAccountingGate(gate)
+	if err := e.SetAccountingGate(gate); err != nil {
+		return err
+	}
+	return n.Store.EnableMonotonicRuntimeRate(n.BootID)
 }

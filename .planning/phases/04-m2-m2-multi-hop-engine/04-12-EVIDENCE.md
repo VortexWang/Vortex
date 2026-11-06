@@ -2273,3 +2273,18 @@ and must not be presented as production-ready rate behavior.
 Artifacts process-fa2a674 report SHA-256
 14747ddde4c9a4f15eb17229bb8f6bc26fe235ee10d5f3b7775de02d3432dd6d;
 test.log 3eb164fbd4f8d5cdcffbabe1894fc9ba9fa0c0b212e5f63871b166edb8a46b13.
+
+## Boot-local monotonic runtime rate clock
+
+Explicit experimental runtime startup enables a Store rate clock using Go
+monotonic elapsed time, conservatively reduced by 1000ppm per refill interval.
+Absolute trusted bounds still gate all authorizations; only rate refill uses
+this separate elapsed domain. A random clock incarnation is persisted per
+source in the same transaction as rate debit. On reopening, existing tokens
+are retained and tick is rebased without downtime credit; mismatched boot is
+rejected and falling back to absolute time for an existing monotonic bucket is
+rejected. Default Store callers retain the conservative absolute-time path.
+The clock choice is immutable within a Store instance. No burst/deadline change.
+Tests cover broad absolute intervals, same-time burst denial, drift allowance,
+untrusted absolute time, reopen debt and domain/boot downgrade. Full Store race
+PASS 19.988s; native runtime validation still required.

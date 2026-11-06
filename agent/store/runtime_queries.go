@@ -5,6 +5,8 @@ package store
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
 	authorizationRecordQuery,
+	`SELECT epoch FROM runtime_rate_clock_epochs WHERE node_id=? AND source_id=?`,
+	`INSERT INTO runtime_rate_clock_epochs(node_id,source_id,epoch) VALUES(?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET epoch=excluded.epoch`,
 	`SELECT boot_id,grant_id,runtime_lease_id,share_lease_id,state FROM runtime_sessions WHERE node_id=? AND session_id=?`,
 	`SELECT authorization_id,reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`,
 	`SELECT 1 FROM runtime_funding_blocks WHERE node_id=? AND batch_id=?`,

@@ -115,18 +115,52 @@ func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use
 	if boot != "" && boot != use.BootID {
 		return ErrAuthorityHandoffRequired
 	}
+	rateLow, rateHigh := use.Earliest.UnixNano(), use.Latest.UnixNano()
+	monotonic := false
+	var epoch string
+	epochErr := tx.QueryRowContext(ctx, `SELECT epoch FROM runtime_rate_clock_epochs WHERE node_id=? AND source_id=?`, use.NodeID, share.SourceID).Scan(&epoch)
+	if epochErr != nil && !errors.Is(epochErr, sql.ErrNoRows) {
+		return epochErr
+	}
+	if runtimeTx, ok := tx.(*runtimeTransaction); ok {
+		if clock := runtimeTx.store.rateClock.Load(); clock != nil {
+			if clock.boot != use.BootID {
+				return ErrAuthorityHandoffRequired
+			}
+			elapsed := clock.now().Sub(clock.start)
+			if elapsed < 0 {
+				return ErrAuthorityTimeUncertain
+			}
+			rateLow, rateHigh, monotonic = int64(elapsed), int64(elapsed), true
+			if epoch != clock.epoch {
+				// Keep durable balance; no elapsed credit across clock incarnations.
+				tick = rateHigh
+				if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_rate_clock_epochs(node_id,source_id,epoch) VALUES(?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET epoch=excluded.epoch`, use.NodeID, share.SourceID, clock.epoch); err != nil {
+					return err
+				}
+			} else if tick > rateHigh {
+				return ErrAuthorityTimeUncertain
+			}
+		}
+	}
+	if epochErr == nil && !monotonic {
+		return ErrAuthorityTimeUncertain
+	}
 	// Represent virtual rate debt at an upper-bound time. Refill against
 	// advancing upper bounds, but keep enough tokens to cover the entire
 	// uncertainty interval before admitting bytes. This is the byte-rounded
 	// form of max(previous finish, Latest)+cost <= Earliest+burst duration.
 	// Debits no longer repeatedly discard overlapping elapsed-time credit.
-	anchor := use.Latest.UnixNano()
+	anchor := rateHigh
 	if tick > anchor {
 		anchor = tick
 	} // Backward bounds never mint credit.
 	fill := int64(burst*8000000000/share.RateBPS) + 1
 	if anchor > tick {
 		delta := anchor - tick
+		if monotonic && delta > 0 {
+			delta -= (delta + 999) / 1000
+		}
 		if delta < 0 || delta >= fill {
 			tokens = burst
 		} else {
@@ -139,8 +173,8 @@ func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use
 		}
 	}
 	var uncertainty uint64
-	if anchor > use.Earliest.UnixNano() {
-		width := anchor - use.Earliest.UnixNano()
+	if anchor > rateLow {
+		width := anchor - rateLow
 		if width < 0 || width >= fill {
 			return &RateLimited{RetryAfter: time.Duration(fill)}
 		}

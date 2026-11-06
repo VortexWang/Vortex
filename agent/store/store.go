@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -23,6 +24,7 @@ type Store struct {
 	runtimeStatements map[string]*sql.Stmt
 	runtimeQueue      runtimeTransactionQueue
 	checkpoints       checkpointQueue
+	rateClock         atomic.Pointer[runtimeRateClock]
 }
 
 type Info struct {
@@ -393,6 +395,10 @@ CREATE TABLE IF NOT EXISTS runtime_sessions (
  initial_grant_id TEXT NOT NULL DEFAULT '', initial_runtime_lease_id TEXT NOT NULL DEFAULT '',
  initial_share_lease_id TEXT NOT NULL DEFAULT '',
  state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
+);
+CREATE TABLE IF NOT EXISTS runtime_rate_clock_epochs (
+ node_id TEXT NOT NULL, source_id TEXT NOT NULL, epoch TEXT NOT NULL,
+ PRIMARY KEY(node_id,source_id)
 );
 CREATE TABLE IF NOT EXISTS runtime_rate_buckets (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, boot_id TEXT NOT NULL,
