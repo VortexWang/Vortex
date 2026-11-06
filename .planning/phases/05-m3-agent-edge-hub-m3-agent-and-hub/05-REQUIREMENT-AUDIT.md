@@ -44,7 +44,7 @@ Source reviewed: 71502ce. Current ROADMAP/CONTEXT decisions govern. V1.11 IDs re
 - G05-01: wire bounded regional reconnect/failover, probes/periodic health and remote authorization renewal into the actual node/Hub protocol fixture. No production backend authority is introduced here.
 - G05-02: node command surface, systemd/container packaging and actual Engine drain/upgrade/restart/rollback with durable-state preservation.
 - G05-03: common control/VLink credential rotation and revocation, with expiry/restart/overlap admission tests.
-- G05-04: bound enrollment concurrency, TLS/read time, request bytes and cancellation; negative slow/oversized-request tests.
+- G05-04: **resolved** by f6a5891 and same-SHA Docker/Actions 42140165239: bounded enrollment concurrency, TLS/read time, request bytes and cancellation; real slow/oversized/overload/cancel tests.
 - G05-05: runtime recovering/caught-up state, full share-reference/fencing and scheduled policy-boundary integration; keep production backend allocator in Phase 6.
 
 Next workflow: `$gsd-plan-phase 5 --gaps` researches and creates executable closure plans from these source-grounded gaps. This audit is not itself an approved replacement implementation plan.

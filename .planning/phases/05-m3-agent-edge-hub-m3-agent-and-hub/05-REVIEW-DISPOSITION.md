@@ -4,7 +4,7 @@
 - R2/R6: G05-01, runtime regional control and reporting integration.
 - R3: G05-02, real service upgrade/drain/recovery integration.
 - R4: G05-03, identity rotation and revocation across control and Engine.
-- R5: G05-04, bounded bootstrap protocol handling.
+- R5: resolved by f6a5891: bounded bootstrap bytes/concurrency/whole-request deadline/cancellation; real TLS oversized-token retry, slow request, pre-handshake overload and cancellation regressions. Docker/Actions 42140165239 pass on the same SHA, downloaded snapshots re-audit.
 - R7: corrected current test references only; no retrospective claim that removed tests still pass.
 - R8: G05-05, recovery mode/share-reference/policy integration.
 

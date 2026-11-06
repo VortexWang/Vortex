@@ -45,3 +45,7 @@ Owner judgment of the reported recovery/security boundaries and operational acce
 - [ ] `nyquist_compliant: true` — intentionally false pending G05-01..05.
 
 Approval: audit complete, coverage partial; phase advancement not approved.
+
+## Security follow-up
+
+G05-04 now resolved: `hub/enrollment_security_test.go` adds four real network tests; ten repeated race runs and same-SHA f6a5891 Docker/Actions pass. Remaining G05-01/02/03/05 implementation gaps keep Nyquist partial.

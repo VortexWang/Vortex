@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "implementation_sha": "f6a58916336e0f754a67252ad54c1091883e8573",
+  "entry": "make phase5-check",
+  "docker": "passed",
+  "actions": "passed",
+  "actions_run": 42140165239,
+  "snapshots_per_host": 5,
+  "fault_cases_per_host": 10,
+  "backend": "protocol-test-only",
+  "production_backend_authority": false,
+  "phase_complete": false,
+  "scope": "enrollment resource-bound security regression"
+}

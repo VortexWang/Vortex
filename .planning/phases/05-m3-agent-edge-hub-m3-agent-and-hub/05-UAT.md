@@ -3,7 +3,7 @@ status: testing
 phase: 05-m3-agent-edge-hub-m3-agent-and-hub
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
 started: "2026-11-06T00:50:09.654515+00:00"
-updated: "2026-11-06T00:50:09.654515+00:00"
+updated: "2026-11-06T00:56:29.815742+00:00"
 ---
 
 ## Current Test
@@ -150,7 +150,7 @@ Automated classifications retain the source SUMMARY boundaries. Same-SHA 71502ce
 
 ## Gaps
 
-No user-reported issues yet. Source-audit gaps G05-01..05 are recorded separately in 05-REQUIREMENT-AUDIT.md and 05-VERIFICATION.md; they remain open even if both human checkpoints pass. No gap is marked resolved without an executed closure plan.
+No user-reported issues yet. Source-audit gaps G05-01/02/03/05 are recorded separately in 05-REQUIREMENT-AUDIT.md and 05-VERIFICATION.md; they remain open even if both human checkpoints pass. G05-04 was separately fixed through GSD debug in f6a5891 and verified by same-SHA Docker/Actions 42140165239; it was a source-audit finding, not a user-reported UAT gap. User-reported gaps require executed closure plans.
 
 ## Workflow hooks
 

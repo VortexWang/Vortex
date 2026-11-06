@@ -15,3 +15,5 @@ Red: `TestEnrollmentRejectsOversizeWithoutConsumingToken` failed before the fix:
 Fix: hard 64 KiB decoded-JSON envelope limit before token redemption; default 64 admitted connections and five-second deadline spanning TLS/read/write; immediate overload close; context cancellation closes listener and all accepted handlers, and Serve waits for cleanup. Limits are configured before serving. No contract schema or wire fields changed.
 
 Green: four real TCP/TLS tests cover oversized rejection with successful same-token retry, incomplete-request timeout, pre-handshake overload and cancellation of stalled TLS. Ten race repetitions and full Agent/Hub race tests pass locally. Same-SHA Linux Docker/Actions evidence follows the source commit before security closure is finalized.
+
+Final paired evidence: f6a58916336e0f754a67252ad54c1091883e8573, clean Docker Linux arm64 and Actions Ubuntu amd64 run 42140165239 passed. Re-audited five snapshots / ten fault cases per host. G05-04 and T-05-05 closed; production backend authority remains excluded.

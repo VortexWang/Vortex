@@ -1,0 +1,3 @@
+commit: f6a58916336e0f754a67252ad54c1091883e8573
+go version go1.27.3 linux/arm64
+Linux 7.2.12-orbstack-00394-gbecdd6130068 aarch64
