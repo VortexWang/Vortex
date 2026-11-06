@@ -1,0 +1,66 @@
+#!/bin/sh
+set -eu
+root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
+cd "$root"
+through=06-09
+expected=${PHASE6_EXPECTED_SHA:-${GITHUB_SHA:-}}
+evidence=${PHASE6_EVIDENCE_DIR:-}
+host=
+while test "$#" -gt 0; do
+  case "$1" in
+    --through-plan) through=$2; shift 2;;
+    --expected-sha) expected=$2; shift 2;;
+    --evidence-dir) evidence=$2; shift 2;;
+    --host) host=$2; shift 2;;
+    *) echo "unknown manifest option: $1" >&2; exit 2;;
+  esac
+done
+test -n "$expected" && test "$(git rev-parse HEAD)" = "$expected"
+test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
+python3 - "$through" "$expected" "$evidence" "$host" <<'PY'
+import hashlib,json,pathlib,re,sys
+through,sha,evidence,host=sys.argv[1:]
+def require(ok,message):
+    if not ok: raise SystemExit('manifest failed: '+message)
+order=['06-01','06-08','06-09','06-02','06-10','06-03','06-04','06-05','06-06','06-07','06-11']
+require(through in order[:3], 'producer not implemented for '+through)
+require(host in ('','docker','actions'), 'invalid host')
+rows=re.findall(r'^\| ([A-Z][A-Z0-9-]+) \| (06-\d\d) \|',pathlib.Path('docs/coverage/phase6/COVERAGE.md').read_text(),re.M)
+require(len(rows)==96 and len(dict(rows))==96, 'full 96-item ownership register required')
+planned={}
+for plan in order:
+    text=pathlib.Path('.planning/phases/06-m4-m4-backend/'+plan+'-PLAN.md').read_text()
+    for req in re.search(r'^requirements: \[(.*?)\]',text,re.M).group(1).split(', '):
+        require(req not in planned, 'duplicate plan owner '+req)
+        planned[req]=plan
+require(dict(rows)==planned, 'ownership differs from plan frontmatter')
+required=['commit.txt','openapi.log','dependencies.log','tracer.log','runner.log','source-status-before.txt','source-status-after.txt','source-identity.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','build-metadata.txt']
+tests={'06-01':['TestTracerDesiredStateReceipt','TestTracerRealProcesses'], '06-08':['TestTenantRestrictionsIndependentAndImmutable','TestTenantAuditRollbackSharedAuthority','TestMigrationUpgradeTenantAuthority'], '06-09':['TestRestrictionAllCauses','TestRestrictionAuditRollback']}
+for producer in ([host] if host else ['docker','actions']):
+    folder=pathlib.Path(evidence)/producer
+    require((folder/'result.json').is_file(), producer+' result.json missing')
+    result=json.loads((folder/'result.json').read_text())
+    require(result.get('commit')==sha and result.get('result')==0 and result.get('source_clean') is True, producer+' result/SHA/clean assertion')
+    require(result.get('producer')==producer, producer+' host identity')
+    require(result.get('through_plan') in order and order.index(result['through_plan'])>=order.index(through), producer+' insufficient scope')
+    if producer=='actions':
+        require(str(result.get('run_id','')).isdigit() and result.get('run_url','').startswith('https://github.com/'), 'Actions provenance missing')
+    for name in required:
+        f=folder/name
+        require(f.is_file(), producer+'/'+name+' missing')
+        require(result.get('checksums',{}).get(name)==hashlib.sha256(f.read_bytes()).hexdigest(), producer+'/'+name+' checksum mismatch')
+    require((folder/'commit.txt').read_text()==sha+'\n', 'SHA file mismatch')
+    require(not (folder/'source-status-before.txt').read_text() and not (folder/'source-status-after.txt').read_text(), 'dirty source')
+    log=(folder/'tracer.log').read_text()
+    require('go version go1.27.3 linux/' in log, 'pinned Linux toolchain missing')
+    require('--- SKIP:' not in log and '\nFAIL' not in log and 'WARNING: DATA RACE' not in log, 'failed/skipped/racy tests')
+    for plan in order[:order.index(through)+1]:
+        for target in tests[plan]:
+            require(re.search(r'--- PASS: '+target+r'[^\n]*',log) is not None, producer+' test evidence missing '+target)
+    require('OpenAPI lint passed:' in (folder/'openapi.log').read_text(), 'lint not passed')
+    require('two clean generations and committed source match byte-for-byte' in (folder/'dependencies.log').read_text(), 'sqlc deterministic evidence missing')
+print('manifest passed: 96 owners; '+('paired Docker/Actions' if not host else host+' producer only; pairing pending'))
+PY
+if test -z "$host"; then
+  cmp --silent "$evidence/docker/commit.txt" "$evidence/actions/commit.txt"
+fi

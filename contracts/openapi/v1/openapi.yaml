@@ -2,10 +2,96 @@ openapi: 3.1.1
 info:
   title: VORTEX Public Business API
   version: 1.0.0
-  description: Draft API contract sourced from V1.11 GEN-007 and BE-005.
+  description: Public business boundary; HTTP adapters are delivered by plan 06-07.
 servers: []
-paths: {}
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/tenants/{tenant_id}/restrictions:
+    parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+    get:
+      operationId: listRestrictions
+      x-vortex-implementation-plan: 06-07
+      x-vortex-collection: true
+      parameters:
+        - name: cursor
+          in: query
+          description: Opaque tenant/filter bound cursor; invalid values return 422.
+          schema: {type: string, maxLength: 512}
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 100, default: 50}
+      responses:
+        '200':
+          description: Active restrictions; all causes must clear before eligibility resumes.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RestrictionPage'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/events:
+    parameters:
+      - name: tenant_id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+    get:
+      operationId: streamTenantEvents
+      x-vortex-implementation-plan: 06-07
+      parameters:
+        - name: Last-Event-ID
+          in: header
+          schema: {type: string, maxLength: 512}
+      x-vortex-sse:
+        authority: PostgreSQL
+        gap_event: resync
+        gap_action: REST-refetch
+        event_schema: '#/components/schemas/BusinessEvent'
+      responses:
+        '200':
+          description: Durable authorized hints; resync requires REST refetch.
+          content:
+            text/event-stream:
+              schema: {type: string}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
 components:
+  responses:
+    Unauthorized:
+      description: Authentication required.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    Forbidden:
+      description: Action is not authorized for this tenant.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    NotFound:
+      description: Resource is not visible in the authorized scope.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    InvalidInput:
+      description: Input or cursor is invalid.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    InternalError:
+      description: Request failed; internal details are excluded.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
   securitySchemes:
     bearerAuth:
       type: http
@@ -13,21 +99,44 @@ components:
   schemas:
     ApiError:
       type: object
-      required: [code, message]
+      additionalProperties: false
+      required: [code, message, request_id]
       properties:
         code: {type: string}
         message: {type: string}
         request_id: {type: string}
     Restriction:
       type: object
-      required: [id, kind, active]
+      additionalProperties: false
+      required: [cause, source_id, source_version, effective_at]
       properties:
-        id: {type: string, format: uuid}
-        kind: {type: string}
-        active: {type: boolean}
+        cause:
+          type: string
+          enum: [account_suspended, account_banned, package_expired, quota_exhausted, quantity_exceeded, manual]
+        source_id: {type: string, maxLength: 128}
+        source_version: {type: integer, minimum: 1}
+        effective_at: {type: string, format: date-time}
+        cleared_at: {type: [string, 'null'], format: date-time}
+    RestrictionPage:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Restriction'}
+        next_cursor: {type: [string, 'null'], maxLength: 512}
+    BusinessEvent:
+      type: object
+      additionalProperties: false
+      required: [id, type, resource_id, revision]
+      properties:
+        id: {type: string, maxLength: 512}
+        type: {type: string, enum: [operation_changed, restriction_changed, resync]}
+        resource_id: {type: string, format: uuid}
+        revision: {type: integer, minimum: 1}
 x-vortex-source:
   requirements: [GEN-007, BE-005]
-  status: draft
-  unresolved:
-    - V1.11 defines REST, SSE and business-model boundaries but does not enumerate endpoint paths, payload schemas, pagination, authentication flows or status codes.
-    - Do not expose internal runtime configuration or VLink wire types as public compatibility commitments.
+  status: phase6-contract
+  implementation_plan: 06-07
+  generator: none
