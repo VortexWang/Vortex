@@ -56,7 +56,8 @@ def tcp_phase(seconds):
             conn = socket.create_connection((args.host, args.tcp_port), timeout=5)
             conn.setblocking(False)
             state = {"socket": conn, "outstanding": 0, "pending": payload,
-                     "write_closed": False, "eof": False, "first_sent": None, "first_received": False}
+                     "write_closed": False, "eof": False, "registered": True,
+                     "first_sent": None, "first_received": False}
             selector.register(conn, selectors.EVENT_READ | selectors.EVENT_WRITE, state)
             states.append(state)
             totals["connections"] += 1
@@ -122,8 +123,16 @@ def tcp_phase(seconds):
                     if not state["pending"]:
                         state["pending"] = payload
             if state["eof"]:
-                selector.unregister(conn)
-                conn.close()
+                # A peer error can close a descriptor before the selector key is
+                # processed. Cleanup must be idempotent under that race.
+                if state["registered"]:
+                    try:
+                        selector.unregister(conn)
+                    except (KeyError, ValueError):
+                        pass
+                    state["registered"] = False
+                if conn.fileno() >= 0:
+                    conn.close()
             else:
                 events = selectors.EVENT_READ
                 if not state["write_closed"] and state["outstanding"] < max_inflight:
