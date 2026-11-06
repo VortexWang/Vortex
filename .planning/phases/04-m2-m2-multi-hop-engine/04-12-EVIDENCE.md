@@ -2068,3 +2068,19 @@ transaction reports at most once; automatic rollback time may be included in
 the observed hold interval. No payload or authority identifier is logged.
 This adds diagnostic overhead and must not be represented as an uninstrumented
 performance run. Full Store race PASS 18.247s; Agent/Hub vet PASS.
+
+Clean 8b868da4244defe3998580f8eda7bfb316b63cfe native diagnostic run: single
+TCP/UDP PASS, concurrency FAIL stream 7 round 1 (0.45s), overall 21.009s.
+Observed successful reservation wait 119.689ms vs hold 5.445ms; checkpoint
+wait 167.458ms vs hold 2.838ms, and checkpoint wait 132.831ms vs hold 2.306ms.
+These observed slow operations support queue delay, not a single long-held
+transaction, as the next target. Logs below 25ms are intentionally absent, so
+this is not a complete latency distribution. Local installed Go database/sql
+source calls connRequests.TakeRandom when handing out a released connection
+(sql.go:1554); it does not promise FIFO. Next hypothesis: explicit bounded,
+cancellation-aware runtime transaction ordering may reduce long-tail waits.
+Must preserve cancellation/rollback and avoid starving control updates or
+releasing the queue before the underlying transaction actually finishes.
+Artifacts process-8b868da report SHA-256
+567bb68e510cfa0b4160aab97d1f49af5a32f5cbadf9d524aced057eb685c55a;
+test.log 58c3a9655854dff9f716c015bf4bd8d133933396eb1a6a74baf7b06291afb963.
