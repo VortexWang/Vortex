@@ -1,63 +1,36 @@
 ---
 phase: 05-m3-agent-edge-hub-m3-agent-and-hub
-status: gaps_found
+status: passed_with_scope
 verified: "2026-11-06"
-score: 3/5 success criteria covered within implemented fixture
-reviewed_sha: 71502ce37e110aef3af7e1549c39dbf35d8be19c
+score: 5/5 success criteria covered within implemented runtime/protocol-adapter scope
+reviewed_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 human_verification_pending: false
 gaps:
   - gap_id: G05-01
-    truth: "Node runtime performs bounded regional failover, probes, periodic health and remote renewal"
     status: resolved
-    reason: "05-07/08 completed actual regional loop, bounded probes/reports and finite renewal; final 0c104a6 passed Docker/Actions42175493658 and independent ledger audits"
-    artifacts:
-      - path: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-08-EVIDENCE.md
-        issue: "Resolved within current runtime/protocol-backend fixture; production backend remains Phase 6"
-    missing: []
+    truth: Bounded regional runtime, scheduler and durable remote renewal
+    evidence: 05-07-EVIDENCE.md and 05-08-EVIDENCE.md
   - gap_id: G05-02
-    truth: "Single node binary exposes operational commands and performs service-level safe upgrades"
-    status: failed
-    reason: "Installer exists as a library; no runtime invocation, systemd package or actual session drain/replacement demonstration"
-    artifacts:
-      - path: cmd/vortex-node/main.go
-        issue: "No enroll/run/status/drain command surface or installer orchestration"
-      - path: agent/upgrade/installer.go
-        issue: "Callbacks not connected to running node lifecycle"
-    missing:
-      - "Service integration and signed upgrade/rollback process tests preserving durable financial state"
-  - gap_id: G05-03
-    truth: "Control and VLink credentials rotate and revoke consistently across restart and overlap"
-    status: failed
-    reason: "Control renewal is wired but runtime Engine identity is loaded independently"
-    artifacts:
-      - path: agent/credentials.go
-        issue: "No verified Engine credential reload path"
-      - path: agent/engine_runtime.go
-        issue: "Runtime identity selected at construction"
-    missing:
-      - "Common validated identity provider and expired/revoked connection-admission regressions"
-  - gap_id: G05-04
-    truth: "Enrollment uses bounded connections, bytes and time with cancellation cleanup"
     status: resolved
-    reason: "Resolved by f6a5891; repeated race, Docker/Actions 42140165239 and downloaded snapshot audit passed"
-    artifacts:
-      - path: hub/enrollment.go
-        issue: "Resource bounds verified with real TLS tests and retained paired evidence"
-    missing: []
+    truth: Operational node commands, actual drain and signed service replacement/rollback
+    evidence: 05-10-EVIDENCE.md and 05-11-EVIDENCE.md
+  - gap_id: G05-03
+    status: resolved
+    truth: Shared control/VLink identity rotation and current revocation admission
+    evidence: 05-09-EVIDENCE.md
+  - gap_id: G05-04
+    status: resolved
+    truth: Bounded enrollment resources and cancellation
+    evidence: f6a5891 paired gate and retained network regressions
   - gap_id: G05-05
-    truth: "Runtime distinguishes recovering/caught-up and enforces complete share/policy transitions"
-    status: failed
-    reason: "Atomic S/R slice works but operational recovery mode/share-reference and policy scheduling are incomplete"
-    artifacts:
-      - path: agent/store/handoff.go
-        issue: "Handoff returns online mode without separate caught-up runtime state"
-    missing:
-      - "Recovering-mode capability enforcement and caught-up checkpoint transition"
-      - "Durable share-reference/CAS and scheduled policy-boundary integration; backend authority remains Phase 6"
+    status: resolved
+    truth: Finite recovering barrier, complete share occupancy and immutable funded policy transitions
+    evidence: 05-12-EVIDENCE.md and 05-13-EVIDENCE.md
+pending: []
 
 ---
 
-# Phase 5 goal verification
+# Historical Phase 5 goal verification
 
 Verdict: **gaps_found**. Five executed plan slices do not establish the entire phase goal. The owner-approved authorization 1.1.0 proposal remains recorded exactly as approved; signer epoch stays independent of path generation.
 
@@ -96,3 +69,17 @@ The original phase score/reviewed_sha above is historical. This incremental
 disposition does not constitute a fresh phase-wide goal verification: G05-02,
 G05-03 and G05-05 plus05-09..14 remain outstanding, shared requirements remain
 pending, and new flows still require phase-end UAT/verification.
+
+## Current goal verification — deb8b08
+
+Current status is **passed_with_scope**, not the historical gaps_found verdict above. G05-01..05 are implemented and verified within the current runtime/protocol-adapter scope. Current machine-readable gap dispositions supersede historical missing-code descriptions; no original result is relabeled as previously accepted.
+
+| ROADMAP success criterion | Current disposition | Evidence |
+|---|---|---|
+| 1. Node identity, regional control, drain and rollback | Implemented; paired gate/UAT passed | Actual regional, identity, node commands and signed service-upgrade process tests; 05-07..11 |
+| 2. FULL before ACK and disk/crash safety | Implemented; paired gate passed | Mandatory recovery/renewal/retention races and independently audited raw SQLite |
+| 3. Restricted autonomy and fenced recovering | Implemented; paired gate/UAT passed | Original deadline/scope, current incarnation and finite persisted catch-up barrier; 05-07/08/12 |
+| 4. Atomic S/R and prefix/tail replay | Implemented at Agent/Hub adapter boundary | Unique successor/R transfer, hash-bound contiguous checkpoint and live tail; production backend remains Phase 6 |
+| 5. Unknown activation and share/policy proof before release | Implemented; paired gate/UAT passed | Actual restart, Commit/Abort races, retained share holds and immutable policy cutover; 05-04/13 |
+
+All 34 IDs are mapped to existing source/test paths in the refreshed requirement audit. HUB-005/006 remain TRANSFER-PARTIAL for Phase 6 production transport/allocation under D-19. No performance or physical power-loss certification is inferred. Inline code/security/validation re-audits and renewed UAT are recorded separately. Phase 5 is complete for the stated runtime/protocol-adapter scope; Phase 6 production authority and Phase 4 qualification remain future gates.

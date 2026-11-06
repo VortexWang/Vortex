@@ -1,8 +1,8 @@
 ---
 phase: 05
-status: reviewed_with_findings
+status: reviewed
 depth: standard
-reviewed_sha: 71502ce37e110aef3af7e1549c39dbf35d8be19c
+reviewed_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 review_mode: inline-owner-request
 ---
 
@@ -22,3 +22,7 @@ Scope: Agent, Hub protocol fixture, SQLite store, Engine integration, node entry
 | R8 | Warning | S/R transaction/replay tests pass, but runtime recovery does not expose a distinct recovering-vs-caught-up operational mode and the full share-reference/policy-transition orchestration is absent. | Open G05-05. Production backend authority stays Phase 6 under D-19. |
 
 The five plan summaries establish their implemented slices, not all 34 mapped requirements. No unimplemented feature is treated as a passing manual check. Existing unrelated Phase 4 changes were excluded.
+
+## Current gap-closure re-review — deb8b08
+
+Historical R2/R3/R4/R6/R8 are resolved by executed 05-07..13 within the defined runtime/fixture boundary; see 05-REVIEW-DISPOSITION.md for current source references. The historical table above records the original review, not current missing implementation. Inline follow-up inspected credential snapshot/revocation placement, regional cancellation ownership, FULL recovery barrier and hash-bound ACK, upgrade stop witness/journal ownership, share holds and immutable policy funding, and the final evidence gate/negative tests. No new blocking finding was established. Same-source Linux Docker/Actions pair and renewed UAT passed on `deb8b08`; production backend and performance are not certified.
