@@ -51,15 +51,12 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 func readAuthorizationTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationID string) (AuthorizationRecord, string, error) {
 	var record AuthorizationRecord
 	var state, ruleRevision, pathGeneration, signerEpoch, amount, rate, connections string
-	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(
+	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state,issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(
 		&record.AuthorizationID, &record.ParentAuthorizationID, &record.SourceID, &record.Kind, &record.RuleID,
 		&ruleRevision, &pathGeneration, &signerEpoch, &record.BootID, &record.IssuedAt, &record.NotBefore,
-		&record.ExpiresAt, &record.HardDeadline, &record.BillingSnapshotID, &amount, &rate, &connections, &state)
+		&record.ExpiresAt, &record.HardDeadline, &record.BillingSnapshotID, &amount, &rate, &connections, &state, &record.IssuerID)
 	if err != nil {
 		return AuthorizationRecord{}, "", fmt.Errorf("%w: %w", ErrAuthorizationDenied, err)
-	}
-	if err := tx.QueryRowContext(ctx, `SELECT issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&record.IssuerID); err != nil {
-		return AuthorizationRecord{}, "", err
 	}
 	for _, field := range []struct {
 		text  string

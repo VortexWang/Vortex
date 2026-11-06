@@ -579,6 +579,7 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 						case <-time.After(time.Millisecond):
 						}
 					}
+					t.Logf("continuous renewal round=%d expected_issued=%d", round+1, expectedIssued)
 					exchange()
 					waitSettled(expectedIssued, uint64((round+3)*2*len(message)))
 					balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)

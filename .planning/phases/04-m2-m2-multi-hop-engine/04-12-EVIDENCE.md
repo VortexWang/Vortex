@@ -897,3 +897,20 @@ check PASS. This is local Darwin correctness evidence for eight controlled
 renewal cycles, not a sustained throughput/latency qualification, full real
 backend integration, multi-hop durable performance or D-04 parameter lock.
 Dedicated Ubuntu execution at the new clean SHA remains to be recorded.
+
+## Native continuous-renewal failure and authorization-read optimization
+
+Dedicated Ubuntu clean SHA 4f41cee failed the continuous TCP and UDP race
+integration after 27.986s. Both streams received RST during renewal; the UDP
+bridge explicitly reported authorization denied with context deadline exceeded.
+The launcher stopped before full regression/vet. Original logs remain at
+/root/VORTEX-phase4-accounting/artifacts/phase4/continuous-4f41cee. This is a
+failed native result despite the earlier local success, not qualification.
+
+Inspection found readAuthorizationTx queried the same authorization row twice,
+with a separate query solely for issuer_id. Fetch issuer_id with the existing
+row query, retaining all parsing and authority checks. This reduces duplicate
+SQLite work without changing the 200ms bound or bypassing durable metering.
+Add per-round integration logs for diagnosing the native failure. Full local
+Agent/Hub race PASS (Agent 50.722s), vet/diff PASS. Native revalidation is still
+required; this optimization is not yet proof of the timeout root cause or fix.
