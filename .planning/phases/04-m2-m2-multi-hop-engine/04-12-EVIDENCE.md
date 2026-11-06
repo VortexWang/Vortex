@@ -2427,3 +2427,26 @@ version-2 setting throughout qualification and comparison; documented in README.
 Identity/HELLO, broader configured-route and NFR-006 completion remain open.
 Also corrected historical security sign-off wording: production durable
 accounting belongs to X5/X6, not a Phase 4 advancement blocker.
+
+## P4-Q2 same-commit native stale OPEN verification
+
+Clean 42024405bb7d1e1ae8cded1ef7bac5a7d432e375 passed the 17-case live
+five-process attack runner on the dedicated Ubuntu 24.04.5 x86_64 host, exit 0.
+Metadata confirms Linux, clean tree and runtime-authority mode. Raw evidence:
+/root/VORTEX-phase4-accounting/artifacts/phase4/attack-4202440.
+SHA256 forged-open.json: c92b658827979b45b184567dad6c4c09f7c73839fb185601c1e0a7b5a75edd4a
+SHA256 attack-gate.json: c066740b10472273b630864971786c56dfde79ea3d9bac51297535ce101ef551
+SHA256 host.json: b71c4c86d457874cf24648935f47bedd3043eddd7b2e6c007ac9bf29e9d6e2f9
+Same clean commit passed locally on macOS at /private/tmp/vortex-attack-4202440.
+No Docker/Actions run is claimed. No performance qualification is claimed.
+
+Qualification and comparison now both default to policy version 2, so the
+standard workflow can test legal nonzero stale OPENs without extra caller flags.
+Direct generator default remains 1 for compatibility. Explicit comparison
+version 1 rejects before starting workloads (verified exit 2). Python gate suite
+19 tests PASS. Old version-1 performance results retain their original SHA and
+semantics; they cannot be reused as final version-2 qualification.
+
+This closes the enumerated stale-revision/stale-generation slice for TCP/UDP;
+P4-Q2 overall stays open for the remaining identity/HELLO, configuration and
+path/fault matrix evidence. Existing later-stage handoff ownership is unchanged.
