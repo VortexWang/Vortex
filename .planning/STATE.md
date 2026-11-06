@@ -5,10 +5,10 @@ current_phase: 5
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 4
 status: verifying
-stopped_at: 05-04 complete; Phase 5 plan execution finished; phase-wide review, validation/security hooks and UAT pending
-last_updated: "2026-11-05T23:58:30.372085Z"
+stopped_at: 05-04 complete; Phase 5 plan execution finished; phase-wide audit found G05-01..05; security fix paired; two human UAT checkpoints pending
+last_updated: "2026-11-06T00:50:09.654515+00:00"
 last_activity: 2026-11-05
-last_activity_desc: 05-04 passed same-SHA Docker/Actions on 79a1c0b; SUMMARY committed as 6c957cd
+last_activity_desc: Phase 5 audit gaps_found; 71502ce Docker/Actions passed; UAT testing
 state_head: 6c957cd
 progress:
   total_phases: 8
@@ -31,10 +31,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 5 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 Current Plan: 4
 Total Plans in Phase: 5
-Status: Verifying — all planned implementation complete; phase acceptance pending
+Status: Verifying — gaps_found; security fix verified; UAT in progress
 Last activity: 2026-11-05 — Plan 05-04 complete. Authorization 1.1.0, atomic S/R, authenticated runtime restart and fault evidence pass on 79a1c0b; Actions 42132354600.
 
-Progress: Phase 5 [██████████] 5/5 plans executed; phase-wide review, validation/security hooks, requirement audit and UAT remain pending.
+Progress: Phase 5 [██████████] 5/5 existing plans executed; phase audit gaps_found, Nyquist partial; two UAT checkpoints pending. G05-01..05 need gap planning before completion.
 
 ## Performance Metrics
 
@@ -102,8 +102,8 @@ Progress: Phase 5 [██████████] 5/5 plans executed; phase-wid
 ## Session Continuity
 
 Last session: 2026-11-05
-Stopped at: Completed 05-04; continue Phase 5 verification, security/validation hooks and UAT before Phase 6
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-VERIFICATION.md
+Stopped at: Phase 5 audit recorded; resume 05-UAT test 1, then plan G05-01..05 closure before Phase 6
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-UAT.md
 
 ### Historical qualification review (not a main-workflow gate)
 

@@ -46,17 +46,17 @@ coverage:
         ref: agent/identity/identity_test.go#TestCredentialRotationValidatesBeforeOverlapAndExpiresOldCredential
         status: pass
       - kind: integration
-        ref: agent/control_test.go#TestPersistCredentialStoresNodeIdentityAndExpiry
+        ref: agent/registration_test.go#TestRegisterGeneratesLocalKeyAndPersistsIssuedCredential
         status: pass
     human_judgment: false
   - id: D2
     description: TLS 1.3 mutual-authenticated control ACKs are correlated and durably persisted.
     verification:
       - kind: integration
-        ref: agent/control_test.go#TestControlClientUsesMutualTLSAndPersistsAck
+        ref: agent/control_test.go#TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC
         status: pass
       - kind: integration
-        ref: agent/control_test.go#TestControlRejectsAcknowledgementForDifferentMessage
+        ref: agent/unknown_usage_test.go#TestUnknownLiabilitySurvivesBadAckLostAckAndRestart
         status: pass
     human_judgment: false
   - id: D3
@@ -209,3 +209,7 @@ Ready for `05-03`. Production Hub authority, certificate renewal/revocation orch
 ---
 *Phase: 05-m3-agent-edge-hub-m3-agent-and-hub*
 *Completed: 2026-11-05*
+
+## Phase-wide audit correction — 2026-11-06
+
+Three stale structured test references were replaced with existing regression tests. These references establish the current registration/control/unknown-ACK slice; they do not establish production token authority, service-level upgrade or regional failover. See 05-VERIFICATION.md for the broader phase verdict.

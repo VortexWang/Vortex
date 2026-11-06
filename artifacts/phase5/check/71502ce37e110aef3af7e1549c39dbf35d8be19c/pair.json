@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "implementation_sha": "71502ce37e110aef3af7e1549c39dbf35d8be19c",
+  "entry": "make phase5-check",
+  "docker": "passed",
+  "actions": "passed",
+  "actions_run": 42138697667,
+  "docker_audit": {
+    "snapshots": 5,
+    "required_fault_cases": 10
+  },
+  "actions_audit": {
+    "snapshots": 5,
+    "required_fault_cases": 10
+  },
+  "concurrent_commit_abort": "passed on both hosts",
+  "backend": "protocol-test-only",
+  "production_backend_authority": false,
+  "phase_complete": false,
+  "scope": "Phase 5 safety-fix regression and audit"
+}
