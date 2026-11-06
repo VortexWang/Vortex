@@ -1391,3 +1391,19 @@ downloaded, archive hash verified against remote:
 9e7b85d736a6acc22a1889f062d022d9a82478904d34baa6fbd9190d9834cfbd.
 04-22 manifest records all raw hashes. D-04, complete hostile coverage and
 formal Phase 4 qualification remain open.
+
+## Single-transaction distinct-authority validation
+
+Existing-block admission now checks each distinct current/held credit grant and
+runtime/share lease once in its transaction. The initial joined query already
+pins session state and IDs; no recursive re-read of that session or of both
+leases is needed for each grant. The validated share record is passed to a
+private same-transaction rate helper. No cross-transaction cache or revocation
+relaxation is introduced. Ordinary reservation callers still use the original
+rate helper, which performs its own share validation.
+
+Full Store race PASS 14.830s; Agent funding and real block renewal race PASS
+31.045s. Added distinct-grant renewal regression revokes held grant, current
+grant, current runtime and current share separately; every next admission fails
+without changing rate tokens (targeted race PASS 3.598s). Vet/diff PASS. Native
+concurrency verification is still required; the prior failure remains open.

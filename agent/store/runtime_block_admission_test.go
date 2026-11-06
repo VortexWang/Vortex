@@ -102,3 +102,47 @@ func TestRuntimeBlockAdmissionSharesRateWithoutSpendingFunding(t *testing.T) {
 		t.Fatalf("admission debited funding: %+v %v", b, err)
 	}
 }
+
+func TestRuntimeBlockAdmissionChecksBothGrantsAfterSessionRenewal(t *testing.T) {
+	for _, revoked := range []string{"grant", "renewed-grant", "renewed-runtime", "renewed-share"} {
+		t.Run(revoked, func(t *testing.T) {
+			s, scope, _ := runtimeStore(t)
+			ctx := context.Background()
+			a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+			if err != nil {
+				t.Fatal(err)
+			}
+			old := runtimeReservation("old-block", 100)
+			if _, err := s.ReserveRuntimeFundingBlock(ctx, old, a.Use); err != nil {
+				t.Fatal(err)
+			}
+			if err := installRuntimeRenewal(s, renewedRuntimeRecords(t, s, a.Use)); err != nil {
+				t.Fatal(err)
+			}
+			use := a.Use
+			use.Earliest = use.Earliest.Add(2 * time.Second)
+			use.Latest = use.Latest.Add(2 * time.Second)
+			next := runtimeReservation("new-block", 100)
+			next.Direction = "ingress"
+			if _, err := s.ReserveRuntimeFundingBlock(ctx, next, use); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.AdmitRuntimeFundingBlockWrite(ctx, old, use, 1); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.PersistAuthorizationUpdate(ctx, AuthorizationUpdate{IssuerID: "hub-one", NodeID: "node", BootID: "boot", UpdateID: "revoke-current", Payload: []byte("revoke-current"), SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, nil, []string{revoked}); err != nil {
+				t.Fatal(err)
+			}
+			var before, after uint64
+			if err := s.db.QueryRow(`SELECT tokens FROM runtime_rate_buckets WHERE node_id='node'`).Scan(&before); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.AdmitRuntimeFundingBlockWrite(ctx, old, use, 1); err == nil {
+				t.Fatal("revoked distinct authority admitted")
+			}
+			if err := s.db.QueryRow(`SELECT tokens FROM runtime_rate_buckets WHERE node_id='node'`).Scan(&after); err != nil || before != after {
+				t.Fatalf("denied rate changed: %d %d %v", before, after, err)
+			}
+		})
+	}
+}

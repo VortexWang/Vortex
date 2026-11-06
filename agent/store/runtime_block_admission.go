@@ -32,23 +32,34 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	}
 	// Read current IDs from the durable session, never trust caller-supplied
 	// replacement leases. Validate both the current and the held grant.
-	scope.Kind, scope.AuthorizationID = "credit_grant", grant
-	scope.RuntimeLeaseID, scope.ShareLeaseID = runtime, share
+	// The join above already checked session identity and selected its IDs.
+	// Validate each distinct authority once in this transaction, instead of
+	// recursively re-reading runtime/share for both current and held grants.
+	scope.SessionID = ""
+	scope.RuntimeLeaseID, scope.ShareLeaseID = "", ""
 	scope.ExistingSession = true
+	scope.Kind, scope.AuthorizationID = "credit_grant", grant
 	current, err := checkAuthorizationTx(ctx, tx, scope)
 	if err != nil {
 		return err
 	}
-	scope.SessionID = ""
-	scope.AuthorizationID = auth
-	heldGrant, err := checkAuthorizationTx(ctx, tx, scope)
-	if err != nil {
-		return err
+	heldGrant := current
+	if auth != grant {
+		scope.AuthorizationID = auth
+		heldGrant, err = checkAuthorizationTx(ctx, tx, scope)
+		if err != nil {
+			return err
+		}
 	}
 	if !sameRuntimeFamily(current, heldGrant) {
 		return ErrAuthorityHandoffRequired
 	}
-	shareRecord, _, err := readAuthorizationTx(ctx, tx, block.NodeID, share)
+	scope.Kind, scope.AuthorizationID = "runtime_lease", runtime
+	if _, err := checkAuthorizationTx(ctx, tx, scope); err != nil {
+		return err
+	}
+	scope.Kind, scope.AuthorizationID = "share_lease", share
+	shareRecord, err := checkAuthorizationTx(ctx, tx, scope)
 	if err != nil {
 		return err
 	}
@@ -59,7 +70,7 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	if shareRecord.SourceID != source || count > shareRecord.Connections {
 		return ErrAuthorizationDenied
 	}
-	if err := consumeRuntimeRate(ctx, tx, scope, n); err != nil {
+	if err := consumeValidatedRuntimeRateTx(ctx, tx, scope, n, shareRecord); err != nil {
 		return err
 	}
 	return tx.Commit()

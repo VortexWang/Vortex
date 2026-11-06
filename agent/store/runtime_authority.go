@@ -80,6 +80,12 @@ func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n
 	if err != nil {
 		return err
 	}
+	return consumeValidatedRuntimeRateTx(ctx, tx, use, n, share)
+}
+
+// The share must have passed checkAuthorizationTx in this same transaction.
+// Never use a record cached across transactions or control updates here.
+func consumeValidatedRuntimeRateTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n uint64, share AuthorizationRecord) error {
 	if share.RateBPS == 0 {
 		return ErrAuthorizationDenied
 	}
@@ -96,7 +102,7 @@ func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n
 	var tokens uint64
 	var tick int64
 	var boot string
-	err = tx.QueryRowContext(ctx, `SELECT tokens,last_tick,boot_id FROM runtime_rate_buckets WHERE node_id=? AND source_id=?`, use.NodeID, share.SourceID).Scan(&tokens, &tick, &boot)
+	err := tx.QueryRowContext(ctx, `SELECT tokens,last_tick,boot_id FROM runtime_rate_buckets WHERE node_id=? AND source_id=?`, use.NodeID, share.SourceID).Scan(&tokens, &tick, &boot)
 	if errors.Is(err, sql.ErrNoRows) {
 		tokens = burst
 		tick = use.Latest.UnixNano()
