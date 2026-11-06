@@ -1934,3 +1934,32 @@ No timeout, durability setting or candidate default was relaxed. D-04 parameter
 lock and full Phase 4 closure remain unverified. Next work must address measured
 cross-session transaction contention and retain per-write authority and durable
 settlement guarantees, rather than increase the deadline to pass this test.
+
+## Sustained native SQL profile and fragment crash coverage
+
+Read-only inspection of the failed concurrent database found only 3 authorization
+records, 16 sessions, 22 funding blocks and 36 reservations. Large authorization
+history is not supported as the explanation for this failure.
+
+On the same clean 417ce63 host, ran BenchmarkRuntimeDurableAccounting/bytes-1200
+with -benchtime=5s and CPU profiling. PASS: 934 iterations, 6,825,069 ns/op,
+72,794 B/op, 2,290 allocations/op. These are instrumented ordinary per-write
+reservation/settlement measurements, not block throughput, network throughput,
+or qualification. Profile duration 7.18s with 8.14s CPU samples: SQLite prepareV2
+3.45s (42.38%), parser 3.36s (41.28%), readAuthorizationTx cumulative 2.38s
+(29.24%). Nested percentages overlap and must not be added. This strengthens
+the case to measure prepared statement reuse before redesigning admission queues.
+The installed modernc sqlite v1.61.1 stmt.go caches a compiled single-statement
+handle for a retained driver statement; ordinary QueryContext constructs and
+closes statements. Reuse must retain transaction isolation and fresh row reads,
+not cache authorization results. Benefits on block concurrency remain unproven.
+
+Also ran TestRuntimeFragmentSIGKILLRecovery with -race -count=3 on the dedicated
+host: all first/all/settled-first crash boundaries PASS, total 6.838s. This closes
+the missing native evidence for the existing fragment crash test, not the full
+attack matrix or current-version disk-full coverage.
+
+Artifacts: artifacts/phase4/store-profile-417ce63 (matching store.test included).
+SHA-256 benchmark.log ed4b712d913a2601153c74311c6cbd0d068d7f54898cd92f45fc0a00e775c2a1;
+cpu.pprof 7653ebf07057f38288aa54b6a7e4ad3447319930e4fb13c53d83be6110e28290;
+fragment-crash.log d515b6746dc1a965a8fb8a87004b7dfbb0fd5b9438b3915026621584cb27085b.
