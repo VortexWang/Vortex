@@ -127,7 +127,7 @@ The previous verification referenced early five-second trials and missing mode/f
 
 - **NFR-003/005:** baa0a02 native scale trials reached 1086–1200 Mbps TCP and <0.1% UDP loss at approximately 100 Mbps actual offered UDP. The one same-load independent TLS comparison reached 82.64%. These diagnostic numeric targets were met. Formal per-node resource/link, 60-second warmup / 300-second three-trial evidence and actual authorization gating are absent. Actions scale offered only 24.21 Mbps, separately recorded.
 - **NFR-006:** integrity, forged OPEN, bypass and process-recovery tests pass for their enumerated finite cases. Full attack/path/configuration coverage has not been demonstrated. Dedicated hardware is not the blocker for closing these functional gaps.
-- **NFR-007:** pool/mux samples now exist, but runtime TCP waits for OPEN_OK before bridging, including downstream relay confirmation. Controlled RTT/timeline evidence and bounded authorized early-DATA behavior are missing. Small loopback medians do not prove no extra network round trip.
+- **NFR-007:** the current runtime bridge now has finite delayed-authorization evidence for bounded authorized TCP early DATA, while UDP remains OPEN/OPEN_OK gated. Controlled pool/mux RTT timelines, dedicated-host resource evidence, and formal NFR-007 qualification remain open; small loopback medians do not prove no extra network round trip.
 - **NFR-039/040/044:** c8c2a37 verifies funded immutable snapshot selection, old-session affinity, new-session admission, coefficient binding, late-grant isolation, and zero held/session leakage. It still does not establish policy-boundary leases, share-CAS/drain, or full per-source conservation. In-process injected authority remains non-authoritative; Engine must not connect to a database.
 - **D-04:** parameter review is complete in 04-06-D04-REVIEW.md. Keep 256 KiB→4 MiB / 8 MiB minimum / 30-second target / 30% waterline as unapproved candidates; no adaptive grant/block/renewal experiment has yet run. VLink windows are distinct parameters.
 
@@ -139,7 +139,7 @@ Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307
 
 ## Next execution slice
 
-Continue with NFR-039/040/044 runtime integration, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
+Continue with NFR-039/040/044 runtime integration, NFR-006 attack cases, and controlled pool/mux RTT evidence for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
 
 No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.
 
