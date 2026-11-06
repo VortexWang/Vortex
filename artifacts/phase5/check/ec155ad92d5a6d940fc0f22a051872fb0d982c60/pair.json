@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "implementation_sha": "ec155ad92d5a6d940fc0f22a051872fb0d982c60",
+  "entry": "make phase5-check",
+  "docker": "passed",
+  "actions": "passed",
+  "actions_run": 42154985414,
+  "process_scenarios_per_host": 5,
+  "regional_race_repetitions": 10,
+  "snapshots_per_host": 5,
+  "fault_cases_per_host": 10,
+  "backend": "protocol-test-only",
+  "production_backend_authority": false,
+  "phase_complete": false,
+  "scope": "05-07 bounded regional control runtime"
+}

@@ -1,0 +1,16 @@
+=== RUN   TestRegionalProcessFailover
+=== RUN   TestRegionalProcessFailover/silent-stream
+=== RUN   TestRegionalProcessFailover/silent-established
+=== RUN   TestRegionalProcessFailover/autonomous
+=== RUN   TestRegionalProcessFailover/recovering
+=== RUN   TestRegionalProcessFailover/tcp-original-authorization
+2026/11/06 03:07:06 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:07:06 INFO udp link drop summary link_id=155c38864b2802f29a54d9f9841d4ea6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRegionalProcessFailover (5.92s)
+    --- PASS: TestRegionalProcessFailover/silent-stream (1.23s)
+    --- PASS: TestRegionalProcessFailover/silent-established (2.46s)
+    --- PASS: TestRegionalProcessFailover/autonomous (0.40s)
+    --- PASS: TestRegionalProcessFailover/recovering (0.41s)
+    --- PASS: TestRegionalProcessFailover/tcp-original-authorization (0.46s)
+PASS
+ok  	vortex/test/phase5	5.921s
