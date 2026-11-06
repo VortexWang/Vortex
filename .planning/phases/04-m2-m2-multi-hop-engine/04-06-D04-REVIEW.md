@@ -44,6 +44,22 @@ exception or something covered by the native green test suite.
 
 ## 04-12 measured review
 
+### Clean current adapter scan — 2026-11-06
+
+The selector-cleanup fix on `ae858f5` enabled the executable scan to complete
+all seven one-factor cases with three repetitions (21 trials). Each trial used
+16 TCP streams plus actual roughly 100 Mbps UDP for 5 seconds per phase; all
+source ledgers conserved and settled with zero unknown bytes and zero UDP loss.
+Mixed TCP ranges were 2,735.23–3,135.58 Mbps and short-flow medians were
+0.4468–0.4839 ms. The complete table and raw-output paths are in
+`04-38-D04-CANDIDATE-SCAN-EVIDENCE.md`.
+
+The scan is valid only for the bounded process-local issuer on the recorded
+Darwin host. It has no remote issuer merge measurement, durable funding
+occupancy, or idle return proof. A separate 15-second attempt failed closed
+with 41.35% UDP loss and TCP resets. Keep all candidates unlocked and do not
+promote this scan to formal performance qualification.
+
 The candidate inventory has now been executed as seven one-factor cases x
 three repetitions on d1ee7d2. All 21 source ledgers reconcile; all UDP runs have
 zero loss. TCP medians span 1030.47–1034.22 Mbps and short-flow medians span
