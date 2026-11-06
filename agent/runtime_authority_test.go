@@ -109,6 +109,13 @@ func TestRuntimeContinuousDurableAdaptiveRenewal(t *testing.T) {
 	runDurableRuntimeAuthority(t, 8)
 }
 
+func TestRuntimeLongLivedDurableAdaptiveRenewal(t *testing.T) {
+	if testing.Short() {
+		t.Skip("long-lived durable renewal integration")
+	}
+	runDurableRuntimeAuthority(t, 32)
+}
+
 func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 	t.Helper()
 	for _, network := range []uint8{1, 2} {
@@ -557,6 +564,12 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 					controlDone <- (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, continuousHub.Addr().String())
 				}()
 				for round := 0; round < renewalRounds; round++ {
+					// This fixture models an online backend. Preserve the
+					// original absolute deadline while refreshing liveness.
+					if err := hs.RecordBackendHeartbeat(ctx, time.Now().UTC(), delegation.AutonomyDeadline); err != nil {
+						t.Fatal(err)
+					}
+
 					// The first old grant has expired with 1096 unused bytes.
 					// Those bytes must not count toward the next usable target.
 					if round == 0 {
@@ -674,7 +687,7 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
 				saveRuntimeLedger(t, network, agentDB, hubDB)
 				saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			} else {
-				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			}
 		})
 	}

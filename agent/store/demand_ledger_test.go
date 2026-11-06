@@ -123,3 +123,25 @@ func TestDemandConsumptionUsesBoundedDurableWindow(t *testing.T) {
 		t.Fatal("clock rollback accepted into durable window")
 	}
 }
+
+func TestDemandLedgerZeroBalanceKeepsUnknownFrozen(t *testing.T) {
+	s, use, _ := runtimeStore(t)
+	ctx := context.Background()
+	use.AuthorizationID, use.Kind, use.BillingSnapshotID = "grant", "credit_grant", "snapshot"
+	r := runtimeReservation("exhaust-to-unknown", 1<<20)
+	if _, err := s.ReserveAuthorizedUsage(ctx, r, use); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SettleUsageReservation(ctx, r, "unknown", 1<<20, []byte("unknown"), 1<<20); err != nil {
+		t.Fatal(err)
+	}
+	scope := DemandScope{HubID: "hub-one", DelegationID: "parent", NodeID: "node", BootID: "boot", SourceID: "funding", SnapshotID: "snapshot", RuleID: "rule", SignerEpoch: 1, RuleRevision: 1, PathGeneration: 1}
+	got, err := s.ReadDemandLedger(ctx, scope, IssuerTime{Earliest: use.Earliest, Latest: use.Latest, Trusted: true}, time.Now())
+	if err != nil || got != (DemandLedger{}) {
+		t.Fatalf("unknown became demand credit: %+v %v", got, err)
+	}
+	b, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || b.Initial != 1<<20 || b.Unknown != 1<<20 || b.Remaining != 0 || b.Reserved != 0 || b.Committed != 0 {
+		t.Fatalf("read changed liabilities: %+v %v", b, err)
+	}
+}

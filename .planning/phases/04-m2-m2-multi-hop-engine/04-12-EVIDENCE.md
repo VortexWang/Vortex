@@ -970,3 +970,41 @@ SHA-256 344eb2ada3a066d991f7201ad69fac4e1480f0d7848ffa45eed6522a9dc9b54d.
 Host socket maxima remained 212992. D-04 timeout investigation stays open;
 next diagnostic should retain complete TCP/UDP ordering and inspect the failing
 reservation stage instead of treating more passing UDP-only runs as closure.
+
+## Longer renewal reproducer and zero-balance planning read
+
+Clean d70fdaf passed three complete TCP/UDP eight-renewal repetitions. Extending
+the fixture to 32 renewals then reproduced the native failure with actionable
+error context: runtime reservation stage=select-authority elapsed=203.133214ms.
+That run failed after 60.19s. This confirms where the deadline expired, not an
+isolated timing measurement of selection itself (elapsed starts at reservation).
+
+ReadDemandLedger was still fully checking every active historical credit grant,
+including exhausted grants, on the shared SQLite connection. It now reads
+ID/remaining metadata in one snapshot and skips authority/lineage queries for
+exactly zero balances. All records still count toward the 4096 bound; positive
+balances retain scope, conservative time, lineage and amount checks. A regression
+exhausts an entire grant into unknown liability and verifies zero available
+credit, zero consumption-rate contribution and unchanged unknown conservation.
+This is a query-cost reduction, not a block allocator or liability refund.
+
+The first local 32-renewal run also found only 32 of the expected 68 batches at
+the protocol backend. Hub retained all batches: its initial backend heartbeat
+had aged beyond the 30-second online grace, so later use correctly followed
+autonomous local-ACK behavior. The online long-run fixture now records explicit
+backend heartbeat observations each renewal while preserving its initial
+absolute autonomy deadline. This is test liveness input, not production backend
+heartbeat transport. Snapshot names include renewal count to avoid collisions.
+
+With both changes, TestRuntimeLongLivedDurableAdaptiveRenewal passed locally
+under race (102.661s) and on the dedicated Ubuntu host as an uncommitted-source
+diagnostic (108.10s). Each TCP/UDP session completes 32 renewals, issues 104192
+bytes, meters 102000, clears pending demands and Agent outbox, and verifies 68
+Hub/protocol-backend ledger batches. Full local Agent/Hub race PASS (149.181s
+Agent, 11.645s Store), vet/diff PASS. Native clean-SHA repeat verification remains
+required; no stable timeout closure, performance qualification or D-04 lock.
+
+Clean-stage results, before/after long-run logs and exact diagnostic source are
+retained in artifacts/phase4/long-renewal-diagnostics/results.tar.gz. Remote
+archive hash verified: 1349db5389998b23ed53c97d8e675e09aa5a982ac01c2122d4667acbed82b7f1.
+Downloaded diagnostic files were byte-compared with local source.

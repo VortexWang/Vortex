@@ -78,19 +78,28 @@ func (s *Store) ReadDemandLedger(ctx context.Context, scope DemandScope, now Iss
 		return result, err
 	}
 	defer tx.Rollback()
-	rows, err := tx.QueryContext(ctx, `SELECT authorization_id FROM authorization_records WHERE node_id=? AND source_id=? AND kind='credit_grant' AND state='active'`, scope.NodeID, scope.SourceID)
+	rows, err := tx.QueryContext(ctx, `SELECT a.authorization_id,b.remaining_bytes FROM authorization_records a LEFT JOIN authorization_balances b ON b.node_id=a.node_id AND b.authorization_id=a.authorization_id WHERE a.node_id=? AND a.source_id=? AND a.kind='credit_grant' AND a.state='active'`, scope.NodeID, scope.SourceID)
 	if err != nil {
 		return result, err
 	}
-	var ids []string
+	type candidate struct {
+		id        string
+		remaining uint64
+	}
+	var candidates []candidate
 	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
+		var id, raw string
+		if err := rows.Scan(&id, &raw); err != nil {
 			rows.Close()
 			return result, err
 		}
-		ids = append(ids, id)
-		if len(ids) > 4096 {
+		remaining, err := strconv.ParseUint(raw, 10, 64)
+		if err != nil {
+			rows.Close()
+			return result, ErrAuthorizationDenied
+		}
+		candidates = append(candidates, candidate{id, remaining})
+		if len(candidates) > 4096 {
 			rows.Close()
 			return result, ErrAuthorizationDenied
 		}
@@ -100,7 +109,13 @@ func (s *Store) ReadDemandLedger(ctx context.Context, scope DemandScope, now Iss
 	if err != nil {
 		return result, err
 	}
-	for _, id := range ids {
+	for _, c := range candidates {
+		// An exhausted grant contributes no usable credit. Keep it in the scan
+		// bound, but avoid its full authority/lineage queries on every tick.
+		if c.remaining == 0 {
+			continue
+		}
+		id := c.id
 		r, err := checkAuthorizationTx(ctx, tx, AuthorizationUse{NodeID: scope.NodeID, BootID: scope.BootID, AuthorizationID: id, Kind: "credit_grant", RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, BillingSnapshotID: scope.SnapshotID, Earliest: now.Earliest, Latest: now.Latest, TrustedTime: now.Trusted, ExistingSession: true})
 		if errors.Is(err, ErrAuthorizationDenied) {
 			continue
@@ -111,12 +126,8 @@ func (s *Store) ReadDemandLedger(ctx context.Context, scope DemandScope, now Iss
 		if demandScopeFor(scope.NodeID, r) != scope {
 			continue
 		}
-		var raw string
-		if err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, scope.NodeID, id).Scan(&raw); err != nil {
-			return DemandLedger{}, err
-		}
-		remaining, err := strconv.ParseUint(raw, 10, 64)
-		if err != nil || remaining > r.AmountBytes || remaining > math.MaxInt64-result.Available {
+		remaining := c.remaining
+		if remaining > r.AmountBytes || remaining > math.MaxInt64-result.Available {
 			return DemandLedger{}, ErrAuthorizationDenied
 		}
 		result.Available += remaining
