@@ -5,17 +5,17 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 08
-status: executing
-stopped_at: Completed 06-01-PLAN.md; next dependency wave 06-08
-last_updated: "2026-11-06T19:11:49Z"
+status: blocked
+stopped_at: 06-08 Task 2 blocked by sqlc MPL-2.0 license conflict; CR-003 owner decision required
+last_updated: "2026-11-06T19:35:05Z"
 last_activity: 2026-11-07
-last_activity_desc: "Phase 6 plan 06-01 completed: real PostgreSQL/mTLS tracer; next dependency wave 06-08."
+last_activity_desc: "06-08 Task 1 complete; Task 2 application checks pass but generator license gate blocked. CR-003 pending."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 44
   completed_plans: 43
-state_head: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
+state_head: 82dd410fd3249b7a2e6a741091fde547801ce5b7
 ---
 
 # Project State
@@ -32,8 +32,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 08
 Total Plans in Phase: 11
-Status: In progress — 06-01 PostgreSQL authority and real Agent/blocked Hub mTLS tracer complete; 06-08 is next in dependency order.
-Last activity: 2026-11-07 — exact source a21b3cf passed clean Docker normal/process-race checks; Actions not run and caller cleanliness failed. See 06-01-SUMMARY.md.
+Status: Blocked — 06-08 Task 1 complete; Task 2 awaits owner decision on CR-003 sqlc generator MPL-2.0 exception. Phase 6 remains 1/11 complete.
+Last activity: 2026-11-07 — source 6a66113 passed clean Docker normal/process-race backend checks; dependency license gate exit 1. Actions not run and caller remains dirty. See blocked 06-08-SUMMARY.md.
 
 Progress: Phase 6 [█░░░░░░░░░] 1/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -65,10 +65,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 |------|----------|-------|-------|
 | Phase 05 P03 | multi-session | 4 tasks | 61 files (source/governance; evidence excluded) |
 | Phase 06 P01 | 29min | 1 task | 26 files (source/tooling; 24 evidence files excluded) |
+| Phase 06 P08 (checkpoint) | 19min | 1/2 tasks complete | 21 source/tooling/proposal files; evidence separate |
 
 ## Accumulated Context
 
 ### Decisions
+
+- 06-08 preserves applied 00001 and adds immutable tenant restriction history in 00002. Official sqlc v1.31.1 links MPL-2.0 mysql v1.9.3; complete dependency gate remains blocked until CR-003 owner decision. Backend-only closure and passing Docker tests do not approve the generator license.
 
 - 06-01 uses real Agent NodeControl receipts; HubControl remains authenticated persistent liveness, blocked with signer epoch zero. Financial authority remains 06-05/06-06. Clean committed-clone Docker evidence is separate from the dirty caller checkout and unrun Actions.
 
@@ -88,6 +91,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 - Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
 
 ### Blockers/Concerns
+
+- 06-08 Task 2 blocking-human decision: docs/governance/proposals/CR-003-sqlc-generator-license-exception.md offers exact development/CI artifact exception, replan, or defer. Do not execute dependent waves or mark the partial SUMMARY complete before resolution. WINDOWS entry 2 records the conflict.
 
 - GSD state handlers reject Phase 5's existing `passed_with_scope` verification status. Preserve that scoped verdict; 06-01 position, progress, metric, decision and session were synchronized narrowly after SDK failure. Phase 6 cache-loss checks must extend to real source balances after 06-05; see WINDOWS.md.
 
@@ -110,8 +115,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-06T19:11:49Z
-Stopped at: Completed 06-01-PLAN.md; next dependency wave 06-08
+Last session: 2026-11-06T19:35:05Z
+Stopped at: 06-08 Task 2 blocked by sqlc generator MPL-2.0 license policy conflict; CR-003 owner decision required
 Resume file: .planning/phases/06-m4-m4-backend/06-08-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
