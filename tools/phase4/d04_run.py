@@ -2,6 +2,7 @@
 """Execute one-factor D-04 trials; never automatically lock production defaults."""
 import argparse
 import hashlib
+import itertools
 import json
 import math
 import os
@@ -11,7 +12,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def candidates(rate_mbps=100):
+def candidates(rate_mbps=100, full_factorial=False):
     baseline = dict(block_bytes=256 * 1024, grant_target_seconds=30, waterline_percent=30)
     cases = [dict(id="baseline", **baseline)]
     for field, values in (("block_bytes", (64 * 1024, 1024 * 1024)),
@@ -21,6 +22,12 @@ def candidates(rate_mbps=100):
             cases.append(dict(baseline, id=f"{field}-{value}", **{field: value}))
     for case in cases:
         case["grant_target_bytes"] = max(8 * 1024 * 1024, int(rate_mbps * 1e6 / 8 * case["grant_target_seconds"]))
+    if full_factorial:
+        cases = [dict(id=f"factorial-{index:02d}", block_bytes=block,
+                      grant_target_seconds=seconds, waterline_percent=waterline,
+                      grant_target_bytes=max(8 * 1024 * 1024, int(rate_mbps * 1e6 / 8 * seconds)))
+                 for index, (block, seconds, waterline) in enumerate(itertools.product(
+                     (64 * 1024, 256 * 1024, 1024 * 1024), (10, 30, 60), (20, 30, 50)), 1)]
     return cases
 
 
@@ -123,13 +130,14 @@ def main():
     parser.add_argument("--duration", type=int, default=15)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--rate-mbps", type=float, default=100)
+    parser.add_argument("--full-factorial", action="store_true", help="run all 27 factor combinations")
     args = parser.parse_args()
-    if args.duration < 5 or args.repeats < 1 or args.rate_mbps <= 0:
+    if args.duration < 5 or args.repeats < 1 or not math.isfinite(args.rate_mbps) or args.rate_mbps <= 0:
         parser.error("positive rate, duration >= 5, repeats >= 1 required")
     base = args.output.resolve()
     base.mkdir(parents=True, exist_ok=True)
     results = []
-    for case in candidates(args.rate_mbps):
+    for case in candidates(args.rate_mbps, args.full_factorial):
         for repeat in range(1, args.repeats + 1):
             out = base / case["id"] / f"trial-{repeat}"
             if out.exists():
@@ -151,6 +159,7 @@ def main():
     if len({result["commit"] for result in results}) != 1:
         raise SystemExit("mixed source commits")
     summary = dict(schema=1, status="measured-candidates-require-review", locked=False,
+                   factor_policy="full-factorial" if args.full_factorial else "one-factor-at-a-time",
                    reference_rate_mbps=args.rate_mbps, duration_seconds=args.duration, repeats=args.repeats, results=results)
     (base / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     with (base / "checksums.sha256").open("w") as checksums:

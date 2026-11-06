@@ -3,6 +3,15 @@ from d04_run import candidates, percentile_bucket, summarize_observations
 
 
 class D04Tests(unittest.TestCase):
+    def test_full_factorial_has_all_unique_combinations(self):
+        cases = candidates(100, full_factorial=True)
+        combinations = {(c["block_bytes"], c["grant_target_seconds"], c["waterline_percent"]) for c in cases}
+        self.assertEqual(len(cases), 27)
+        self.assertEqual(len(combinations), 27)
+        self.assertEqual(len({c["id"] for c in cases}), 27)
+        for c in cases:
+            self.assertEqual(c["grant_target_bytes"], 12500000 * c["grant_target_seconds"])
+
     def test_one_factor_changes_and_fixed_rate_conversion(self):
         cases = candidates(100)
         self.assertEqual(len(cases), 7)
