@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "status": "native-block-qualification-failed",
+  "archive_sha256": "b41827d66884272766255a247d2a04ce2f6f8b6e0705aae565c839f31068f993",
+  "runs": [
+    {
+      "directory": "artifacts/phase4/block-e3662bc",
+      "sha": "e3662bc0710210d1f765a3020dffeff1216c3429",
+      "stage": "trial-1",
+      "exit_code": 1,
+      "files": {
+        "exit-code": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "host.txt": "9d18b8defd15b55d80e1f34a6e66790aa507a71048e3a4578b376aa35d2ace35",
+        "launcher.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha": "8f10585dad10da1fbf7a5bfa9c03a704608f715971f85340181c7492f06088df",
+        "stage": "3b1a4e4e423139cd8ef03f7625dc831f5e82000a0321f09792d1bcbd57c41796",
+        "trial-1/runtime-block-1-rounds-2-delay-false-agent.sqlite.gz": "20c3e28d591b6ba595ebac17c1e7123b879b6da405656b3c69508243d8468340",
+        "trial-1/runtime-block-1-rounds-2-delay-false-backend.sqlite.gz": "eef4e6eaa2250a2ef439d31826fba2d3c188aac9e9a74bdc4dad52aabf608cd6",
+        "trial-1/runtime-block-1-rounds-2-delay-false-hub.sqlite.gz": "172d455b206a83815016045d5dca1cef1393e9258a781e4742f58acbc5386106",
+        "trial-1/runtime-block-1-rounds-2-delay-false-ledgers.json": "761cc583b0d5eccddf0792d4fc2e75026f7f882e5d891bcfea2a31e4402b3919",
+        "trial-1/runtime-block-1-rounds-2-delay-true-agent.sqlite.gz": "f702dfaf7988222e489001e6d068dbdac5bfc173125316a7586891cc979f4bc3",
+        "trial-1/runtime-block-1-rounds-2-delay-true-backend.sqlite.gz": "248aa3f94358d90c340d84592e636a4c1eda57fa9671933201ba6a031e682442",
+        "trial-1/runtime-block-1-rounds-2-delay-true-hub.sqlite.gz": "887edeae8234310270d2aacde39c3bdcfcc7aa6290193358a8176268955967df",
+        "trial-1/runtime-block-1-rounds-2-delay-true-ledgers.json": "888154e987a3cc8c0554af79ed5242671a5627d817176344b00e6b2fc10539a9",
+        "trial-1.log": "e9e4a5ecd09609ad7610e90d4cd992626a9b494e3cf014c7c3cc2ca7a216c4cd"
+      }
+    },
+    {
+      "directory": "artifacts/phase4/block-82ae28b",
+      "sha": "82ae28b9a8283e0d537fb3be9850bee19120ef9d",
+      "stage": "trial-1",
+      "exit_code": 1,
+      "files": {
+        "exit-code": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "host.txt": "706889cbcd903aa1723fe860e2502e109df99a2a3ad9c5668b71581ccfead557",
+        "launcher.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha": "c88790d167b1f7aac5962a3ca1221a72bf5088e04c67f5cac8e6fcec226ff5b5",
+        "stage": "3b1a4e4e423139cd8ef03f7625dc831f5e82000a0321f09792d1bcbd57c41796",
+        "trial-1/runtime-block-1-rounds-2-delay-false-agent.sqlite.gz": "cc819fed19ce62f47c419d2b403552e3651480a21b55ea0bd296b3ef847b568a",
+        "trial-1/runtime-block-1-rounds-2-delay-false-backend.sqlite.gz": "69cd4af3513cd25538083232f465f4cfddedab80e40b583fd1361895f2646553",
+        "trial-1/runtime-block-1-rounds-2-delay-false-hub.sqlite.gz": "008cd40a67b3e877d391592e3d55699df32e02a5fc586da4d4da0fbe39f20263",
+        "trial-1/runtime-block-1-rounds-2-delay-false-ledgers.json": "42cf37269393160f60bb3e9787c89d1f79d34858599286ea43d0fb48825dce0f",
+        "trial-1/runtime-block-1-rounds-2-delay-true-agent.sqlite.gz": "5295bde2947a6e263f68b3db071be0475dbe3438bcf93f050af2288208868663",
+        "trial-1/runtime-block-1-rounds-2-delay-true-backend.sqlite.gz": "f11a1aa0d4c64a3960edc886aa534fdcee93f4953a32b67467b1edf4234d7d83",
+        "trial-1/runtime-block-1-rounds-2-delay-true-hub.sqlite.gz": "9e0a1256211bdef169d24b620ffb6f76b87162baecf893b69ed294d945dbe557",
+        "trial-1/runtime-block-1-rounds-2-delay-true-ledgers.json": "53447ebe2ed7b04dc4f6cdfb4e91a5c78c5f747201ddb7b4c48e4ea382fb827e",
+        "trial-1.log": "1175f44cad69513523bc3dca9465988f735f3d691276a61913a2e94c08ec5955"
+      }
+    }
+  ]
+}

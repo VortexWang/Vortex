@@ -1281,3 +1281,24 @@ checks. Cancellation still ends the wait; unknown settlement faults the gate.
 A regression holds the outbound batch unresolved and proves the response waits
 until its checkpoint, then reconciles exactly 3000 consumed / 1096 remaining.
 Native confirmation of this fix is required before closing this failure.
+
+## Native response-wait fix 82ae28b — still failed; timeout retained
+
+Local funding-gate race PASS 3.135s; both real block renewal modes PASS locally
+27.689s; vet/diff PASS. Dedicated clean
+82ae28b9a8283e0d537fb3be9850bee19120ef9d still failed the UDP expiry exchange
+in trial-1. The ordinary UDP log identifies runtime reservation stage=reserve-
+usage elapsed=93.778062ms with context deadline exceeded. This is one nested
+transaction inside the unchanged shared 200 ms admission budget, not the total
+operation elapsed time. Multiple funding attempts and tail release can consume
+the shared budget. The outbound-wait regression establishes a scheduling
+boundary but does not close this native failure. Atomic preferred/minimum block
+selection and fewer repeated authority transactions are the next work.
+
+Both native launchers stopped with exit 1 at trial-1; later attacks/full-race/vet
+stages did not run. Neither result is a pass. Raw logs and completed TCP ledger
+snapshots were downloaded. Archive SHA-256 matches remote
+b41827d66884272766255a247d2a04ce2f6f8b6e0705aae565c839f31068f993.
+04-22-NATIVE-BLOCK-ATTEMPTS.json records measured SHAs and file hashes.
+Socket maxima stayed 212992. No timeout increase, kernel tuning or protocol
+change was made. D-04 and full native block qualification remain open.
