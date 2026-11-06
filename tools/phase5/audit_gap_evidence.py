@@ -82,7 +82,9 @@ def inspect_snapshot(path, expected_hash):
     with tempfile.TemporaryDirectory() as directory:
         db_path = Path(directory) / "ledger.sqlite"
         db_path.write_bytes(raw)
-        db = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        # Immutable mode keeps audit reads read-only while allowing SQLite to
+        # validate snapshots whose original connection used WAL on macOS.
+        db = sqlite3.connect(f"file:{db_path}?mode=ro&immutable=1", uri=True)
         try:
             if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                 raise ValueError(f"SQLite integrity failure: {path}")

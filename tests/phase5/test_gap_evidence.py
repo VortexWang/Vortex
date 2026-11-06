@@ -109,6 +109,21 @@ class GapEvidenceTests(unittest.TestCase):
         self.update_file("policy/snapshot.sqlite.gz")
         self.rejected()
 
+    def test_wal_snapshot_passes_immutable_audit(self):
+        wal_db = self.root / "policy/wal.sqlite"
+        connection = sqlite3.connect(wal_db)
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("CREATE TABLE proof (value INTEGER)")
+        connection.execute("INSERT INTO proof VALUES (2)")
+        connection.commit()
+        connection.close()
+        wal_snapshot = self.root / "policy/wal.sqlite.gz"
+        wal_snapshot.write_bytes(gzip.compress(wal_db.read_bytes()))
+        entry = {"path": "policy/wal.sqlite.gz", "sha256": self.digest(wal_snapshot), "raw_sha256": hashlib.sha256(wal_db.read_bytes()).hexdigest()}
+        self.manifest["snapshots"].append(entry)
+        self.manifest["files"].append({"path": entry["path"], "sha256": entry["sha256"], "size": wal_snapshot.stat().st_size})
+        validate_manifest(self.root, self.manifest, self.sha)
+
     def test_partially_collected_case_set_fails(self):
         self.manifest["process_cases"].pop()
         self.rejected()
