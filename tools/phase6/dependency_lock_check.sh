@@ -1,8 +1,10 @@
 #!/bin/sh
 # Fail closed on generator bytes, resolved dependencies and reviewed licenses.
 set -eu
+export PYTHONDONTWRITEBYTECODE=1
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
+python3 -m unittest discover -s tools/phase6 -p 'test_sqlc_license_check.py'
 test "$(GOTOOLCHAIN=local go env GOVERSION)" = go1.27.3
 work=$(mktemp -d /tmp/vortex-phase6-lock.XXXXXX)
 trap 'rm -rf "$work"' EXIT HUP INT TERM

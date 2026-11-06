@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "exceptions": [
+    {
+      "id": "CR-003",
+      "status": "approved",
+      "decision": "A",
+      "owner_response": "按推荐",
+      "approved_at": "2026-11-06",
+      "approval_context": "Project owner selected the recommended option A in the active execute-phase conversation; scope is exactly CR-003 as presented",
+      "usage": "development-ci-sql-to-go",
+      "license": "MPL-2.0",
+      "dependency": {
+        "module": "github.com/go-sql-driver/mysql",
+        "version": "v1.9.3",
+        "sum": "h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo="
+      },
+      "artifacts": [
+        {
+          "platform": "darwin-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_darwin_arm64.tar.gz",
+          "archive_sha256": "21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e",
+          "binary_sha256": "7e63a8b2166f1103a2ad1d2e5d05d8fe3f13ca65ecf2774a2570b830d32055fd"
+        },
+        {
+          "platform": "linux-amd64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_amd64.tar.gz",
+          "archive_sha256": "497ae4fcdfa64c5b0c311ffe4c2bd991e43991e82e5367792ed78bc2dca27354",
+          "binary_sha256": "0496fbc18f603e2fbd10c752942d1389a1fa9bc3d18de7243ec00cccd611575f"
+        },
+        {
+          "platform": "linux-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_arm64.tar.gz",
+          "archive_sha256": "b7cae247740d0c51a1e657479e5b2d21e6fef428f596682a01bc55bf4ab8a23d",
+          "binary_sha256": "3b42bdbc5be1d534b95fc6b9f0e1572e6aa555fda3c96f208cb26abb1bb77d7e"
+        }
+      ],
+      "obligations": [
+        "Unchanged official generator only; never a VORTEX runtime dependency exception",
+        "Retain sqlc MIT and driver MPL copyright/license notices and exact source links",
+        "External distribution requires a separate inventory and fulfillment of MPL source availability and recipient notice obligations",
+        "Other licenses, modules, versions, hashes, usage and distribution remain unapproved"
+      ],
+      "sources": [
+        "https://github.com/go-sql-driver/mysql/tree/v1.9.3",
+        "https://www.mozilla.org/MPL/2.0/",
+        "https://www.mozilla.org/en-US/MPL/2.0/FAQ/"
+      ]
+    }
+  ]
+}

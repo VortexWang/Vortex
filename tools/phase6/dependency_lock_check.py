@@ -12,6 +12,7 @@ import platform
 import subprocess
 import sys
 import zipfile
+from sqlc_license_check import verify as verify_sqlc
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "tools/phase6/backend-dependencies.json"
@@ -85,21 +86,16 @@ def main():
     binary = work / "bin/protoc"
     binary.chmod(0o755)
     assert command([str(binary), "--version"]) == "libprotoc 36.2"
-    generator_metadata = command(["go", "version", "-m", str(work / "sqlc")])
-    known_findings = reviewed["generator_license_findings"]
-    blocked = []
-    for finding in known_findings:
-        assert f'{finding["module"]}\t{finding["version"]}\t{finding["sum"]}' in generator_metadata, "generator closure changed; new review required"
-        if finding["license"] not in allowed:
-            blocked.append(finding)
-    print(json.dumps(dict(status="blocked" if blocked else "passed", go="1.27.3", goose=goose["version"], goose_sum=goose["sum"],
+    generator = verify_sqlc(work / "sqlc.tar.gz", work / "sqlc", platform_key, pinned["sqlc"])
+    blocked = generator["license_findings"]
+    print(json.dumps(dict(status=generator["status"], go="1.27.3", goose=goose["version"], goose_sum=goose["sum"],
                           sqlc="v1.31.1", protoc="36.2", protoc_archive_sha256=digest,
                           compiled_modules=len(actual), targets=["linux/amd64", "linux/arm64", "host"],
-                          scope="backend compiled production/test closure and generator license blocking findings; external services excluded",
-                          generator_closure_status="blocked-known-disallowed" if blocked else "review-required",
+                          scope="backend production/test and exact sqlc generator linked and embedded licenses; protoc checksum; external services excluded",
+                          generator_closure_status=generator["status"], generator=generator,
                           license_findings=blocked)))
-    if blocked:
-        raise SystemExit("sqlc generator contains a linked license outside the project allowlist; explicit policy/artifact decision required")
+    if generator["status"] != "passed":
+        raise SystemExit("sqlc generator contains an unapproved license; CR-003 cannot approve other components")
 
 
 if __name__ == "__main__":
