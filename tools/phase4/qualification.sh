@@ -8,6 +8,11 @@ export PHASE4_POLICY_VERSION="${PHASE4_POLICY_VERSION:-2}"
 qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 export BACKEND="$mode" QUALIFICATION_DIR="$qual" PHASE4_FORMAL="${PHASE4_FORMAL:-0}"
 
+if [ "$PHASE4_FORMAL" = 1 ] && [ -z "${PHASE4_TRIAL_ID:-}" ]; then
+  echo "PHASE4_TRIAL_ID is required before starting formal workload" >&2
+  exit 2
+fi
+
 "$root/tools/phase4/topology-smoke.sh"
 
 for name in source relay-1 relay-2 relay-3 destination; do

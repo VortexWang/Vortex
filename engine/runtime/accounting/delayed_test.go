@@ -46,6 +46,9 @@ func TestDelayedIssuerCoalescesBeforeWrites(t *testing.T) {
 	}
 	wg.Wait()
 	state := g.Credit.State()
+	if state.Denials != 0 || state.Waits == nil || state.Waits.Attempts != 16 || state.Waits.FinalFailures != 0 || state.Waits.Waits != state.Waits.WaitSucceeded {
+		t.Fatalf("successful waits counted as denials: %+v", state)
+	}
 	if state.Used != 16 || state.Grants != 1 || state.GrantRecords != 1 || state.PendingGrant != 0 {
 		t.Fatal(state)
 	}
@@ -68,6 +71,9 @@ func TestDelayedIssuerTimeoutDoesNotReleasePending(t *testing.T) {
 		t.Fatalf("wait=%s", elapsed)
 	}
 	state := g.Credit.State()
+	if state.Denials != 1 || state.Waits == nil || state.Waits.TimedOut != 1 || state.Waits.FinalFailures != 1 || state.Waits.WaitSucceeded != 0 {
+		t.Fatalf("timeout counter: %+v", state)
+	}
 	if state.PendingGrant != 128 || state.Used != 0 || state.Available != 0 {
 		t.Fatal(state)
 	}
@@ -100,6 +106,10 @@ func TestDelayedIssuerCallerCancellationKeepsRequest(t *testing.T) {
 	}
 	if err = b.Commit(ctx, 1); err != nil {
 		t.Fatal(err)
+	}
+	state := g.Credit.State()
+	if state.Waits == nil || state.Waits.Attempts != 2 || state.Waits.Cancelled != 1 || state.Denials != 1 {
+		t.Fatalf("cancellation counter: %+v", state)
 	}
 	if g.Credit.State().Grants != 1 || g.Credit.State().GrantRecords != 1 {
 		t.Fatal(g.Credit.State())

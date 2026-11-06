@@ -43,21 +43,32 @@ type CreditObservations struct {
 	IssuerNanos      [64]uint64 `json:"issuer_nanoseconds_log2_buckets"`
 }
 
+type CreditWaitObservations struct {
+	Attempts      uint64 `json:"attempts"`
+	Shortfalls    uint64 `json:"shortfalls"`
+	Waits         uint64 `json:"waits"`
+	WaitSucceeded uint64 `json:"wait_succeeded"`
+	TimedOut      uint64 `json:"timed_out"`
+	Cancelled     uint64 `json:"cancelled"`
+	FinalFailures uint64 `json:"final_failures"`
+}
+
 type CreditState struct {
-	Observations *CreditObservations `json:"observations,omitempty"`
-	SnapshotID   string              `json:"snapshot_id"`
-	PendingGrant int64               `json:"pending_grant_bytes"`
-	UnknownGrant int64               `json:"unknown_grant_bytes"`
-	GrantRecords uint64              `json:"grant_records"`
-	Budget       int64               `json:"budget_bytes"`
-	Unissued     int64               `json:"unissued_bytes"`
-	Available    int64               `json:"available_bytes"`
-	Held         int64               `json:"held_bytes"`
-	Used         int64               `json:"used_bytes"`
-	Unknown      int64               `json:"unknown_bytes"`
-	Grants       uint64              `json:"grants"`
-	Denials      uint64              `json:"denials"`
-	Sessions     int64               `json:"sessions"`
+	Waits        *CreditWaitObservations `json:"waits,omitempty"`
+	Observations *CreditObservations     `json:"observations,omitempty"`
+	SnapshotID   string                  `json:"snapshot_id"`
+	PendingGrant int64                   `json:"pending_grant_bytes"`
+	UnknownGrant int64                   `json:"unknown_grant_bytes"`
+	GrantRecords uint64                  `json:"grant_records"`
+	Budget       int64                   `json:"budget_bytes"`
+	Unissued     int64                   `json:"unissued_bytes"`
+	Available    int64                   `json:"available_bytes"`
+	Held         int64                   `json:"held_bytes"`
+	Used         int64                   `json:"used_bytes"`
+	Unknown      int64                   `json:"unknown_bytes"`
+	Grants       uint64                  `json:"grants"`
+	Denials      uint64                  `json:"denials"`
+	Sessions     int64                   `json:"sessions"`
 }
 
 // CreditGate serializes issuance, block allocation and settlement. At all times
@@ -66,6 +77,8 @@ type CreditState struct {
 // session block tails and unresolved batches; closing never frees an unknown.
 type CreditGate struct {
 	injectedIssuer bool
+	waitStats      CreditWaitObservations
+	observeWaits   bool
 	mu             sync.Mutex
 	cfg            CreditConfig
 	state          CreditState
@@ -91,6 +104,10 @@ func (g *CreditGate) State() CreditState {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	state := g.state
+	if g.observeWaits {
+		observations := g.waitStats
+		state.Waits = &observations
+	}
 	if g.cfg.Observe {
 		observation := g.observations
 		state.Observations = &observation
@@ -152,6 +169,9 @@ type creditSession struct {
 }
 
 func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) (*core.Batch, error) {
+	return s.reserve(ctx, d, n, true)
+}
+func (s *creditSession) reserve(ctx context.Context, d core.Direction, n int64, countDenial bool) (*core.Batch, error) {
 	g := s.gate
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -197,7 +217,9 @@ func (s *creditSession) Reserve(ctx context.Context, d core.Direction, n int64) 
 		}
 		take := min(max(need, s.next[i]), g.state.Available)
 		if take < need {
-			g.state.Denials++
+			if countDenial {
+				g.state.Denials++
+			}
 			return nil, core.ErrDenied
 		}
 		g.state.Available -= take

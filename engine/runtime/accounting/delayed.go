@@ -34,6 +34,7 @@ func NewDelayedCreditGate(parent context.Context, c CreditConfig, delay time.Dur
 	if err != nil {
 		return nil, err
 	}
+	credit.observeWaits = true
 	ctx, cancel := context.WithCancel(parent)
 	return &DelayedCreditGate{Credit: credit, delay: delay, ctx: ctx, cancel: cancel, changed: make(chan struct{}), waiters: make(chan struct{}, 128)}, nil
 }
@@ -98,23 +99,50 @@ func (g *DelayedCreditGate) Open(ctx context.Context, f core.Flow) (core.Session
 	if err != nil {
 		return nil, err
 	}
-	return &delayedSession{gate: g, inner: s}, nil
+	return &delayedSession{gate: g, inner: s.(*creditSession)}, nil
 }
 
 type delayedSession struct {
 	gate  *DelayedCreditGate
-	inner core.Session
+	inner *creditSession
 }
 
 func (s *delayedSession) Close() error { return s.inner.Close() }
-func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64) (*core.Batch, error) {
+func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64) (result *core.Batch, resultErr error) {
+	shortfall, waited := false, false
+	defer func() {
+		g := s.gate.Credit
+		g.mu.Lock()
+		defer g.mu.Unlock()
+		g.waitStats.Attempts++
+		if shortfall {
+			g.waitStats.Shortfalls++
+		}
+		if waited {
+			g.waitStats.Waits++
+		}
+		if waited && resultErr == nil {
+			g.waitStats.WaitSucceeded++
+		}
+		if resultErr != nil {
+			g.waitStats.FinalFailures++
+			g.state.Denials++
+			if errors.Is(resultErr, context.DeadlineExceeded) {
+				g.waitStats.TimedOut++
+			}
+			if errors.Is(resultErr, context.Canceled) {
+				g.waitStats.Cancelled++
+			}
+		}
+	}()
+
 	if s.gate.ctx.Err() != nil {
 		return nil, core.ErrDenied
 	}
 	// One deadline for the whole attempt; never reset on a wakeup.
 	attempt, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
 	defer cancel()
-	b, err := s.inner.Reserve(attempt, d, n)
+	b, err := s.inner.reserve(attempt, d, n, false)
 	if err == nil {
 		_, _ = s.gate.request()
 		return b, nil
@@ -122,6 +150,7 @@ func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64)
 	if !errors.Is(err, core.ErrDenied) {
 		return nil, err
 	}
+	shortfall = true
 	if attempt.Err() != nil {
 		return nil, attempt.Err()
 	}
@@ -138,12 +167,13 @@ func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64)
 	if changed == nil {
 		return nil, err
 	}
+	waited = true
 	select {
 	case <-attempt.Done():
 		return nil, attempt.Err()
 	case <-changed:
 	}
-	b, err = s.inner.Reserve(attempt, d, n)
+	b, err = s.inner.reserve(attempt, d, n, false)
 	if err == nil {
 		_, _ = s.gate.request()
 	}
