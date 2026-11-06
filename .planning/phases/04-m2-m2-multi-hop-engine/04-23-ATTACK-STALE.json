@@ -1,0 +1,14 @@
+{
+  "commit": "acfe970a1cef4ec4e71ec9db9a6303951a5728b1",
+  "dirty": false,
+  "host": "macOS native, not Ubuntu qualification",
+  "raw_directory": "/private/tmp/vortex-attack-stale-v2-20261106",
+  "status": "pass",
+  "cases": 17,
+  "sha256": {
+    "forged-open.json": "e4411fa3a7f451ca250f58f33c60d04731b34758edb6898d78937b92173afa47",
+    "attack-gate.json": "c066740b10472273b630864971786c56dfde79ea3d9bac51297535ce101ef551",
+    "probe.log": "0d47811b17e06509b4e15f56b994a59a7c0a1e2462ee53e0bde298d57c6efdfb"
+  },
+  "scope": "16 configured-route OPEN cases and UDP link loss; identity handshake matrix and full NFR-006 not complete"
+}

@@ -289,3 +289,19 @@ stream are functional coverage, not a duration-based performance trial.
 `workload.json` records each case's actual configuration; `traffic.json` records
 request/response duration, byte throughput and round-trip percentiles. These
 percentiles are not issuer-wait latency. The report requires all three cases.
+
+### Configured-route stale OPEN matrix
+
+Run `ATTACK_DIR=/absolute/fresh/path tools/phase4/attack.sh` for the standalone
+native five-process matrix. It enables bounded runtime authority, generates
+revision/generation 2, then checks valid nonzero old-version OPENs for TCP and
+UDP. The output covers 16 named OPEN cases plus UDP link loss; it is not a full
+identity-handshake/security qualification. The directory must not exist.
+
+The expanded `attack_gate.py` deliberately rejects the previous 12-case report.
+When using `comparison.sh`, generate both the original qualification run and
+its comparison with `PHASE4_POLICY_VERSION=2`; preserve that value across warmup
+and all trials so their semantics match. The generator still defaults to 1 for
+existing non-attack fixtures. A full attack probe against version 1 fails with
+an explanatory error because decrementing it would test invalid zero fields
+locally, not stale authorization at the receiving runtime.

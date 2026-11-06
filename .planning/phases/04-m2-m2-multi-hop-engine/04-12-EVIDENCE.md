@@ -2408,3 +2408,22 @@ prerequisites to 04-12-PLAN, including avoiding duplicated billing at every hop.
 Local Agent Runtime/authority race regressions PASS 10.456s; full Engine
 runtime subtree race suite PASS (accounting/config/link/relay/topology).
 No native five-process claim is made from this boundary change.
+
+## P4-Q2 stale OPEN coverage, within corrected M2 scope
+
+Added TCP/UDP stale revision and stale generation to the configured-route live
+probe and required gate matrix (16 OPEN cases plus UDP link loss). First local
+attempt 22b2dc3 failed because decrementing fixture version 1 gives zero and
+fails client validation, not receiver authorization. Preserved raw directory
+/private/tmp/vortex-attack-stale-20261106. Added explicit generator version 2
+option (default unchanged), standalone native runner and clear version precheck.
+
+Clean acfe970a1cef4ec4e71ec9db9a6303951a5728b1 macOS native five-process
+runtime-authority matrix PASS all 17 cases; raw directory and checksums in
+04-23-ATTACK-STALE.json. This is not dedicated Ubuntu or same-SHA Actions evidence.
+Python gates: 19 tests PASS; Go OPEN tests PASS. Previous 12-case artifacts now
+correctly fail the expanded coverage gate. Comparison callers must use the same
+version-2 setting throughout qualification and comparison; documented in README.
+Identity/HELLO, broader configured-route and NFR-006 completion remain open.
+Also corrected historical security sign-off wording: production durable
+accounting belongs to X5/X6, not a Phase 4 advancement blocker.
