@@ -249,9 +249,13 @@ share authority remains mandatory, and node recovery precedes traffic startup.
 
 This exposes the durable allocator for independent-process workloads. Existing
 `d04_run.py` still measures the process-local issuer and does not automatically
-use this option; it cannot qualify durable Hub performance. Required follow-up
-is a same-SHA multi-process durable workload with raw ledger reconciliation,
-16 streams, actual UDP offered load and the controlled candidate matrix.
+use this option; it cannot qualify durable Hub performance. The durable
+candidate entrypoint is `make phase4-d04-durable-scan` (or
+`python3 tools/phase4/d04_durable_scan.py`): it runs the 3 x 3 x 3 matrix,
+executes both TCP and UDP for every case, preserves each test log, and checks
+source conservation, pending/unknown/held settlement, issuer occupancy and
+idle-tail reclamation. Its final manifest always keeps `locked=false`; a pass
+is evidence for D-04 review, not an automatic production-default change.
 
 The protocol-test Hub now accepts paired `--authority-fixture FILE` and
 `--fixture-backend-db FILE` options. The JSON object has `delegation` (explicit

@@ -64,6 +64,7 @@ Only after preflight passes, use one clean SHA and preserve all raw evidence:
 
 ```bash
 make phase4-d04-scan
+make phase4-d04-durable-scan D04_DURABLE_OUTPUT=artifacts/phase4/d04-durable-scan
 BACKEND=native make phase4-runtime-mixed
 BACKEND=native make phase4-runtime-comparison
 make phase4-qualification-gate \

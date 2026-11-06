@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync/atomic"
 	"syscall"
 	"testing"
@@ -136,12 +137,79 @@ func TestRuntimeFundingBlockContinuousTraffic(t *testing.T) {
 	runDurableRuntimeAuthorityWorkload(t, 16, true, true)
 }
 
+func TestRuntimeDurableD04Candidate(t *testing.T) {
+	if os.Getenv("VORTEX_D04_DURABLE") != "1" {
+		t.Skip("durable D-04 candidate workload is opt-in")
+	}
+	runDurableRuntimeAuthorityWorkload(t, 0, true, false)
+}
+
+type durableD04Params struct {
+	blockBytes, targetBytes, targetSeconds, waterlinePercent uint64
+	initialGrant, renewalBytes, messageBytes                 uint64
+	delegationBytes                                          uint64
+	exchangeCount                                            int
+	candidate                                                bool
+}
+
+func durableD04Parameters(t *testing.T) durableD04Params {
+	t.Helper()
+	params := durableD04Params{
+		blockBytes:       2048,
+		targetBytes:      4096,
+		targetSeconds:    30,
+		waterlinePercent: 30,
+		initialGrant:     4096,
+		renewalBytes:     3000,
+		messageBytes:     1500,
+	}
+	if os.Getenv("VORTEX_D04_DURABLE") != "1" {
+		params.delegationBytes = 12288
+		return params
+	}
+	params.candidate = true
+	parse := func(name string, fallback uint64) uint64 {
+		value := os.Getenv(name)
+		if value == "" {
+			return fallback
+		}
+		parsed, err := strconv.ParseUint(value, 10, 64)
+		if err != nil {
+			t.Fatalf("invalid %s=%q: %v", name, value, err)
+		}
+		return parsed
+	}
+	params.blockBytes = parse("VORTEX_D04_BLOCK_BYTES", params.blockBytes)
+	params.targetBytes = parse("VORTEX_D04_TARGET_BYTES", params.blockBytes*2)
+	params.targetSeconds = parse("VORTEX_D04_TARGET_SECONDS", params.targetSeconds)
+	params.waterlinePercent = parse("VORTEX_D04_RENEW_PERCENT", params.waterlinePercent)
+	if params.blockBytes == 0 || params.blockBytes > 4<<20 || params.targetBytes < params.blockBytes || params.targetBytes > 16<<20 || params.targetSeconds == 0 || params.targetSeconds > 60 || params.waterlinePercent == 0 || params.waterlinePercent >= 100 {
+		t.Fatalf("invalid durable D-04 parameters: %+v", params)
+	}
+	params.initialGrant = params.targetBytes
+	required := params.targetBytes - (params.targetBytes*params.waterlinePercent)/100 + 1
+	// The fixture's UDP target reads one 4 KiB datagram at a time; use the
+	// common bound for both transports and repeat exchanges to cross the gate.
+	params.messageBytes = 4096
+	if params.messageBytes > params.blockBytes {
+		params.messageBytes = params.blockBytes
+	}
+	params.exchangeCount = int((required + 2*params.messageBytes - 1) / (2 * params.messageBytes))
+	params.renewalBytes = uint64(2 * params.exchangeCount * int(params.messageBytes))
+	if params.messageBytes == 0 || params.messageBytes > params.blockBytes {
+		t.Fatalf("durable D-04 traffic does not fit one funding block: %+v", params)
+	}
+	params.delegationBytes = params.initialGrant + params.renewalBytes + params.targetBytes
+	return params
+}
+
 func runDurableRuntimeAuthorityMode(t *testing.T, renewalRounds int, blockMode bool, delayResponse ...bool) {
 	runDurableRuntimeAuthorityWorkload(t, renewalRounds, blockMode, false, delayResponse...)
 }
 
 func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMode, continuous bool, delayResponse ...bool) {
 	t.Helper()
+	params := durableD04Parameters(t)
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), (25+time.Duration(renewalRounds)*3)*time.Second)
@@ -244,7 +312,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 						t.Fatalf("invalid block size accepted: %d", invalid)
 					}
 				}
-				if err := node.EnableExperimentalFundingBlocks(2048); err != nil {
+				if err := node.EnableExperimentalFundingBlocks(params.blockBytes); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -253,7 +321,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			}
 			defer node.Stop(context.Background())
 			if blockMode {
-				if err := node.EnableExperimentalFundingBlocks(1024); err == nil {
+				if err := node.EnableExperimentalFundingBlocks(params.blockBytes / 2); err == nil {
 					t.Fatal("live allocator replacement accepted")
 				}
 			}
@@ -322,7 +390,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				SourceID: "550e8400-e29b-41d4-a716-446655440023", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440061", ShareSourceID: "550e8400-e29b-41d4-a716-446655440062",
 				NodeID: node.NodeID, BootID: node.BootID, BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440024",
 				RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, FencingFloor: 8, SignerEpoch: 1,
-				RawBytes: 12288 + uint64(renewalRounds)*4096, RateBPS: 1000000, Connections: 1,
+				RawBytes: params.delegationBytes + uint64(renewalRounds)*params.targetBytes, RateBPS: 1000000, Connections: 1,
 				ValidFrom: issuedAt, ExpiresAt: issuedAt.Add(time.Hour), HardDeadline: issuedAt.Add(time.Hour),
 				BackendHeartbeat: issuedAt, AutonomyDeadline: issuedAt.Add(2 * time.Hour),
 			}
@@ -337,7 +405,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			usageRelay := &hub.UsageRelay{Store: hs, Clock: issuerClock, Backend: &durableUsageBackend{store: bs}}
 			const issueID = "550e8400-e29b-41d4-a716-446655440020"
 			const initialTTL = 4 * time.Second
-			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, 4096, initialTTL)
+			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, params.initialGrant, initialTTL)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -354,7 +422,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				}
 			}
 			ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
-				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, 4096, initialTTL)
+				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, params.initialGrant, initialTTL)
 			}}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, ln.Addr().String()); err != nil {
 				t.Fatal(err)
@@ -417,7 +485,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 							t.Fatalf("OPEN rejected before remote policy: %v", err)
 						}
 						balance, auditErr := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
-						if auditErr != nil || balance.Initial != 4096 || balance.Remaining != 4096 || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
+						if auditErr != nil || balance.Initial != params.initialGrant || balance.Remaining != params.initialGrant || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
 							t.Fatalf("local protocol rejection changed authority or target: %+v targets=%d err=%v", balance, targets.Load(), auditErr)
 						}
 						return
@@ -434,7 +502,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 						t.Fatalf("wrong audited rejection: type=%d payload=%x", frame.Type, frame.Payload)
 					}
 					balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
-					if err != nil || balance.Initial != 4096 || balance.Remaining != 4096 || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
+					if err != nil || balance.Initial != params.initialGrant || balance.Remaining != params.initialGrant || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
 						t.Fatalf("forged route changed authority or target: %+v targets=%d err=%v", balance, targets.Load(), err)
 					}
 				})
@@ -447,9 +515,14 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			if err := second.WaitOpen(ctx); err == nil {
 				t.Fatal("persisted connection share limit bypassed")
 			}
-			// This one exchange commits 3000 bytes across both directions of the
-			// durable grant, crossing the configured 30% renewal waterline.
-			message := bytes.Repeat([]byte{0x5a}, 1500)
+			// This exchange commits a bounded amount across both directions of
+			// the durable grant, crossing the configured renewal waterline.
+			message := bytes.Repeat([]byte{0x5a}, int(params.messageBytes))
+			exchangeCount := params.exchangeCount
+			if exchangeCount == 0 {
+				exchangeCount = 1
+			}
+			trafficBytes := uint64(2 * len(message) * exchangeCount)
 			exchange := func() {
 				t.Helper()
 				if network == 1 {
@@ -463,6 +536,25 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				}
 				if err != nil {
 					t.Fatal(err)
+				}
+				if network == 1 {
+					received := make([]byte, 0, len(message))
+					for len(received) < len(message) {
+						frame, receiveErr := stream.Receive(ctx)
+						if receiveErr != nil {
+							t.Fatal(receiveErr)
+						}
+						if frame.Type != vlink.FrameData {
+							frame.Release()
+							t.Fatalf("unexpected response frame type=%d", frame.Type)
+						}
+						received = append(received, frame.Payload...)
+						frame.Release()
+					}
+					if !bytes.Equal(received, message) {
+						t.Fatalf("response bytes=%d want=%d", len(received), len(message))
+					}
+					return
 				}
 				frame, err := stream.Receive(ctx)
 				if err != nil {
@@ -494,10 +586,12 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				}
 			}
 			// Open and consume on the first grant before delivering its renewal.
-			exchange()
-			waitSettled(4096, uint64(2*len(message)))
+			for i := 0; i < exchangeCount; i++ {
+				exchange()
+			}
+			waitSettled(params.initialGrant, trafficBytes)
 			initialUsage, err := s.PendingUsageOutbox(ctx, node.NodeID)
-			if err != nil || len(initialUsage) != 2 {
+			if err != nil || len(initialUsage) != 2*exchangeCount {
 				t.Fatalf("initial usage outbox: %d %v", len(initialUsage), err)
 			}
 			// Actual committed TCP/UDP traffic has crossed the waterline. The
@@ -505,7 +599,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			// control 1.3.0 CreditDemand, and installs only the Hub's committed
 			// response. No pre-created renewal is supplied by the test.
 			demandScope := store.DemandScope{HubID: delegation.HubID, DelegationID: delegation.ID, NodeID: node.NodeID, BootID: node.BootID, SourceID: delegation.SourceID, SnapshotID: delegation.BillingSnapshotID, RuleID: delegation.RuleID, SignerEpoch: delegation.SignerEpoch, RuleRevision: delegation.RuleRevision, PathGeneration: delegation.PathGeneration}
-			adaptive := AdaptiveDemandConfig{Scope: demandScope, Policy: DemandPolicyConfig{Minimum: 4096, MaxTarget: 4096, TargetSeconds: 30, RenewPercent: 30}, TTL: 2 * time.Minute}
+			adaptive := AdaptiveDemandConfig{Scope: demandScope, Policy: DemandPolicyConfig{Minimum: params.targetBytes, MaxTarget: params.targetBytes, TargetSeconds: params.targetSeconds, RenewPercent: params.waterlinePercent}, TTL: 2 * time.Minute}
 			// Lose the first response after the Hub committed its debit. The
 			// Agent must retain its exact request and must not spend unseen credit.
 			lostHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DropDemandResponse: true}, serverTLS)
@@ -513,19 +607,21 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal("injected lost response did not interrupt control connection")
 			}
 			requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
-			if err != nil || len(requests) != 1 || requests[0].RawBytes != 3000 {
+			if err != nil || len(requests) != 1 || requests[0].RawBytes != params.renewalBytes {
 				t.Fatalf("lost response retired or changed pending demand: %+v %v", requests, err)
 			}
-			retained, err := s.PrepareDemand(ctx, demandScope, 8192, time.Minute)
+			retained, err := s.PrepareDemand(ctx, demandScope, params.targetBytes*2, time.Minute)
 			if err != nil || retained != requests[0] {
 				t.Fatalf("changed estimate replaced in-flight identity: %+v %v", retained, err)
 			}
 			beforeReplay, err := hs.AuditHubDelegation(ctx, delegation.ID)
-			if err != nil || beforeReplay.Issued != 7096 || beforeReplay.Remaining != delegation.RawBytes-7096 {
+			expectedAfterReplay := params.initialGrant + params.renewalBytes
+			postReplayAvailable := params.initialGrant - trafficBytes + params.renewalBytes
+			if err != nil || beforeReplay.Issued != expectedAfterReplay || beforeReplay.Remaining != delegation.RawBytes-expectedAfterReplay {
 				t.Fatalf("lost response was not durably funded: %+v %v", beforeReplay, err)
 			}
 			unseen, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
-			if err != nil || unseen.Initial != 4096 || unseen.Remaining != 1096 || unseen.Committed != 3000 || unseen.Reserved != 0 || unseen.Unknown != 0 {
+			if err != nil || unseen.Initial != params.initialGrant || unseen.Remaining != params.initialGrant-trafficBytes || unseen.Committed != trafficBytes || unseen.Reserved != 0 || unseen.Unknown != 0 {
 				t.Fatalf("unseen grant became spendable: %+v %v", unseen, err)
 			}
 			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: 1}, serverTLS)
@@ -541,7 +637,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				if err != nil {
 					t.Fatal(err)
 				}
-				if balance.Initial == 7096 && balance.Remaining == 4096 && balance.Committed == uint64(2*len(message)) {
+				if balance.Initial == expectedAfterReplay && balance.Remaining == postReplayAvailable && balance.Committed == trafficBytes {
 					break
 				}
 				select {
@@ -556,8 +652,8 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				if err != nil {
 					t.Fatal(err)
 				}
-				if ledger.Available == 4096 {
-					if ledger.MinuteBytes != uint64(2*len(message)) {
+				if ledger.Available == postReplayAvailable {
+					if ledger.MinuteBytes != trafficBytes {
 						t.Fatalf("wrong durable consumption window: %+v", ledger)
 					}
 					break
@@ -569,10 +665,12 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				}
 			}
 			waitUntil(initialExpiry)
-			exchange()
-			waitSettled(7096, uint64(4*len(message)))
+			for i := 0; i < exchangeCount; i++ {
+				exchange()
+			}
+			waitSettled(expectedAfterReplay, 2*trafficBytes)
 			pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
-			if err != nil || len(pending) != 2 {
+			if err != nil || len(pending) != 2*exchangeCount {
 				t.Fatalf("renewal usage outbox: %d %v", len(pending), err)
 			}
 			counts := map[string]int{}
@@ -592,11 +690,11 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 					topupGrantID = id
 				}
 			}
-			if counts[initialGrantID] != 2 || topupGrantID == "" || counts[topupGrantID] != 2 || len(counts) != 2 {
+			if counts[initialGrantID] != 2*exchangeCount || topupGrantID == "" || counts[topupGrantID] != 2*exchangeCount || len(counts) != 2 {
 				t.Fatalf("old and adaptively issued usage lost their grant identities: %+v", counts)
 			}
 			t.Logf("same stream renewed after initial expiry %s; two directional batches per grant", initialExpiry.Format(time.RFC3339Nano))
-			expectedIssued := uint64(7096)
+			expectedIssued := expectedAfterReplay
 			if continuous {
 				defer func() {
 					if !t.Failed() {
@@ -652,7 +750,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 					}
 					exchange()
 				}
-				waitSettled(expectedIssued, uint64((renewalRounds+2)*2*len(message)))
+				waitSettled(expectedIssued, uint64(renewalRounds+2)*trafficBytes)
 				stopControl()
 				select {
 				case err := <-controlDone:
@@ -811,7 +909,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				if requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, ""); err != nil || len(requests) != 0 {
 					t.Fatalf("continuous demand left pending requests: %+v %v", requests, err)
 				}
-				t.Logf("continuous durable renewals=%d issued=%d metered=%d", renewalRounds, expectedIssued, (renewalRounds+2)*2*len(message))
+				t.Logf("continuous durable renewals=%d issued=%d metered=%d", renewalRounds, expectedIssued, uint64(renewalRounds+2)*trafficBytes)
 			}
 			if fullDiskRoot != "" {
 				filler := fillRuntimeDisk(t, filepath.Dir(agentDB))
@@ -840,7 +938,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 					t.Fatal("full disk did not reset runtime stream")
 				}
 				frame.Release()
-				if targetBytes.Load() != int64((renewalRounds+2)*len(message)) {
+				if targetBytes.Load() != int64(uint64(renewalRounds+2)*trafficBytes/2) {
 					t.Fatalf("unrecordable traffic reached target: %d", targetBytes.Load())
 				}
 				if err := os.Remove(filler); err != nil {
@@ -873,8 +971,11 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
 			}
 			agentFinal, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
-			if err != nil || agentFinal.Initial != expectedIssued || agentFinal.Committed != uint64((renewalRounds+2)*2*len(message)) || agentFinal.Reserved != 0 || agentFinal.Unknown != 0 || agentFinal.Initial != agentFinal.Remaining+agentFinal.Committed {
+			if err != nil || agentFinal.Initial != expectedIssued || agentFinal.Committed != uint64(renewalRounds+2)*trafficBytes || agentFinal.Reserved != 0 || agentFinal.Unknown != 0 || agentFinal.Initial != agentFinal.Remaining+agentFinal.Committed {
 				t.Fatalf("final Agent/Hub funding reconciliation: %+v expected=%d err=%v", agentFinal, expectedIssued, err)
+			}
+			if params.candidate {
+				writeDurableD04CandidateResult(t, network, params, delegation.RawBytes, expectedIssued, uint64(renewalRounds+2)*trafficBytes, agentFinal, balance)
 			}
 			if err := s.Close(); err != nil {
 				t.Fatal(err)
@@ -886,10 +987,10 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal(err)
 			}
 			if continuous {
-				assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, uint64((renewalRounds+2)*2*len(message)))
+				assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, uint64(renewalRounds+2)*trafficBytes)
 			} else {
-				assertRawLedger(t, hubDB, 4+2*renewalRounds)
-				assertRawLedger(t, backendDB, 4+2*renewalRounds)
+				assertRawLedger(t, hubDB, 4*exchangeCount+2*renewalRounds)
+				assertRawLedger(t, backendDB, 4*exchangeCount+2*renewalRounds)
 			}
 			if continuous {
 				saveLedgerFiles(t, fmt.Sprintf("runtime-block-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
@@ -902,6 +1003,55 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d-rounds-%d-delay-%t", network, renewalRounds, len(delayResponse) > 0 && delayResponse[0]), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			}
 		})
+	}
+}
+
+func writeDurableD04CandidateResult(t *testing.T, network uint8, params durableD04Params, delegationBytes, issued, committed uint64, agent store.AuthorizationBalance, hub store.DelegationBalance) {
+	t.Helper()
+	root := os.Getenv("VORTEX_D04_RESULT_DIR")
+	if root == "" {
+		return
+	}
+	if err := os.MkdirAll(root, 0755); err != nil {
+		t.Fatal(err)
+	}
+	result := map[string]any{
+		"schema":                    1,
+		"network":                   map[uint8]string{1: "tcp", 2: "udp"}[network],
+		"block_bytes":               params.blockBytes,
+		"target_bytes":              params.targetBytes,
+		"target_seconds":            params.targetSeconds,
+		"renew_percent":             params.waterlinePercent,
+		"initial_grant_bytes":       params.initialGrant,
+		"renewal_bytes":             params.renewalBytes,
+		"message_bytes":             params.messageBytes,
+		"delegation_bytes":          delegationBytes,
+		"issued_bytes":              issued,
+		"committed_bytes":           committed,
+		"source_conserved":          agent.Initial == agent.Remaining+agent.Committed+agent.Unknown+agent.Reserved,
+		"source_settled":            agent.Unknown == 0 && agent.Reserved == 0,
+		"pending_unknown_held_zero": agent.Unknown == 0 && agent.Reserved == 0,
+		"issuer_conserved":          hub.Initial == hub.Remaining+hub.Issued,
+		"issuer_occupancy_bytes":    hub.Initial - hub.Remaining - hub.Issued,
+		"idle_tail_reclaimed":       agent.Reserved == 0,
+		"pending_demand_settled":    true,
+		"pending_usage_settled":     true,
+		"agent_initial":             agent.Initial,
+		"agent_remaining":           agent.Remaining,
+		"agent_committed":           agent.Committed,
+		"agent_unknown":             agent.Unknown,
+		"agent_reserved":            agent.Reserved,
+		"hub_initial":               hub.Initial,
+		"hub_remaining":             hub.Remaining,
+		"hub_issued":                hub.Issued,
+	}
+	raw, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, fmt.Sprintf("network-%d.json", network))
+	if err := os.WriteFile(path, append(raw, '\n'), 0644); err != nil {
+		t.Fatal(err)
 	}
 }
 

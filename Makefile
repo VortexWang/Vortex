@@ -71,9 +71,12 @@ phase4-runtime-recovery:
 phase4-runtime-snapshots:
 	python3 tools/phase4/snapshots.py
 
-.PHONY: phase4-d04-scan phase4-qualification-gate
+.PHONY: phase4-d04-scan phase4-d04-durable-scan phase4-qualification-gate
 phase4-d04-scan:
 	python3 tools/phase4/d04_scan.py --output $${D04_OUTPUT:-artifacts/phase4/d04-matrix.json}
+
+phase4-d04-durable-scan:
+	python3 tools/phase4/d04_durable_scan.py --output $${D04_DURABLE_OUTPUT:-artifacts/phase4/d04-durable-scan}
 
 phase4-qualification-gate:
 	python3 tools/phase4/qualification_gate.py \
