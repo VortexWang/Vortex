@@ -45,6 +45,7 @@ type InstallState struct {
 }
 
 type Installer struct {
+	Service               ServiceController
 	mu                    sync.Mutex
 	Root                  string
 	ActiveLink            string
@@ -67,6 +68,11 @@ func (i *Installer) Install(ctx context.Context, request InstallRequest) error {
 	}
 	i.mu.Lock()
 	defer i.mu.Unlock()
+	unlock, err := i.lockJournal()
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	return i.installLocked(ctx, request)
 }
 
@@ -92,10 +98,21 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 			}
 			switch existing.State {
 			case "healthy":
+				if i.Service != nil {
+					path, err := i.resolveTarget(existing.Candidate)
+					if err != nil {
+						return err
+					}
+					health, cancel := context.WithTimeout(ctx, i.HealthTimeout)
+					defer cancel()
+					if err = i.Health(health, path); err != nil {
+						return errors.Join(ErrActivationUnknown, err)
+					}
+				}
 				return nil
 			case "rolled-back", "rollback-blocked":
 				return fmt.Errorf("upgrade: transaction already ended in %s", existing.State)
-			case "activation-intent", "activation-unknown", "health-check", "rollback-intent":
+			case "activation-intent", "activation-unknown", "health-check", "rollback-intent", "process-stop-intent", "process-stop-unknown":
 				if err := i.recoverLocked(ctx); err != nil {
 					return err
 				}
@@ -218,12 +235,29 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 	if err := i.fail("after-drain"); err != nil {
 		return err
 	}
+	if i.Service != nil {
+		state.State = "process-stop-intent"
+		if err := i.writeState(state); err != nil {
+			return err
+		}
+		if err := i.stopService(ctx); err != nil {
+			state.State, state.Reason = "process-stop-unknown", "termination_unproven"
+			return errors.Join(err, i.writeState(state))
+		}
+		if err := i.fail("after-service-stop"); err != nil {
+			return err
+		}
+	}
 	state.State = "activation-intent"
 	if err := i.writeState(state); err != nil {
 		return err
 	}
 	if err := i.fail("before-activate"); err != nil {
 		return err
+	}
+	if current, err := i.activeTarget(); err != nil || current != previous {
+		state.State, state.Reason = "activation-unknown", "active_target_changed_before_switch"
+		return errors.Join(ErrActivationUnknown, err, i.writeState(state))
 	}
 	if err := i.atomicActivate(candidate); err != nil {
 		state.State, state.Reason = "not-activated", "activation_failed"
@@ -241,7 +275,7 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 		return err
 	}
 	healthCtx, cancelHealth := context.WithTimeout(ctx, i.HealthTimeout)
-	healthErr := i.Health(healthCtx, candidatePath)
+	healthErr := i.startAndCheck(healthCtx, candidatePath)
 	cancelHealth()
 	if healthErr == nil {
 		state.State, state.Reason = "healthy", ""
@@ -261,6 +295,11 @@ func (i *Installer) Recover(ctx context.Context) error {
 	}
 	i.mu.Lock()
 	defer i.mu.Unlock()
+	unlock, err := i.lockJournal()
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	return i.recoverLocked(ctx)
 }
 
@@ -284,6 +323,15 @@ func (i *Installer) recoverLocked(ctx context.Context) error {
 			return ErrActivationUnknown
 		}
 		return nil
+	case "process-stop-intent", "process-stop-unknown":
+		if i.Service == nil || active != state.Previous {
+			return ErrActivationUnknown
+		}
+		if err := i.stopService(ctx); err != nil {
+			return err
+		}
+		state.State, state.Reason = "not-activated", "service_termination_proven"
+		return i.writeState(state)
 	case "rolled-back", "not-activated", "staging", "staged", "draining":
 		if active != state.Previous {
 			state.State = "activation-unknown"
@@ -311,6 +359,17 @@ func (i *Installer) recoverLocked(ctx context.Context) error {
 		return ErrActivationUnknown
 	case "rollback-intent":
 		if active == state.Previous {
+			if i.Service != nil {
+				path, err := i.resolveTarget(state.Previous)
+				if err != nil {
+					return err
+				}
+				health, cancel := context.WithTimeout(ctx, i.HealthTimeout)
+				defer cancel()
+				if err = i.startAndCheck(health, path); err != nil {
+					return errors.Join(ErrActivationUnknown, err)
+				}
+			}
 			state.State, state.Reason = "rolled-back", ""
 			return i.writeState(state)
 		}
@@ -350,6 +409,9 @@ func (i *Installer) completeRollback(ctx context.Context, state InstallState, ca
 	if err := i.fail("before-rollback-state"); err != nil {
 		return err
 	}
+	if err := i.stopService(ctx); err != nil {
+		return errors.Join(ErrActivationUnknown, cause, err)
+	}
 	snapshot, err := os.ReadFile(state.Snapshot)
 	if err != nil {
 		return errors.Join(ErrActivationUnknown, cause, err)
@@ -362,6 +424,17 @@ func (i *Installer) completeRollback(ctx context.Context, state InstallState, ca
 	}
 	if err := i.atomicActivate(state.Previous); err != nil {
 		return errors.Join(ErrActivationUnknown, cause, err)
+	}
+	if i.Service != nil {
+		path, err := i.resolveTarget(state.Previous)
+		if err != nil {
+			return err
+		}
+		health, cancel := context.WithTimeout(ctx, i.HealthTimeout)
+		defer cancel()
+		if err = i.startAndCheck(health, path); err != nil {
+			return errors.Join(ErrActivationUnknown, cause, err)
+		}
 	}
 	state.State, state.Reason = "rolled-back", "health_check_failed"
 	if err := i.writeState(state); err != nil {
