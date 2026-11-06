@@ -2221,3 +2221,23 @@ Artifacts process-eda39a2 report SHA-256
 test.log d1ed214e11112c8c4cd34347a7d59302a4676d3c73c83e1a7c49c8b0384e49c6.
 Continue diagnosing the admission wait chain and add coordinator cancellation/
 shutdown/crash attack coverage before any broad qualification claim.
+
+## Confirmed overlapping-time rate starvation regression
+
+Read-only failed eda39a2 ledger: shared rate bucket has 170 tokens, committed
+payload is 1,056,000 bytes, while grant balances still have 7,332,608 and
+8,388,608 free bytes. This points to exhaustion of the 1 MiB rate burst rather
+than insufficient monetary authority. consumeValidatedRuntimeRateTx calculates
+refill from Earliest minus stored tick but stores Latest after every debit.
+With overlapping trusted intervals, frequent writes continually move the tick
+forward and suppress refill even after ample cumulative elapsed time.
+
+Added intended-behavior regression TestRuntimeRateProgressWithOverlappingTrustedIntervals:
+8 KiB/s share, 100-byte writes every 20ms, 100ms conservative interval width.
+Actual traffic is below configured rate. Test FAILS at write 655 with rate
+exhausted, deterministically reproducing the starvation independently of CPU,
+FIFO and checkpoint grouping. This is a deliberately unresolved regression;
+the current branch is not test-green or qualified. Next fix must preserve
+conservative cumulative time credit without treating a lower bound as the exact
+instant of a prior write; test variable uncertainty, backward time, same-time
+bursts, persistent restart, rate sharing and overflow before native retest.
