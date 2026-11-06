@@ -18,6 +18,10 @@ cd engine && go test -race ./...
 python3 -m unittest discover -s tools/phase4 -p 'test_*.py'
 ```
 
+The same commit also passed `DOCKER_CONTEXT=orbstack make phase4-m2-check`.
+This is a protocol/runtime regression result, not a dedicated-host performance
+qualification.
+
 This remains injected process-local evidence. It does not establish a network
 issuer, durable Agent/Hub receipt, formal performance qualification, or a locked
 D-04 parameter combination.

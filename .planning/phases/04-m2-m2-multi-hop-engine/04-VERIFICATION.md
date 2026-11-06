@@ -31,6 +31,10 @@ the grant settles once and can be consumed. This is finite adapter recovery
 evidence only; it does not qualify a remote issuer or durable authority. See
 `04-36-LATE-ACCEPTED-RENEWAL-EVIDENCE.md`.
 
+The same commit passed `DOCKER_CONTEXT=orbstack make phase4-m2-check`, including
+the VLink integration and UDP bounded-resource regressions. The result remains
+runtime regression evidence and does not change the formal qualification status.
+
 ## Prior reconciliation — Plan 04-12
 
 The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
