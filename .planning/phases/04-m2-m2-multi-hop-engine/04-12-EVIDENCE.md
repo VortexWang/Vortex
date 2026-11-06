@@ -1714,3 +1714,28 @@ LargestGrant=3000 for a 1500-byte write: the earlier fragmentation deadlock is
 resolved, but instrumentation/latency qualification is not. Do not count this
 as race pass. Native composite validation, crash/fault coverage of collection
 and sustained multi-stream D-04 scans remain required. No parameters locked.
+
+## Native composite admission validation a128471
+
+Dedicated Ubuntu clean a1284717a194fc86d77d7e25db339283d3c4763a ran
+continuous real TCP/UDP traffic three times: PASS 35.137s, exit 0. Each run
+uses unchanged 200ms admission deadlines and exact three-ledger reconciliation.
+Separate three-repeat native race tests for composite settlement outcomes,
+fragment identity/unknown conservation, and existing grouped checkpoint SIGKILL
+recovery also passed (exit 0; Store 6.381s). Raw artifacts:
+artifacts/phase4/fragments-a128471 on the dedicated host.
+continuous.log SHA-256 e3b003f83ff1740f7374a9089424ba2817f6eb2aa444ade38c26bfbcd143cd87;
+fault-race.log SHA-256 8cf29304b4654b03c9fc59c05a1fd980d2eb2d9c15ba6f1ce981a3f7695c3b1c.
+
+Added three real child-process SIGKILL cases for ordinary fragment collection:
+after the first 100-byte hold, after two 100-byte holds, and after committing
+70 bytes from the first hold. Reopening must retain respectively 100, 200 and
+100 unknown bytes; only the last case has 70 committed bytes and a proven
+30-byte return. Source conservation is asserted after recovery. This directly
+tests durable transaction boundaries, not physical power loss or Agent process
+startup. Local race plus fragment identity tests repeated three times PASS
+3.410s. New subprocess cases still need native execution.
+
+Native full non-race Agent/Hub regression and vet were launched at a128471;
+results pending. Existing continuous race timeouts remain unresolved. These
+functional successes do not constitute sustained multi-stream D-04 qualification.
