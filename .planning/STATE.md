@@ -64,6 +64,8 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Decisions
 
+- 2026-11-06 owner-approved scope correction: Phase 4 implementation closed; only P4-Q1..Q5 in `04-CLOSURE.md` remain qualification work. X5/X6 persistent authority and backend tasks are transferred, not Phase 4 blockers. Do not resume the superseded cross-phase closure loop.
+
 - 2026-11-05 owner decision: Phase 4 qualification and optimization continue on gsd/phase-4-optimization-closure; main proceeds with Phase 5. Historical Phase 4 gaps do not block main progression or automatically reopen Phase 4. Final acceptance findings remain truthful.
 
 - V1.11 is a product reference, not a frozen acceptance baseline; current owner decisions govern.
@@ -75,7 +77,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Pending Todos
 
-- Phase 4: NFR-003/005 existing dedicated-host gate passed on fe2a4ba; the newer runtime still requires same-build performance requalification. Plan 04-12 completed 21 static D-04 trials, passed the 91e409e pool/mux latency gate, and repaired policy/share/early-DATA boundaries. D-04 lock and NFR-006/007/039/040/044 remaining scope must retain explicit evidence status; persisted Agent/Hub authority remains an integration obligation, not a pass inferred from Engine tests. Phase 5 proceeds independently.
+- Phase 4: NFR-003/005 existing dedicated-host gate passed on fe2a4ba; the newer runtime still requires same-build performance requalification. Plan 04-12 completed 21 static D-04 trials, passed the 91e409e pool/mux latency gate, and repaired policy/share/early-DATA boundaries. D-04 lock and NFR-006/007/039/040/044 remaining scope must retain explicit evidence status; persisted Agent/Hub authority is a Phase 5/6 integration obligation and must not block Phase 4 closure. Current residual ownership is in 04-CLOSURE.md. Phase 5 proceeds independently.
 
 ### Blockers/Concerns
 
@@ -95,6 +97,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261103-l7e | Project restart governance clarified; Phase 1 complete for M0 entry | 2026-11-03 | 62f4687 | complete | [261103-l7e-project-restart-governance](./quick/261103-l7e-project-restart-governance/) |
 | 261103-lt9 | Restart governance aligned; M0 TCP relay tracer implemented | 2026-11-03 | a9b79f1 | complete | [261103-lt9-align-restart-governance-and-enter-m0-im](./quick/261103-lt9-align-restart-governance-and-enter-m0-im/) |
 | 261105-9j7 | Native host preflight and formal qualification runbook | 2026-11-05 | pending | complete | [20261105-native-host-preflight](./quick/20261105-native-host-preflight/) |
+| 261106-op3 | Phase 4 closure scope reconciled; P4 qualification retained, X5/X6 transferred | 2026-11-06 | see git history | complete | [261106-op3-phase-4-closure-scope-reconciliation](./quick/261106-op3-phase-4-closure-scope-reconciliation/) |
 | 261105-gva | Phase 4 UDP tuning portability and closure evidence | 2026-11-05 | f2c9020 | complete | [261105-gva-phase-4-optimization-and-closure](./quick/261105-gva-phase-4-optimization-and-closure/) |
 
 

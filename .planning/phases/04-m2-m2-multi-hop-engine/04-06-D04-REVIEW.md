@@ -1,6 +1,13 @@
 # D-04 参数评审（2026-11-04）
 
-## Current reconciliation — 2026-11-06
+## Current stage boundary — 2026-11-06 owner decision
+
+M2 参数关闭按 [04-CLOSURE.md](04-CLOSURE.md) 的 P4-Q4 执行：允许有限、
+可审计的进程内 issuer，必须标明指标适用边界。下方 durable 实现和其
+尚缺验收移交 Phase 5，不再作为 M2 参数评审前提。生产参数需在实际
+Agent/Hub 集成时复验；本次未锁定任何候选值。
+
+## Historical cross-phase reconciliation — 2026-11-06
 
 Status: **not locked; durable implementation integrated, full qualification open**.
 The historical rows below describe earlier slices and must not be read as the

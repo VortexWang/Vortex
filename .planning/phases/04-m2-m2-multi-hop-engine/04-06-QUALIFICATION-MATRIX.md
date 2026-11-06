@@ -1,6 +1,12 @@
 # Phase 4 剩余资格化核对（2026-11-05）
 
-## Current result: Plan 04-12
+## Current scope — 2026-11-06
+
+当前关闭条件与归属以 [04-CLOSURE.md](04-CLOSURE.md) 为准。
+Phase 4 实现范围已关闭，P4-Q1..Q5 资格缺口保留；持久化与生产后端
+移交 Phase 5/6，不作为 M2 阻塞。本文件以下为历史证据，不重新激活越界任务。
+
+## Prior result: Plan 04-12
 
 See [04-12-EVIDENCE.md](04-12-EVIDENCE.md) for the authoritative current status:
 21 D-04 static trials complete; 91e409e pool/mux latency gate passes; finite

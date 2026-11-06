@@ -2,13 +2,20 @@
 phase: 04-m2-m2-multi-hop-engine
 verified: 2026-11-05
 status: gaps_found
-score: D-04 static scan and 91e409e latency verified; durable authority and final performance remain open
+score: implementation closed; Phase 4 qualification gaps retained; durable integration transferred to Phase 5/6
 behavior_unverified: 5
 ---
 
 # Phase 4 Verification — current qualification review
 
-## Current reconciliation — Plan 04-12
+## Current scope decision — 2026-11-06
+
+[04-CLOSURE.md](04-CLOSURE.md) defines the current Phase 4 gates P4-Q1..Q5.
+Implementation is closed; qualification remains gaps_found. Persistent Agent/Hub
+and production backend work belong to Phase 5/6, not Phase 4 closure blockers.
+No previous failed check is promoted to pass.
+
+## Prior reconciliation — Plan 04-12
 
 The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
 The review text below this section is historical and retains its original SHA.
