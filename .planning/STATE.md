@@ -105,7 +105,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261106-w6d | Surface D-04 observations in trial summaries | 2026-11-06 | b96b1fe | complete | [261106-w6d-d-04-d04-result-python-text](./quick/261106-w6d-d-04-d04-result-python-text/) |
 | 261106-wd1 | Add delayed-authorization early TCP DATA regression | 2026-11-06 | b47c282 | complete | [261106-wd1-runtime-bridge-bounded-early-tcp-data-ud](./quick/261106-wd1-runtime-bridge-bounded-early-tcp-data-ud/) |
 | 261106-wk2 | Reconcile early-DATA verification status text | 2026-11-06 | pending | complete | [261106-wk2-phase-4-verification-early-tcp-data-cont](./quick/261106-wk2-phase-4-verification-early-tcp-data-cont/) |
-| 261106-woq | Add fail-closed latency event timelines | 2026-11-06 | pending | complete | [261106-woq-phase-4-latency-gate-connect-send-first-](./quick/261106-woq-phase-4-latency-gate-connect-send-first-/) |
+| 261106-woq | Add fail-closed latency event timelines | 2026-11-06 | 37fe33a | complete | [261106-woq-phase-4-latency-gate-connect-send-first-](./quick/261106-woq-phase-4-latency-gate-connect-send-first-/) |
 
 
 ## Session Continuity
