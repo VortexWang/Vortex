@@ -67,3 +67,9 @@ Exact-head Phase 4 Actions run https://github.com/nodeox/VORTEX/actions/runs/423
 First dynamic trial passed independent audit of 103 sampled conservation equations, 65s idle window and target growth/shrink: TCP654.678696Mbps,UDP99.96672Mbps,zero loss. The first combination's three repetitions also passed. Local automatic evidence monitor runs in exec session74598, downloading JSON/config evidence and auditing each completed trial; remote raw events remain intact. Full-factorial final audit remains pending.
 
 The timeline auditor now optionally recomputes the exact consumption-derived target during cold-start elapsed<58s, before any rolling-minute bucket can expire. First trial: 58 formula samples match, including three uncapped growth samples. Negative tests reject the wrong horizon even when target bounds still hold. All32Phase4Python tests pass. This is independent auditor enhancement; it does not change running workload source or credit semantics.
+
+## D-04 review draft
+
+Added 04-44-D04-PARAMETER-REVIEW.md. It records the 27-case durable matrix and independent audit, dynamic factor definitions, formula/idle/occupancy criteria and explicit limits. Decision remains `locked=false`; target seconds are reviewed as horizons under explicit byte ceilings, not as unbounded measured-throughput grants. Issuer timing is process-local and does not prove durable Hub wait or grant return.
+
+The exact-head Phase 4 CI completed successfully. The unrelated Phase 5 wave1 run failed in the intentionally full-disk regression after SQLITE_FULL caused continuous durable runtime tests to time out; logs and authorization artifact are retained under artifacts/phase4/ci-0c2ba71/phase5. No race report was emitted. This is recorded as Phase 5 follow-up, not a Phase 4 pass or blocker.
