@@ -619,20 +619,20 @@ protocol and parameter locking remain incomplete. No wire contract changed.
 ## Expanded funded runtime OPEN attack cases
 
 `TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget` now exercises
-11 forged OPEN variants for both TCP and UDP after an authenticated, durable Hub
+12 forged OPEN variants for both TCP and UDP after an authenticated, durable Hub
 credit grant: unknown rule, stale/future rule revision, stale/future path
 generation, skipped hop, local loop, duplicate/zero visited node, over-limit
-visited list, invalid network, and unspecified original-client address. All 22
+visited list, invalid network, and unspecified original-client address. All 24
 checks establish the expected rejection path, zero target access and unchanged
 source ledger (initial=remaining=4096; reserved/committed/unknown=0).
 
 The over-limit visited list and invalid network are rejected by the local
 MarshalOpen preflight before a frame is sent. They are therefore client-side
 protocol guards, not claims of remote runtime rejection; ParseOpen and OpenPolicy
-protocol rejection have separate VLink test coverage. The other nine attacks
+protocol rejection have separate VLink test coverage. The other ten attacks
 reach the real TLS/HELLO runtime, receive the expected OPEN_ERR class with a
 nonzero correlation ID, and leave target and funds untouched. This extends
-funded-route coverage from five to eleven types per transport. It remains a
+funded-route coverage from five to twelve types per transport. It remains a
 finite route attack set, not a complete attack audit across certificates,
 control replay, tenant isolation, quotas, disk failure, multi-hop switching and
 recovery.
@@ -642,3 +642,34 @@ Verification: targeted funded-runtime race test PASS; full `go test -race
 `go test -race ./vlink/...` and `go vet ./vlink/...` PASS; `git diff --check`
 PASS. A combined root-module command with `./engine/vlink/...` was invalid
 because Engine is a nested Go module; corrected commands ran at each module root.
+
+## Actual adaptive demand drives funded TCP/UDP runtime renewal
+
+The durable-runtime test now drives demand through the configured Agent
+ControlClient after actual metered traffic, using a Hub TLS identity exactly
+matching the delegation and immutable DemandScope. For each transport, one
+1500-byte echo commits 3000 raw bytes across both directions from an initial
+4096-byte grant, leaving 1096 below the configured 30% waterline. The live
+controller computes a 3000-byte deficit from the durable one-minute consumption
+ring and scoped available balance, sends control 1.3.0 CreditDemand, and the Hub
+commits/issues exactly 3000 bytes before replying. The Agent persists and
+installs the response, closes the request atomically, and observes exactly 4096
+available after conservative NotBefore catches up. The same open TCP or UDP
+stream then sends another 1500-byte echo after the original 4-second grant
+expires. Old and new grant IDs each retain their two directional usage batches;
+source and Hub conservation checks pass. The test no longer pre-issues the
+renewal out of band.
+
+This exposed and corrected a TestServer limit semantic: UsageBatchLimit=0 now
+means no usage-count cutoff, allowing initial pending usage ACKs and a subsequent
+demand to share one authenticated stream. This is test-harness behavior, not a
+production server change. The earlier mismatched placeholder Hub certificate
+was corrected so the authenticated TLS issuer, delegation and adaptive scope
+are identical; exact identity isolation remains enforced.
+
+Verification: targeted `go test -race ./agent -run
+'^TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget$' -count=1`
+PASS for both TCP and UDP; full `go test -race ./agent/... ./hub/...` and
+`go vet ./agent/... ./hub/...` PASS; Engine VLink race/vet PASS. This proves a
+small-budget end-to-end trigger/issue/install/use cycle only. It is not a
+sustained throughput/D-04 scan, lost-response test, or proof-based return path.

@@ -225,7 +225,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[body.UnknownUsageBatch.GetBatchId()] = true
 				usageReceived++
 			}
-			if s.UsageBatchLimit <= usageReceived {
+			if s.UsageBatchLimit > 0 && s.UsageBatchLimit <= usageReceived {
 				return nil
 			}
 		case *controlv1.NodeMessage_UsageBatch:
@@ -257,7 +257,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[batch.GetBatchId()] = true
 				usageReceived++
 			}
-			if s.UsageBatchLimit <= usageReceived {
+			if s.UsageBatchLimit > 0 && s.UsageBatchLimit <= usageReceived {
 				return nil
 			}
 		case *controlv1.NodeMessage_ApplyResult:

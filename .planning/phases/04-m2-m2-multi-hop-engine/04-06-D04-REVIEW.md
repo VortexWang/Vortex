@@ -9,7 +9,7 @@ current implementation inventory.
 | Requirement | Current implementation/evidence | Remaining acceptance |
 | --- | --- | --- |
 | Immutable authority isolation | DemandScope, exact scoped ledger read, Agent/Hub SQLite and TLS issuer binding | Full cross-tenant/multi-hop hostile matrix and product startup wiring |
-| Cold start / dynamic target / renewal waterline | Explicit candidate parameters; 60-slot durable committed-consumption ring; scoped valid balance; opt-in adaptive control delivery | Real durable-issuer workload and controlled candidate scan; no defaults locked |
+| Cold start / dynamic target / renewal waterline | Explicit candidate parameters; 60-slot durable committed-consumption ring; scoped valid balance; opt-in startup wiring; one actual metered TCP and UDP control 1.3.0 demand→durable issue→install→same-stream renewal cycle | Sustained durable-issuer workload, controlled candidate scan; no defaults locked |
 | Coalescing / delayed responses | Persisted UUID, atomic success/refusal, replay after restart, source conservation and refusal backoff tests | Delayed/lost response injection during sustained native TCP/UDP workload |
 | Missing-authority wait | One 200 ms context covers initial attempt and retries; 128-waiter bound; scope-bound control wakeups | End-to-end native load tail latency, including cancellation and queue pressure |
 | Native correctness | Clean 382aab9: ten SQLite contention repetitions, Agent/Hub/Engine race and vet PASS on dedicated Ubuntu | Does not establish performance of the durable allocator |

@@ -107,6 +107,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 			defer cancel()
 			const peerID = "550e8400-e29b-41d4-a716-446655440099"
+			const runtimeHubID = "550e8400-e29b-41d4-a716-446655440060"
 			dir := t.TempDir()
 			identities := runtimeIdentities(t, dir, controlTestNodeID, peerID)
 			var targets atomic.Int64
@@ -242,7 +243,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if targets.Load() != 0 {
 				t.Fatal("unauthorized OPEN reached target")
 			}
-			serverTLS, clientTLS, _ := controlTLS(t, controlTestNodeID)
+			serverTLS, clientTLS, _ := controlTLSForHub(t, controlTestNodeID, runtimeHubID)
 			hubDB := filepath.Join(dir, "hub.db")
 			if fullDiskRoot != "" {
 				hubDB = filepath.Join(filepath.Dir(agentDB), "hub.db")
@@ -262,7 +263,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			// reserve it durably before its control response becomes visible.
 			issuedAt := time.Now().UTC()
 			delegation := store.HubDelegation{
-				ID: "550e8400-e29b-41d4-a716-446655440022", HubID: "550e8400-e29b-41d4-a716-446655440060",
+				ID: "550e8400-e29b-41d4-a716-446655440022", HubID: runtimeHubID,
 				SourceID: "550e8400-e29b-41d4-a716-446655440023", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440061", ShareSourceID: "550e8400-e29b-41d4-a716-446655440062",
 				NodeID: node.NodeID, BootID: node.BootID, BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440024",
 				RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, FencingFloor: 8, SignerEpoch: 1,
@@ -391,7 +392,9 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := second.WaitOpen(ctx); err == nil {
 				t.Fatal("persisted connection share limit bypassed")
 			}
-			message := []byte("metered runtime payload")
+			// This one exchange commits 3000 bytes across both directions of the
+			// durable grant, crossing the configured 30% renewal waterline.
+			message := bytes.Repeat([]byte{0x5a}, 1500)
 			exchange := func() {
 				t.Helper()
 				if network == 1 {
@@ -439,37 +442,51 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err != nil || len(initialUsage) != 2 {
 				t.Fatalf("initial usage outbox: %d %v", len(initialUsage), err)
 			}
-			// The same stream stays open while a fresh, same-parent grant and
-			// leases arrive over authenticated control. No OPEN is replayed.
-			topupPrepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
-			if err != nil {
+			// Actual committed TCP/UDP traffic has crossed the waterline. The
+			// Node now derives the deficit from its durable scoped ledger, sends
+			// control 1.3.0 CreditDemand, and installs only the Hub's committed
+			// response. No pre-created renewal is supplied by the test.
+			demandScope := store.DemandScope{HubID: delegation.HubID, DelegationID: delegation.ID, NodeID: node.NodeID, BootID: node.BootID, SourceID: delegation.SourceID, SnapshotID: delegation.BillingSnapshotID, RuleID: delegation.RuleID, SignerEpoch: delegation.SignerEpoch, RuleRevision: delegation.RuleRevision, PathGeneration: delegation.PathGeneration}
+			adaptive := AdaptiveDemandConfig{Scope: demandScope, Policy: DemandPolicyConfig{Minimum: 4096, MaxTarget: 4096, TargetSeconds: 30, RenewPercent: 30}, TTL: 2 * time.Minute}
+			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: 1}, serverTLS)
+			if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, topupHub.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
-			topupPayload, err := validateAuthorizationUpdate(topupPrepared.Payload, node.NodeID, node.BootID, 4)
-			if err != nil {
-				t.Fatal(err)
-			}
-			var topupGrantID string
-			for _, record := range topupPayload.Authorizations {
-				if record.Kind == "credit_grant" {
-					topupGrantID = record.AuthorizationID
+			for {
+				balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if balance.Initial == 7096 && balance.Remaining == 4096 && balance.Committed == uint64(2*len(message)) {
+					break
+				}
+				select {
+				case <-ctx.Done():
+					t.Fatalf("durable adaptive grant was not installed: %+v", balance)
+				case <-time.After(time.Millisecond):
 				}
 			}
-			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, UsageBatchLimit: 2, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
-				return issuer.Issue(ctx, delegation.ID, id, boot, "550e8400-e29b-41d4-a716-446655440081", 4096, 2*time.Minute)
-			}}, serverTLS)
-			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, topupHub.Addr().String()); err != nil {
-				t.Fatal(err)
-			}
-			waitUntil(topupPayload.IssuedAt)
-			low, high, trusted := node.TrustedTime()
-			boundGrant, err := s.CheckStoredAuthorization(ctx, store.AuthorizationUse{NodeID: node.NodeID, BootID: node.BootID, AuthorizationID: topupGrantID, Kind: "credit_grant", RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, BillingSnapshotID: delegation.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted})
-			if err != nil || boundGrant.IssuerID != "hub" {
-				t.Fatalf("grant missing authenticated Hub identity: %s %v", boundGrant.IssuerID, err)
+			for {
+				low, high, trusted := node.TrustedTime()
+				ledger, err := s.ReadDemandLedger(ctx, demandScope, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted}, time.Now())
+				if err != nil {
+					t.Fatal(err)
+				}
+				if ledger.Available == 4096 {
+					if ledger.MinuteBytes != uint64(2*len(message)) {
+						t.Fatalf("wrong durable consumption window: %+v", ledger)
+					}
+					break
+				}
+				select {
+				case <-ctx.Done():
+					t.Fatalf("new grant not yet active within conservative clock: %+v", ledger)
+				case <-time.After(time.Millisecond):
+				}
 			}
 			waitUntil(initialExpiry)
 			exchange()
-			waitSettled(8192, uint64(4*len(message)))
+			waitSettled(7096, uint64(4*len(message)))
 			pending, err := s.PendingUsageOutbox(ctx, node.NodeID)
 			if err != nil || len(pending) != 2 {
 				t.Fatalf("renewal usage outbox: %d %v", len(pending), err)
@@ -485,8 +502,14 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				}
 				counts[usage.Deltas[0].GrantId]++
 			}
-			if counts[initialGrantID] != 2 || counts[topupGrantID] != 2 || len(counts) != 2 {
-				t.Fatalf("old and renewed usage lost their grant identities: %+v", counts)
+			var topupGrantID string
+			for id := range counts {
+				if id != initialGrantID {
+					topupGrantID = id
+				}
+			}
+			if counts[initialGrantID] != 2 || topupGrantID == "" || counts[topupGrantID] != 2 || len(counts) != 2 {
+				t.Fatalf("old and adaptively issued usage lost their grant identities: %+v", counts)
 			}
 			t.Logf("same stream renewed after initial expiry %s; two directional batches per grant", initialExpiry.Format(time.RFC3339Nano))
 			if fullDiskRoot != "" {
@@ -539,7 +562,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatalf("outbox not acknowledged: %d %v", len(pending), err)
 			}
 			balance, err := hs.AuditHubDelegation(ctx, delegation.ID)
-			if err != nil || balance.Initial != 12288 || balance.Remaining != 4096 || balance.Issued != 8192 {
+			if err != nil || balance.Initial != 12288 || balance.Remaining != 5192 || balance.Issued != 7096 {
 				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
 			}
 			if err := s.Close(); err != nil {
