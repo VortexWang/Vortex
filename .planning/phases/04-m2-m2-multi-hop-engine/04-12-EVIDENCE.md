@@ -1107,3 +1107,25 @@ response barrier the test inspects ledgers but does not attempt unfunded writes;
 it therefore does not establish wait-tail latency or traffic availability during
 missing authority. Store mutation tests are not remote multi-hop attack proofs.
 Durable session blocks, complete hostile matrix and D-04 lock remain open.
+
+## Durable funding reservation — Store API only
+
+Added ReserveRuntimeFundingBlock with atomic funding/marker persistence, one
+unresolved block per session/direction, a 4 MiB block cap and 4096 unresolved
+blocks per node. It skips rate consumption only for funding allocation; normal
+write APIs reject replay of its batch identity. Scope and live session checks
+remain in the existing transaction. Unresolved blocks use old-boot recovery's
+full unknown bound; no unknown credit is returned.
+
+Tests cover idempotency, direction separation, ordinary rate enforcement,
+marker failure rollback, close/reopen recovery, unknown refund rejection,
+oversize and closed-session denial. Local full Agent/Hub race PASS (Agent
+181.750s, Store 12.945s; other packages cached); separate full Store race PASS
+12.432s. go vet and git diff --check PASS. These are local results, not native
+dedicated-host qualification.
+
+No consumption/checkpoint API or Engine runtime wiring is enabled. Therefore
+this is partial step 1 of 04-20, not durable block performance evidence, a D-04
+parameter lock, or Phase 4 completion. Control 1.3.0 approval remains recorded;
+this additive local schema/API change does not implement the unapproved 1.4.0
+grant-return wire.

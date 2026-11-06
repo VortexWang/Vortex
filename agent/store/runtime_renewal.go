@@ -140,7 +140,22 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 // ReserveRuntimeUsage renews the live session's authority and pre-reserves
 // bytes atomically. Its snapshot and initial ownership are immutable; changing
 // the selected IDs never moves old usage holds or refunds their liabilities.
-func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse) (result string, resultErr error) {
+func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse) (string, error) {
+	return s.reserveRuntimeUsage(ctx, r, scope, false)
+}
+
+// ReserveRuntimeFundingBlock reserves money, not permission to forward bytes.
+// Its unresolved upper bound uses the existing old-boot unknown recovery path.
+// Runtime write admission must not treat the returned grant ID as a capability.
+// Block consumption/checkpoint integration is deliberately a separate API.
+func (s *Store) ReserveRuntimeFundingBlock(ctx context.Context, r UsageReservation, scope AuthorizationUse) (string, error) {
+	if s.owner != "agent" || r.Reserved > 4<<20 {
+		return "", ErrAuthorizationDenied
+	}
+	return s.reserveRuntimeUsage(ctx, r, scope, true)
+}
+
+func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool) (result string, resultErr error) {
 	started := time.Now()
 	stage := "validate"
 	defer func() {
@@ -196,8 +211,13 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	// direction already renewed this session. It cannot debit or migrate twice.
 	stage = "read-existing-hold"
 	var heldID string
-	err = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, scope.NodeID, r.BatchID).Scan(&heldID)
+	var blockSession, blockDirection sql.NullString
+	err = tx.QueryRowContext(ctx, `SELECT h.authorization_id,b.session_id,b.direction FROM authorization_usage_holds h LEFT JOIN runtime_funding_blocks b ON b.node_id=h.node_id AND b.batch_id=h.batch_id WHERE h.node_id=? AND h.batch_id=?`, scope.NodeID, r.BatchID).Scan(&heldID, &blockSession, &blockDirection)
 	if err == nil {
+		// Allocation identities never serve as ordinary write admission.
+		if blockSession.Valid != fundingBlock || fundingBlock && (blockSession.String != scope.SessionID || blockDirection.String != r.Direction) {
+			return "", ErrUsageBatchConflict
+		}
 		held, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, heldID)
 		if err != nil {
 			return "", err
@@ -213,7 +233,7 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		scope.ExistingSession = true
 		scope.SessionID = ""
 		stage = "reserve-usage"
-		id, err := reserveAuthorizedUsageTx(ctx, tx, r, scope)
+		id, err := reserveAuthorizedUsageWithRateTx(ctx, tx, r, scope, !fundingBlock)
 		if err != nil {
 			return "", err
 		}
@@ -225,6 +245,17 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return "", err
+	}
+	if fundingBlock {
+		// One unresolved block per direction, plus a per-node durable cap.
+		// Resolved rows remain as immutable replay evidence, not live capacity.
+		var live, sameDirection int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(CASE WHEN b.session_id=? AND b.direction=? THEN 1 ELSE 0 END),0) FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id WHERE b.node_id=? AND u.state='reserved'`, scope.SessionID, r.Direction, r.NodeID).Scan(&live, &sameDirection); err != nil {
+			return "", err
+		}
+		if live >= 4096 || sameDirection != 0 {
+			return "", ErrAuthorizationDenied
+		}
 	}
 	scope.ExistingSession = true
 	stage = "select-authority"
@@ -250,9 +281,14 @@ func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	scope.ShareLeaseID = chosen.share.AuthorizationID
 	r.AuthorizationID = chosen.grant.AuthorizationID
 	stage = "reserve-usage"
-	id, err := reserveAuthorizedUsageTx(ctx, tx, r, scope)
+	id, err := reserveAuthorizedUsageWithRateTx(ctx, tx, r, scope, !fundingBlock)
 	if err != nil {
 		return "", err
+	}
+	if fundingBlock {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_funding_blocks(node_id,batch_id,session_id,direction) VALUES(?,?,?,?)`, r.NodeID, r.BatchID, scope.SessionID, r.Direction); err != nil {
+			return "", err
+		}
 	}
 	stage = "commit"
 	if err := tx.Commit(); err != nil {

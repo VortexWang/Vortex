@@ -165,10 +165,26 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 }
 
 func reserveAuthorizedUsageTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, use AuthorizationUse) (string, error) {
+	return reserveAuthorizedUsageWithRateTx(ctx, tx, reservation, use, true)
+}
+
+// Funding allocation alone is not write admission. Only the explicit block
+// allocation path may disable rate consumption; ordinary writes always charge.
+func reserveAuthorizedUsageWithRateTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, use AuthorizationUse, chargeRate bool) (string, error) {
 	var err error
 	var priorAuth, priorReserved, priorState string
 	err = tx.QueryRowContext(ctx, `SELECT authorization_id,reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&priorAuth, &priorReserved, &priorState)
 	if err == nil {
+		if chargeRate {
+			var block int
+			err := tx.QueryRowContext(ctx, `SELECT 1 FROM runtime_funding_blocks WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&block)
+			if err == nil {
+				return "", ErrUsageBatchConflict
+			}
+			if !errors.Is(err, sql.ErrNoRows) {
+				return "", err
+			}
+		}
 		prior, parseErr := strconv.ParseUint(priorReserved, 10, 64)
 
 		if parseErr != nil || priorAuth != use.AuthorizationID || prior != reservation.Reserved || priorState != "reserved" {
@@ -204,7 +220,7 @@ func reserveAuthorizedUsageTx(ctx context.Context, tx *sql.Tx, reservation Usage
 	if err != nil || remaining < reservation.Reserved {
 		return "", ErrAuthorizationDenied
 	}
-	if use.SessionID != "" {
+	if chargeRate && use.SessionID != "" {
 		if err := consumeRuntimeRate(ctx, tx, use, reservation.Reserved); err != nil {
 			return "", err
 		}

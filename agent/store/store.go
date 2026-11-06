@@ -248,6 +248,11 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, session_id TEXT NOT NULL,
+ direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,batch_id) REFERENCES usage_reservations(node_id,batch_id)
+);
 CREATE TABLE IF NOT EXISTS demand_idle_observations (
  scope BLOB PRIMARY KEY NOT NULL, node_id TEXT NOT NULL, rule_id TEXT NOT NULL,
  since_latest TEXT NOT NULL, observed_latest TEXT NOT NULL

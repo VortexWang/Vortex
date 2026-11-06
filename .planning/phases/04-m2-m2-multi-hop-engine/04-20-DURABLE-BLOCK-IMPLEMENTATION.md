@@ -1,8 +1,9 @@
 # Durable session block implementation boundaries
 
-Status: implementation work required; no parameter lock or wire change.
+Status: funding reservation Store API implemented; consumption/checkpoint/runtime
+integration still required. No parameter lock or wire change.
 Execution context: 04-12. This note specifies the next production change, not
-an alternative acceptance criterion or a claim that blocks already exist.
+an alternative acceptance criterion or a claim of integrated block forwarding.
 
 ## Existing seams
 
@@ -67,3 +68,17 @@ for subsequent writes: revocation, session close and time validity may change.
 
 Grant return to Hub remains separate from local block-tail release. The proposed
 control 1.4.0 return protocol still needs owner approval before frozen wire edits.
+
+## Funding reservation progress
+
+ReserveRuntimeFundingBlock now reserves a single-grant hold without consuming
+per-write rate allowance. It retains runtime scope/session validation, caps a
+block at 4 MiB and unresolved blocks at 4096 per node, and permits one unresolved
+block per session/direction. Marker insertion and funding debit are atomic.
+Block identities cannot replay through ordinary write reservation APIs. Existing
+old-boot recovery retains the full unresolved upper bound as unknown.
+
+Local Store and full Agent/Hub race regressions pass. This completes the funding
+reservation portion of step 1 only: no child allocation, checkpoint or runtime
+configuration uses this API yet, and a returned grant ID is not write permission.
+The bounds above are implementation safety caps, not D-04 measured parameters.
