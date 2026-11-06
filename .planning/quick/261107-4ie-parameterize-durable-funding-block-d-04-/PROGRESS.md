@@ -13,3 +13,9 @@
 This is a finite, in-process Agent/Hub fixture with SQLite persistence and authenticated control traffic. Its target byte floor equals its maximum (twice the block size), so changing target seconds does not exercise a changing consumption-derived target. It does not establish the required 8 MiB floor, 16-stream mixed-load throughput, issuer wait percentiles, merge rate, or grant idle-return proof. Block-tail return is distinct from issuer credit release. A complete passing matrix cannot alone lock D-04 or close Phase 4. The original P4-Q4 criteria in `04-CLOSURE.md` remain authoritative.
 
 Validation so far: 27 Python tests passed; default funding-block suite passed at 34da54d; native corrected matrix pending. No Phase 4 completion claim.
+
+## Current native run — 2543fb7
+
+The corrected native run uses exact commit `2543fb745d942ddf710c02d502a3675b9b3c7fe9`. Sequential wrapper PID 196261 is `/tmp/vortex-2543fb7-scans.sh`; its log is `/tmp/vortex-2543fb7-scans.log`. First it runs 27 durable cases into `artifacts/phase4/d04-durable-2543fb7`, preserving SQLite ledger copies. Then it runs `d04_run.py --full-factorial --duration 15 --repeats 3 --rate-mbps 100` into `artifacts/phase4/d04-factorial-2543fb7`, with GOMAXPROCS=1 and 65 seconds idle per trial. The wrapper restores the original UDP buffer limits via EXIT trap after the performance scan. Both scripts keep locked=false; inspection and parameter review remain required. Do not checkout a new SHA in the remote worktree while these scans are active.
+
+Local corrected validation: largest 1 MiB/20% TCP candidate passed; `go vet ./agent` passed; all 28 Python tests passed. Full native results remain pending. For monitoring, inspect PID 196261, its child processes, and the log/summary files rather than restarting when an SSH handle disappears.
