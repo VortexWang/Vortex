@@ -2385,3 +2385,10 @@ SQL transaction, not a coordinator mid-commit interruption. Combined targeted
 race suite repeated three times PASS 4.093s. Mid-commit cancellation and real
 cross-session SIGKILL coverage are still outstanding; do not mark full fault
 matrix complete from these tests.
+
+Native dedicated Ubuntu clean d774c8ab63e8d1f9cb39065b685f12529aac8b52:
+combined checkpoint/coordinator/SIGKILL race suite repeated three times PASS
+12.457s, exit 0. Evidence artifacts/phase4/checkpoint-d774c8a/test.log SHA256
+bef3900311d24cdebeff1479c3a46ee6a51736467804985682e55ff40f9d4200.
+Local complete Store race suite PASS 19.949s. These are fault regression results,
+not parameter-lock or formal performance qualification evidence.
