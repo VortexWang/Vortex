@@ -1877,3 +1877,18 @@ no usable summary; its surviving test node PID 127348 was explicitly terminated
 and confirmed absent before repeating. That failed diagnostic is preserved at
 artifacts/phase4/transaction-trace-b9fc9b2, never counted as qualification.
 No production deadline, SQLite FULL setting or D-04 candidate was changed.
+
+## Cross-session queue diagnosis and explicit profiling entry
+
+Inspection confirms admission coalescing is per fundingBlockSession. Sixteen
+separate streams cannot share their initial allocation through that queue;
+increasing its one-millisecond window is therefore not an evidenced fix and
+was not applied. The native begin-transaction delay remains unresolved.
+
+Added explicit node --diagnostics-dir for CPU, block and mutex profiles. It
+requires a fresh local directory, exposes no network endpoint, and writes only
+on opt-in. Graceful shutdown flushes profiles; fatal os.Exit or SIGKILL may leave
+incomplete evidence and must not be treated as successful capture. Profiling
+adds overhead and is diagnostic only. Default runtime parameters and SQLite FULL
+remain unchanged. CLI tests cover disabled mode, fresh-directory capture and
+refusal to overwrite prior evidence. Native profile capture is the next step.

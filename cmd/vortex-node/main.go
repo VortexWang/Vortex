@@ -36,7 +36,13 @@ func main() {
 	renewBefore := flag.Duration("renew-before", 24*time.Hour, "renew runtime certificate before expiry")
 	credentialOverlap := flag.Duration("credential-overlap", 5*time.Minute, "old/new credential overlap after validated renewal")
 	renewRetry := flag.Duration("renew-retry", time.Minute, "retry delay after a failed certificate renewal")
+	diagnosticsDir := flag.String("diagnostics-dir", "", "fresh local directory for CPU/block/mutex profiles; diagnostic runs only")
 	flag.Parse()
+	stopDiagnostics, err := startDiagnostics(*diagnosticsDir)
+	if err != nil {
+		fatal(err)
+	}
+	defer stopDiagnostics()
 	if *demandConfig != "" && (*hubAddr == "" || *hubName == "") {
 		fatal(errors.New("credit-demand-config requires hub and hub-name"))
 	}
