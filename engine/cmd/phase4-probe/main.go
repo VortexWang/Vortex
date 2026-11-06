@@ -38,6 +38,9 @@ func main() {
 		// test the receiving runtime policy using the real authenticated identity.
 		cfg.NextHopNodeID = ""
 	}
+	if !*staleOnly && *bypassPeer == "" && (cfg.RuleRevision < 2 || cfg.PathGeneration < 2) {
+		check(fmt.Errorf("stale OPEN matrix requires rule revision and generation >= 2; generate with PHASE4_POLICY_VERSION=2"))
+	}
 	s, err := link.New(cfg)
 	check(err)
 	defer s.Close()

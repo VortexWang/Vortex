@@ -17,7 +17,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 (cd "$root/engine" && go build -o "$out/phase4-probe" ./cmd/phase4-probe && go build -o "$out/vortex-relay" ./cmd/vortex-relay)
-BACKEND=native PHASE4_FORMAL=1 VORTEX_RELAY_BIN="$out/vortex-relay" QUALIFICATION_DIR="$out" "$root/tools/phase4/run-topology.sh" >"$out/topology.log" 2>&1 &
+BACKEND=native PHASE4_FORMAL=1 PHASE4_POLICY_VERSION=2 VORTEX_RELAY_BIN="$out/vortex-relay" QUALIFICATION_DIR="$out" "$root/tools/phase4/run-topology.sh" >"$out/topology.log" 2>&1 &
 topology_pid=$!
 for attempt in $(seq 1 60); do
   test -f "$out/topology-ready" && break
