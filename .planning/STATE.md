@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 10
+current_plan: 11
 status: executing
-stopped_at: Completed 05-09; next 05-10 node commands and drain integration
-last_updated: "2026-11-06T07:46:51.814Z"
+stopped_at: Completed 05-10; next 05-11 signed service upgrade and rollback
+last_updated: "2026-11-06T08:33:26.233Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-09 completed on a9aea9d Docker/Actions42181891508; 05-10 next; Phase 5 executing
-state_head: c284ec1e35a153b7c62eb1b58814239fea4ad895
+last_activity_desc: 05-10 completed on061ffb5 Docker/Actions42186204143; 05-11 next; Phase5 executing
+state_head: d25255afc17b72d431db83c6204fb780505d0ab1
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 42
-  completed_plans: 37
+  completed_plans: 38
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
-Current Plan: 10
+Current Plan: 11
 Total Plans in Phase: 14
-Status: Executing — 05-09 complete with live identity rotation, durable revocation and paired evidence; 05-10 next
-Last activity: 2026-11-06 — 05-09 completed on a9aea9d with Docker/Actions42181891508 and independent raw-ledger audits; Phase 5 remains incomplete.
+Status: Executing — 05-10 complete with commands/drain/deployment and paired evidence; 05-11 next
+Last activity: 2026-11-06 — 05-10 completed on061ffb5 with Docker/Actions42186204143 and independent raw-ledger audits; Phase5 remains incomplete.
 
-Progress: Phase 5 [██████░░░░] 9/14 plans executed; 05-10 ready, 05-11..05-14 dependency-waiting. G05-01/03/04 resolved within protocol-adapter/static-destination scope; G05-02/05 remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [██████░░░░] 10/14 plans executed; 05-11 ready, 05-12..05-14 dependency-waiting. G05-01/03/04 resolved within protocol-adapter/static-destination scope; G05-02/05 remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 
