@@ -2492,3 +2492,25 @@ Targeted race tests repeated three times PASS 1.580s. This is deterministic
 response ordering, not elapsed-delay latency or five-process workload evidence.
 Remaining: connect the injection controller to a real topology experiment,
 bounded waiting/clock scheduling, dynamic target and temporal occupancy review.
+
+## P4-Q4 delayed issuer connected to native source
+
+106917c adds explicit --test-issuer-delay, finite coalesced issuance and one
+200ms Reserve deadline with at most 128 waiters. Caller timeout does not release
+pending issuance; issuer shutdown marks its pending request unknown. Default
+synchronous adapter unchanged. Native launcher applies the flag only to source;
+Docker rejects this experiment until supported. Semantic evidence records delay.
+Targeted race repeated three times PASS 2.346s; full accounting/relay/command
+race suites PASS 1.782s/1.950s/1.415s.
+
+Clean 106917c local macOS five-process diagnostic, delay=40ms, 4 TCP streams,
+2s each baseline/mixed, actual UDP 99.7296 Mbps and zero loss. Source used
+2,964,906,184 bytes equals twice target/accounting 1,482,453,092 per direction.
+31 grants; final sessions/held/pending/unknown all zero; source conservation
+retained. Raw /private/tmp/vortex-delay-40ms-20261106 and sibling .log.
+Command exit 1: PHASE4_TRIAL_ID was omitted, so no passing qualification report.
+Additionally credit denials=1 includes the transient failed Reserve before
+successful waiting. Next fix measurement to distinguish transient shortage,
+wait success/timeout and final refusal; do not silently ignore the existing
+settlement gate or claim performance qualification. Native Linux, candidates,
+delay/failure matrix and dynamic-target integration remain outstanding.
