@@ -2165,3 +2165,32 @@ block counting is the remaining cause. Preserve failed extended test.
 Artifacts process-ac20b2f report SHA-256
 04249e1c1bf1064b1bc28264a9eb1fcd3db766197314ae250815348d770b819b;
 test.log ee3014d7bd73c3b7056b2ae57849d2093c844790dd2622c6291efcf2b45a0b51.
+
+## Profile the actual extended process workload
+
+Clean ac20b2f node/test-hub binaries were reused in profile-ac20b2f with the
+explicit diagnostics wrapper. ConcurrentRenewal failed again (3.17s). CPU
+capture duration 3.11s, 3.99s samples: commitSettlementGroup cumulative 1.44s
+(36.09%), CheckpointRuntimeFundingBlocks 1.42s (35.59%),
+AdmitRuntimeFundingBlockWrite 1.10s (27.57%). Categories overlap and include
+startup/shutdown; these are not throughput figures. Block profile attributes
+42.94s cumulative goroutine wait to runtime FIFO acquire across concurrent
+workers, not a single 42.94s request. Current per-session batching cannot merge
+checkpoints from distinct sessions; this remains a serialization bottleneck.
+
+Next implementation candidate: a bounded Store-wide checkpoint coordinator.
+Each caller must retain session ownership and its exact immutable checkpoint
+entries until completion; only complete per-caller groups may join a shared
+transaction, respecting the existing 64-entry bound. Every response waits for
+commit. Cancellation of a participating request must cancel/rollback the shared
+transaction; ambiguous outcomes must fault all participating allocators and
+retain upper bounds. Never retry a partially committed group, independently
+acknowledge entries before commit, or reorder dependent residuals within a block.
+Required tests: cross-session atomic rollback, duplicate/replay identity,
+queue overflow, cancellation during/after commit, close and SIGKILL recovery.
+This is a next-step design, not implemented or qualification evidence.
+
+Profile SHA-256 cpu.pprof
+ a75cab24008ef7ad78f3cf41e44d5f0f7de463dc751f1f1faa0296bd6cdf57f6;
+block.pprof 2caf9de8241fd84a159358e69cf05bd385c73a8ad42948c8d3c1c22ea6b3e221;
+test.log 348f9985439ebced487c569b77206cb2514e86a51eadace231c08de8af8623f4.
