@@ -44,17 +44,21 @@ type sessionFundingBlock struct {
 	idleGeneration uint64
 }
 type fundingBlockSession struct {
-	mu           fundingContextMutex
-	inner        *authorizationSession
-	size         uint64
-	blocks       map[accounting.Direction]*sessionFundingBlock
-	changed      chan struct{}
-	closed       bool
-	idleTimeout  time.Duration
-	queueMu      sync.Mutex
-	queue        []*fundingAdmissionRequest
-	queueRunning bool
-	queueCount   int
+	mu                fundingContextMutex
+	inner             *authorizationSession
+	size              uint64
+	blocks            map[accounting.Direction]*sessionFundingBlock
+	changed           chan struct{}
+	closed            bool
+	idleTimeout       time.Duration
+	queueMu           sync.Mutex
+	queue             []*fundingAdmissionRequest
+	queueRunning      bool
+	queueCount        int
+	settlementMu      sync.Mutex
+	settlements       []*fundingSettlementRequest
+	settlementRunning bool
+	settlementCount   int
 }
 
 func (s *fundingBlockSession) signal() { close(s.changed); s.changed = make(chan struct{}) }
@@ -233,7 +237,7 @@ func (s *fundingBlockSession) release(ctx context.Context, b *sessionFundingBloc
 	}
 	return s.inner.gate.node.Store.SettleUsageReservation(ctx, b.reservation, "returned", 0, nil, 0)
 }
-func (s *fundingBlockSession) resolve(ctx context.Context, direction accounting.Direction, b *sessionFundingBlock, out accounting.Outcome) error {
+func (s *fundingBlockSession) resolveDirect(ctx context.Context, direction accounting.Direction, b *sessionFundingBlock, out accounting.Outcome) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	defer s.signal()

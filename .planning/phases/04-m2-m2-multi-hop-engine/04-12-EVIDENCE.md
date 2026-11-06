@@ -1511,3 +1511,20 @@ Targeted race PASS 3.007s; full Store race PASS 16.924s; Agent/Hub vet and diff
 PASS. These are Store transaction tests, not process-kill or native performance
 qualification. Agent settlement queue integration remains required; runtime
 currently still invokes individual checkpoints. D-04 stays open.
+
+## Agent grouped durable settlement queue
+
+Known positive write outcomes use a separate bounded settlement worker (64
+pending callbacks, one-millisecond experimental grouping window). It builds
+ordered residual checkpoints and acknowledges each callback only after the
+shared Store transaction commits. Admission capacity waits and settlement
+processing use separate queues. Unknown/returned outcomes retain direct
+serialized handling; canceled/uncertain groups poison participating residuals
+and fault admission rather than refunding their unknown upper bounds.
+
+Funding/settlement tests repeated three times PASS 6.794s. Added canceled-group
+regression proves zero partial known usage, the full 128-byte recovery bound,
+no refund on close and refusal of further admission. Existing independent
+settlement and unknown-tail tests still pass. Real ordinary/delayed TCP/UDP
+block renewal race PASS 30.542s; Agent/Hub vet and diff PASS. Native concurrent
+validation and full regression remain required; D-04 is not locked.

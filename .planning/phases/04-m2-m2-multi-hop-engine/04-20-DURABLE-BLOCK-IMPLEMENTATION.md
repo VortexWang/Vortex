@@ -219,3 +219,19 @@ returning success. Canceled or uncertain groups retain their durable residual
 and fault further admission; never release their tails based on an uncommitted
 in-memory outcome. Unknown outcomes require serialization with known groups.
 The new Store API is not yet called by runtime settlement.
+
+## Agent grouped settlement integration
+
+Known positive outcomes now enter an independent session settlement queue,
+bounded at 64 pending callbacks. Overflow uses the existing synchronous path.
+A one-millisecond experimental grouping window precedes one ordered Store
+checkpoint transaction. Every callback waits for durable completion; admission
+waiters cannot block the separate settlement worker from freeing capacity.
+Canceled group transactions poison all participating residuals, retain crash
+recovery bounds and fault admission. Unknown and zero/returned outcomes remain
+serialized through the existing direct path. No memory-only acknowledgment is
+introduced. Known commit success is independent of later idle-tail return; a
+failed tail return faults the gate and retains the tail for recovery.
+
+Native concurrency and full fault qualification are still required. The queue
+bounds/grouping interval are experimental, not selected D-04 parameters.

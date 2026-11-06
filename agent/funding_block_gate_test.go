@@ -461,3 +461,43 @@ func TestFundingBlockQueuedGroupKeepsIndependentSettlement(t *testing.T) {
 		t.Fatalf("group unknown %+v", b)
 	}
 }
+
+func TestFundingBlockSettlementGroupCanceledPreservesWholeBound(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	ctx := context.Background()
+	first, err := s.Reserve(ctx, accounting.LeftToRight, 40)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := s.Reserve(ctx, accounting.LeftToRight, 40)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.mu.Lock()
+	block := s.blocks[accounting.LeftToRight]
+	s.mu.Unlock()
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	group := []*fundingSettlementRequest{
+		{ctx: ctx, direction: accounting.LeftToRight, block: block, outcome: accounting.Outcome{Resolution: accounting.Committed, Reserved: first.Reserved(), Used: 20}},
+		{ctx: canceled, direction: accounting.LeftToRight, block: block, outcome: accounting.Outcome{Resolution: accounting.Committed, Reserved: second.Reserved(), Used: 20}},
+	}
+	if err := s.commitSettlementGroup(group); err != context.Canceled {
+		t.Fatalf("canceled group: %v", err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	b := fundingBalance(t, n)
+	if b.Reserved != 128 || b.Committed != 0 || b.Remaining != 4096-128 {
+		t.Fatalf("uncertain group refunded: %+v", b)
+	}
+	pending, err := n.Store.UnresolvedUsageReservations(ctx, n.NodeID, "next-boot")
+	if err != nil || len(pending) != 1 || pending[0].Reserved != 128 {
+		t.Fatalf("recovery bound: %+v %v", pending, err)
+	}
+	if _, err := s.Reserve(ctx, accounting.LeftToRight, 1); err == nil {
+		t.Fatal("faulted group admitted")
+	}
+}
