@@ -378,6 +378,9 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 			return errors.New("identity: local credential no longer valid")
 		}
 		peer := state.PeerCertificates[0]
+		if now.Before(peer.NotBefore) || !now.Before(peer.NotAfter) {
+			return errors.New("identity: peer credential outside validity interval")
+		}
 		if revoked != nil && revoked(peer) {
 			return errors.New("identity: certificate revoked")
 		}

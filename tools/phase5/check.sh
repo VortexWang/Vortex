@@ -60,7 +60,7 @@ for name in ('TestSchedulerProcessRenewal/low-water-tcp-udp','TestSchedulerProce
 for name in ('TestIdentityProcessRotation',):
  log=(out/'identity-process.log').read_text()
  assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
-for name in ('TestRuntimeIdentityProfileAndSignerRejections','TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation','TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded','TestRuntimeIdentityCrashPublicationAndStaleAliases','TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew','TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection'):
+for name in ('TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal','TestRuntimeIdentityProfileAndSignerRejections','TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation','TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded','TestRuntimeIdentityCrashPublicationAndStaleAliases','TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew','TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection'):
  log=(out/'identity-race.log').read_text()
  assert log.count(f'--- PASS: {name} ')==10 and '--- SKIP:' not in log,name
 for name in ('TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello','TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake','TestIdentityAdmissionRejectsNewOpenWithoutClosingExistingStreams'):

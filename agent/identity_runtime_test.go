@@ -387,3 +387,32 @@ func TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection(t *testing.T) {
 		t.Fatal("uncommitted replacement changed aliases")
 	}
 }
+
+func TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal(t *testing.T) {
+	ca, der, err := identity.NewCA(time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := runtimeCredential(t, ca, der)
+	roots := x509.NewCertPool()
+	roots.AddCert(ca.Certificate)
+	config, err := identity.TLSConfig(c, roots, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	peer := *c.Leaf
+	peer.NotAfter = time.Now().Add(-time.Second)
+	if err = config.VerifyConnection(tls.ConnectionState{PeerCertificates: []*x509.Certificate{&peer}}); err == nil {
+		t.Fatal("captured control config accepted expired peer")
+	}
+	local := *c.Leaf
+	c.Leaf = &local
+	config, err = identity.TLSConfig(c, roots, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	local.NotAfter = time.Now().Add(-time.Second)
+	if err = config.VerifyConnection(tls.ConnectionState{PeerCertificates: []*x509.Certificate{ca.Certificate}}); err == nil {
+		t.Fatal("captured control config accepted expired local identity")
+	}
+}
