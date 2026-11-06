@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"syscall"
 	"testing"
 	"time"
@@ -27,9 +28,10 @@ import (
 
 // Explicit binary qualification entry; ordinary unit runs do not build or
 // silently substitute in-process services for the two process boundaries.
-func TestDurableAuthorityProcessesTCP(t *testing.T) { runDurableAuthorityProcesses(t, 1) }
-func TestDurableAuthorityProcessesUDP(t *testing.T) { runDurableAuthorityProcesses(t, 2) }
-func runDurableAuthorityProcesses(t *testing.T, network uint8) {
+func TestDurableAuthorityProcessesTCP(t *testing.T)           { runDurableAuthorityProcesses(t, 1, 1) }
+func TestDurableAuthorityProcessesUDP(t *testing.T)           { runDurableAuthorityProcesses(t, 2, 1) }
+func TestDurableAuthorityProcessesConcurrentTCP(t *testing.T) { runDurableAuthorityProcesses(t, 1, 16) }
+func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount int) {
 	bin := os.Getenv("VORTEX_PROCESS_BIN_DIR")
 	if bin == "" {
 		t.Skip("run tools/phase4/durable-process.sh with built binaries")
@@ -136,9 +138,15 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 		return p
 	}
 	hubCredentials, nodeCredentials := credentials(hubID), credentials(nodeID)
-	d := store.HubDelegation{ID: id(104), HubID: hubID, SourceID: id(105), RuntimeSourceID: id(106), ShareSourceID: id(107), NodeID: nodeID, BillingSnapshotID: id(108), RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, SignerEpoch: 1, FencingFloor: 8, RawBytes: 1 << 20, RateBPS: 1000000, Connections: 16, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(2 * time.Hour)}
-	fixture := writeJSON("authority.json", map[string]any{"delegation": d, "initial_request_id": id(109), "initial_bytes": 4096, "ttl_seconds": 60})
-	demand := writeJSON("demand.json", map[string]any{"interval_ms": 100, "demands": []any{map[string]any{"scope": store.DemandScope{HubID: hubID, DelegationID: d.ID, NodeID: nodeID, SourceID: d.SourceID, SnapshotID: d.BillingSnapshotID, RuleID: cfg.RuleID, SignerEpoch: 1, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}, "policy": DemandPolicyConfig{Minimum: 4096, MaxTarget: 4096, TargetSeconds: 30, RenewPercent: 30}, "ttl_seconds": 60}}})
+	initial, block, budget, rate := uint64(4096), uint64(2048), uint64(1<<20), uint64(1000000)
+	if streamCount > 1 {
+		initial, block, budget, rate = 8<<20, 256<<10, 64<<20, 100000000
+	}
+	expectedBytes := uint64(streamCount) * 48000
+	writeJSON("workload.json", map[string]any{"network": network, "streams": streamCount, "exchanges_per_stream": 16, "payload_bytes": 1500, "initial_bytes": initial, "block_bytes": block, "rate_bps": rate, "expected_bidirectional_bytes": expectedBytes, "performance_qualified": false})
+	d := store.HubDelegation{ID: id(104), HubID: hubID, SourceID: id(105), RuntimeSourceID: id(106), ShareSourceID: id(107), NodeID: nodeID, BillingSnapshotID: id(108), RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, SignerEpoch: 1, FencingFloor: 8, RawBytes: budget, RateBPS: rate, Connections: 16, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(2 * time.Hour)}
+	fixture := writeJSON("authority.json", map[string]any{"delegation": d, "initial_request_id": id(109), "initial_bytes": initial, "ttl_seconds": 60})
+	demand := writeJSON("demand.json", map[string]any{"interval_ms": 100, "demands": []any{map[string]any{"scope": store.DemandScope{HubID: hubID, DelegationID: d.ID, NodeID: nodeID, SourceID: d.SourceID, SnapshotID: d.BillingSnapshotID, RuleID: cfg.RuleID, SignerEpoch: 1, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}, "policy": DemandPolicyConfig{Minimum: initial, MaxTarget: initial, TargetSeconds: 30, RenewPercent: 30}, "ttl_seconds": 60}}})
 	hubDB, backendDB, agentDB := filepath.Join(dir, "hub.db"), filepath.Join(dir, "backend.db"), filepath.Join(dir, "agent.db")
 	start := func(name string, args ...string) func() {
 		log, e := os.Create(filepath.Join(dir, name+".log"))
@@ -176,7 +184,9 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 		return stop
 	}
 	stopHub := start("vortex-test-hub", "--listen", hubAddr, "--db", hubDB, "--tls-cert", hubCredentials+"/runtime-cert.pem", "--tls-key", hubCredentials+"/runtime-key.pem", "--tls-ca", hubCredentials+"/trust-ca.pem", "--authority-fixture", fixture, "--fixture-backend-db", backendDB)
-	stopNode := start("vortex-node", "--node-id", nodeID, "--db", agentDB, "--hub", hubAddr, "--hub-name", hubID, "--credential-dir", nodeCredentials, "--enrollment-hub", hubAddr, "--renew-before", "1m", "--engine-config", engineFile, "--experimental-funding-block-bytes", "2048", "--credit-demand-config", demand)
+	defer stopHub()
+	stopNode := start("vortex-node", "--node-id", nodeID, "--db", agentDB, "--hub", hubAddr, "--hub-name", hubID, "--credential-dir", nodeCredentials, "--enrollment-hub", hubAddr, "--renew-before", "1m", "--engine-config", engineFile, "--experimental-funding-block-bytes", fmt.Sprint(block), "--credit-demand-config", demand)
+	defer stopNode()
 	// Read-only observation of durable installation; never provision the Agent DB.
 	wait := func(check func() bool) {
 		t.Helper()
@@ -224,50 +234,83 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 	hash := sha256.Sum256([]byte(cfg.RuleID))
 	var rule [16]byte
 	copy(rule[:], hash[:16])
-	stream, err := mux.Open(ctx, vlink.OpenRequest{RuleID: rule, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, Network: network, ClientAddress: []byte{127, 0, 0, 1}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = stream.WaitOpen(ctx); err != nil {
-		t.Fatal(err)
-	}
-	message := bytes.Repeat([]byte{0x5a}, 1500)
-	for round := 0; round < 16; round++ {
-		if network == 1 {
-			if err := stream.WriteData(ctx, message); err != nil {
-				t.Fatal(err)
-			}
-		} else {
-			accepted, err := stream.WriteDgram(ctx, message)
-			if err != nil || !accepted {
-				t.Fatalf("datagram rejected: %v", err)
-			}
+	streams := make([]*vlink.MuxStream, streamCount)
+	for i := range streams {
+		stream, e := mux.Open(ctx, vlink.OpenRequest{RuleID: rule, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, Network: network, ClientAddress: []byte{127, 0, 0, 1}})
+		if e != nil {
+			t.Fatal(e)
 		}
-		received := []byte{}
-		for len(received) < len(message) {
-			frame, e := stream.Receive(ctx)
-			if e != nil {
-				t.Fatal(e)
-			}
-			expectedType := vlink.FrameData
-			if network == 2 {
-				expectedType = vlink.FrameDgram
-			}
-			if frame.Type != expectedType {
-				frame.Release()
-				t.Fatalf("non-DATA frame %d", frame.Type)
-			}
-			if network == 2 && len(frame.Payload) != len(message) {
-				frame.Release()
-				t.Fatal("datagram boundary mismatch")
-			}
-			received = append(received, frame.Payload...)
-			frame.Release()
+		if e = stream.WaitOpen(ctx); e != nil {
+			t.Fatal(e)
 		}
-		if !bytes.Equal(received, message) {
-			t.Fatal("payload mismatch")
+		streams[i] = stream
+	}
+	trafficStarted := time.Now()
+	latencies := make([][]time.Duration, streamCount)
+	for i := range latencies {
+		latencies[i] = make([]time.Duration, 16)
+	}
+	results := make(chan error, streamCount)
+	for index, stream := range streams {
+		go func(index int, stream *vlink.MuxStream) {
+			message := bytes.Repeat([]byte{byte(index + 1)}, 1500)
+			for round := 0; round < 16; round++ {
+				started := time.Now()
+				if network == 1 {
+					if e := stream.WriteData(ctx, message); e != nil {
+						results <- e
+						return
+					}
+				} else {
+					accepted, e := stream.WriteDgram(ctx, message)
+					if e != nil || !accepted {
+						results <- fmt.Errorf("datagram rejected: %v", e)
+						return
+					}
+				}
+				received := []byte{}
+				for len(received) < len(message) {
+					frame, e := stream.Receive(ctx)
+					if e != nil {
+						results <- e
+						return
+					}
+					expectedType := vlink.FrameData
+					if network == 2 {
+						expectedType = vlink.FrameDgram
+					}
+					if frame.Type != expectedType || network == 2 && len(frame.Payload) != len(message) {
+						frameErr := fmt.Errorf("stream=%d round=%d unexpected frame=%d payload=%x", index, round, frame.Type, frame.Payload)
+						frame.Release()
+						results <- frameErr
+						return
+					}
+					received = append(received, frame.Payload...)
+					frame.Release()
+				}
+				latencies[index][round] = time.Since(started)
+				if !bytes.Equal(received, message) {
+					results <- fmt.Errorf("payload mismatch on stream %d", index)
+					return
+				}
+			}
+			results <- nil
+		}(index, stream)
+	}
+	for range streams {
+		if e := <-results; e != nil {
+			t.Fatal(e)
 		}
 	}
+	elapsed := time.Since(trafficStarted)
+	var samples []time.Duration
+	for _, streamSamples := range latencies {
+		samples = append(samples, streamSamples...)
+	}
+	sort.Slice(samples, func(i, j int) bool { return samples[i] < samples[j] })
+	percentile := func(p int) float64 { return float64(samples[(len(samples)*p+99)/100-1]) / float64(time.Millisecond) }
+	writeJSON("traffic.json", map[string]any{"streams": streamCount, "network": network, "round_trips": len(samples), "round_trip_ms": map[string]float64{"p50": percentile(50), "p95": percentile(95), "p99": percentile(99)}, "traffic_elapsed_ns": elapsed.Nanoseconds(), "bidirectional_payload_bytes": expectedBytes, "bidirectional_payload_mbps": float64(expectedBytes) * 8 / elapsed.Seconds() / 1e6, "timing_scope": "request-response traffic; excludes later ACK drain", "performance_qualified": false})
+
 	wait(func() bool {
 		rows, err := db.QueryContext(ctx, "SELECT payload,state FROM usage_batches")
 		if err != nil {
@@ -289,9 +332,11 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 				total += delta.Bytes
 			}
 		}
-		return rows.Err() == nil && total == 48000
+		return rows.Err() == nil && total == expectedBytes
 	})
-	_ = stream.Reset(ctx, 0)
+	for _, stream := range streams {
+		_ = stream.Reset(ctx, 0)
+	}
 	stopNode()
 	stopHub()
 	db.Close()
@@ -302,7 +347,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 	}
 	defer agentAudit.Close()
 	source, err := agentAudit.AuditAuthorizationSource(ctx, nodeID, d.SourceID)
-	if err != nil || source.Committed != 48000 || source.Unknown != 0 || source.Reserved != 0 || source.Initial != source.Remaining+source.Committed {
+	if err != nil || source.Committed != expectedBytes || source.Unknown != 0 || source.Reserved != 0 || source.Initial != source.Remaining+source.Committed {
 		t.Fatalf("Agent source conservation %+v %v", source, err)
 	}
 	hubAudit, err := store.Open(hubDB, "hub")
@@ -320,6 +365,6 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 	if err := hubAudit.Close(); err != nil {
 		t.Fatal(err)
 	}
-	assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, 48000)
+	assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, expectedBytes)
 	saveLedgerFiles(t, fmt.Sprintf("process-network-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 }

@@ -282,3 +282,10 @@ it additionally audits Agent source conservation and reconciles Agent initial
 credit against Hub durable issuance. The report requires explicit PASS markers
 for both tests, so a skipped/missing protocol cannot produce success. This adds
 UDP functional coverage only; offered-rate/loss performance is still unmeasured.
+
+The entry additionally exercises 16 concurrent TCP streams with explicit
+256 KiB blocks and an 8 MiB initial/target grant. Its fixed 16 exchanges per
+stream are functional coverage, not a duration-based performance trial.
+`workload.json` records each case's actual configuration; `traffic.json` records
+request/response duration, byte throughput and round-trip percentiles. These
+percentiles are not issuer-wait latency. The report requires all three cases.

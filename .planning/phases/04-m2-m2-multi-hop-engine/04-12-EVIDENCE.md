@@ -1825,3 +1825,30 @@ explicit PASS markers for both cases; missing/skipped tests fail closed.
 This is functional evidence, not UDP offered-load or sustained qualification.
 
 Clean local TCP+UDP process rerun PASS at 711dbb3109d18d17dcb8b7b1b9df9681c1824b1b; both explicit test markers verified. Report SHA-256 0d299516971b1e79951df37197308da3454d9f9d82d37f53f04b41c178735ebb. Evidence: /private/tmp/vortex-process-protocols-clean. Native UDP remains pending.
+
+## Native UDP process failure and concurrent candidate fixture
+
+Dedicated clean c5eebf0e2efd4f99902628e542ade67cd1cd73ce process run passed TCP
+but failed UDP with FrameRST (type 7). Overall report correctly failed; raw
+artifacts remain at artifacts/phase4/process-c5eebf0. The stopped UDP Agent DB
+had 25 committed usage reservations and two residual reservations (1096 and
+144 bytes); this is not a successful UDP or source-settlement verdict. Initial
+node log did not contain an explicit admission error. Investigation continues;
+local success cannot override this native failure.
+
+Added an independent-process 16-concurrent-stream TCP case with explicit
+256 KiB blocks, 8 MiB cold-start/target, 64 MiB delegation and 100 Mbps share
+rate. Each stream performs sixteen 1500-byte request/response exchanges using
+its own payload pattern; exact total is 768000 bidirectional bytes. This is a
+candidate functional configuration, not a locked default or sustained NFR run.
+All three local process cases passed in the development metrics run at
+/private/tmp/vortex-process-concurrent-metrics. Per-case workload.json records
+parameters and traffic.json records actual bytes/time plus p50/p95/p99 round-
+trip samples, explicitly excluding the later ACK drain. Report now requires all
+three named tests. These metrics are not issuer-wait latency or UDP offered-load
+qualification, and the concurrent case has not run natively yet.
+
+Failure teardown now gracefully stops Node then Hub before canceling their parent
+context, preserving final logs instead of immediately killing them on t.Fatal.
+Unexpected frames report stream, round, type and payload before buffer release,
+to diagnose the unresolved native UDP reset on the next clean-SHA attempt.
