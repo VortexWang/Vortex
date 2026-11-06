@@ -139,9 +139,22 @@ func main() {
 			credit, sourceGate, stopIssuer = delayed.Credit, delayed, delayed.Close
 			slog.Info("qualification delayed issuer", "delay", *issuerDelay, "renewal_only", *renewalOnly, "wait_limit", "200ms", "scope", "process-local")
 		}
+		var stopTimeline func() creditTimeline
+		if cfg.SourceCredit.Observe {
+			stopTimeline = startCreditTimeline(credit.State, time.Second, 3600)
+		}
 		defer func() {
 			if stopIssuer != nil {
 				stopIssuer()
+			}
+			if stopTimeline != nil {
+				data, err := json.Marshal(stopTimeline())
+				if err == nil {
+					err = os.WriteFile(cfg.EvidenceFile+".credit-timeline.json", append(data, '\n'), 0600)
+				}
+				if err != nil {
+					fatal(fmt.Sprintf("write credit timeline: %v", err))
+				}
 			}
 			data, err := json.MarshalIndent(credit.State(), "", "  ")
 			if err == nil {
