@@ -2542,6 +2542,30 @@ remain required before parameter lock.
 
 ## P4-Q4 renewal-only 600ms pressure (5bfb9b2)
 
+Subsequent implementation: 6d2a9b0 adds optional target_seconds to the Engine
+test adapter and PHASE4_CREDIT_TARGET_SECONDS to configuration generation.
+Zero preserves the fixed target. Enabled mode counts committed raw bytes in
+60 one-second buckets, computes ceil(minute bytes * horizon / 60), clamps to an
+8MiB floor and configured grant_target_bytes ceiling. The process monotonic
+clock and gate mutex bound history and serialize observations. Unknown/reserved
+bytes do not count as committed consumption. Shrinking the estimate neither
+returns issued credit nor releases pending/unknown authority. Agent code and
+production protocols unchanged.
+
+Race tests verify growth, ceiling, expiry at 60 seconds and unchanged pending/
+unknown balances across idle shrink; accounting PASS 2.177s. Runtime config,
+link, relay, topology and command race PASS 1.472/1.808/2.363/2.663/3.068s.
+Generated source configuration verified 30s horizon and explicit ceiling.
+
+Clean 6d2a9b0fbe33732a1cd96824bb43dfe24853c209 local macOS five-process smoke
+exits 0, runtime_correctness pass. Four TCP streams, 2s phases, synchronous
+process-local issuer: source used 2909894344 equals two 1454947172-byte directions;
+27 grants, no denials; final sessions/held/pending/unknown zero. UDP 99.8064Mbps,
+zero loss. Final dynamic target reaches the 375000000-byte ceiling. Raw paths,
+report and hashes: 04-28-DYNAMIC-TARGET-SMOKE.json. This validates wiring, not
+native performance, delayed dynamic behavior or time-series occupancy. D-04
+remains pending review and P4 qualification gaps remain open.
+
 Clean 5bfb9b2e0ecf593d43e303071f6db24a6137b856 separates initial finite grant
 from renewal delay. Dedicated Ubuntu five-process runs use 600ms renewal delay,
 375000000-byte fixed target, 256KiB initial / 4MiB max blocks, 16 TCP streams,
