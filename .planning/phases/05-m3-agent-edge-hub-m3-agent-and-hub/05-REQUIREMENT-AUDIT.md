@@ -12,7 +12,7 @@ Source reviewed: 71502ce. Current ROADMAP/CONTEXT decisions govern. V1.11 IDs re
 | AGT-006 | COVERED-SLICE | agent/usage.go; agent/store/usage_retention.go; independent ledger audits | FULL/unknown/full-disk and conservative settled transport cleanup verified; original journal retained; production backend settlement remains Phase 6. |
 | AGT-007 | COVERED-SLICE | agent/scheduler.go; agent/scheduler_test.go | Bounded installed-target probes/current-session periodic reports verified in 05-08. |
 | AGT-008 | PARTIAL | agent/upgrade/installer.go; agent/upgrade/installer_test.go | Real file installer covered; service-level drain/restart/rollback integration absent. G05-02. |
-| AGT-012 | PARTIAL | agent/credentials.go; agent/engine_runtime.go | Control renewal wired; common Engine VLink rotation/revocation unverified. G05-03. |
+| AGT-012 | COVERED-SLICE | agent/identity_runtime.go; agent/identity_control_test.go; test/phase5/identity_process_test.go | 05-09 shared control/VLink live rotation, durable revocation and expiry/overlap/failure tests passed on a9aea9d Docker/Actions42181891508; production CA authority remains Phase 6. |
 | AGT-009 | COVERED-SLICE | agent/runtime_restart_test.go | Fresh boot fences old grants as settlement-only and preserves debt. |
 | AGT-010 | COVERED-SLICE | agent/runtime_restart_test.go; agent/runtime_activation.go | Actual configured destination re-Prepare/current authority/Commit; hot/source/relay integration not claimed. |
 | AGT-011 | COVERED-SLICE | agent/authorization_gate.go; agent/runtime_authority_test.go | Installed authorization bounds fail closed; no broader runtime topology certification. |
@@ -43,7 +43,7 @@ Source reviewed: 71502ce. Current ROADMAP/CONTEXT decisions govern. V1.11 IDs re
 
 - G05-01: **resolved within planned adapter scope** by 05-07/08; final0c104a6 passed Docker/Actions42175493658 and independent ledger audits. No production backend authority introduced; shared IDs remain pending for later plans.
 - G05-02: node command surface, systemd/container packaging and actual Engine drain/upgrade/restart/rollback with durable-state preservation.
-- G05-03: common control/VLink credential rotation and revocation, with expiry/restart/overlap admission tests.
+- G05-03: resolved in 05-09 on a9aea9d with same-SHA Docker/Actions42181891508. Actual static destination runtime rotation and new OPEN revocation/expiry verified; production CA authority remains Phase 6.
 - G05-04: **resolved** by f6a5891 and same-SHA Docker/Actions 42140165239: bounded enrollment concurrency, TLS/read time, request bytes and cancellation; real slow/oversized/overload/cancel tests.
 - G05-05: runtime recovering/caught-up state, full share-reference/fencing and scheduled policy-boundary integration; keep production backend allocator in Phase 6.
 

@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 9
+current_plan: 10
 status: executing
-stopped_at: Completed 05-08; next 05-09 shared control/VLink identity integration
-last_updated: "2026-11-06T06:48:41.148Z"
+stopped_at: Completed 05-09; next 05-10 node commands and drain integration
+last_updated: "2026-11-06T07:46:51.814Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-08 completed on 0c104a6 Docker/Actions42175493658; 05-09 next; Phase 5 executing
-state_head: 1c579ccf0cf2a120115d05c9c7cd1b2027e3f5dd
+last_activity_desc: 05-09 completed on a9aea9d Docker/Actions42181891508; 05-10 next; Phase 5 executing
+state_head: c284ec1e35a153b7c62eb1b58814239fea4ad895
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 42
-  completed_plans: 36
+  completed_plans: 37
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
-Current Plan: 9
+Current Plan: 10
 Total Plans in Phase: 14
-Status: Executing — 05-08 complete with probes/reports, live renewal, safe retention and fault evidence; 05-09 next
-Last activity: 2026-11-06 — 05-08 completed on 0c104a6 with Docker/Actions42175493658 and independent raw-ledger audits; Phase 5 remains incomplete.
+Status: Executing — 05-09 complete with live identity rotation, durable revocation and paired evidence; 05-10 next
+Last activity: 2026-11-06 — 05-09 completed on a9aea9d with Docker/Actions42181891508 and independent raw-ledger audits; Phase 5 remains incomplete.
 
-Progress: Phase 5 [██████░░░░] 8/14 plans executed; 05-09 ready, 05-10..05-14 dependency-waiting. G05-01/04 resolved within protocol-adapter scope; G05-02/03/05 remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [██████░░░░] 9/14 plans executed; 05-10 ready, 05-11..05-14 dependency-waiting. G05-01/03/04 resolved within protocol-adapter/static-destination scope; G05-02/05 remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 
@@ -102,8 +102,8 @@ Progress: Phase 5 [██████░░░░] 8/14 plans executed; 05-09 re
 ## Session Continuity
 
 Last session: 2026-11-06
-Stopped at: 05-08 live TCP/UDP renewal paired; continue renewal-specific revocation/late-session/time combinations and >=7-day safe retention inline
-Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-08-PLAN.md
+Stopped at: Completed 05-09 identity rotation/revocation with paired runtime evidence; execute 05-10 inline
+Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-10-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 
