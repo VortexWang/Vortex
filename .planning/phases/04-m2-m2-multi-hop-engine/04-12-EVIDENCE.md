@@ -914,3 +914,31 @@ SQLite work without changing the 200ms bound or bypassing durable metering.
 Add per-round integration logs for diagnosing the native failure. Full local
 Agent/Hub race PASS (Agent 50.722s), vet/diff PASS. Native revalidation is still
 required; this optimization is not yet proof of the timeout root cause or fix.
+
+## Native repetition disproves complete timeout fix
+
+At clean cb69c03 the native continuous integration, full Agent/Hub race and vet
+first passed (full Agent 89.422s, Store 37.750s). Three additional uncached
+continuous race repetitions then yielded one FAIL and two PASS: UDP round 8
+received RST with context deadline exceeded in the failing repetition. Therefore
+the duplicate-query optimization does not establish a complete timeout fix.
+Do not promote this run to stable qualification.
+
+Both the 4f41cee failure and cb69c03 initial/repeat results, including initial
+successful ledger snapshots, were retrieved as
+artifacts/phase4/continuous-native-results/results.tar.gz. Archive SHA-256
+verified against the dedicated host:
+a17c00f7dda82279a7d0d67c16cd23c36b7c9c5ebe166f4634a19f3fbde3440e.
+The first launch exit is 1 at 4f41cee; cb69c03 initial exit is 0 but repeat exit
+is 1. Those scopes remain separate.
+
+The next optimization removes eager full-row reads for every live historical
+authorization during each pre-debit. Selection reads bounded ID/issue-time
+metadata, parses/sorts actual timestamps as before, and reads full candidates
+only until credit/runtime/share choices are validated. The 4096-candidate limit,
+conservative time checks, family/issuer/source restrictions and atomic debit
+remain intact. A regression exhausts the newest grant through a real hold and
+requires fallback to a funded original grant while keeping the newer runtime
+and share leases; exact conservation is asserted. Full local Agent/Hub race
+PASS (Agent 48.384s), updated Store uncached race PASS, vet/diff PASS. Native
+repetition of this new change is pending; the timeout issue remains open.

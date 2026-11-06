@@ -38,19 +38,28 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 	}
 	// The coarse SQL filter only bounds history scanned; exact conservative
 	// expiry checks still run below. A seconds-level equality is never authority.
-	rows, err := tx.QueryContext(ctx, `SELECT authorization_id FROM authorization_records WHERE node_id=? AND boot_id=? AND rule_id=? AND rule_revision=? AND path_generation=? AND state='active' AND unixepoch(expires_at)>=unixepoch(?)`, scope.NodeID, scope.BootID, scope.RuleID, strconv.FormatUint(scope.RuleRevision, 10), strconv.FormatUint(scope.PathGeneration, 10), scope.Latest.UTC().Format(time.RFC3339Nano))
+	rows, err := tx.QueryContext(ctx, `SELECT authorization_id,issued_at FROM authorization_records WHERE node_id=? AND boot_id=? AND rule_id=? AND rule_revision=? AND path_generation=? AND state='active' AND unixepoch(expires_at)>=unixepoch(?)`, scope.NodeID, scope.BootID, scope.RuleID, strconv.FormatUint(scope.RuleRevision, 10), strconv.FormatUint(scope.PathGeneration, 10), scope.Latest.UTC().Format(time.RFC3339Nano))
 	if err != nil {
 		return result, err
 	}
-	var ids []string
+	type candidate struct {
+		id     string
+		issued time.Time
+	}
+	var candidates []candidate
 	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
+		var id, issued string
+		if err := rows.Scan(&id, &issued); err != nil {
 			rows.Close()
 			return result, err
 		}
-		ids = append(ids, id)
-		if len(ids) > 4096 {
+		at, err := time.Parse(time.RFC3339Nano, issued)
+		if err != nil {
+			rows.Close()
+			return result, ErrAuthorizationDenied
+		}
+		candidates = append(candidates, candidate{id, at})
+		if len(candidates) > 4096 {
 			rows.Close()
 			return result, ErrAuthorizationDenied
 		}
@@ -60,31 +69,21 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 	if err != nil {
 		return result, err
 	}
-	type candidate struct {
-		record AuthorizationRecord
-		issued time.Time
-	}
-	var candidates []candidate
-	for _, id := range ids {
-		r, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, id)
-		if err != nil {
-			return result, err
-		}
-		at, err := time.Parse(time.RFC3339Nano, r.IssuedAt)
-		if err != nil {
-			return result, ErrAuthorizationDenied
-		}
-		candidates = append(candidates, candidate{r, at})
-	}
 	sort.Slice(candidates, func(i, j int) bool {
 		if candidates[i].issued.Equal(candidates[j].issued) {
-			return candidates[i].record.AuthorizationID > candidates[j].record.AuthorizationID
+			return candidates[i].id > candidates[j].id
 		}
 		return candidates[i].issued.After(candidates[j].issued)
 	})
 	selected := map[string]AuthorizationRecord{}
 	for _, c := range candidates {
-		r := c.record
+		if selected["credit_grant"].AuthorizationID != "" && selected["runtime_lease"].AuthorizationID != "" && selected["share_lease"].AuthorizationID != "" {
+			break
+		}
+		r, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, c.id)
+		if err != nil {
+			return result, err
+		}
 		if _, ok := selected[r.Kind]; ok {
 			continue
 		}
