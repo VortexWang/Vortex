@@ -5,11 +5,11 @@ current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 8
 status: executing
-stopped_at: 05-08 incremental probes/reports/journal paired; remote renewal and retention next
-last_updated: "2026-11-06T03:59:00Z"
+stopped_at: 05-08 anchored auth1.2 and successful renewal storage paired; live transport/retention next
+last_updated: "2026-11-06T04:31:00Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-08 incremental runtime 29b3085 passed Docker/Actions42158960763; plan remains executing
-state_head: 29b30852331798028073d5f20bab37c026541102
+last_activity_desc: 05-08 auth1.2/share prerequisites 5b0b15b passed Docker/Actions42162182113; plan remains executing
+state_head: 5b0b15bf04ebde99777f39b751c4d83adc895e87
 progress:
   total_phases: 8
   completed_phases: 4
@@ -31,8 +31,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
 Current Plan: 8
 Total Plans in Phase: 14
-Status: Executing — 05-08 partial; probes/reports and renewal journal verified; live remote renewal/retention remain
-Last activity: 2026-11-06 — 05-08 incremental runtime 29b3085 passed Docker/Actions42158960763 and independent ledger audits; no plan completion claimed.
+Status: Executing — 05-08 partial; probes/reports, journal and anchored auth1.2/issuer storage verified; live remote renewal/retention remain
+Last activity: 2026-11-06 — 05-08 incremental prerequisites 5b0b15b passed Docker/Actions42162182113 and independent ledger audits; no plan completion claimed.
 
 Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 executing (probes/reports/journal partial), 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 

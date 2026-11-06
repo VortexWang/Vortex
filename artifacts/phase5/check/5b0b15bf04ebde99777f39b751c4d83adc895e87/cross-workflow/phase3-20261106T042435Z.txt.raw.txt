@@ -1,0 +1,219 @@
+goos: linux
+goarch: amd64
+pkg: vortex/engine/vlink
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	       7	  83259800 ns/op	 806.02 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	       7	  83888989 ns/op	 799.97 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/forward-4         	       7	  84264508 ns/op	 796.41 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	       7	  88536221 ns/op	 757.98 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	       7	  90060602 ns/op	 745.15 MB/s
+BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-4         	       7	  90448878 ns/op	 741.95 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	       7	  68631729 ns/op	 977.81 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	       7	  68194637 ns/op	 984.08 MB/s
+BenchmarkVLinkTCPThroughput/tls-baseline-4                 	       7	  73808313 ns/op	 909.23 MB/s
+2026/11/06 04:24:45 INFO udp link drop summary link_id=5b4d035223b4bba06b1fe91c98971aa7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=ca3f1ef18f33027f3d2231ebb1cbf097 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	2026/11/06 04:24:45 INFO udp link drop summary link_id=9cdfa868a7382e4d466267e027c33cef window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=b422873a8b97c94aaf9d3875c5df465b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=d7493a6fc4020ea254e91a609e910945 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=090d7bf65d0b71b66031cfc17161fa26 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=772b6d71ddb18cc302194cf3b206e54c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=3f82a424b39f70f2797420725533d41a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=b850519e9c85409b6ef1bed8d8adc0a6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=b5b7f614adc5d4ad1cdea8bebf07bf5c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=e45632d16fdec80aa1ef697d836e0f93 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:45 INFO udp link drop summary link_id=55ce54f481103b554fb19a30fc937a78 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=a73762fc8dce707983866f1bdba3d7c7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=131106f7fe411f6608f7a2ca5dd17bae window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=9336822a32c2c8d3f44d836680b8fdbe window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=201fe1928a2a5d15e4283a0ccaaf3a2c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 163510708 ns/op	 410.42 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	2026/11/06 04:24:46 INFO udp link drop summary link_id=6244fdabb0a1b1df9887415d741c85b2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=c2991ba2fd14abe03d60810f8e6ce666 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=307f8a22ff7f95a52ab782e9d6c1b483 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=670c316d0158a682b669a5fb88bf0e69 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=72edd1b99a61c8dcea4e60b594f72640 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=27fbcc99fd97db07b302d4438083461d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=21545bdaf8be364ec42acbb252a07733 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:46 INFO udp link drop summary link_id=e4f752f0e6eb82f6aa8b67386d7061c4 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=0b12b053b33eda088dcc206a34e68a53 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=42712b4e05f671b80056f88142c74b7e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=79b94237eac280e5494260d471e402bc window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=64e1c986ba13d2b829edef3e3a469bf6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=2854934a408d710f23b26ff2b4fc6227 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=594b2c030d6545ed74e0400f18d331e0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=006085e472c686e8a35b35cacef904c9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=557dafbdab043c2ec6b183eb338415d3 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 168793562 ns/op	 397.58 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/forward-4            	2026/11/06 04:24:47 INFO udp link drop summary link_id=1ce986f3198425b3b3df070a2152e05a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:47 INFO udp link drop summary link_id=33de1edf81ae46e6dbd8c6cdeb9e03b6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=0cdc2862002e3f0137b9be6978efe805 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=2d395e51cf14a735434134a73f2d4db6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=77f3c2a464c8911750b268cfab1bac8d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=07f3960ec21ec12a98d5ccc9af91fc1e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=d5dbaf138097e6e3de529947d92cb308 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=31211e888a3523e1256e7dc1f3202935 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=43451cd5f37591cfcc37c7291412b781 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=db7b9b80816c4b70d132ad5fece98fbf window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=b2dd0e3de595bca9df2755fd430be964 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=19b9a29d2aecf60208495fb3a3b5e49a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=13d310889eeae5550b3b90a09126a4a7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=1a607912f44fa5b745c8a5c12fb8d46d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=25efec38469bb71ae11c505ee725f4a4 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:48 INFO udp link drop summary link_id=8f7fa8e27d9262b5eb7543c7272c210a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 167108315 ns/op	 401.59 MB/s
+2026/11/06 04:24:49 INFO udp link drop summary link_id=cd0f62ccd72534b6d66de920795f2c7b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=89dedc40ad9b810726f89b7451cc371f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	2026/11/06 04:24:49 INFO udp link drop summary link_id=42542cce6c8b5cf35358cacd8dd44d1c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=f3443326048aba3be75235ca66f6a4be window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=502868fb4227253f5918205e33780a42 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=7a60e5aacf9919f5c48b2e878f564229 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=463faa09bd3438bb604151393e500687 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=b0371598ac7322453b5efb0e66173dad window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=f788866b34f6828ce71a23cd9aa87e92 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:49 INFO udp link drop summary link_id=c7015b5486022a2f6143df93dbc32a90 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=5efd70a8611d218e6e531444fc578b8d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=24df3cf8a45d250aec438e2b6536b73a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=f67dbfaa82fab365a7578862c2a14f21 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=13a0043944b8d5998ee52c78fd86ab9a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=74e319441bd5aaad77942ba2af45ec40 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=d1a0dd35513aad014fe96f140cc64ee1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 169965057 ns/op	 394.84 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	2026/11/06 04:24:50 INFO udp link drop summary link_id=9b73d06188f669795f5d9f792329dfcb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=80080cd3874f5c0c5177e4f040efa4b3 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=24744f7424c8a135a8f345d384ed7fab window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=dc47c4d56d999ea59c079f1ad5fbace8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=2c5121ea7b1e5c1679543368f36eafc5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:50 INFO udp link drop summary link_id=2f2962671aa089eafa530b819e10e4f7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=4f81fad19940214b4ff9629eae99527b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=086d8bd9ff1091bd1fb4e83adceae61b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=14d5b8c73f0c01d2916a2638c42fad42 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=398253981bd691c33f418921023a335f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=ebc76e6be5dd8789dfd590cd6403f735 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=abee0c667a883399e7fd6fdfd76a9878 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=f05c96022a061c3fad02b64118e3ba70 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=99f39036d3023e042d5b5bef61a8e3fc window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=99d1956bd697296383c94e5d7df3e130 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=bd3d49631eb77f13c64d06ddac6fa543 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 165014440 ns/op	 406.68 MB/s
+BenchmarkVLinkTCPThroughput/vlink-mux/reverse-established-4         	2026/11/06 04:24:51 INFO udp link drop summary link_id=5af2848c2c64dcb806379067b79e96aa window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:51 INFO udp link drop summary link_id=e85be7fe8bd2be7f5467faadb24b5637 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=67a51ce7db3320fa79f6f95d23239d71 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=9c82e77a6ddf41f2d04f8116f028c431 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=aa846452ced14a6cc5afd8a061c3d81b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=cd06ea4dc113fa6be3535041de7cc0ad window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=923ba7631b23c842a47aa746436c0c43 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=3e67d9a759c768856f55a94f4ccc8329 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=28081649dec2ba3bd0a28545af96fa4a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=edcc972141ca992934bb13823086cd6a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=c8ad5e803649ef4bd9cdcd349541573c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=8a5e79a0085a9d9d0633e79befb685d9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=ffd8e68f7099239ab22eb600d8e61a90 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:52 INFO udp link drop summary link_id=271a30097f845a28f8564bcb7232c313 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=17828d6194538a56d1fc935571a67905 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=b9165f881b4f9935e046797b0224a0cb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	 164890574 ns/op	 406.99 MB/s
+2026/11/06 04:24:53 INFO udp link drop summary link_id=b25bc73f0bb3f4245b11c31d50f85983 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=0ca3bdbfb4f108e0df74ed46a3598eba window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+BenchmarkVLinkFirstByte/mux-4                                       	2026/11/06 04:24:53 INFO udp link drop summary link_id=ce4c1e84ffd1d5979030efdcdeb2050d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=90d8c7eca4e1168bac23e586ac7d4c81 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=c042767386b7ede7b347970f86b4ed55 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=c6ca7a2b2756cdcd6c6a7d411922de62 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f993686ad36cf851d527c8c56b61f331 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=80a5586213e75814aa69bdc3dadaf37b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=edea7c0319f1bb15cb669431f8d2cdc8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=7a0a63169d54ff40fa4ec23aaf18c1f5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=14ded635bf1e255780a8a16680b67c51 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=37b04d02fb5805de64ed590e659e168f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=bd312906c567b42c26a3bf7cdce7b4db window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f694bc9ce951f2fab06eaa64c4cb44a1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=91a1e2c48c886fce4da321560fc1d5d8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=12bb9f8dbf59152a18d08f5d5159ac12 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2457571 ns/op	       403.0 median-extra-us	       498.0 median-first-byte-us	        94.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-4                                       	2026/11/06 04:24:53 INFO udp link drop summary link_id=67bf2a5a748b01b5910ea9fa9589e5ef window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=0f55b9e3daa089a9d4ecb5606495cdc5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=ee46d24ccd3aa93b1dca4a770d063eba window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=62321edac6a3836bc0c9a35386b593e2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=b44446614009943d0e68c0934a0afe74 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=1449536d665207f33ed0192747d9224d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=955436a287dbfc0feac8baa911681d09 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=91a291549859b12a6edc337b1c0751ea window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=93bd1732fdbf6ae9ffb45a34a886c3be window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=68c0bed882ecfff3f3c3ed91109b0db5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f751336e8a52317d18002fcf2a09370d window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=c4bde8a69d89212a1a3820d4cfc676c3 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=15eb71a25a931e3e58dd919eaf5a4faa window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=310658ec766ba22e0ffd84d3bf651eb5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=22685fbc2821c2b4318dac3b013a5403 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=9d3d33d158051b8511e8ab578dddd0d5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2176216 ns/op	       326.0 median-extra-us	       415.0 median-first-byte-us	        88.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/mux-4                                       	2026/11/06 04:24:53 INFO udp link drop summary link_id=1829c988d655d2f7889cc92de903027a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=2c66386661b3c27f3387b7ded6bc81db window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=920b1a839bc33d24a9620f6ccf095fc3 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=8f87df2039f6682a7097af108f250569 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=ebfe71b125251c0e9dd7c14898596231 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=d1b24e6b9892d12b4596dd1146f824f0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f8ed5fcf717806e6c551e0caaee3c978 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=079eb6c955397fceac7b0e41946d7561 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=9570a5c3b1913ce192d2ff213d48cfeb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=75a4dc19f52db6ef94b14235dd48f5c2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=d68053ee6420aa839614cc24abc184bc window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=0f84a38d7000944aa0b50e6b0d79dabb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=132f0f747f50c4e8daa5be45e37407e2 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=e34178c0f5e28b2291398fd3298526ee window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=ac79f2719f9a43c4b3792f8e54c51295 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=12a30138d1ba1b113eac0d226484f320 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2122030 ns/op	       328.0 median-extra-us	       419.0 median-first-byte-us	        91.00 median-rtt-sum-us
+2026/11/06 04:24:53 INFO udp link drop summary link_id=07c51180e8fabe179a91de166c7ceac8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=7cf84e0f16132f6b739a43a5782d7639 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	2026/11/06 04:24:53 INFO udp link drop summary link_id=32419bcf44cead2efebb51e5612a9a65 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f3696b0d9186a5031cc5f2cb6dcb2ee1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=119124c1767841df76d67fc394fb2012 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=c64bc4c135d89c9b1e7868a8e6053183 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=4aae17c3fb49aa030e9b0fa82c58f403 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=93286edd31687315f76b5b08e375f38a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f1a64d048a7e792abda7994dd291ab39 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=b98cbd2e2689a9a142b86354a4fd68d6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=9d26ebc7101599f71d7b62ec89755f60 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=9c5bad96f5b54b6eb459bff5df92c1f8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=3f3e8d7294d6d45e1794659a010193a4 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=f1331fa6d2229cbb194df6cf76c57bac window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=32b043b92dbca5cfa176f8fcaa15c262 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=318fe362d8743c90f94c9cd0f11dd4da window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2212048 ns/op	       369.0 median-extra-us	       467.0 median-first-byte-us	        97.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	2026/11/06 04:24:53 INFO udp link drop summary link_id=afdaf7e8baa7e8624bf99e92ccf5ae8c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=088ed69af8e5d6c5493f08e6675e006e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=2910cf1cf3f2c555ce021073f42f6cd4 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=4f5a2dd6d4eb96685ba60002587bd4fb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=41e74a47a6f61ead5f8e8b28de24ead6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=6d45e21b1d44e4930a71431c43b6a715 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=47a580bc0d40648fc3895ced04faa7de window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=31a12cc300580d4bb95659b94f08456f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=544d9ffaeefea593ec8accdfda574040 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=fe74d912da94ec0b15548c2995277ec6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=1dc12f3e4b0691970d2b01e1bf5e6381 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=51247f325f815755c9db96b99ff87fd0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=0e6431d5cd71bf7575e45243dc7fce39 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=97eb427b6be785d69253b8d2ba391f62 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=62f40d92bf2d7fbfac488fece60f49d9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=2248cdd125d243a6c871c4ea8a8a8376 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2146538 ns/op	       313.0 median-extra-us	       408.0 median-first-byte-us	        95.00 median-rtt-sum-us
+BenchmarkVLinkFirstByte/pool-prewarmed-4                            	2026/11/06 04:24:53 INFO udp link drop summary link_id=d42b1c1eae74f5d261309eceb9c1263a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=3dec9a0a9515ad6a653825caa087dac0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=eaccb1afb9fafe05a784b9ab438ba7f8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=aa3dd70638f55389accd5cf83a02ab3b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=693cb75a5c03fb8dc9e7353aa3723a37 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=6943e84ff491ff42c9d09b1c08848022 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=50339a32650f3559b7ae1d90fd12d57c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=eae6eeb3d4990f9ecab96d14d5144c41 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=0e9c41ac9d471cc0ee722a734d9fc741 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=89a2133a8685eceeb41ad397052b501e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=48eda157436f14264d7fca78e24919b7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=64d76c0100c6af899ed9960304e2c54a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=ba44325191f779ee28ded782ad5e17fc window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=afc717ac5f5c6f1ebe065f7dd9bcb902 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=c0d62ed0102972d7d6ad75a5f2d0e570 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 04:24:53 INFO udp link drop summary link_id=cadfb06042b9600c35aa4df221dd3b82 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+       7	   2190582 ns/op	       354.0 median-extra-us	       444.0 median-first-byte-us	        90.00 median-rtt-sum-us
+PASS
+ok  	vortex/engine/vlink	14.185s

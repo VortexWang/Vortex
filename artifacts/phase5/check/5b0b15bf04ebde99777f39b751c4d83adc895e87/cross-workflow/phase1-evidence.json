@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "commit_sha": "5b0b15bf04ebde99777f39b751c4d83adc895e87",
+  "dirty": false,
+  "command": "make phase1-check",
+  "started_at": "2026-11-06T04:23:26Z",
+  "ended_at": "2026-11-06T04:23:44Z",
+  "environment": {
+    "host_os": "Linux",
+    "host_arch": "x86_64",
+    "docker_os": "Ubuntu 24.04.5 LTS",
+    "docker_arch": "amd64"
+  },
+  "image_digest": "\nsha256:64da2e945d11bbaa3403610a79488b9162264dc4bf9c9202c7c9cb4e99cdce7a",
+  "checks": {
+    "python-tests": 0,
+    "lock-check": 0,
+    "contract-check": 1,
+    "requirement-map": 0,
+    "go-tests": 0,
+    "model-report": 0,
+    "evidence-disposition": 0,
+    "docker-build": 0,
+    "network-smoke": 0
+  },
+  "requirements": {
+    "NFR-038": "out-of-scope"
+  },
+  "artifacts": [
+    "runs/20261106T042326Z-2417/contract-check.log",
+    "runs/20261106T042326Z-2417/docker-build.log",
+    "runs/20261106T042326Z-2417/evidence-disposition.log",
+    "runs/20261106T042326Z-2417/go-tests.log",
+    "runs/20261106T042326Z-2417/lock-check.log",
+    "runs/20261106T042326Z-2417/model-report.log",
+    "runs/20261106T042326Z-2417/modelcheck/model-report.json",
+    "runs/20261106T042326Z-2417/network-smoke.log",
+    "runs/20261106T042326Z-2417/python-tests.log",
+    "runs/20261106T042326Z-2417/requirement-map.log",
+    "runs/20261106T042326Z-2417/status.env"
+  ],
+  "status": "failed",
+  "note": "Network fixture is smoke coverage only; Engine throughput, UDP correctness and leak acceptance remain Phase 2."
+}

@@ -92,15 +92,93 @@ Linux full-disk acceptance. No check was skipped and called passed.
 - Actual remote RenewalRequest/Result issuance and application, configurable
   low-water/TTL trigger, minimum retry, original-boundary enforcement and live
   TCP/UDP source-conservation tracer are not complete.
-- The current authorization consumer and fixture issuer still consume/produce
-  legacy 1.0.0/1.1.0. Approved 1.2.0 renewal correlation additionally requires
-  delegation/share references and authenticated source anchoring. Those
-  interfaces overlap the planned 05-12/05-13 adapter/share work. Implement the
-  necessary approved prerequisites before claiming new remote renewal; accepting
-  a correlated legacy payload or stripping share restrictions is insufficient.
+- Authorization 1.2.0 parsing, anchored share-reference storage and correlated
+  successful issuer results are implemented incrementally below. Live negotiated
+  renewal scheduling/transport and negative-result persistence are not yet wired.
+  Full share activation occupancy/CAS and authenticated backend provisioning
+  remain the 05-12/05-13/Phase 6 boundaries; no correlated legacy downgrade is allowed.
 - Authenticated contiguous-confirmation retention (at least seven days),
   disputed/unknown retention, uncertain-age refusal and process-level renewal
   loss/restart/disk/time/revocation fault cases remain open.
 - Protocol fixtures remain test-only; Phase 6 production authority and Phase 4
   performance qualifications are outside these claims. T-05-13/14 and G05-01
   remain open until the complete 05-08 runtime acceptance passes.
+
+
+## Incremental approved authorization 1.2 prerequisites (not plan completion)
+
+Source `adaa38826459e7df9b5d8c25b5bb428f7e4e2b25` adds the already approved
+share/delegation/correlation prerequisites needed by 05-08. This is a necessary
+cross-file extension to the plan's proposed file list, not a new wire contract,
+dependency or claim that 05-12/05-13 were executed.
+
+- `agent/store/share_refs.go`: immutable archived references, independent trusted
+  source anchors and monotonic heads, bounded parent-chain validation, sibling
+  capacity checks, and current-root checks for new admission. Historical valid
+  authorizations retain their original revision while draining. Source roots
+  enter only through `InstallShareSourceAnchor`, a trusted internal provisioning
+  adapter; a received AuthorizationUpdate cannot provision its own root. Finite
+  Store fixtures do not prove an authenticated production provisioning path.
+- `agent/authorization.go` and `agent/control.go`: strict opt-in 1.2 parsing;
+  legacy fields remain isolated. A correlated update requires the exact durable
+  successful response from the selected issuer, current boot, request hash and
+  original rule/source/snapshot/amount/TTL bounds. Nonempty policy transitions
+  remain fail closed pending their runtime slice.
+- `agent/store/issuer.go`: full 1.2 share/delegation binding and exact successful
+  RenewalResult bytes commit in the same FULL transaction as the budget debit.
+  Every new debit checks the current anchored chain again. Duplicate successful
+  requests replay exact persisted bytes; changed request/scope is rejected.
+- Schema 15 is additive. The migration test recreates the prior column/table
+  layout, reopens it and checks that a legacy issued payload remains identical
+  and neither refills nor repeats its debit. This is not a binary rollback or
+  power-loss proof of the entire migration sequence.
+
+`make phase5-check` passed on this SHA in local pinned Go 1.27.3 Linux arm64
+Docker and [Actions 42161832491](https://github.com/VortexWang/Vortex/actions/runs/42161832491)
+Linux amd64. Both have 30 named share/renewal race passes (10 tests repeated
+three times), including anchored-root refusal, changed root fencing, invalid
+chains/sibling capacity, concurrent finite exhaustion, injected write rollback,
+reopen/replay, legacy migration, strict JSON and matching durable request scope.
+These are component/store tests, not the outstanding live TCP/UDP renewal tracer.
+The full existing gate also retained its process, scheduler, journal, Engine and
+real full-disk recovery checks. Both raw recovery sets were independently
+re-audited in pinned Linux: five snapshots and ten faults passed each.
+
+Raw evidence, pair metadata and SHA-256 manifest:
+`artifacts/phase5/check/adaa38826459e7df9b5d8c25b5bb428f7e4e2b25/`.
+Native root tests, Agent/Hub race tests, Engine tests and vet also passed; the
+required Linux disk checks come from Docker/Actions, not macOS.
+
+Open implementation: durable negative issuer results; negotiated live request/
+result handling; low-water/TTL scheduling; real TCP/UDP continuation and fault
+tracer; authenticated contiguous confirmation and >=7-day safe retention.
+After signer-epoch transfer, immutable old share scope currently refuses new
+1.2 issuance until successor provisioning is implemented; it never strips the
+share scope to obtain a legacy grant. T-05-13/14 and G05-01 remain open.
+
+### Cross-workflow findings while validating this increment
+
+Phase 1 run 42161832400 failed because the workflow lacked both complete Git
+history and protoc, as well as the previously documented VLink review-hash
+mismatch. Commit `5b0b15bf04ebde99777f39b751c4d83adc895e87` adds full checkout
+history and the already locked protoc 36.2. Run 42162182135 then passed all
+27 Python tests and every other listed Phase 1 check except the known VLink
+contract hash. The current VLink document hash is
+`bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e`;
+its recorded approval is still `dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52`.
+05-05 explicitly excluded that drift from its control approval. No approval hash,
+wire document or frozen-contract check was weakened to turn it green.
+
+Phase 3 run 42162182082 passed Engine race/fuzz and Docker VLink tests, then
+failed in its benchmark script. The raw benchmark exits PASS but interleaved
+link diagnostics split metric lines; the script's metric extraction cannot find
+all requested values. Its raw output remains diagnostic, not qualified. This
+historical benchmark path is separate from Phase 5's passing accounting and
+runtime checks; no full-repository CI pass is claimed.
+
+Latest validation-only commit `5b0b15bf04ebde99777f39b751c4d83adc895e87` also
+passed the full local Docker gate and [Actions 42162182113](https://github.com/VortexWang/Vortex/actions/runs/42162182113).
+Both raw recovery sets were independently re-audited (five snapshots/ten faults),
+and both have 30 required share/renewal race passes. Evidence, pair manifest and
+cross-workflow failure excerpts are retained under its SHA directory. The earlier
+`adaa388` pair remains retained separately; no result is attributed to another SHA.

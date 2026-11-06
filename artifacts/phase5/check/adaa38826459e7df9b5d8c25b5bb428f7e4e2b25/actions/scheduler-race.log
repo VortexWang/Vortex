@@ -1,0 +1,54 @@
+=== RUN   TestSchedulerProbeThresholdsAndUnsupportedUDP
+--- PASS: TestSchedulerProbeThresholdsAndUnsupportedUDP (0.00s)
+=== RUN   TestSchedulerBoundsConcurrencyAndJoinsCancellation
+--- PASS: TestSchedulerBoundsConcurrencyAndJoinsCancellation (0.00s)
+=== RUN   TestSchedulerKeepsReportResponsiveDuringSlowProbe
+--- PASS: TestSchedulerKeepsReportResponsiveDuringSlowProbe (2.00s)
+=== RUN   TestSchedulerRejectsUnboundedConfiguration
+--- PASS: TestSchedulerRejectsUnboundedConfiguration (0.00s)
+=== RUN   TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority
+--- PASS: TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority (0.43s)
+=== RUN   TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown
+--- PASS: TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown (0.00s)
+=== RUN   TestSchedulerProbeThresholdsAndUnsupportedUDP
+--- PASS: TestSchedulerProbeThresholdsAndUnsupportedUDP (0.00s)
+=== RUN   TestSchedulerBoundsConcurrencyAndJoinsCancellation
+--- PASS: TestSchedulerBoundsConcurrencyAndJoinsCancellation (0.00s)
+=== RUN   TestSchedulerKeepsReportResponsiveDuringSlowProbe
+--- PASS: TestSchedulerKeepsReportResponsiveDuringSlowProbe (2.00s)
+=== RUN   TestSchedulerRejectsUnboundedConfiguration
+--- PASS: TestSchedulerRejectsUnboundedConfiguration (0.00s)
+=== RUN   TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority
+--- PASS: TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority (0.33s)
+=== RUN   TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown
+--- PASS: TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown (0.00s)
+=== RUN   TestSchedulerProbeThresholdsAndUnsupportedUDP
+--- PASS: TestSchedulerProbeThresholdsAndUnsupportedUDP (0.00s)
+=== RUN   TestSchedulerBoundsConcurrencyAndJoinsCancellation
+--- PASS: TestSchedulerBoundsConcurrencyAndJoinsCancellation (0.00s)
+=== RUN   TestSchedulerKeepsReportResponsiveDuringSlowProbe
+--- PASS: TestSchedulerKeepsReportResponsiveDuringSlowProbe (2.00s)
+=== RUN   TestSchedulerRejectsUnboundedConfiguration
+--- PASS: TestSchedulerRejectsUnboundedConfiguration (0.00s)
+=== RUN   TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority
+--- PASS: TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority (0.33s)
+=== RUN   TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown
+--- PASS: TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown (0.00s)
+PASS
+ok  	vortex/agent	8.120s
+=== RUN   TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot
+--- PASS: TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot (0.00s)
+=== RUN   TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot
+--- PASS: TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot (0.00s)
+=== RUN   TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot
+--- PASS: TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot (0.00s)
+PASS
+ok  	vortex/hub	1.017s
+=== RUN   TestNodeReportRejectsUnboundedAndUnknownTelemetry
+--- PASS: TestNodeReportRejectsUnboundedAndUnknownTelemetry (0.00s)
+=== RUN   TestNodeReportRejectsUnboundedAndUnknownTelemetry
+--- PASS: TestNodeReportRejectsUnboundedAndUnknownTelemetry (0.00s)
+=== RUN   TestNodeReportRejectsUnboundedAndUnknownTelemetry
+--- PASS: TestNodeReportRejectsUnboundedAndUnknownTelemetry (0.00s)
+PASS
+ok  	vortex/contracts	1.016s

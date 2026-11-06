@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "commit": "adaa38826459e7df9b5d8c25b5bb428f7e4e2b25",
+  "status": "passed",
+  "scope": "incremental-share-anchors-and-correlated-renewal-storage",
+  "actions_run": 42161832491,
+  "full_plan_complete": false,
+  "production_backend_authority": false,
+  "docker": {
+    "report_sha256": "57e61e74c5c7908764429c5742e6f442c2f1aeded717de5c6075e4cb8aa5d5de",
+    "share_renewal_race_passes": 30
+  },
+  "actions": {
+    "report_sha256": "57e61e74c5c7908764429c5742e6f442c2f1aeded717de5c6075e4cb8aa5d5de",
+    "share_renewal_race_passes": 30
+  }
+}
