@@ -1,0 +1,7 @@
+{
+  "command": "./tools/phase6/dependency_lock_check.sh",
+  "exit_code": 1,
+  "status": "blocked",
+  "source_commit": "6a661137160000a9401920744170f07560353832",
+  "relevant_source_clean": true
+}

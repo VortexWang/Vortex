@@ -1,0 +1,35 @@
+{
+  "status": "blocked",
+  "source_commit": "6a661137160000a9401920744170f07560353832",
+  "docker": {
+    "status": "passed",
+    "architecture": "linux/arm64 native OrbStack",
+    "normal": true,
+    "race": true,
+    "real_processes": true,
+    "clean_committed_clone": true,
+    "tests": [
+      "TestValkeyLossRebuildAllProducedAuthority",
+      "TestTracerRealProcesses",
+      "TestTenantRepositoryScopeAndPlatformAudit",
+      "TestTenantRestrictionsIndependentAndImmutable",
+      "TestTenantPlatformOwnershipGrant",
+      "TestTenantAuditRollbackSharedAuthority",
+      "TestMigrationUpgradeTenantAuthority"
+    ]
+  },
+  "dependency_gate": {
+    "status": "blocked",
+    "exit_code": 1,
+    "reason": "sqlc official generator links non-allowlisted MPL-2.0 mysql driver",
+    "protoc_checksum": "passed",
+    "goose_module_checksum": "passed",
+    "sqlc_checksum_and_two_generation_cmp": "passed",
+    "backend_compiled_license_closure": "24 modules reviewed; Linux amd64/arm64 and host",
+    "generator_full_closure": "not passed"
+  },
+  "actions": "not_run",
+  "caller_checkout_clean": false,
+  "source_balances": "not produced until 06-05; WINDOWS entry remains open",
+  "hub_signer": "blocked; epoch zero; funded forwarding not tested"
+}
