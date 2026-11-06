@@ -8,6 +8,26 @@ import statistics
 from pathlib import Path
 
 
+def validate_timeline(samples, timeline):
+    if not isinstance(timeline, list) or len(timeline) != len(samples):
+        raise ValueError("latency event timeline does not align with samples")
+    required = ("sample", "connect_ms", "send_ms", "first_byte_ms", "complete_ms", "close_ms")
+    for index, event in enumerate(timeline):
+        if not isinstance(event, dict) or event.get("sample") != index:
+            raise ValueError("latency event timeline has invalid sample index")
+        values = []
+        for field in required[1:]:
+            value = event.get(field)
+            if not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+                raise ValueError(f"invalid latency timeline value: {field}")
+            values.append(value)
+        connect, send, first_byte, complete, close = values
+        if not (connect <= first_byte <= complete <= close):
+            raise ValueError("latency event timeline is out of order")
+        if abs(first_byte - samples[index]) > 1e-6:
+            raise ValueError("latency timeline first-byte value differs from sample")
+
+
 def qualify(base):
     reasons, modes, commits = [], {}, set()
     for mode in ("pool", "mux"):
@@ -15,7 +35,9 @@ def qualify(base):
             out = base / mode / "comparison"
             report = json.loads((out / "comparison.json").read_text())
             host = json.loads((out / "runtime-host.json").read_text())
-            samples = json.loads((out / "runtime-latency.json").read_text())["samples_ms"]
+            latency = json.loads((out / "runtime-latency.json").read_text())
+            samples = latency["samples_ms"]
+            validate_timeline(samples, latency.get("timeline"))
             config = json.loads((out / "config/source.json").read_text())
             if host.get("dirty") is not False or host["authorization_mode"] != "runtime-authority" or host["backend"] != "native" or host["system"] != "Linux":
                 reasons.append(f"{mode}: requires clean authorized native Linux evidence")

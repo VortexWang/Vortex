@@ -72,6 +72,10 @@ not the separate Agent runtime configuration contract.
 The mode summary keeps fresh client-connect-to-first-byte separate from the
 userspace segment echo RTT sum. Their subtraction is diagnostic; this alone
 does not qualify NFR-007 or prove that OPEN confirmation adds no network RTT.
+Each latency probe also records a bounded monotonic event timeline per sample
+(connect, send, first byte, complete echo, and close). `latency_gate.py` requires
+that timeline to align with the raw first-byte samples and fail-closes on
+missing, non-finite, or out-of-order events.
 
 Evidence files:
 

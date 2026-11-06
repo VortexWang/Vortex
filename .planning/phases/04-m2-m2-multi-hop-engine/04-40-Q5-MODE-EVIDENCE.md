@@ -23,3 +23,9 @@ VM, the samples are userspace connect-to-first-byte measurements, and the
 formal gate still requires clean native Linux mode pairs and controlled RTT
 evidence. No Agent/Hub persistence latency is included.
 
+The latency probe now retains a per-sample monotonic event timeline from
+connect through send, first byte, complete echo and close. The pool/mux gate
+requires timeline/sample alignment and rejects missing, non-finite or
+out-of-order events. This strengthens the controlled-RTT evidence format but
+does not promote the current OrbStack Docker run to native qualification.
+

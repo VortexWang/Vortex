@@ -2,7 +2,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from latency_gate import qualify
+from latency_gate import qualify, validate_timeline
 
 
 class LatencyGateTests(unittest.TestCase):
@@ -15,7 +15,10 @@ class LatencyGateTests(unittest.TestCase):
             out.mkdir(parents=True)
             self.write(mode, "runtime-host.json", dict(dirty=False, authorization_mode="runtime-authority", backend="native", system="Linux", commit="test-sha"))
             self.write(mode, "config/source.json", dict(transport_mode=mode))
-            self.write(mode, "runtime-latency.json", dict(samples_ms=[7.0] * 50))
+            self.write(mode, "runtime-latency.json", dict(
+                samples_ms=[7.0] * 50,
+                timeline=[dict(sample=i, connect_ms=1.0, send_ms=1.0, first_byte_ms=7.0, complete_ms=8.0, close_ms=9.0) for i in range(50)],
+            ))
             self.write(mode, "comparison.json", dict(commit="test-sha", latency=dict(runtime_minus_segment_sum_ms=2.0), binary_integrity=dict(status="pass"), forged_open=dict(status="pass"), middle_hop_failure=dict(status="pass"), direct_bypass={"relay-2": dict(status="pass"), "destination": dict(status="pass")}))
             for name in ("source", "relay-1", "relay-2", "relay-3", "destination"):
                 self.write(mode, f"rtt-{name}.json", dict(samples_ms=[1.0] * 50, median_ms=1.0))
@@ -37,8 +40,18 @@ class LatencyGateTests(unittest.TestCase):
         self.assertEqual(qualify(self.base)["status"], "not-qualified")
 
     def test_nonfinite_sample_fails(self):
-        self.write("mux", "runtime-latency.json", dict(samples_ms=[float("nan")] * 50))
+        self.write("mux", "runtime-latency.json", dict(samples_ms=[float("nan")] * 50, timeline=[]))
         self.assertEqual(qualify(self.base)["status"], "not-qualified")
+
+    def test_missing_timeline_fails_closed(self):
+        self.write("mux", "runtime-latency.json", dict(samples_ms=[7.0] * 50))
+        self.assertEqual(qualify(self.base)["status"], "not-qualified")
+
+    def test_timeline_must_match_first_byte_sample(self):
+        timeline = [dict(sample=i, connect_ms=1.0, send_ms=1.0, first_byte_ms=7.0, complete_ms=8.0, close_ms=9.0) for i in range(50)]
+        timeline[4]["complete_ms"] = 6.0
+        with self.assertRaises(ValueError):
+            validate_timeline([7.0] * 50, timeline)
 
     def test_diagnostic_authority_fails(self):
         self.write("pool", "runtime-host.json", dict(dirty=False, authorization_mode="qualification-only", backend="native", system="Linux", commit="test-sha"))
