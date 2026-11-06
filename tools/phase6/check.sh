@@ -60,6 +60,7 @@ if test "$result" -eq 0; then
 fi
 git status --porcelain=v1 > "$out/source-status-after.txt"
 if test -s "$out/source-status-after.txt"; then result=1; fi
+if test "$(git rev-parse HEAD)" != "$expected"; then result=1; fi
 python3 - "$out" "$expected" "$produce" "$through" "$result" <<'PY'
 import hashlib,json,os,pathlib,platform,sys
 out,sha,host,through,result=sys.argv[1:]
