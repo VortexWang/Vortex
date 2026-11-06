@@ -2,6 +2,10 @@
 set -eu
 
 mode=${BACKEND:-native}
+case "${PHASE4_TEST_ISSUER_RENEWAL_ONLY:-0}" in 0|1) ;; *) echo 'invalid renewal-only option' >&2; exit 2 ;; esac
+if [ "${PHASE4_TEST_ISSUER_RENEWAL_ONLY:-0}" = 1 ] && [ -z "${PHASE4_TEST_ISSUER_DELAY:-}" ]; then
+ echo 'renewal-only requires issuer delay' >&2; exit 2
+fi
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 out=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 "$root/tools/phase4/generate-qualification.sh" "$mode" "$out"
@@ -68,6 +72,7 @@ for name in source relay-1 relay-2 relay-3 destination; do
   set -- --config "$out/config/$name.json"
   if [ "$name" = source ] && [ -n "${PHASE4_TEST_ISSUER_DELAY:-}" ]; then
     set -- "$@" --test-issuer-delay "$PHASE4_TEST_ISSUER_DELAY"
+    if [ "${PHASE4_TEST_ISSUER_RENEWAL_ONLY:-0}" = 1 ]; then set -- "$@" --test-issuer-renewal-only; fi
   fi
   if [ "${CPU_PROFILE:-0}" = 1 ]; then
     "$bin" "$@" --cpu-profile "$out/$name.pprof" >"$out/logs/$name.log" 2>&1 &

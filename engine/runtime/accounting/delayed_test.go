@@ -116,3 +116,39 @@ func TestDelayedIssuerCallerCancellationKeepsRequest(t *testing.T) {
 	}
 	conserved(t, g.Credit)
 }
+
+func TestDelayedRenewalSeparatesColdStartFromRenewalDeadline(t *testing.T) {
+	ctx := context.Background()
+	g, err := NewDelayedRenewalCreditGate(ctx, CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	s, err := g.Open(ctx, core.Flow{Key: "flow"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for i := 0; i < 128; i++ {
+		b, e := s.Reserve(ctx, core.LeftToRight, 1)
+		if e != nil {
+			t.Fatalf("initial grant byte %d: %v", i, e)
+		}
+		if e = b.Commit(ctx, 1); e != nil {
+			t.Fatal(e)
+		}
+	}
+	_, err = s.Reserve(ctx, core.LeftToRight, 1)
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("renewal bypassed wait limit: %v", err)
+	}
+	state := g.Credit.State()
+	if state.Grants != 1 || state.Used != 128 || state.PendingGrant != 90 || state.Waits.TimedOut != 1 {
+		t.Fatal(state)
+	}
+	g.Close()
+	conserved(t, g.Credit)
+	if g.Credit.State().UnknownGrant != 90 {
+		t.Fatal("shutdown lost pending renewal", g.Credit.State())
+	}
+}

@@ -13,17 +13,19 @@ import (
 // measured response delay, not a network or durable authority. Caller timeout
 // does not prove non-issuance; the delayed reply can still settle its request.
 type DelayedCreditGate struct {
-	Credit  *CreditGate
-	delay   time.Duration
-	ctx     context.Context
-	cancel  context.CancelFunc
-	mu      sync.Mutex
-	pending string
-	changed chan struct{}
-	serial  uint64
-	workers sync.WaitGroup
-	closed  bool
-	waiters chan struct{}
+	Credit       *CreditGate
+	delay        time.Duration
+	initialDelay time.Duration
+	issued       uint64
+	ctx          context.Context
+	cancel       context.CancelFunc
+	mu           sync.Mutex
+	pending      string
+	changed      chan struct{}
+	serial       uint64
+	workers      sync.WaitGroup
+	closed       bool
+	waiters      chan struct{}
 }
 
 func NewDelayedCreditGate(parent context.Context, c CreditConfig, delay time.Duration) (*DelayedCreditGate, error) {
@@ -36,8 +38,21 @@ func NewDelayedCreditGate(parent context.Context, c CreditConfig, delay time.Dur
 	}
 	credit.observeWaits = true
 	ctx, cancel := context.WithCancel(parent)
-	return &DelayedCreditGate{Credit: credit, delay: delay, ctx: ctx, cancel: cancel, changed: make(chan struct{}), waiters: make(chan struct{}, 128)}, nil
+	return &DelayedCreditGate{Credit: credit, delay: delay, initialDelay: delay, ctx: ctx, cancel: cancel, changed: make(chan struct{}), waiters: make(chan struct{}, 128)}, nil
 }
+
+// NewDelayedRenewalCreditGate supplies the first finite grant without injected
+// delay, isolating subsequent renewal pressure from cold-start timeout.
+// It is an experiment mode, not a change to the 200ms admission deadline.
+func NewDelayedRenewalCreditGate(parent context.Context, c CreditConfig, delay time.Duration) (*DelayedCreditGate, error) {
+	g, err := NewDelayedCreditGate(parent, c, delay)
+	if err != nil {
+		return nil, err
+	}
+	g.initialDelay = 0
+	return g, nil
+}
+
 func (g *DelayedCreditGate) request() (chan struct{}, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -56,11 +71,16 @@ func (g *DelayedCreditGate) request() (chan struct{}, error) {
 		return nil, nil
 	}
 	g.pending = id
+	delay := g.delay
+	if g.issued == 0 {
+		delay = g.initialDelay
+	}
+	g.issued++
 	changed := g.changed
 	g.workers.Add(1)
 	go func() {
 		defer g.workers.Done()
-		timer := time.NewTimer(g.delay)
+		timer := time.NewTimer(delay)
 		defer timer.Stop()
 		outcome := GrantAccepted
 		select {

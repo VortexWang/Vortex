@@ -34,6 +34,7 @@ func main() {
 	role := flag.String("role", "", "optional role override")
 	cpuProfile := flag.String("cpu-profile", "", "optional diagnostic CPU profile file")
 	issuerDelay := flag.Duration("test-issuer-delay", 0, "explicit source-only process-local qualification issuer response delay")
+	renewalOnly := flag.Bool("test-issuer-renewal-only", false, "skip injected delay on first finite grant only")
 	flag.Parse()
 	if *cpuProfile != "" {
 		file, err := os.Create(*cpuProfile)
@@ -58,6 +59,9 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	if *renewalOnly && *issuerDelay == 0 {
+		fatal("renewal-only requires test-issuer-delay")
+	}
 	if *issuerDelay != 0 && (cfg.Role != config.RoleSource || cfg.SourceCredit == nil || cfg.EvidenceFile == "") {
 		fatal("test issuer delay requires source credit and evidence output")
 	}
@@ -124,12 +128,16 @@ func main() {
 		sourceGate = credit
 		var stopIssuer func()
 		if *issuerDelay != 0 {
-			delayed, err := runtimeaccounting.NewDelayedCreditGate(ctx, *cfg.SourceCredit, *issuerDelay)
+			constructor := runtimeaccounting.NewDelayedCreditGate
+			if *renewalOnly {
+				constructor = runtimeaccounting.NewDelayedRenewalCreditGate
+			}
+			delayed, err := constructor(ctx, *cfg.SourceCredit, *issuerDelay)
 			if err != nil {
 				fatal(err.Error())
 			}
 			credit, sourceGate, stopIssuer = delayed.Credit, delayed, delayed.Close
-			slog.Info("qualification delayed issuer", "delay", *issuerDelay, "wait_limit", "200ms", "scope", "process-local")
+			slog.Info("qualification delayed issuer", "delay", *issuerDelay, "renewal_only", *renewalOnly, "wait_limit", "200ms", "scope", "process-local")
 		}
 		defer func() {
 			if stopIssuer != nil {
