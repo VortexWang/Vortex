@@ -25,6 +25,12 @@ for the tested finite case only. It does not qualify remote issuance,
 persistent authority, formal performance, or D-04 locking; see
 `04-35-REJECTED-RENEWAL-EVIDENCE.md`.
 
+The complementary delayed-accepted case also passes: a caller timeout leaves
+the exact pending request occupied until its late accepted reply arrives, then
+the grant settles once and can be consumed. This is finite adapter recovery
+evidence only; it does not qualify a remote issuer or durable authority. See
+`04-36-LATE-ACCEPTED-RENEWAL-EVIDENCE.md`.
+
 ## Prior reconciliation — Plan 04-12
 
 The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).

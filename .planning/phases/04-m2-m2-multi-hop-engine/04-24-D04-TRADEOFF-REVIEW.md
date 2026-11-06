@@ -168,3 +168,14 @@ sessions/held/pending 均零；unknown_grant 非零，因此不得称“全部�
 该证据补齐了拒绝结果与 unknown 结果的语义分界，仍不代表远端签发、丢失
 回执恢复或持久化权威。正式性能资格、D-04 锁定和 Agent/Hub 持久化债务
 保持未完成。详见 `04-35-REJECTED-RENEWAL-EVIDENCE.md`。
+
+## 迟到 accepted 回执的适配器证据（further runtime slice）
+
+新增 `TestDelayedIssuerLateAcceptedRenewalSettlesOnce`，在 300ms 进程内
+issuer 延迟下先触发 200ms caller timeout，再等待原 request 的 accepted
+回执。pending 不提前释放；迟到回执只增加一个 grant，随后 1 字节可继续
+消费，grant record 不重复增加，额度守恒保持成立。
+
+该结果补齐了“超时不等于未签发”的有限语义，但仍不代表网络签发、持久化
+回执恢复或 D-04 生产参数锁定。详见
+`04-36-LATE-ACCEPTED-RENEWAL-EVIDENCE.md`。

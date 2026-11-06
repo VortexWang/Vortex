@@ -164,6 +164,65 @@ func TestDelayedIssuerTimeoutDoesNotReleasePending(t *testing.T) {
 	}
 	conserved(t, g.Credit)
 }
+
+func TestDelayedIssuerLateAcceptedRenewalSettlesOnce(t *testing.T) {
+	ctx := context.Background()
+	g, err := NewDelayedRenewalCreditGate(ctx, CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, 300*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	s, err := g.Open(ctx, core.Flow{Key: "late-accepted-renewal"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for range 128 {
+		b, e := s.Reserve(ctx, core.LeftToRight, 1)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = b.Commit(ctx, 1); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if _, err = s.Reserve(ctx, core.LeftToRight, 1); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("expected bounded renewal timeout: %v", err)
+	}
+	timeoutState := g.Credit.State()
+	if timeoutState.PendingGrant != 90 || timeoutState.UnknownGrant != 0 || timeoutState.Grants != 1 || timeoutState.Used != 128 {
+		t.Fatalf("timeout released or duplicated renewal: %+v", timeoutState)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	var settled CreditState
+	for {
+		state := g.Credit.State()
+		if state.PendingGrant == 0 {
+			settled = state
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("late accepted renewal did not settle: %+v", state)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if settled.Available != 90 || settled.UnknownGrant != 0 || settled.Grants != 2 || settled.GrantRecords != 2 || settled.Used != 128 {
+		t.Fatalf("late accepted renewal settled incorrectly: %+v", settled)
+	}
+	b, err := s.Reserve(ctx, core.LeftToRight, 1)
+	if err != nil {
+		t.Fatalf("late grant was not reusable: %v", err)
+	}
+	if err = b.Commit(ctx, 1); err != nil {
+		t.Fatal(err)
+	}
+	final := g.Credit.State()
+	if final.Used != 129 || final.Grants != 2 || final.GrantRecords != 2 || final.UnknownGrant != 0 {
+		t.Fatalf("late grant was replayed or lost: %+v", final)
+	}
+	conserved(t, g.Credit)
+}
+
 func TestDelayedIssuerCallerCancellationKeepsRequest(t *testing.T) {
 	g := delayedFixture(t, 40*time.Millisecond)
 	ctx := context.Background()
