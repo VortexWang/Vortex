@@ -1,0 +1,10 @@
+{
+  "source_sha": "061ffb5577a726b0431d2de9697850d86be061ef",
+  "clean_checkout": true,
+  "host": "macOS-26.6.2-arm64-arm-64bit",
+  "host_arch": "arm64",
+  "go": "go version go1.27.3 darwin/arm64",
+  "docker_server": "29.8.2",
+  "container_arch": "arm64",
+  "systemd": "not available on macOS; required Ubuntu Actions result separate"
+}

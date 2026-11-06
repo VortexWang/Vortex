@@ -1,0 +1,18 @@
+=== RUN   TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello
+--- PASS: TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello (0.02s)
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/hello
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/tls
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/node
+--- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/hello (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/tls (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/node (0.00s)
+PASS
+ok  	vortex/engine/runtime/link	1.037s
+=== RUN   TestIdentityAdmissionRejectsNewOpenWithoutClosingExistingStreams
+2026/11/06 08:19:56 INFO udp link drop summary link_id=1983df2838f0640bb8e0c9b62b72c627 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:19:56 INFO udp link drop summary link_id=3b4f7c713e3f05db4e02a046ddf459bb window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestIdentityAdmissionRejectsNewOpenWithoutClosingExistingStreams (0.00s)
+PASS
+ok  	vortex/engine/vlink	1.018s

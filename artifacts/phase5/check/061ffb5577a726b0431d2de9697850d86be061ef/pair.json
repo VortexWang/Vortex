@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "source_sha": "061ffb5577a726b0431d2de9697850d86be061ef",
+  "scope": "05-10-node-commands-drain-deployment",
+  "production_backend_authority": false,
+  "docker": {
+    "architecture": "arm64",
+    "report": "docker/report.json",
+    "deployment": "deployment-docker/report.json",
+    "systemd": "unavailable"
+  },
+  "actions": {
+    "architecture": "amd64",
+    "run_id": 42186204143,
+    "url": "https://github.com/VortexWang/Vortex/actions/runs/42186204143",
+    "report": "actions/report.json",
+    "deployment": "actions/deployment/report.json",
+    "systemd_verify": "passed"
+  }
+}

@@ -1,0 +1,183 @@
+=== RUN   TestConcurrentCommitAbortHasOneOutcome
+--- PASS: TestConcurrentCommitAbortHasOneOutcome (0.00s)
+=== RUN   TestTransactionIdentityAndUnknownAbort
+--- PASS: TestTransactionIdentityAndUnknownAbort (0.00s)
+=== RUN   TestActiveCommitIsIdempotent
+--- PASS: TestActiveCommitIsIdempotent (0.00s)
+=== RUN   TestIdempotentUnknownAndFencing
+--- PASS: TestIdempotentUnknownAndFencing (0.00s)
+PASS
+ok  	vortex/engine/apply	1.020s
+=== RUN   TestBatchCommitResolvesOnceWithAcceptedBytes
+--- PASS: TestBatchCommitResolvesOnceWithAcceptedBytes (0.00s)
+=== RUN   TestBatchReturnAndUnknownKeepReservedAmount
+=== RUN   TestBatchReturnAndUnknownKeepReservedAmount/returned
+=== RUN   TestBatchReturnAndUnknownKeepReservedAmount/unknown
+--- PASS: TestBatchReturnAndUnknownKeepReservedAmount (0.00s)
+    --- PASS: TestBatchReturnAndUnknownKeepReservedAmount/returned (0.00s)
+    --- PASS: TestBatchReturnAndUnknownKeepReservedAmount/unknown (0.00s)
+=== RUN   TestBatchResolverFailureBecomesUnknownAndCannotRetry
+--- PASS: TestBatchResolverFailureBecomesUnknownAndCannotRetry (0.00s)
+=== RUN   TestBatchRejectsInvalidAmounts
+--- PASS: TestBatchRejectsInvalidAmounts (0.00s)
+=== RUN   TestSnapshotRejectsCoefficientOrIDReuse
+--- PASS: TestSnapshotRejectsCoefficientOrIDReuse (0.00s)
+PASS
+ok  	vortex/engine/accounting	1.017s
+?   	vortex/engine/runtime	[no test files]
+=== RUN   TestCreditBookSelectionPinsExistingSessions
+--- PASS: TestCreditBookSelectionPinsExistingSessions (0.00s)
+=== RUN   TestCreditBookPreallocatesFundingAndCopiesBindings
+--- PASS: TestCreditBookPreallocatesFundingAndCopiesBindings (0.00s)
+=== RUN   TestCreditBookLateGrantStaysWithOldSnapshot
+--- PASS: TestCreditBookLateGrantStaysWithOldSnapshot (0.00s)
+=== RUN   TestCreditBookSelectionNeverReleasesUnknownLiability
+--- PASS: TestCreditBookSelectionNeverReleasesUnknownLiability (0.00s)
+=== RUN   TestCreditGatePersistsUsageBeforeSettlingReservation
+--- PASS: TestCreditGatePersistsUsageBeforeSettlingReservation (0.00s)
+=== RUN   TestCreditGateFreezesWhenDurableUsageWriteFails
+--- PASS: TestCreditGateFreezesWhenDurableUsageWriteFails (0.00s)
+=== RUN   TestCreditGateDoesNotReturnWritableBatchWhenPrewriteFails
+--- PASS: TestCreditGateDoesNotReturnWritableBatchWhenPrewriteFails (0.00s)
+=== RUN   TestCreditExhaustionRenewalAndDirections
+--- PASS: TestCreditExhaustionRenewalAndDirections (0.00s)
+=== RUN   TestCreditUnknownAndPendingSurviveClose
+--- PASS: TestCreditUnknownAndPendingSurviveClose (0.00s)
+=== RUN   TestCreditReturnedPartialAndCancelledReservations
+--- PASS: TestCreditReturnedPartialAndCancelledReservations (0.00s)
+=== RUN   TestCreditConcurrentBudgetCannotBeReissued
+--- PASS: TestCreditConcurrentBudgetCannotBeReissued (0.00s)
+=== RUN   TestCreditZeroBudgetAndIndependentSnapshotAuthority
+--- PASS: TestCreditZeroBudgetAndIndependentSnapshotAuthority (0.00s)
+=== RUN   TestCreditReclaimsOnlyIdleTailsAcrossSessions
+--- PASS: TestCreditReclaimsOnlyIdleTailsAcrossSessions (0.00s)
+=== RUN   TestGrantUnknownLateResponseAndIdentity
+--- PASS: TestGrantUnknownLateResponseAndIdentity (0.00s)
+=== RUN   TestGrantRejectedProofAndGrantIDReuse
+--- PASS: TestGrantRejectedProofAndGrantIDReuse (0.00s)
+=== RUN   TestGrantRequestsBoundedAndCancelled
+--- PASS: TestGrantRequestsBoundedAndCancelled (0.01s)
+=== RUN   TestEventChunksPreserveOrderSnapshotAndCapacity
+--- PASS: TestEventChunksPreserveOrderSnapshotAndCapacity (0.55s)
+=== RUN   TestUnknownOutcomeRetainsReservation
+--- PASS: TestUnknownOutcomeRetainsReservation (0.00s)
+=== RUN   TestPolicyWindowRequiresPreissueAndLeaseCoverage
+--- PASS: TestPolicyWindowRequiresPreissueAndLeaseCoverage (0.00s)
+=== RUN   TestPolicyBoundarySwitchesAtTAndRejectsMissingSnapshot
+--- PASS: TestPolicyBoundarySwitchesAtTAndRejectsMissingSnapshot (0.00s)
+=== RUN   TestPolicyBoundaryPausesExistingSessionThenResumesSameSession
+--- PASS: TestPolicyBoundaryPausesExistingSessionThenResumesSameSession (0.00s)
+=== RUN   TestPolicyBoundaryRejectsExcessUncertaintyAndHardDeadline
+--- PASS: TestPolicyBoundaryRejectsExcessUncertaintyAndHardDeadline (0.00s)
+=== RUN   TestPolicyBoundaryRecoversWithinTwelveSecondProtectionBand
+--- PASS: TestPolicyBoundaryRecoversWithinTwelveSecondProtectionBand (0.00s)
+=== RUN   TestPolicyBoundaryDoesNotReleaseOldUnknownLiability
+--- PASS: TestPolicyBoundaryDoesNotReleaseOldUnknownLiability (0.00s)
+=== RUN   TestShareGateAcquiresBeforeOpenAndReleasesExactlyOnce
+--- PASS: TestShareGateAcquiresBeforeOpenAndReleasesExactlyOnce (0.00s)
+=== RUN   TestShareGateRollsBackShareIfInnerOpenFails
+--- PASS: TestShareGateRollsBackShareIfInnerOpenFails (0.00s)
+=== RUN   TestShareGateRejectsExpiredLeaseBeforeAcquiring
+--- PASS: TestShareGateRejectsExpiredLeaseBeforeAcquiring (0.00s)
+PASS
+ok  	vortex/engine/runtime/accounting	1.587s
+=== RUN   TestLoadFileRejectsUnknownFields
+--- PASS: TestLoadFileRejectsUnknownFields (0.00s)
+=== RUN   TestValidateRoleAndRequiredPeer
+--- PASS: TestValidateRoleAndRequiredPeer (0.00s)
+=== RUN   TestUDPServiceListenIsOptionalAndSourceOnly
+--- PASS: TestUDPServiceListenIsOptionalAndSourceOnly (0.00s)
+=== RUN   TestSourceRequiresFundedGateOutsideQualificationMode
+--- PASS: TestSourceRequiresFundedGateOutsideQualificationMode (0.00s)
+=== RUN   TestSourceCreditRejectsUngatedCombinations
+--- PASS: TestSourceCreditRejectsUngatedCombinations (0.00s)
+=== RUN   TestSourceCreditBookPinsExecutionAndBillingBindings
+--- PASS: TestSourceCreditBookPinsExecutionAndBillingBindings (0.00s)
+=== RUN   TestPolicyWindowRequiresExplicitBookAndBoundedIssuer
+--- PASS: TestPolicyWindowRequiresExplicitBookAndBoundedIssuer (0.00s)
+=== RUN   TestShareRequiresFencingAndLeaseInputs
+--- PASS: TestShareRequiresFencingAndLeaseInputs (0.00s)
+=== RUN   TestTransportBoundsRejectUnsupportedAndUnboundedModes
+--- PASS: TestTransportBoundsRejectUnsupportedAndUnboundedModes (0.00s)
+PASS
+ok  	vortex/engine/runtime/config	1.018s
+=== RUN   TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello
+--- PASS: TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello (0.01s)
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/hello
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/tls
+=== RUN   TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/node
+--- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/hello (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/tls (0.00s)
+    --- PASS: TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake/node (0.00s)
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/unlisted
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/target
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/candidate
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/identity
+=== RUN   TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/same-generation
+--- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial (0.00s)
+    --- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/unlisted (0.00s)
+    --- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/target (0.00s)
+    --- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/candidate (0.00s)
+    --- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/identity (0.00s)
+    --- PASS: TestRouteReloadRejectsUnauthorizedMutationsBeforeDial/same-generation (0.00s)
+=== RUN   TestOldGenerationAdmissionAndLeaseDrain
+2026/11/06 08:22:57 INFO runtime route drained generation=1
+--- PASS: TestOldGenerationAdmissionAndLeaseDrain (0.00s)
+=== RUN   TestSupervisorRequiresConfiguredIdentity
+--- PASS: TestSupervisorRequiresConfiguredIdentity (0.00s)
+PASS
+ok  	vortex/engine/runtime/link	1.031s
+=== RUN   TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown
+=== RUN   TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/1/short-nil
+2026/11/06 08:22:57 INFO udp link drop summary link_id=22c598d784632017f05675e52f586784 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=d2f8cbd1ca68852abb47066eae53d29b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/1/short-error
+2026/11/06 08:22:57 INFO udp link drop summary link_id=1440fe20b102e8555a783816c0f8e26b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=eef8465a9538d26e7ab83bb86ca30b3c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/2/short-nil
+2026/11/06 08:22:57 INFO udp link drop summary link_id=4cfe6fcb04c472d62d5239eda23f6485 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=326f3bd0338b908f7220f655d530f23b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/2/short-error
+2026/11/06 08:22:57 INFO udp link drop summary link_id=d92163d6c7d78f4d1dfc8c0016019a71 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=0ff4e762eda705f684ffc9845f5bcace window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown (0.07s)
+    --- PASS: TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/1/short-nil (0.02s)
+    --- PASS: TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/1/short-error (0.02s)
+    --- PASS: TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/2/short-nil (0.02s)
+    --- PASS: TestRuntimeAmbiguousTargetWriteRetainsUnknownAfterShutdown/2/short-error (0.02s)
+=== RUN   TestSourceFirstTargetByteObserverIgnoresClientRequest
+2026/11/06 08:22:57 INFO udp link drop summary link_id=cea2378f111f2a7268212fb46f31879f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=d2d0f279f60e5a05b83f9503117dfb77 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSourceFirstTargetByteObserverIgnoresClientRequest (0.02s)
+=== RUN   TestBridgeConnWithoutGateRejectsBeforeTargetWrite
+2026/11/06 08:22:57 INFO udp link drop summary link_id=c4ce0a1556ea1d697e9e59cc43ba4ce1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=3cc03408d7dde7e1431506032aea3438 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestBridgeConnWithoutGateRejectsBeforeTargetWrite (0.01s)
+=== RUN   TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority
+=== RUN   TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority/zero=false
+2026/11/06 08:22:57 INFO udp link drop summary link_id=c2a75ad214c6145a23c22737e3f55e3c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=a1ac7f31b99f98988b742778738843c0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority/zero=true
+2026/11/06 08:22:57 INFO udp link drop summary link_id=a0f28a30f56bd1f6e918e8d579ceacfa window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=8ab00e2039b72375bed66380f7ebfff8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority (0.03s)
+    --- PASS: TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority/zero=false (0.02s)
+    --- PASS: TestRuntimeCreditDenialAndUnknownConserveFiniteAuthority/zero=true (0.02s)
+=== RUN   TestDrainRejectsNewOpenOnEstablishedMux
+2026/11/06 08:22:57 INFO udp link drop summary link_id=71460d15bf0ebe1bf82a5e9644c3a311 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 08:22:57 INFO udp link drop summary link_id=da902c269055f06d095ae5ef583f93ee window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestDrainRejectsNewOpenOnEstablishedMux (0.01s)
+=== RUN   TestDrainWaitsForWorkerAndDoesNotInventCleanup
+--- PASS: TestDrainWaitsForWorkerAndDoesNotInventCleanup (0.02s)
+=== RUN   TestStaticPolicyRequiresExplicitQualificationAuthorization
+2026/11/06 08:22:57 WARN vlink OPEN rejected node_id=00000000-0000-0000-0000-000000000001 peer_id=00000000-0000-0000-0000-000000000002 code=2 correlation_id=b9796c2247623860948e9d606bb24cdd
+--- PASS: TestStaticPolicyRequiresExplicitQualificationAuthorization (0.00s)
+PASS
+ok  	vortex/engine/runtime/relay	1.184s
+=== RUN   TestManifestRequiresThreeRelays
+--- PASS: TestManifestRequiresThreeRelays (0.00s)
+PASS
+ok  	vortex/engine/runtime/topology	1.014s

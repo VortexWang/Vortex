@@ -1,0 +1,2 @@
+{"schema": 1, "status": "passed", "snapshots": 5, "fault_cases": 10, "backend": "protocol-test-only"}
+{"schema":1,"status":"passed","commit":"061ffb5577a726b0431d2de9697850d86be061ef","scope":"activation-query-and-hub-handoff","plan_complete":false,"backend":"protocol-test-only"}

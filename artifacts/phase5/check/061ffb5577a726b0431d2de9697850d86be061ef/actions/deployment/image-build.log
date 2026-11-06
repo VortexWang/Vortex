@@ -1,0 +1,109 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 714B done
+#1 DONE 0.0s
+
+#2 [auth] docker/dockerfile:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 0.4s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#4 extracting sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62
+#4 sha256:528c92d70d7e39dbb3dd1c6681f6750c565c7e45b70527cda47c1a61495c1b6a 1.41kB / 1.41kB done
+#4 sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 14.28MB / 14.28MB 0.1s done
+#4 sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 9.08kB / 9.08kB done
+#4 sha256:7b32114e84ca21aeb2d6f871a0b62b3a0762193f75d9afd048ee4cbe889f3148 1.13kB / 1.13kB done
+#4 extracting sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 0.1s done
+#4 DONE 0.2s
+
+#5 [auth] library/golang:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048
+#6 DONE 0.3s
+
+#7 [internal] load build context
+#7 transferring context: 2.12MB 0.1s done
+#7 DONE 0.1s
+
+#8 [build 1/4] FROM docker.io/library/golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048
+#8 resolve docker.io/library/golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048 done
+#8 sha256:5bbe76a31abbe0f1449d7820e550131c020b097c24d3bcfc5ad1231779982c1c 2.32kB / 2.32kB done
+#8 sha256:7fac3b752bd4f060dcf33c0f54d1fad29fce8ff42b8fb544f9ec95372f0933bf 25.63MB / 25.63MB 0.2s done
+#8 sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048 9.70kB / 9.70kB done
+#8 sha256:a301d0a6035630abb8777dd3adcf73ecbb939c0935b4bbfaa687469c316beedf 3.04kB / 3.04kB done
+#8 sha256:a1d156b0aab5fb07d822a7f4681f6d3ed1689073531c34f5668818c233633f11 49.41MB / 49.41MB 0.2s
+#8 sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 8.39MB / 67.82MB 0.2s
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 0B / 102.45MB 0.2s
+#8 sha256:a1d156b0aab5fb07d822a7f4681f6d3ed1689073531c34f5668818c233633f11 49.41MB / 49.41MB 0.2s done
+#8 sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 16.78MB / 67.82MB 0.3s
+#8 extracting sha256:a1d156b0aab5fb07d822a7f4681f6d3ed1689073531c34f5668818c233633f11
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 14.68MB / 71.15MB 0.3s
+#8 sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 34.60MB / 67.82MB 0.4s
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 31.46MB / 71.15MB 0.4s
+#8 sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 67.82MB / 67.82MB 0.5s
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 13.63MB / 102.45MB 0.5s
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 46.14MB / 71.15MB 0.5s
+#8 sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 67.82MB / 67.82MB 0.5s done
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 28.31MB / 102.45MB 0.6s
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 59.77MB / 71.15MB 0.6s
+#8 sha256:5b534a18e2e5f6b1357329d379c890936bcac773dd508384ca3cd87c03f1750c 127B / 127B 0.5s done
+#8 sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 32B / 32B 0.6s done
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 45.09MB / 102.45MB 0.7s
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 71.15MB / 71.15MB 0.7s
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 99.61MB / 102.45MB 0.9s
+#8 sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 71.15MB / 71.15MB 0.7s done
+#8 sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 102.45MB / 102.45MB 0.9s done
+#8 extracting sha256:a1d156b0aab5fb07d822a7f4681f6d3ed1689073531c34f5668818c233633f11 1.6s done
+#8 extracting sha256:7fac3b752bd4f060dcf33c0f54d1fad29fce8ff42b8fb544f9ec95372f0933bf
+#8 extracting sha256:7fac3b752bd4f060dcf33c0f54d1fad29fce8ff42b8fb544f9ec95372f0933bf 0.6s done
+#8 extracting sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c
+#8 extracting sha256:c0168c6e6744fc499abc90618818f9e4aaf652a587fb6345b3882dc57de1495c 2.2s done
+#8 extracting sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f
+#8 extracting sha256:b3560024de9caf4f31eb81decf4a997d9ca03b1ac0657e866593c4b17aac565f 2.2s done
+#8 extracting sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b
+#8 extracting sha256:82e0bb27ae78502103ed383ed33346f88a83943fb7bd93977850d5890ee8fb3b 4.7s done
+#8 extracting sha256:5b534a18e2e5f6b1357329d379c890936bcac773dd508384ca3cd87c03f1750c
+#8 extracting sha256:5b534a18e2e5f6b1357329d379c890936bcac773dd508384ca3cd87c03f1750c done
+#8 extracting sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 done
+#8 DONE 13.4s
+
+#9 [build 2/4] WORKDIR /src
+#9 DONE 0.0s
+
+#10 [build 3/4] COPY . .
+#10 DONE 0.1s
+
+#11 [build 4/4] RUN CGO_ENABLED=0 go build -trimpath -o /out/vortex-node ./cmd/vortex-node
+#11 0.224 go: downloading golang.org/x/sys v0.49.0
+#11 0.224 go: downloading google.golang.org/grpc v1.85.0
+#11 0.241 go: downloading google.golang.org/protobuf v1.36.12
+#11 0.735 go: downloading modernc.org/sqlite v1.61.1
+#11 0.758 go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1
+#11 0.758 go: downloading golang.org/x/net v0.60.0
+#11 1.000 go: downloading golang.org/x/text v0.42.0
+#11 2.256 go: downloading modernc.org/libc v1.79.0
+#11 3.608 go: downloading modernc.org/mathutil v1.7.1
+#11 3.608 go: downloading github.com/google/uuid v1.6.0
+#11 3.608 go: downloading github.com/dustin/go-humanize v1.1.0
+#11 3.608 go: downloading modernc.org/memory v1.12.1
+#11 3.637 go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+#11 DONE 37.5s
+
+#12 [stage-1 1/2] COPY --from=build /out/vortex-node /vortex-node
+#12 DONE 0.0s
+
+#13 [stage-1 2/2] WORKDIR /state
+#13 DONE 0.0s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.2s done
+#14 writing image sha256:38c7797db26b0f427bdd6d2ee91a94a55eccd704db3451364dba70815bf6bccb
+#14 writing image sha256:38c7797db26b0f427bdd6d2ee91a94a55eccd704db3451364dba70815bf6bccb done
+#14 naming to docker.io/library/vortex-node-test:061ffb5577a726b0431d2de9697850d86be061ef done
+#14 DONE 0.2s
