@@ -2467,3 +2467,9 @@ Scope: handshake/library security regressions, not five-process hostile identity
 injection or complete NFR-006. Native Ubuntu/Actions evidence still needed for
 this new test commit. Initial command used the wrong relative directory and
 created no file; only subsequent named test execution is counted.
+
+Clean 0824be8e87f29deb67821764149ffc8d8a805b7e dedicated Ubuntu identity /
+HELLO / freshness race suite repeated three times PASS 16.436s, exit 0, raw
+artifacts/phase4/hello-0824be8/test.log. Local full VLink race suite PASS 6.642s;
+local combined identity suite PASS 6.350s. These demonstrate the listed handshake
+boundaries only; current process attack matrix and Actions remain distinct.
