@@ -1,7 +1,7 @@
 ---
 quick_id: 261106-wk2
 objective: 修正 Phase 4 verification 中已完成 early TCP DATA 与仍未完成 controlled RTT 的状态表述
-status: in_progress
+status: complete
 ---
 
 # Quick Plan

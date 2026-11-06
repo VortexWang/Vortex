@@ -8,6 +8,20 @@ behavior_unverified: 5
 
 # Phase 4 Verification — current qualification review
 
+## Current final-commit audit — 2026-11-07
+
+The final branch commit `000fe6b7d470482152a9be73068d866f9678472e` now has
+current-code evidence for the bounded Q2/Q3/Q4/Q5 slices in
+[04-43-CURRENT-SHA-EVIDENCE.md](04-43-CURRENT-SHA-EVIDENCE.md). Q2's 16-case
+attack matrix and eight recovery cases pass; Q3's snapshot and TCP/UDP credit
+boundaries pass; Q4's 21 candidate trials pass conservation and remain
+`locked=false`; and Docker `pool`/`mux`/`auto` mode regression passes.
+
+These results close the finite implementation and tracer evidence slices only.
+P4-Q1 native formal performance, P4-Q4 production D-04 locking, P4-Q5 native
+controlled RTT, and persistent Agent/Hub authority remain explicitly open.
+The overall verification status therefore remains `gaps_found`.
+
 ## Current scope decision — 2026-11-06
 
 [04-CLOSURE.md](04-CLOSURE.md) defines the current Phase 4 gates P4-Q1..Q5.

@@ -77,7 +77,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Pending Todos
 
-- Phase 4: NFR-003/005 existing dedicated-host gate passed on fe2a4ba; the newer runtime still requires same-build performance requalification. Plan 04-12 completed 21 static D-04 trials, passed the 91e409e pool/mux latency gate, and repaired policy/share/early-DATA boundaries. D-04 lock and NFR-006/007/039/040/044 remaining scope must retain explicit evidence status; persisted Agent/Hub authority is a Phase 5/6 integration obligation and must not block Phase 4 closure. Current residual ownership is in 04-CLOSURE.md. Phase 5 proceeds independently.
+- Phase 4: current final commit `000fe6b` reverified bounded Q2/Q3 attack, recovery, snapshot and source-credit boundaries, plus formal-semantic Docker pool/mux/auto diagnostics and 21 D-04 candidate trials. Formal native performance, native controlled RTT, D-04 lock, and persisted Agent/Hub authority remain explicitly open; current residual ownership is in 04-CLOSURE.md. Phase 5 proceeds independently.
 
 ### Blockers/Concerns
 
@@ -106,6 +106,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261106-wd1 | Add delayed-authorization early TCP DATA regression | 2026-11-06 | b47c282 | complete | [261106-wd1-runtime-bridge-bounded-early-tcp-data-ud](./quick/261106-wd1-runtime-bridge-bounded-early-tcp-data-ud/) |
 | 261106-wk2 | Reconcile early-DATA verification status text | 2026-11-06 | pending | complete | [261106-wk2-phase-4-verification-early-tcp-data-cont](./quick/261106-wk2-phase-4-verification-early-tcp-data-cont/) |
 | 261106-woq | Add fail-closed latency event timelines | 2026-11-06 | 37fe33a | complete | [261106-woq-phase-4-latency-gate-connect-send-first-](./quick/261106-woq-phase-4-latency-gate-connect-send-first-/) |
+| 261107-0pg | Reconcile current Phase 4 evidence and native-host access boundary | 2026-11-07 | pending | complete | [261107-0pg-continue-phase-4-qualification-evidence-](./quick/261107-0pg-continue-phase-4-qualification-evidence-/) |
 
 
 ## Session Continuity

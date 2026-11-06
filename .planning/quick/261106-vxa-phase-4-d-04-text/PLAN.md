@@ -1,7 +1,7 @@
 ---
 quick_id: 261106-vxa
 objective: 补充 Phase 4 D-04 进程内观测：续申合并、闲置尾部回收与占用峰值，并加入回归测试；保持参数未锁定、生产持久化权威为后续债务
-status: in_progress
+status: complete
 ---
 
 # Quick Plan

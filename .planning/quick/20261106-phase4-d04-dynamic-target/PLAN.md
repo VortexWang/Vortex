@@ -1,6 +1,6 @@
 ---
 quick_id: 20261106-phase4-d04-dynamic-target
-status: in-progress
+status: complete
 ---
 
 # Phase 4 Dynamic D-04 Target Scan
