@@ -47,6 +47,12 @@ finite fault/integrity coverage; the result is recorded in
 but the native Linux controlled-RTT gate remains open and NFR-007 is not
 promoted.
 
+## Formal qualification gate audit — 2026-11-06
+
+The actual qualification gate and direct host preflight both fail closed for
+the current environment. The reasons and exact report paths are recorded in
+`04-42-FORMAL-GATE-BOUNDARY.md`; no Docker diagnostic is promoted to P4-Q1.
+
 ## Rejected renewal increment — 2026-11-06
 
 The delayed process-local issuer now has a regression for a definitive renewal
