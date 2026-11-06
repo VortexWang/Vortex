@@ -87,3 +87,7 @@ Queue PID211765 runs /tmp/vortex-phase4-formal-provisional.sh, waiting on delay 
 ## Independent byte-accounting cross-check
 
 Extended full-factorial auditor to compare every per-flow directional amount against target start/final byte deltas, the accounting report and source committed usage. It validates required88TCP/2UDP identities for16streams+50short samples+5warmups+smoke, exact TCP echo, counter types and nondecreasing target counters. All23currently downloaded dynamic trials pass. Negative tests reject altered target/source counters and omitted flows;35Phase4Python tests pass. This is additional proof from existing raw JSON, not a changed workload or premature full-matrix pass.
+
+## Independent workload metric audit
+
+All27completed64KiB dynamic trials passed raw accounting and exact consumption formula audit. Scanner then entered256KiB factorial10. Added independent recomputation of TCP Mbps from received bytes/measured duration, UDP loss from unique sequence counts, UDP payload rate/byte counts and short-flow median from exactly50samples+5warmups. All28currently downloaded trials pass; negative tests reject altered metrics and missing samples. All37Python tests pass. Full81trial review remains pending.

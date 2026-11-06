@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from audit_d04_scan import audit_accounting
+from audit_d04_scan import audit_accounting, audit_workload
 
 
 class ByteReconciliationTests(unittest.TestCase):
@@ -51,6 +51,35 @@ class ByteReconciliationTests(unittest.TestCase):
             path.write_text(json.dumps(data))
             with self.assertRaises(ValueError):
                 audit_accounting(directory)
+
+
+class WorkloadMetricTests(unittest.TestCase):
+    def fixture(self):
+        import copy
+        tcp = dict(errors=[], connections=16, first_byte_latency_ms=[1.0]*16,
+                   received_bytes=30_000_000, sent_bytes=30_000_000,
+                   duration_seconds=15.0, throughput_mbps=16.0)
+        return (dict(baseline=tcp, duration_seconds_per_phase=15.0,
+                     mixed=dict(errors=[], tcp=copy.deepcopy(tcp), udp_sent=125000,
+                                udp_received=125000, udp_unique_received=125000,
+                                udp_bytes_received=150000000, udp_payload_mbps=80.0, udp_loss=0.0)),
+                dict(samples_ms=[1.0]*50, median_ms=1.0, warmup_connections=5))
+
+    def test_metrics_recompute(self):
+        workload, short = self.fixture()
+        self.assertTrue(audit_workload(workload, short)['udp_sequence_counts_checked'])
+
+    def test_derived_metrics_cannot_override_raw_counts(self):
+        mutations = [lambda w,s: w['mixed']['tcp'].update(throughput_mbps=17.0),
+                     lambda w,s: w['mixed'].update(udp_loss=0.1),
+                     lambda w,s: w['mixed'].update(udp_unique_received=125001),
+                     lambda w,s: s.update(median_ms=2.0),
+                     lambda w,s: s.update(samples_ms=[1.0]*49)]
+        for mutate in mutations:
+            workload, short = self.fixture()
+            mutate(workload, short)
+            with self.assertRaises(ValueError):
+                audit_workload(workload, short)
 
 
 if __name__ == '__main__':

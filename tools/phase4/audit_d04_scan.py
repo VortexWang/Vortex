@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import json
 import re
+import math
+import statistics
 from pathlib import Path
 
 from audit_d04_timeline import audit as audit_timeline
@@ -12,6 +14,40 @@ from d04_run import candidates, evaluate
 
 def read(path):
     return json.loads(path.read_text())
+
+
+def audit_workload(workload, short):
+    samples = short['samples_ms']
+    if len(samples) != 50 or short.get('warmup_connections') != 5 or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in samples):
+        raise ValueError('fifty finite short-flow samples and five warmups required')
+    if not math.isclose(statistics.median(samples), short['median_ms'], rel_tol=1e-12, abs_tol=1e-12):
+        raise ValueError('short-flow median differs from samples')
+    mixed = workload['mixed']
+    if mixed['errors']:
+        raise ValueError('mixed traffic errors')
+    for tcp in (workload['baseline'], mixed['tcp']):
+        if tcp['errors'] or tcp['connections'] != 16 or len(tcp['first_byte_latency_ms']) != 16:
+            raise ValueError('sixteen completed TCP streams required')
+        if type(tcp['received_bytes']) is not int or tcp['received_bytes'] <= 0 or tcp['received_bytes'] != tcp['sent_bytes']:
+            raise ValueError('TCP send/receive mismatch')
+        duration = tcp['duration_seconds']
+        if type(duration) not in (int, float) or not math.isfinite(duration) or duration < 15:
+            raise ValueError('invalid TCP measured duration')
+        rate = tcp['received_bytes'] * 8 / duration / 1e6
+        if not math.isclose(rate, tcp['throughput_mbps'], rel_tol=1e-12):
+            raise ValueError('TCP throughput differs from bytes and duration')
+    for key in ('udp_sent', 'udp_received', 'udp_unique_received', 'udp_bytes_received'):
+        if type(mixed[key]) is not int or mixed[key] < 0:
+            raise ValueError('invalid UDP counter')
+    if not 0 < mixed['udp_unique_received'] <= mixed['udp_received'] <= mixed['udp_sent'] or mixed['udp_bytes_received'] != 1200 * mixed['udp_received']:
+        raise ValueError('UDP sequence and byte counters differ')
+    loss = 1 - mixed['udp_unique_received'] / mixed['udp_sent']
+    if not math.isclose(loss, mixed['udp_loss'], abs_tol=1e-12):
+        raise ValueError('UDP loss differs from sequence counts')
+    payload_rate = mixed['udp_bytes_received'] * 8 / workload['duration_seconds_per_phase'] / 1e6
+    if not math.isclose(payload_rate, mixed['udp_payload_mbps'], rel_tol=1e-12):
+        raise ValueError('UDP payload rate differs from bytes and duration')
+    return dict(short_flow_samples=50, tcp_streams=16, udp_sequence_counts_checked=True)
 
 
 def audit_accounting(out):
@@ -91,10 +127,11 @@ def audit(base):
         window = read(out / 'idle-window.json')
         if window.get('requested_seconds', 0) < 65 or window.get('elapsed_nanoseconds', 0) < 65_000_000_000:
             raise ValueError('post-workload idle window missing')
+        workload_audit = audit_workload(read(out / 'mixed-workload.json'), read(out / 'short-flow-latency.json'))
         accounting = audit_accounting(out)
         timeline = audit_timeline(read(out / 'events-source.jsonl.credit-timeline.json'), case['grant_target_bytes'], True, case['grant_target_seconds'])
         commits.add(host['commit'])
-        reviewed.append(dict(case=case['id'], repeat=repeat, timeline=timeline, accounting=accounting,
+        reviewed.append(dict(case=case['id'], repeat=repeat, timeline=timeline, accounting=accounting, workload=workload_audit,
                              source_settled=True, raw_result_sha256=hashlib.sha256((out/'d04-result.json').read_bytes()).hexdigest()))
     if len(commits) != 1:
         raise ValueError('mixed source commits')
