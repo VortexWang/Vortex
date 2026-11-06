@@ -45,7 +45,8 @@ accounting transitions. Focused race tests cover the 15-of-16 coalescing
 result under concurrent renewal pressure, pending/unknown peaks, and reclaim
 of idle tails across sessions. Repository validation on this change passed
 `go test -race ./...`, `go vet ./...`, 21 Phase 4 Python tests, and the
-OrbStack `phase4-m2-check`.
+OrbStack `phase4-m2-check`. The D-04 runner also validates and copies these
+fields into each `d04-result.json`, including a bounded renewal merge rate.
 
 These fields make the process-local D-04 timeline more auditable, but they do
 not observe remote in-flight merge, durable funding occupancy, Agent/Hub
