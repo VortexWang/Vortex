@@ -3,67 +3,47 @@ phase: "05"
 slug: m3-agent-edge-hub-m3-agent-and-hub
 status: validated
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
+reviewed_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 created: "2026-11-06"
 ---
 
 # Phase 5 validation audit
 
-Reconstructed from five plans, current test files and current ROADMAP/CONTEXT. Status validated means the coverage audit ran; it does not mean all requirements passed.
+Inline re-audit covers all 14 plan groups and 34 IDs in 05-REQUIREMENT-AUDIT.md. Earlier missing runtime behaviors are implemented through 05-13; consolidated same-source Linux evidence and renewed owner UAT passed on deb8b08. Historical audit versions are retained in Git. No missing behavior is converted into a manual-only exception.
 
-## Test Infrastructure
+## Test infrastructure
 
-Go testing/race/vet, Python contract and snapshot checks, SQLite FULL/WAL, isolated 4 MiB Linux tmpfs. Quick: `go test ./agent/... ./hub/...`. Full: `make phase5-check` in pinned Go 1.27.3/protoc 36.2 environment. Docker uses `sh tools/phase5/docker_check.sh`; Actions phase5.yml executes the same full entry. Full feedback is several minutes; no watch flags.
+Pinned Go 1.27.3/protoc 36.2, Go testing/race, Python evidence and contract tests, real node/Hub/backend-fixture subprocesses, separate SQLite FULL/WAL files and isolated 4 MiB tmpfs. Full entry: `make phase5-check`; clean local Linux entry: `sh tools/phase5/docker_check.sh`; Actions phase5.yml uses the same gate. Quick evidence negatives: `python3 -m unittest discover -s tests/phase5`. No watch modes. arm64 Docker execution and amd64 Actions execution are distinct native cells; neither is an arm64 Actions result.
 
-## Per-Task Verification Map
+## Verification map
 
-| Task group | Requirements | Threat | Command / actual evidence | Coverage |
-|---|---|---|---|---|
-| 05-01 durable store / node | AGT-003, SUP-AGENT-001 | T-05-08 | `go test ./agent/store/... ./agent/...`; node lifecycle tests | PARTIAL: command/service interface absent |
-| 05-02 enrollment/control/upgrade | AGT-001/002/008/012 | T-05-01/04/07 | `go test -race ./agent/... ./hub/...`; registration, identity, installer tests | PARTIAL: real service/failover/VLink identity gaps |
-| 05-05 control apply / installer | AGT-004/008/010 | T-05-02/07 | control_apply and installer fault tests | PARTIAL: library boundaries covered, service integration absent |
-| 05-03 grants/usage/autonomy | AGT-005/006/007/011, HUB-001..009 | T-05-02/03/08 | authorization gate, source conservation, unknown usage, autonomy and real full-disk regressions | PARTIAL: probes/reporting/remote renewal absent |
-| 05-04 activation and S/R | AGT-009/010, HUB-010..018, SUP-B1/B3/B4 | T-05-03/06/08 | recovery-race.log and five audited snapshots via full gate | PARTIAL: recovery mode/share-policy runtime orchestration incomplete |
-| Security regression | HUB-001 | T-05-01 | `go test -race ./agent -run TestControlHubRejectsUnverifiedPeerChain` | GREEN: real unrelated-CA refusal before receipt |
-
-Full 34-ID map and exact limits: `05-REQUIREMENT-AUDIT.md`. Historical 05-02 stale test references were corrected with an annotation; no non-existing test is counted.
-
-## Wave 0 / gap dependencies
-
-G05-01/02/03/05 now have gap-mode plans 05-06..05-14 grounded in the existing audit and current source; implementation and matching integration tests remain pending. Existing test infrastructure is available. Missing behaviors are not reclassified as manual-only checks or accepted exceptions. Runtime failover, service replacement and credential rotation must be demonstrated against actual processes before acceptance.
-
-## Manual-Only Verifications
-
-Owner judgment of the reported recovery/security boundaries and operational acceptance occurs in 05-UAT.md. Physical power loss is outside the demonstrated process-failure model; no manual result is fabricated.
-
-## Validation Sign-Off
-
-- [x] Current test infrastructure and five plan groups mapped.
-- [x] 34 phase requirement IDs accounted for.
-- [x] No watch-mode commands.
-- [ ] Missing runtime integrations and new negative tests completed.
-- [ ] `nyquist_compliant: true` — intentionally false pending G05-01/02/03/05 implementation and evidence.
-
-Approval: audit complete, coverage partial; phase advancement not approved.
-
-## Security follow-up
-
-G05-04 now resolved: `hub/enrollment_security_test.go` adds four real network tests; ten repeated race runs and same-SHA f6a5891 Docker/Actions pass. Remaining G05-01/02/03/05 implementation gaps keep Nyquist partial.
-
-## Gap-plan verification map (planned, not executed)
-
-Planning checks do not change `nyquist_compliant: false`, current requirement status or historical UAT. New tests/scripts below must be created by their owning tasks; names are future outputs, not current green evidence. Every named process case must execute with assertions; empty selection or SKIP fails acceptance.
-
-| Plan | Planned verification | Required negative boundary | State |
+| Plan group | Behavior / ID groups | Actual tests and mandatory evidence | Current status |
 |---|---|---|---|
-| 05-06 | candidate lifecycle Python fixtures; contracts_check.sh; Go contract round-trip | unapproved bytes, overflow, incompatible identity/version | Pending implementation and exact proposal approval |
-| 05-07 | TestRegionalProcessFailover + regional race regressions | stalled Hub, late old stream, no healthy peer | Pending |
-| 05-08 | Seven actual-process scenarios; named scheduler/safety/retention/journal races; independent SQLite audits | duplicate/lost response, exhaustion, revocation, disk/time and retention failure | Passed: 0c104a6 Docker/Actions42175493658; fixture boundaries retained |
-| 05-09 | TestIdentityProcessRotation + Engine/Agent race checks | revoked/expired/wrong SAN, mixed signer, publication crash | Pending |
-| 05-10 | TestNodeCommandsDrain + Docker signals/systemd unit verification | established mux new OPEN during drain, deadline, unauthorized admin | Pending |
-| 05-11 | TestUpgradeProcessRollback + installer race checks | bad signature, stop unknown, health failure, financial rollback | Pending |
-| 05-12 | TestRecoveringProcessCatchup + recovery race checks | forged ACK, crash, >1000 records, continuous tail | Pending |
-| 05-13 | TestSharePolicyProcess + Engine/share and store race checks | stale CAS, missing/cyclic parent, unknown clock, period cutover | Pending |
-| 05-14 | mandatory process gate, independent snapshot verifier, same-SHA Docker/Actions | missing/wrong SHA/skip/empty/forged evidence | Pending |
+| 05-01/03 | WAL/FULL, grants/reservations, write failure, unknown debt; AGT-003/005/006/011, HUB-001..009 | agent/store and authority/usage tests; real disk-full, renewal and retention audit | Same-SHA Docker/Actions pair passed |
+| 05-02/05 | enrollment, config, credentials; AGT-001/002/004/008/012 | registration, control/identity and reconciler tests; contract gate | Same-SHA Docker/Actions pair passed |
+| 05-04 | activation, S/R and restart; AGT-009/010, HUB-010..018, SUP-B1/B3/B4 | recovery_check.sh: actual SIGKILL/full-disk, concurrent Commit/Abort and five SQLite snapshots | Same-SHA Docker/Actions pair passed |
+| 05-06 | exact approved lifecycle/identity schema | tests/phase1/test_lifecycle_candidates.py; contracts/lifecycle_test.go; contracts_check.sh | Complete per 05-06-SUMMARY |
+| 05-07 | bounded regional failover | TestRegionalProcessFailover: 5 real cases; 10x regional races | Complete per 05-07-EVIDENCE |
+| 05-08 | renewal/probes/reports/retention | TestSchedulerProcessRenewal: 7 cases; repeated journal, safety, scheduler and retention tests; independent raw audits | Complete per 05-08-EVIDENCE |
+| 05-09 | common control/VLink identity | TestIdentityProcessRotation; 10x identity races and Engine admission tests | Complete per 05-09-EVIDENCE |
+| 05-10 | operational commands/drain | TestNodeCommandsDrain: 3 real cases; admin/lock races; container and unit verification | Complete per 05-10-EVIDENCE |
+| 05-11 | service replacement/rollback | TestUpgradeProcessRollback: 2 Linux cases; journal crash/digest/full-disk faults | Complete per 05-11-EVIDENCE |
+| 05-12 | recovering/caught-up and tail | TestRecoveringProcessCatchup: 5 real cases; >1000 record replay, migration and atomicity tests | Complete per 05-12-EVIDENCE |
+| 05-13 | share/policy transitions | TestSharePolicyProcess: 8 TCP/UDP and hostile-chain cases; policy races and six raw snapshots | Complete per 05-13-EVIDENCE |
+| 05-14 | fail-closed consolidated evidence | 31 mandatory process cases; eleven evidence negative/WAL tests; independent snapshot audits | Passed: Docker and Actions run 42224211933 on deb8b08 |
 
-New threats T-05-09..26 are planning entries, not closed audit findings. Full verification must update review/security/requirement dispositions and collect renewed UAT for new behavior. The 68 spec-less fallback edges remain explicit backstops; lack of evidence stays unverified.
+All 34 IDs have scoped test references. HUB-005/006 production transport/allocation remains explicitly Phase 6; this audit does not call those whole-product requirements complete. Exact command/test names are enforced in tools/phase5/check.sh and audit_gap_evidence.py rather than inferred from package success. Missing tests, SKIP, missing/changed evidence and invalid raw snapshots fail.
+
+## Manual acceptance and limits
+
+Renewed owner confirmation covers the newly delivered failover, live identity, service operation and recovery/share/policy behavior. Historical UAT is retained separately. Physical power loss, actual systemd daemon boot, arbitrary Agent source/relay modes, Phase 6 production authority and Phase 4 performance are not claimed by process/fixture coverage. No UI is delivered in this phase, so browser verification does not apply.
+
+## Sign-off
+
+- [x] All 14 task groups and 34 IDs mapped to existing tests.
+- [x] Previously missing runtime scenarios implemented with real process assertions.
+- [x] Negative evidence fixtures execute and reject absent/partial/skipped/changed data.
+- [x] Final current-source Docker/Actions pair independently re-audited.
+- [x] Renewed owner UAT recorded.
+- [x] Nyquist final status updated after current consolidated results.

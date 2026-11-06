@@ -4,17 +4,17 @@ milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 14
-status: executing
-stopped_at: Completed 05-13; next 05-14 consolidated evidence and renewed UAT
-last_updated: "2026-11-06T10:58:35.625Z"
+status: complete
+stopped_at: Completed 05-14; Phase 5 acceptance closed within runtime/protocol-adapter scope
+last_updated: "2026-11-06T21:20:00.000Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-13 completed onbc1c262 Docker/Actions42204137919; 05-14 next; Phase5 executing
-state_head: 7f25f3e5aab0556828cc1e1fe3805ca68d69539c
+last_activity_desc: 05-14 completed on deb8b08 Docker/Actions42224211933 with independent raw-ledger audits; Phase 5 complete
+state_head: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 42
-  completed_plans: 41
+  completed_plans: 42
 ---
 
 # Project State
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 
 ## Current Position
 
-Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
+Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — COMPLETE
 Current Plan: 14
 Total Plans in Phase: 14
-Status: Executing — 05-13 complete with share/policy runtime and paired evidence; 05-14 next
-Last activity: 2026-11-06 — 05-13 completed onbc1c262 with Docker/Actions42204137919 and independent raw-ledger audits; Phase5 remains incomplete.
+Status: Complete — 05-14 consolidated acceptance passed on deb8b08 with same-SHA Docker/Actions and independent raw-ledger audits.
+Last activity: 2026-11-06 — 05-14 completed on deb8b08 with Docker/Actions 42224211933; Phase 5 closed within the runtime/protocol-adapter scope.
 
-Progress: Phase 5 [██████░░░░] 13/14 plans executed; 05-14 ready. G05-01/02/03/04 resolved within protocol-adapter/static-destination scope; G05-05 recovery/share/policy slices verified; consolidated acceptance remains open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [██████████] 14/14 plans executed. G05-01/02/03/04/05 are resolved within protocol-adapter/static-destination scope; consolidated acceptance, independent raw audits and renewed UAT passed. Historical UAT remains retained (17 passed) alongside renewed runtime UAT (18 passed). Nyquist validation is complete for this scope.
 
 ## Performance Metrics
 

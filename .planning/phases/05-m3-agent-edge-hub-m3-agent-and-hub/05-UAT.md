@@ -3,14 +3,15 @@ status: complete
 phase: 05-m3-agent-edge-hub-m3-agent-and-hub
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
 started: "2026-11-06T00:50:09.654515+00:00"
-updated: 2026-11-06T01:07:31.632Z
+updated: 2026-11-06
+renewed_source_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 ---
 
 ## Current Test
 
 [testing complete]
 
-## Tests
+## Historical tests — original acceptance
 
 ### 1. 实际节点重启与账本恢复边界
 expected: 新 boot 不释放旧未知负债；实际 TCP 经新授权恢复；S/R 只转未签发 R，不延长旧授权。
@@ -151,4 +152,16 @@ No user-reported issues; both owner checkpoints confirmed. Source-audit gaps G05
 
 verify:pre api-coverage gate passed via `check api-coverage.verify-pre 05`: no external-API integration detected. The rendered hook uses an older query spelling; the current installed gate module documents the check command. No gate was skipped. Phase has no UI deliverable; frontend browser UAT does not apply. Work performed inline at owner request.
 
-verify:post closure: Nyquist coverage remains audited/partial (`05-VALIDATION.md`), security register verified with zero open threats (`05-SECURITY.md`), no UI deliverable in this phase. Full-phase verification remains `gaps_found` for G05-01/02/03/05.
+verify:post closure: Nyquist coverage is complete for the bounded runtime/protocol-adapter scope (`05-VALIDATION.md`), security register verified with zero open threats (`05-SECURITY.md`), no UI deliverable in this phase. Full-phase verification is `passed_with_scope`; Phase 6 production authority and Phase 4 qualification remain separate.
+
+## Renewed runtime UAT — 2026-11-06
+
+### 18. 新增实际运行时流程与边界
+expected: 实际进程支持区域 Hub 故障切换、控制/VLink 凭据轮换与吊销、节点排空及签名升级失败回退；恢复追账、share 校验和新旧计费快照切换保持原未知负债。当前验收限于 Agent/Engine 与协议后端夹具，生产后端属于 Phase 6。
+result: pass
+source: human
+reported: "符合预期，通过"
+verification: test/phase5/{regional_process_test.go,scheduler_process_test.go,identity_process_test.go,node_commands_test.go,upgrade_process_test.go,recovering_process_test.go,share_policy_process_test.go}; 05-14-EVIDENCE.md
+source_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
+
+All seven workflows are automatically covered by 31 mandatory named process cases; this is the single owner confirmation summary required for automatically covered deliverables. Clean Docker and Ubuntu Actions passed on the same `deb8b08` source SHA, and the independent manifest/raw snapshot audit passed on both hosts. Original 17 tests and their historical scope above remain unchanged. Total recorded UAT: 18 passed, zero issues/pending for the bounded Phase 5 runtime/protocol-adapter scope. Production backend authority and Phase 4 performance remain outside this UAT.

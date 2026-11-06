@@ -1,13 +1,13 @@
 ---
 phase: "05"
 slug: m3-agent-edge-hub-m3-agent-and-hub
-status: verified
+status: verified_slice
 threats_open: 0
 threats_open_total: 0
 asvs_level: 1
 register_authored_at_plan_time: false
 audit_mode: retroactive-stride-inline
-reviewed_sha: f6a58916336e0f754a67252ad54c1091883e8573
+reviewed_sha: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 created: "2026-11-06"
 ---
 
@@ -57,4 +57,22 @@ No accepted risks. No open threat was silently waived; T-05-05 was fixed and re-
 - [x] `threats_open: 0` at configured high threshold.
 - [x] Retroactive register and medium issue fixed with retained evidence.
 
-Approval: security threshold verified for the implemented slice; phase acceptance remains `gaps_found`.
+Approval: security threshold verified for the implemented slice; phase acceptance is closed for the Phase 5 runtime/protocol-adapter scope. Production backend security remains Phase 6.
+
+## Gap-plan threat re-audit — deb8b08
+
+The original eight-row register above is historical. New plan-time threats were inspected inline against source and named tests; earlier per-plan paired runs are recorded in their EVIDENCE files. Final consolidated Docker/Actions execution passed on the same source SHA, with independent raw evidence audits. No risk was accepted.
+
+| Threats | Boundary / mitigation inspected | Required current evidence | Disposition |
+|---|---|---|---|
+| T-05-09/10 | Exact approved lifecycle companions, strict bounds, immutable receipt and source lineage | contracts/lifecycle_test.go; contract hash/approval gate; renewal-journal/share-renewal races | Implemented; paired gate passed |
+| T-05-11/12 | Current mTLS incarnation fences mutation; cancel/join old attempts, bounded sweep, retain debt | regional-process.log; regional-race.log; recovery audit | Implemented; paired gate passed |
+| T-05-13/14 | Source-scoped idempotent renewal, revocation dominates late response, FULL journal and conservative retention | renewal-process.log; renewal-safety/journal/retention races and raw audits | Implemented; paired gate passed |
+| T-05-15/16 | Atomic common identity snapshot, verified SAN/usage/signer; durable revocation, expiry and failed publication | identity-process.log; identity-race.log; identity-engine-race.log | Implemented; paired gate passed |
+| T-05-17/18 | Restricted local admin socket, bounded drain, no new OPEN and actual process cleanup | node-commands.log; node-admin-race.log; Docker deployment lifecycle | Implemented; paired gate passed |
+| T-05-19/20 | Signed/digest-checked candidate, locked durable journal, witnessed stop, health rollback without financial restore | upgrade-process.log; upgrade-race.log; recovery debt audit | Implemented; paired gate passed |
+| T-05-21/22 | Persist finite catch-up target with S/R, contiguous authenticated ACK and independent tail; restart retains barrier | recovering-process.log; recovering-race.log; recovery audit | Implemented; paired gate passed |
+| T-05-23/24 | Complete current share chain/CAS and proof-backed holds; immutable separately funded future snapshots, conservative time | policy-process.log; policy-race.log; policy-audit.json | Implemented; paired gate passed |
+| T-05-25/26 | Fail-closed source-bound named-case/file/raw-snapshot manifest, no skipped/absent evidence or production-authority claim | gap_check.sh; audit_gap_evidence.py; eleven tests/phase5 negative and WAL fixtures | Implemented; paired gate passed |
+
+No new exploitable high-severity finding was established by this inline re-audit. This register is not an ASVS certification. Final status is verified for the bounded Phase 5 runtime/protocol-adapter scope; Phase 6 production authority and Phase 4 qualification remain explicitly out of scope.

@@ -10,7 +10,7 @@
 - [x] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。 (completed 2026-11-04)
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
 - [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；正式性能资格化、D-04 锁定和持久化权威缺口保留为后续验收债务。
-- [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(current)*
+- [x] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(completed 2026-11-06 within runtime/protocol-adapter scope)*
 - [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
 - [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。
 - [ ] **Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)** - 完成规格全量性能、稳定性、故障恢复和交付物验收。
@@ -114,7 +114,7 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 14 total:13 executed. 05-13 share/policy runtime completed on `bc1c262` with Docker/Actions42204137919 and independent ledger audits. 05-14 consolidated acceptance is next. G05-01/02/03/04 resolved within the Phase 5 protocol-adapter/static-destination scope; G05-05 implementation slices are verified; consolidated acceptance remains open. Phase-wide verification/UAT must be refreshed after all gap plans; historical UAT (17 passed) is retained. Production backend remains Phase 6; Phase 4 work stays separate.
+**Plans**: 14/14 executed. 05-14 consolidated acceptance passed on `deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1` with Docker, Actions run `42224211933`, independent raw audits and renewed UAT. G05-01/02/03/04/05 are resolved within the Phase 5 runtime/protocol-adapter/static-destination scope. Production backend remains Phase 6; Phase 4 performance qualification and D-04 work stay separate.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -142,7 +142,7 @@
 **Wave 12** *(blocked on Wave 11 completion)*
 - [x] 05-13 — Full share-chain CAS and immutable policy cutover
 **Wave 13** *(blocked on Wave 12 completion)*
-- [ ] 05-14 — Paired process evidence and renewed phase acceptance
+- [x] 05-14 — Paired process evidence and renewed phase acceptance
 
 **Cross-cutting constraints:** Unknown financial liability remains frozen through timeout, reconnect, restart, rotation and rollback. Authoritative SQLite rows are never restored from an older snapshot. Normative contracts require the exact owner-approved proposal in 05-06; later changes repeat that gate. Every integration plan starts with a real running tracer after contract approval. Docker/Actions evidence uses identical source SHA; missing/skipped scenarios cannot pass. Production backend authority stays Phase 6; Phase 4 qualification continues independently.
 
@@ -193,7 +193,7 @@
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
-| 5. M3 Agent and Edge Hub | 13/14 | Implementation verified; phase acceptance pending | - |
+| 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
