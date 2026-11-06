@@ -102,7 +102,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		return fmt.Errorf("test hub: control peer identity missing")
 	}
 	tlsInfo, ok := remote.AuthInfo.(credentials.TLSInfo)
-	if !ok || len(tlsInfo.State.PeerCertificates) == 0 {
+	if !ok || tlsInfo.State.Version != tls.VersionTLS13 || len(tlsInfo.State.VerifiedChains) == 0 || len(tlsInfo.State.PeerCertificates) == 0 {
 		return fmt.Errorf("test hub: control mTLS certificate missing")
 	}
 	certificate := tlsInfo.State.PeerCertificates[0]
