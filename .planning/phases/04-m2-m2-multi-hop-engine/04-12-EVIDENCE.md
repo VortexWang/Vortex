@@ -2096,3 +2096,18 @@ is idempotent. No database connection count, deadline, authorization predicate
 or durability setting changed. Added FIFO/canceled-waiter/double-release and
 canceled-transaction rollback visibility tests. Full Store race PASS 18.572s;
 Agent/Hub vet/diff checks PASS. Native concurrency effect remains unverified.
+
+Clean 1fe78639412afe871fdd2174f1f873432c5f0207 dedicated process run PASS:
+single TCP, UDP and concurrent TCP (11.38s), overall 31.908s. Repeated concurrent
+TCP three times with the same binaries and SHA: all PASS, total 34.284s. These
+checks reconcile payloads and ledger rows across Node/test-Hub/protocol-backend,
+assert exact committed bytes, zero reserved/unknown after drain, and source
+conservation. Native full Store race PASS 80.124s. Local Hub/CLI tests PASS.
+This is the first passing clean independent-process concurrency result after
+FIFO admission; diagnostics remain enabled. It is short functional coverage,
+not sustained five-process multi-hop, 100Mbps mixed UDP, or D-04 parameter lock.
+Artifacts process-1fe7863 and fifo-repeat-1fe7863 under artifacts/phase4.
+SHA-256 process report 459039c988351ca7e5b50a4dd9fe56225ccd516fdd40bcfe6f32d7189b6543dc;
+process test.log 34a2f80740a38617abaff6ac746f0c8efdb202c608b63ba2c88201939effcacd;
+concurrent.log bdef8c25e895c4a1c533f1b8eda06cc83c63fa9943db1ee32aec1677791f4d48;
+store-race.log cd8e223f120377a0f75cd30d0009f088b45bfc5d2684ed1e43f1a778189cb2a0.
