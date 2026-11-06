@@ -43,7 +43,7 @@ coverage:
       - kind: e2e
         ref: test/phase5/scheduler_process_test.go#TestSchedulerProcessRenewal
         status: pass
-      - kind: command
+      - kind: other
         ref: make phase5-check on 0c104a6 Docker and Actions42175493658
         status: pass
     human_judgment: false
@@ -56,7 +56,7 @@ coverage:
       - kind: integration
         ref: agent/renewal_session_test.go#TestRenewalSafetyLateOldMutualTLSResultCannotInstall
         status: pass
-      - kind: command
+      - kind: other
         ref: tools/phase5/audit_renewal_safety.py retained Docker/Actions snapshots
         status: pass
     human_judgment: false
@@ -69,7 +69,7 @@ coverage:
       - kind: integration
         ref: hub/usage_retention_test.go#TestRecoveryRetainsReceiptIdentityAfterUsageCompaction
         status: pass
-      - kind: command
+      - kind: other
         ref: tools/phase5/audit_usage_retention.py retained Docker/Actions snapshots
         status: pass
     human_judgment: false

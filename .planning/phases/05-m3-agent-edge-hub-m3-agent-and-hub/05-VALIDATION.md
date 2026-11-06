@@ -58,7 +58,7 @@ Planning checks do not change `nyquist_compliant: false`, current requirement st
 |---|---|---|---|
 | 05-06 | candidate lifecycle Python fixtures; contracts_check.sh; Go contract round-trip | unapproved bytes, overflow, incompatible identity/version | Pending implementation and exact proposal approval |
 | 05-07 | TestRegionalProcessFailover + regional race regressions | stalled Hub, late old stream, no healthy peer | Pending |
-| 05-08 | TestSchedulerProcessRenewal + store/Hub race regressions | duplicate/lost response, exhaustion, revocation, disk/time failure | Pending |
+| 05-08 | Seven actual-process scenarios; named scheduler/safety/retention/journal races; independent SQLite audits | duplicate/lost response, exhaustion, revocation, disk/time and retention failure | Passed: 0c104a6 Docker/Actions42175493658; fixture boundaries retained |
 | 05-09 | TestIdentityProcessRotation + Engine/Agent race checks | revoked/expired/wrong SAN, mixed signer, publication crash | Pending |
 | 05-10 | TestNodeCommandsDrain + Docker signals/systemd unit verification | established mux new OPEN during drain, deadline, unauthorized admin | Pending |
 | 05-11 | TestUpgradeProcessRollback + installer race checks | bad signature, stop unknown, health failure, financial rollback | Pending |

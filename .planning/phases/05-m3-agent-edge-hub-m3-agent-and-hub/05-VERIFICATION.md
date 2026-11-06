@@ -8,16 +8,12 @@ human_verification_pending: false
 gaps:
   - gap_id: G05-01
     truth: "Node runtime performs bounded regional failover, probes, periodic health and remote renewal"
-    status: failed
-    reason: "Main calls single-address Run; ConnectRegion has no per-candidate deadline; probe/report/renewal scheduling is absent"
+    status: resolved
+    reason: "05-07/08 completed actual regional loop, bounded probes/reports and finite renewal; final 0c104a6 passed Docker/Actions42175493658 and independent ledger audits"
     artifacts:
-      - path: cmd/vortex-node/main.go
-        issue: "Single Hub endpoint only"
-      - path: agent/control.go
-        issue: "Regional helper is not wired into main"
-    missing:
-      - "Bounded regional control loop with health preference and stalled-peer failover tests"
-      - "Probe, health/version and authorization-renewal scheduler with persistent bounds"
+      - path: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-08-EVIDENCE.md
+        issue: "Resolved within current runtime/protocol-backend fixture; production backend remains Phase 6"
+    missing: []
   - gap_id: G05-02
     truth: "Single node binary exposes operational commands and performs service-level safe upgrades"
     status: failed
@@ -89,3 +85,14 @@ G05-01..05 source-grounded groups are detailed in `05-REQUIREMENT-AUDIT.md` and 
 Security follow-up: f6a5891 passes Docker/Actions run 42140165239; both downloaded/local evidence sets independently re-audited. See `artifacts/phase5/check/f6a58916336e0f754a67252ad54c1091883e8573/pair.json`. G05-04 is resolved; remaining runtime integration gaps keep the phase verdict unchanged.
 
 UAT closure: owner confirmed both checkpoints; 05-UAT.md is `complete` with 17 passing entries, zero issues and zero pending. This closes the audit/security/UAT task, not the four remaining implementation gaps or Phase 5 itself.
+
+
+## Incremental G05-01 closure — 2026-11-06
+
+05-07 and 05-08 now close the regional/probe/report/renewal gap within its
+planned actual-runtime/protocol-adapter boundary. Final source0c104a6 passed
+Docker/Actions42175493658; see05-08-SUMMARY/EVIDENCE and raw ledger audits.
+The original phase score/reviewed_sha above is historical. This incremental
+disposition does not constitute a fresh phase-wide goal verification: G05-02,
+G05-03 and G05-05 plus05-09..14 remain outstanding, shared requirements remain
+pending, and new flows still require phase-end UAT/verification.

@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 8
+current_plan: 9
 status: executing
-stopped_at: 05-08 conservative Hub retention paired; renewal revocation/old-session/time combinations remain
-last_updated: "2026-11-06T06:09:56Z"
+stopped_at: Completed 05-08; next 05-09 shared control/VLink identity integration
+last_updated: "2026-11-06T06:48:41.148Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-08 conservative retention b0ab02a passed Docker/Actions42171635825 and independent SQLite audits; plan remains executing
-state_head: b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587
+last_activity_desc: 05-08 completed on 0c104a6 Docker/Actions42175493658; 05-09 next; Phase 5 executing
+state_head: 1c579ccf0cf2a120115d05c9c7cd1b2027e3f5dd
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 42
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
-Current Plan: 8
+Current Plan: 9
 Total Plans in Phase: 14
-Status: Executing — 05-08 partial; probes/reports, renewal crash/failure and conservative Hub usage compaction verified; renewal-specific revocation/old-session/time combinations remain
-Last activity: 2026-11-06 — 05-08 conservative Hub retention b0ab02a passed Docker/Actions42171635825 and independent ledger audits; no plan completion claimed.
+Status: Executing — 05-08 complete with probes/reports, live renewal, safe retention and fault evidence; 05-09 next
+Last activity: 2026-11-06 — 05-08 completed on 0c104a6 with Docker/Actions42175493658 and independent raw-ledger audits; Phase 5 remains incomplete.
 
-Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 executing (live renewal partial), 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [██████░░░░] 8/14 plans executed; 05-09 ready, 05-10..05-14 dependency-waiting. G05-01/04 resolved within protocol-adapter scope; G05-02/03/05 remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 

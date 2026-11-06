@@ -114,7 +114,7 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 14 total: 7 executed; 05-06 exact approved lifecycle freeze passed Docker/Actions42150094526 on 8ca29f8. 05-07 regional runtime passed Docker/Actions42154985414 on ec155ad; 05-08 incremental probes/reports/journal passed Docker/Actions42158960763 on 29b3085; remote renewal/retention pending; 05-09..05-14 dependency-waiting; runtime gaps remain open. Wave 4 (05-04) passed same-SHA Docker/Actions and raw ledger audits on `79a1c0b` (Actions `42132354600`); SUMMARY committed. Phase-wide audit now reports `gaps_found`: G05-01/02/03/05 runtime integration groups remain open; G05-04 security fix f6a5891 passed Docker/Actions 42140165239. Nyquist partial; UAT complete (17 passed, including two owner confirmations). Audit/security/UAT task complete; Gap planning is now complete; execute the new plans before phase completion.
+**Plans**: 14 total: 8 executed. 05-08 scheduler, finite live TCP/UDP renewal and conservative retention completed on `0c104a6` with Docker/Actions42175493658 and independent ledger audits. 05-09 shared identity integration is next; 05-10..05-14 remain dependency-waiting. G05-01 and G05-04 resolved within the Phase 5 protocol-adapter scope; G05-02/03/05 remain open. Phase-wide verification/UAT must be refreshed after all gap plans; historical UAT (17 passed) is retained. Production backend remains Phase 6; Phase 4 work stays separate.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -130,7 +130,7 @@
 **Wave 6** *(blocked on Wave 5 completion)*
 - [x] 05-07 — Actual regional failover and current-session fencing
 **Wave 7** *(blocked on Wave 6 completion)*
-- [ ] 05-08 — Probe/report scheduler, durable remote renewal and retention
+- [x] 05-08 — Probe/report scheduler, durable remote renewal and retention
 **Wave 8** *(blocked on Wave 7 completion)*
 - [ ] 05-09 — Control/VLink identity rotation and revocation
 **Wave 9** *(blocked on Wave 8 completion)*
@@ -193,7 +193,7 @@
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
-| 5. M3 Agent and Edge Hub | 7/14 | Implementation verified; phase acceptance pending | - |
+| 5. M3 Agent and Edge Hub | 8/14 | Implementation verified; phase acceptance pending | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
