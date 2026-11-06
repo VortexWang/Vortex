@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "status": "native-scoped-correctness-pass",
+  "measured_commit": "69f5db9426946b267b400d8279c0833b090b9244",
+  "clean": true,
+  "delayed_renewal_trials": 3,
+  "transports": [
+    "TCP",
+    "UDP"
+  ],
+  "renewals_per_transport": 8,
+  "reservation_attack_cases": 12,
+  "reservation_attack_repeats": 3,
+  "race": true,
+  "vet": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "attacks-race.log": "cf615c3a3ab01e3c5412d47246977edd55c63e3e0ab4d153c78a2deb7befc641",
+    "commit": "250e49d4a2810d5d6993e3029d57dc38ebb54e0dedf8c0cfd9cdc0d173d261e3",
+    "delay-race.log": "a22d5436b9aa2ff6d4f2aa42028b59cd67f5720b734e115f0fda950788d4981b",
+    "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "git-status": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host": "b4069fc3536a32891b23eb0b164829a1b7b0e35eb686672ffa3db3d6561c7179",
+    "results.tar.gz": "040e4b79ec120bbf9647cb09d07e911877cdb7f0ae96058dc408bf870b81cf42",
+    "stage": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "local_directory": "artifacts/phase4/delay-69f5db9",
+  "scope_limits": [
+    "Delay is a deterministic post-issuance response barrier. Business writes resume after delivery; no missing-authority wait-latency claim.",
+    "Reservation mutations exercise Store APIs, not remote multi-hop attacks.",
+    "No durable block implementation or D-04 lock; not formal performance qualification."
+  ]
+}

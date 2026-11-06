@@ -1085,3 +1085,25 @@ so merely enlarging it is not a correct block allocator. Funding holds, bounded
 partial checkpoints, concurrent suballocation, revocation/time validation and
 old-boot unknown recovery must be integrated before measuring block candidates.
 No block implementation, parameter lock or Phase 4 completion is claimed.
+
+## Native delayed-response and reservation-attack evidence — 69f5db9
+
+Dedicated Ubuntu clean commit 69f5db9426946b267b400d8279c0833b090b9244:
+three uncached race runs of TestRuntimeDelayedDurableAdaptiveRenewal PASS
+(31.81s, 33.60s, 33.26s), including eight delayed renewals per TCP/UDP transport.
+Each checks a funded Hub issue, unchanged Agent credit before delivery, one
+retained demand identity despite a changed estimate, then resumes actual metered
+traffic. Six transport runs each finish with issued=32192 and metered=30000.
+Three repetitions of the 12-case Store reservation mutation/replay matrix PASS;
+Agent/Hub vet PASS; launcher stage=complete, exit=0. Buffer maxima stayed 212992.
+
+04-21-NATIVE-DELAY-ATTACKS.json records source SHA, scope and raw-file hashes.
+Raw results are in artifacts/phase4/delay-69f5db9. The downloaded archive matches
+remote SHA-256 040e4b79ec120bbf9647cb09d07e911877cdb7f0ae96058dc408bf870b81cf42.
+Both logs were checked for the expected pass counts and absence of failed tests.
+
+This is a finite controlled-response-delay and Store attack slice. During the
+response barrier the test inspects ledgers but does not attempt unfunded writes;
+it therefore does not establish wait-tail latency or traffic availability during
+missing authority. Store mutation tests are not remote multi-hop attack proofs.
+Durable session blocks, complete hostile matrix and D-04 lock remain open.
