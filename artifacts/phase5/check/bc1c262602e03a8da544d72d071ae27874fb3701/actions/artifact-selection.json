@@ -2,9 +2,6 @@
   "artifact_id": 13496817615,
   "archive_sha256": "ef7a422ea6416a1bcce9d7c4d1ae304788302f10717a50ce7864aec97df389ef",
   "selected_members": [
-    "97eb2c2/docker/contracts.log",
-    "97eb2c2/docker/report.json",
-    "97eb2c2/docker/root-test.log",
     "audit.json",
     "contracts.log",
     "deployment/binaries.sha256",
@@ -134,5 +131,5 @@
     "upgrade-race.log",
     "usage-retention-race.log"
   ],
-  "omitted_members": 3048
+  "omitted_members": 3051
 }
