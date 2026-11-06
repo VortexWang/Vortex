@@ -1,0 +1,11 @@
+.git
+.planning
+artifacts
+docs
+**/node_modules
+**/__pycache__
+**/*.sqlite
+**/*.sqlite.gz
+**/*.db
+**/*.pem
+**/*.key

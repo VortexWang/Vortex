@@ -27,6 +27,9 @@ type Service struct {
 	ObserveRouteFirstTargetByte func(uint64, time.Duration)
 	mu                          sync.Mutex
 	closing                     bool
+	draining                    bool
+	active                      int
+	idle                        chan struct{}
 	workers                     sync.WaitGroup
 }
 
@@ -41,10 +44,29 @@ func (s *Service) ServeLink(ctx context.Context, link *vlink.MuxLink) error {
 			s.mu.Unlock()
 			return context.Canceled
 		}
+		if s.draining {
+			s.mu.Unlock()
+			_ = link.AuthorizeRemote(ctx, stream.ID, func(context.Context, vlink.NodeID, vlink.OpenRequest) (io.Closer, error) {
+				return nil, errors.New("relay: draining")
+			})
+			continue
+		}
+		if s.active == 0 {
+			s.idle = make(chan struct{})
+		}
+		s.active++
 		s.workers.Add(1)
 		s.mu.Unlock()
 		go func() {
 			defer s.workers.Done()
+			defer func() {
+				s.mu.Lock()
+				s.active--
+				if s.active == 0 {
+					close(s.idle)
+				}
+				s.mu.Unlock()
+			}()
 			s.serveStream(ctx, link, stream)
 		}()
 	}

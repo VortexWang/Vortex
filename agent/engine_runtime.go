@@ -8,6 +8,7 @@ import (
 	engineaccounting "vortex/engine/accounting"
 	engineruntime "vortex/engine/runtime"
 	"vortex/engine/runtime/config"
+	"vortex/engine/runtime/relay"
 )
 
 // RuntimeEngine adapts the Engine runtime lifecycle to the Agent process.
@@ -91,3 +92,7 @@ func (e *RuntimeEngine) Err() error {
 	}
 	return e.runtime.Err()
 }
+
+func (e *RuntimeEngine) BeginDrain()                     { e.runtime.BeginDrain() }
+func (e *RuntimeEngine) Drain(ctx context.Context) error { return e.runtime.Drain(ctx) }
+func (e *RuntimeEngine) Stats() relay.Stats              { return e.runtime.Stats() }

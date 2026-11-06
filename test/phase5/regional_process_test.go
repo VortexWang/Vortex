@@ -19,6 +19,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -474,7 +475,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
 	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
-	if renewalMode != "" && renewalMode != "identity-rotation" {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") {
 		lifecycle["renew_percent"] = 30
 		lifecycle["renew_retry_min_ms"] = 1000
 	}
@@ -482,6 +483,20 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
+	if strings.HasPrefix(renewalMode, "commands-") {
+		seed, err := store.Open(nodePath, "agent")
+		if err != nil {
+			t.Fatal(err)
+		}
+		payload, err := contracts.EncodeUnknownUsage(&controlv1.UnknownUsageBatch{BatchId: "command-debt", OriginBootId: regionalBoot, BillingSnapshotId: regionalBoot, RuleId: "rule", GrantId: regionalFirst, Role: "source", Direction: "egress", UnknownUpperBound: 512})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = seed.PersistUnknownUsage(ctx, regionalNode, payload); err != nil {
+			t.Fatal(err)
+		}
+		seed.Close()
+	}
 	nodeArgs := []string{"--node-id", regionalNode, "--db", nodePath, "--engine-config", enginePath, "--control-config", controlPath, "--hub-name", regionalFirst, "--enrollment-hub", addresses[0], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m"}
 	var rotatedIdentitySerial string
 	var identityEnrollment *hub.EnrollmentServer
@@ -507,6 +522,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 				nodeArgs[i+1] = "59m55s"
 			}
 		}
+	}
+	if strings.HasPrefix(renewalMode, "commands-") {
+		nodeArgs = append([]string{"run"}, nodeArgs...)
 	}
 	nodeProcess := start("vortex-node", nodeArgs...)
 	db, e := openProcessLedger(nodePath)
@@ -583,7 +601,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
 	}
-	if renewalMode != "" && renewalMode != "identity-rotation" {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") {
 		fault := func() bool {
 			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
 				killProcess(t, first)
@@ -596,6 +614,10 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			})
 		}
 		schedulerRenewalTraffic(t, ctx, db, dir, cfg, mux, stream, exchange, fault)
+		return
+	}
+	if strings.HasPrefix(renewalMode, "commands-") {
+		exerciseNodeCommandDrain(t, ctx, binaries, renewalMode, nodePath, cfg, mux, stream, exchange, func() { killProcess(t, nodeProcess); nodeProcess = start("vortex-node", nodeArgs...) })
 		return
 	}
 	exchange("before-control-switch")

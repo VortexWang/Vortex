@@ -30,6 +30,8 @@ go test -count=1 ./... > "$out/root-test.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/regional-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestSchedulerProcessRenewal$' > "$out/renewal-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestIdentityProcessRotation$' > "$out/identity-process.log" 2>&1
+go test -count=1 -v ./test/phase5 -run '^TestNodeCommandsDrain$' > "$out/node-commands.log" 2>&1
+go test -race ./cmd/vortex-node ./agent -run 'Test(Admin|ProcessLock|Command|Enroll)' > "$out/node-admin-race.log" 2>&1
 go test -count=10 -race -v ./agent -run '^TestRuntimeIdentity' > "$out/identity-race.log" 2>&1
 (cd engine && go test -race -v ./runtime/link ./vlink -run '^(TestRuntimeIdentity|TestIdentityAdmission)') > "$out/identity-engine-race.log" 2>&1
 
@@ -57,6 +59,9 @@ for name in ('TestRegionalProcessFailover/silent-stream','TestRegionalProcessFai
 for name in ('TestSchedulerProcessRenewal/low-water-tcp-udp','TestSchedulerProcessRenewal/lost-result','TestSchedulerProcessRenewal/hub-restart','TestSchedulerProcessRenewal/node-restart','TestSchedulerProcessRenewal/quota-exhausted','TestSchedulerProcessRenewal/write-failure','TestSchedulerProcessRenewal/expiry-with-pending-result'):
  log=(out/'renewal-process.log').read_text()
  assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
+for name in ('TestNodeCommandsDrain/commands-grace','TestNodeCommandsDrain/commands-force','TestNodeCommandsDrain/commands-restart'):
+ log=(out/'node-commands.log').read_text()
+ assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
 for name in ('TestIdentityProcessRotation',):
  log=(out/'identity-process.log').read_text()
  assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name

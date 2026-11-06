@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	engineaccounting "vortex/engine/accounting"
 	"vortex/engine/runtime/config"
@@ -17,8 +18,7 @@ import (
 )
 
 // Runtime owns the Engine data-plane lifecycle used by an Agent process. It
-// deliberately accepts an already validated config and exposes only Start and
-// Stop to the control-plane adapter.
+// deliberately accepts an already validated config and exposes lifecycle and drain operations to the control-plane adapter.
 type Runtime struct {
 	cfg        config.Config
 	supervisor *link.Supervisor
@@ -160,4 +160,22 @@ func (r *Runtime) SetIdentityProvider(provider link.IdentityProvider, boot vlink
 		return errors.New("runtime: identity provider must be installed before Start")
 	}
 	return r.supervisor.SetIdentityProvider(provider, boot)
+}
+
+// BeginDrain denies new streams without closing established authorized traffic.
+func (r *Runtime) BeginDrain()        { r.service.BeginDrain() }
+func (r *Runtime) Stats() relay.Stats { return r.service.Stats() }
+
+// Drain stops residual streams on deadline, then joins settlement/worker cleanup.
+// A deadline is never financial release; stream cleanup must finish before success.
+func (r *Runtime) Drain(ctx context.Context) error {
+	if err := r.service.Drain(ctx); err != nil {
+		cleanup, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		r.supervisor.Close()
+		if stopErr := r.service.Drain(cleanup); stopErr != nil {
+			return fmt.Errorf("runtime: forced drain cleanup: %w", stopErr)
+		}
+	}
+	return nil
 }

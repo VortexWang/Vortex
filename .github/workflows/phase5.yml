@@ -52,6 +52,10 @@ jobs:
         run: |
           git ls-files --others --exclude-standard
           make phase5-check
+      - name: Verify node deployment lifecycle
+        env:
+          PHASE5_DEPLOYMENT_EVIDENCE_DIR: artifacts/phase5/check/deployment
+        run: sh tools/phase5/node_deployment_check.sh
       - name: Retain recovery regression evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

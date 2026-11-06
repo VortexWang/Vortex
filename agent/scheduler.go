@@ -203,6 +203,12 @@ func (n *Node) ObserveReport(ctx context.Context, r *controlv1.NodeReport) error
 		return err
 	}
 	r.ActiveSessions, err = n.Store.RuntimeSessionCount(ctx, n.NodeID, n.BootID)
+	if engine, ok := n.Engine.(OperationalEngine); ok {
+		r.DrainState = engine.Stats().DrainState
+		if r.DrainState == "drained" {
+			r.DrainState = "stopped"
+		}
+	}
 	return err
 }
 

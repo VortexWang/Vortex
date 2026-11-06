@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"sync"
 	"time"
 
 	"vortex/agent/store"
@@ -21,12 +22,14 @@ func (NoopEngine) Start(context.Context) error { return nil }
 func (NoopEngine) Stop(context.Context) error  { return nil }
 
 type Node struct {
-	bootStarted time.Time
-	clock       *AuthorityClock
-	NodeID      string
-	BootID      string
-	Store       *store.Store
-	Engine      Engine
+	statusMu        sync.RWMutex
+	hubModeObserver func() string
+	bootStarted     time.Time
+	clock           *AuthorityClock
+	NodeID          string
+	BootID          string
+	Store           *store.Store
+	Engine          Engine
 }
 
 func New(nodeID string, s *store.Store, e Engine) (*Node, error) {

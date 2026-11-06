@@ -1,0 +1,29 @@
+[Unit]
+Description=VORTEX Agent and Engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+User=vortex-node
+StateDirectory=vortex-node
+StateDirectoryMode=0700
+RuntimeDirectory=vortex-node
+RuntimeDirectoryMode=0700
+WorkingDirectory=/var/lib/vortex-node
+UMask=0077
+EnvironmentFile=/etc/vortex-node/node.env
+ExecStart=/usr/local/bin/vortex-node run --node-id ${VORTEX_NODE_ID} --db /var/lib/vortex-node/agent.db --engine-config /etc/vortex-node/engine.json --control-config /etc/vortex-node/control.json --hub-name ${VORTEX_HUB_NAME} --enrollment-hub ${VORTEX_ENROLLMENT_ENDPOINT} --tls-ca /etc/vortex-node/trust-ca.pem --credential-dir /var/lib/vortex-node/credentials --admin-socket /run/vortex-node/admin.sock --drain-timeout 30s
+ExecStop=/usr/local/bin/vortex-node drain --admin-socket /run/vortex-node/admin.sock --drain-timeout 30s
+TimeoutStopSec=50s
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/vortex-node /run/vortex-node
+
+[Install]
+WantedBy=multi-user.target
