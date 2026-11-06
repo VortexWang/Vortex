@@ -383,3 +383,29 @@ func TestRegionalRevocationAndNoHealthyPeerAreBounded(t *testing.T) {
 		t.Fatal("no healthy Hub minted rights")
 	}
 }
+
+func TestRegionalSwitchCancelsBlockedMutation(t *testing.T) {
+	parent, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	c := new(ControlClient)
+	old, stop, id := c.beginSession(parent)
+	defer stop()
+	entered, returned := make(chan struct{}), make(chan error, 1)
+	go func() {
+		returned <- c.withSession(old, id, func() error { close(entered); <-old.Done(); return old.Err() })
+	}()
+	<-entered
+	next := make(chan context.CancelFunc, 1)
+	go func() { _, cancel, _ := c.beginSession(parent); next <- cancel }()
+	select {
+	case cancel := <-next:
+		cancel()
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("switch waited on blocked sender before cancelling it")
+	}
+	select {
+	case <-returned:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("old mutation boundary never returned")
+	}
+}

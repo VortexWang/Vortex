@@ -20,13 +20,15 @@ finish() {
  trap - EXIT
  status=failed
  [ "$code" -ne 0 ] || status=passed
- printf '{"schema":1,"status":"%s","commit":"%s","scope":"05-04-runtime-recovery","backend":"protocol-test-only","production_backend_authority":false}\n' "$status" "$sha" > "$out/report.json"
+ printf '{"schema":1,"status":"%s","commit":"%s","scope":"phase5-runtime-regressions","backend":"protocol-test-only","production_backend_authority":false}\n' "$status" "$sha" > "$out/report.json"
  cat "$out/report.json"
  exit "$code"
 }
 trap finish EXIT
 sh tools/phase5/contracts_check.sh > "$out/contracts.log" 2>&1
 go test -count=1 ./... > "$out/root-test.log" 2>&1
+go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/regional-process.log" 2>&1
+go test -count=10 -race -v ./agent -run '^TestRegional' > "$out/regional-race.log" 2>&1
 (cd engine && go test -count=1 ./...) > "$out/engine-test.log" 2>&1
 (cd engine && go test -count=1 -race -v ./apply ./accounting ./runtime/...) > "$out/engine-race.log" 2>&1
 PHASE5_RECOVERY_EVIDENCE_DIR="$out/recovery" sh tools/phase5/recovery_check.sh > "$out/recovery.log" 2>&1
@@ -37,7 +39,13 @@ import json,pathlib,sys
 out=pathlib.Path(sys.argv[1]);sha=sys.argv[2]
 r=json.loads((out/'recovery/report.json').read_text())
 assert r['status']=='passed' and r['commit']==sha and r['backend']=='protocol-test-only'
-assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome ' in (out/'engine-race.log').read_text()
-for path in ('contracts.log','root-test.log','engine-test.log','engine-race.log','recovery/recovery-race.log','recovery/host.txt','audit.json'):
+for name in ('TestRegionalProcessFailover/silent-stream','TestRegionalProcessFailover/silent-established','TestRegionalProcessFailover/autonomous','TestRegionalProcessFailover/recovering','TestRegionalProcessFailover/tcp-original-authorization'):
+ log=(out/'regional-process.log').read_text()
+ assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
+for name in ('TestRegionalStatusRejectsUnauthenticatedOrStaleBounds','TestRegionalStaleIncarnationCannotMutateAuthority','TestRegionalSwitchCancelsBlockedMutation','TestRegionalFailoverRetainsUnknownDebt','TestRegionalLateAuthorizationCannotAdvanceClockOrConfig','TestRegionalRevocationAndNoHealthyPeerAreBounded'):
+ log=(out/'regional-race.log').read_text()
+ assert log.count(f'--- PASS: {name} ') == 10 and f'--- SKIP: {name}' not in log,name
+assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome '  in (out/'engine-race.log').read_text()
+for path in ('regional-process.log','regional-race.log','contracts.log','root-test.log','engine-test.log','engine-race.log','recovery/recovery-race.log','recovery/host.txt','audit.json'):
  assert (out/path).is_file() and (out/path).stat().st_size>0,path
 PY
