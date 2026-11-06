@@ -134,3 +134,98 @@ func TestRuntimeFundingBlockRejectsOversizeAndClosedSession(t *testing.T) {
 		t.Fatalf("rejected block changed funds: %+v %v", b, err)
 	}
 }
+
+func TestRuntimeFundingBlockCheckpointAtomicRecovery(t *testing.T) {
+	s, scope, path := runtimeStore(t)
+	ctx := context.Background()
+	a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	block := runtimeReservation("block", 256<<10)
+	if _, err := s.ReserveRuntimeFundingBlock(ctx, block, a.Use); err != nil {
+		t.Fatal(err)
+	}
+	// A failure after splitting the hold must roll back both the split and outbox.
+	if _, err := s.db.Exec(`CREATE TRIGGER fail_checkpoint BEFORE INSERT ON usage_batches BEGIN SELECT RAISE(ABORT,'checkpoint failure'); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CheckpointRuntimeFundingBlock(ctx, block, "checkpoint", 65536, []byte("known")); err == nil {
+		t.Fatal("failed checkpoint committed")
+	}
+	b, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || b.Reserved != block.Reserved || b.Committed != 0 {
+		t.Fatalf("rollback: %+v %v", b, err)
+	}
+	if _, err := s.db.Exec(`DROP TRIGGER fail_checkpoint`); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		if err := s.CheckpointRuntimeFundingBlock(ctx, block, "checkpoint", 65536, []byte("known")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.CheckpointRuntimeFundingBlock(ctx, block, "checkpoint", 65536, []byte("changed")); !errors.Is(err, ErrUsageBatchConflict) {
+		t.Fatalf("mutated retry: %v", err)
+	}
+	if err := s.CheckpointRuntimeFundingBlock(ctx, block, "stale", 65536, []byte("known")); !errors.Is(err, ErrUsageBatchConflict) {
+		t.Fatalf("stale residual: %v", err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = Open(path, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	pending, err := s.UnresolvedUsageReservations(ctx, "node", "new-boot")
+	if err != nil || len(pending) != 1 || pending[0].Reserved != (256<<10)-65536 {
+		t.Fatalf("residual recovery: %+v %v", pending, err)
+	}
+	if err := s.SettleUsageReservation(ctx, pending[0], "unknown", pending[0].Reserved, []byte("unknown-tail"), pending[0].Reserved); err != nil {
+		t.Fatal(err)
+	}
+	b, err = s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || b.Reserved != 0 || b.Committed != 65536 || b.Unknown != (256<<10)-65536 || b.Remaining != (1<<20)-(256<<10) {
+		t.Fatalf("recovery conservation: %+v %v", b, err)
+	}
+	// A lost successful response can still replay after recovery settles the tail.
+	if err := s.CheckpointRuntimeFundingBlock(ctx, block, "checkpoint", 65536, []byte("known")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRuntimeFundingBlockCheckpointExhaustion(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	block := runtimeReservation("block", 100)
+	if _, err := s.ReserveRuntimeFundingBlock(ctx, block, a.Use); err != nil {
+		t.Fatal(err)
+	}
+	for _, used := range []uint64{40, 60} {
+		id := "partial"
+		if used == 60 {
+			id = "final"
+		}
+		if err := s.CheckpointRuntimeFundingBlock(ctx, block, id, used, []byte(id)); err != nil {
+			t.Fatal(err)
+		}
+		block.Reserved -= used
+	}
+	pending, err := s.UnresolvedUsageReservations(ctx, "node", "new-boot")
+	if err != nil || len(pending) != 0 {
+		t.Fatalf("exhausted recovery: %+v %v", pending, err)
+	}
+	if _, err := s.ReserveRuntimeFundingBlock(ctx, runtimeReservation("next", 100), a.Use); err != nil {
+		t.Fatal(err)
+	}
+	b, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || b.Committed != 100 || b.Reserved != 100 || b.Remaining != (1<<20)-200 {
+		t.Fatalf("exhaustion: %+v %v", b, err)
+	}
+}

@@ -1129,3 +1129,26 @@ this is partial step 1 of 04-20, not durable block performance evidence, a D-04
 parameter lock, or Phase 4 completion. Control 1.3.0 approval remains recorded;
 this additive local schema/API change does not implement the unapproved 1.4.0
 grant-return wire.
+
+## Atomic funding-block checkpoints — Store persistence slice
+
+CheckpointRuntimeFundingBlock splits confirmed consumption into a committed
+child batch while reducing the parent residual in the same SQLite transaction.
+The transaction also records the usage outbox and demand-consumption window.
+Exact retries compare parent identity, prior residual, child metadata, amount
+and payload. Stale residual updates fail. Fully consumed blocks leave a zero
+returned tail with no refund; only the remaining residual is recovered unknown.
+The existing settlement implementation is shared inside the transaction.
+
+Targeted funding/block race tests PASS (2.383s), including injected outbox insert
+failure after the split, complete rollback, exact retry, changed-payload and
+stale-residual rejection, close/reopen recovery, replay after unknown recovery,
+multiple partial checkpoints, exhaustion and reuse of the direction slot.
+Full local Agent/Hub race PASS (Agent 182.120s, Store 14.638s, Hub 1.842s;
+identity/upgrade cached). go vet and git diff --check PASS.
+
+These tests prove a local transaction/recovery slice, not actual power-loss,
+SQLITE_FULL or multi-hop runtime behavior. No runtime caller enables this API.
+Exclusive suballocation, per-write admission/control-update serialization,
+bounded flush scheduling and native qualification are still required before
+D-04 can be locked. The goal and full Phase 4 qualification remain open.

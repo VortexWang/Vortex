@@ -253,6 +253,11 @@ CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
  direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
  FOREIGN KEY(node_id,batch_id) REFERENCES usage_reservations(node_id,batch_id)
 );
+CREATE TABLE IF NOT EXISTS runtime_block_checkpoints (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, block_id TEXT NOT NULL,
+ prior_reserved TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,block_id) REFERENCES runtime_funding_blocks(node_id,batch_id)
+);
 CREATE TABLE IF NOT EXISTS demand_idle_observations (
  scope BLOB PRIMARY KEY NOT NULL, node_id TEXT NOT NULL, rule_id TEXT NOT NULL,
  since_latest TEXT NOT NULL, observed_latest TEXT NOT NULL
@@ -588,8 +593,15 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 		return err
 	}
 	defer tx.Rollback()
+	if err := settleUsageReservationTx(ctx, tx, reservation, resolution, used, payload, unknownUpper, typed); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func settleUsageReservationTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64, typed *UnknownUsageRecord) error {
 	var bootID, snapshotID, flowKey, ruleID, direction, reservedText, state, usedText string
-	err = tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
+	err := tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
 		Scan(&bootID, &snapshotID, &flowKey, &ruleID, &direction, &reservedText, &state, &usedText)
 	if err != nil {
 		return err
@@ -623,7 +635,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 				if !bytes.Equal(previousPayload, payload) {
 					return ErrUsageBatchConflict
 				}
-				return tx.Commit()
+				return nil
 			}
 			var storedPayload []byte
 			var storedUpper string
@@ -637,7 +649,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 				return ErrUsageBatchConflict
 			}
 		}
-		return tx.Commit()
+		return nil
 	}
 	var holdReserved, holdState string
 	holdErr := tx.QueryRowContext(ctx, `SELECT reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&holdReserved, &holdState)
@@ -708,7 +720,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 			return err
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 // UnresolvedUsageReservations returns reservations from earlier boots. The

@@ -82,3 +82,18 @@ Local Store and full Agent/Hub race regressions pass. This completes the funding
 reservation portion of step 1 only: no child allocation, checkpoint or runtime
 configuration uses this API yet, and a returned grant ID is not write permission.
 The bounds above are implementation safety caps, not D-04 measured parameters.
+
+## Checkpoint persistence progress
+
+CheckpointRuntimeFundingBlock now atomically transfers confirmed consumption
+from the residual hold to an independently identified committed usage batch,
+including outbox insertion and demand-consumption observation. The caller uses
+the expected current residual; stale updates fail. Exact checkpoint retries
+remain valid after the parent residual is settled by recovery. Exhaustion marks
+the zero tail returned without refunding funds, freeing the direction slot.
+
+This supplies the persistence portion of step 3. It does not supply the
+exclusive allocator, write-admission barrier, bounded flush scheduling or Engine
+integration in steps 2/4/6. Until those exist, the API is not used for forwarding.
+Tests currently simulate transaction failure and close/reopen recovery; actual
+process kill, disk-full and native block runtime qualification remain required.
