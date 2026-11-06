@@ -1914,3 +1914,23 @@ trusted-time, state, lineage, deadline, lease and session checks remain; no
 cross-transaction authority cache exists. Ordinary callers still read then
 validate normally. Full Store race PASS 17.353s. This is a bounded query reduction,
 not proof the native deadline is fixed; clean native retest remains required.
+
+## Clean 417ce63 native retest
+
+User reiterated approval of control 1.3.0; this does not approve control 1.4.0
+grant return. Continued the existing 04-12 execution on the isolated branch.
+Clean 417ce6384a3154af46a46212814ef114cfcea9cc was deployed to the dedicated
+Ubuntu host and tested without profiling using durable-process.sh.
+Artifacts: artifacts/phase4/process-417ce63. Overall FAIL (11.644s): UDP PASS
+(10.27s), single TCP FAIL at round 9 with RST 0008 (0.97s), concurrent TCP FAIL
+at stream 11 round 0 with RST 0008 (0.40s). Concurrent admission logs again show
+begin-transaction timeout at approximately 199ms. Single TCP logs show a
+select-authority deadline after 198ms total admission time. Query deduplication
+has not resolved the qualification blocker. Do not infer regression causality
+from one run; intermittent single-stream resets existed before this change.
+Report SHA-256 e02a1b2b5f7c174ee383fc45c6f20da4cadfb3b501bb3065ba94268603c9d438;
+test.log SHA-256 d1f2a9c230a4471e22caf44c95492d66e1eec267b900b7103f75bb40a9b1870b.
+No timeout, durability setting or candidate default was relaxed. D-04 parameter
+lock and full Phase 4 closure remain unverified. Next work must address measured
+cross-session transaction contention and retain per-write authority and durable
+settlement guarantees, rather than increase the deadline to pass this test.
