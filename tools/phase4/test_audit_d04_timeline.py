@@ -26,6 +26,22 @@ class TimelineAuditTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 audit(data, 16<<20, True)
 
+    def test_consumption_horizon_is_measured_before_ceiling(self):
+        data = self.fixture()
+        for sample in data["samples"]:
+            state = sample["state"]
+            state["budget_bytes"] = 200 << 20
+            state["used_bytes"] = (96 << 20) if sample["elapsed_nanoseconds"] else 0
+            state["unissued_bytes"] = state["budget_bytes"] - state["used_bytes"]
+        result = audit(data, 32 << 20, True, 10)
+        self.assertEqual(result["formula_samples"], 2)
+        self.assertEqual(result["uncapped_formula_samples"], 1)
+        with self.assertRaises(ValueError):
+            audit(data, 32 << 20, True, 30)
+        for seconds in (0, 61, True):
+            with self.assertRaises(ValueError):
+                audit(data, 32 << 20, True, seconds)
+
     def test_idle_and_sampling_failures(self):
         data = self.fixture()
         variants = []

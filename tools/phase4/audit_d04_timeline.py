@@ -8,7 +8,9 @@ AMOUNTS = ("unissued_bytes", "pending_grant_bytes", "unknown_grant_bytes",
            "available_bytes", "held_bytes", "used_bytes", "unknown_bytes")
 
 
-def audit(timeline, ceiling, require_idle=False):
+def audit(timeline, ceiling, require_idle=False, target_seconds=None):
+    if target_seconds is not None and (type(target_seconds) is not int or not 1 <= target_seconds <= 60):
+        raise ValueError("invalid target horizon")
     if timeline.get("dropped_periodic_samples") != 0:
         raise ValueError("missing periodic samples")
     samples = timeline.get("samples")
@@ -19,6 +21,9 @@ def audit(timeline, ceiling, require_idle=False):
     budget = None
     identity = None
     targets = []
+    formula_samples = uncapped_formula_samples = 0
+    if target_seconds is not None and samples[0]["state"]["used_bytes"] != 0:
+        raise ValueError("cold-start consumption evidence missing")
     for sample in samples:
         elapsed = sample["elapsed_nanoseconds"]
         state = sample["state"]
@@ -40,6 +45,15 @@ def audit(timeline, ceiling, require_idle=False):
         target = state["dynamic_target_bytes"]
         if not 8 * 1024 * 1024 <= target <= ceiling:
             raise ValueError("dynamic target outside floor/ceiling")
+        if target_seconds is not None and elapsed < 58_000_000_000:
+            # The cold-start timeline begins before usage. Before 58s no
+            # one-second bucket can have aged out of the rolling minute.
+            expected = min(ceiling, max(8 * 1024 * 1024,
+                           (state["used_bytes"] * target_seconds + 59) // 60))
+            if target != expected:
+                raise ValueError("dynamic target differs from committed consumption horizon")
+            formula_samples += 1
+            uncapped_formula_samples += 8 * 1024 * 1024 < target < ceiling
         targets.append(target)
     final = samples[-1]["state"]
     if require_idle:
@@ -52,7 +66,8 @@ def audit(timeline, ceiling, require_idle=False):
     return {"status": "pass", "samples": len(samples), "target_min": min(targets),
             "target_max": max(targets), "target_final": targets[-1],
             "sampled_source_conserved": True, "idle_shrink_checked": require_idle,
-            "issuer_credit_return_proved": False}
+            "issuer_credit_return_proved": False, "formula_samples": formula_samples,
+            "uncapped_formula_samples": uncapped_formula_samples}
 
 
 def main():
@@ -60,12 +75,13 @@ def main():
     parser.add_argument("timeline", type=Path)
     parser.add_argument("--ceiling", type=int, required=True)
     parser.add_argument("--require-idle", action="store_true")
+    parser.add_argument("--target-seconds", type=int)
     args = parser.parse_args()
     if args.require_idle:
         window = json.loads((args.timeline.parent / "idle-window.json").read_text())
         if window.get("requested_seconds", 0) < 65 or window.get("elapsed_nanoseconds", 0) < 65_000_000_000:
             raise ValueError("65-second post-workload idle window is missing")
-    print(json.dumps(audit(json.loads(args.timeline.read_text()), args.ceiling, args.require_idle), sort_keys=True))
+    print(json.dumps(audit(json.loads(args.timeline.read_text()), args.ceiling, args.require_idle, args.target_seconds), sort_keys=True))
 
 
 if __name__ == "__main__":

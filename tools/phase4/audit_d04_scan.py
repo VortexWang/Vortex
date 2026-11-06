@@ -57,7 +57,7 @@ def audit(base):
         window = read(out / 'idle-window.json')
         if window.get('requested_seconds', 0) < 65 or window.get('elapsed_nanoseconds', 0) < 65_000_000_000:
             raise ValueError('post-workload idle window missing')
-        timeline = audit_timeline(read(out / 'events-source.jsonl.credit-timeline.json'), case['grant_target_bytes'], True)
+        timeline = audit_timeline(read(out / 'events-source.jsonl.credit-timeline.json'), case['grant_target_bytes'], True, case['grant_target_seconds'])
         commits.add(host['commit'])
         reviewed.append(dict(case=case['id'], repeat=repeat, timeline=timeline,
                              source_settled=True, raw_result_sha256=hashlib.sha256((out/'d04-result.json').read_bytes()).hexdigest()))
