@@ -42,7 +42,7 @@ assert r['status']=='passed' and r['commit']==sha and r['backend']=='protocol-te
 for name in ('TestRegionalProcessFailover/silent-stream','TestRegionalProcessFailover/silent-established','TestRegionalProcessFailover/autonomous','TestRegionalProcessFailover/recovering','TestRegionalProcessFailover/tcp-original-authorization'):
  log=(out/'regional-process.log').read_text()
  assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
-for name in ('TestRegionalStatusRejectsUnauthenticatedOrStaleBounds','TestRegionalStaleIncarnationCannotMutateAuthority','TestRegionalSwitchCancelsBlockedMutation','TestRegionalFailoverRetainsUnknownDebt','TestRegionalLateAuthorizationCannotAdvanceClockOrConfig','TestRegionalRevocationAndNoHealthyPeerAreBounded'):
+for name in ('TestRegionalStatusRejectsUnauthenticatedOrStaleBounds','TestRegionalStaleIncarnationCannotMutateAuthority','TestRegionalSwitchCancelsBlockedMutation','TestRegionalHealthyLossRestartsSweepBudget','TestRegionalFailoverRetainsUnknownDebt','TestRegionalLateAuthorizationCannotAdvanceClockOrConfig','TestRegionalRevocationAndNoHealthyPeerAreBounded'):
  log=(out/'regional-race.log').read_text()
  assert log.count(f'--- PASS: {name} ') == 10 and f'--- SKIP: {name}' not in log,name
 assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome '  in (out/'engine-race.log').read_text()

@@ -416,3 +416,54 @@ func TestRegionalSwitchCancelsBlockedMutation(t *testing.T) {
 		t.Fatal("old mutation boundary never returned")
 	}
 }
+
+func TestRegionalHealthyLossRestartsSweepBudget(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	ns, err := store.Open(filepath.Join(t.TempDir(), "node.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ns.Close()
+	n, err := New(controlTestNodeID, ns, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	serverTLS, clientTLS, _ := controlTLS(t, n.NodeID)
+	endpoints := []HubEndpoint{}
+	for i, id := range []string{regionalHubID, regionalOtherID} {
+		hs, err := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer hs.Close()
+		regionalSeed(t, hs, id, n.NodeID, n.BootID)
+		listener := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, HubID: id, Region: "east", AcceptUsage: true, StallAfterReadiness: i == 0}, serverTLS)
+		endpoints = append(endpoints, HubEndpoint{Region: "east", Address: listener.Addr().String(), HubID: id, ServerName: "hub"})
+	}
+	c := &ControlClient{Node: n, TLS: clientTLS}
+	done := make(chan error, 1)
+	go func() {
+		done <- c.RunRegion(ctx, RegionalConfig{Region: "east", Endpoints: endpoints, DialTimeout: 500 * time.Millisecond, Watchdog: 500 * time.Millisecond, FailoverBudget: 500 * time.Millisecond, RetryMin: time.Second, RetryMax: time.Second})
+	}()
+	for {
+		s := c.CurrentHubStatus()
+		if s != nil && s.HubId == regionalOtherID {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			t.Fatal("healthy lifetime consumed the next candidate sweep budget")
+		case <-time.After(5 * time.Millisecond):
+		}
+	}
+	if c.RegionalCounters().ReadySessions < 2 {
+		t.Fatal("fixture never established primary readiness")
+	}
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("regional loop did not join")
+	}
+}
