@@ -11,7 +11,8 @@ objective: Parameterize durable funding-block D-04 qualification workload and ru
 1. Parameterize the durable funding-block runtime workload through environment variables while preserving current defaults and fail-closed validation.
 2. Add a repeatable D-04 scan entrypoint covering funding-block size, target seconds, renewal waterline, TCP and UDP durable authority, source conservation, settlement states, issuer occupancy, and idle-tail behavior.
 3. Run the candidate matrix on the native Ubuntu host, preserving raw evidence and restoring temporary socket settings after every run.
-4. Update Phase 4 acceptance records only from observed evidence; keep D-04 unlocked when the matrix does not satisfy the durable authority bar.
+4. Establish same-source CI regression evidence in the authenticated account’s existing VORTEX repository, using isolated qualification branches and a draft PR without modifying its main branch.
+5. Update Phase 4 acceptance records only from observed evidence; keep D-04 unlocked when the matrix does not satisfy the durable authority bar.
 
 ## Acceptance
 
