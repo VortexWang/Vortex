@@ -1,0 +1,893 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vortex.invalid/contracts/authorization/v1/payload.schema.json",
+  "title": "VORTEX Authorization Update 1.2.0; retains 1.1.0 input branch",
+  "oneOf": [
+    {
+      "title": "VORTEX Authorization Update 1.1.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "update_id",
+        "node_id",
+        "boot_id",
+        "signer_epoch",
+        "path_generation",
+        "fencing_generation_floor",
+        "issued_at",
+        "backend_heartbeat_at",
+        "autonomy_deadline",
+        "authorizations",
+        "revocations",
+        "restrictions"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "update_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "path_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fencing_generation_floor": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "backend_heartbeat_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "autonomy_deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authorizations": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "authorization_id",
+              "parent_authorization_id",
+              "source_id",
+              "kind",
+              "rule_id",
+              "rule_revision",
+              "path_generation",
+              "issued_at",
+              "not_before",
+              "expires_at",
+              "hard_deadline"
+            ],
+            "properties": {
+              "authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "parent_authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "kind": {
+                "enum": [
+                  "runtime_lease",
+                  "share_lease",
+                  "credit_grant"
+                ]
+              },
+              "rule_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "rule_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "path_generation": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "issued_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "not_before": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hard_deadline": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "billing_snapshot_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "amount_bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "rate_bps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000000000
+              },
+              "connections": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "credit_grant"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "billing_snapshot_id",
+                    "amount_bytes"
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "share_lease"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "rate_bps",
+                    "connections"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "restrictions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "existing_rules_only",
+            "existing_shares_only",
+            "existing_delegated_balances_only",
+            "new_rules",
+            "new_ports",
+            "dns_changes",
+            "registrations",
+            "cross_node_rebalance"
+          ],
+          "properties": {
+            "existing_rules_only": {
+              "const": true
+            },
+            "existing_shares_only": {
+              "const": true
+            },
+            "existing_delegated_balances_only": {
+              "const": true
+            },
+            "new_rules": {
+              "const": false
+            },
+            "new_ports": {
+              "const": false
+            },
+            "dns_changes": {
+              "const": false
+            },
+            "registrations": {
+              "const": false
+            },
+            "cross_node_rebalance": {
+              "const": false
+            }
+          }
+        },
+        "epoch_handoffs": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "transfer_id",
+              "parent_authorization_id",
+              "source_id",
+              "from_epoch",
+              "to_epoch",
+              "remaining_bytes",
+              "sealed_sequence",
+              "record_sha256"
+            ],
+            "properties": {
+              "transfer_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "parent_authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "from_epoch": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "to_epoch": {
+                "type": "integer",
+                "minimum": 2
+              },
+              "remaining_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9223372036854775807
+              },
+              "sealed_sequence": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "record_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "update_id",
+        "node_id",
+        "boot_id",
+        "signer_epoch",
+        "path_generation",
+        "fencing_generation_floor",
+        "issued_at",
+        "backend_heartbeat_at",
+        "autonomy_deadline",
+        "authorizations",
+        "revocations",
+        "restrictions",
+        "share_references",
+        "policy_transitions"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.2.0"
+        },
+        "update_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "path_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fencing_generation_floor": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "backend_heartbeat_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "autonomy_deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authorizations": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "authorization_id",
+              "parent_authorization_id",
+              "source_id",
+              "kind",
+              "rule_id",
+              "rule_revision",
+              "path_generation",
+              "issued_at",
+              "not_before",
+              "expires_at",
+              "hard_deadline",
+              "share_reference_id",
+              "delegation_id"
+            ],
+            "properties": {
+              "authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "parent_authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "kind": {
+                "enum": [
+                  "runtime_lease",
+                  "share_lease",
+                  "credit_grant"
+                ]
+              },
+              "rule_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "rule_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "path_generation": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "issued_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "not_before": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hard_deadline": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "billing_snapshot_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "amount_bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "rate_bps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000000000
+              },
+              "connections": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "share_reference_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "delegation_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "credit_grant"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "billing_snapshot_id",
+                    "amount_bytes"
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "share_lease"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "rate_bps",
+                    "connections"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "restrictions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "existing_rules_only",
+            "existing_shares_only",
+            "existing_delegated_balances_only",
+            "new_rules",
+            "new_ports",
+            "dns_changes",
+            "registrations",
+            "cross_node_rebalance"
+          ],
+          "properties": {
+            "existing_rules_only": {
+              "const": true
+            },
+            "existing_shares_only": {
+              "const": true
+            },
+            "existing_delegated_balances_only": {
+              "const": true
+            },
+            "new_rules": {
+              "const": false
+            },
+            "new_ports": {
+              "const": false
+            },
+            "dns_changes": {
+              "const": false
+            },
+            "registrations": {
+              "const": false
+            },
+            "cross_node_rebalance": {
+              "const": false
+            }
+          }
+        },
+        "epoch_handoffs": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "transfer_id",
+              "parent_authorization_id",
+              "source_id",
+              "from_epoch",
+              "to_epoch",
+              "remaining_bytes",
+              "sealed_sequence",
+              "record_sha256"
+            ],
+            "properties": {
+              "transfer_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "parent_authorization_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "from_epoch": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "to_epoch": {
+                "type": "integer",
+                "minimum": 2
+              },
+              "remaining_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9223372036854775807
+              },
+              "sealed_sequence": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "record_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "share_references": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/share_reference"
+          }
+        },
+        "policy_transitions": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/policy_transition"
+          }
+        },
+        "renewal_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "renewal_request_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "dependentRequired": {
+            "renewal_request_id": [
+              "renewal_request_sha256"
+            ],
+            "renewal_request_sha256": [
+              "renewal_request_id"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "share_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "share_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "parent_share_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "parent_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "allowed_issuer_hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "subject_node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "share_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "rule_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "path_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "rate_bps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000
+        },
+        "connections": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hard_deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "share_id",
+        "parent_share_id",
+        "parent_revision",
+        "source_id",
+        "allowed_issuer_hub_id",
+        "subject_node_id",
+        "signer_epoch",
+        "share_generation",
+        "revision",
+        "rule_id",
+        "rule_revision",
+        "path_generation",
+        "rate_bps",
+        "connections",
+        "not_before",
+        "expires_at",
+        "hard_deadline"
+      ]
+    },
+    "policy_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "transition_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "path_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "old_snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "snapshot_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "rule_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "execution_node_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "path_generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "policy_revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "coefficient_milli": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "snapshot_id",
+            "rule_id",
+            "execution_node_id",
+            "path_generation",
+            "policy_revision",
+            "coefficient_milli"
+          ]
+        },
+        "new_snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "snapshot_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "rule_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "execution_node_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "path_generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "policy_revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "coefficient_milli": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "snapshot_id",
+            "rule_id",
+            "execution_node_id",
+            "path_generation",
+            "policy_revision",
+            "coefficient_milli"
+          ]
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "preissue_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "guard_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 300
+        },
+        "future_source_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "future_credit_authorization_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "future_runtime_authorization_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "future_share_authorization_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        }
+      },
+      "required": [
+        "transition_id",
+        "rule_id",
+        "path_generation",
+        "old_snapshot",
+        "new_snapshot",
+        "effective_at",
+        "preissue_seconds",
+        "guard_seconds",
+        "future_source_id",
+        "future_credit_authorization_id",
+        "future_runtime_authorization_id",
+        "future_share_authorization_id"
+      ]
+    }
+  }
+}

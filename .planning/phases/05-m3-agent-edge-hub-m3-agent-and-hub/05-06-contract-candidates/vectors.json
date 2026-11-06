@@ -1,0 +1,225 @@
+{
+  "hello": {
+    "control_version": "1.3.0",
+    "capabilities": [
+      "status-v1",
+      "renewal-v1"
+    ],
+    "session_id": "550e8400-e29b-41d4-a716-000000000008",
+    "region_id": "region-a"
+  },
+  "node_report": {
+    "report_id": "550e8400-e29b-41d4-a716-000000000009",
+    "build_version": "test-build",
+    "applied_config_version": 1,
+    "observed_at": "2026-11-06T00:00:00Z",
+    "probes": [
+      {
+        "target_id": "550e8400-e29b-41d4-a716-000000000006",
+        "state": "healthy",
+        "failures": 0,
+        "successes": 2,
+        "observed_at": "2026-11-06T00:00:00Z",
+        "latency_us": 500
+      }
+    ],
+    "active_sessions": 1,
+    "drain_state": "running"
+  },
+  "renewal_request": {
+    "request_id": "550e8400-e29b-41d4-a716-000000000007",
+    "node_id": "550e8400-e29b-41d4-a716-000000000001",
+    "boot_id": "550e8400-e29b-41d4-a716-000000000002",
+    "delegation_id": "550e8400-e29b-41d4-a716-000000000003",
+    "source_id": "550e8400-e29b-41d4-a716-000000000004",
+    "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+    "rule_revision": 1,
+    "path_generation": 1,
+    "fencing_generation": 1,
+    "signer_epoch": 1,
+    "requested_raw_bytes": 1024,
+    "requested_ttl_seconds": 60,
+    "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "billing_snapshot_id": "550e8400-e29b-41d4-a716-000000000010"
+  },
+  "renewal_result": {
+    "request_id": "550e8400-e29b-41d4-a716-000000000007",
+    "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "code": "ok",
+    "retryable": false,
+    "authorization_update_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "hub_status": {
+    "hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "region_id": "region-a",
+    "mode": "recovering",
+    "session_id": "550e8400-e29b-41d4-a716-000000000008",
+    "control_version": "1.3.0",
+    "capabilities": [
+      "status-v1",
+      "renewal-v1",
+      "identity-v1",
+      "recovery-v1",
+      "share-policy-v1"
+    ],
+    "signer_epoch": 2,
+    "recovery_target_sequence": 10,
+    "confirmed_sequence": 9,
+    "pending_tail_records": 3,
+    "backend_heartbeat_at": "2026-11-06T00:00:00Z",
+    "autonomy_deadline": "2026-11-06T01:00:00Z",
+    "revocation_revision": 1,
+    "restriction_revision": 1
+  },
+  "backend_heartbeat": {
+    "backend_id": "550e8400-e29b-41d4-a716-000000000051",
+    "hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "session_id": "550e8400-e29b-41d4-a716-000000000008",
+    "region_id": "region-a",
+    "observed_at": "2026-11-06T00:00:00Z",
+    "autonomy_deadline": "2026-11-06T01:00:00Z",
+    "revocation_revision": 1,
+    "restriction_revision": 1
+  },
+  "backend_allocation": {
+    "allocation_id": "550e8400-e29b-41d4-a716-000000000050",
+    "delegation_id": "550e8400-e29b-41d4-a716-000000000003",
+    "hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "region_id": "region-a",
+    "node_id": "550e8400-e29b-41d4-a716-000000000001",
+    "boot_id": "550e8400-e29b-41d4-a716-000000000002",
+    "source_id": "550e8400-e29b-41d4-a716-000000000004",
+    "runtime_source_id": "550e8400-e29b-41d4-a716-000000000012",
+    "share_source_id": "550e8400-e29b-41d4-a716-000000000013",
+    "billing_snapshot_id": "550e8400-e29b-41d4-a716-000000000010",
+    "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+    "rule_revision": 1,
+    "path_generation": 1,
+    "fencing_generation_floor": 1,
+    "signer_epoch": 1,
+    "raw_bytes": 8192,
+    "rate_bps": 1000000,
+    "connections": 4,
+    "valid_from": "2026-11-06T00:00:00Z",
+    "expires_at": "2026-11-06T00:05:00Z",
+    "hard_deadline": "2026-11-06T01:00:00Z",
+    "backend_heartbeat_at": "2026-11-06T00:00:00Z",
+    "autonomy_deadline": "2026-11-06T01:00:00Z",
+    "share_references": [
+      {
+        "share_id": "550e8400-e29b-41d4-a716-000000000020",
+        "parent_share_id": "",
+        "parent_revision": 0,
+        "source_id": "550e8400-e29b-41d4-a716-000000000004",
+        "allowed_issuer_hub_id": "550e8400-e29b-41d4-a716-000000000005",
+        "subject_node_id": "550e8400-e29b-41d4-a716-000000000001",
+        "signer_epoch": 1,
+        "share_generation": 1,
+        "revision": 1,
+        "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+        "rule_revision": 1,
+        "path_generation": 1,
+        "rate_bps": 1000000,
+        "connections": 4,
+        "not_before": "2026-11-06T00:00:00Z",
+        "expires_at": "2026-11-06T00:05:00Z",
+        "hard_deadline": "2026-11-06T01:00:00Z"
+      }
+    ],
+    "policy_transitions": []
+  },
+  "credential_revocations": {
+    "issuer_id": "550e8400-e29b-41d4-a716-000000000051",
+    "revision": 1,
+    "certificate_serials": [
+      "123"
+    ],
+    "node_ids": [
+      "550e8400-e29b-41d4-a716-000000000090"
+    ],
+    "effective_at": "2026-11-06T00:00:00Z"
+  },
+  "ledger_ack": {
+    "record_id": "550e8400-e29b-41d4-a716-000000000052",
+    "ledger_sequence": 10,
+    "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "kind": "handoff"
+  },
+  "share_reference": {
+    "share_id": "550e8400-e29b-41d4-a716-000000000020",
+    "parent_share_id": "",
+    "parent_revision": 0,
+    "source_id": "550e8400-e29b-41d4-a716-000000000004",
+    "allowed_issuer_hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "subject_node_id": "550e8400-e29b-41d4-a716-000000000001",
+    "signer_epoch": 1,
+    "share_generation": 1,
+    "revision": 1,
+    "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+    "rule_revision": 1,
+    "path_generation": 1,
+    "rate_bps": 1000000,
+    "connections": 4,
+    "not_before": "2026-11-06T00:00:00Z",
+    "expires_at": "2026-11-06T00:05:00Z",
+    "hard_deadline": "2026-11-06T01:00:00Z"
+  },
+  "policy_transition": {
+    "transition_id": "550e8400-e29b-41d4-a716-000000000030",
+    "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+    "path_generation": 1,
+    "old_snapshot": {
+      "snapshot_id": "550e8400-e29b-41d4-a716-000000000010",
+      "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+      "execution_node_id": "550e8400-e29b-41d4-a716-000000000001",
+      "path_generation": 1,
+      "policy_revision": 1,
+      "coefficient_milli": 1000
+    },
+    "new_snapshot": {
+      "snapshot_id": "550e8400-e29b-41d4-a716-000000000011",
+      "rule_id": "550e8400-e29b-41d4-a716-000000000006",
+      "execution_node_id": "550e8400-e29b-41d4-a716-000000000001",
+      "path_generation": 1,
+      "policy_revision": 2,
+      "coefficient_milli": 1000
+    },
+    "effective_at": "2026-11-06T00:05:00Z",
+    "preissue_seconds": 86400,
+    "guard_seconds": 5,
+    "future_source_id": "550e8400-e29b-41d4-a716-000000000004",
+    "future_credit_authorization_id": "550e8400-e29b-41d4-a716-000000000040",
+    "future_runtime_authorization_id": "550e8400-e29b-41d4-a716-000000000041",
+    "future_share_authorization_id": "550e8400-e29b-41d4-a716-000000000042"
+  },
+  "delegation_restriction": {
+    "delegation_id": "550e8400-e29b-41d4-a716-000000000003",
+    "max_total_issued_raw_bytes": 8192,
+    "max_rate_bps": 1000000,
+    "max_connections": 4
+  },
+  "authority_restrictions": {
+    "restriction_id": "550e8400-e29b-41d4-a716-000000000060",
+    "hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "revision": 1,
+    "effective_at": "2026-11-06T00:00:00Z",
+    "revoked_delegation_ids": [],
+    "revoked_authorization_ids": [],
+    "limits": [
+      {
+        "delegation_id": "550e8400-e29b-41d4-a716-000000000003",
+        "max_total_issued_raw_bytes": 8192,
+        "max_rate_bps": 1000000,
+        "max_connections": 4
+      }
+    ]
+  },
+  "epoch_handoff_request": {
+    "handoff_id": "550e8400-e29b-41d4-a716-000000000061",
+    "hub_id": "550e8400-e29b-41d4-a716-000000000005",
+    "from_epoch": 1,
+    "to_epoch": 2,
+    "backend_heartbeat_at": "2026-11-06T00:00:00Z",
+    "required_restriction_revision": 1
+  }
+}

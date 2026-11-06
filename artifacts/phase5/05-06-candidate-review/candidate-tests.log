@@ -1,0 +1,18 @@
+test_auth_legacy_branch_retained_and_new_fields_required (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_backend_restriction_and_handoff_boundaries (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_bounds_and_result_payload_presence (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_existing_proto_field_types_and_tags_are_unchanged (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_identity_profile_preserves_canonical_node_binding (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_manifest_and_frozen_baselines_match_exact_bytes (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_policy_preissue_and_time_boundary_are_explicit (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_positive_projection_json_round_trips (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_protobuf_real_binary_roundtrip_and_request_digest (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_rejects_overflow_missing_unknown_and_mutated_identity (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_runtime_legacy_input_and_new_bounded_targets (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_share_chain_rejects_stale_missing_cyclic_scope_and_untrusted_anchor (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+test_uninitialized_hub_is_blocked_not_online_authority (test_lifecycle_candidates.LifecycleCandidateTests) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.261s
+
+OK

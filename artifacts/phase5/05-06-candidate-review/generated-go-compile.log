@@ -1,0 +1,2 @@
+?   	command-line-arguments	[no test files]
+PASS: generated candidate package compiles; [no test files] is build-only evidence, not a unit/runtime pass
