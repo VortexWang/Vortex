@@ -1679,3 +1679,38 @@ of a large preexisting unknown liability. The continuous regression remains
 expected to fail until allocator integration is complete. D-04 stays unlocked.
 Full Store race regression also PASS 16.353s; this does not supersede the failing
 continuous runtime regression or establish native evidence for the new API.
+
+## Agent composite admission consumes fragmented credit
+
+Experimental funding-block allocation now falls back after whole-grant denial
+to collecting up to 64 ordinary durable per-grant fragments, with at most 64
+unsettled composite writes per session. Allocator ownership and the original
+200ms enqueue deadline cover collection. No capability is returned until the
+entire write is funded. Each fragment retains its grant identity and spends
+shared rate through the existing transactional checks. Admission failure returns
+only previously confirmed unused children; uncertain current holds remain for
+recovery. Known-idle opposite tails are returned before collection; live tails
+remain protected. No extra authority is issued to hide fragmented balances.
+
+Settlement partitions known writes in reservation order, returns proven-unused
+bytes, and preserves per-child durable outbox identities. Unknown results fault
+the gate and freeze all children. A settlement failure retains its uncertain
+hold and freezes later children rather than refunding them. Close does not
+refund outstanding composite writes. Tests cover two-grant short writes after
+close, unknown outcomes, canceled settlement and partial collection rollback.
+Three local race repetitions PASS 3.140s; vet and diff checks PASS.
+
+Continuous real TCP/UDP traffic now completes sixteen exchanges without waiting
+for renewal balances or idle settlement. Its previous fixed batch-count check
+was replaced for this workload with exact Agent/Hub/backend identity and payload
+comparison, protobuf byte-total reconciliation, settled-state checks and SQLite
+integrity checks. Three non-race repetitions PASS 31.938s. Initial integration
+failed only the old batch-count assumption; raw attempts are preserved in
+artifacts/phase4/fragment-integration.
+
+The broader local funding-block race run still FAILS the new continuous test
+at the unchanged deadline (43.101s overall). Its diagnostic had Available=4096,
+LargestGrant=3000 for a 1500-byte write: the earlier fragmentation deadlock is
+resolved, but instrumentation/latency qualification is not. Do not count this
+as race pass. Native composite validation, crash/fault coverage of collection
+and sustained multi-stream D-04 scans remain required. No parameters locked.

@@ -50,6 +50,7 @@ type fundingBlockSession struct {
 	blocks            map[accounting.Direction]*sessionFundingBlock
 	changed           chan struct{}
 	closed            bool
+	fragmentWrites    int
 	idleTimeout       time.Duration
 	queueMu           sync.Mutex
 	queue             []*fundingAdmissionRequest
@@ -159,6 +160,22 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 					return nil, s.changed, nil
 				}
 			}
+		}
+		if errors.Is(err, store.ErrAuthorizationDenied) {
+			// The failed transaction rolled back idle returns. Release only
+			// proven-idle tails before collecting ordinary per-grant fragments.
+			for _, tail := range idle {
+				old := s.blocks[idleDirection]
+				if old == nil || old.reservation != tail {
+					return nil, nil, s.fail(store.ErrUsageBatchConflict)
+				}
+				if e := s.release(ctx, old); e != nil {
+					return nil, nil, s.fail(e)
+				}
+				delete(s.blocks, idleDirection)
+			}
+			batch, e := s.reserveFragments(ctx, direction, n)
+			return batch, nil, e
 		}
 		if err != nil {
 			return nil, nil, s.admissionError(err)

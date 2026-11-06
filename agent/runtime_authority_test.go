@@ -879,8 +879,12 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			if err := bs.Close(); err != nil {
 				t.Fatal(err)
 			}
-			assertRawLedger(t, hubDB, 4+2*renewalRounds)
-			assertRawLedger(t, backendDB, 4+2*renewalRounds)
+			if continuous {
+				assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, uint64((renewalRounds+2)*2*len(message)))
+			} else {
+				assertRawLedger(t, hubDB, 4+2*renewalRounds)
+				assertRawLedger(t, backendDB, 4+2*renewalRounds)
+			}
 			if continuous {
 				saveLedgerFiles(t, fmt.Sprintf("runtime-block-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			} else if blockMode {
@@ -985,4 +989,70 @@ func fillRuntimeDisk(t *testing.T, dir string) string {
 	f.Close()
 	t.Fatal("full disk fixture must be an isolated filesystem of at most 16 MiB")
 	return ""
+}
+
+// Fragment count is workload-dependent. Compare every durable identity/payload
+// across all three ledgers and independently sum actual protobuf byte deltas.
+func assertFragmentLedgers(t *testing.T, paths []string, wantBytes uint64) {
+	t.Helper()
+	var reference map[string][]byte
+	for index, path := range paths {
+		db, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer db.Close()
+		var integrity string
+		if err := db.QueryRow("PRAGMA quick_check").Scan(&integrity); err != nil || integrity != "ok" {
+			t.Fatalf("ledger integrity %s %v", integrity, err)
+		}
+		rows, err := db.Query("SELECT batch_id,payload,state FROM usage_batches")
+		if err != nil {
+			t.Fatal(err)
+		}
+		entries := map[string][]byte{}
+		var total uint64
+		for rows.Next() {
+			var id, state string
+			var payload []byte
+			if err := rows.Scan(&id, &payload, &state); err != nil {
+				t.Fatal(err)
+			}
+			expected := "ledgered"
+			if index == 0 {
+				expected = "hub_acked"
+			}
+			if state != expected {
+				t.Fatalf("unsettled batch %s state=%s", id, state)
+			}
+			var batch controlv1.UsageBatch
+			if err := proto.Unmarshal(payload, &batch); err != nil {
+				t.Fatal(err)
+			}
+			if batch.BatchId != id || len(batch.Deltas) != 1 || batch.Deltas[0].GrantId == "" {
+				t.Fatalf("invalid usage %s", id)
+			}
+			total += batch.Deltas[0].Bytes
+			entries[id] = payload
+		}
+		if err := rows.Err(); err != nil {
+			t.Fatal(err)
+		}
+		rows.Close()
+		if total != wantBytes {
+			t.Fatalf("ledger bytes %d want %d", total, wantBytes)
+		}
+		if index == 0 {
+			reference = entries
+			continue
+		}
+		if len(entries) != len(reference) {
+			t.Fatal("ledger identity count mismatch")
+		}
+		for id, payload := range reference {
+			if !bytes.Equal(payload, entries[id]) {
+				t.Fatalf("ledger payload mismatch %s", id)
+			}
+		}
+	}
 }
