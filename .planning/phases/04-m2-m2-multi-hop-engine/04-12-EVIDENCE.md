@@ -2140,3 +2140,15 @@ block churn while retaining low-credit opposite-tail recovery semantics.
 Artifacts process-825f31b report SHA-256
 070ed740881eb3d26cc4ef57cc24ec8b4912fc0b2ad36a6d09ef7b43d1f94757;
 test.log b4ae8e7e814aca8bbcdea89383b147841df3b67d92798f5f919264e0eb0491a9.
+
+## Avoid idle opposite-direction funding churn
+
+New-direction allocation first attempts free-credit funding without returning
+opposite idle tails. Only a definitive authorization denial (rolled-back Store
+transaction) permits retry with those caller-proven idle tails. Ambiguous errors
+never retry; successful free-credit allocation leaves the opposite block intact.
+Existing low-credit reclamation and fragmented-grant fallback remain. Added a
+regression alternating duplex writes and requiring stable block IDs plus final
+source conservation. Funding-block race suite PASS 46.394s, Agent vet/diff PASS.
+Native 256-round renewal test remains required; historical live-count indexing
+has not yet changed.

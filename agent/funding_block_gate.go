@@ -150,7 +150,14 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 				idleDirection = otherDirection
 			}
 		}
-		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), idle)
+		// Keep both directions funded when free credit can cover this write.
+		// Only retry with proven-idle tails after a definitive rolled-back denial.
+		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), nil)
+		if errors.Is(err, store.ErrAuthorizationDenied) && len(idle) > 0 {
+			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), idle)
+		} else if err == nil {
+			idle = nil // No opposite tail was returned by the successful transaction.
+		}
 		if errors.Is(err, store.ErrAuthorizationDenied) {
 			// A UDP response can arrive before the outbound write's commit
 			// callback takes the mutex. Wait for that known in-flight bound

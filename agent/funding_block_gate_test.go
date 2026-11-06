@@ -338,6 +338,38 @@ func TestFundingBlockGateReclaimsOnlyIdleOppositeDirection(t *testing.T) {
 	}
 }
 
+func TestFundingBlockGateKeepsFundedDuplexBlocks(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.idleTimeout = time.Hour
+	ctx := context.Background()
+	ids := map[accounting.Direction]string{}
+	for i := 0; i < 8; i++ {
+		for _, direction := range []accounting.Direction{accounting.LeftToRight, accounting.RightToLeft} {
+			batch, err := s.Reserve(ctx, direction, 8)
+			if err != nil {
+				t.Fatal(err)
+			}
+			s.mu.Lock()
+			id := s.blocks[direction].reservation.BatchID
+			s.mu.Unlock()
+			if prior := ids[direction]; prior != "" && prior != id {
+				t.Fatal("idle opposite block churned despite free funding")
+			}
+			ids[direction] = id
+			if err := batch.Commit(ctx, 8); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if balance := fundingBalance(t, n); balance.Committed != 128 || balance.Reserved != 0 || balance.Unknown != 0 || balance.Initial != balance.Remaining+balance.Committed {
+		t.Fatalf("duplex conservation: %+v", balance)
+	}
+}
+
 func TestFundingBlockGateResponseWaitsForOutboundCheckpoint(t *testing.T) {
 	n, session := fundingSession(t)
 	s := session.(*fundingBlockSession)
