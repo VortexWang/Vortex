@@ -173,7 +173,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## BE Requirements
 
-- [ ] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
+- [x] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
 - [ ] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
 - [ ] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
 - [ ] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
@@ -328,10 +328,10 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [ ] **SUP-ARTIFACT-001**: §14.5 required delivery artifacts. (Source: §14.5, lines 1001-1003; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-PARAM-001**: Appendix A defaults and adjustable parameter ranges. (Source: Appendix A, lines 1037-1096; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B1-001**: Appendix B.1 relative lease and absolute boundary rules. (Source: Appendix B.1, lines 1102-1108; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
-- [ ] **SUP-B2-001**: Appendix B.2 sources, rounding and unknown-liability rules. (Source: Appendix B.2, lines 1110-1119; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
+- [x] **SUP-B2-001**: Appendix B.2 sources, rounding and unknown-liability rules. (Source: Appendix B.2, lines 1110-1119; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B3-001**: Appendix B.3 share-chain and bootstrap activation safety. (Source: Appendix B.3, lines 1121-1132; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B4-001**: Appendix B.4 ledger rotation and continuous signing. (Source: Appendix B.4, lines 1134-1140; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
-- [ ] **SUP-B5-001**: Appendix B.5 immutable billing snapshots and concurrent configurations. (Source: Appendix B.5, lines 1142-1149; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
+- [x] **SUP-B5-001**: Appendix B.5 immutable billing snapshots and concurrent configurations. (Source: Appendix B.5, lines 1142-1149; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 
 ## v2 / Out of Scope
 
@@ -491,7 +491,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | HUB-016 | Phase 5 | Pending |
 | HUB-017 | Phase 5 | Pending |
 | HUB-018 | Phase 5 | Pending |
-| BE-001 | Phase 6 | Pending |
+| BE-001 | Phase 6 | Complete |
 | BE-002 | Phase 6 | Pending |
 | BE-003 | Phase 6 | Pending |
 | BE-004 | Phase 6 | Pending |
@@ -622,10 +622,10 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | SUP-ARTIFACT-001 | Phase 8 | Pending |
 | SUP-PARAM-001 | Phase 1 | Pending |
 | SUP-B1-001 | Phase 5 | Pending |
-| SUP-B2-001 | Phase 6 | Pending |
+| SUP-B2-001 | Phase 6 | Complete |
 | SUP-B3-001 | Phase 5 | Pending |
 | SUP-B4-001 | Phase 5 | Pending |
-| SUP-B5-001 | Phase 6 | Pending |
+| SUP-B5-001 | Phase 6 | Complete |
 
 **Coverage:**
 - Original numbered requirements: 257 (250 table records + 7 outside-table blocks)

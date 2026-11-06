@@ -4,17 +4,17 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 01
-status: ready_to_execute
-stopped_at: Phase 6 planning complete; ready to execute 06-01
-last_updated: "2026-11-06T18:21:39.260Z"
+current_plan: 08
+status: executing
+stopped_at: Completed 06-01-PLAN.md; next dependency wave 06-08
+last_updated: "2026-11-06T19:11:49Z"
 last_activity: 2026-11-07
-last_activity_desc: "Phase 6 planned: 11 plans / 11 waves / 25 tasks; independent plan review passed; implementation not started."
+last_activity_desc: "Phase 6 plan 06-01 completed: real PostgreSQL/mTLS tracer; next dependency wave 06-08."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 44
-  completed_plans: 42
+  completed_plans: 43
 state_head: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 ---
 
@@ -29,13 +29,13 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 
 ## Current Position
 
-Phase: 06 (M4 后端业务闭环 (M4 Backend)) — READY TO EXECUTE
-Current Plan: 01
+Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
+Current Plan: 08
 Total Plans in Phase: 11
-Status: Ready to execute — research, patterns, validation strategy and independent plan review passed; Phase 6 implementation has not started.
-Last activity: 2026-11-07 — 11 plans / 11 dependency waves / 25 tasks; 96 requirements and 24 decisions covered. See 06-PLAN-CHECK.md.
+Status: In progress — 06-01 PostgreSQL authority and real Agent/blocked Hub mTLS tracer complete; 06-08 is next in dependency order.
+Last activity: 2026-11-07 — exact source a21b3cf passed clean Docker normal/process-race checks; Actions not run and caller cleanliness failed. See 06-01-SUMMARY.md.
 
-Progress: Phase 6 [░░░░░░░░░░] 0/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [█░░░░░░░░░] 1/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -64,10 +64,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 05 P03 | multi-session | 4 tasks | 61 files (source/governance; evidence excluded) |
+| Phase 06 P01 | 29min | 1 task | 26 files (source/tooling; 24 evidence files excluded) |
 
 ## Accumulated Context
 
 ### Decisions
+
+- 06-01 uses real Agent NodeControl receipts; HubControl remains authenticated persistent liveness, blocked with signer epoch zero. Financial authority remains 06-05/06-06. Clean committed-clone Docker evidence is separate from the dirty caller checkout and unrun Actions.
 
 - 05-04 owner approved authorization 1.1.0 exact proposal 185541ee09e8dfbb0333a6249e0571c805b182220c77e7c2a79976d45efa4b6e. Signer S/R transfer preserves path generation and prior grant/debt boundaries; production backend remains Phase 6.
 
@@ -85,6 +88,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 - Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
 
 ### Blockers/Concerns
+
+- GSD state handlers reject Phase 5's existing `passed_with_scope` verification status. Preserve that scoped verdict; 06-01 position, progress, metric, decision and session were synchronized narrowly after SDK failure. Phase 6 cache-loss checks must extend to real source balances after 06-05; see WINDOWS.md.
 
 - Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
 - Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification remains pending. D-04 has now received a candidate review, but parameter experiments and lock approval remain pending. No Phase 4 completion is claimed.
@@ -105,9 +110,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-06T18:22:15.731Z
-Stopped at: Phase 6 planning complete; ready to execute 06-01
-Resume file: .planning/phases/06-m4-m4-backend/06-01-PLAN.md
+Last session: 2026-11-06T19:11:49Z
+Stopped at: Completed 06-01-PLAN.md; next dependency wave 06-08
+Resume file: .planning/phases/06-m4-m4-backend/06-08-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 
