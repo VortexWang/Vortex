@@ -34,6 +34,8 @@ type ControlClient struct {
 	sessionID                 uint64
 	sessionCancel             context.CancelFunc
 	currentStatus             *controlv1.HubStatus
+	reportMu                  sync.Mutex
+	reports                   chan *controlv1.NodeReport
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
@@ -263,11 +265,30 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		ticker.Stop()
 	}
 	lastHeartbeat := time.Now()
+	reports := c.reportQueue()
 	for {
 		var response received
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case report := <-reports:
+			if regional == nil || !negotiated {
+				continue
+			}
+			if err := c.withSession(ctx, incarnation, func() error {
+				seq, err := c.Node.Store.NextControlSequence(ctx)
+				if err != nil {
+					return err
+				}
+				if err := stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: seq, Body: &controlv1.NodeMessage_NodeReport{NodeReport: report}}); err != nil {
+					return err
+				}
+				lastNodeSequence = seq
+				return nil
+			}); err != nil {
+				return err
+			}
+			continue
 		case <-activationTicker.C:
 			if regional != nil && !negotiated {
 				continue

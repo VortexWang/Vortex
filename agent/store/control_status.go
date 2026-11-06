@@ -17,6 +17,12 @@ type HubControlSnapshot struct {
 	Confirmed, Pending         uint64
 }
 
+func (s *Store) RuntimeSessionCount(ctx context.Context, nodeID, bootID string) (uint64, error) {
+	var count uint64
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM runtime_sessions WHERE node_id=? AND boot_id=? AND state='open'`, nodeID, bootID).Scan(&count)
+	return count, err
+}
+
 func (s *Store) HubControlSnapshot(ctx context.Context, hubID string, now time.Time) (HubControlSnapshot, error) {
 	result := HubControlSnapshot{Mode: "blocked"}
 	if s.owner != "hub" || !validIssuerUUID(hubID) {

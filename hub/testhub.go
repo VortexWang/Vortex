@@ -49,6 +49,8 @@ type TestServer struct {
 	Usage               *UsageRelay
 	mu                  sync.RWMutex
 	revoked             map[string]struct{}
+	reports             map[string]NodeReportSnapshot
+	ReportObserver      func(context.Context, string, string, string, *controlv1.NodeReport) error
 }
 
 func (s *TestServer) Revoke(serial string) {
@@ -167,6 +169,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return e
 		}
 		lastNodeSequence = message.GetSequence()
+		if err := s.beginReportSession(first.GetNodeId(), first.GetBootId(), hello.SessionId); err != nil {
+			return err
+		}
+		defer s.endReportSession(first.GetNodeId(), hello.SessionId)
 		if e = sendHubStatus(stream, status, &controlSequence); e != nil {
 			return e
 		}
@@ -222,6 +228,13 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		}
 		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_NodeReport:
+			if hello == nil {
+				return fmt.Errorf("test hub: unnegotiated node report")
+			}
+			if err := s.acceptReport(ctx, first.GetNodeId(), first.GetBootId(), hello.SessionId, body.NodeReport); err != nil {
+				return err
+			}
 		case *controlv1.NodeMessage_Heartbeat:
 			if hello == nil {
 				return fmt.Errorf("test hub: unnegotiated lifecycle heartbeat")

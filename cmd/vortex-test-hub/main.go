@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 	controlv1 "vortex/contracts/protobuf/v1"
@@ -32,6 +33,7 @@ func main() {
 	stall := flag.Bool("stall-readiness", false, "test-only fault: stall until stream cancellation")
 	delegationPath := flag.String("test-delegation-template", "", "test-only offline authenticated allocation fixture; never production backend authority")
 	updatePath := flag.String("test-config-update", "", "test-only RuntimeConfigUpdate JSON fixture")
+	reportPath := flag.String("test-report-output", "", "test-only latest observational node report; overwritten atomically")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
@@ -63,6 +65,30 @@ func main() {
 	}
 	config := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}, ClientCAs: pool, ClientAuth: tls.RequireAndVerifyClientCert}
 	server := &hub.TestServer{Store: s, HubID: *hubID, Region: *region, StallReadiness: *stall, StallAfterReadiness: *stallAfter, AcceptUsage: *hubID != ""}
+	if *reportPath != "" {
+		server.ReportObserver = func(_ context.Context, nodeID, bootID, sessionID string, r *controlv1.NodeReport) error {
+			raw, err := json.Marshal(struct {
+				NodeID, BootID, SessionID string
+				Report                    *controlv1.NodeReport
+			}{nodeID, bootID, sessionID, r})
+			if err != nil {
+				return err
+			}
+			f, err := os.CreateTemp(filepath.Dir(*reportPath), ".node-report-*")
+			if err != nil {
+				return err
+			}
+			defer os.Remove(f.Name())
+			if _, err := f.Write(raw); err != nil {
+				f.Close()
+				return err
+			}
+			if err := f.Close(); err != nil {
+				return err
+			}
+			return os.Rename(f.Name(), *reportPath)
+		}
+	}
 	if *updatePath != "" {
 		raw, e := os.ReadFile(*updatePath)
 		if e != nil {

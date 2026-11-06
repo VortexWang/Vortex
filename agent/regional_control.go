@@ -23,6 +23,8 @@ type RegionalConfig struct {
 	Endpoints                             []HubEndpoint
 	DialTimeout, Watchdog, FailoverBudget time.Duration
 	RetryMin, RetryMax                    time.Duration
+	Probes                                *SchedulerConfig
+	ProbeReferences                       []ProbeTarget
 	onlineOnly                            bool
 }
 
@@ -230,7 +232,12 @@ func (c *ControlClient) withSession(ctx context.Context, id uint64, fn func() er
 // Engine configuration. It refuses ambiguous JSON and unapproved extra keys.
 func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, error) {
 	var envelope struct {
-		Version   uint64 `json:"version"`
+		Version uint64 `json:"version"`
+		Targets []struct {
+			ID       string `json:"target_id"`
+			RuleID   string `json:"rule_id"`
+			Protocol string `json:"protocol"`
+		} `json:"probe_targets"`
 		Lifecycle *struct {
 			Region struct {
 				ID   string `json:"region_id"`
@@ -240,11 +247,15 @@ func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, e
 					ServerName string `json:"server_name"`
 				} `json:"hubs"`
 			} `json:"region"`
-			Dial     int `json:"dial_timeout_seconds"`
-			Watchdog int `json:"watchdog_seconds"`
-			Budget   int `json:"failover_budget_seconds"`
-			RetryMin int `json:"retry_min_ms"`
-			RetryMax int `json:"retry_max_ms"`
+			Dial           int `json:"dial_timeout_seconds"`
+			Watchdog       int `json:"watchdog_seconds"`
+			Budget         int `json:"failover_budget_seconds"`
+			RetryMin       int `json:"retry_min_ms"`
+			RetryMax       int `json:"retry_max_ms"`
+			ProbeInterval  int `json:"probe_interval_ms"`
+			ProbeTimeout   int `json:"probe_timeout_ms"`
+			ProbeWorkers   int `json:"probe_workers"`
+			ReportInterval int `json:"report_interval_seconds"`
 		} `json:"lifecycle"`
 	}
 	if len(payload) == 0 || len(payload) > 1<<20 {
@@ -264,6 +275,10 @@ func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, e
 	}
 	v := envelope.Lifecycle
 	r := RegionalConfig{Region: v.Region.ID, DialTimeout: time.Duration(v.Dial) * time.Second, Watchdog: time.Duration(v.Watchdog) * time.Second, FailoverBudget: time.Duration(v.Budget) * time.Second, RetryMin: time.Duration(v.RetryMin) * time.Millisecond, RetryMax: time.Duration(v.RetryMax) * time.Millisecond}
+	r.Probes = &SchedulerConfig{ProbeInterval: time.Duration(v.ProbeInterval) * time.Millisecond, ProbeTimeout: time.Duration(v.ProbeTimeout) * time.Millisecond, ProbeWorkers: v.ProbeWorkers, ReportInterval: time.Duration(v.ReportInterval) * time.Second}
+	for _, t := range envelope.Targets {
+		r.ProbeReferences = append(r.ProbeReferences, ProbeTarget{ID: t.ID, RuleID: t.RuleID, Protocol: t.Protocol})
+	}
 	for _, e := range v.Region.Hubs {
 		r.Endpoints = append(r.Endpoints, HubEndpoint{Region: r.Region, Address: e.Endpoint, HubID: e.ID, ServerName: e.ServerName})
 	}

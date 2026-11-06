@@ -18,6 +18,7 @@ import (
 	"vortex/agent"
 	"vortex/agent/identity"
 	"vortex/agent/store"
+	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 func main() {
@@ -242,12 +243,28 @@ func main() {
 	}
 
 	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
+	scheduler, err := n.SchedulerForRegion(regional)
+	if err != nil {
+		fatal(err)
+	}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
 	var workers sync.WaitGroup
 	workers.Add(2)
 	defer func() { cancel(); workers.Wait() }()
-	runErr := make(chan error, 1)
+	runErr := make(chan error, 2)
 	go func() { defer workers.Done(); runErr <- client.RunRegion(ctx, regional) }()
+	if scheduler != nil {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			runErr <- scheduler.Run(ctx, func(ctx context.Context, r *controlv1.NodeReport) error {
+				if err := n.ObserveReport(ctx, r); err != nil {
+					return err
+				}
+				return client.EnqueueNodeReport(ctx, r)
+			})
+		}()
+	}
 	renewErr := make(chan error, 1)
 	go func() {
 		defer workers.Done()

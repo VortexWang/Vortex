@@ -152,6 +152,9 @@ func TestRegionalProcessFailover(t *testing.T) {
 				}
 				cert, key := processCredential(t, dir, id, ca, der)
 				args := []string{"--listen", addresses[i], "--db", path, "--tls-cert", cert, "--tls-key", key, "--tls-ca", caPath, "--hub-id", id, "--region", "east"}
+				if i == 1 {
+					args = append(args, "--test-report-output", filepath.Join(dir, "current-report.json"))
+				}
 				if i == 0 && fault == "silent-stream" {
 					args = append(args, "--stall-readiness")
 				}
@@ -179,7 +182,7 @@ func TestRegionalProcessFailover(t *testing.T) {
 			for i, id := range []string{regionalFirst, regionalSecond} {
 				hubs = append(hubs, map[string]any{"hub_id": id, "endpoint": addresses[i], "server_name": id})
 			}
-			cfg, _ := json.Marshal(map[string]any{"version": 1, "node_id": regionalNode, "listeners": []any{}, "rules": []any{}, "revocations": []string{}, "lifecycle": map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}})
+			cfg, _ := json.Marshal(map[string]any{"version": 1, "node_id": regionalNode, "listeners": []any{}, "rules": []any{}, "revocations": []string{}, "lifecycle": map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50, "report_interval_seconds": 1}})
 			cfgPath := filepath.Join(dir, "control.json")
 			if e = os.WriteFile(cfgPath, cfg, 0600); e != nil {
 				t.Fatal(e)
@@ -226,6 +229,30 @@ func TestRegionalProcessFailover(t *testing.T) {
 			var count int
 			if e = nd.QueryRowContext(ctx, "SELECT count(*) FROM agent_state WHERE key='backend_heartbeat'").Scan(&count); e != nil || count != 0 {
 				t.Fatal("status minted authority time")
+			}
+			for {
+				raw, err := os.ReadFile(filepath.Join(dir, "current-report.json"))
+				if err == nil {
+					var snapshot struct {
+						NodeID, BootID, SessionID string
+						Report                    *controlv1.NodeReport
+					}
+					if err := json.Unmarshal(raw, &snapshot); err != nil {
+						t.Fatal(err)
+					}
+					if snapshot.NodeID != regionalNode || snapshot.BootID == regionalBoot || snapshot.SessionID == "" {
+						t.Fatalf("report identity: %+v", snapshot)
+					}
+					if err := contracts.ValidateNodeReport(snapshot.Report); err != nil {
+						t.Fatal(err)
+					}
+					break
+				}
+				select {
+				case <-ctx.Done():
+					t.Fatal("actual node never reported over current Hub stream")
+				case <-time.After(20 * time.Millisecond):
+				}
 			}
 			// Node is still alive after successful handoff; normal termination joins
 			// control ownership and leaves the authoritative database intact.

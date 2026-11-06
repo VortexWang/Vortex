@@ -30,6 +30,7 @@ go test -count=1 ./... > "$out/root-test.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/regional-process.log" 2>&1
 go test -count=10 -race -v ./agent -run '^TestRegional' > "$out/regional-race.log" 2>&1
 go test -count=3 -race -v ./contracts ./agent/store -run '^TestRenewal' > "$out/renewal-journal-race.log" 2>&1
+go test -count=3 -race -v ./agent ./hub ./contracts -run '^(TestScheduler|TestCurrentNodeReport|TestNodeReport)' > "$out/scheduler-race.log" 2>&1
 (cd engine && go test -count=1 ./...) > "$out/engine-test.log" 2>&1
 (cd engine && go test -count=1 -race -v ./apply ./accounting ./runtime/...) > "$out/engine-race.log" 2>&1
 PHASE5_RECOVERY_EVIDENCE_DIR="$out/recovery" sh tools/phase5/recovery_check.sh > "$out/recovery.log" 2>&1
@@ -49,6 +50,9 @@ for name in ('TestRegionalStatusRejectsUnauthenticatedOrStaleBounds','TestRegion
 assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome '  in (out/'engine-race.log').read_text()
 for name in ('TestRenewalDigestAndStrictBounds','TestRenewalResultRejectsUncorrelatedOrInventedSuccess','TestRenewalJournalReopensAndRejectsChangedIntent','TestRenewalJournalReceiptIsNotInstallation','TestRenewalJournalDiskFailureAndConcurrentLineage','TestRenewalJournalInstallationRequiresExactCommittedUpdate'):
  log=(out/'renewal-journal-race.log').read_text()
+ assert log.count(f'--- PASS: {name} ') == 3 and f'--- SKIP: {name}' not in log,name
+for name in ('TestSchedulerProbeThresholdsAndUnsupportedUDP','TestSchedulerBoundsConcurrencyAndJoinsCancellation','TestSchedulerKeepsReportResponsiveDuringSlowProbe','TestSchedulerRejectsUnboundedConfiguration','TestSchedulerReportsOverCurrentMutualTLSStreamWithoutAuthority','TestSchedulerProbesOnlyInstalledRuleAndKeepsUDPUnknown','TestCurrentNodeReportFencesOldConnectionAndCopiesSnapshot','TestNodeReportRejectsUnboundedAndUnknownTelemetry'):
+ log=(out/'scheduler-race.log').read_text()
  assert log.count(f'--- PASS: {name} ') == 3 and f'--- SKIP: {name}' not in log,name
 for path in ('regional-process.log','regional-race.log','contracts.log','root-test.log','engine-test.log','engine-race.log','recovery/recovery-race.log','recovery/host.txt','audit.json'):
  assert (out/path).is_file() and (out/path).stat().st_size>0,path
