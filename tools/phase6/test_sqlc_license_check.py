@@ -1,10 +1,10 @@
-"""CR-003 authorization must not survive artifact, use or dependency drift."""
+"""Exact CR-003/004 authorization must not survive artifact/source/use drift."""
 import copy
 import json
 from pathlib import Path
 import unittest
 
-from sqlc_license_check import exception_matches
+from sqlc_license_check import exception_matches, embedded_exception_matches
 from compare_wasm_archive import normalized, ar_members
 import tempfile
 
@@ -53,6 +53,89 @@ class ExactToolLicenseException(unittest.TestCase):
         approval["status"] = "approved"
         approval["decision"] = "B"
         self.assertFalse(self.matches(approval=approval))
+
+
+class ExactEmbeddedLicenseException(unittest.TestCase):
+    def setUp(self):
+        approvals = json.loads((ROOT / "docs/governance/tool-license-exceptions.json").read_text())["exceptions"]
+        self.approval = next(row for row in approvals if row["id"] == "CR-004")
+        self.review = json.loads((ROOT / "tools/phase6/sqlc-dependencies.json").read_text())
+
+    def matches(self, item, *, artifact=None, source=None, license_id=None, usage=None, approval=None):
+        return embedded_exception_matches(
+            self.approval if approval is None else approval,
+            self.approval["artifacts"][0] if artifact is None else artifact,
+            self.approval["usage"] if usage is None else usage,
+            item["source"] if source is None else source,
+            item["license"] if license_id is None else license_id)
+
+    def test_both_reviewed_sources_match_only_three_official_artifacts(self):
+        self.assertEqual(self.approval["owner_response"], "a")
+        self.assertEqual(self.approval["artifacts"], self.review["artifacts"])
+        self.assertEqual(len(self.approval["embedded_sources"]), 2)
+        for item, source in zip(self.approval["embedded_sources"], self.review["embedded_sources"]):
+            for artifact in self.review["artifacts"]:
+                self.assertTrue(self.matches(item, source=source, artifact=artifact))
+
+    def test_module_version_sum_component_asset_and_file_digest_drift(self):
+        for item in self.approval["embedded_sources"]:
+            for key in ("module", "version", "sum", "component", "binary_asset"):
+                source = copy.deepcopy(item["source"])
+                source[key] += "-changed"
+                with self.subTest(module=source["module"], key=key):
+                    self.assertFalse(self.matches(item, source=source))
+            for name in item["source"]["files"]:
+                source = copy.deepcopy(item["source"])
+                source["files"][name] = "0" * 64
+                self.assertFalse(self.matches(item, source=source))
+                del source["files"][name]
+                self.assertFalse(self.matches(item, source=source))
+            source = copy.deepcopy(item["source"])
+            source["files"]["unreviewed.c"] = "0" * 64
+            self.assertFalse(self.matches(item, source=source))
+
+    def test_missing_identity_and_artifact_fields_are_rejected(self):
+        for item in self.approval["embedded_sources"]:
+            for key in item["source"]:
+                source = copy.deepcopy(item["source"])
+                del source[key]
+                self.assertFalse(self.matches(item, source=source))
+            for key in self.approval["artifacts"][0]:
+                artifact = dict(self.approval["artifacts"][0])
+                artifact[key] += "-changed"
+                self.assertFalse(self.matches(item, artifact=artifact))
+                del artifact[key]
+                self.assertFalse(self.matches(item, artifact=artifact))
+
+    def test_unapproved_ordinary_gpl_missing_or_different_bison_exception(self):
+        for item in self.approval["embedded_sources"]:
+            for license_id in ("GPL-2.0-or-later", "GPL-2.0-only", "GPL-3.0-only",
+                               "GPL-2.0-or-later WITH Bison-exception-2.1", "UNKNOWN"):
+                self.assertFalse(self.matches(item, license_id=license_id))
+        allocator, parser = self.approval["embedded_sources"]
+        self.assertFalse(self.matches(allocator, license_id=parser["license"]))
+        self.assertFalse(self.matches(parser, license_id=allocator["license"]))
+
+    def test_missing_pending_or_different_approval_is_rejected(self):
+        for item in self.approval["embedded_sources"]:
+            self.assertFalse(self.matches(item, approval={}))
+            for key, value in (("id", "CR-003"), ("status", "pending"), ("decision", "B"),
+                               ("embedded_sources", []), ("artifacts", []), ("usage", "product-runtime")):
+                approval = copy.deepcopy(self.approval)
+                approval[key] = value
+                self.assertFalse(self.matches(item, approval=approval))
+
+    def test_modified_distribution_runtime_and_skeleton_uses_are_rejected(self):
+        for item in self.approval["embedded_sources"]:
+            for usage in ("product-runtime", "distributed-tool-image", "parser-generator-skeleton",
+                          "development-ci-sql-to-go-modified", ""):
+                self.assertFalse(self.matches(item, usage=usage))
+
+    def test_approvals_do_not_widen_global_policy(self):
+        allowed = json.loads((ROOT / "docs/governance/license-policy.yaml").read_text())["allowed_spdx"]
+        for item in self.approval["embedded_sources"]:
+            self.assertNotIn(item["license"], allowed)
+        self.assertNotIn("GPL-2.0-or-later", allowed)
 
 
 class WasmSourceComparison(unittest.TestCase):

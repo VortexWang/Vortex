@@ -1,6 +1,6 @@
 """Exact official sqlc artifact and linked-source license verification.
 
-CR-003 is a tuple-scoped exception, never a change to allowed_spdx. Review
+CR-003 and CR-004 are tuple-scoped exceptions, never changes to allowed_spdx. Review
 includes nested notices and embedded-source licenses, not just module roots.
 """
 import hashlib
@@ -59,9 +59,21 @@ def exception_matches(approval, artifact, usage, dependency, license_id):
             and license_id == approval.get("license"))
 
 
+def embedded_exception_matches(approval, artifact, usage, source, license_id):
+    """CR-004 covers exact source/assets, including the Bison output exception."""
+    identity = {key: source.get(key) for key in
+                ("module", "version", "sum", "component", "files", "binary_asset")}
+    return (approval.get("id") == "CR-004"
+            and approval.get("status") == "approved" and approval.get("decision") == "A"
+            and usage == USAGE == approval.get("usage")
+            and artifact in approval.get("artifacts", [])
+            and any(identity == item.get("source") and license_id == item.get("license")
+                    for item in approval.get("embedded_sources", [])))
+
+
 def verify(archive, binary, platform_key, pinned):
     review = json.loads((ROOT / "tools/phase6/sqlc-dependencies.json").read_text())
-    approval = json.loads((ROOT / "docs/governance/tool-license-exceptions.json").read_text())["exceptions"][0]
+    approvals = json.loads((ROOT / "docs/governance/tool-license-exceptions.json").read_text())["exceptions"]
     artifact = next(row for row in review["artifacts"] if row["platform"] == platform_key)
     if digest(archive) != artifact["archive_sha256"] or digest(binary) != artifact["binary_sha256"]:
         raise ValueError("sqlc artifact bytes changed")
@@ -79,8 +91,11 @@ def verify(archive, binary, platform_key, pinned):
         dependency = {k: row[k] for k in ("module", "version", "sum")}
         for license_id in row["licenses"]:
             if license_id not in allowed:
-                if exception_matches(approval, artifact, USAGE, dependency, license_id):
-                    matched.append(dict(dependency=dependency, license=license_id, exception="CR-003"))
+                approval = next((item for item in approvals
+                                 if item.get("id") == "CR-003"
+                                 and exception_matches(item, artifact, USAGE, dependency, license_id)), None)
+                if approval:
+                    matched.append(dict(dependency=dependency, license=license_id, exception=approval["id"]))
                 else:
                     blocked.append(dict(dependency=dependency, license=license_id))
     binary_bytes = binary.read_bytes()
@@ -97,9 +112,15 @@ def verify(archive, binary, platform_key, pinned):
             raise ValueError("reviewed embedded asset not found in sqlc binary")
         for license_id in row["licenses"]:
             if license_id not in allowed:
-                blocked.append(dict(component=row["component"], module=row["module"],
-                                    version=row["version"], sum=row["sum"], license=license_id,
-                                    files=row["files"]))
+                approval = next((item for item in approvals
+                                 if embedded_exception_matches(item, artifact, USAGE, row, license_id)), None)
+                finding = dict(component=row["component"], module=row["module"],
+                               version=row["version"], sum=row["sum"], license=license_id,
+                               files=row["files"])
+                if approval:
+                    matched.append(dict(finding, exception=approval["id"]))
+                else:
+                    blocked.append(finding)
     auxiliary = review["auxiliary_source_review"]
     for name, expected_digest in auxiliary["evidence_files"].items():
         if digest(ROOT / name) != expected_digest:

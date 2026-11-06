@@ -95,7 +95,7 @@ def main():
                           generator_closure_status=generator["status"], generator=generator,
                           license_findings=blocked)))
     if generator["status"] != "passed":
-        raise SystemExit("sqlc generator contains an unapproved license; CR-003 cannot approve other components")
+        raise SystemExit("sqlc generator contains an unapproved license or unresolved source provenance")
 
 
 if __name__ == "__main__":
