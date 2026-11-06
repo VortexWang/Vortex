@@ -148,6 +148,55 @@ func schedulerRenewalFault(t *testing.T, ctx context.Context, db *sql.DB, dir, m
 		return true
 	}
 
+	if mode == "expiry-with-pending-result" {
+		var requestID string
+		hdb, err := openProcessLedger(filepath.Join(dir, "hub0.db"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer hdb.Close()
+		awaitRenewalFault(t, ctx, func() bool {
+			return hdb.QueryRowContext(ctx, `SELECT request_id FROM issuer_renewals LIMIT 1`).Scan(&requestID) == nil
+		}, "durable renewal before absolute expiry")
+		before, err := ns.RenewalIntent(ctx, requestID)
+		if err != nil || before.State != "pending" || before.Result != nil {
+			t.Fatalf("unexpected held result: %+v %v", before, err)
+		}
+		var deadlineText string
+		if err := db.QueryRowContext(ctx, `SELECT MIN(hard_deadline) FROM authorization_records WHERE kind='credit_grant'`).Scan(&deadlineText); err != nil {
+			t.Fatal(err)
+		}
+		deadline, err := time.Parse(time.RFC3339Nano, deadlineText)
+		if err != nil {
+			t.Fatal(err)
+		}
+		awaitRenewalFault(t, ctx, func() bool { return !time.Now().UTC().Before(deadline) }, "real hard deadline")
+		if err := stream.WriteData(ctx, []byte("expired-must-not-forward")); err != nil {
+			t.Fatal(err)
+		}
+		frame, err := stream.Receive(ctx)
+		if err != nil {
+			t.Fatalf("expected explicit fail-closed stream reset: %v", err)
+		}
+		defer frame.Release()
+		if frame.Type != vlink.FrameRST {
+			t.Fatalf("expired write forwarded: type=%v payload=%q", frame.Type, frame.Payload)
+		}
+		after, err := ns.RenewalIntent(ctx, requestID)
+		if err != nil || after.State != "pending" || after.Result != nil || !bytes.Equal(before.Request.RequestSha256, after.Request.RequestSha256) {
+			t.Fatalf("expiry changed unresolved request: %+v %v", after, err)
+		}
+		balance, err := ns.AuditAuthorizationSource(ctx, regionalNode, regionalFirst)
+		if err != nil || balance.Initial != 8192 || balance.Committed != 6144 || balance.Remaining != 2048 || balance.Unknown != 0 || balance.Reserved != 0 {
+			t.Fatalf("expiry consumed or released credit: %+v %v", balance, err)
+		}
+		hubBalance, err := hs.AuditHubDelegation(ctx, delegation)
+		if err != nil || hubBalance.Issued != 16384 || hubBalance.Remaining != 49152 {
+			t.Fatalf("expiry released unseen committed renewal: %+v %v", hubBalance, err)
+		}
+		t.Logf("absolute expiry stopped real TCP; original request %s remains pending, Hub keeps both grants reserved", requestID)
+		return true
+	}
 	if mode == "quota-exhausted" {
 		var requestID string
 		awaitRenewalFault(t, ctx, func() bool {

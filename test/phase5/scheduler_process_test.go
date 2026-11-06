@@ -27,7 +27,7 @@ func TestSchedulerProcessRenewal(t *testing.T) {
 			t.Fatalf("build %s: %v\n%s", name, err, out)
 		}
 	}
-	for _, scenario := range []string{"low-water-tcp-udp", "lost-result", "hub-restart", "node-restart", "quota-exhausted", "write-failure"} {
+	for _, scenario := range []string{"low-water-tcp-udp", "lost-result", "hub-restart", "node-restart", "quota-exhausted", "write-failure", "expiry-with-pending-result"} {
 		t.Run(scenario, func(t *testing.T) { regionalTrafficContinuity(t, binaries, scenario) })
 	}
 }

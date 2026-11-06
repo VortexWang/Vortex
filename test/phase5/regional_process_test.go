@@ -399,6 +399,11 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		if renewalMode == "quota-exhausted" {
 			d.RawBytes = 8192
 		}
+		if renewalMode == "expiry-with-pending-result" {
+			// Hard absolute boundary is never extended by renewal or heartbeat.
+			d.ExpiresAt = now.Add(10 * time.Second)
+			d.HardDeadline = d.ExpiresAt
+		}
 		for i, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
 			d.ShareReferences = append(d.ShareReferences, store.ShareReference{ID: fmt.Sprintf("550e8400-e29b-41d4-a716-%012d", 970+i), SourceID: source, IssuerID: d.HubID, NodeID: d.NodeID, SignerEpoch: 1, Generation: 1, Revision: 1, RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, RateBPS: d.RateBPS, Connections: d.Connections, NotBefore: d.ValidFrom, ExpiresAt: d.ExpiresAt, HardDeadline: d.HardDeadline})
 		}
@@ -434,6 +439,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			args = append(args, "--test-delegation-template", allocationPath, "--test-config-update", updatePath)
 			if renewalMode == "lost-result" {
 				args = append(args, "--test-drop-first-renewal-reply")
+			}
+			if renewalMode == "expiry-with-pending-result" {
+				args = append(args, "--test-hold-renewal-replies")
 			}
 			if renewalMode == "hub-restart" || renewalMode == "node-restart" {
 				restartArgs := append([]string(nil), args...)
