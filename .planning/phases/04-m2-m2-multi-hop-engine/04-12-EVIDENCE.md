@@ -1600,3 +1600,30 @@ excludes the later test-only de71f90 addition; that addition has separate local
 race evidence above. Prior native race deadline failures remain failures.
 Neither this suite nor process-local d04_run.py establishes sustained durable
 Hub issuance performance or completes the D-04 parameter scan.
+
+## Native funding-block disk exhaustion and checkpoint process death
+
+Clean ac5e0e5557ccef7b8abb06c15985c2ccbf15a4bf ran both ordinary and delayed
+funding-block durable renewal tests on the dedicated Ubuntu host with
+VORTEX_TEST_FULL_DISK_DIR pointing to a separate 8 MiB tmpfs. TCP and UDP
+passed, total 27.354s, exit 0. The fixture verifies SQLITE_FULL, refusal of new
+Hub issuance, stopping target writes and refusal to reopen the faulted gate
+after space returns. This is actual filesystem exhaustion, not physical disk
+power-loss testing. The isolated mount was successfully unmounted (exit 0).
+Remote artifacts: artifacts/phase4/block-full-disk-ac5e0e5; test.log SHA-256
+86a0410086fa4769eae65487a5fcc2ef1262a2320e33c802b37545602bf46ddf.
+
+Added subprocess SIGKILL tests for the grouped checkpoint path. Before commit,
+both child mutations have executed in the transaction but remain uncommitted;
+recovery must retain 1000 bytes and no child outbox rows. After acknowledged
+commit, recovery must retain only 700 bytes with two durable children totaling
+300 bytes. Both branches freeze the residual as unknown, preserve conservation,
+and check that exact committed replay succeeds while replay of the rolled-back
+checkpoint cannot spend the frozen block. Three local race repetitions PASS
+3.456s alongside the existing transactional replay/recovery test. Native execution
+of this new test remains pending; this is process death, not power loss.
+
+Inspection confirms the existing runtime renewal fixture waits for issuance
+before each exchange and idle settlement afterward. It cannot serve as sustained
+load or prove demand-wait tail latency. A continuous durable-authority workload
+is still required before D-04 candidate lock; current values remain experimental.
