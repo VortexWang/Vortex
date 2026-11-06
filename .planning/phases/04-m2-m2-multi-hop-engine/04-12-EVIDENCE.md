@@ -1326,3 +1326,25 @@ Tests include below-target allocation, idempotency, request mutation, strict
 replay rejection, impossible replacement rollback, injected request-marker
 failure and exact final conservation. Native confirmation and full regression
 for the final commit remain required. No D-04 parameter selection is claimed.
+
+## Atomic funding native confirmation b02a394 — partial improvement, still fail
+
+Final local full Agent/Hub race PASS (Agent 209.303s, Store 15.944s, Hub 2.348s),
+vet/diff PASS at b02a394ca8f2abfd0539df5de4d3b5c8181793ea. Dedicated Ubuntu
+trial-1 passed all four ordinary/delayed TCP/UDP cases in 38.086s. Trial-2
+failed delayed TCP at the first exchange after initial expiry (RST payload 0008);
+its other three cases passed. No underlying error was captured for that reset,
+so it is not proven to share the previous timeout root cause. Launcher stopped
+at trial-2, exit 1; trial-3 and later attack/full-race/vet stages did not run.
+
+Archive download verified SHA-256
+09f58d4e4108dfc4b8fad99ef2ea47b868890121cf1f8cab6a758a2f2278b127.
+04-22 manifest includes raw trial logs and completed ledger snapshots. Host
+conditions and the 200 ms gate remained unchanged. Native qualification remains
+failed, despite the first successful complete native trial.
+
+Added bounded-detail failure logging at the Agent block admission boundary
+(direction, requested bytes, total elapsed and returned error) so subsequent
+resets can be attributed without weakening authorization or timeouts. No payload
+or credential is logged. Diagnostic change targeted funding-gate race PASS
+3.281s; vet/diff PASS. Its native reproduction remains the next step.

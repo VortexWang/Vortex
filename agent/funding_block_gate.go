@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -53,7 +54,13 @@ type fundingBlockSession struct {
 }
 
 func (s *fundingBlockSession) signal() { close(s.changed); s.changed = make(chan struct{}) }
-func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.Direction, n int64) (*accounting.Batch, error) {
+func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.Direction, n int64) (result *accounting.Batch, resultErr error) {
+	started := time.Now()
+	defer func() {
+		if resultErr != nil {
+			slog.Warn("funding block admission failed", "direction", direction, "requested_bytes", n, "elapsed", time.Since(started), "error", resultErr)
+		}
+	}()
 	for {
 		type attemptResult struct {
 			batch *accounting.Batch

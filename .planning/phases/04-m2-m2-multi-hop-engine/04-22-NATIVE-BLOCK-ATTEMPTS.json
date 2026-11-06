@@ -46,6 +46,52 @@
         "trial-1/runtime-block-1-rounds-2-delay-true-ledgers.json": "53447ebe2ed7b04dc4f6cdfb4e91a5c78c5f747201ddb7b4c48e4ea382fb827e",
         "trial-1.log": "1175f44cad69513523bc3dca9465988f735f3d691276a61913a2e94c08ec5955"
       }
+    },
+    {
+      "directory": "artifacts/phase4/block-b02a394",
+      "sha": "b02a394ca8f2abfd0539df5de4d3b5c8181793ea",
+      "stage": "trial-2",
+      "exit_code": 1,
+      "archive_sha256": "09f58d4e4108dfc4b8fad99ef2ea47b868890121cf1f8cab6a758a2f2278b127",
+      "trial_1": "pass",
+      "trial_2": "fail TCP delayed expiry exchange; other three transport cases passed",
+      "files": {
+        "exit-code": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "host.txt": "9a06811a0578f1f206e39b8f57afd3620c874529a71de2d9e9dec872d7dfa30a",
+        "launcher.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha": "61d813a575db4d5a1c4df2094ab92d0e7974ca9aab115d7015adf7d53aeabe15",
+        "stage": "512aee0f4771a5da7917574aff702426c306caf0f01dab836bb5d45d092db925",
+        "trial-1/runtime-block-1-rounds-2-delay-false-agent.sqlite.gz": "d9238a6360c9cc9c7f66667a54468c5f76fb0bda09ae67c85788b061cced4751",
+        "trial-1/runtime-block-1-rounds-2-delay-false-backend.sqlite.gz": "dd3be926e9fc9a131bbc9c71ea45586a81ade0d376f4743f5372b3a51330b497",
+        "trial-1/runtime-block-1-rounds-2-delay-false-hub.sqlite.gz": "c84f1418a5c8899d6efe0788e29f85b94b53509536dcaacf551d8e4ea575b54d",
+        "trial-1/runtime-block-1-rounds-2-delay-false-ledgers.json": "8321fdcc62de3c060c872ef2cb6f8f59d5df01961c40c148d074ef49e55968c8",
+        "trial-1/runtime-block-1-rounds-2-delay-true-agent.sqlite.gz": "c37daaf66bbfcd945c1d1847d1f2e2168078a5e0db6793d858bed0d40f99addd",
+        "trial-1/runtime-block-1-rounds-2-delay-true-backend.sqlite.gz": "a8b676565ed9599ddd777abe834ef4d865daaeab26d51af0cbc6f53307c50fa1",
+        "trial-1/runtime-block-1-rounds-2-delay-true-hub.sqlite.gz": "e61b287ac63867a1759f2deba6b25b889cd476200b7ebabdd8a49b85d2dbcb47",
+        "trial-1/runtime-block-1-rounds-2-delay-true-ledgers.json": "0c295ce3fd8b4b89412f04b587edeae4c7ccef9cf45849684ae4334b7b98b524",
+        "trial-1/runtime-block-2-rounds-2-delay-false-agent.sqlite.gz": "9b52ef91be971d6927ea8755edb6e8d7cc1b8362ceb54f0c2054a058b2f85371",
+        "trial-1/runtime-block-2-rounds-2-delay-false-backend.sqlite.gz": "08ab11e716906503e4d924294fd0323e22697e74f9a1c5b790043a877238868b",
+        "trial-1/runtime-block-2-rounds-2-delay-false-hub.sqlite.gz": "aa7ce7ebb9d8f3f718b12a0fbd8718be36eafbd80e000db8768211be6f6ba046",
+        "trial-1/runtime-block-2-rounds-2-delay-false-ledgers.json": "1fcdd43272a31617feb584b06a965dd2f9f13641977dfacd1b941563df8a8636",
+        "trial-1/runtime-block-2-rounds-2-delay-true-agent.sqlite.gz": "0b95809743befb1042672e2cdef84a82e2bb2fd4c990efde75a5c2ed5265c185",
+        "trial-1/runtime-block-2-rounds-2-delay-true-backend.sqlite.gz": "1571caf6ad0e523108c1fd03a4b7aaabd41f897c52a48a4e1dd8c2b3f45a7245",
+        "trial-1/runtime-block-2-rounds-2-delay-true-hub.sqlite.gz": "39722b00ceef642a7b6cc9756c55959a006b3345c6012182009b00bf2391c933",
+        "trial-1/runtime-block-2-rounds-2-delay-true-ledgers.json": "b4d6f8d6fee21ffe40862eef2d4a193bacef11cba2f5502fa0f9dda6142ab296",
+        "trial-1.log": "5337ab2d34450bb6b07fc25ab801ff34464420d633eb36ee230d469e23e17ea7",
+        "trial-2/runtime-block-1-rounds-2-delay-false-agent.sqlite.gz": "19102d315616b9945210ac4726a99a47271fed37b63b028d13693c27bf082a89",
+        "trial-2/runtime-block-1-rounds-2-delay-false-backend.sqlite.gz": "0c71073a910e23749ee8ac24b64d2471f4ad67e65e0738ee93720a41d33ab47b",
+        "trial-2/runtime-block-1-rounds-2-delay-false-hub.sqlite.gz": "a47ae318afc613fb4fcf15c667e3c679dfa2961328fb6ea7284a2ee57d3b486b",
+        "trial-2/runtime-block-1-rounds-2-delay-false-ledgers.json": "62e2af9c3bb270c07a13760997f7b71e7ed81463279b0122b5dc2998f72864be",
+        "trial-2/runtime-block-2-rounds-2-delay-false-agent.sqlite.gz": "b4e6aef1977754f62e5442fb475ce9defe398a8286cdc19288cdfeebafcbc76b",
+        "trial-2/runtime-block-2-rounds-2-delay-false-backend.sqlite.gz": "2b2faeafd8cb22ea5e2d4a38b74b805f3cbdc1a99a2aa6d1f069c27b44a22380",
+        "trial-2/runtime-block-2-rounds-2-delay-false-hub.sqlite.gz": "9ac08f7e835160091b1fc67b5da47357e7defa046be9449f8a6444c8087ddc0d",
+        "trial-2/runtime-block-2-rounds-2-delay-false-ledgers.json": "58a5a529e2dea14a17d73f982e6809da0be0c24789f360decf30edef9a15bb14",
+        "trial-2/runtime-block-2-rounds-2-delay-true-agent.sqlite.gz": "c9f867046a4f6f72ac3bdaea7552c092a22c48bae9f07ba46310c323b1993fb3",
+        "trial-2/runtime-block-2-rounds-2-delay-true-backend.sqlite.gz": "04f44fc3c1bb9aa99f2b08af08800fb502147a7654031fb2e190b50c304d7dda",
+        "trial-2/runtime-block-2-rounds-2-delay-true-hub.sqlite.gz": "305dd5a7542296a24e3a37d71f9dd0c76a8b1d2463368829b10e6a4409e65d7b",
+        "trial-2/runtime-block-2-rounds-2-delay-true-ledgers.json": "532b79bf2f0bffee222e7696647ab1e9a96100761845553cbd406d8ff4338527",
+        "trial-2.log": "b6fa5dae6a0315d054f6fe58401d45a0dc6f3050b5d4237df4769f8c380ba6d7"
+      }
     }
   ]
 }
