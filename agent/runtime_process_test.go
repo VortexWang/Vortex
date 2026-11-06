@@ -156,8 +156,14 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	fixture := writeJSON("authority.json", map[string]any{"delegation": d, "initial_request_id": id(109), "initial_bytes": initial, "ttl_seconds": 60})
 	demand := writeJSON("demand.json", map[string]any{"interval_ms": 100, "demands": []any{map[string]any{"scope": store.DemandScope{HubID: hubID, DelegationID: d.ID, NodeID: nodeID, SourceID: d.SourceID, SnapshotID: d.BillingSnapshotID, RuleID: cfg.RuleID, SignerEpoch: 1, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}, "policy": DemandPolicyConfig{Minimum: initial, MaxTarget: initial, TargetSeconds: 30, RenewPercent: 30}, "ttl_seconds": 60}}})
 	hubDB, backendDB, agentDB := filepath.Join(dir, "hub.db"), filepath.Join(dir, "backend.db"), filepath.Join(dir, "agent.db")
+	starts := map[string]int{}
 	start := func(name string, args ...string) func() {
-		log, e := os.Create(filepath.Join(dir, name+".log"))
+		logName := name
+		if starts[name] > 0 {
+			logName = fmt.Sprintf("%s-restart-%d", name, starts[name])
+		}
+		starts[name]++
+		log, e := os.Create(filepath.Join(dir, logName+".log"))
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -347,6 +353,27 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	}
 	stopNode()
 	stopHub()
+	// A fixed fixture heartbeat intentionally enters autonomy after 30 seconds.
+	// Its ACK then proves Hub durability, not backend delivery. Restart the Hub
+	// with the same databases to exercise durable accounting replay explicitly.
+	stopRecoveredHub := start("vortex-test-hub", "--listen", hubAddr, "--db", hubDB, "--tls-cert", hubCredentials+"/runtime-cert.pem", "--tls-key", hubCredentials+"/runtime-key.pem", "--tls-ca", hubCredentials+"/trust-ca.pem", "--authority-fixture", fixture, "--fixture-backend-db", backendDB)
+	defer stopRecoveredHub()
+	hubObservation, err := sql.Open("sqlite", "file:"+hubDB+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hubObservation.Close()
+	wait(func() bool {
+		connection, err := net.DialTimeout("tcp", hubAddr, 100*time.Millisecond)
+		if err != nil {
+			return false
+		}
+		connection.Close()
+		var pending int
+		err = hubObservation.QueryRowContext(ctx, `SELECT COUNT(*) FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id)`).Scan(&pending)
+		return err == nil && pending == 0
+	})
+	stopRecoveredHub()
 	db.Close()
 	// Writers have stopped: audit durable source funds as well as usage rows.
 	agentAudit, err := store.Open(agentDB, "agent")

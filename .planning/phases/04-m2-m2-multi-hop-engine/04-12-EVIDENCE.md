@@ -2326,3 +2326,24 @@ next investigate Hub forwarding/retry and explicit backend drain condition,
 without treating a Hub-local durable ACK as proof of backend delivery. Preserve
 this failure and verify recovery of outstanding Hub rows before broad closure.
 Artifacts: artifacts/phase4/process-f170963.
+
+## Fixed-heartbeat autonomy and accounting replay
+
+Code inspection resolves the latest gap: online UsageRelay.AcceptKnown waits for
+backend confirmation synchronously. The explicit protocol fixture records only
+one heartbeat; after the unchanged 30-second grace it acknowledges local durable
+rows without forwarding. This fixture has no replay caller, so waiting longer
+alone cannot drain its backlog. This is not evidence of lost Hub ledger rows.
+
+The fixture CLI now replays pending accounting on startup, without refreshing
+heartbeat, changing signing epoch, or issuing authority. The process harness
+explicitly restarts Hub after Agent ACK drain, observes zero unconfirmed known
+rows, then performs the original exact three-ledger audit. Restart logs remain
+separate. The original 60-second process deadline is unchanged. This is fixture
+recovery coverage, not production backend/revocation integration.
+
+Regression crosses the 30-second boundary with an injected clock, verifies one
+locally acknowledged pending row, closes/reopens Hub, replays twice, checks the
+backend payload/digest and zero pending rows, and asserts authority status and
+funds unchanged. CLI race suite PASS (1.966s); Agent process tests compile but
+skip without native binaries; vet and diff checks PASS. Native rerun pending.

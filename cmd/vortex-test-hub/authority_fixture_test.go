@@ -82,4 +82,60 @@ func TestAuthorityFixtureBindsBootAndReplaysDurably(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	// After heartbeat loss, a successful ACK proves only Hub persistence.
+	offline := now.Add(store.BackendLossGrace + time.Second)
+	fixture.Usage.Clock = func() store.IssuerTime {
+		return store.IssuerTime{Earliest: offline, Latest: offline, Trusted: true}
+	}
+	usage.BatchId = id(12)
+	if err := fixture.Usage.AcceptKnown(ctx, id(6), id(9), usage); err != nil {
+		t.Fatal(err)
+	}
+	pending, err := s.PendingBackendUsage(ctx)
+	if err != nil || len(pending) != 1 || pending[0].BatchID != id(12) {
+		t.Fatalf("autonomous ACK pending=%+v err=%v", pending, err)
+	}
+	before, err := s.CurrentAutonomyStatus(ctx, offline, true)
+	if err != nil || before.Mode != store.AutonomyOffline {
+		t.Fatalf("autonomy status=%+v err=%v", before, err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = store.Open(path, "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture = configureAuthorityFixture(ctx, s, backend, c)
+	for i := 0; i < 2; i++ {
+		if err := fixture.Usage.ReplayPending(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	remaining, err := s.PendingBackendUsage(ctx)
+	if err != nil || len(remaining) != 0 {
+		t.Fatalf("replay pending=%+v err=%v", remaining, err)
+	}
+	// Inspect backend payload and digest, not just the Hub receipt.
+	backendRows, err := backend.PendingBackendUsage(ctx)
+	if err != nil || len(backendRows) != 2 {
+		t.Fatalf("backend rows=%+v err=%v", backendRows, err)
+	}
+	matched := false
+	for _, row := range backendRows {
+		if row.BatchID == pending[0].BatchID {
+			matched = string(row.Payload) == string(pending[0].Payload) && string(row.Digest) == string(pending[0].Digest)
+		}
+	}
+	if !matched {
+		t.Fatal("backend replay changed payload or digest")
+	}
+	after, err := s.CurrentAutonomyStatus(ctx, offline, true)
+	if err != nil || after != before {
+		t.Fatalf("accounting replay changed authority: before=%+v after=%+v err=%v", before, after, err)
+	}
+	replayedBalance, err := s.AuditHubDelegation(ctx, id(1))
+	if err != nil || replayedBalance != balance {
+		t.Fatalf("accounting replay changed funds: before=%+v after=%+v err=%v", balance, replayedBalance, err)
+	}
 }
