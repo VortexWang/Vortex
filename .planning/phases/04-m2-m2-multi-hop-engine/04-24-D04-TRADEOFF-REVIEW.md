@@ -156,3 +156,15 @@ sessions/held/pending 均零；unknown_grant 非零，因此不得称“全部�
 及语义配置。此项证明故障下不重复签发、不无资金释放；不能证明正常
 吞吐，也未证明真实丢失响应后恢复成功。测试机两个 sysctl max 均已
 恢复 212992。明确拒绝、迟到恢复和重复参数对照仍待原生验证。
+
+## 明确拒绝续申的适配器证据（further runtime slice）
+
+新增 `TestFaultedRenewalRejectedIsDefinitiveAndConserved`，用 40ms 延迟的
+进程内 issuer 返回明确 `rejected`。测试先耗尽首个 accepted grant，再验证
+续申失败为 `ErrDenied`；pending 归还 `unissued`，`unknown_grant=0`，不生成
+替代 accepted grant，wait 统计记录 final failure 且不计为 timeout。冷启动
+本身的一次等待作为基线保留，续申断言按增量计算。
+
+该证据补齐了拒绝结果与 unknown 结果的语义分界，仍不代表远端签发、丢失
+回执恢复或持久化权威。正式性能资格、D-04 锁定和 Agent/Hub 持久化债务
+保持未完成。详见 `04-35-REJECTED-RENEWAL-EVIDENCE.md`。

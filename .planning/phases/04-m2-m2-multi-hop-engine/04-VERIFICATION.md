@@ -15,6 +15,16 @@ Implementation is closed; qualification remains gaps_found. Persistent Agent/Hub
 and production backend work belong to Phase 5/6, not Phase 4 closure blockers.
 No previous failed check is promoted to pass.
 
+## Rejected renewal increment — 2026-11-06
+
+The delayed process-local issuer now has a regression for a definitive renewal
+rejection. It preserves the budget invariant, returns the pending amount to
+`unissued`, leaves `unknown_grant` at zero, and records a final failure rather
+than a timeout. This closes the adapter's rejected-versus-unknown distinction
+for the tested finite case only. It does not qualify remote issuance,
+persistent authority, formal performance, or D-04 locking; see
+`04-35-REJECTED-RENEWAL-EVIDENCE.md`.
+
 ## Prior reconciliation — Plan 04-12
 
 The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).

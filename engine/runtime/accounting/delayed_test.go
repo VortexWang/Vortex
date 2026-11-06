@@ -95,6 +95,42 @@ func TestFaultedRenewalUnknownCannotBeReplacedOrSpent(t *testing.T) {
 	}
 	conserved(t, g.Credit)
 }
+
+func TestFaultedRenewalRejectedIsDefinitiveAndConserved(t *testing.T) {
+	ctx := context.Background()
+	g, err := NewFaultedRenewalCreditGate(ctx, CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, 40*time.Millisecond, GrantRejected)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	s, err := g.Open(ctx, core.Flow{Key: "rejected-renewal"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for range 128 {
+		b, e := s.Reserve(ctx, core.LeftToRight, 1)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = b.Commit(ctx, 1); e != nil {
+			t.Fatal(e)
+		}
+	}
+	before := g.Credit.State()
+	if _, err = s.Reserve(ctx, core.LeftToRight, 1); !errors.Is(err, core.ErrDenied) {
+		t.Fatalf("rejected renewal was not denied: %v", err)
+	}
+	state := g.Credit.State()
+	if state.PendingGrant != 0 || state.UnknownGrant != 0 || state.Available != 0 || state.Used != 128 || state.Unissued != 128 || state.Grants != 1 || state.GrantRecords != 2 {
+		t.Fatalf("rejected renewal changed authority unexpectedly: %+v", state)
+	}
+	if state.Waits == nil || before.Waits == nil || state.Waits.Waits != before.Waits.Waits+1 || state.Waits.WaitSucceeded != before.Waits.WaitSucceeded || state.Waits.TimedOut != before.Waits.TimedOut || state.Waits.FinalFailures != before.Waits.FinalFailures+1 || state.Waits.Shortfalls != before.Waits.Shortfalls+1 {
+		t.Fatalf("rejected renewal wait accounting: %+v", state.Waits)
+	}
+	conserved(t, g.Credit)
+}
+
 func TestDelayedIssuerTimeoutDoesNotReleasePending(t *testing.T) {
 	g := delayedFixture(t, time.Second)
 	ctx := context.Background()

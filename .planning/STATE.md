@@ -99,6 +99,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261105-9j7 | Native host preflight and formal qualification runbook | 2026-11-05 | pending | complete | [20261105-native-host-preflight](./quick/20261105-native-host-preflight/) |
 | 261106-op3 | Phase 4 closure scope reconciled; P4 qualification retained, X5/X6 transferred | 2026-11-06 | see git history | complete | [261106-op3-phase-4-closure-scope-reconciliation](./quick/261106-op3-phase-4-closure-scope-reconciliation/) |
 | 261105-gva | Phase 4 UDP tuning portability and closure evidence | 2026-11-05 | f2c9020 | complete | [261105-gva-phase-4-optimization-and-closure](./quick/261105-gva-phase-4-optimization-and-closure/) |
+| 261106-syi | Add explicit delayed rejected-renewal runtime evidence | 2026-11-06 | pending | complete | [261106-syi-add-explicit-delayed-rejected-renewal-ru](./quick/261106-syi-add-explicit-delayed-rejected-renewal-ru/) |
 
 
 ## Session Continuity
