@@ -2257,3 +2257,19 @@ accepted traffic against burst+rate*actual elapsed time. Full Store race PASS
 19.270s; final rate tests three times PASS 3.947s; Agent funding-block race PASS
 46.292s; vet PASS. Native extended traffic still required. These finite tests
 are not full model verification.
+
+Clean fa2a67414b286aa92c5397dab1f8552064a75434 native suite FAIL 21.663s:
+single TCP/UDP PASS, both concurrent cases FAIL; extended case stream 4 round 1
+(0.58s). First short-concurrent admission total 200.331ms. Thus the conservative
+virtual-debt correction passes finite Store checks but regresses actual process
+availability and is NOT qualified. An absolute uncertainty width exceeding the
+1 MiB / 100Mbps burst duration (~84ms) cannot pass the new margin condition;
+bootstrap clock intervals can exceed this duration. This is a concrete next
+investigation, not proof of the exact observed width (not logged yet).
+Need distinguish authenticated absolute lease time from boot-local monotonic
+rate elapsed time, preserving conservative drift and restart debt. Do not widen
+burst/deadline or reduce workload as a workaround. Current code is experimental
+and must not be presented as production-ready rate behavior.
+Artifacts process-fa2a674 report SHA-256
+14747ddde4c9a4f15eb17229bb8f6bc26fe235ee10d5f3b7775de02d3432dd6d;
+test.log 3eb164fbd4f8d5cdcffbabe1894fc9ba9fa0c0b212e5f63871b166edb8a46b13.
