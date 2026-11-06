@@ -1800,3 +1800,7 @@ at /private/tmp/vortex-process-first; corrected evidence at
 attempts, not native or clean-SHA qualification. Shell syntax, vet and diff PASS.
 The harness uses preissued valid certificates with a renewal endpoint configured
 but does not exercise renewal; fixed Hub heartbeat/autonomy limits still apply.
+
+Clean local process rerun PASS at b8a10dc3f9e7cf5044a80dfb87b28073695c6688 (dirty=false).
+Report: /private/tmp/vortex-process-clean/report.json; SHA-256 e7ffe66c8c982a503dbad479a3635fb9e6454cbc25a7d75a44b425600e2c647f.
+This confirms only the two-process TCP functional scope described above.
