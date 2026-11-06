@@ -22,6 +22,7 @@ type Store struct {
 	owner             string
 	runtimeStatements map[string]*sql.Stmt
 	runtimeQueue      runtimeTransactionQueue
+	checkpoints       checkpointQueue
 }
 
 type Info struct {

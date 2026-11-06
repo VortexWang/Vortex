@@ -108,6 +108,10 @@ func (s *Store) CheckpointRuntimeFundingBlocks(ctx context.Context, entries []Ru
 		}
 		seen[identity] = true
 	}
+	return s.enqueueCheckpoints(ctx, entries)
+}
+
+func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeBlockCheckpoint) error {
 	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err

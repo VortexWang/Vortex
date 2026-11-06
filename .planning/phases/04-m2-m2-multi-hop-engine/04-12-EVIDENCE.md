@@ -2194,3 +2194,19 @@ Profile SHA-256 cpu.pprof
  a75cab24008ef7ad78f3cf41e44d5f0f7de463dc751f1f1faa0296bd6cdf57f6;
 block.pprof 2caf9de8241fd84a159358e69cf05bd385c73a8ad42948c8d3c1c22ea6b3e221;
 test.log 348f9985439ebced487c569b77206cb2514e86a51eadace231c08de8af8623f4.
+
+## Store-wide checkpoint coordinator implementation
+
+CheckpointRuntimeFundingBlocks now enqueues complete caller groups into a
+Store-owned coordinator, bounded to 64 outstanding calls and 64 entries per
+transaction, with a one-millisecond initial coalescing window. Caller entry order
+is preserved; cancellation propagates into the shared transaction and every
+caller waits for its final result. Any failure returns the same error to all
+participants, whose existing Agent logic retains/faults the durable bounds.
+Duplicate checkpoint identities across callers are rejected before mutation.
+Added deterministic two-session atomic rollback/replay tests, cancellation and
+queue overflow checks. Full Store race PASS 18.704s; strengthened cross-session
+checks three times PASS 2.242s; funding-block Agent race PASS 45.164s; vet PASS.
+New coordinator-specific mid-commit cancellation/close/crash coverage remains
+required in addition to the existing underlying transaction tests. Native
+extended workload effect remains unverified; no parameter has been locked.
