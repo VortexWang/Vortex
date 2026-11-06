@@ -23,3 +23,13 @@ Local corrected validation: largest 1 MiB/20% TCP candidate passed; `go vet ./ag
 ## Independent closed-ledger audit
 
 `tools/phase4/audit_d04_ledgers.py` audits downloaded SQLite copies independently of the Go test exit status and summary booleans. The first corrected native case passes for both transports: 52 usage batches each; 237568 issued, 212992 committed, 24576 remaining. Agent/Hub/backend batches match by node ID, batch ID and payload; every payload digest and decompressed file digest matches; SQLite integrity checks pass. Agent source ownership, grant balances and Hub delegation conserve bytes. There are no pending demands or held/unknown usage. A copied summary with committed_bytes incremented by one is rejected with `summary differs from SQLite`. This is finite fixture evidence, not dynamic performance or production authority acceptance.
+
+## Same-SHA Docker diagnostic
+
+Exact detached verification worktree `/private/tmp/vortex-phase4-2543fb7-verification` ran the 2543fb7 Docker workload with GOMAXPROCS=1, 16 TCP streams, 15 seconds per phase, and PHASE4_FORMAL=1. Evidence root: `artifacts/phase4/qualification/docker-current` in that worktree. Host and report both show dirty=false and exact SHA 2543fb745d942ddf710c02d502a3675b9b3c7fe9. Runtime correctness passed; mixed TCP 3300.647845 Mbps, UDP 99.95968 Mbps and zero loss; each direction reconciled 13066165956 bytes. Source used 26132331912 bytes, with pending/unknown/held/session/denial all zero. This is OrbStack diagnostic evidence; report performance_qualification remains not-qualified.
+
+- host.json SHA256: `47d4c5c34a8f17d57f9d815518d33ad79bd29de040f4466c656eb3b18a0de5a2`
+- report.json SHA256: `68b5082711fc49b397e131eedb198fcd31776648822c6907be19921eadfd7ca1`
+- source credit SHA256: `de4b74fc76204b6914b8c70a587457dcb5735600a9b0566672cdcaf76315f886`
+
+Local Engine `go test -race ./...` passed (cached where applicable). Root `go test ./...; go vet ./...` is still running in local session 72562; inspect its result before claiming a pass. No Actions run for 2543fb7 has been established.
