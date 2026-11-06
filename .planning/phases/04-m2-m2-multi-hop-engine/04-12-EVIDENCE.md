@@ -593,3 +593,25 @@ This is local lifecycle groundwork only. Warm allowance shrink, authenticated
 proof delivery and one-time issuer reconciliation, durable adaptive performance,
 full attack qualification and D-04 parameter lock remain open. Historical native
 and throughput evidence is not evidence for this new SHA.
+
+## Explicit node startup integration for adaptive demand
+
+vortex-node now accepts --credit-demand-config and passes validated candidates
+to its actual ControlClient, enabling the existing periodic/wakeup sender only
+when the file is explicitly provided. Local JSON is bounded to 1 MiB/64 scopes,
+rejects unknown fields/trailing objects, pins Hub and optional node identity,
+forbids file-supplied boot identity, checks all scope and policy bounds, rejects
+duplicates, and binds the current Node boot. No authorization is created by
+configuration. Missing Hub settings or malformed config fail startup.
+
+Race tests for cmd/vortex-node, Agent and Hub PASS; vet for those packages PASS;
+git diff --check PASS. Parser tests cover current/restarted boot binding,
+foreign identity, stale boot, bad UUID, missing scope fields, TTL/poll overflow,
+invalid candidate policy, duplicate/excess/empty scopes and malformed/oversized
+files. Existing authenticated demand integration regressions also pass.
+
+See docs/operations/phase4-adaptive-demand.md for concrete candidate input and
+bootstrap prerequisites. Actual Hub delegation provisioning and current-boot
+authorization/time bootstrap are still required: this file does not solve or
+bypass them. Full native process deployment, load/failure tests, idle return
+protocol and parameter locking remain incomplete. No wire contract changed.

@@ -30,11 +30,15 @@ func main() {
 	caPath := flag.String("tls-ca", "", "trusted Hub CA PEM")
 	hubName := flag.String("hub-name", "", "Hub certificate DNS identity")
 	engineConfig := flag.String("engine-config", "", "Engine runtime JSON configuration")
+	demandConfig := flag.String("credit-demand-config", "", "explicit control 1.3.0 adaptive demand candidate JSON configuration")
 	credentialDir := flag.String("credential-dir", "credentials", "directory for locally generated node credentials")
 	renewBefore := flag.Duration("renew-before", 24*time.Hour, "renew runtime certificate before expiry")
 	credentialOverlap := flag.Duration("credential-overlap", 5*time.Minute, "old/new credential overlap after validated renewal")
 	renewRetry := flag.Duration("renew-retry", time.Minute, "retry delay after a failed certificate renewal")
 	flag.Parse()
+	if *demandConfig != "" && (*hubAddr == "" || *hubName == "") {
+		fatal(errors.New("credit-demand-config requires hub and hub-name"))
+	}
 	s, err := store.Open(*dbPath, "agent")
 	if err != nil {
 		fatal(err)
@@ -50,6 +54,14 @@ func main() {
 	n, err := agent.New(*nodeID, s, engine)
 	if err != nil {
 		fatal(err)
+	}
+	var adaptiveDemands []agent.AdaptiveDemandConfig
+	var demandInterval time.Duration
+	if *demandConfig != "" {
+		adaptiveDemands, demandInterval, err = loadDemandConfig(*demandConfig, n.NodeID, n.BootID, *hubName)
+		if err != nil {
+			fatal(fmt.Errorf("load credit demand configuration: %w", err))
+		}
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
@@ -197,7 +209,8 @@ func main() {
 	defer stopNode(n)
 	applyManager := apply.NewManager()
 	reconciler := &agent.Reconciler{Store: s, Apply: agent.EngineApplier{Manager: applyManager}}
-	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
+	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler,
+		EnableCreditDemand: *demandConfig != "", AdaptiveDemands: adaptiveDemands, DemandInterval: demandInterval}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
 	runErr := make(chan error, 1)
 	go func() { runErr <- client.Run(ctx, *hubAddr) }()
