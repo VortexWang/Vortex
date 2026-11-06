@@ -118,3 +118,22 @@ Observe 开启时，每秒采样 CreditState，最多 3600 份周期记录，另
 unknown 时序也尚未采得。延迟 issuer 的旧 issuer_nanoseconds 直方图
 仍为零，不能用它声称实际续申延迟分位数；Waits 仅证明结果计数。
 命令与 accounting race 通过，采样器并发停止/保留最终样本回归通过。
+
+## 原生 65s 闲置窗口（1ffc1f0）
+
+相同动态目标中心候选，15s 双阶段负载后保持五进程运行并闲置 65s。
+干净 1ffc1f0 正确性通过；mixed TCP 996.641Mbps、UDP 99.95776Mbps、
+零丢包，175 次等待全部成功。103 份状态覆盖 101.037s，无上限丢弃，
+逐份核验非负、时间顺序及额度守恒。目标曾达 375000000 bytes，第
+93.001s 的采样回到 8MiB；第 94.001s 已无会话/held/pending/unknown，
+之后余额与授权次数不变。最终 used 8907366760、available 238709440。
+
+该实验实证“目标回落、闲置尾块安全回到本地池”，不声称已签发可用
+额度会退回 issuer：目标缩小没有将 available 变成 unissued。生产
+grant-return 仍属 Phase 5 协议事项，不能因此引入 Phase 4 新关闭前提。
+本组没有非零 unknown，故不能替代未知响应故障证据。
+
+04-33-NATIVE-IDLE-TARGET.json 保留原始 SHA256、报告、语义配置、闲置
+窗口和逐秒状态投影；投影省略 allocator 直方图，原始时序仍在测试机。
+两个 sysctl max 恢复 212992 并实查。20 项 Python 门禁测试通过，非法
+闲置时长在启动进程前被拒绝。正式资格及 D-04 参数锁定仍未完成。
