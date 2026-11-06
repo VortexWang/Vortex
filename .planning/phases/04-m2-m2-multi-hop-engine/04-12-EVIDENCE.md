@@ -719,3 +719,21 @@ PASS. These are local finite transport-loss checks with actual SQLite/TLS and
 runtime TCP/UDP traffic. They do not establish sustained fault-load throughput,
 process-crash response recovery, all attack classes or parameter lock. No
 production protocol or frozen wire artifact changed.
+
+## Reviewable grant-return contract proposal
+
+04-16-GRANT-RETURN-PROPOSAL.md proposes additive control 1.4.0 GrantReturn and
+GrantReturnAck. It binds a permanently sealed grant, final known/unknown batch
+commitment and exact unused amount to a durable per-grant return receipt.
+Hub reconciliation must match batch identities/hashes as well as totals before
+one-time credit. Old ownership returns remain nonspendable recovered funds;
+unknown liability is never returned. Agent receipt completion never creates a
+new spendable grant. The proposal specifies replay, conflict, crash, transfer
+and opt-in compatibility behavior plus concrete verification obligations.
+
+Current local GrantSettlementProof only records totals: it is not sufficient
+for this wire proof and no current Hub recredit implementation is claimed.
+No frozen proto/hash/version was changed. The explicit owner-approval rule in
+docs/governance/contract-review.yaml applies; the prior 1.3.0 approval covers
+CreditDemand outcomes, not this new unused-credit return. Other performance and
+attack work remains authorized while this proposal awaits an owner decision.
