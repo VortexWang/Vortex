@@ -2241,3 +2241,19 @@ the current branch is not test-green or qualified. Next fix must preserve
 conservative cumulative time credit without treating a lower bound as the exact
 instant of a prior write; test variable uncertainty, backward time, same-time
 bursts, persistent restart, rate sharing and overflow before native retest.
+
+## Conservative virtual rate debt correction
+
+Kept the existing tokens/tick persisted representation, but refill advances to
+max(previous tick, Latest), while admission reserves ceil((anchor-Earliest)*rate)
+bytes for time uncertainty. This implements the byte-rounded virtual finish
+condition max(previous finish, Latest)+cost <= Earliest+burst duration. Refill
+rounds down and uncertainty rounds up; backward bounds cannot mint credit.
+Intervals wider than a burst duration fail closed. This retains initial burst,
+source sharing, existing persisted state and boot rejection; no schema reset or
+larger burst/deadline is introduced. The overlapping-time regression now PASS.
+Added deterministic varying-uncertainty test checking every sliding interval of
+accepted traffic against burst+rate*actual elapsed time. Full Store race PASS
+19.270s; final rate tests three times PASS 3.947s; Agent funding-block race PASS
+46.292s; vet PASS. Native extended traffic still required. These finite tests
+are not full model verification.

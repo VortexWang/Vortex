@@ -115,11 +115,19 @@ func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use
 	if boot != "" && boot != use.BootID {
 		return ErrAuthorityHandoffRequired
 	}
-	delta := use.Earliest.UnixNano() - tick
-	if delta > 0 {
-		// Saturate before multiplication to avoid overflow after a long outage.
-		fill := int64(burst*8*1000000000/share.RateBPS) + 1
-		if delta >= fill {
+	// Represent virtual rate debt at an upper-bound time. Refill against
+	// advancing upper bounds, but keep enough tokens to cover the entire
+	// uncertainty interval before admitting bytes. This is the byte-rounded
+	// form of max(previous finish, Latest)+cost <= Earliest+burst duration.
+	// Debits no longer repeatedly discard overlapping elapsed-time credit.
+	anchor := use.Latest.UnixNano()
+	if tick > anchor {
+		anchor = tick
+	} // Backward bounds never mint credit.
+	fill := int64(burst*8000000000/share.RateBPS) + 1
+	if anchor > tick {
+		delta := anchor - tick
+		if delta < 0 || delta >= fill {
 			tokens = burst
 		} else {
 			earned := uint64(delta) * share.RateBPS / 8000000000
@@ -130,9 +138,22 @@ func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use
 			}
 		}
 	}
-	if tokens < n {
-		return &RateLimited{RetryAfter: time.Duration((n-tokens)*8000000000/share.RateBPS + 1)}
+	var uncertainty uint64
+	if anchor > use.Earliest.UnixNano() {
+		width := anchor - use.Earliest.UnixNano()
+		if width < 0 || width >= fill {
+			return &RateLimited{RetryAfter: time.Duration(fill)}
+		}
+		product := uint64(width) * share.RateBPS
+		uncertainty = product / 8000000000
+		if product%8000000000 != 0 {
+			uncertainty++
+		}
 	}
-	_, err = tx.ExecContext(ctx, `INSERT INTO runtime_rate_buckets(node_id,source_id,boot_id,tokens,last_tick) VALUES(?,?,?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET boot_id=excluded.boot_id,tokens=excluded.tokens,last_tick=excluded.last_tick`, use.NodeID, share.SourceID, use.BootID, tokens-n, use.Latest.UnixNano())
+	if tokens < n || uncertainty > tokens-n {
+		short := n + uncertainty - tokens
+		return &RateLimited{RetryAfter: time.Duration(short*8000000000/share.RateBPS + 1)}
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO runtime_rate_buckets(node_id,source_id,boot_id,tokens,last_tick) VALUES(?,?,?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET boot_id=excluded.boot_id,tokens=excluded.tokens,last_tick=excluded.last_tick`, use.NodeID, share.SourceID, use.BootID, tokens-n, anchor)
 	return err
 }
