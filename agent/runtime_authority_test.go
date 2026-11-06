@@ -102,9 +102,18 @@ func runtimeIdentities(t *testing.T, dir string, ids ...string) map[string]confi
 }
 
 func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T) {
+	runDurableRuntimeAuthority(t, 0)
+}
+
+func TestRuntimeContinuousDurableAdaptiveRenewal(t *testing.T) {
+	runDurableRuntimeAuthority(t, 8)
+}
+
+func runDurableRuntimeAuthority(t *testing.T, renewalRounds int) {
+	t.Helper()
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), (25+time.Duration(renewalRounds)*3)*time.Second)
 			defer cancel()
 			const peerID = "550e8400-e29b-41d4-a716-446655440099"
 			const runtimeHubID = "550e8400-e29b-41d4-a716-446655440060"
@@ -267,7 +276,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				SourceID: "550e8400-e29b-41d4-a716-446655440023", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440061", ShareSourceID: "550e8400-e29b-41d4-a716-446655440062",
 				NodeID: node.NodeID, BootID: node.BootID, BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440024",
 				RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, FencingFloor: 8, SignerEpoch: 1,
-				RawBytes: 12288, RateBPS: 1000000, Connections: 1,
+				RawBytes: 12288 + uint64(renewalRounds)*4096, RateBPS: 1000000, Connections: 1,
 				ValidFrom: issuedAt, ExpiresAt: issuedAt.Add(time.Hour), HardDeadline: issuedAt.Add(time.Hour),
 				BackendHeartbeat: issuedAt, AutonomyDeadline: issuedAt.Add(2 * time.Hour),
 			}
@@ -463,7 +472,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatalf("changed estimate replaced in-flight identity: %+v %v", retained, err)
 			}
 			beforeReplay, err := hs.AuditHubDelegation(ctx, delegation.ID)
-			if err != nil || beforeReplay.Issued != 7096 || beforeReplay.Remaining != 5192 {
+			if err != nil || beforeReplay.Issued != 7096 || beforeReplay.Remaining != delegation.RawBytes-7096 {
 				t.Fatalf("lost response was not durably funded: %+v %v", beforeReplay, err)
 			}
 			unseen, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
@@ -538,6 +547,58 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatalf("old and adaptively issued usage lost their grant identities: %+v", counts)
 			}
 			t.Logf("same stream renewed after initial expiry %s; two directional batches per grant", initialExpiry.Format(time.RFC3339Nano))
+			expectedIssued := uint64(7096)
+			if renewalRounds > 0 {
+				// Keep one real control connection and the original business stream
+				// alive across repeated consumption-driven durable renewals.
+				continuousHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: renewalRounds}, serverTLS)
+				controlDone := make(chan error, 1)
+				go func() {
+					controlDone <- (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, continuousHub.Addr().String())
+				}()
+				for round := 0; round < renewalRounds; round++ {
+					// The first old grant has expired with 1096 unused bytes.
+					// Those bytes must not count toward the next usable target.
+					if round == 0 {
+						expectedIssued += 4096
+					} else {
+						expectedIssued += 3000
+					}
+					for {
+						low, high, trusted := node.TrustedTime()
+						ledger, err := s.ReadDemandLedger(ctx, demandScope, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted}, time.Now())
+						if err != nil {
+							t.Fatal(err)
+						}
+						if ledger.Available == 4096 {
+							break
+						}
+						select {
+						case <-ctx.Done():
+							t.Fatalf("round %d renewal unavailable: %+v", round, ledger)
+						case <-time.After(time.Millisecond):
+						}
+					}
+					exchange()
+					waitSettled(expectedIssued, uint64((round+3)*2*len(message)))
+					balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+					if err != nil || balance.Reserved != 0 || balance.Unknown != 0 || balance.Initial != balance.Remaining+balance.Committed {
+						t.Fatalf("round %d conservation: %+v %v", round, balance, err)
+					}
+				}
+				select {
+				case err := <-controlDone:
+					if err != nil {
+						t.Fatal(err)
+					}
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+				if requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, ""); err != nil || len(requests) != 0 {
+					t.Fatalf("continuous demand left pending requests: %+v %v", requests, err)
+				}
+				t.Logf("continuous durable renewals=%d issued=%d metered=%d", renewalRounds, expectedIssued, (renewalRounds+2)*2*len(message))
+			}
 			if fullDiskRoot != "" {
 				filler := fillRuntimeDisk(t, filepath.Dir(agentDB))
 				probeErr := s.AppendEvent(ctx, "full-disk-probe", "probe", []byte("must fail durably"))
@@ -565,7 +626,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 					t.Fatal("full disk did not reset runtime stream")
 				}
 				frame.Release()
-				if targetBytes.Load() != int64(2*len(message)) {
+				if targetBytes.Load() != int64((renewalRounds+2)*len(message)) {
 					t.Fatalf("unrecordable traffic reached target: %d", targetBytes.Load())
 				}
 				if err := os.Remove(filler); err != nil {
@@ -580,7 +641,13 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := node.Stop(ctx); err != nil {
 				t.Fatal(err)
 			}
-			usageHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, UsageBatchLimit: 2}, serverTLS)
+			// Control demand completion does not imply asynchronous usage ACKs
+			// have drained. Freeze traffic first, then replay every pending batch.
+			toDrain, err := s.PendingUsageOutbox(ctx, node.NodeID)
+			if err != nil || len(toDrain) < 2 {
+				t.Fatalf("expected final pending usage: %d %v", len(toDrain), err)
+			}
+			usageHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, UsageBatchLimit: len(toDrain)}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, usageHub.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
@@ -588,7 +655,7 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				t.Fatalf("outbox not acknowledged: %d %v", len(pending), err)
 			}
 			balance, err := hs.AuditHubDelegation(ctx, delegation.ID)
-			if err != nil || balance.Initial != 12288 || balance.Remaining != 5192 || balance.Issued != 7096 {
+			if err != nil || balance.Initial != delegation.RawBytes || balance.Remaining != delegation.RawBytes-expectedIssued || balance.Issued != expectedIssued {
 				t.Fatalf("Hub delegated reserve: %+v %v", balance, err)
 			}
 			if err := s.Close(); err != nil {
@@ -600,10 +667,14 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			if err := bs.Close(); err != nil {
 				t.Fatal(err)
 			}
-			assertRawLedger(t, hubDB, 4)
-			assertRawLedger(t, backendDB, 4)
-			saveRuntimeLedger(t, network, agentDB, hubDB)
-			saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+			assertRawLedger(t, hubDB, 4+2*renewalRounds)
+			assertRawLedger(t, backendDB, 4+2*renewalRounds)
+			if renewalRounds == 0 {
+				saveRuntimeLedger(t, network, agentDB, hubDB)
+				saveLedgerFiles(t, fmt.Sprintf("runtime-handoff-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+			} else {
+				saveLedgerFiles(t, fmt.Sprintf("runtime-continuous-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+			}
 		})
 	}
 }

@@ -868,3 +868,32 @@ PASS. The local complete generator check stopped at the exact-version guard
 because protoc is 36.0 rather than required 36.2; it is not a passing generator
 reproduction result. The approved proposal text remains immutable under its
 recorded hash. Control 1.4.0 grant-return proposal is still unapproved.
+
+## Continuous real-traffic durable renewal integration
+
+`TestRuntimeContinuousDurableAdaptiveRenewal` reuses the funded TCP/UDP runtime
+fixture and keeps the original business stream plus one actual mTLS control
+connection alive for eight additional consumption-triggered renewals. Each
+renewal is derived from the durable Agent demand ledger and issued by the
+transactional Hub issuer; no renewal grants are injected. After the original
+4-second grant expires, its 1096 unused bytes do not count toward a new usable
+target: the first new demand requests 4096, subsequent demands request 3000.
+The test audits source conservation with zero reserved/unknown bytes after
+each exchange, verifies no pending demands remain, and reconciles Hub funding.
+Per transport, total issuance is 32192 bytes and committed usage is 30000 bytes.
+
+The initial expanded test revealed an invalid fixture assumption that only two
+usage batches would remain pending when a demand-limited control stream ends.
+Usage delivery is asynchronous. The fixture now stops traffic, reads the actual
+durable pending set, and replays all of it through the Hub usage relay before
+asserting an empty Agent outbox. Both Hub and protocol-backend SQLite ledgers
+must contain exactly 20 committed batches. Existing single-renewal and disk-full
+variants retain their respective checks. Continuous-test snapshot names are
+separate so they cannot overwrite single-renewal evidence.
+
+Targeted TCP/UDP old+new integration race run PASS (40.547s); full Agent/Hub
+race PASS (Agent 52.137s, Store 11.332s; remaining packages cached), vet and diff
+check PASS. This is local Darwin correctness evidence for eight controlled
+renewal cycles, not a sustained throughput/latency qualification, full real
+backend integration, multi-hop durable performance or D-04 parameter lock.
+Dedicated Ubuntu execution at the new clean SHA remains to be recorded.
