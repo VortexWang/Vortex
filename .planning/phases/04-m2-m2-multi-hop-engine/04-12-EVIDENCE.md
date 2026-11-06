@@ -1995,3 +1995,16 @@ results. Artifacts store-profile-4e7d849, benchmark.log SHA-256
 43ba0c1e23e0cab1a195ed88ff8c179a145da3f9ed9ff4f305b35e1854eba272;
 cpu.pprof 7dc288bead3650f4240b933761fae4b81381dd84b37ce4b0b0105988ecfaaf29.
 Local Hub and node/test-hub CLI tests also PASS. No D-04 default is locked.
+
+## Bounded runtime statement reuse
+
+Expanded prepared SQL reuse to a fixed 47-statement allowlist covering runtime
+admission, reservation and settlement reads/writes. Original SQL remains at call
+sites; nonmatching SQL falls back to ordinary transaction execution. Parent
+statements are prepared after schema setup, transaction bindings are created
+lazily and retained only for that transaction. A mutex protects binding creation;
+cancelled binding attempts are not retained. All parameter values and row reads
+remain per operation. No grant, lease, rate or balance result is cached.
+Ordinary settlement now also uses the runtime transaction wrapper. Added same-
+transaction read-after-cancellation coverage. Full Store race PASS 20.508s;
+Agent/Hub vet PASS. Native process and benchmark comparison remain required.

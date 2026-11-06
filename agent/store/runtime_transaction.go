@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"sync"
 )
 
 // storeTransaction is implemented by both sql.Tx and runtimeTransaction.
@@ -20,7 +21,9 @@ const authorizationRecordQuery = `SELECT authorization_id,parent_authorization_i
 // Preparing on the DB after BeginTx would deadlock our single connection pool.
 type runtimeTransaction struct {
 	*sql.Tx
-	authorizationStatement *sql.Stmt
+	parents map[string]*sql.Stmt
+	mu      sync.Mutex
+	bound   map[string]*sql.Stmt
 }
 
 func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
@@ -28,12 +31,42 @@ func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runti
 	if err != nil {
 		return nil, err
 	}
-	return &runtimeTransaction{Tx: tx, authorizationStatement: tx.StmtContext(ctx, s.authorizationStatement)}, nil
+	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt)}, nil
+}
+
+func (tx *runtimeTransaction) statement(ctx context.Context, query string) *sql.Stmt {
+	parent := tx.parents[query]
+	if parent == nil {
+		return nil
+	}
+	tx.mu.Lock()
+	defer tx.mu.Unlock()
+	if stmt := tx.bound[query]; stmt != nil {
+		return stmt
+	}
+	stmt := tx.Tx.StmtContext(ctx, parent)
+	// A cancelled binding must not poison subsequent use of this transaction.
+	if ctx.Err() == nil {
+		tx.bound[query] = stmt
+	}
+	return stmt
 }
 
 func (tx *runtimeTransaction) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
-	if query == authorizationRecordQuery {
-		return tx.authorizationStatement.QueryRowContext(ctx, args...)
+	if stmt := tx.statement(ctx, query); stmt != nil {
+		return stmt.QueryRowContext(ctx, args...)
 	}
 	return tx.Tx.QueryRowContext(ctx, query, args...)
+}
+func (tx *runtimeTransaction) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	if stmt := tx.statement(ctx, query); stmt != nil {
+		return stmt.QueryContext(ctx, args...)
+	}
+	return tx.Tx.QueryContext(ctx, query, args...)
+}
+func (tx *runtimeTransaction) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	if stmt := tx.statement(ctx, query); stmt != nil {
+		return stmt.ExecContext(ctx, args...)
+	}
+	return tx.Tx.ExecContext(ctx, query, args...)
 }

@@ -18,9 +18,9 @@ import (
 // Store is the durable local authority for an Agent or Hub. Each role opens
 // its own file; WAL files are never shared between processes.
 type Store struct {
-	db                     *sql.DB
-	owner                  string
-	authorizationStatement *sql.Stmt
+	db                *sql.DB
+	owner             string
+	runtimeStatements map[string]*sql.Stmt
 }
 
 type Info struct {
@@ -137,10 +137,14 @@ func Open(path, owner string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
-	s.authorizationStatement, err = db.Prepare(authorizationRecordQuery)
-	if err != nil {
-		_ = db.Close()
-		return nil, fmt.Errorf("store: prepare authorization read: %w", err)
+	s.runtimeStatements = make(map[string]*sql.Stmt, len(runtimeQueries))
+	for _, query := range runtimeQueries {
+		stmt, err := db.Prepare(query)
+		if err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("store: prepare runtime SQL: %w", err)
+		}
+		s.runtimeStatements[query] = stmt
 	}
 	return s, nil
 }
@@ -600,7 +604,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 	if resolution == "committed" && (used > reservation.Reserved || len(payload) == 0 || unknownUpper != 0) || resolution == "unknown" && (used != reservation.Reserved || unknownUpper != reservation.Reserved || len(payload) == 0) || resolution == "returned" && (used != 0 || unknownUpper != 0 || len(payload) != 0) {
 		return fmt.Errorf("store: inconsistent usage settlement")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}

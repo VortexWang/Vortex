@@ -54,6 +54,9 @@ func TestPreparedAuthorizationCancellationDoesNotPoisonReuse(t *testing.T) {
 	if _, _, err := readAuthorizationTx(cancelled, tx, "node", "grant"); !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancelled read returned %v", err)
 	}
+	if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
+		t.Fatalf("cancelled binding poisoned current transaction: %v", err)
+	}
 	if err := tx.Rollback(); err != nil {
 		t.Fatal(err)
 	}
