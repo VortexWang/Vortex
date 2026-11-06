@@ -53,12 +53,12 @@ func schedulerRenewalFault(t *testing.T, ctx context.Context, db *sql.DB, dir, m
 	if mode == "low-water-tcp-udp" || mode == "lost-result" {
 		return false
 	}
-	ns, err := store.Open(filepath.Join(dir, "agent.db"), "agent")
+	ns, err := store.OpenReader(filepath.Join(dir, "agent.db"), "agent")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ns.Close()
-	hs, err := store.Open(filepath.Join(dir, "hub0.db"), "hub")
+	hs, err := store.OpenReader(filepath.Join(dir, "hub0.db"), "hub")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,12 @@ func schedulerRenewalFault(t *testing.T, ctx context.Context, db *sql.DB, dir, m
 			}
 			r := before.Request
 			stamp := time.Now().UTC()
-			_, err := ns.ReserveAuthorizedUsage(ctx, store.UsageReservation{NodeID: r.NodeId, BootID: r.BootId, BatchID: "renewal-crash-write", AuthorizationID: grant, SnapshotID: r.BillingSnapshotId, FlowKey: "crash-fixture", RuleID: r.RuleId, Direction: "egress", Reserved: 512}, store.AuthorizationUse{NodeID: r.NodeId, BootID: r.BootId, AuthorizationID: grant, Kind: "credit_grant", RuleID: r.RuleId, RuleRevision: r.RuleRevision, PathGeneration: r.PathGeneration, BillingSnapshotID: r.BillingSnapshotId, Earliest: stamp, Latest: stamp, TrustedTime: true, ExistingSession: true})
+			writer, err := store.Open(filepath.Join(dir, "agent.db"), "agent")
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = writer.ReserveAuthorizedUsage(ctx, store.UsageReservation{NodeID: r.NodeId, BootID: r.BootId, BatchID: "renewal-crash-write", AuthorizationID: grant, SnapshotID: r.BillingSnapshotId, FlowKey: "crash-fixture", RuleID: r.RuleId, Direction: "egress", Reserved: 512}, store.AuthorizationUse{NodeID: r.NodeId, BootID: r.BootId, AuthorizationID: grant, Kind: "credit_grant", RuleID: r.RuleId, RuleRevision: r.RuleRevision, PathGeneration: r.PathGeneration, BillingSnapshotID: r.BillingSnapshotId, Earliest: stamp, Latest: stamp, TrustedTime: true, ExistingSession: true})
+			writer.Close()
 			if err != nil {
 				t.Fatal(err)
 			}

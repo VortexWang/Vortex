@@ -129,7 +129,11 @@ func Open(path, owner string) (*Store, error) {
 	if path == "" || owner == "" {
 		return nil, fmt.Errorf("store: path and owner are required")
 	}
-	db, err := sql.Open("sqlite", path)
+	dsn, err := ledgerDSN(path, false)
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("store: open: %w", err)
 	}

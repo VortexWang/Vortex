@@ -90,12 +90,12 @@ func schedulerRenewalTraffic(t *testing.T, ctx context.Context, db *sql.DB, dir 
 	}
 	// Both authoritative local stores must account for every issued grant; a
 	// lost response does not duplicate debit. Audit reads transactional snapshots.
-	ns, err := store.Open(filepath.Join(dir, "agent.db"), "agent")
+	ns, err := store.OpenReader(filepath.Join(dir, "agent.db"), "agent")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer ns.Close()
-	hs, err := store.Open(filepath.Join(dir, "hub0.db"), "hub")
+	hs, err := store.OpenReader(filepath.Join(dir, "hub0.db"), "hub")
 	if err != nil {
 		t.Fatal(err)
 	}
