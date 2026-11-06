@@ -37,6 +37,16 @@ type ControlReceipt struct {
 	State          string
 }
 
+type CurrentRestriction struct {
+	TenantID      string
+	Cause         string
+	SourceID      string
+	SourceVersion int64
+	EventID       string
+	EffectiveAt   pgtype.Timestamptz
+	ClearedAt     pgtype.Timestamptz
+}
+
 type DesiredState struct {
 	TenantID      string
 	ResourceID    string
@@ -69,6 +79,41 @@ type Outbox struct {
 	DeliveredAt pgtype.Timestamptz
 }
 
+type PlatformPrincipal struct {
+	ID    string
+	Role  string
+	State string
+}
+
+type ResourceGrant struct {
+	ID         string
+	TenantID   string
+	ResourceID string
+	OwnerKind  string
+	Version    int64
+	Status     string
+	ValidFrom  pgtype.Timestamptz
+	ValidUntil pgtype.Timestamptz
+}
+
+type ResourceOwnership struct {
+	ResourceID    string
+	ResourceKind  string
+	OwnerKind     string
+	OwnerTenantID pgtype.Text
+}
+
+type RestrictionEvent struct {
+	ID            string
+	TenantID      string
+	Cause         string
+	SourceID      string
+	SourceVersion int64
+	EventKind     string
+	EffectiveAt   pgtype.Timestamptz
+	ClearedAt     pgtype.Timestamptz
+}
+
 type Task struct {
 	ID          string
 	TenantID    string
@@ -77,4 +122,17 @@ type Task struct {
 	LeaseToken  pgtype.Text
 	LeaseUntil  pgtype.Timestamptz
 	Attempts    int32
+}
+
+type Tenant struct {
+	ID           string
+	AccountState string
+	Version      int64
+}
+
+type User struct {
+	ID       string
+	TenantID string
+	Role     string
+	State    string
 }

@@ -71,7 +71,7 @@ func (s *Tracer) RebuildCache(ctx context.Context, scope TenantScope, address st
 	if !scope.Valid() {
 		return nil, ErrScope
 	}
-	rows, err := generated.New(s.Pool).ListAuthority(ctx, scope.tenant)
+	rows, err := generated.New(s.Pool).ListAuthority(ctx, scope.TenantID())
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +79,6 @@ func (s *Tracer) RebuildCache(ctx context.Context, scope TenantScope, address st
 	if err != nil {
 		return nil, err
 	}
-	_, err = CacheCommand(ctx, address, "SET", "vortex:authority:"+scope.tenant, string(raw))
+	_, err = CacheCommand(ctx, address, "SET", "vortex:authority:"+scope.TenantID(), string(raw))
 	return raw, err
 }
