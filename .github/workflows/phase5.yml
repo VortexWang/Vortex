@@ -36,6 +36,13 @@ jobs:
         run: make phase5-contract-check
       - name: Run Wave 1 check
         run: make phase5-wave1-check
+      - name: Retain Wave 1 diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-wave1-${{ github.sha }}
+          path: artifacts/phase5/wave1/
+          if-no-files-found: error
       - name: Run Wave 2 check
         run: make phase5-wave2-check
       - name: Prepare isolated full-disk fixture

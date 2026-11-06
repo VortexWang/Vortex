@@ -31,3 +31,15 @@ Added fixed-argv SystemdService with selected/running executable digest check an
 The actual Linux node tracer now launches distinct built candidate bytes through the Installer/OS-process service controller and validates healthy replacement and failed candidate rollback using the same database. Protocol-test backend explicitly supplies fresh fenced transactions and separately funded source anchors for replacement boots; old occupied roots are never reused/refunded. Initial tracer failures (short RPC cleanup allowance, stale closed configuration, reuse of occupied share roots) were retained in development logs and not counted as passed. Darwin cannot prove the Linux executor witness and its upgrade process scenario is explicitly skipped; required Linux gates reject skipped scenarios.
 
 The tracer passed healthy/rollback/current TCP and unknown512 retention on Linux before the additional confirmed-consumption/fence comparison was added. The stronger assertion now also passed: original usage payload digests unchanged, fencing floor >=9, prior boot has no active authorization, unresolved512 retains original boot. Native Agent/CLI/upgrade race and vet passed. Actual systemd boot/upgrade, all-stage crash/full-disk recovery and same-source Docker/Actions acceptance still pending. Plan remains incomplete.
+
+
+### Same-source gate attempt8566b1e
+
+Actions42192956408 failed at Wave1; full recovery/deployment steps did not run.
+Legacy redirected Wave1 diagnostics were not retained. Failed-step log/report are
+retained under that source's actions directory; new source prints/archives Wave1
+failure diagnostics. Local Docker for8566b1e remains a distinct result, never a
+paired pass. Subsequent source adds same-transaction restart reconciliation,
+recovered digest enforcement, service crash-boundary tests and actual isolated
+full-disk pre-stop rejection; native race and pinned Linux full-disk tests passed.
+No05-11 completion claim until the latest committed source passes both gates.

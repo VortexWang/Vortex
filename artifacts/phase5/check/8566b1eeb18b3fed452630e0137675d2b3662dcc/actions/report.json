@@ -1,0 +1,1 @@
+{"commit": "8566b1eeb18b3fed452630e0137675d2b3662dcc", "status": "failed", "run_id": 42192956408, "failed_step": "Run Wave 1 check", "downstream_full_gate": "not_run", "diagnostic_limitation": "legacy Wave1 redirected log not retained; next source adds explicit failure output/artifact"}

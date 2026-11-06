@@ -192,5 +192,9 @@ func upgradeNode(ctx context.Context, args []string, out, diagnostics io.Writer)
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(out).Encode(map[string]string{"status": "verified", "scope": "node-service-upgrade"})
+	state, err := installer.State()
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(out).Encode(map[string]string{"status": state.State, "transaction_id": state.TransactionID, "scope": "node-service-upgrade"})
 }

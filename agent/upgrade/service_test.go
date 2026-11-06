@@ -199,3 +199,142 @@ func TestServiceReleaseTargetCannotEscapeThroughDirectorySymlink(t *testing.T) {
 		t.Fatal("release target escaped trusted installer root")
 	}
 }
+
+func TestServiceCrashAfterSelectionRecoversSameTransactionWithFreshWitness(t *testing.T) {
+	f := newInstallerFixture(t)
+	service := &testService{running: true}
+	f.installer.Service = service
+	f.installer.Failpoint = func(stage string) error {
+		if stage == "after-activate" {
+			return errors.New("upgrader crashed")
+		}
+		return nil
+	}
+	request := f.request("80112233-4455-6677-8899-aabbccddeeff")
+	if err := f.installer.Install(context.Background(), request); err == nil {
+		t.Fatal("crash ignored")
+	}
+	state, err := f.installer.State()
+	if err != nil || state.State != "activation-intent" {
+		t.Fatalf("%+v %v", state, err)
+	}
+	f.installer.Failpoint = nil
+	if err = f.installer.Recover(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	state, err = f.installer.State()
+	if err != nil || state.State != "healthy" || state.TransactionID != request.TransactionID {
+		t.Fatalf("%+v %v", state, err)
+	}
+	if got := strings.Join(service.events, ","); got != "stop,stop,start:80112233-4455-6677-8899-aabbccddeeff" {
+		t.Fatal(got)
+	}
+}
+
+func TestServiceRecoveredCandidateDigestCannotBeChanged(t *testing.T) {
+	f := newInstallerFixture(t)
+	service := &testService{running: true}
+	f.installer.Service = service
+	f.installer.Failpoint = func(stage string) error {
+		if stage == "after-activate" {
+			return errors.New("crash")
+		}
+		return nil
+	}
+	request := f.request("90112233-4455-6677-8899-aabbccddeeff")
+	if err := f.installer.Install(context.Background(), request); err == nil {
+		t.Fatal("crash ignored")
+	}
+	state, _ := f.installer.State()
+	path := filepath.Join(f.root, state.Candidate)
+	os.WriteFile(path, []byte("changed"), 0755)
+	if err := f.installer.Recover(context.Background()); !errors.Is(err, ErrActivationUnknown) {
+		t.Fatal(err)
+	}
+	if len(service.events) != 1 {
+		t.Fatal("unverified recovered artifact reached service")
+	}
+}
+
+func TestServiceFullDiskCannotStopOrSelectCandidate(t *testing.T) {
+	base := os.Getenv("VORTEX_TEST_FULL_DISK_DIR")
+	if base == "" {
+		t.Skip("isolated Linux full-disk fixture required by deployment gate")
+	}
+	root, err := os.MkdirTemp(base, "upgrade-full-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(root)
+	f := newInstallerFixture(t)
+	old := filepath.Join(root, "releases/old/vortex-node")
+	os.MkdirAll(filepath.Dir(old), 0700)
+	if err = os.WriteFile(old, []byte("old"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	active := filepath.Join(root, "current")
+	if err = os.Symlink("releases/old/vortex-node", active); err != nil {
+		t.Fatal(err)
+	}
+	f.installer.Root, f.installer.ActiveLink = root, active
+	service := &testService{running: true}
+	f.installer.Service = service
+	filler, err := os.Create(filepath.Join(root, "fill"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	chunk := make([]byte, 65536)
+	for i := 0; i < 512; i++ {
+		_, err = filler.Write(chunk)
+		if err != nil {
+			break
+		}
+	}
+	filler.Close()
+	if err == nil {
+		t.Fatal("fixture was not a bounded full filesystem")
+	}
+	if err = f.installer.Install(context.Background(), f.request("a0112233-4455-6677-8899-aabbccddeeff")); err == nil {
+		t.Fatal("full disk upgrade succeeded")
+	}
+	if len(service.events) != 0 {
+		t.Fatal("stopped service before durable staging")
+	}
+	target, err := os.Readlink(active)
+	if err != nil || target != "releases/old/vortex-node" {
+		t.Fatal("disk failure switched release")
+	}
+}
+
+func TestServiceCrashBoundariesRetainOneTransaction(t *testing.T) {
+	for _, stage := range []string{"before-stage", "staged", "before-drain", "after-drain", "after-service-stop", "before-activate", "after-activate", "before-health", "healthy"} {
+		t.Run(stage, func(t *testing.T) {
+			f := newInstallerFixture(t)
+			f.installer.Service = &testService{running: true}
+			request := f.request("b0112233-4455-6677-8899-aabbccddeeff")
+			f.installer.Failpoint = func(current string) error {
+				if current == stage {
+					return errors.New("simulated upgrader crash")
+				}
+				return nil
+			}
+			if err := f.installer.Install(context.Background(), request); err == nil {
+				t.Fatal("missing failpoint")
+			}
+			state, err := f.installer.State()
+			if err != nil || state.TransactionID != request.TransactionID {
+				t.Fatalf("lost durable transaction %+v %v", state, err)
+			}
+			f.installer.Failpoint = nil
+			// An unelapsed drain remains pending, not activation proof.
+			err = f.installer.Recover(context.Background())
+			if err != nil && !errors.Is(err, ErrActivationUnknown) {
+				t.Fatal(err)
+			}
+			state, err = f.installer.State()
+			if err != nil || state.TransactionID != request.TransactionID {
+				t.Fatal("recovery changed identity")
+			}
+		})
+	}
+}

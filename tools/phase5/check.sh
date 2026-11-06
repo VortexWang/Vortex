@@ -61,6 +61,9 @@ for name in ('TestRegionalProcessFailover/silent-stream','TestRegionalProcessFai
 for name in ('TestSchedulerProcessRenewal/low-water-tcp-udp','TestSchedulerProcessRenewal/lost-result','TestSchedulerProcessRenewal/hub-restart','TestSchedulerProcessRenewal/node-restart','TestSchedulerProcessRenewal/quota-exhausted','TestSchedulerProcessRenewal/write-failure','TestSchedulerProcessRenewal/expiry-with-pending-result'):
  log=(out/'renewal-process.log').read_text()
  assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
+for name in ('TestServiceFullDiskCannotStopOrSelectCandidate','TestServiceCrashBoundariesRetainOneTransaction','TestServiceCrashAfterSelectionRecoversSameTransactionWithFreshWitness','TestServiceRecoveredCandidateDigestCannotBeChanged'):
+ log=(out/'upgrade-race.log').read_text()
+ assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
 for name in ('TestUpgradeProcessRollback/upgrade-healthy','TestUpgradeProcessRollback/upgrade-rollback'):
  log=(out/'upgrade-process.log').read_text()
  assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name

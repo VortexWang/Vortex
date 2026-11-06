@@ -120,6 +120,9 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 				if err != nil {
 					return err
 				}
+				if existing.State == "healthy" {
+					return nil
+				}
 				if existing.State == "activation-unknown" || existing.State == "health-check" || existing.State == "rollback-blocked" {
 					return ErrActivationUnknown
 				}
@@ -224,7 +227,11 @@ func (i *Installer) installLocked(ctx context.Context, request InstallRequest) e
 	if err := i.writeState(state); err != nil {
 		return err
 	}
-	drainCtx, cancelDrain := context.WithDeadline(ctx, state.DrainDeadline.Add(15*time.Second))
+	drainRPCDeadline := state.DrainDeadline
+	if i.Service != nil {
+		drainRPCDeadline = drainRPCDeadline.Add(15 * time.Second)
+	}
+	drainCtx, cancelDrain := context.WithDeadline(ctx, drainRPCDeadline)
 	drainErr := i.Drain(drainCtx)
 	cancelDrain()
 	if drainErr != nil {
@@ -344,6 +351,32 @@ func (i *Installer) recoverLocked(ctx context.Context) error {
 		}
 		return nil
 	case "activation-intent", "activation-unknown", "health-check":
+		if active == state.Candidate && i.Service != nil {
+			path, err := i.resolveTarget(state.Candidate)
+			if err != nil {
+				return err
+			}
+			artifact, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			digest := sha256.Sum256(artifact)
+			if hex.EncodeToString(digest[:]) != state.SHA256 {
+				return errors.Join(ErrActivationUnknown, errors.New("upgrade: recovered candidate digest changed"))
+			}
+			// Explicit same-transaction reconciliation restarts only after a fresh
+			// service termination witness. It never derives success from the symlink.
+			if err = i.stopService(ctx); err != nil {
+				return err
+			}
+			health, cancel := context.WithTimeout(ctx, i.HealthTimeout)
+			defer cancel()
+			if err = i.startAndCheck(health, path); err != nil {
+				return i.rollback(ctx, state, err)
+			}
+			state.State, state.Reason = "healthy", "reconciled_same_transaction"
+			return i.writeState(state)
+		}
 		if active == state.Candidate {
 			state.State = "activation-unknown"
 			if err := i.writeState(state); err != nil {
@@ -647,4 +680,19 @@ func validTransactionID(value string) bool {
 		}
 	}
 	return true
+}
+
+// State reports the durable transaction outcome without implying service health.
+func (i *Installer) State() (InstallState, error) {
+	if i == nil {
+		return InstallState{}, errors.New("upgrade: missing installer")
+	}
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	unlock, err := i.lockJournal()
+	if err != nil {
+		return InstallState{}, err
+	}
+	defer unlock()
+	return i.readState()
 }

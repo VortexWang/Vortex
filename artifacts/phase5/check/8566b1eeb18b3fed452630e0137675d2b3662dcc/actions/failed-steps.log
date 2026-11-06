@@ -1,0 +1,51 @@
+wave1	Run Wave 1 check	﻿2026-11-06T09:10:33.6616581Z ##[group]Run make phase5-wave1-check
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6617066Z ^[[36;1mmake phase5-wave1-check^[[0m
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6641703Z shell: /usr/bin/bash -e {0}
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6642030Z env:
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6642279Z   GOTOOLCHAIN: local
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6642549Z ##[endgroup]
+wave1	Run Wave 1 check	2026-11-06T09:10:33.6700150Z tools/phase5/wave1_check.sh
+wave1	Run Wave 1 check	2026-11-06T09:10:33.7716779Z go: downloading golang.org/x/sys v0.49.0
+wave1	Run Wave 1 check	2026-11-06T09:10:33.7747189Z go: downloading modernc.org/sqlite v1.61.1
+wave1	Run Wave 1 check	2026-11-06T09:10:33.7829938Z go: downloading google.golang.org/grpc v1.85.0
+wave1	Run Wave 1 check	2026-11-06T09:10:34.1374307Z go: downloading golang.org/x/net v0.60.0
+wave1	Run Wave 1 check	2026-11-06T09:10:34.1377773Z go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1
+wave1	Run Wave 1 check	2026-11-06T09:10:34.3109359Z go: downloading golang.org/x/text v0.42.0
+wave1	Run Wave 1 check	2026-11-06T09:10:35.1831841Z go: downloading modernc.org/libc v1.79.0
+wave1	Run Wave 1 check	2026-11-06T09:10:36.2957698Z go: downloading modernc.org/mathutil v1.7.1
+wave1	Run Wave 1 check	2026-11-06T09:10:36.2958311Z go: downloading github.com/google/uuid v1.6.0
+wave1	Run Wave 1 check	2026-11-06T09:10:36.2959363Z go: downloading modernc.org/memory v1.12.1
+wave1	Run Wave 1 check	2026-11-06T09:10:36.2959897Z go: downloading github.com/dustin/go-humanize v1.1.0
+wave1	Run Wave 1 check	2026-11-06T09:10:36.3230765Z go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+wave1	Run Wave 1 check	2026-11-06T09:12:16.6270231Z make: *** [Makefile:7: phase5-wave1-check] Error 1
+wave1	Run Wave 1 check	2026-11-06T09:12:16.6288621Z ##[error]Process completed with exit code 2.
+wave1	Retain authorization regression evidence	﻿2026-11-06T09:12:20.2300466Z ##[group]Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2300802Z with:
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2301052Z   name: phase5-authorization-8566b1eeb18b3fed452630e0137675d2b3662dcc
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2302338Z   path: artifacts/phase5/authorization/*.log
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/*.txt
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/report.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/runtime-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/runtime-*.sqlite.gz
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/unknown-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/unknown-*.sqlite.gz
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/handoff-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/handoff-*.sqlite.gz
+wave1	Retain authorization regression evidence	
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2303576Z   if-no-files-found: error
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2303777Z   compression-level: 6
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2304234Z   overwrite: false
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2304421Z   include-hidden-files: false
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2304621Z   archive: true
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2304783Z env:
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2304949Z   GOTOOLCHAIN: local
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.2305161Z ##[endgroup]
+wave1	Retain authorization regression evidence	2026-11-06T09:12:20.3528577Z ##[error]No files were found with the provided path: artifacts/phase5/authorization/*.log
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/*.txt
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/report.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/runtime-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/runtime-*.sqlite.gz
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/unknown-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/unknown-*.sqlite.gz
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/handoff-*.json
+wave1	Retain authorization regression evidence	artifacts/phase5/authorization/handoff-*.sqlite.gz. No artifacts will be uploaded.
