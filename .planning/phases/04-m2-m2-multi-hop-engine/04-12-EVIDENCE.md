@@ -2210,3 +2210,14 @@ checks three times PASS 2.242s; funding-block Agent race PASS 45.164s; vet PASS.
 New coordinator-specific mid-commit cancellation/close/crash coverage remains
 required in addition to the existing underlying transaction tests. Native
 extended workload effect remains unverified; no parameter has been locked.
+
+Clean eda39a2ec336157f8b6c04f1f468953f2942a00f native process suite: short
+TCP/UDP/concurrent cases PASS, ConcurrentRenewal FAIL stream 3 round 21 (2.41s),
+overall 34.381s. First admission timeout total 200.153ms/direct 199.034ms. No
+claim of stable throughput benefit follows from this run; cross-session
+checkpoint batching alone has not removed the extended-workload blocker.
+Artifacts process-eda39a2 report SHA-256
+4c142fd69d06c3fbda2d162b12b893b5e883e3a3963498d4649c1ac3e7f721fb;
+test.log d1ed214e11112c8c4cd34347a7d59302a4676d3c73c83e1a7c49c8b0384e49c6.
+Continue diagnosing the admission wait chain and add coordinator cancellation/
+shutdown/crash attack coverage before any broad qualification claim.
