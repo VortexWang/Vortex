@@ -737,3 +737,21 @@ No frozen proto/hash/version was changed. The explicit owner-approval rule in
 docs/governance/contract-review.yaml applies; the prior 1.3.0 approval covers
 CreditDemand outcomes, not this new unused-credit return. Other performance and
 attack work remains authorized while this proposal awaits an owner decision.
+
+## Sealed grant replay and resurrection boundary
+
+TestSealedGrantCannotBeResurrectedByAuthorizationReplay creates committed=80
+and unknown=120 against a 1MiB grant, seals it, prepares a conserved final proof,
+closes the database and reopens it. Identical update replay remains idempotent
+without restoring spending permission. New envelopes reusing the grant ID,
+including changed amount, boot, signer epoch, path generation or issuer, fail
+with an immutable identity conflict. After every attempt, direct reservation
+and authorization checks still deny use; source conservation and final proof
+bytes/hash remain unchanged. A rejected path update cannot partially advance
+the stored path generation. This checks the Store transaction boundary rather
+than claiming new authenticated transport coverage or hostile-agent attestation.
+
+Targeted seal/proof race tests PASS; full Agent/Hub race and vet PASS; diff check
+PASS. No production behavior or frozen contract changed. The unapproved 1.4.0
+proposal remains pending; this independent local seal invariant is required
+regardless of any future return wire protocol. D-04 remains unlocked.
