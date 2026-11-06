@@ -92,6 +92,9 @@ func main() {
 		// The explicit backend fixture has no revocation stream. Replay accounting
 		// only; do not refresh the heartbeat or reopen the signing epoch.
 		if err := server.Usage.ReplayPending(ctx); err != nil {
+			if ctx.Err() != nil {
+				return
+			}
 			panic(err)
 		}
 	}

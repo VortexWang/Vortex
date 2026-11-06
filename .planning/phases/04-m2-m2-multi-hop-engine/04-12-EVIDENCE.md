@@ -2347,3 +2347,11 @@ locally acknowledged pending row, closes/reopens Hub, replays twice, checks the
 backend payload/digest and zero pending rows, and asserts authority status and
 funds unchanged. CLI race suite PASS (1.966s); Agent process tests compile but
 skip without native binaries; vet and diff checks PASS. Native rerun pending.
+
+Native clean 33618c8: extended 8192-batch process renewal/replay and exact
+three-ledger reconciliation PASS 43.91s; TCP/UDP PASS. Overall suite FAIL 76.020s
+because the short concurrent test stopped the recovered Hub while its startup
+replay query was finishing: CLI panicked on normal context cancellation.
+Preserved artifacts/phase4/process-33618c8. Treat canceled startup replay as
+normal signal shutdown, retaining panic on other errors. Targeted Agent control
+race PASS 5.767s. Full native rerun required after cancellation fix.
