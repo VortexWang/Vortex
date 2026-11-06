@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/tenant_red_test.py",
+  "exitCode": 1,
+  "output": "test_restriction_authority (__main__.TenantPolicy) ... FAIL\n\n======================================================================\nFAIL: test_restriction_authority (__main__.TenantPolicy)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/tenant_red_test.py\", line 14, in test_restriction_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestTenantRestrictionSchema\n2026/11/07 03:17:26 goose: no migrations to run. current version: 1\n    tenant_test.go:14: tenant policy authority table tenants is missing\n    tenant_test.go:14: tenant policy authority table users is missing\n    tenant_test.go:14: tenant policy authority table platform_principals is missing\n    tenant_test.go:14: tenant policy authority table resource_grants is missing\n    tenant_test.go:14: tenant policy authority table restriction_events is missing\n    tenant_test.go:14: tenant policy authority table current_restrictions is missing\n--- FAIL: TestTenantRestrictionSchema (0.02s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.372s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.794s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_restriction_authority",
+  "targetFile": "tools/phase6/tenant_red_test.py",
+  "expected": "real PostgreSQL has tenant policy and restriction authority tables",
+  "actual": "Go target executed and found all six required authority tables missing",
+  "semanticAssessment": "The real Go target ran against migrated PostgreSQL 00001 and failed six planned table-existence assertions. No compilation, discovery or fixture errors occurred; unittest asserts the real command result."
+}
