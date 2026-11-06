@@ -173,12 +173,22 @@ func (s *Store) ReserveRuntimeFundingBlockUpTo(ctx context.Context, r UsageReser
 // same-session tails and reserves replacement funding. The exclusive allocator
 // must join all writers before listing a tail. Failed allocation returns none.
 func (s *Store) ReserveRuntimeFundingBlockReplacingIdle(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation) (UsageReservation, error) {
+	return s.reserveRuntimeFundingRange(ctx, r, scope, minimum, idle, false)
+}
+
+// ReserveAndAdmitRuntimeFundingBlock atomically funds a new block and consumes
+// rate for its first minimum-byte write. Allocation identities cannot be reused
+// for this operation: uncertain commit results must fault the caller.
+func (s *Store) ReserveAndAdmitRuntimeFundingBlock(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation) (UsageReservation, error) {
+	return s.reserveRuntimeFundingRange(ctx, r, scope, minimum, idle, true)
+}
+func (s *Store) reserveRuntimeFundingRange(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation, admit bool) (UsageReservation, error) {
 	if len(idle) > 1 || s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 {
 		return UsageReservation{}, ErrAuthorizationDenied
 	}
 	encoded, _ := json.Marshal(idle)
 	digest := fmt.Sprintf("%x", sha256.Sum256(encoded))
-	bounds := &fundingBlockRange{minimum: minimum, preferred: r.Reserved, idle: idle, idleDigest: digest}
+	bounds := &fundingBlockRange{minimum: minimum, preferred: r.Reserved, idle: idle, idleDigest: digest, admit: admit}
 	id, err := s.reserveRuntimeUsage(ctx, r, scope, true, bounds)
 	if err != nil {
 		return UsageReservation{}, err
@@ -192,6 +202,7 @@ type fundingBlockRange struct {
 	minimum, preferred, allocated uint64
 	idle                          []UsageReservation
 	idleDigest                    string
+	admit                         bool
 }
 
 func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool, bounds *fundingBlockRange) (result string, resultErr error) {
@@ -253,6 +264,9 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	var blockSession, blockDirection sql.NullString
 	err = tx.QueryRowContext(ctx, `SELECT h.authorization_id,b.session_id,b.direction FROM authorization_usage_holds h LEFT JOIN runtime_funding_blocks b ON b.node_id=h.node_id AND b.batch_id=h.batch_id WHERE h.node_id=? AND h.batch_id=?`, scope.NodeID, r.BatchID).Scan(&heldID, &blockSession, &blockDirection)
 	if err == nil {
+		if bounds != nil && bounds.admit {
+			return "", ErrUsageBatchConflict
+		}
 		// Allocation identities never serve as ordinary write admission.
 		if blockSession.Valid != fundingBlock || fundingBlock && (blockSession.String != scope.SessionID || blockDirection.String != r.Direction) {
 			return "", ErrUsageBatchConflict
@@ -379,6 +393,12 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	id, err := reserveAuthorizedUsageWithRateTx(ctx, tx, r, scope, !fundingBlock)
 	if err != nil {
 		return "", err
+	}
+	if bounds != nil && bounds.admit {
+		stage = "first-write-rate"
+		if err := consumeRuntimeRate(ctx, tx, scope, bounds.minimum); err != nil {
+			return "", err
+		}
 	}
 	if fundingBlock {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_funding_blocks(node_id,batch_id,session_id,direction) VALUES(?,?,?,?)`, r.NodeID, r.BatchID, scope.SessionID, r.Direction); err != nil {

@@ -139,7 +139,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 				idleDirection = otherDirection
 			}
 		}
-		funded, err := s.inner.gate.node.Store.ReserveRuntimeFundingBlockReplacingIdle(ctx, r, use, uint64(n), idle)
+		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), idle)
 		if errors.Is(err, store.ErrAuthorizationDenied) {
 			// A UDP response can arrive before the outbound write's commit
 			// callback takes the mutex. Wait for that known in-flight bound
@@ -161,16 +161,18 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		s.blocks[direction] = b
 		s.armIdle(direction, b)
 	}
-	if err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockWrite(ctx, b.reservation, use, uint64(n)); err != nil {
-		if existing && b.inFlight == 0 && errors.Is(err, store.ErrAuthorizationDenied) {
-			if releaseErr := s.release(ctx, b); releaseErr != nil {
-				return nil, nil, s.fail(releaseErr)
+	if existing {
+		if err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockWrite(ctx, b.reservation, use, uint64(n)); err != nil {
+			if existing && b.inFlight == 0 && errors.Is(err, store.ErrAuthorizationDenied) {
+				if releaseErr := s.release(ctx, b); releaseErr != nil {
+					return nil, nil, s.fail(releaseErr)
+				}
+				s.stopIdle(b)
+				delete(s.blocks, direction)
+				return nil, nil, errRefreshFundingBlock
 			}
-			s.stopIdle(b)
-			delete(s.blocks, direction)
-			return nil, nil, errRefreshFundingBlock
+			return nil, nil, s.admissionError(err)
 		}
-		return nil, nil, s.admissionError(err)
 	}
 	s.stopIdle(b)
 	b.inFlight += uint64(n)

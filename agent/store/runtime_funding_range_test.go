@@ -64,3 +64,35 @@ func TestRuntimeFundingRangeAtomicSelectionReplayAndRollback(t *testing.T) {
 		t.Fatalf("final: %+v %v", balance, err)
 	}
 }
+
+func TestRuntimeFundingFirstAdmissionAtomicRate(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := runtimeReservation("first-write", 256<<10)
+	funded, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, r, a.Use, 65536, nil)
+	if err != nil || funded.Reserved != 256<<10 {
+		t.Fatalf("fund and admit: %+v %v", funded, err)
+	}
+	if _, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, r, a.Use, 65536, nil); !errors.Is(err, ErrUsageBatchConflict) {
+		t.Fatalf("admission replay: %v", err)
+	}
+	if err := s.AdmitRuntimeFundingBlockWrite(ctx, funded, a.Use, 1); err == nil {
+		t.Fatal("first write did not consume rate")
+	}
+	next := runtimeReservation("rate-denied", 256<<10)
+	next.Direction = "ingress"
+	if _, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, next, a.Use, 1, []UsageReservation{funded}); err == nil {
+		t.Fatal("rate-denied allocation succeeded")
+	}
+	balance, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || balance.Reserved != 256<<10 || balance.Remaining != (1<<20)-(256<<10) {
+		t.Fatalf("rate denial did not roll back idle replacement: %+v %v", balance, err)
+	}
+	if err := s.SettleUsageReservation(ctx, funded, "returned", 0, nil, 0); err != nil {
+		t.Fatal(err)
+	}
+}

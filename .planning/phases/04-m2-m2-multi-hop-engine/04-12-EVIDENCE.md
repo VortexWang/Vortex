@@ -1348,3 +1348,24 @@ Added bounded-detail failure logging at the Agent block admission boundary
 resets can be attributed without weakening authorization or timeouts. No payload
 or credential is logged. Diagnostic change targeted funding-gate race PASS
 3.281s; vet/diff PASS. Its native reproduction remains the next step.
+
+## Native admission diagnosis and atomic first-write admission
+
+Dedicated ec07301 diagnostic repeat (five ordinary/delayed runs) failed, exit 1,
+157.926s. Boundary logs now confirm right-to-left 1500-byte admissions ending
+at 200.7..202.0ms with context deadline exceeded. These observations identify
+the unchanged total admission budget, not a TLS/frame correctness failure.
+Raw results remain in artifacts/phase4/block-ec07301 on the dedicated host.
+
+ReserveAndAdmitRuntimeFundingBlock now commits new-block funding, joined idle
+tail replacement and shared rate debit for the first write in one transaction.
+Existing-block writes still use fresh transactional admission. New allocation
+already verifies session, current authority, lineage, connection limits and
+held grant; avoiding the immediately repeated admission transaction preserves
+these checks and removes an extra FULL commit. First-admission batch identities
+cannot replay; uncertain commit errors must fault the caller.
+
+Local Agent funding/real-renewal race PASS 32.012s; Store targeted race PASS
+4.335s after adding first-admission replay/rate/rollback assertions. Agent/Hub
+vet and diff checks PASS. Native and complete regression remain outstanding.
+No timeout increase or D-04 lock is claimed.
