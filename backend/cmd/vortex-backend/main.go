@@ -1,0 +1,169 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"vortex/backend/db"
+	"vortex/backend/db/generated"
+	"vortex/backend/internal/control"
+	"vortex/backend/internal/service"
+	"vortex/backend/internal/worker"
+	controlv1 "vortex/contracts/protobuf/v1"
+)
+
+func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+	if err := run(ctx, os.Args[1:]); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func run(ctx context.Context, args []string) error {
+	if len(args) == 0 {
+		return errors.New("command required: migrate, serve, mutate, operation")
+	}
+	url := os.Getenv("PHASE6_DATABASE_URL")
+	if url == "" {
+		return errors.New("PHASE6_DATABASE_URL required")
+	}
+	if args[0] == "migrate" {
+		return db.Migrate(ctx, url)
+	}
+	config, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return err
+	}
+	config.MaxConns = 8
+	config.ConnConfig.ConnectTimeout = 3 * time.Second
+	pool, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	if err = pool.Ping(ctx); err != nil {
+		return err
+	}
+	switch args[0] {
+	case "serve":
+		return serve(ctx, pool, args[1:])
+	case "mutate", "operation":
+		flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
+		actor := flags.String("actor", "", "authenticated local actor UUID")
+		tenant := flags.String("tenant", "", "actor tenant UUID")
+		selected := flags.String("scope", "", "selected tenant UUID")
+		resource := flags.String("target", "", "target UUID")
+		key := flags.String("key", "", "idempotency key")
+		request := flags.String("request", "", "request ID")
+		payload := flags.String("payload", "", "runtime artifact path")
+		revision := flags.Int64("revision", 1, "target revision")
+		expected := flags.Int64("expected", 0, "expected revision")
+		generation := flags.Int64("generation", 1, "fencing generation")
+		id := flags.String("operation", "", "operation UUID")
+		if err = flags.Parse(args[1:]); err != nil {
+			return err
+		}
+		scope, e := service.NewTenantScope(*actor, *tenant, *selected)
+		if e != nil {
+			return e
+		}
+		s := &service.Tracer{Pool: pool}
+		if args[0] == "operation" {
+			op, e := s.Operation(ctx, scope, *id)
+			if e != nil {
+				return e
+			}
+			return json.NewEncoder(os.Stdout).Encode(map[string]any{"operation_id": op.ID, "state": op.State, "revision": op.TargetRevision, "occupation_held": op.OccupationHeld})
+		}
+		raw, e := os.ReadFile(*payload)
+		if e != nil {
+			return e
+		}
+		op, e := s.Mutate(ctx, scope, service.Mutation{ResourceID: *resource, TargetKind: "node", Revision: *revision, ExpectedRevision: *expected, Generation: *generation, IdempotencyKey: *key, RequestID: *request, Payload: raw})
+		if e != nil {
+			return e
+		}
+		return json.NewEncoder(os.Stdout).Encode(map[string]any{"operation_id": op.ID, "state": op.State, "revision": op.TargetRevision})
+	default:
+		return errors.New("unknown command")
+	}
+}
+func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
+	f := flag.NewFlagSet("serve", flag.ContinueOnError)
+	nodeListen := f.String("node-listen", "127.0.0.1:19091", "NodeControl address")
+	hubListen := f.String("hub-listen", "127.0.0.1:19092", "HubControl address")
+	cert := f.String("cert", "", "backend server certificate")
+	key := f.String("key", "", "backend key")
+	nodeCA := f.String("node-ca", "", "node-role client root")
+	hubCA := f.String("hub-ca", "", "Hub-role client root")
+	backendID := f.String("backend-id", "", "backend UUID")
+	hubID := f.String("hub-id", "", "configured Hub UUID")
+	if err := f.Parse(args); err != nil {
+		return err
+	}
+	ctx, cancel := context.WithCancel(parent)
+	defer cancel()
+	observe := func(ctx context.Context, peer, session string, raw []byte) error {
+		return generated.New(pool).InsertControlObservation(ctx, generated.InsertControlObservationParams{HubID: peer, SessionID: session, Payload: raw})
+	}
+	adapter := &control.Adapter{Observe: observe}
+	nodeTLS, err := control.ServerTLS(*cert, *key, *nodeCA)
+	if err != nil {
+		return err
+	}
+	hubTLS, err := control.ServerTLS(*cert, *key, *hubCA)
+	if err != nil {
+		return err
+	}
+	// A shared client root would collapse the role boundary.
+	nodeRoot, err := os.ReadFile(*nodeCA)
+	if err != nil {
+		return err
+	}
+	hubRoot, err := os.ReadFile(*hubCA)
+	if err != nil {
+		return err
+	}
+	if string(nodeRoot) == string(hubRoot) {
+		return errors.New("node and Hub trust roots must differ")
+	}
+	nodes, err := net.Listen("tcp", *nodeListen)
+	if err != nil {
+		return err
+	}
+	defer nodes.Close()
+	hubs, err := net.Listen("tcp", *hubListen)
+	if err != nil {
+		return err
+	}
+	defer hubs.Close()
+	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(nodeTLS)), grpc.MaxRecvMsgSize(control.MaxMessage), grpc.MaxSendMsgSize(control.MaxMessage))
+	hubServer := grpc.NewServer(grpc.Creds(credentials.NewTLS(hubTLS)), grpc.MaxRecvMsgSize(control.MaxMessage), grpc.MaxSendMsgSize(control.MaxMessage))
+	defer server.Stop()
+	defer hubServer.Stop()
+	controlv1.RegisterNodeControlServer(server, adapter)
+	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe})
+	failures := make(chan error, 3)
+	go func() { failures <- server.Serve(nodes) }()
+	go func() { failures <- hubServer.Serve(hubs) }()
+	go func() { failures <- (&worker.Worker{Pool: pool, Adapter: adapter}).Run(ctx) }()
+	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
+	select {
+	case <-parent.Done():
+		return nil
+	case err := <-failures:
+		return err
+	}
+}
