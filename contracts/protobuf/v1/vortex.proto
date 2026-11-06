@@ -4,8 +4,8 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.2.0. Additive extension approved from the 1.1.0 baseline.
-// Approval record binds the exact proposal hash in 05-05-CONTRACT-PROPOSAL.md.
+// CONTRACT 1.3.0. Approval is bound by the exact governance record.
+// Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
 
 service NodeControl {
   // Bidirectional control stream. Business forwarding traffic must never use it.
@@ -23,6 +23,9 @@ message NodeMessage {
     NodeEvent event = 13;
     RegisterRequest register = 14;
     UnknownUsageBatch unknown_usage_batch = 15;
+    LifecycleHello lifecycle_hello = 16;
+    NodeReport node_report = 17;
+    RenewalRequest renewal_request = 18;
   }
 }
 
@@ -35,6 +38,9 @@ message ControlMessage {
     AuthorizationUpdate authorization_update = 12;
     ControlError error = 13;
     UnknownUsageAcknowledgement unknown_usage_ack = 14;
+    HubStatus hub_status = 15;
+    RenewalResult renewal_result = 16;
+    CredentialRevocations credential_revocations = 17;
   }
 }
 
@@ -113,3 +119,154 @@ message NodeEvent { string event_id = 1; string kind = 2; bytes payload = 3; }
 // RuntimeConfigUpdate.payload is UTF-8 JSON validated against the frozen runtime
 // schema before Prepare. See the control contract review for bounds, stable
 // errors, idempotency, fencing, retries and activation-unknown behavior.
+
+// All lifecycle bodies require negotiated capabilities on the current stream.
+message LifecycleHello {
+  string control_version = 1;
+  repeated string capabilities = 2;
+  string session_id = 3;
+  string region_id = 4;
+}
+message ProbeObservation {
+  string target_id = 1;
+  string state = 2;
+  uint64 failures = 3;
+  uint64 successes = 4;
+  string observed_at = 5;
+  uint64 latency_us = 6;
+}
+message NodeReport {
+  string report_id = 1;
+  string build_version = 2;
+  uint64 applied_config_version = 3;
+  string observed_at = 4;
+  repeated ProbeObservation probes = 5;
+  uint64 active_sessions = 6;
+  string drain_state = 7;
+}
+message HubStatus {
+  string hub_id = 1;
+  string region_id = 2;
+  string mode = 3;
+  string session_id = 4;
+  string control_version = 5;
+  repeated string capabilities = 6;
+  uint64 signer_epoch = 7;
+  uint64 recovery_target_sequence = 8;
+  uint64 confirmed_sequence = 9;
+  uint64 pending_tail_records = 10;
+  string backend_heartbeat_at = 11;
+  string autonomy_deadline = 12;
+  uint64 revocation_revision = 13;
+  uint64 restriction_revision = 14;
+}
+message RenewalRequest {
+  string request_id = 1;
+  string node_id = 2;
+  string boot_id = 3;
+  string delegation_id = 4;
+  string source_id = 5;
+  string rule_id = 6;
+  uint64 rule_revision = 7;
+  uint64 path_generation = 8;
+  uint64 fencing_generation = 9;
+  uint64 signer_epoch = 10;
+  uint64 requested_raw_bytes = 11;
+  uint64 requested_ttl_seconds = 12;
+  bytes request_sha256 = 13;
+  string billing_snapshot_id = 14;
+}
+message RenewalResult {
+  string request_id = 1;
+  bytes request_sha256 = 2;
+  string code = 3;
+  bool retryable = 4;
+  AuthorizationUpdate authorization_update = 5;
+}
+message CredentialRevocations {
+  string issuer_id = 1;
+  uint64 revision = 2;
+  repeated string certificate_serials = 3;
+  repeated string node_ids = 4;
+  string effective_at = 5;
+}
+// Phase 5 protocol fixture adapter. Implementing this RPC does not supply the
+// production backend CA/token/tenant/allocation authority assigned to Phase 6.
+service HubControl {
+  rpc Connect(stream HubMessage) returns (stream BackendMessage);
+}
+message HubMessage {
+  string hub_id = 1;
+  string boot_id = 2;
+  uint64 sequence = 3;
+  oneof body {
+    LifecycleHello lifecycle_hello = 10;
+    HubStatus status = 11;
+    LedgerRecord ledger_record = 12;
+  }
+}
+message LedgerRecord {
+  string record_id = 1;
+  uint64 ledger_sequence = 2;
+  bytes payload = 3;
+  bytes payload_sha256 = 4;
+  string kind = 5;
+}
+message BackendMessage {
+  string message_id = 1;
+  uint64 sequence = 2;
+  oneof body {
+    BackendHeartbeat heartbeat = 10;
+    BackendAllocation allocation = 11;
+    CredentialRevocations credential_revocations = 12;
+    LedgerAcknowledgement ledger_ack = 13;
+    ControlError error = 14;
+    AuthorityRestrictions authority_restrictions = 15;
+    EpochHandoffRequest epoch_handoff_request = 16;
+  }
+}
+message BackendHeartbeat {
+  string backend_id = 1;
+  string hub_id = 2;
+  string session_id = 3;
+  string region_id = 4;
+  string observed_at = 5;
+  string autonomy_deadline = 6;
+  uint64 revocation_revision = 7;
+  uint64 restriction_revision = 8;
+}
+message BackendAllocation {
+  string allocation_id = 1;
+  bytes payload = 2; // lifecycle.schema.json #/$defs/backend_allocation
+  bytes payload_sha256 = 3;
+}
+message LedgerAcknowledgement {
+  string record_id = 1;
+  uint64 ledger_sequence = 2;
+  bytes payload_sha256 = 3;
+  string kind = 4;
+}
+
+message DelegationRestriction {
+  string delegation_id = 1;
+  uint64 max_total_issued_raw_bytes = 2;
+  uint64 max_rate_bps = 3;
+  uint64 max_connections = 4;
+}
+message AuthorityRestrictions {
+  string restriction_id = 1;
+  string hub_id = 2;
+  uint64 revision = 3;
+  string effective_at = 4;
+  repeated string revoked_delegation_ids = 5;
+  repeated string revoked_authorization_ids = 6;
+  repeated DelegationRestriction limits = 7;
+}
+message EpochHandoffRequest {
+  string handoff_id = 1;
+  string hub_id = 2;
+  uint64 from_epoch = 3;
+  uint64 to_epoch = 4;
+  string backend_heartbeat_at = 5;
+  uint64 required_restriction_revision = 6;
+}

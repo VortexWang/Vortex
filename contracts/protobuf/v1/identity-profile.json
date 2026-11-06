@@ -1,0 +1,27 @@
+{
+  "profile_version": "1.0.0",
+  "contract": "vortex.control.v1@1.3.0",
+  "node_dns_san": "exactly one canonical lowercase node UUID",
+  "node_uri_san": "exactly one urn:vortex:node:<same canonical node UUID>",
+  "common_name": "same canonical node UUID, informational only; never authorizes without SAN and verified chain",
+  "extended_key_usage": [
+    "clientAuth",
+    "serverAuth"
+  ],
+  "key_usage": [
+    "digitalSignature"
+  ],
+  "tls_version": "1.3 only",
+  "private_key": "node generated; signer matches certificate public key; no transmitted key",
+  "peer_validation": [
+    "trusted role-specific CA and verified chain",
+    "valid conservative time interval",
+    "expected peer identity and current authorized path membership",
+    "current revocation view",
+    "same immutable TLS/HELLO signer snapshot"
+  ],
+  "server_name": "control Hub/backend expected DNS from trusted config; VLink expected peer node UUID as DNS plus canonical URI check",
+  "rotation": "commit validated identity durably, then publish atomically; previous key only bounded overlap, never after NotAfter or revocation",
+  "session_resumption": "disabled until fresh revocation and resumed peer identity checks are implemented and tested",
+  "compatibility": "DNS-only legacy cert remains control-only; reject for lifecycle identity-v1/VLink, reissue through existing local CSR before enabling capability"
+}

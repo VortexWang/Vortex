@@ -34,6 +34,9 @@ type NodeMessage struct {
 	//	*NodeMessage_Event
 	//	*NodeMessage_Register
 	//	*NodeMessage_UnknownUsageBatch
+	//	*NodeMessage_LifecycleHello
+	//	*NodeMessage_NodeReport
+	//	*NodeMessage_RenewalRequest
 	Body          isNodeMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -151,6 +154,33 @@ func (x *NodeMessage) GetUnknownUsageBatch() *UnknownUsageBatch {
 	return nil
 }
 
+func (x *NodeMessage) GetLifecycleHello() *LifecycleHello {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_LifecycleHello); ok {
+			return x.LifecycleHello
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetNodeReport() *NodeReport {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_NodeReport); ok {
+			return x.NodeReport
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetRenewalRequest() *RenewalRequest {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_RenewalRequest); ok {
+			return x.RenewalRequest
+		}
+	}
+	return nil
+}
+
 type isNodeMessage_Body interface {
 	isNodeMessage_Body()
 }
@@ -179,6 +209,18 @@ type NodeMessage_UnknownUsageBatch struct {
 	UnknownUsageBatch *UnknownUsageBatch `protobuf:"bytes,15,opt,name=unknown_usage_batch,json=unknownUsageBatch,proto3,oneof"`
 }
 
+type NodeMessage_LifecycleHello struct {
+	LifecycleHello *LifecycleHello `protobuf:"bytes,16,opt,name=lifecycle_hello,json=lifecycleHello,proto3,oneof"`
+}
+
+type NodeMessage_NodeReport struct {
+	NodeReport *NodeReport `protobuf:"bytes,17,opt,name=node_report,json=nodeReport,proto3,oneof"`
+}
+
+type NodeMessage_RenewalRequest struct {
+	RenewalRequest *RenewalRequest `protobuf:"bytes,18,opt,name=renewal_request,json=renewalRequest,proto3,oneof"`
+}
+
 func (*NodeMessage_Heartbeat) isNodeMessage_Body() {}
 
 func (*NodeMessage_UsageBatch) isNodeMessage_Body() {}
@@ -191,6 +233,12 @@ func (*NodeMessage_Register) isNodeMessage_Body() {}
 
 func (*NodeMessage_UnknownUsageBatch) isNodeMessage_Body() {}
 
+func (*NodeMessage_LifecycleHello) isNodeMessage_Body() {}
+
+func (*NodeMessage_NodeReport) isNodeMessage_Body() {}
+
+func (*NodeMessage_RenewalRequest) isNodeMessage_Body() {}
+
 type ControlMessage struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	MessageId string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
@@ -202,6 +250,9 @@ type ControlMessage struct {
 	//	*ControlMessage_AuthorizationUpdate
 	//	*ControlMessage_Error
 	//	*ControlMessage_UnknownUsageAck
+	//	*ControlMessage_HubStatus
+	//	*ControlMessage_RenewalResult
+	//	*ControlMessage_CredentialRevocations
 	Body          isControlMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -303,6 +354,33 @@ func (x *ControlMessage) GetUnknownUsageAck() *UnknownUsageAcknowledgement {
 	return nil
 }
 
+func (x *ControlMessage) GetHubStatus() *HubStatus {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_HubStatus); ok {
+			return x.HubStatus
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetRenewalResult() *RenewalResult {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_RenewalResult); ok {
+			return x.RenewalResult
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetCredentialRevocations() *CredentialRevocations {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_CredentialRevocations); ok {
+			return x.CredentialRevocations
+		}
+	}
+	return nil
+}
+
 type isControlMessage_Body interface {
 	isControlMessage_Body()
 }
@@ -327,6 +405,18 @@ type ControlMessage_UnknownUsageAck struct {
 	UnknownUsageAck *UnknownUsageAcknowledgement `protobuf:"bytes,14,opt,name=unknown_usage_ack,json=unknownUsageAck,proto3,oneof"`
 }
 
+type ControlMessage_HubStatus struct {
+	HubStatus *HubStatus `protobuf:"bytes,15,opt,name=hub_status,json=hubStatus,proto3,oneof"`
+}
+
+type ControlMessage_RenewalResult struct {
+	RenewalResult *RenewalResult `protobuf:"bytes,16,opt,name=renewal_result,json=renewalResult,proto3,oneof"`
+}
+
+type ControlMessage_CredentialRevocations struct {
+	CredentialRevocations *CredentialRevocations `protobuf:"bytes,17,opt,name=credential_revocations,json=credentialRevocations,proto3,oneof"`
+}
+
 func (*ControlMessage_ConfigUpdate) isControlMessage_Body() {}
 
 func (*ControlMessage_UsageAck) isControlMessage_Body() {}
@@ -336,6 +426,12 @@ func (*ControlMessage_AuthorizationUpdate) isControlMessage_Body() {}
 func (*ControlMessage_Error) isControlMessage_Body() {}
 
 func (*ControlMessage_UnknownUsageAck) isControlMessage_Body() {}
+
+func (*ControlMessage_HubStatus) isControlMessage_Body() {}
+
+func (*ControlMessage_RenewalResult) isControlMessage_Body() {}
+
+func (*ControlMessage_CredentialRevocations) isControlMessage_Body() {}
 
 type RegisterRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -1181,11 +1277,1552 @@ func (x *NodeEvent) GetPayload() []byte {
 	return nil
 }
 
+// All lifecycle bodies require negotiated capabilities on the current stream.
+type LifecycleHello struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ControlVersion string                 `protobuf:"bytes,1,opt,name=control_version,json=controlVersion,proto3" json:"control_version,omitempty"`
+	Capabilities   []string               `protobuf:"bytes,2,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	SessionId      string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId       string                 `protobuf:"bytes,4,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *LifecycleHello) Reset() {
+	*x = LifecycleHello{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LifecycleHello) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LifecycleHello) ProtoMessage() {}
+
+func (x *LifecycleHello) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LifecycleHello.ProtoReflect.Descriptor instead.
+func (*LifecycleHello) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *LifecycleHello) GetControlVersion() string {
+	if x != nil {
+		return x.ControlVersion
+	}
+	return ""
+}
+
+func (x *LifecycleHello) GetCapabilities() []string {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
+}
+
+func (x *LifecycleHello) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *LifecycleHello) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+type ProbeObservation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TargetId      string                 `protobuf:"bytes,1,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Failures      uint64                 `protobuf:"varint,3,opt,name=failures,proto3" json:"failures,omitempty"`
+	Successes     uint64                 `protobuf:"varint,4,opt,name=successes,proto3" json:"successes,omitempty"`
+	ObservedAt    string                 `protobuf:"bytes,5,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	LatencyUs     uint64                 `protobuf:"varint,6,opt,name=latency_us,json=latencyUs,proto3" json:"latency_us,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProbeObservation) Reset() {
+	*x = ProbeObservation{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProbeObservation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProbeObservation) ProtoMessage() {}
+
+func (x *ProbeObservation) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProbeObservation.ProtoReflect.Descriptor instead.
+func (*ProbeObservation) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ProbeObservation) GetTargetId() string {
+	if x != nil {
+		return x.TargetId
+	}
+	return ""
+}
+
+func (x *ProbeObservation) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ProbeObservation) GetFailures() uint64 {
+	if x != nil {
+		return x.Failures
+	}
+	return 0
+}
+
+func (x *ProbeObservation) GetSuccesses() uint64 {
+	if x != nil {
+		return x.Successes
+	}
+	return 0
+}
+
+func (x *ProbeObservation) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *ProbeObservation) GetLatencyUs() uint64 {
+	if x != nil {
+		return x.LatencyUs
+	}
+	return 0
+}
+
+type NodeReport struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	ReportId             string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	BuildVersion         string                 `protobuf:"bytes,2,opt,name=build_version,json=buildVersion,proto3" json:"build_version,omitempty"`
+	AppliedConfigVersion uint64                 `protobuf:"varint,3,opt,name=applied_config_version,json=appliedConfigVersion,proto3" json:"applied_config_version,omitempty"`
+	ObservedAt           string                 `protobuf:"bytes,4,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Probes               []*ProbeObservation    `protobuf:"bytes,5,rep,name=probes,proto3" json:"probes,omitempty"`
+	ActiveSessions       uint64                 `protobuf:"varint,6,opt,name=active_sessions,json=activeSessions,proto3" json:"active_sessions,omitempty"`
+	DrainState           string                 `protobuf:"bytes,7,opt,name=drain_state,json=drainState,proto3" json:"drain_state,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *NodeReport) Reset() {
+	*x = NodeReport{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeReport) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeReport) ProtoMessage() {}
+
+func (x *NodeReport) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeReport.ProtoReflect.Descriptor instead.
+func (*NodeReport) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *NodeReport) GetReportId() string {
+	if x != nil {
+		return x.ReportId
+	}
+	return ""
+}
+
+func (x *NodeReport) GetBuildVersion() string {
+	if x != nil {
+		return x.BuildVersion
+	}
+	return ""
+}
+
+func (x *NodeReport) GetAppliedConfigVersion() uint64 {
+	if x != nil {
+		return x.AppliedConfigVersion
+	}
+	return 0
+}
+
+func (x *NodeReport) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *NodeReport) GetProbes() []*ProbeObservation {
+	if x != nil {
+		return x.Probes
+	}
+	return nil
+}
+
+func (x *NodeReport) GetActiveSessions() uint64 {
+	if x != nil {
+		return x.ActiveSessions
+	}
+	return 0
+}
+
+func (x *NodeReport) GetDrainState() string {
+	if x != nil {
+		return x.DrainState
+	}
+	return ""
+}
+
+type HubStatus struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	HubId                  string                 `protobuf:"bytes,1,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	RegionId               string                 `protobuf:"bytes,2,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	Mode                   string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
+	SessionId              string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	ControlVersion         string                 `protobuf:"bytes,5,opt,name=control_version,json=controlVersion,proto3" json:"control_version,omitempty"`
+	Capabilities           []string               `protobuf:"bytes,6,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	SignerEpoch            uint64                 `protobuf:"varint,7,opt,name=signer_epoch,json=signerEpoch,proto3" json:"signer_epoch,omitempty"`
+	RecoveryTargetSequence uint64                 `protobuf:"varint,8,opt,name=recovery_target_sequence,json=recoveryTargetSequence,proto3" json:"recovery_target_sequence,omitempty"`
+	ConfirmedSequence      uint64                 `protobuf:"varint,9,opt,name=confirmed_sequence,json=confirmedSequence,proto3" json:"confirmed_sequence,omitempty"`
+	PendingTailRecords     uint64                 `protobuf:"varint,10,opt,name=pending_tail_records,json=pendingTailRecords,proto3" json:"pending_tail_records,omitempty"`
+	BackendHeartbeatAt     string                 `protobuf:"bytes,11,opt,name=backend_heartbeat_at,json=backendHeartbeatAt,proto3" json:"backend_heartbeat_at,omitempty"`
+	AutonomyDeadline       string                 `protobuf:"bytes,12,opt,name=autonomy_deadline,json=autonomyDeadline,proto3" json:"autonomy_deadline,omitempty"`
+	RevocationRevision     uint64                 `protobuf:"varint,13,opt,name=revocation_revision,json=revocationRevision,proto3" json:"revocation_revision,omitempty"`
+	RestrictionRevision    uint64                 `protobuf:"varint,14,opt,name=restriction_revision,json=restrictionRevision,proto3" json:"restriction_revision,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *HubStatus) Reset() {
+	*x = HubStatus{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubStatus) ProtoMessage() {}
+
+func (x *HubStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubStatus.ProtoReflect.Descriptor instead.
+func (*HubStatus) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *HubStatus) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubStatus) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *HubStatus) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *HubStatus) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *HubStatus) GetControlVersion() string {
+	if x != nil {
+		return x.ControlVersion
+	}
+	return ""
+}
+
+func (x *HubStatus) GetCapabilities() []string {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
+}
+
+func (x *HubStatus) GetSignerEpoch() uint64 {
+	if x != nil {
+		return x.SignerEpoch
+	}
+	return 0
+}
+
+func (x *HubStatus) GetRecoveryTargetSequence() uint64 {
+	if x != nil {
+		return x.RecoveryTargetSequence
+	}
+	return 0
+}
+
+func (x *HubStatus) GetConfirmedSequence() uint64 {
+	if x != nil {
+		return x.ConfirmedSequence
+	}
+	return 0
+}
+
+func (x *HubStatus) GetPendingTailRecords() uint64 {
+	if x != nil {
+		return x.PendingTailRecords
+	}
+	return 0
+}
+
+func (x *HubStatus) GetBackendHeartbeatAt() string {
+	if x != nil {
+		return x.BackendHeartbeatAt
+	}
+	return ""
+}
+
+func (x *HubStatus) GetAutonomyDeadline() string {
+	if x != nil {
+		return x.AutonomyDeadline
+	}
+	return ""
+}
+
+func (x *HubStatus) GetRevocationRevision() uint64 {
+	if x != nil {
+		return x.RevocationRevision
+	}
+	return 0
+}
+
+func (x *HubStatus) GetRestrictionRevision() uint64 {
+	if x != nil {
+		return x.RestrictionRevision
+	}
+	return 0
+}
+
+type RenewalRequest struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	RequestId           string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	NodeId              string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	BootId              string                 `protobuf:"bytes,3,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	DelegationId        string                 `protobuf:"bytes,4,opt,name=delegation_id,json=delegationId,proto3" json:"delegation_id,omitempty"`
+	SourceId            string                 `protobuf:"bytes,5,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`
+	RuleId              string                 `protobuf:"bytes,6,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`
+	RuleRevision        uint64                 `protobuf:"varint,7,opt,name=rule_revision,json=ruleRevision,proto3" json:"rule_revision,omitempty"`
+	PathGeneration      uint64                 `protobuf:"varint,8,opt,name=path_generation,json=pathGeneration,proto3" json:"path_generation,omitempty"`
+	FencingGeneration   uint64                 `protobuf:"varint,9,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
+	SignerEpoch         uint64                 `protobuf:"varint,10,opt,name=signer_epoch,json=signerEpoch,proto3" json:"signer_epoch,omitempty"`
+	RequestedRawBytes   uint64                 `protobuf:"varint,11,opt,name=requested_raw_bytes,json=requestedRawBytes,proto3" json:"requested_raw_bytes,omitempty"`
+	RequestedTtlSeconds uint64                 `protobuf:"varint,12,opt,name=requested_ttl_seconds,json=requestedTtlSeconds,proto3" json:"requested_ttl_seconds,omitempty"`
+	RequestSha256       []byte                 `protobuf:"bytes,13,opt,name=request_sha256,json=requestSha256,proto3" json:"request_sha256,omitempty"`
+	BillingSnapshotId   string                 `protobuf:"bytes,14,opt,name=billing_snapshot_id,json=billingSnapshotId,proto3" json:"billing_snapshot_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *RenewalRequest) Reset() {
+	*x = RenewalRequest{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenewalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenewalRequest) ProtoMessage() {}
+
+func (x *RenewalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenewalRequest.ProtoReflect.Descriptor instead.
+func (*RenewalRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *RenewalRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetDelegationId() string {
+	if x != nil {
+		return x.DelegationId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetSourceId() string {
+	if x != nil {
+		return x.SourceId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetRuleId() string {
+	if x != nil {
+		return x.RuleId
+	}
+	return ""
+}
+
+func (x *RenewalRequest) GetRuleRevision() uint64 {
+	if x != nil {
+		return x.RuleRevision
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetPathGeneration() uint64 {
+	if x != nil {
+		return x.PathGeneration
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetFencingGeneration() uint64 {
+	if x != nil {
+		return x.FencingGeneration
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetSignerEpoch() uint64 {
+	if x != nil {
+		return x.SignerEpoch
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetRequestedRawBytes() uint64 {
+	if x != nil {
+		return x.RequestedRawBytes
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetRequestedTtlSeconds() uint64 {
+	if x != nil {
+		return x.RequestedTtlSeconds
+	}
+	return 0
+}
+
+func (x *RenewalRequest) GetRequestSha256() []byte {
+	if x != nil {
+		return x.RequestSha256
+	}
+	return nil
+}
+
+func (x *RenewalRequest) GetBillingSnapshotId() string {
+	if x != nil {
+		return x.BillingSnapshotId
+	}
+	return ""
+}
+
+type RenewalResult struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	RequestId           string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	RequestSha256       []byte                 `protobuf:"bytes,2,opt,name=request_sha256,json=requestSha256,proto3" json:"request_sha256,omitempty"`
+	Code                string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	Retryable           bool                   `protobuf:"varint,4,opt,name=retryable,proto3" json:"retryable,omitempty"`
+	AuthorizationUpdate *AuthorizationUpdate   `protobuf:"bytes,5,opt,name=authorization_update,json=authorizationUpdate,proto3" json:"authorization_update,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *RenewalResult) Reset() {
+	*x = RenewalResult{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenewalResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenewalResult) ProtoMessage() {}
+
+func (x *RenewalResult) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenewalResult.ProtoReflect.Descriptor instead.
+func (*RenewalResult) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *RenewalResult) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *RenewalResult) GetRequestSha256() []byte {
+	if x != nil {
+		return x.RequestSha256
+	}
+	return nil
+}
+
+func (x *RenewalResult) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *RenewalResult) GetRetryable() bool {
+	if x != nil {
+		return x.Retryable
+	}
+	return false
+}
+
+func (x *RenewalResult) GetAuthorizationUpdate() *AuthorizationUpdate {
+	if x != nil {
+		return x.AuthorizationUpdate
+	}
+	return nil
+}
+
+type CredentialRevocations struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	IssuerId           string                 `protobuf:"bytes,1,opt,name=issuer_id,json=issuerId,proto3" json:"issuer_id,omitempty"`
+	Revision           uint64                 `protobuf:"varint,2,opt,name=revision,proto3" json:"revision,omitempty"`
+	CertificateSerials []string               `protobuf:"bytes,3,rep,name=certificate_serials,json=certificateSerials,proto3" json:"certificate_serials,omitempty"`
+	NodeIds            []string               `protobuf:"bytes,4,rep,name=node_ids,json=nodeIds,proto3" json:"node_ids,omitempty"`
+	EffectiveAt        string                 `protobuf:"bytes,5,opt,name=effective_at,json=effectiveAt,proto3" json:"effective_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *CredentialRevocations) Reset() {
+	*x = CredentialRevocations{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CredentialRevocations) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CredentialRevocations) ProtoMessage() {}
+
+func (x *CredentialRevocations) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CredentialRevocations.ProtoReflect.Descriptor instead.
+func (*CredentialRevocations) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *CredentialRevocations) GetIssuerId() string {
+	if x != nil {
+		return x.IssuerId
+	}
+	return ""
+}
+
+func (x *CredentialRevocations) GetRevision() uint64 {
+	if x != nil {
+		return x.Revision
+	}
+	return 0
+}
+
+func (x *CredentialRevocations) GetCertificateSerials() []string {
+	if x != nil {
+		return x.CertificateSerials
+	}
+	return nil
+}
+
+func (x *CredentialRevocations) GetNodeIds() []string {
+	if x != nil {
+		return x.NodeIds
+	}
+	return nil
+}
+
+func (x *CredentialRevocations) GetEffectiveAt() string {
+	if x != nil {
+		return x.EffectiveAt
+	}
+	return ""
+}
+
+type HubMessage struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	HubId    string                 `protobuf:"bytes,1,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	BootId   string                 `protobuf:"bytes,2,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	Sequence uint64                 `protobuf:"varint,3,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	// Types that are valid to be assigned to Body:
+	//
+	//	*HubMessage_LifecycleHello
+	//	*HubMessage_Status
+	//	*HubMessage_LedgerRecord
+	Body          isHubMessage_Body `protobuf_oneof:"body"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubMessage) Reset() {
+	*x = HubMessage{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubMessage) ProtoMessage() {}
+
+func (x *HubMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubMessage.ProtoReflect.Descriptor instead.
+func (*HubMessage) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *HubMessage) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubMessage) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *HubMessage) GetSequence() uint64 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
+
+func (x *HubMessage) GetBody() isHubMessage_Body {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+func (x *HubMessage) GetLifecycleHello() *LifecycleHello {
+	if x != nil {
+		if x, ok := x.Body.(*HubMessage_LifecycleHello); ok {
+			return x.LifecycleHello
+		}
+	}
+	return nil
+}
+
+func (x *HubMessage) GetStatus() *HubStatus {
+	if x != nil {
+		if x, ok := x.Body.(*HubMessage_Status); ok {
+			return x.Status
+		}
+	}
+	return nil
+}
+
+func (x *HubMessage) GetLedgerRecord() *LedgerRecord {
+	if x != nil {
+		if x, ok := x.Body.(*HubMessage_LedgerRecord); ok {
+			return x.LedgerRecord
+		}
+	}
+	return nil
+}
+
+type isHubMessage_Body interface {
+	isHubMessage_Body()
+}
+
+type HubMessage_LifecycleHello struct {
+	LifecycleHello *LifecycleHello `protobuf:"bytes,10,opt,name=lifecycle_hello,json=lifecycleHello,proto3,oneof"`
+}
+
+type HubMessage_Status struct {
+	Status *HubStatus `protobuf:"bytes,11,opt,name=status,proto3,oneof"`
+}
+
+type HubMessage_LedgerRecord struct {
+	LedgerRecord *LedgerRecord `protobuf:"bytes,12,opt,name=ledger_record,json=ledgerRecord,proto3,oneof"`
+}
+
+func (*HubMessage_LifecycleHello) isHubMessage_Body() {}
+
+func (*HubMessage_Status) isHubMessage_Body() {}
+
+func (*HubMessage_LedgerRecord) isHubMessage_Body() {}
+
+type LedgerRecord struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RecordId       string                 `protobuf:"bytes,1,opt,name=record_id,json=recordId,proto3" json:"record_id,omitempty"`
+	LedgerSequence uint64                 `protobuf:"varint,2,opt,name=ledger_sequence,json=ledgerSequence,proto3" json:"ledger_sequence,omitempty"`
+	Payload        []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256  []byte                 `protobuf:"bytes,4,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	Kind           string                 `protobuf:"bytes,5,opt,name=kind,proto3" json:"kind,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *LedgerRecord) Reset() {
+	*x = LedgerRecord{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LedgerRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LedgerRecord) ProtoMessage() {}
+
+func (x *LedgerRecord) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LedgerRecord.ProtoReflect.Descriptor instead.
+func (*LedgerRecord) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *LedgerRecord) GetRecordId() string {
+	if x != nil {
+		return x.RecordId
+	}
+	return ""
+}
+
+func (x *LedgerRecord) GetLedgerSequence() uint64 {
+	if x != nil {
+		return x.LedgerSequence
+	}
+	return 0
+}
+
+func (x *LedgerRecord) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *LedgerRecord) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+func (x *LedgerRecord) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+type BackendMessage struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	MessageId string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	Sequence  uint64                 `protobuf:"varint,2,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	// Types that are valid to be assigned to Body:
+	//
+	//	*BackendMessage_Heartbeat
+	//	*BackendMessage_Allocation
+	//	*BackendMessage_CredentialRevocations
+	//	*BackendMessage_LedgerAck
+	//	*BackendMessage_Error
+	//	*BackendMessage_AuthorityRestrictions
+	//	*BackendMessage_EpochHandoffRequest
+	Body          isBackendMessage_Body `protobuf_oneof:"body"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BackendMessage) Reset() {
+	*x = BackendMessage{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackendMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackendMessage) ProtoMessage() {}
+
+func (x *BackendMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackendMessage.ProtoReflect.Descriptor instead.
+func (*BackendMessage) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *BackendMessage) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+func (x *BackendMessage) GetSequence() uint64 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
+
+func (x *BackendMessage) GetBody() isBackendMessage_Body {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetHeartbeat() *BackendHeartbeat {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_Heartbeat); ok {
+			return x.Heartbeat
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetAllocation() *BackendAllocation {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_Allocation); ok {
+			return x.Allocation
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetCredentialRevocations() *CredentialRevocations {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_CredentialRevocations); ok {
+			return x.CredentialRevocations
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetLedgerAck() *LedgerAcknowledgement {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_LedgerAck); ok {
+			return x.LedgerAck
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetError() *ControlError {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetAuthorityRestrictions() *AuthorityRestrictions {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_AuthorityRestrictions); ok {
+			return x.AuthorityRestrictions
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetEpochHandoffRequest() *EpochHandoffRequest {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_EpochHandoffRequest); ok {
+			return x.EpochHandoffRequest
+		}
+	}
+	return nil
+}
+
+type isBackendMessage_Body interface {
+	isBackendMessage_Body()
+}
+
+type BackendMessage_Heartbeat struct {
+	Heartbeat *BackendHeartbeat `protobuf:"bytes,10,opt,name=heartbeat,proto3,oneof"`
+}
+
+type BackendMessage_Allocation struct {
+	Allocation *BackendAllocation `protobuf:"bytes,11,opt,name=allocation,proto3,oneof"`
+}
+
+type BackendMessage_CredentialRevocations struct {
+	CredentialRevocations *CredentialRevocations `protobuf:"bytes,12,opt,name=credential_revocations,json=credentialRevocations,proto3,oneof"`
+}
+
+type BackendMessage_LedgerAck struct {
+	LedgerAck *LedgerAcknowledgement `protobuf:"bytes,13,opt,name=ledger_ack,json=ledgerAck,proto3,oneof"`
+}
+
+type BackendMessage_Error struct {
+	Error *ControlError `protobuf:"bytes,14,opt,name=error,proto3,oneof"`
+}
+
+type BackendMessage_AuthorityRestrictions struct {
+	AuthorityRestrictions *AuthorityRestrictions `protobuf:"bytes,15,opt,name=authority_restrictions,json=authorityRestrictions,proto3,oneof"`
+}
+
+type BackendMessage_EpochHandoffRequest struct {
+	EpochHandoffRequest *EpochHandoffRequest `protobuf:"bytes,16,opt,name=epoch_handoff_request,json=epochHandoffRequest,proto3,oneof"`
+}
+
+func (*BackendMessage_Heartbeat) isBackendMessage_Body() {}
+
+func (*BackendMessage_Allocation) isBackendMessage_Body() {}
+
+func (*BackendMessage_CredentialRevocations) isBackendMessage_Body() {}
+
+func (*BackendMessage_LedgerAck) isBackendMessage_Body() {}
+
+func (*BackendMessage_Error) isBackendMessage_Body() {}
+
+func (*BackendMessage_AuthorityRestrictions) isBackendMessage_Body() {}
+
+func (*BackendMessage_EpochHandoffRequest) isBackendMessage_Body() {}
+
+type BackendHeartbeat struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	BackendId           string                 `protobuf:"bytes,1,opt,name=backend_id,json=backendId,proto3" json:"backend_id,omitempty"`
+	HubId               string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	SessionId           string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId            string                 `protobuf:"bytes,4,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	ObservedAt          string                 `protobuf:"bytes,5,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	AutonomyDeadline    string                 `protobuf:"bytes,6,opt,name=autonomy_deadline,json=autonomyDeadline,proto3" json:"autonomy_deadline,omitempty"`
+	RevocationRevision  uint64                 `protobuf:"varint,7,opt,name=revocation_revision,json=revocationRevision,proto3" json:"revocation_revision,omitempty"`
+	RestrictionRevision uint64                 `protobuf:"varint,8,opt,name=restriction_revision,json=restrictionRevision,proto3" json:"restriction_revision,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *BackendHeartbeat) Reset() {
+	*x = BackendHeartbeat{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackendHeartbeat) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackendHeartbeat) ProtoMessage() {}
+
+func (x *BackendHeartbeat) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackendHeartbeat.ProtoReflect.Descriptor instead.
+func (*BackendHeartbeat) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *BackendHeartbeat) GetBackendId() string {
+	if x != nil {
+		return x.BackendId
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetAutonomyDeadline() string {
+	if x != nil {
+		return x.AutonomyDeadline
+	}
+	return ""
+}
+
+func (x *BackendHeartbeat) GetRevocationRevision() uint64 {
+	if x != nil {
+		return x.RevocationRevision
+	}
+	return 0
+}
+
+func (x *BackendHeartbeat) GetRestrictionRevision() uint64 {
+	if x != nil {
+		return x.RestrictionRevision
+	}
+	return 0
+}
+
+type BackendAllocation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AllocationId  string                 `protobuf:"bytes,1,opt,name=allocation_id,json=allocationId,proto3" json:"allocation_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"` // lifecycle.schema.json #/$defs/backend_allocation
+	PayloadSha256 []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BackendAllocation) Reset() {
+	*x = BackendAllocation{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackendAllocation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackendAllocation) ProtoMessage() {}
+
+func (x *BackendAllocation) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackendAllocation.ProtoReflect.Descriptor instead.
+func (*BackendAllocation) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *BackendAllocation) GetAllocationId() string {
+	if x != nil {
+		return x.AllocationId
+	}
+	return ""
+}
+
+func (x *BackendAllocation) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *BackendAllocation) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type LedgerAcknowledgement struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RecordId       string                 `protobuf:"bytes,1,opt,name=record_id,json=recordId,proto3" json:"record_id,omitempty"`
+	LedgerSequence uint64                 `protobuf:"varint,2,opt,name=ledger_sequence,json=ledgerSequence,proto3" json:"ledger_sequence,omitempty"`
+	PayloadSha256  []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	Kind           string                 `protobuf:"bytes,4,opt,name=kind,proto3" json:"kind,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *LedgerAcknowledgement) Reset() {
+	*x = LedgerAcknowledgement{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LedgerAcknowledgement) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LedgerAcknowledgement) ProtoMessage() {}
+
+func (x *LedgerAcknowledgement) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LedgerAcknowledgement.ProtoReflect.Descriptor instead.
+func (*LedgerAcknowledgement) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *LedgerAcknowledgement) GetRecordId() string {
+	if x != nil {
+		return x.RecordId
+	}
+	return ""
+}
+
+func (x *LedgerAcknowledgement) GetLedgerSequence() uint64 {
+	if x != nil {
+		return x.LedgerSequence
+	}
+	return 0
+}
+
+func (x *LedgerAcknowledgement) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+func (x *LedgerAcknowledgement) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+type DelegationRestriction struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	DelegationId           string                 `protobuf:"bytes,1,opt,name=delegation_id,json=delegationId,proto3" json:"delegation_id,omitempty"`
+	MaxTotalIssuedRawBytes uint64                 `protobuf:"varint,2,opt,name=max_total_issued_raw_bytes,json=maxTotalIssuedRawBytes,proto3" json:"max_total_issued_raw_bytes,omitempty"`
+	MaxRateBps             uint64                 `protobuf:"varint,3,opt,name=max_rate_bps,json=maxRateBps,proto3" json:"max_rate_bps,omitempty"`
+	MaxConnections         uint64                 `protobuf:"varint,4,opt,name=max_connections,json=maxConnections,proto3" json:"max_connections,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DelegationRestriction) Reset() {
+	*x = DelegationRestriction{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DelegationRestriction) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DelegationRestriction) ProtoMessage() {}
+
+func (x *DelegationRestriction) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DelegationRestriction.ProtoReflect.Descriptor instead.
+func (*DelegationRestriction) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *DelegationRestriction) GetDelegationId() string {
+	if x != nil {
+		return x.DelegationId
+	}
+	return ""
+}
+
+func (x *DelegationRestriction) GetMaxTotalIssuedRawBytes() uint64 {
+	if x != nil {
+		return x.MaxTotalIssuedRawBytes
+	}
+	return 0
+}
+
+func (x *DelegationRestriction) GetMaxRateBps() uint64 {
+	if x != nil {
+		return x.MaxRateBps
+	}
+	return 0
+}
+
+func (x *DelegationRestriction) GetMaxConnections() uint64 {
+	if x != nil {
+		return x.MaxConnections
+	}
+	return 0
+}
+
+type AuthorityRestrictions struct {
+	state                   protoimpl.MessageState   `protogen:"open.v1"`
+	RestrictionId           string                   `protobuf:"bytes,1,opt,name=restriction_id,json=restrictionId,proto3" json:"restriction_id,omitempty"`
+	HubId                   string                   `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	Revision                uint64                   `protobuf:"varint,3,opt,name=revision,proto3" json:"revision,omitempty"`
+	EffectiveAt             string                   `protobuf:"bytes,4,opt,name=effective_at,json=effectiveAt,proto3" json:"effective_at,omitempty"`
+	RevokedDelegationIds    []string                 `protobuf:"bytes,5,rep,name=revoked_delegation_ids,json=revokedDelegationIds,proto3" json:"revoked_delegation_ids,omitempty"`
+	RevokedAuthorizationIds []string                 `protobuf:"bytes,6,rep,name=revoked_authorization_ids,json=revokedAuthorizationIds,proto3" json:"revoked_authorization_ids,omitempty"`
+	Limits                  []*DelegationRestriction `protobuf:"bytes,7,rep,name=limits,proto3" json:"limits,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *AuthorityRestrictions) Reset() {
+	*x = AuthorityRestrictions{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthorityRestrictions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthorityRestrictions) ProtoMessage() {}
+
+func (x *AuthorityRestrictions) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthorityRestrictions.ProtoReflect.Descriptor instead.
+func (*AuthorityRestrictions) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *AuthorityRestrictions) GetRestrictionId() string {
+	if x != nil {
+		return x.RestrictionId
+	}
+	return ""
+}
+
+func (x *AuthorityRestrictions) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *AuthorityRestrictions) GetRevision() uint64 {
+	if x != nil {
+		return x.Revision
+	}
+	return 0
+}
+
+func (x *AuthorityRestrictions) GetEffectiveAt() string {
+	if x != nil {
+		return x.EffectiveAt
+	}
+	return ""
+}
+
+func (x *AuthorityRestrictions) GetRevokedDelegationIds() []string {
+	if x != nil {
+		return x.RevokedDelegationIds
+	}
+	return nil
+}
+
+func (x *AuthorityRestrictions) GetRevokedAuthorizationIds() []string {
+	if x != nil {
+		return x.RevokedAuthorizationIds
+	}
+	return nil
+}
+
+func (x *AuthorityRestrictions) GetLimits() []*DelegationRestriction {
+	if x != nil {
+		return x.Limits
+	}
+	return nil
+}
+
+type EpochHandoffRequest struct {
+	state                       protoimpl.MessageState `protogen:"open.v1"`
+	HandoffId                   string                 `protobuf:"bytes,1,opt,name=handoff_id,json=handoffId,proto3" json:"handoff_id,omitempty"`
+	HubId                       string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	FromEpoch                   uint64                 `protobuf:"varint,3,opt,name=from_epoch,json=fromEpoch,proto3" json:"from_epoch,omitempty"`
+	ToEpoch                     uint64                 `protobuf:"varint,4,opt,name=to_epoch,json=toEpoch,proto3" json:"to_epoch,omitempty"`
+	BackendHeartbeatAt          string                 `protobuf:"bytes,5,opt,name=backend_heartbeat_at,json=backendHeartbeatAt,proto3" json:"backend_heartbeat_at,omitempty"`
+	RequiredRestrictionRevision uint64                 `protobuf:"varint,6,opt,name=required_restriction_revision,json=requiredRestrictionRevision,proto3" json:"required_restriction_revision,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
+}
+
+func (x *EpochHandoffRequest) Reset() {
+	*x = EpochHandoffRequest{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EpochHandoffRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EpochHandoffRequest) ProtoMessage() {}
+
+func (x *EpochHandoffRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EpochHandoffRequest.ProtoReflect.Descriptor instead.
+func (*EpochHandoffRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *EpochHandoffRequest) GetHandoffId() string {
+	if x != nil {
+		return x.HandoffId
+	}
+	return ""
+}
+
+func (x *EpochHandoffRequest) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *EpochHandoffRequest) GetFromEpoch() uint64 {
+	if x != nil {
+		return x.FromEpoch
+	}
+	return 0
+}
+
+func (x *EpochHandoffRequest) GetToEpoch() uint64 {
+	if x != nil {
+		return x.ToEpoch
+	}
+	return 0
+}
+
+func (x *EpochHandoffRequest) GetBackendHeartbeatAt() string {
+	if x != nil {
+		return x.BackendHeartbeatAt
+	}
+	return ""
+}
+
+func (x *EpochHandoffRequest) GetRequiredRestrictionRevision() uint64 {
+	if x != nil {
+		return x.RequiredRestrictionRevision
+	}
+	return 0
+}
+
 var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
-	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xf8\x03\n" +
+	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xd6\x05\n" +
 	"\vNodeMessage\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x17\n" +
 	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
@@ -1197,8 +2834,12 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\fapply_result\x18\f \x01(\v2\x1e.vortex.control.v1.ApplyResultH\x00R\vapplyResult\x124\n" +
 	"\x05event\x18\r \x01(\v2\x1c.vortex.control.v1.NodeEventH\x00R\x05event\x12@\n" +
 	"\bregister\x18\x0e \x01(\v2\".vortex.control.v1.RegisterRequestH\x00R\bregister\x12V\n" +
-	"\x13unknown_usage_batch\x18\x0f \x01(\v2$.vortex.control.v1.UnknownUsageBatchH\x00R\x11unknownUsageBatchB\x06\n" +
-	"\x04body\"\xde\x03\n" +
+	"\x13unknown_usage_batch\x18\x0f \x01(\v2$.vortex.control.v1.UnknownUsageBatchH\x00R\x11unknownUsageBatch\x12L\n" +
+	"\x0flifecycle_hello\x18\x10 \x01(\v2!.vortex.control.v1.LifecycleHelloH\x00R\x0elifecycleHello\x12@\n" +
+	"\vnode_report\x18\x11 \x01(\v2\x1d.vortex.control.v1.NodeReportH\x00R\n" +
+	"nodeReport\x12L\n" +
+	"\x0frenewal_request\x18\x12 \x01(\v2!.vortex.control.v1.RenewalRequestH\x00R\x0erenewalRequestB\x06\n" +
+	"\x04body\"\xcb\x05\n" +
 	"\x0eControlMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -1208,7 +2849,11 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\tusage_ack\x18\v \x01(\v2'.vortex.control.v1.UsageAcknowledgementH\x00R\busageAck\x12[\n" +
 	"\x14authorization_update\x18\f \x01(\v2&.vortex.control.v1.AuthorizationUpdateH\x00R\x13authorizationUpdate\x127\n" +
 	"\x05error\x18\r \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12\\\n" +
-	"\x11unknown_usage_ack\x18\x0e \x01(\v2..vortex.control.v1.UnknownUsageAcknowledgementH\x00R\x0funknownUsageAckB\x06\n" +
+	"\x11unknown_usage_ack\x18\x0e \x01(\v2..vortex.control.v1.UnknownUsageAcknowledgementH\x00R\x0funknownUsageAck\x12=\n" +
+	"\n" +
+	"hub_status\x18\x0f \x01(\v2\x1c.vortex.control.v1.HubStatusH\x00R\thubStatus\x12I\n" +
+	"\x0erenewal_result\x18\x10 \x01(\v2 .vortex.control.v1.RenewalResultH\x00R\rrenewalResult\x12a\n" +
+	"\x16credential_revocations\x18\x11 \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocationsB\x06\n" +
 	"\x04body\"\x81\x01\n" +
 	"\x0fRegisterRequest\x12)\n" +
 	"\x10enrollment_token\x18\x01 \x01(\tR\x0fenrollmentToken\x12\x17\n" +
@@ -1276,9 +2921,161 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\tNodeEvent\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload2_\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload\"\x99\x01\n" +
+	"\x0eLifecycleHello\x12'\n" +
+	"\x0fcontrol_version\x18\x01 \x01(\tR\x0econtrolVersion\x12\"\n" +
+	"\fcapabilities\x18\x02 \x03(\tR\fcapabilities\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x04 \x01(\tR\bregionId\"\xbf\x01\n" +
+	"\x10ProbeObservation\x12\x1b\n" +
+	"\ttarget_id\x18\x01 \x01(\tR\btargetId\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x1a\n" +
+	"\bfailures\x18\x03 \x01(\x04R\bfailures\x12\x1c\n" +
+	"\tsuccesses\x18\x04 \x01(\x04R\tsuccesses\x12\x1f\n" +
+	"\vobserved_at\x18\x05 \x01(\tR\n" +
+	"observedAt\x12\x1d\n" +
+	"\n" +
+	"latency_us\x18\x06 \x01(\x04R\tlatencyUs\"\xac\x02\n" +
+	"\n" +
+	"NodeReport\x12\x1b\n" +
+	"\treport_id\x18\x01 \x01(\tR\breportId\x12#\n" +
+	"\rbuild_version\x18\x02 \x01(\tR\fbuildVersion\x124\n" +
+	"\x16applied_config_version\x18\x03 \x01(\x04R\x14appliedConfigVersion\x12\x1f\n" +
+	"\vobserved_at\x18\x04 \x01(\tR\n" +
+	"observedAt\x12;\n" +
+	"\x06probes\x18\x05 \x03(\v2#.vortex.control.v1.ProbeObservationR\x06probes\x12'\n" +
+	"\x0factive_sessions\x18\x06 \x01(\x04R\x0eactiveSessions\x12\x1f\n" +
+	"\vdrain_state\x18\a \x01(\tR\n" +
+	"drainState\"\xc0\x04\n" +
+	"\tHubStatus\x12\x15\n" +
+	"\x06hub_id\x18\x01 \x01(\tR\x05hubId\x12\x1b\n" +
+	"\tregion_id\x18\x02 \x01(\tR\bregionId\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12'\n" +
+	"\x0fcontrol_version\x18\x05 \x01(\tR\x0econtrolVersion\x12\"\n" +
+	"\fcapabilities\x18\x06 \x03(\tR\fcapabilities\x12!\n" +
+	"\fsigner_epoch\x18\a \x01(\x04R\vsignerEpoch\x128\n" +
+	"\x18recovery_target_sequence\x18\b \x01(\x04R\x16recoveryTargetSequence\x12-\n" +
+	"\x12confirmed_sequence\x18\t \x01(\x04R\x11confirmedSequence\x120\n" +
+	"\x14pending_tail_records\x18\n" +
+	" \x01(\x04R\x12pendingTailRecords\x120\n" +
+	"\x14backend_heartbeat_at\x18\v \x01(\tR\x12backendHeartbeatAt\x12+\n" +
+	"\x11autonomy_deadline\x18\f \x01(\tR\x10autonomyDeadline\x12/\n" +
+	"\x13revocation_revision\x18\r \x01(\x04R\x12revocationRevision\x121\n" +
+	"\x14restriction_revision\x18\x0e \x01(\x04R\x13restrictionRevision\"\x97\x04\n" +
+	"\x0eRenewalRequest\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x17\n" +
+	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12\x17\n" +
+	"\aboot_id\x18\x03 \x01(\tR\x06bootId\x12#\n" +
+	"\rdelegation_id\x18\x04 \x01(\tR\fdelegationId\x12\x1b\n" +
+	"\tsource_id\x18\x05 \x01(\tR\bsourceId\x12\x17\n" +
+	"\arule_id\x18\x06 \x01(\tR\x06ruleId\x12#\n" +
+	"\rrule_revision\x18\a \x01(\x04R\fruleRevision\x12'\n" +
+	"\x0fpath_generation\x18\b \x01(\x04R\x0epathGeneration\x12-\n" +
+	"\x12fencing_generation\x18\t \x01(\x04R\x11fencingGeneration\x12!\n" +
+	"\fsigner_epoch\x18\n" +
+	" \x01(\x04R\vsignerEpoch\x12.\n" +
+	"\x13requested_raw_bytes\x18\v \x01(\x04R\x11requestedRawBytes\x122\n" +
+	"\x15requested_ttl_seconds\x18\f \x01(\x04R\x13requestedTtlSeconds\x12%\n" +
+	"\x0erequest_sha256\x18\r \x01(\fR\rrequestSha256\x12.\n" +
+	"\x13billing_snapshot_id\x18\x0e \x01(\tR\x11billingSnapshotId\"\xe2\x01\n" +
+	"\rRenewalResult\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12%\n" +
+	"\x0erequest_sha256\x18\x02 \x01(\fR\rrequestSha256\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\x12\x1c\n" +
+	"\tretryable\x18\x04 \x01(\bR\tretryable\x12Y\n" +
+	"\x14authorization_update\x18\x05 \x01(\v2&.vortex.control.v1.AuthorizationUpdateR\x13authorizationUpdate\"\xbf\x01\n" +
+	"\x15CredentialRevocations\x12\x1b\n" +
+	"\tissuer_id\x18\x01 \x01(\tR\bissuerId\x12\x1a\n" +
+	"\brevision\x18\x02 \x01(\x04R\brevision\x12/\n" +
+	"\x13certificate_serials\x18\x03 \x03(\tR\x12certificateSerials\x12\x19\n" +
+	"\bnode_ids\x18\x04 \x03(\tR\anodeIds\x12!\n" +
+	"\feffective_at\x18\x05 \x01(\tR\veffectiveAt\"\xae\x02\n" +
+	"\n" +
+	"HubMessage\x12\x15\n" +
+	"\x06hub_id\x18\x01 \x01(\tR\x05hubId\x12\x17\n" +
+	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
+	"\bsequence\x18\x03 \x01(\x04R\bsequence\x12L\n" +
+	"\x0flifecycle_hello\x18\n" +
+	" \x01(\v2!.vortex.control.v1.LifecycleHelloH\x00R\x0elifecycleHello\x126\n" +
+	"\x06status\x18\v \x01(\v2\x1c.vortex.control.v1.HubStatusH\x00R\x06status\x12F\n" +
+	"\rledger_record\x18\f \x01(\v2\x1f.vortex.control.v1.LedgerRecordH\x00R\fledgerRecordB\x06\n" +
+	"\x04body\"\xa9\x01\n" +
+	"\fLedgerRecord\x12\x1b\n" +
+	"\trecord_id\x18\x01 \x01(\tR\brecordId\x12'\n" +
+	"\x0fledger_sequence\x18\x02 \x01(\x04R\x0eledgerSequence\x12\x18\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x04 \x01(\fR\rpayloadSha256\x12\x12\n" +
+	"\x04kind\x18\x05 \x01(\tR\x04kind\"\x88\x05\n" +
+	"\x0eBackendMessage\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
+	"\bsequence\x18\x02 \x01(\x04R\bsequence\x12C\n" +
+	"\theartbeat\x18\n" +
+	" \x01(\v2#.vortex.control.v1.BackendHeartbeatH\x00R\theartbeat\x12F\n" +
+	"\n" +
+	"allocation\x18\v \x01(\v2$.vortex.control.v1.BackendAllocationH\x00R\n" +
+	"allocation\x12a\n" +
+	"\x16credential_revocations\x18\f \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocations\x12I\n" +
+	"\n" +
+	"ledger_ack\x18\r \x01(\v2(.vortex.control.v1.LedgerAcknowledgementH\x00R\tledgerAck\x127\n" +
+	"\x05error\x18\x0e \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12a\n" +
+	"\x16authority_restrictions\x18\x0f \x01(\v2(.vortex.control.v1.AuthorityRestrictionsH\x00R\x15authorityRestrictions\x12\\\n" +
+	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequestB\x06\n" +
+	"\x04body\"\xb6\x02\n" +
+	"\x10BackendHeartbeat\x12\x1d\n" +
+	"\n" +
+	"backend_id\x18\x01 \x01(\tR\tbackendId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x04 \x01(\tR\bregionId\x12\x1f\n" +
+	"\vobserved_at\x18\x05 \x01(\tR\n" +
+	"observedAt\x12+\n" +
+	"\x11autonomy_deadline\x18\x06 \x01(\tR\x10autonomyDeadline\x12/\n" +
+	"\x13revocation_revision\x18\a \x01(\x04R\x12revocationRevision\x121\n" +
+	"\x14restriction_revision\x18\b \x01(\x04R\x13restrictionRevision\"y\n" +
+	"\x11BackendAllocation\x12#\n" +
+	"\rallocation_id\x18\x01 \x01(\tR\fallocationId\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha256\"\x98\x01\n" +
+	"\x15LedgerAcknowledgement\x12\x1b\n" +
+	"\trecord_id\x18\x01 \x01(\tR\brecordId\x12'\n" +
+	"\x0fledger_sequence\x18\x02 \x01(\x04R\x0eledgerSequence\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha256\x12\x12\n" +
+	"\x04kind\x18\x04 \x01(\tR\x04kind\"\xc3\x01\n" +
+	"\x15DelegationRestriction\x12#\n" +
+	"\rdelegation_id\x18\x01 \x01(\tR\fdelegationId\x12:\n" +
+	"\x1amax_total_issued_raw_bytes\x18\x02 \x01(\x04R\x16maxTotalIssuedRawBytes\x12 \n" +
+	"\fmax_rate_bps\x18\x03 \x01(\x04R\n" +
+	"maxRateBps\x12'\n" +
+	"\x0fmax_connections\x18\x04 \x01(\x04R\x0emaxConnections\"\xc8\x02\n" +
+	"\x15AuthorityRestrictions\x12%\n" +
+	"\x0erestriction_id\x18\x01 \x01(\tR\rrestrictionId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x1a\n" +
+	"\brevision\x18\x03 \x01(\x04R\brevision\x12!\n" +
+	"\feffective_at\x18\x04 \x01(\tR\veffectiveAt\x124\n" +
+	"\x16revoked_delegation_ids\x18\x05 \x03(\tR\x14revokedDelegationIds\x12:\n" +
+	"\x19revoked_authorization_ids\x18\x06 \x03(\tR\x17revokedAuthorizationIds\x12@\n" +
+	"\x06limits\x18\a \x03(\v2(.vortex.control.v1.DelegationRestrictionR\x06limits\"\xfb\x01\n" +
+	"\x13EpochHandoffRequest\x12\x1d\n" +
+	"\n" +
+	"handoff_id\x18\x01 \x01(\tR\thandoffId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x1d\n" +
+	"\n" +
+	"from_epoch\x18\x03 \x01(\x04R\tfromEpoch\x12\x19\n" +
+	"\bto_epoch\x18\x04 \x01(\x04R\atoEpoch\x120\n" +
+	"\x14backend_heartbeat_at\x18\x05 \x01(\tR\x12backendHeartbeatAt\x12B\n" +
+	"\x1drequired_restriction_revision\x18\x06 \x01(\x04R\x1brequiredRestrictionRevision2_\n" +
 	"\vNodeControl\x12P\n" +
-	"\aConnect\x12\x1e.vortex.control.v1.NodeMessage\x1a!.vortex.control.v1.ControlMessage(\x010\x01B(Z&vortex/contracts/protobuf/v1;controlv1b\x06proto3"
+	"\aConnect\x12\x1e.vortex.control.v1.NodeMessage\x1a!.vortex.control.v1.ControlMessage(\x010\x012]\n" +
+	"\n" +
+	"HubControl\x12O\n" +
+	"\aConnect\x12\x1d.vortex.control.v1.HubMessage\x1a!.vortex.control.v1.BackendMessage(\x010\x01B(Z&vortex/contracts/protobuf/v1;controlv1b\x06proto3"
 
 var (
 	file_contracts_protobuf_v1_vortex_proto_rawDescOnce sync.Once
@@ -1292,7 +3089,7 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
 	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
@@ -1309,6 +3106,22 @@ var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*RuntimeConfigUpdate)(nil),         // 12: vortex.control.v1.RuntimeConfigUpdate
 	(*AuthorizationUpdate)(nil),         // 13: vortex.control.v1.AuthorizationUpdate
 	(*NodeEvent)(nil),                   // 14: vortex.control.v1.NodeEvent
+	(*LifecycleHello)(nil),              // 15: vortex.control.v1.LifecycleHello
+	(*ProbeObservation)(nil),            // 16: vortex.control.v1.ProbeObservation
+	(*NodeReport)(nil),                  // 17: vortex.control.v1.NodeReport
+	(*HubStatus)(nil),                   // 18: vortex.control.v1.HubStatus
+	(*RenewalRequest)(nil),              // 19: vortex.control.v1.RenewalRequest
+	(*RenewalResult)(nil),               // 20: vortex.control.v1.RenewalResult
+	(*CredentialRevocations)(nil),       // 21: vortex.control.v1.CredentialRevocations
+	(*HubMessage)(nil),                  // 22: vortex.control.v1.HubMessage
+	(*LedgerRecord)(nil),                // 23: vortex.control.v1.LedgerRecord
+	(*BackendMessage)(nil),              // 24: vortex.control.v1.BackendMessage
+	(*BackendHeartbeat)(nil),            // 25: vortex.control.v1.BackendHeartbeat
+	(*BackendAllocation)(nil),           // 26: vortex.control.v1.BackendAllocation
+	(*LedgerAcknowledgement)(nil),       // 27: vortex.control.v1.LedgerAcknowledgement
+	(*DelegationRestriction)(nil),       // 28: vortex.control.v1.DelegationRestriction
+	(*AuthorityRestrictions)(nil),       // 29: vortex.control.v1.AuthorityRestrictions
+	(*EpochHandoffRequest)(nil),         // 30: vortex.control.v1.EpochHandoffRequest
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
@@ -1317,20 +3130,41 @@ var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	14, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
 	2,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
 	8,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
-	12, // 6: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
-	7,  // 7: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
-	13, // 8: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	3,  // 9: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
-	9,  // 10: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
-	6,  // 11: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
-	11, // 12: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
-	0,  // 13: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	1,  // 14: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	14, // [14:15] is the sub-list for method output_type
-	13, // [13:14] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	15, // 6: vortex.control.v1.NodeMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	17, // 7: vortex.control.v1.NodeMessage.node_report:type_name -> vortex.control.v1.NodeReport
+	19, // 8: vortex.control.v1.NodeMessage.renewal_request:type_name -> vortex.control.v1.RenewalRequest
+	12, // 9: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
+	7,  // 10: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
+	13, // 11: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	3,  // 12: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
+	9,  // 13: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
+	18, // 14: vortex.control.v1.ControlMessage.hub_status:type_name -> vortex.control.v1.HubStatus
+	20, // 15: vortex.control.v1.ControlMessage.renewal_result:type_name -> vortex.control.v1.RenewalResult
+	21, // 16: vortex.control.v1.ControlMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	6,  // 17: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
+	11, // 18: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
+	16, // 19: vortex.control.v1.NodeReport.probes:type_name -> vortex.control.v1.ProbeObservation
+	13, // 20: vortex.control.v1.RenewalResult.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	15, // 21: vortex.control.v1.HubMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	18, // 22: vortex.control.v1.HubMessage.status:type_name -> vortex.control.v1.HubStatus
+	23, // 23: vortex.control.v1.HubMessage.ledger_record:type_name -> vortex.control.v1.LedgerRecord
+	25, // 24: vortex.control.v1.BackendMessage.heartbeat:type_name -> vortex.control.v1.BackendHeartbeat
+	26, // 25: vortex.control.v1.BackendMessage.allocation:type_name -> vortex.control.v1.BackendAllocation
+	21, // 26: vortex.control.v1.BackendMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	27, // 27: vortex.control.v1.BackendMessage.ledger_ack:type_name -> vortex.control.v1.LedgerAcknowledgement
+	3,  // 28: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
+	29, // 29: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
+	30, // 30: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
+	28, // 31: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
+	0,  // 32: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	22, // 33: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
+	1,  // 34: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	24, // 35: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
+	34, // [34:36] is the sub-list for method output_type
+	32, // [32:34] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -1345,6 +3179,9 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*NodeMessage_Event)(nil),
 		(*NodeMessage_Register)(nil),
 		(*NodeMessage_UnknownUsageBatch)(nil),
+		(*NodeMessage_LifecycleHello)(nil),
+		(*NodeMessage_NodeReport)(nil),
+		(*NodeMessage_RenewalRequest)(nil),
 	}
 	file_contracts_protobuf_v1_vortex_proto_msgTypes[1].OneofWrappers = []any{
 		(*ControlMessage_ConfigUpdate)(nil),
@@ -1352,6 +3189,23 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*ControlMessage_AuthorizationUpdate)(nil),
 		(*ControlMessage_Error)(nil),
 		(*ControlMessage_UnknownUsageAck)(nil),
+		(*ControlMessage_HubStatus)(nil),
+		(*ControlMessage_RenewalResult)(nil),
+		(*ControlMessage_CredentialRevocations)(nil),
+	}
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[22].OneofWrappers = []any{
+		(*HubMessage_LifecycleHello)(nil),
+		(*HubMessage_Status)(nil),
+		(*HubMessage_LedgerRecord)(nil),
+	}
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[24].OneofWrappers = []any{
+		(*BackendMessage_Heartbeat)(nil),
+		(*BackendMessage_Allocation)(nil),
+		(*BackendMessage_CredentialRevocations)(nil),
+		(*BackendMessage_LedgerAck)(nil),
+		(*BackendMessage_Error)(nil),
+		(*BackendMessage_AuthorityRestrictions)(nil),
+		(*BackendMessage_EpochHandoffRequest)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1359,9 +3213,9 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   31,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_contracts_protobuf_v1_vortex_proto_goTypes,
 		DependencyIndexes: file_contracts_protobuf_v1_vortex_proto_depIdxs,

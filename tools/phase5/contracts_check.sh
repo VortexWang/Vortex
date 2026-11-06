@@ -23,8 +23,11 @@ cmp "$tmp/first/contracts/protobuf/v1/vortex_grpc.pb.go" contracts/protobuf/v1/v
 
 python3 tools/phase1/contracts.py check-frozen --contract-id vortex.control.v1
 python3 tools/phase1/contracts.py check-frozen --contract-id vortex.authorization.v1
+python3 tools/phase1/contracts.py check-frozen --contract-id vortex.runtime-config
 python3 tools/phase1/contracts.py check-map
 python3 -m unittest discover -s tools/phase1 -p 'test_contracts.py'
+python3 -m unittest discover -s tests/phase1 -p 'test_contracts.py'
+python3 -m unittest discover -s tests/phase1 -p 'test_lifecycle_candidates.py'
 
 base=${CONTRACT_BASE:-HEAD^}
 git cat-file -e "$base^{commit}"

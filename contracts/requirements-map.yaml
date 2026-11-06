@@ -959,16 +959,38 @@
     {
       "id": "AGT-001",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "AGT-002",
       "contracts": [
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "AGT-003",
@@ -998,7 +1020,16 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "AGT-006",
@@ -1013,9 +1044,19 @@
       "id": "AGT-007",
       "contracts": [
         "vortex.control.v1",
-        "vortex.runtime-config"
+        "vortex.runtime-config",
+        "vortex.authorization.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "AGT-008",
@@ -1028,10 +1069,20 @@
       "id": "AGT-012",
       "contracts": [
         "vortex.authorization.v1",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "AGT-009",
@@ -1097,10 +1148,20 @@
       "id": "HUB-004",
       "contracts": [
         "vortex.authorization.v1",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "HUB-005",
@@ -1189,19 +1250,39 @@
       "contracts": [
         "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "HUB-014",
       "contracts": [
         "vortex.authorization.v1",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "HUB-015",
@@ -1218,10 +1299,20 @@
       "contracts": [
         "vortex.authorization.v1",
         "vortex.control.v1",
-        "vortex.database"
+        "vortex.database",
+        "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "HUB-017",
@@ -1242,7 +1333,16 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "BE-001",
@@ -2322,9 +2422,19 @@
       "id": "SUP-B3-001",
       "contracts": [
         "vortex.runtime-config",
-        "vortex.control.v1"
+        "vortex.control.v1",
+        "vortex.authorization.v1"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "phase5_lifecycle_review": {
+        "proposal_sha256": "fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a",
+        "versions": {
+          "vortex.control.v1": "1.3.0",
+          "vortex.authorization.v1": "1.2.0",
+          "vortex.runtime-config": "1.1.0"
+        },
+        "status": "mapped; runtime implementation/evidence pending"
+      }
     },
     {
       "id": "SUP-B4-001",

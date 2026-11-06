@@ -115,3 +115,105 @@ var NodeControl_ServiceDesc = grpc.ServiceDesc{
 	},
 	Metadata: "contracts/protobuf/v1/vortex.proto",
 }
+
+const (
+	HubControl_Connect_FullMethodName = "/vortex.control.v1.HubControl/Connect"
+)
+
+// HubControlClient is the client API for HubControl service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Phase 5 protocol fixture adapter. Implementing this RPC does not supply the
+// production backend CA/token/tenant/allocation authority assigned to Phase 6.
+type HubControlClient interface {
+	Connect(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[HubMessage, BackendMessage], error)
+}
+
+type hubControlClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewHubControlClient(cc grpc.ClientConnInterface) HubControlClient {
+	return &hubControlClient{cc}
+}
+
+func (c *hubControlClient) Connect(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[HubMessage, BackendMessage], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &HubControl_ServiceDesc.Streams[0], HubControl_Connect_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[HubMessage, BackendMessage]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type HubControl_ConnectClient = grpc.BidiStreamingClient[HubMessage, BackendMessage]
+
+// HubControlServer is the server API for HubControl service.
+// All implementations must embed UnimplementedHubControlServer
+// for forward compatibility.
+//
+// Phase 5 protocol fixture adapter. Implementing this RPC does not supply the
+// production backend CA/token/tenant/allocation authority assigned to Phase 6.
+type HubControlServer interface {
+	Connect(grpc.BidiStreamingServer[HubMessage, BackendMessage]) error
+	mustEmbedUnimplementedHubControlServer()
+}
+
+// UnimplementedHubControlServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedHubControlServer struct{}
+
+func (UnimplementedHubControlServer) Connect(grpc.BidiStreamingServer[HubMessage, BackendMessage]) error {
+	return status.Error(codes.Unimplemented, "method Connect not implemented")
+}
+func (UnimplementedHubControlServer) mustEmbedUnimplementedHubControlServer() {}
+func (UnimplementedHubControlServer) testEmbeddedByValue()                    {}
+
+// UnsafeHubControlServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to HubControlServer will
+// result in compilation errors.
+type UnsafeHubControlServer interface {
+	mustEmbedUnimplementedHubControlServer()
+}
+
+func RegisterHubControlServer(s grpc.ServiceRegistrar, srv HubControlServer) {
+	// If the following call panics, it indicates UnimplementedHubControlServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&HubControl_ServiceDesc, srv)
+}
+
+func _HubControl_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HubControlServer).Connect(&grpc.GenericServerStream[HubMessage, BackendMessage]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type HubControl_ConnectServer = grpc.BidiStreamingServer[HubMessage, BackendMessage]
+
+// HubControl_ServiceDesc is the grpc.ServiceDesc for HubControl service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var HubControl_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "vortex.control.v1.HubControl",
+	HandlerType: (*HubControlServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Connect",
+			Handler:       _HubControl_Connect_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "contracts/protobuf/v1/vortex.proto",
+}

@@ -11,6 +11,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ID_RE = re.compile(r"\*\*([A-Z][A-Z0-9]*-[A-Z0-9-]+)\*\*")
 CONTRACT_IDS = {"vortex.database", "vortex.public-api", "vortex.control.v1", "vortex.runtime-config", "vortex.vlink.v1", "vortex.authorization.v1"}
+CONTROL_COMPANIONS = {
+    "contracts/protobuf/v1/lifecycle.schema.json",
+    "contracts/protobuf/v1/lifecycle.md",
+    "contracts/protobuf/v1/identity-profile.json",
+}
+
+
+def changed_contract_ids(catalogs, paths):
+    """A normative companion change is a contract change, including deletion."""
+    return {c['id'] for catalog in catalogs for c in catalog.get('contracts', [])
+            if set([c['path']] + c.get('artifacts', [])) & set(paths)}
+
+
 SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 CHANGELOG_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
 
@@ -128,6 +141,27 @@ def check_frozen(versions, review, root=ROOT, contract_ids=None):
             errors.append(f"{contract_id}: approved review hash is missing or stale")
         if reviews.get(contract_id, {}).get("decision") != "approved":
             errors.append(f"{contract_id}: individual contract decision is not approved")
+        required = CONTROL_COMPANIONS if contract_id == "vortex.control.v1" and semver_tuple(version) is not None and semver_tuple(version) >= (1, 3, 0) else set()
+        declared = contract.get("artifacts", [])
+        recorded_artifacts = recorded.get("artifacts", [])
+        if not isinstance(declared, list) or any(not isinstance(x, str) for x in declared):
+            errors.append(f"{contract_id}: invalid companion catalog")
+            continue
+        if not isinstance(recorded_artifacts, list) or any(not isinstance(x, dict) or not isinstance(x.get('path'), str) for x in recorded_artifacts):
+            errors.append(f"{contract_id}: invalid companion review")
+            continue
+        reviewed_paths = [x['path'] for x in recorded_artifacts]
+        if len(set(declared)) != len(declared) or len(set(reviewed_paths)) != len(reviewed_paths) or set(declared) != set(reviewed_paths) or (required and set(declared) != required):
+            errors.append(f"{contract_id}: missing, duplicate or unapproved normative companion")
+            continue
+        for artifact in recorded_artifacts:
+            name = artifact['path']
+            path = root / name
+            if not path.resolve().is_relative_to(root.resolve()) or not path.is_file():
+                errors.append(f"{contract_id}: missing or invalid companion {name}")
+                continue
+            if __import__('hashlib').sha256(path.read_bytes()).hexdigest() != artifact.get('sha256'):
+                errors.append(f"{contract_id}: companion hash is missing or stale: {name}")
     return errors
 
 
@@ -163,7 +197,7 @@ def main():
             after_data = load(args.versions)
             after = {c["id"]: c["version"] for c in after_data["contracts"]}
             changed = subprocess.check_output(["git", "diff", "--name-only", args.base, "--", "contracts"], cwd=ROOT, text=True).splitlines()
-            changed_ids = {c["id"] for c in after_data["contracts"] if c["path"] in changed}
+            changed_ids = changed_contract_ids([json.loads(before_text), after_data], changed)
             changelog_text = (ROOT / "contracts/CHANGELOG.md").read_text(encoding="utf-8")
             changelog_match = CHANGELOG_RE.search(changelog_text)
             if not changelog_match:
