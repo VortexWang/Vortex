@@ -827,3 +827,44 @@ Ran `BenchmarkRuntimeDurableAccounting` at clean commit `d46ca8e793a9b7f79c5e65c
 All 15 samples passed. Median reserve-plus-settle operation times were 6.819 ms for 1,200 bytes (0.18 MB/s accounting capacity), 6.032 ms for 16,384 bytes (2.72 MB/s), and 6.460 ms for 65,536 bytes (10.14 MB/s). Each benchmark verifies SQLite WAL/FULL, exact source conservation after the run, and one pending UsageBatch outbox row for each operation. The complete outputs, clean SHA/status and checksums are retained in `artifacts/phase4/durable-accounting-d46ca8e/`; the manifest is `04-17-NATIVE-ACCOUNTING.json`.
 
 The roughly 6 ms per-operation cost is sensitive to write granularity and motivates a measured comparison with bounded session blocks. This result remains a serial Store microbenchmark: it includes no network transfer, Hub issuance or session blocks and is not VLink throughput, a Phase 4 gate, or a D-04 parameter selection. The planned real five-process one-factor candidate scan and its TCP/UDP, latency, allocation and conservation measurements remain outstanding; D-04 remains unlocked.
+
+## Native seven-case D-04 diagnostic scan — 2026-11-06
+
+At clean measured SHA `d46ca8e793a9b7f79c5e65ca011401bdbd76bdde`,
+`tools/phase4/d04_run.py --duration 15 --repeats 3 --rate-mbps 100`
+completed all 21 five-process trials on dedicated Ubuntu. Each trial uses
+16 TCP streams, 50 short-flow samples and 100 Mbps target UDP. All trial
+reports have runtime_correctness=pass, exact source conservation and settlement,
+zero UDP loss, and actual UDP offered rate at least 99.9584 Mbps. Formal
+performance qualification remains not-qualified: each workload phase is only
+15 seconds and this scan supplies no independent TLS comparison.
+
+Mixed TCP medians by case (Mbps): baseline 1026.43; 64 KiB start 1022.59;
+1 MiB start 1025.54; 10-second target 1025.00; 60-second target 1026.78;
+20% waterline 1024.50; 50% waterline 1022.47. These closely grouped diagnostic
+results do not establish a statistically supported winner or lock defaults.
+The issuer is the synchronous process-local finite allocator. Target seconds
+are converted from a fixed 100 Mbps reference; this is not the persistent
+Hub's rolling-rate demand scheduler or durable session-block implementation.
+
+The initial unbuffered baseline failed closed: 3,874 kernel RcvbufErrors,
+2.4801% UDP loss and a destination accounting mismatch. Its original directory
+is retained and excluded from the successful scan. A separate buffered
+preflight passed. The 21-trial scan used rmem_max/wmem_max=67,108,864 with
+defaults still 212,992. Its EXIT cleanup restored both max values to 212,992;
+scan and restore exit codes are both 0 and live sysctl confirmed restoration.
+
+`04-18-NATIVE-D04-SCAN.json` records outcomes and archive hashes. Downloaded
+reports and failure/preflight diagnostics are in
+`artifacts/phase4/d04-scan-buffered-d46ca8e/`; the reports archive hash was
+checked against the remote archive and all downloaded original files matched
+the remote per-file manifest. Full role logs and accounting JSONL remain on
+the dedicated host at the same relative artifact path under
+`/root/VORTEX-phase4-accounting`; their hashes are in raw-artifact-sha256.json.
+Certificate private keys were excluded from this evidence transfer.
+
+Approval reconciliation: control 1.3.0 frozen-hash and requirements-map checks
+PASS. The local complete generator check stopped at the exact-version guard
+because protoc is 36.0 rather than required 36.2; it is not a passing generator
+reproduction result. The approved proposal text remains immutable under its
+recorded hash. Control 1.4.0 grant-return proposal is still unapproved.

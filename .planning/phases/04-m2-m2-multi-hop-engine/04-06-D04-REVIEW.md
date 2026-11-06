@@ -141,3 +141,20 @@ block policies, include transport or Hub issuance, or establish user-visible
 throughput. Keep the existing D-04 candidates unlocked until the planned
 five-process authorized TCP/UDP scan compares durable bounded blocks and
 per-write accounting while recording latency and held-funding costs.
+
+## Seven-case native diagnostic comparison — 2026-11-06
+
+`04-18-NATIVE-D04-SCAN.json` adds 21 successful 15-second trials at clean
+`d46ca8e`. All seven one-factor cases have zero UDP loss and conserved/settled
+source credit; mixed TCP medians span only 1022.47–1026.78 Mbps. This narrow
+spread gives no basis to declare a winning production configuration. Each
+trial's formal performance status remains not-qualified.
+
+The scan covers actual five-process forwarding with the process-local finite
+allocator. It does not measure the persistent Hub scheduler or a durable
+session-block strategy, and fixed-reference target-size conversion is distinct
+from dynamic consumption-based renewal. Keep all D-04 defaults unlocked.
+Sustained durable-authority traffic, lost/delayed control responses under load,
+funding occupancy, idle-return proof and formal same-SHA qualification remain
+required. The unbuffered failed baseline remains visible in the diagnostic
+archive; temporary buffer maxima were restored after the successful scan.
