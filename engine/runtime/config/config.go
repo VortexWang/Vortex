@@ -285,6 +285,12 @@ func (c Config) TLSConfig(server bool) (*tls.Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("config: load certificate: %w", err)
 	}
+	return c.TLSConfigWithCertificate(server, cert)
+}
+
+// TLSConfigWithCertificate loads pinned runtime trust without opening identity
+// alias files. Agent supplies its durably selected certificate via the provider.
+func (c Config) TLSConfigWithCertificate(server bool, cert tls.Certificate) (*tls.Config, error) {
 	data, err := os.ReadFile(c.TrustBundle)
 	if err != nil {
 		return nil, fmt.Errorf("config: read trust bundle: %w", err)

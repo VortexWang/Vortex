@@ -40,6 +40,7 @@ type ControlClient struct {
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
+	CredentialRevocations     *CredentialRevocationView
 	Reconciler                *Reconciler
 	MaxAttempts               int
 	RetryMin                  time.Duration
@@ -137,6 +138,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		return fmt.Errorf("agent: unauthenticated control TLS is forbidden")
 	}
 	var issuerIdentity atomic.Value
+	var authenticatedTLS atomic.Pointer[tls.ConnectionState]
 	previousVerify := tlsConfig.VerifyConnection
 	tlsConfig.VerifyConnection = func(state tls.ConnectionState) error {
 		if previousVerify != nil {
@@ -151,6 +153,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if len(cert.DNSNames) != 1 || cert.Subject.CommonName != cert.DNSNames[0] {
 			return fmt.Errorf("agent: ambiguous Hub identity")
 		}
+		authenticatedTLS.Store(&state)
 		issuerIdentity.CompareAndSwap(nil, cert.DNSNames[0])
 		if issuerIdentity.Load().(string) != cert.DNSNames[0] {
 			return fmt.Errorf("agent: Hub identity changed within control session")
@@ -160,7 +163,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	if endpoint.ServerName != "" {
 		tlsConfig.ServerName = endpoint.ServerName
 	}
-	tlsConfig.MinVersion = tls.VersionTLS13
+	tlsConfig.MinVersion, tlsConfig.MaxVersion = tls.VersionTLS13, tls.VersionTLS13
+	tlsConfig.SessionTicketsDisabled, tlsConfig.ClientSessionCache = true, nil
 	conn, err := grpc.DialContext(ctx, address,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		grpc.WithBlock(),
@@ -296,6 +300,11 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-activationTicker.C:
+			if state := authenticatedTLS.Load(); state != nil {
+				if err := tlsConfig.VerifyConnection(*state); err != nil {
+					return err
+				}
+			}
 			if regional != nil && !negotiated {
 				continue
 			}
@@ -369,6 +378,11 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if err := func() error {
 			c.sessionMu.Lock()
 			defer c.sessionMu.Unlock()
+			if state := authenticatedTLS.Load(); state != nil {
+				if err := tlsConfig.VerifyConnection(*state); err != nil {
+					return err
+				}
+			}
 			if c.sessionID != incarnation || ctx.Err() != nil {
 				return fmt.Errorf("agent: stale control session")
 			}
@@ -381,6 +395,15 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 			}
 			switch body := message.GetBody().(type) {
+			case *controlv1.ControlMessage_CredentialRevocations:
+				if c.CredentialRevocations == nil {
+					return fmt.Errorf("agent: credential revocation receiver unavailable")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if err := c.CredentialRevocations.Apply(ctx, issuer, body.CredentialRevocations); err != nil {
+					return err
+				}
+				return nil
 			case *controlv1.ControlMessage_HubStatus:
 				if regional == nil {
 					return fmt.Errorf("agent: unnegotiated Hub status")

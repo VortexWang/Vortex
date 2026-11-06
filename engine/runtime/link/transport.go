@@ -2,7 +2,6 @@ package link
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"log/slog"
 	"sync"
@@ -50,11 +49,7 @@ func NewTransport(ctx context.Context, owner *Supervisor, mode vlink.TransportMo
 	dial := func(ctx context.Context) (vlink.PooledLink, error) {
 		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-		conn, err := (&tls.Dialer{Config: owner.TLS.Clone()}).DialContext(dialCtx, "tcp", owner.PeerAddr)
-		if err != nil {
-			return nil, err
-		}
-		mux, peer, err := owner.handshake(dialCtx, conn.(*tls.Conn), true)
+		mux, peer, err := owner.dial(dialCtx)
 		if err != nil {
 			return nil, err
 		}

@@ -172,6 +172,7 @@ func NewEnrollmentServer(ca *identity.CA, caDER []byte, tokens map[string]bool, 
 	roots := x509.NewCertPool()
 	roots.AddCert(ca.Certificate)
 	config := tlsConfig.Clone()
+	config.SessionTicketsDisabled, config.ClientSessionCache = true, nil
 	config.MinVersion = tls.VersionTLS13
 	config.MaxVersion = tls.VersionTLS13
 	config.ClientAuth = tls.RequestClientCert

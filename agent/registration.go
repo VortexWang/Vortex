@@ -12,6 +12,7 @@ import (
 
 	"vortex/agent/identity"
 	"vortex/agent/store"
+	"vortex/engine/vlink"
 )
 
 type registrationRequest struct {
@@ -39,10 +40,13 @@ func Register(ctx context.Context, nodeID, token, address, certificateDir string
 	if err != nil {
 		return identity.Credential{}, err
 	}
-	if err := identity.SaveFiles(certificateDir, credential, caDER); err != nil {
+	if err := identity.SaveVersionFiles(certificateDir, credential); err != nil {
 		return identity.Credential{}, err
 	}
 	if err := PersistCredential(ctx, db, credential); err != nil {
+		return identity.Credential{}, err
+	}
+	if err := identity.SaveActiveFiles(certificateDir, credential, caDER); err != nil {
 		return identity.Credential{}, err
 	}
 	return credential, nil
@@ -87,11 +91,23 @@ func persistCredentialRotation(ctx context.Context, db *store.Store, directory s
 }
 
 func exchangeCredential(ctx context.Context, nodeID, token, address string, roots *x509.CertPool, serverName string, current *identity.Credential) (identity.Credential, []byte, error) {
+	return exchangeCredentialWithRevocations(ctx, nodeID, token, address, roots, serverName, current, nil)
+}
+func exchangeCredentialWithRevocations(ctx context.Context, nodeID, token, address string, roots *x509.CertPool, serverName string, current *identity.Credential, revoked func(*x509.Certificate) bool) (identity.Credential, []byte, error) {
 	key, csr, err := identity.GenerateCSR(nodeID)
 	if err != nil {
 		return identity.Credential{}, nil, err
 	}
-	config := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, RootCAs: roots, ServerName: serverName}
+	config := &tls.Config{SessionTicketsDisabled: true, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, RootCAs: roots, ServerName: serverName}
+	config.VerifyConnection = func(state tls.ConnectionState) error {
+		if current != nil && (time.Now().Before(current.Leaf.NotBefore) || !time.Now().Before(current.Leaf.NotAfter) || (revoked != nil && revoked(current.Leaf))) {
+			return errors.New("agent: renewal identity expired or revoked")
+		}
+		if len(state.PeerCertificates) == 0 || (revoked != nil && revoked(state.PeerCertificates[0])) {
+			return errors.New("agent: enrollment peer missing or revoked")
+		}
+		return nil
+	}
 	requestType := "register"
 	if current != nil {
 		config.Certificates = []tls.Certificate{current.Certificate}
@@ -131,6 +147,13 @@ func exchangeCredential(ctx context.Context, nodeID, token, address string, root
 	credential, err := identity.AttachKey(identity.Credential{NodeID: nodeID, Leaf: leaf}, key, response.CA)
 	if err != nil {
 		return identity.Credential{}, nil, err
+	}
+	// UUID node enrollment uses the approved lifecycle profile. Non-node fixture
+	// service identities retain their existing control-only profile.
+	if id, parseErr := vlink.ParseNodeID(nodeID); parseErr == nil && id.String() == nodeID {
+		if err := identity.ValidateRuntimeCredential(credential, time.Now()); err != nil {
+			return identity.Credential{}, nil, err
+		}
 	}
 	return credential, response.CA, nil
 }

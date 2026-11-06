@@ -55,6 +55,12 @@ func New(cfg config.Config) (*Runtime, error) { return NewWithAccountingGate(cfg
 // NewWithAccountingGate injects the Agent-owned in-process authorization and
 // durable accounting boundary. Runtime never opens the Agent database itself.
 func NewWithAccountingGate(cfg config.Config, gate engineaccounting.Gate) (*Runtime, error) {
+	return newRuntime(cfg, gate, false)
+}
+
+// NewForAgent requires managed identity composition before Start.
+func NewForAgent(cfg config.Config) (*Runtime, error) { return newRuntime(cfg, nil, true) }
+func newRuntime(cfg config.Config, gate engineaccounting.Gate, managed bool) (*Runtime, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -62,7 +68,13 @@ func NewWithAccountingGate(cfg config.Config, gate engineaccounting.Gate) (*Runt
 		return nil, errors.New("runtime: only the static destination runtime is supported")
 	}
 	cfg = cfg.Effective()
-	supervisor, err := link.New(cfg)
+	var supervisor *link.Supervisor
+	var err error
+	if managed {
+		supervisor, err = link.NewManaged(cfg)
+	} else {
+		supervisor, err = link.New(cfg)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +95,9 @@ func (r *Runtime) Start(parent context.Context) error {
 	}
 	if err := parent.Err(); err != nil {
 		return err
+	}
+	if r.supervisor.Signer == nil && !r.supervisor.HasIdentityProvider() {
+		return errors.New("runtime: managed identity provider required")
 	}
 	if !r.cfg.QualificationOnly && r.service.Gate == nil {
 		return errors.New("runtime: Agent authorization gate is required")
@@ -135,4 +150,14 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 		protocol = "udp"
 	}
 	return net.Dial(protocol, net.JoinHostPort(strings.Trim(target.Host, "[]"), strconv.Itoa(int(target.Port))))
+}
+
+// SetIdentityProvider composes Agent-owned credentials without storage access.
+func (r *Runtime) SetIdentityProvider(provider link.IdentityProvider, boot vlink.BootID) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.started {
+		return errors.New("runtime: identity provider must be installed before Start")
+	}
+	return r.supervisor.SetIdentityProvider(provider, boot)
 }

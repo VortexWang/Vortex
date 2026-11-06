@@ -29,6 +29,10 @@ sh tools/phase5/contracts_check.sh > "$out/contracts.log" 2>&1
 go test -count=1 ./... > "$out/root-test.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/regional-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestSchedulerProcessRenewal$' > "$out/renewal-process.log" 2>&1
+go test -count=1 -v ./test/phase5 -run '^TestIdentityProcessRotation$' > "$out/identity-process.log" 2>&1
+go test -count=10 -race -v ./agent -run '^TestRuntimeIdentity' > "$out/identity-race.log" 2>&1
+(cd engine && go test -race -v ./runtime/link ./vlink -run '^(TestRuntimeIdentity|TestIdentityAdmission)') > "$out/identity-engine-race.log" 2>&1
+
 PHASE5_AUTHORIZATION_EVIDENCE_DIR="$out/renewal-safety" go test -count=3 -race -v ./agent -run '^TestRenewalSafety' > "$out/renewal-safety-race.log" 2>&1
 python3 tools/phase5/audit_renewal_safety.py "$out/renewal-safety" > "$out/renewal-safety-audit.json"
 go test -count=10 -race -v ./agent -run '^TestRegional' > "$out/regional-race.log" 2>&1
@@ -53,6 +57,15 @@ for name in ('TestRegionalProcessFailover/silent-stream','TestRegionalProcessFai
 for name in ('TestSchedulerProcessRenewal/low-water-tcp-udp','TestSchedulerProcessRenewal/lost-result','TestSchedulerProcessRenewal/hub-restart','TestSchedulerProcessRenewal/node-restart','TestSchedulerProcessRenewal/quota-exhausted','TestSchedulerProcessRenewal/write-failure','TestSchedulerProcessRenewal/expiry-with-pending-result'):
  log=(out/'renewal-process.log').read_text()
  assert f'--- PASS: {name} ' in log and f'--- SKIP: {name}' not in log,name
+for name in ('TestIdentityProcessRotation',):
+ log=(out/'identity-process.log').read_text()
+ assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
+for name in ('TestRuntimeIdentityProfileAndSignerRejections','TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation','TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded','TestRuntimeIdentityCrashPublicationAndStaleAliases','TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew','TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection'):
+ log=(out/'identity-race.log').read_text()
+ assert log.count(f'--- PASS: {name} ')==10 and '--- SKIP:' not in log,name
+for name in ('TestRuntimeIdentitySnapshotCapturedOnceForTLSAndHello','TestRuntimeIdentityMismatchedSignerFailsBeforeHandshake','TestIdentityAdmissionRejectsNewOpenWithoutClosingExistingStreams'):
+ log=(out/'identity-engine-race.log').read_text()
+ assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
 for name in ('TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result','TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result','TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent','TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry','TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor','TestRenewalSafetyLateOldMutualTLSResultCannotInstall'):
  log=(out/'renewal-safety-race.log').read_text()
  assert log.count(f'--- PASS: {name} ') == 3 and f'--- SKIP: {name}' not in log,name

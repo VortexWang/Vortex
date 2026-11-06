@@ -137,11 +137,22 @@ func (m *CredentialManager) Renew(ctx context.Context, address, directory string
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	next, caDER, err := exchangeCredential(ctx, m.set.Active.NodeID, "", address, m.roots, m.serverName, &m.set.Active)
+	if m.revoked != nil && m.revoked(m.set.Active.Leaf) {
+		return errors.New("agent credentials: active identity revoked")
+	}
+	next, caDER, err := exchangeCredentialWithRevocations(ctx, m.set.Active.NodeID, "", address, m.roots, m.serverName, &m.set.Active, m.revoked)
 	if err != nil {
 		return err
 	}
 	now := time.Now().UTC()
+	if now.Before(m.set.Active.Leaf.NotBefore) || !now.Before(m.set.Active.Leaf.NotAfter) || (m.revoked != nil && m.revoked(m.set.Active.Leaf)) {
+		return errors.New("agent credentials: renewal authority expired or revoked during exchange")
+	}
+	if len(m.set.Active.Leaf.URIs) > 0 {
+		if err := identity.ValidateRuntimeCredential(next, now); err != nil {
+			return err
+		}
+	}
 	nextSet, err := m.set.Rotate(next, now, overlap, func(candidate identity.Credential) error {
 		if m.revoked != nil && m.revoked(candidate.Leaf) {
 			return errors.New("replacement credential is revoked")

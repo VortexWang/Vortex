@@ -136,6 +136,8 @@ func (d *Dispatcher) Err() error              { d.mu.Lock(); defer d.mu.Unlock()
 func (d *Dispatcher) StreamCount() int        { return d.streams.Count() }
 
 type MuxConfig struct {
+	// Admit rechecks current link identities before new stream authority.
+	Admit                                    func() error
 	LocalClient                              bool
 	MaxPendingOpenBytes                      int
 	StreamWindow, AggregateWindow, MaxWindow uint32
@@ -257,6 +259,11 @@ func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 }
 
 func (m *MuxLink) Open(ctx context.Context, request OpenRequest) (*MuxStream, error) {
+	if m.config.Admit != nil {
+		if err := m.config.Admit(); err != nil {
+			return nil, err
+		}
+	}
 	network := StreamNetwork(request.Network)
 	id, err := m.dispatch.Open(network)
 	if err != nil {
@@ -305,7 +312,12 @@ func (m *MuxLink) AuthorizeRemote(ctx context.Context, id uint32, authorize Remo
 	}
 	var resource io.Closer
 	var err error
-	if authorize == nil {
+	if m.config.Admit != nil {
+		err = m.config.Admit()
+	}
+	if err != nil {
+		// Preserve existing stream liabilities; only reject this new OPEN.
+	} else if authorize == nil {
 		rejection := &OpenRejection{Code: OpenUnauthorized}
 		_, _ = rand.Read(rejection.CorrelationID[:])
 		err = rejection

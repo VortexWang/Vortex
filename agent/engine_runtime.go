@@ -24,6 +24,15 @@ type RuntimeEngine struct {
 }
 
 func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
+	return newRuntimeEngine(configPath, nodeID, false)
+}
+
+// NewManagedRuntimeEngine is the node composition entry point: identity comes
+// from the durable Agent manager, never runtime file aliases.
+func NewManagedRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
+	return newRuntimeEngine(configPath, nodeID, true)
+}
+func newRuntimeEngine(configPath, nodeID string, managed bool) (*RuntimeEngine, error) {
 	if configPath == "" {
 		return nil, fmt.Errorf("agent: engine config path is required")
 	}
@@ -34,7 +43,12 @@ func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
 	if cfg.NodeID != nodeID {
 		return nil, fmt.Errorf("agent: engine node identity does not match agent")
 	}
-	rt, err := engineruntime.New(cfg)
+	var rt *engineruntime.Runtime
+	if managed {
+		rt, err = engineruntime.NewForAgent(cfg)
+	} else {
+		rt, err = engineruntime.New(cfg)
+	}
 	if err != nil {
 		return nil, err
 	}

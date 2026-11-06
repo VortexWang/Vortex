@@ -13,11 +13,13 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+	"vortex/engine/vlink"
 )
 
 type Credential struct {
@@ -33,6 +35,13 @@ func CredentialFromTLS(nodeID string, certificate tls.Certificate, leaf *x509.Ce
 	}
 	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != nodeID || leaf.Subject.CommonName != nodeID {
 		return Credential{}, errors.New("identity: TLS credential node SAN mismatch")
+	}
+	if !key.PublicKey.Equal(leaf.PublicKey) {
+		return Credential{}, errors.New("identity: TLS signer mismatch")
+	}
+	actual, ok := certificate.PrivateKey.(*ecdsa.PrivateKey)
+	if !ok || !actual.PublicKey.Equal(&key.PublicKey) {
+		return Credential{}, errors.New("identity: TLS private key mismatch")
 	}
 	certificate.Leaf = leaf
 	return Credential{NodeID: nodeID, PrivateKey: key, Certificate: certificate, Leaf: leaf}, nil
@@ -127,7 +136,12 @@ func GenerateCSR(nodeID string) (*ecdsa.PrivateKey, []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	csr, err := x509.CreateCertificateRequest(rand.Reader, &x509.CertificateRequest{Subject: pkix.Name{CommonName: nodeID}, DNSNames: []string{nodeID}}, key)
+	template := &x509.CertificateRequest{Subject: pkix.Name{CommonName: nodeID}, DNSNames: []string{nodeID}}
+	if id, err := vlink.ParseNodeID(nodeID); err == nil && id.String() == nodeID {
+		uri, _ := url.Parse("urn:vortex:node:" + nodeID)
+		template.URIs = []*url.URL{uri}
+	}
+	csr, err := x509.CreateCertificateRequest(rand.Reader, template, key)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -153,6 +167,13 @@ func (ca *CA) SignCSR(csrDER []byte, nodeID string, now time.Time, ttl time.Dura
 		return Credential{}, err
 	}
 	tmpl := &x509.Certificate{SerialNumber: serial, Subject: pkix.Name{CommonName: nodeID}, DNSNames: []string{nodeID}, NotBefore: now.Add(-time.Minute), NotAfter: now.Add(ttl), KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}}
+	if id, err := vlink.ParseNodeID(nodeID); err == nil && id.String() == nodeID {
+		if len(csr.URIs) != 1 || csr.URIs[0].String() != "urn:vortex:node:"+nodeID {
+			return Credential{}, errors.New("identity: CSR node URI mismatch")
+		}
+		tmpl.URIs = csr.URIs
+		tmpl.KeyUsage = x509.KeyUsageDigitalSignature
+	}
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, ca.Certificate, csr.PublicKey, ca.Key)
 	if err != nil {
 		return Credential{}, err
@@ -188,6 +209,7 @@ func AttachKey(c Credential, key *ecdsa.PrivateKey, caDER []byte) (Credential, e
 			return Credential{}, fmt.Errorf("identity: issuer certificate mismatch: %w", err)
 		}
 	}
+	c.PrivateKey = key
 	c.Certificate.PrivateKey = key
 	c.Certificate.Certificate = [][]byte{c.Leaf.Raw}
 	c.Certificate.Leaf = c.Leaf
@@ -340,16 +362,23 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 		return nil, errors.New("identity: trust pool required")
 	}
 	now := time.Now()
+	if revoked != nil && revoked(c.Leaf) {
+		return nil, errors.New("identity: local credential revoked")
+	}
 	if now.Before(c.Leaf.NotBefore) || !now.Before(c.Leaf.NotAfter) {
 		return nil, errors.New("identity: local credential is outside validity interval")
 	}
-	conf := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{c.Certificate}, RootCAs: roots, ClientCAs: roots, ServerName: c.NodeID}
+	conf := &tls.Config{SessionTicketsDisabled: true, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{c.Certificate}, RootCAs: roots, ClientCAs: roots, ServerName: c.NodeID}
 	if server {
 		conf.ClientAuth = tls.RequireAndVerifyClientCert
 	}
 	conf.VerifyConnection = func(state tls.ConnectionState) error {
 		if len(state.PeerCertificates) == 0 {
 			return errors.New("identity: peer certificate missing")
+		}
+		now := time.Now()
+		if now.Before(c.Leaf.NotBefore) || !now.Before(c.Leaf.NotAfter) || (revoked != nil && revoked(c.Leaf)) {
+			return errors.New("identity: local credential no longer valid")
 		}
 		peer := state.PeerCertificates[0]
 		if revoked != nil && revoked(peer) {
@@ -374,10 +403,42 @@ func TLSConfigSet(set CredentialSet, roots *x509.CertPool, revoked func(*x509.Ce
 	}
 	config.Certificates = make([]tls.Certificate, 0, len(credentials))
 	for _, credential := range credentials {
+		if revoked != nil && revoked(credential.Leaf) {
+			continue
+		}
 		if credential.Leaf == nil || credential.Certificate.PrivateKey == nil {
 			return nil, errors.New("identity: incomplete overlapping credential")
 		}
 		config.Certificates = append(config.Certificates, credential.Certificate)
 	}
 	return config, nil
+}
+
+// ValidateRuntimeCredential enforces the approved identity-v1 profile. DNS-only
+// legacy credentials can serve legacy control, but cannot enter VLink runtime.
+func ValidateRuntimeCredential(c Credential, now time.Time) error {
+	id, err := vlink.ParseNodeID(c.NodeID)
+	if err != nil || id.String() != c.NodeID || c.Leaf == nil {
+		return errors.New("identity: canonical node UUID required")
+	}
+	leaf := c.Leaf
+	if len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != c.NodeID || len(leaf.URIs) != 1 || leaf.URIs[0].String() != "urn:vortex:node:"+c.NodeID {
+		return errors.New("identity: runtime DNS/URI SAN mismatch")
+	}
+	if leaf.IsCA || leaf.KeyUsage != x509.KeyUsageDigitalSignature || len(leaf.UnknownExtKeyUsage) != 0 || len(leaf.ExtKeyUsage) != 2 {
+		return errors.New("identity: runtime certificate usage mismatch")
+	}
+	client, server := false, false
+	for _, usage := range leaf.ExtKeyUsage {
+		client = client || usage == x509.ExtKeyUsageClientAuth
+		server = server || usage == x509.ExtKeyUsageServerAuth
+	}
+	if !client || !server {
+		return errors.New("identity: both client and server EKU required")
+	}
+	if now.Before(leaf.NotBefore) || !now.Before(leaf.NotAfter) {
+		return errors.New("identity: runtime credential outside validity")
+	}
+	_, err = CredentialFromTLS(c.NodeID, c.Certificate, leaf, c.PrivateKey)
+	return err
 }

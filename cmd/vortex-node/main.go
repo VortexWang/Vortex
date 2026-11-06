@@ -49,7 +49,7 @@ func main() {
 	defer s.Close()
 	var engine agent.Engine
 	if *engineConfig != "" {
-		engine, err = agent.NewRuntimeEngine(*engineConfig, *nodeID)
+		engine, err = agent.NewManagedRuntimeEngine(*engineConfig, *nodeID)
 		if err != nil {
 			fatal(err)
 		}
@@ -89,6 +89,7 @@ func main() {
 		regional = agent.RegionalConfig{Region: *region, Endpoints: []agent.HubEndpoint{{Region: *region, Address: *hubAddr, HubID: *hubID, ServerName: *hubName}}, DialTimeout: *dialTimeout, Watchdog: *watchdog, FailoverBudget: *failoverBudget}
 	}
 	if *hubAddr == "" && *controlConfig == "" {
+
 		if err := n.Start(ctx); err != nil {
 			fatal(err)
 		}
@@ -140,10 +141,14 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
+	revocations, err := agent.LoadCredentialRevocations(ctx, s, n.TrustedTime)
+	if err != nil {
+		fatal(err)
+	}
 	var credential identity.Credential
 	var credentialManager *agent.CredentialManager
 	if len(versions) != 0 {
-		credentialManager, err = agent.LoadCredentialManager(ctx, s, n.NodeID, *credentialDir, *hubName, roots, nil, time.Now())
+		credentialManager, err = agent.LoadCredentialManager(ctx, s, n.NodeID, *credentialDir, *hubName, roots, revocations.IsRevoked, time.Now())
 		if err != nil {
 			fatal(err)
 		}
@@ -192,7 +197,7 @@ func main() {
 				fatal(err)
 			}
 		}
-		credentialManager, err = agent.NewCredentialManager(credential, roots, *hubName, nil)
+		credentialManager, err = agent.NewCredentialManager(credential, roots, *hubName, revocations.IsRevoked)
 		if err != nil {
 			fatal(err)
 		}
@@ -233,6 +238,11 @@ func main() {
 			fatal(err)
 		}
 	}
+	if runtimeEngine, ok := engine.(*agent.RuntimeEngine); ok {
+		if err := runtimeEngine.SetIdentityProvider(credentialManager, n.BootID); err != nil {
+			fatal(err)
+		}
+	}
 	if err := n.Start(ctx); err != nil {
 		fatal(err)
 	}
@@ -242,7 +252,7 @@ func main() {
 		reconciler.Apply = runtimeApply
 	}
 
-	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
+	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler}
 	scheduler, err := n.SchedulerForRegion(regional)
 	if err != nil {
 		fatal(err)

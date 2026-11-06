@@ -50,6 +50,7 @@ func TLS13Config(config *tls.Config, policy PeerCertificatePolicy, server bool) 
 		return nil, errors.New("vlink: TLS config and peer policy are required")
 	}
 	clone := config.Clone()
+	clone.SessionTicketsDisabled, clone.ClientSessionCache = true, nil
 	clone.MinVersion, clone.MaxVersion = tls.VersionTLS13, tls.VersionTLS13
 	if server {
 		clone.ClientAuth = tls.RequireAndVerifyClientCert

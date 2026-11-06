@@ -6,6 +6,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
@@ -24,6 +25,7 @@ import (
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/link"
 	"vortex/engine/vlink"
+	"vortex/hub"
 
 	"vortex/agent/identity"
 	"vortex/agent/store"
@@ -313,13 +315,11 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		})
 		return cmd
 	}
-	// Current Engine fixture uses the historical qualification DNS identity;
-	// unified production identity rotation is a separate 05-09 gate.
+	// The node publishes its durable control identity to VLink. Both fixture
+	// trust roles use this explicit CA; peers use exact node UUID DNS+URI SANs.
 	const peerID = "550e8400-e29b-41d4-a716-446655440199"
-	engineCA, _, e := identity.NewCA(now)
-	if e != nil {
-		t.Fatal(e)
-	}
+	engineCA := ca
+	var e error
 	engineTrust := filepath.Join(dir, "engine-ca.pem")
 	os.WriteFile(engineTrust, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: engineCA.Certificate.Raw}), 0600)
 	engineConfig := func(id string) config.Config {
@@ -328,7 +328,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			t.Fatal(e)
 		}
 		uri, _ := url.Parse("urn:vortex:node:" + id)
-		cert := &x509.Certificate{SerialNumber: big.NewInt(time.Now().UnixNano()), URIs: []*url.URL{uri}, DNSNames: []string{"vortex"}, NotBefore: now.Add(-time.Minute), NotAfter: now.Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}}
+		cert := &x509.Certificate{SerialNumber: big.NewInt(time.Now().UnixNano()), URIs: []*url.URL{uri}, DNSNames: []string{id}, NotBefore: now.Add(-time.Minute), NotAfter: now.Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}}
 		certDER, e := x509.CreateCertificate(rand.Reader, cert, engineCA.Certificate, &key.PublicKey, engineCA.Key)
 		if e != nil {
 			t.Fatal(e)
@@ -474,7 +474,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
 	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
-	if renewalMode != "" {
+	if renewalMode != "" && renewalMode != "identity-rotation" {
 		lifecycle["renew_percent"] = 30
 		lifecycle["renew_retry_min_ms"] = 1000
 	}
@@ -483,6 +483,31 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
 	nodeArgs := []string{"--node-id", regionalNode, "--db", nodePath, "--engine-config", enginePath, "--control-config", controlPath, "--hub-name", regionalFirst, "--enrollment-hub", addresses[0], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m"}
+	var rotatedIdentitySerial string
+	var identityEnrollment *hub.EnrollmentServer
+	if renewalMode == "identity-rotation" {
+		hubPair, err := tls.LoadX509KeyPair(filepath.Join(dir, regionalFirst+".pem"), filepath.Join(dir, regionalFirst+".key"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		identityEnrollment, err = hub.NewEnrollmentServer(ca, der, map[string]bool{"unused-renewal-fixture-token": true}, &tls.Config{MinVersion: tls.VersionTLS13, Certificates: []tls.Certificate{hubPair}}, time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		go func() { _ = identityEnrollment.Serve(ctx, listener) }()
+		for i, arg := range nodeArgs {
+			if arg == "--enrollment-hub" {
+				nodeArgs[i+1] = listener.Addr().String()
+			}
+			if arg == "--renew-before" {
+				nodeArgs[i+1] = "59m55s"
+			}
+		}
+	}
 	nodeProcess := start("vortex-node", nodeArgs...)
 	db, e := openProcessLedger(nodePath)
 	if e != nil {
@@ -510,6 +535,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	supervisor.TLS.ServerName = regionalNode
 	defer supervisor.Close()
 	ready := make(chan *vlink.MuxLink, 1)
 	go func() {
@@ -557,7 +583,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
 	}
-	if renewalMode != "" {
+	if renewalMode != "" && renewalMode != "identity-rotation" {
 		fault := func() bool {
 			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
 				killProcess(t, first)
@@ -573,6 +599,68 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		return
 	}
 	exchange("before-control-switch")
+	if renewalMode == "identity-rotation" {
+		originalPair, err := tls.LoadX509KeyPair(nodeCert, nodeKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		original, err := x509.ParseCertificate(originalPair.Certificate[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		var active *x509.Certificate
+		for {
+			var raw []byte
+			if err = db.QueryRowContext(ctx, `SELECT certificate FROM credentials WHERE node_id=?`, regionalNode).Scan(&raw); err == nil {
+				active, err = x509.ParseCertificate(raw)
+				if err == nil && active.SerialNumber.Cmp(original.SerialNumber) != 0 {
+					break
+				}
+			}
+			select {
+			case <-ctx.Done():
+				t.Fatal("live credential renewal never committed")
+			case <-time.After(20 * time.Millisecond):
+			}
+		}
+		rotatedIdentitySerial = active.SerialNumber.String()
+		exchange("existing-TCP-after-identity-rotation")
+		// A fresh full TLS+exporter HELLO validates the new serial and signer,
+		// including stable Agent boot and path generation across rotation.
+		pair, err := tls.LoadX509KeyPair(peer.Certificate, peer.PrivateKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		roots := x509.NewCertPool()
+		roots.AddCert(ca.Certificate)
+		connection, err := (&tls.Dialer{Config: &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, RootCAs: roots, Certificates: []tls.Certificate{pair}, ServerName: regionalNode, SessionTicketsDisabled: true}}).DialContext(ctx, "tcp", cfg.Listen)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer connection.Close()
+		tlsConn := connection.(*tls.Conn)
+		if tlsConn.ConnectionState().DidResume || tlsConn.ConnectionState().PeerCertificates[0].SerialNumber.Cmp(active.SerialNumber) != 0 {
+			t.Fatal("fresh VLink did not select durable replacement")
+		}
+		var boot string
+		if err = db.QueryRowContext(ctx, `SELECT boot_id FROM authorization_records WHERE kind='credit_grant' AND state='active' LIMIT 1`).Scan(&boot); err != nil {
+			t.Fatal(err)
+		}
+		bootID, _ := vlink.ParseNodeID(boot)
+		peerNode, _ := vlink.ParseNodeID(peerID)
+		_, err = vlink.HandshakeHello(ctx, tlsConn, vlink.HelloConfig{Client: true, NodeID: peerNode, BootID: vlink.BootID{9}, Generation: cfg.PathGeneration, Capabilities: []uint16{1, 2}, Signer: pair.PrivateKey.(*ecdsa.PrivateKey), VerifyPeer: func(_ context.Context, cert *x509.Certificate, message vlink.HelloMessage) error {
+			if cert.SerialNumber.Cmp(active.SerialNumber) != 0 || message.LocalBootID != vlink.BootID(bootID) || message.LocalGeneration != cfg.PathGeneration || message.LocalNodeID != supervisor.ExpectedPeer {
+				return fmt.Errorf("rotated identity changed HELLO binding")
+			}
+			return nil
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		exchange("old-TCP-after-new-signer-handshake")
+		t.Logf("rotated serial %s -> %s with boot=%s generation=%d; old TCP preserved", original.SerialNumber, active.SerialNumber, boot, cfg.PathGeneration)
+	}
+
 	var boot, grant, source, expires string
 	if e = db.QueryRowContext(ctx, "SELECT boot_id,authorization_id,source_id,expires_at FROM authorization_records WHERE kind='credit_grant' AND state='active'").Scan(&boot, &grant, &source, &expires); e != nil {
 		t.Fatal(e)
@@ -615,6 +703,12 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		case <-ctx.Done():
 			t.Fatal("second actual Hub never selected")
 		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	if renewalMode == "identity-rotation" {
+		var count int
+		if err := secondDB.QueryRowContext(ctx, `SELECT COUNT(*) FROM durable_events WHERE kind='control-identity' AND payload=?`, []byte(rotatedIdentitySerial)).Scan(&count); err != nil || count == 0 {
+			t.Fatalf("successor control stream did not authenticate rotated serial: count=%d error=%v", count, err)
 		}
 	}
 	exchange("after-control-switch")
