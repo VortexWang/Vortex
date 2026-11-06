@@ -132,7 +132,15 @@ func runDurableRuntimeAuthority(t *testing.T, renewalRounds int, delayResponse .
 	runDurableRuntimeAuthorityMode(t, renewalRounds, false, delayResponse...)
 }
 
+func TestRuntimeFundingBlockContinuousTraffic(t *testing.T) {
+	runDurableRuntimeAuthorityWorkload(t, 16, true, true)
+}
+
 func runDurableRuntimeAuthorityMode(t *testing.T, renewalRounds int, blockMode bool, delayResponse ...bool) {
+	runDurableRuntimeAuthorityWorkload(t, renewalRounds, blockMode, false, delayResponse...)
+}
+
+func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMode, continuous bool, delayResponse ...bool) {
 	t.Helper()
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
@@ -583,7 +591,90 @@ func runDurableRuntimeAuthorityMode(t *testing.T, renewalRounds int, blockMode b
 			}
 			t.Logf("same stream renewed after initial expiry %s; two directional batches per grant", initialExpiry.Format(time.RFC3339Nano))
 			expectedIssued := uint64(7096)
-			if renewalRounds > 0 {
+			if continuous {
+				defer func() {
+					if !t.Failed() {
+						return
+					}
+					auditCtx, stop := context.WithTimeout(context.Background(), time.Second)
+					defer stop()
+					agentBalance, ae := s.AuditAuthorizationSource(auditCtx, node.NodeID, delegation.SourceID)
+					hubBalance, he := hs.AuditHubDelegation(auditCtx, delegation.ID)
+					requests, re := s.PendingDemands(auditCtx, node.NodeID, node.BootID, runtimeHubID, "")
+					low, high, trusted := node.TrustedTime()
+					ledger, le := s.ReadDemandLedger(auditCtx, demandScope, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted}, time.Now())
+					t.Logf("continuous failure agent=%+v err=%v hub=%+v err=%v pending=%+v err=%v ledger=%+v err=%v", agentBalance, ae, hubBalance, he, requests, re, ledger, le)
+				}()
+				// Keep sending on the existing business stream. Do not wait for
+				// grants or idle-tail settlement between exchanges: real admission
+				// waits and the live adaptive controller must bridge renewals.
+				controlCtx, stopControl := context.WithCancel(ctx)
+				defer stopControl()
+				continuousHub := startTestControlHub(t, controlCtx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer}, serverTLS)
+				controlDone := make(chan error, 1)
+				go func() {
+					controlDone <- (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(controlCtx, continuousHub.Addr().String())
+				}()
+				// Wait only for the authenticated control consumer to register;
+				// never wait for its grant balance or a round's idle settlement.
+				for {
+					node.demandMu.Lock()
+					ready := false
+					for sub := range node.demandSubscriptions {
+						for _, configured := range sub.scopes {
+							if configured.Scope == adaptive.Scope {
+								ready = true
+							}
+						}
+					}
+					node.demandMu.Unlock()
+					if ready {
+						break
+					}
+					select {
+					case err := <-controlDone:
+						t.Fatalf("control stopped before readiness: %v", err)
+					case <-ctx.Done():
+						t.Fatal(ctx.Err())
+					case <-time.After(time.Millisecond):
+					}
+				}
+				started := time.Now()
+				for round := 0; round < renewalRounds; round++ {
+					if err := hs.RecordBackendHeartbeat(ctx, time.Now().UTC(), delegation.AutonomyDeadline); err != nil {
+						t.Fatal(err)
+					}
+					exchange()
+				}
+				waitSettled(expectedIssued, uint64((renewalRounds+2)*2*len(message)))
+				stopControl()
+				select {
+				case err := <-controlDone:
+					if err != nil && !errors.Is(err, context.Canceled) {
+						t.Logf("control stop: %v", err)
+					}
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+				// A response in flight at shutdown must be replayed before final
+				// reconciliation; the same durable identity prevents a new debit.
+				requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(requests) > 0 {
+					replayHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: len(requests)}, serverTLS)
+					if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true}).Connect(ctx, replayHub.Addr().String()); err != nil {
+						t.Fatal(err)
+					}
+				}
+				funded, err := hs.AuditHubDelegation(ctx, delegation.ID)
+				if err != nil {
+					t.Fatal(err)
+				}
+				expectedIssued = funded.Issued
+				t.Logf("unpaced durable traffic exchanges=%d elapsed=%s issued=%d", renewalRounds, time.Since(started), expectedIssued)
+			} else if renewalRounds > 0 {
 				// Keep one real control connection and the original business stream
 				// alive across repeated consumption-driven durable renewals.
 				issued := make(chan struct{}, 1)
@@ -790,7 +881,9 @@ func runDurableRuntimeAuthorityMode(t *testing.T, renewalRounds int, blockMode b
 			}
 			assertRawLedger(t, hubDB, 4+2*renewalRounds)
 			assertRawLedger(t, backendDB, 4+2*renewalRounds)
-			if blockMode {
+			if continuous {
+				saveLedgerFiles(t, fmt.Sprintf("runtime-block-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+			} else if blockMode {
 				saveLedgerFiles(t, fmt.Sprintf("runtime-block-%d-rounds-%d-delay-%t", network, renewalRounds, len(delayResponse) > 0 && delayResponse[0]), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 			} else if renewalRounds == 0 {
 				saveRuntimeLedger(t, network, agentDB, hubDB)

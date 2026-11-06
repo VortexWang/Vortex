@@ -1627,3 +1627,31 @@ Inspection confirms the existing runtime renewal fixture waits for issuance
 before each exchange and idle settlement afterward. It cannot serve as sustained
 load or prove demand-wait tail latency. A continuous durable-authority workload
 is still required before D-04 candidate lock; current values remain experimental.
+
+## Native checkpoint crash pass; continuous traffic exposes renewal gap
+
+Dedicated Ubuntu clean e78964f7dc69ea542d67146ed60c2c85cd5cdbff ran the
+SIGKILL checkpoint and transactional replay tests with race, three repetitions:
+PASS 7.078s, exit 0. Remote artifacts artifacts/phase4/block-crash-e78964f,
+test.log SHA-256 8a7241d2823fe52160cc54c660b8b2f6e8b57f305d953cae38c1a5284abec3d1.
+An earlier fetch used a nonexistent bundle branch reference (bundle exported
+HEAD only); the old-SHA attempt is preserved separately at
+artifacts/phase4/block-crash-wrong-sha-ac5e0e5 and is not new-test evidence.
+
+Added TestRuntimeFundingBlockContinuousTraffic: authenticated demand consumer
+readiness is awaited once, then sixteen exchanges run on one real TCP/UDP
+stream without waiting for grants or idle-tail settlement between exchanges.
+The existing fixture's durable issuer, lost-response replay, original expiry,
+200ms admission bound, final ledger checks and 2048-byte blocks are retained.
+It is a functional continuous-demand regression, not sustained NFR load.
+
+The new regression currently FAILS on both TCP and UDP around the 200ms bound.
+A TCP failure diagnostic showed Agent Initial=15288, Remaining=3288,
+Committed=12000, Reserved=Unknown=0; valid scoped Available=2192;
+Hub Issued=15288; no pending demands. Store selection requires a single grant
+with at least the 1500-byte write, while renewal compares summed available
+credit to the 1228-byte waterline. Evidence points to fragmentation causing
+renewal starvation despite adequate aggregate credit; per-grant confirmation
+and a bounded, scope-safe fix remain required. Do not weaken the deadline or
+hide this failing test. Local raw logs retained under
+artifacts/phase4/continuous-regression. D-04 remains unlocked.
