@@ -145,8 +145,10 @@ Automated classifications retain the source SUMMARY boundaries. Same-SHA 71502ce
 
 ## Gaps
 
-No user-reported issues yet. Source-audit gaps G05-01/02/03/05 are recorded separately in 05-REQUIREMENT-AUDIT.md and 05-VERIFICATION.md; they remain open even if both human checkpoints pass. G05-04 was separately fixed through GSD debug in f6a5891 and verified by same-SHA Docker/Actions 42140165239; it was a source-audit finding, not a user-reported UAT gap. User-reported gaps require executed closure plans.
+No user-reported issues; both owner checkpoints confirmed. Source-audit gaps G05-01/02/03/05 are recorded separately in 05-REQUIREMENT-AUDIT.md and 05-VERIFICATION.md; they remain open even if both human checkpoints pass. G05-04 was separately fixed through GSD debug in f6a5891 and verified by same-SHA Docker/Actions 42140165239; it was a source-audit finding, not a user-reported UAT gap. User-reported gaps require executed closure plans.
 
 ## Workflow hooks
 
 verify:pre api-coverage gate passed via `check api-coverage.verify-pre 05`: no external-API integration detected. The rendered hook uses an older query spelling; the current installed gate module documents the check command. No gate was skipped. Phase has no UI deliverable; frontend browser UAT does not apply. Work performed inline at owner request.
+
+verify:post closure: Nyquist coverage remains audited/partial (`05-VALIDATION.md`), security register verified with zero open threats (`05-SECURITY.md`), no UI deliverable in this phase. Full-phase verification remains `gaps_found` for G05-01/02/03/05.

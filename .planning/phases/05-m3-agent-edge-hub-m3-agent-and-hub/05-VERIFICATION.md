@@ -4,7 +4,7 @@ status: gaps_found
 verified: "2026-11-06"
 score: 3/5 success criteria covered within implemented fixture
 reviewed_sha: 71502ce37e110aef3af7e1549c39dbf35d8be19c
-human_verification_pending: true
+human_verification_pending: false
 gaps:
   - gap_id: G05-01
     truth: "Node runtime performs bounded regional failover, probes, periodic health and remote renewal"
@@ -84,6 +84,8 @@ All 34 IDs are accounted for in `05-REQUIREMENT-AUDIT.md`. Security register: no
 
 ## Gaps and routing
 
-G05-01..05 source-grounded groups are detailed in `05-REQUIREMENT-AUDIT.md` and review disposition. Keep Phase 5 verifying; run end-of-phase UAT and then `$gsd-plan-phase 5 --gaps`. Do not advance Phase 6 or mark Phase 5 complete from these passing slices alone. Phase 4 remains separate and is not reopened by this audit.
+G05-01..05 source-grounded groups are detailed in `05-REQUIREMENT-AUDIT.md` and review disposition. Keep Phase 5 verifying; end-of-phase UAT is complete (17 passed, including two owner confirmations); continue with `$gsd-plan-phase 5 --gaps`. Do not advance Phase 6 or mark Phase 5 complete from these passing slices alone. Phase 4 remains separate and is not reopened by this audit.
 
 Security follow-up: f6a5891 passes Docker/Actions run 42140165239; both downloaded/local evidence sets independently re-audited. See `artifacts/phase5/check/f6a58916336e0f754a67252ad54c1091883e8573/pair.json`. G05-04 is resolved; remaining runtime integration gaps keep the phase verdict unchanged.
+
+UAT closure: owner confirmed both checkpoints; 05-UAT.md is `complete` with 17 passing entries, zero issues and zero pending. This closes the audit/security/UAT task, not the four remaining implementation gaps or Phase 5 itself.
