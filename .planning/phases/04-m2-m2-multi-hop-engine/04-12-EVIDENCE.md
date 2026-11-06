@@ -2053,3 +2053,18 @@ which still acquires the session mutex and performs every authorization check.
 This avoids taking the same mutex twice and does not relax synchronization or
 deadlines. Funding-block race PASS 45.973s; Agent vet/diff checks PASS. Native
 effect remains unmeasured; no claim that DB contention or D-04 is resolved.
+
+Clean 33148a35b4640e3457ab604e19c5895fa8521211 native process run: single
+TCP/UDP PASS, concurrent TCP FAIL at stream 2 round 0 (0.40s), total 20.937s.
+First deadline: total 200.102ms, queue 1.056ms, existing attempt zero, direct
+199.045ms. Removing the redundant probe did not resolve the blocker.
+Artifacts process-33148a3, report SHA-256
+99a0ea2a37b9f864a04445ecc63e2dfe9cb6fa00dff688734ac1e0bc7450dea9;
+test.log 88f94de59fe346697d08f86ce1232f4077e587b29949bf7a285c9f605f8fbb0d.
+
+Added runtime transaction diagnostics when connection wait or transaction hold
+exceeds 25ms, including calling operation and commit/rollback result. Each
+transaction reports at most once; automatic rollback time may be included in
+the observed hold interval. No payload or authority identifier is logged.
+This adds diagnostic overhead and must not be represented as an uninstrumented
+performance run. Full Store race PASS 18.247s; Agent/Hub vet PASS.

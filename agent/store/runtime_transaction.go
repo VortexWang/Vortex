@@ -3,7 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
+	"log/slog"
+	"runtime"
 	"sync"
+	"time"
 )
 
 // storeTransaction is implemented by both sql.Tx and runtimeTransaction.
@@ -21,17 +24,27 @@ const authorizationRecordQuery = `SELECT authorization_id,parent_authorization_i
 // Preparing on the DB after BeginTx would deadlock our single connection pool.
 type runtimeTransaction struct {
 	*sql.Tx
-	parents map[string]*sql.Stmt
-	mu      sync.Mutex
-	bound   map[string]*sql.Stmt
+	parents  map[string]*sql.Stmt
+	mu       sync.Mutex
+	bound    map[string]*sql.Stmt
+	started  time.Time
+	wait     time.Duration
+	caller   uintptr
+	reported sync.Once
 }
 
 func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
+	started := time.Now()
+	caller, _, _, _ := runtime.Caller(1)
 	tx, err := s.db.BeginTx(ctx, opts)
+	wait := time.Since(started)
 	if err != nil {
+		if wait >= 25*time.Millisecond {
+			slog.Warn("runtime transaction wait failed", "operation", runtimeOperation(caller), "wait", wait, "error", err)
+		}
 		return nil, err
 	}
-	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt)}, nil
+	return &runtimeTransaction{Tx: tx, parents: s.runtimeStatements, bound: make(map[string]*sql.Stmt), started: time.Now(), wait: wait, caller: caller}, nil
 }
 
 func (tx *runtimeTransaction) statement(ctx context.Context, query string) *sql.Stmt {
@@ -69,4 +82,30 @@ func (tx *runtimeTransaction) ExecContext(ctx context.Context, query string, arg
 		return stmt.ExecContext(ctx, args...)
 	}
 	return tx.Tx.ExecContext(ctx, query, args...)
+}
+
+func runtimeOperation(pc uintptr) string {
+	if f := runtime.FuncForPC(pc); f != nil {
+		return f.Name()
+	}
+	return "unknown"
+}
+
+func (tx *runtimeTransaction) report(operation string, err error) {
+	tx.reported.Do(func() {
+		held := time.Since(tx.started)
+		if tx.wait >= 25*time.Millisecond || held >= 25*time.Millisecond {
+			slog.Warn("slow runtime transaction", "operation", runtimeOperation(tx.caller), "wait", tx.wait, "held", held, "finish", operation, "error", err)
+		}
+	})
+}
+func (tx *runtimeTransaction) Commit() error {
+	err := tx.Tx.Commit()
+	tx.report("commit", err)
+	return err
+}
+func (tx *runtimeTransaction) Rollback() error {
+	err := tx.Tx.Rollback()
+	tx.report("rollback", err)
+	return err
 }
