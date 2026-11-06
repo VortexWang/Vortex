@@ -1543,3 +1543,28 @@ and transaction/commit time separately before further structural tuning. The
 128-byte fixture block forces several capacity waves; it must not be enlarged
 merely to make the test pass without measuring and preserving its requirements.
 D-04 parameter selection and full qualification remain unachieved.
+
+
+## Native profiling and unchanged-deadline non-race control
+
+Owner reiterated approval of control 1.3.0; its existing recorded contract
+approval remains applicable. No additional wire extension is approved here.
+
+On dedicated native Ubuntu, ac5e0e5 ran the same 16-concurrent short-write test
+20 times without race instrumentation: 20 PASS, exit 0, total 3.183s. The
+128-byte funding fixture and 200ms admission deadline were unchanged. Remote
+raw log: artifacts/phase4/profile-ac5e0e5/plain/test.log; SHA-256
+152f64db68045cce0630406207298ed5a1dc4342119c2df1063d9038f71aec1a.
+
+The separately profiled race run still failed (13.592s). CPU samples include
+substantial race/checkptr overhead; SQLite prepare/parser paths account for
+roughly 46% cumulative CPU. Profile symbolization warned that its original
+temporary binary path was missing, so names may be incomplete. This establishes
+an instrumentation confound, not proof that SQLite FULL commits alone caused
+the deadline failures. Cumulative CPU percentages are not transaction latency.
+
+Non-race success does not supersede failed race evidence, full attack coverage,
+sustained durable-authority performance, or D-04 candidate qualification. Keep
+the production deadline unchanged. Further work must distinguish race safety
+and production latency, retain raw profiles, and measure transaction phases
+before additional tuning. D-04 and Phase 4 remain open.
