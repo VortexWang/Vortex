@@ -6,12 +6,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"io"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 	"vortex/backend/db/generated"
+	"vortex/backend/internal/policy"
 )
 
 // CacheCommand is a bounded RESP command for the optional internal Valkey
@@ -67,11 +70,43 @@ func CacheCommand(ctx context.Context, address string, args ...string) (string, 
 	return string(raw[:size]), nil
 }
 
+type AuthorityProjection struct {
+	Operations   []generated.ListAuthorityRow   `json:"operations"`
+	Tasks        []generated.Task               `json:"tasks"`
+	Resources    []generated.ResourceOwnership  `json:"resources"`
+	Grants       []generated.ResourceGrant      `json:"grants"`
+	Restrictions []generated.CurrentRestriction `json:"restrictions"`
+	Users        []generated.User               `json:"users"`
+}
+
 func (s *Tracer) RebuildCache(ctx context.Context, scope TenantScope, address string) ([]byte, error) {
-	if !scope.Valid() {
+	if !scope.Allows(policy.Read) || scope.Platform() {
 		return nil, ErrScope
 	}
-	rows, err := generated.New(s.Pool).ListAuthority(ctx, scope.TenantID())
+	// The rebuild is an internal tenant maintenance path. Platform API reads go
+	// through audited repositories; a platform principal cannot use this bypass.
+	var rows AuthorityProjection
+	err := pgx.BeginTxFunc(ctx, s.Pool, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(tx pgx.Tx) error {
+		q := generated.New(tx)
+		var e error
+		if rows.Operations, e = q.ListAuthority(ctx, scope.TenantID()); e != nil {
+			return e
+		}
+		if rows.Tasks, e = q.ListTenantTasks(ctx, scope.TenantID()); e != nil {
+			return e
+		}
+		if rows.Grants, e = q.ListTenantGrants(ctx, scope.TenantID()); e != nil {
+			return e
+		}
+		if rows.Resources, e = q.ListTenantResources(ctx, generated.ListTenantResourcesParams{TenantID: pgtype.Text{String: scope.TenantID(), Valid: true}, AtTime: timestamp(time.Now())}); e != nil {
+			return e
+		}
+		if rows.Restrictions, e = q.ListCurrentRestrictions(ctx, generated.ListCurrentRestrictionsParams{TenantID: scope.TenantID(), AtTime: timestamp(time.Now())}); e != nil {
+			return e
+		}
+		rows.Users, e = q.ListTenantUsers(ctx, scope.TenantID())
+		return e
+	})
 	if err != nil {
 		return nil, err
 	}
