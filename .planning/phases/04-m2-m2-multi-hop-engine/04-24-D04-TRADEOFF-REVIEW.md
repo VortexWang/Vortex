@@ -137,3 +137,22 @@ grant-return 仍属 Phase 5 协议事项，不能因此引入 Phase 4 新关闭�
 窗口和逐秒状态投影；投影省略 allocator 直方图，原始时序仍在测试机。
 两个 sysctl max 恢复 212992 并实查。20 项 Python 门禁测试通过，非法
 闲置时长在启动进程前被拒绝。正式资格及 D-04 参数锁定仍未完成。
+
+## 原生未知续申故障（f9d99ec）
+
+仅资格测试的显式 outcome 注入：首次有限额度接受，之后续申在 40ms
+返回 unknown。既有生产和默认测试路径不变；未知响应不能视作拒绝或
+未签发证明。单测验证 16 次后续尝试和关闭均不替换/释放 unknown；
+accounting/command race 通过（2.381s / 1.983s）。
+
+专用 Ubuntu 五进程、30s 动态目标/30% 水位/8MiB floor：负载试验
+exit 1，TCP 中断，混合 TCP 为零、UDP 100% 丢失，没有通过报告。
+launcher exit 0 仅表示脚本留证完成。22 份采样全部逐来源守恒；第
+4.000s 已观察到 unknown_grant=6029360，之后直至关闭均保持冻结，
+grant_records=2、accepted grants=1 不变。最终 used=8381768、available=6840，
+sessions/held/pending 均零；unknown_grant 非零，因此不得称“全部结清”。
+
+04-34-NATIVE-UNKNOWN-RENEWAL.json 保存原始 hash、状态投影、失败负载
+及语义配置。此项证明故障下不重复签发、不无资金释放；不能证明正常
+吞吐，也未证明真实丢失响应后恢复成功。测试机两个 sysctl max 均已
+恢复 212992。明确拒绝、迟到恢复和重复参数对照仍待原生验证。
