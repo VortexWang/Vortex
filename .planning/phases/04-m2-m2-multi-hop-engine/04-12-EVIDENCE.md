@@ -2152,3 +2152,16 @@ regression alternating duplex writes and requiring stable block IDs plus final
 source conservation. Funding-block race suite PASS 46.394s, Agent vet/diff PASS.
 Native 256-round renewal test remains required; historical live-count indexing
 has not yet changed.
+
+Clean ac20b2f7266c8a19dedd2f706696caef9dd12648 native process suite: original
+three cases PASS, ConcurrentRenewal FAIL stream 11 round 21 (3.15s), overall
+35.094s. Failure DB contains 32 funding blocks versus previous run's 579,
+734 usage reservations and 6 authorization records. Churn reduction is observed,
+but the workloads stopped at different points so this is not a throughput
+comparison. First deadline: total 200.211ms/direct 199.125ms. Slow admission
+holds include 33.309ms and 21.812ms; checkpoint examples hold 4.8-5.2ms. Need
+continued contention and steady-load profiling; this does not prove historical
+block counting is the remaining cause. Preserve failed extended test.
+Artifacts process-ac20b2f report SHA-256
+04249e1c1bf1064b1bc28264a9eb1fcd3db766197314ae250815348d770b819b;
+test.log ee3014d7bd73c3b7056b2ae57849d2093c844790dd2622c6291efcf2b45a0b51.
