@@ -2025,3 +2025,12 @@ SHA-256 report.json 6d0cd70009ca8eb3173cb39864eb16dab25338e1823130e93ef9119c8a7c
 test.log d856d44397c7e258e6c4a29c2f683808259eb7b1b51c11306f9edb98019b95df;
 benchmark.log b4826d90c3eb9b621e0176f322c5df2da6ea9577d04894d1c0628a6b6646ad18;
 cpu.pprof 901d7d18ee6db91b383796ad5bdd9d283d3834cbaed20103b02d31b6bf505f30.
+
+## Admission timeline diagnostic
+
+Added failure-only enqueue-to-delivery timing: queue wait, existing-block batch
+attempt (including session mutex), and direct admission attempt. Timings are
+owned by the queue worker; request delivery remains buffered and no deadline or
+authorization behavior changes. Group failures inherit their shared attempt
+start. Local funding-block race tests PASS 46.701s; Agent vet PASS. Native
+capture is required to attribute the shortened direct-attempt timeout.

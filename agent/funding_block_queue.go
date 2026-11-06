@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -11,10 +12,13 @@ import (
 )
 
 type fundingAdmissionRequest struct {
-	ctx       context.Context
-	direction accounting.Direction
-	bytes     int64
-	result    chan fundingAdmissionResult
+	enqueued                                  time.Time
+	queueWait, existingAttempt, directAttempt time.Duration
+	existingStarted                           time.Time
+	ctx                                       context.Context
+	direction                                 accounting.Direction
+	bytes                                     int64
+	result                                    chan fundingAdmissionResult
 }
 type fundingAdmissionResult struct {
 	batch *accounting.Batch
@@ -35,7 +39,7 @@ func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	r := &fundingAdmissionRequest{ctx: ctx, direction: direction, bytes: n, result: make(chan fundingAdmissionResult, 1)}
+	r := &fundingAdmissionRequest{enqueued: time.Now(), ctx: ctx, direction: direction, bytes: n, result: make(chan fundingAdmissionResult, 1)}
 	s.queueMu.Lock()
 	if s.queueCount >= 64 {
 		s.queueMu.Unlock()
@@ -66,6 +70,15 @@ func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.
 	}
 }
 func (s *fundingBlockSession) deliverAdmission(r *fundingAdmissionRequest, b *accounting.Batch, err error) {
+	if !r.existingStarted.IsZero() {
+		r.existingAttempt += time.Since(r.existingStarted)
+		r.existingStarted = time.Time{}
+	}
+	if err != nil {
+		slog.Warn("funding admission timeline", "direction", r.direction, "requested_bytes", r.bytes,
+			"total", time.Since(r.enqueued), "queue_wait", r.queueWait, "existing_attempt", r.existingAttempt,
+			"direct_attempt", r.directAttempt, "error", err)
+	}
 	r.result <- fundingAdmissionResult{b, err}
 	s.queueMu.Lock()
 	s.queueCount--
@@ -87,6 +100,7 @@ func (s *fundingBlockSession) drainAdmissionQueue() {
 		s.queueMu.Unlock()
 		for len(pending) > 0 {
 			first := pending[0]
+			first.queueWait = time.Since(first.enqueued)
 			if err := first.ctx.Err(); err != nil {
 				s.deliverAdmission(first, nil, err)
 				pending = pending[1:]
@@ -99,7 +113,9 @@ func (s *fundingBlockSession) drainAdmissionQueue() {
 				pending = pending[used:]
 				continue
 			}
+			started := time.Now()
 			b, err := s.reserveDirect(first.ctx, first.direction, first.bytes)
+			first.directAttempt = time.Since(started)
 			s.deliverAdmission(first, b, err)
 			pending = pending[1:]
 		}
@@ -107,6 +123,14 @@ func (s *fundingBlockSession) drainAdmissionQueue() {
 }
 func (s *fundingBlockSession) admitQueuedExisting(pending []*fundingAdmissionRequest) (int, bool) {
 	first := pending[0]
+	first.existingStarted = time.Now()
+	// Include session mutex wait even when no batch can be formed.
+	defer func() {
+		if !first.existingStarted.IsZero() {
+			first.existingAttempt += time.Since(first.existingStarted)
+			first.existingStarted = time.Time{}
+		}
+	}()
 	if err := s.mu.LockContext(first.ctx); err != nil {
 		s.deliverAdmission(first, nil, err)
 		return 1, true
@@ -168,7 +192,12 @@ func (s *fundingBlockSession) admitQueuedExisting(pending []*fundingAdmissionReq
 		}
 		// An ambiguous storage/commit failure must never trigger a fresh admission.
 		s.fail(err)
+		groupStarted := first.existingStarted
 		for _, r := range pending[:count] {
+			if r != first {
+				r.queueWait = groupStarted.Sub(r.enqueued)
+				r.existingStarted = groupStarted
+			}
 			s.deliverAdmission(r, nil, err)
 		}
 		return count, true
