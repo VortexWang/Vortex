@@ -2034,3 +2034,22 @@ owned by the queue worker; request delivery remains buffered and no deadline or
 authorization behavior changes. Group failures inherit their shared attempt
 start. Local funding-block race tests PASS 46.701s; Agent vet PASS. Native
 capture is required to attribute the shortened direct-attempt timeout.
+
+Clean ae37aa0a023cb6f741fee8e80be461b1df4bb46a dedicated process run: single
+TCP/UDP PASS, concurrent TCP FAIL at stream 14 round 0 (0.44s), overall 20.984s
+FAIL. First deadline timeline: total 200.241ms, queue 1.025ms, existing attempt
+2.611ms, direct attempt 196.605ms; Store begin-transaction 196.419ms. This first
+failure is dominated by DB connection waiting, not the coalescing timer. Other
+cancelled requests show existing-attempt waits as high as 141.201ms, consistent
+with waiting for session mutex held by settlement; these are secondary failures.
+Artifacts process-ae37aa0 report SHA-256
+f6ec84a1ca8f854a9ea4e567ec09741c2f7a9b05494deb4857414b15c7036e21;
+test.log e315fa50f20cf6d2b5d7622d85ba3be05c96fce45d8b7e2278f5b3ff87e070d9.
+Final diagnostic version funding-block race PASS 45.584s.
+
+Removed an unnecessary singleton batch probe: a queue containing one request
+cannot coalesce, so it now goes straight to the ordinary direct admission path,
+which still acquires the session mutex and performs every authorization check.
+This avoids taking the same mutex twice and does not relax synchronization or
+deadlines. Funding-block race PASS 45.973s; Agent vet/diff checks PASS. Native
+effect remains unmeasured; no claim that DB contention or D-04 is resolved.

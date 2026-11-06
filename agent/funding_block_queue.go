@@ -122,6 +122,11 @@ func (s *fundingBlockSession) drainAdmissionQueue() {
 	}
 }
 func (s *fundingBlockSession) admitQueuedExisting(pending []*fundingAdmissionRequest) (int, bool) {
+	// A singleton cannot form a batch. Its direct path performs all required
+	// session, authority and funding checks under the session mutex.
+	if len(pending) < 2 {
+		return 0, false
+	}
 	first := pending[0]
 	first.existingStarted = time.Now()
 	// Include session mutex wait even when no batch can be formed.
