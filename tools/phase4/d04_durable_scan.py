@@ -29,6 +29,7 @@ def run_case(case: dict, output: Path, go: str) -> dict:
         VORTEX_D04_TARGET_SECONDS=str(case["target_seconds"]),
         VORTEX_D04_RENEW_PERCENT=str(case["renew_percent"]),
         VORTEX_D04_RESULT_DIR=str(result_dir),
+        PHASE5_AUTHORIZATION_EVIDENCE_DIR=str(output / "ledgers"),
     )
     command = [go, "test", "./agent", "-run", "^TestRuntimeDurableD04Candidate$", "-count=1", "-v"]
     started = time.time()

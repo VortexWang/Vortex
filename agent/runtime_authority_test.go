@@ -436,7 +436,14 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			}
 			waitUntil := func(at time.Time) {
 				t.Helper()
+				lastHeartbeat := issuedAt
 				for {
+					if params.candidate && time.Since(lastHeartbeat) >= 5*time.Second {
+						lastHeartbeat = time.Now().UTC()
+						if err := hs.RecordBackendHeartbeat(ctx, lastHeartbeat, delegation.AutonomyDeadline); err != nil {
+							t.Fatal(err)
+						}
+					}
 					low, _, trusted := node.TrustedTime()
 					if trusted && !low.Before(at) {
 						return
@@ -672,6 +679,13 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				}
 			}
 			waitUntil(initialExpiry)
+			if params.candidate {
+				// Candidate traffic models an online backend. The longer initial
+				// lease must not accidentally turn this into an autonomy fixture.
+				if err := hs.RecordBackendHeartbeat(ctx, time.Now().UTC(), delegation.AutonomyDeadline); err != nil {
+					t.Fatal(err)
+				}
+			}
 			for i := 0; i < exchangeCount; i++ {
 				exchange()
 			}

@@ -3,7 +3,9 @@
 - Implementation commit: `34da54dbcf3fa905abb03cec0f5ed5b463b28c25`.
 - First native run: `/root/Vortex-phase4-current/artifacts/phase4/d04-durable-scan-34da54d` on the authorized Ubuntu host. Terminal status `fail`: all 18 cases at 64/256 KiB passed; all 9 cases at 1024 KiB failed because the fixture's four-second initial lease expired during the larger initial workload. Original logs remain intact.
 - Correction commit: `20372514f193f7ebab98009f8701fd870b95c506`. Candidate-only initial TTL is 30 seconds with a 90-second context per transport. Default regression TTL stays four seconds. Issued Hub credit is reported as outstanding; the conservation residual is no longer mislabeled as occupancy.
-- Second native run: `/root/Vortex-phase4-current/artifacts/phase4/d04-durable-scan-2037251-retry`, process PID 195244, runner log `/tmp/d04-durable-2037251-retry.log`. Confirmed live immediately after launch. Inspect live process and summaries before continuing; do not restart solely because the local SSH handle has ended.
+- Second native run: `/root/Vortex-phase4-current/artifacts/phase4/d04-durable-scan-2037251-retry`, runner log `/tmp/d04-durable-2037251-retry.log`. Stopped after three recorded failures: a 30-second initial lease wait also exceeded BackendLossGrace, leaving backend ledger delivery incomplete. PID 195244 was explicitly terminated; no scan/test process remained at the subsequent inspection.
+- Follow-up fixture fix refreshes the simulated online backend heartbeat every five seconds during the lease wait. A post-grace heartbeat was correctly rejected before this fix. The largest 1 MiB / 20% TCP case now passes locally in 43.213s (`/tmp/d04-heartbeat.JBjNk6`). No production autonomy rule changed.
+- Dynamic Engine/tracer runner now supports `--full-factorial` (27 combinations), preserving seven-case default behavior. All 28 Python tests pass. A new scan will require its own clean commit and evidence root.
 - An aborted stale-source attempt also exists at `d04-durable-scan-2037251`; its name is not source identity. Do not use it as evidence for 2037251; inspect its manifest.
 
 ## Evidence limits still open
