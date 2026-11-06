@@ -673,3 +673,24 @@ PASS for both TCP and UDP; full `go test -race ./agent/... ./hub/...` and
 `go vet ./agent/... ./hub/...` PASS; Engine VLink race/vet PASS. This proves a
 small-budget end-to-end trigger/issue/install/use cycle only. It is not a
 sustained throughput/D-04 scan, lost-response test, or proof-based return path.
+
+## Dedicated native adaptive integration regression — 4e2780d
+
+Clean measured commit `4e2780de8a51d311e785656533ca5576936b7f83` completed on
+43.254.164.7, Ubuntu 24.04.5 amd64, Go 1.27.3. Detached launcher finished with
+stage=complete and exit-code=0. Three uncached race repetitions of the funded
+TCP/UDP runtime test passed (36.565s total). This includes actual metered
+consumption triggering a 3000-byte control 1.3.0 demand and same-stream use of
+the new durable grant after initial expiry; 12 attack inputs per transport,
+including two client-side encoding refusals, passed each repetition.
+
+Full Node/Agent/Hub race tests and vet passed, followed by full independent
+Engine module race and vet. Both socket max buffers remain at 212992; no sysctl
+change was needed. Raw logs and final targeted-repetition Agent/Hub/backend
+SQLite snapshots were downloaded into artifacts/phase4/durable-4e2780d.
+04-15-NATIVE-ADAPTIVE.json records immutable SHA-256 for every downloaded file.
+Snapshots are the final repetition only; runtime.log records all three.
+
+This qualifies the finite native correctness regression at the named SHA only.
+Sustained adaptive throughput, delayed/lost response workload, full attack scope,
+idle return reconciliation and D-04 parameter locking remain unqualified.
