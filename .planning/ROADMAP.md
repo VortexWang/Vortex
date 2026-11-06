@@ -179,17 +179,17 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 1/11 plans complete in 11 dependency waves; 06-01 complete. 06-08 Task 1 is complete; CR-003 A is implemented. Task 2 is blocked only on the two exact CR-004 embedded license expressions after full source recovery and same-source application Docker/race passes. Final phase acceptance remains pending.
+**Plans**: 2/11 plans executed in 11 dependency waves; 06-01 and 06-08 complete. Owner approved CR-004 A separately from CR-003; exact artifact/source/use matching passes the full license/toolchain gate and same-source Docker normal/race regression on 7d43e1d2. 06-09 is next and has not started. Final phase acceptance, real source balances, Actions/native amd64 and remaining domain requirements are pending.
 
 **Wave 1**
 
 - [x] 06-01-PLAN.md — 真实后端 / PostgreSQL / Agent-Hub mTLS tracer
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** *(complete)*
 
-- [ ] 06-08-PLAN.md — 租户、固定角色、追加迁移、事务审计与 Valkey 重建；Task 1 完成；CR-003 A 已实施，Task 2 待 CR-004 两项精确表达式决定
+- [x] 06-08-PLAN.md — 租户、固定角色、追加迁移、事务审计与 Valkey 重建；2/2 完成；CR-003/004 精确批准门禁与同源 Docker normal/race 通过
 
-**Wave 3** *(blocked on Wave 2 completion)*
+**Wave 3** *(ready after Wave 2; not started)*
 
 - [ ] 06-09-PLAN.md — OpenAPI 唯一来源、分阶段证据门禁与限制清除
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 1/11 | Blocked — 06-08 Task 2 / CR-004 embedded license decision | - |
+| 6. M4 Backend | 2/11 | In progress — 06-08 complete; 06-09 next | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

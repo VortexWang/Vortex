@@ -17,14 +17,14 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## TEN Requirements
 
-- [ ] **TEN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (261-261; SHA-256 recorded there).
+- [x] **TEN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (261-261; SHA-256 recorded there).
 - [ ] **TEN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (262-262; SHA-256 recorded there).
-- [ ] **TEN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (263-263; SHA-256 recorded there).
-- [ ] **TEN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (264-264; SHA-256 recorded there).
-- [ ] **TEN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (265-265; SHA-256 recorded there).
-- [ ] **TEN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (276-276; SHA-256 recorded there).
-- [ ] **TEN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (282-282; SHA-256 recorded there).
-- [ ] **TEN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (283-283; SHA-256 recorded there).
+- [x] **TEN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (263-263; SHA-256 recorded there).
+- [x] **TEN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (264-264; SHA-256 recorded there).
+- [x] **TEN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (265-265; SHA-256 recorded there).
+- [x] **TEN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (276-276; SHA-256 recorded there).
+- [x] **TEN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (282-282; SHA-256 recorded there).
+- [x] **TEN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (283-283; SHA-256 recorded there).
 - [ ] **TEN-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (284-284; SHA-256 recorded there).
 
 ## NOD Requirements
@@ -176,7 +176,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
 - [ ] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
 - [ ] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
-- [ ] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
+- [x] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
 - [ ] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
 - [ ] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
 
@@ -356,14 +356,14 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | GEN-005 | Phase 2 | Complete |
 | GEN-006 | Phase 2 | Complete |
 | GEN-007 | Phase 2 | Complete |
-| TEN-001 | Phase 6 | Pending |
+| TEN-001 | Phase 6 | Complete |
 | TEN-002 | Phase 6 | Pending |
-| TEN-003 | Phase 6 | Pending |
-| TEN-004 | Phase 6 | Pending |
-| TEN-005 | Phase 6 | Pending |
-| TEN-006 | Phase 6 | Pending |
-| TEN-007 | Phase 6 | Pending |
-| TEN-008 | Phase 6 | Pending |
+| TEN-003 | Phase 6 | Complete |
+| TEN-004 | Phase 6 | Complete |
+| TEN-005 | Phase 6 | Complete |
+| TEN-006 | Phase 6 | Complete |
+| TEN-007 | Phase 6 | Complete |
+| TEN-008 | Phase 6 | Complete |
 | TEN-009 | Phase 6 | Pending |
 | NOD-001 | Phase 6 | Pending |
 | NOD-002 | Phase 6 | Pending |
@@ -494,7 +494,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | BE-001 | Phase 6 | Complete |
 | BE-002 | Phase 6 | Pending |
 | BE-003 | Phase 6 | Pending |
-| BE-004 | Phase 6 | Pending |
+| BE-004 | Phase 6 | Complete |
 | BE-005 | Phase 6 | Pending |
 | BE-006 | Phase 6 | Pending |
 | PLN-001 | Phase 6 | Pending |

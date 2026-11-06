@@ -4,18 +4,18 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 08
-status: blocked
-stopped_at: 06-08 Task 2 blocked by exact embedded license decision CR-004; CR-003 A implemented
-last_updated: "2026-11-06T23:13:27Z"
-last_activity: 2026-11-07
-last_activity_desc: "06-08 Task 1 complete; same-source Docker normal/race pass; CR-003 implemented, gate rejects only two CR-004 expressions."
+current_plan: 09
+status: executing
+stopped_at: Completed 06-08-PLAN.md; 06-09 is next and has not started
+last_updated: "2026-11-06T23:33:00Z"
+last_activity: 2026-11-06
+last_activity_desc: "06-08 complete; CR-004 A approved and enforced; full gate and same-source Docker normal/race pass on 7d43e1d2."
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 44
-  completed_plans: 43
-state_head: 35f4a5cdc3a47f8cb0bf926c9e4cb7aaba773a43
+  total_plans: 54
+  completed_plans: 44
+state_head: 677dcafe
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 08
+Current Plan: 09
 Total Plans in Phase: 11
-Status: Blocked — 06-08 Task 1 complete; CR-003 A implemented. Task 2 awaits CR-004 exact MIT-0/Bison-output exception decision. Phase 6 remains 1/11 complete.
-Last activity: 2026-11-06 — source 838c7391 passed clean Docker normal/process-race checks; exact dependency gate exit 1 only on CR-004 expressions. Three generator artifacts reviewed; no source gaps. Actions not run; caller Phase 4/5 work preserved.
+Status: Executing — 06-01 and 06-08 complete (2/11). Both CR-003 A and separately approved CR-004 A are implemented. Next plan 06-09 has not started; final Phase 6 acceptance remains pending.
+Last activity: 2026-11-06 — source 7d43e1d2 passed clean-clone full dependency gate (exit 0), all three exact generator artifacts, seven closure rejection experiments and Docker backend normal/race including real Agent/blocked-Hub processes. Evidence b1a92d72; completion SUMMARY 677dcafe. Actions/native amd64 not run; caller Phase 4/5 work preserved.
 
-Progress: Phase 6 [█░░░░░░░░░] 1/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [██░░░░░░░░░] 2/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -65,13 +65,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 |------|----------|-------|-------|
 | Phase 05 P03 | multi-session | 4 tasks | 61 files (source/governance; evidence excluded) |
 | Phase 06 P01 | 29min | 1 task | 26 files (source/tooling; 24 evidence files excluded) |
-| Phase 06 P08 (checkpoint) | 19min | 1/2 tasks complete | 21 source/tooling/proposal files; evidence separate |
+| Phase 06 P08 | 254min wall including approval checkpoints | 2 tasks | 195 changed files including source/governance/planning and raw evidence |
 
 ## Accumulated Context
 
 ### Decisions
 
-- 06-08 preserves applied 00001 and adds immutable tenant restrictions in 00002. Owner approved CR-003 A with 按推荐; exact artifact/usage/mysql tuple gate implemented. Full 42-module and embedded-source review reconstructs the 120 selected libc/runtime objects; only CR-004 MIT-0 and Bison-output exception expressions remain unapproved.
+- 06-08 preserves applied 00001 and adds immutable tenant restrictions in 00002. Owner approved CR-003 A with 按推荐 and independently approved CR-004 A with a. Exact official artifact/usage/module/source/asset matching now passes all three sqlc artifacts without widening allowed_spdx or runtime/distribution rights. Full 42-module and embedded-source review reconstructs all 120 selected libc/runtime objects. TEN-002/009 and future source-balance validation remain pending for later domain plans/06-11.
 
 - 06-01 uses real Agent NodeControl receipts; HubControl remains authenticated persistent liveness, blocked with signer epoch zero. Financial authority remains 06-05/06-06. Clean committed-clone Docker evidence is separate from the dirty caller checkout and unrun Actions.
 
@@ -92,9 +92,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Blockers/Concerns
 
-- 06-08 Task 2 blocking-human decision: docs/governance/proposals/CR-004-sqlc-embedded-license-review.md consolidates two exact expressions and recommends A; no unknown-license waiver. Do not execute dependent waves or mark the partial SUMMARY complete. WINDOWS 2 fixed for implemented CR-003; WINDOWS 3 tracks the remaining decision; balance debt 1 stays open.
+- 06-08 license decision is resolved: CR-004 A approved and enforced, full gate exit 0 on 7d43e1d2. WINDOWS 2/3 are fixed; balance debt 1 stays open for 06-05/06-11. TEN-002 still requires later domain ownership coverage; TEN-009 full business-resume coverage remains pending. GitHub Actions and native amd64 evidence are not claimed.
 
-- GSD state handlers reject Phase 5's existing `passed_with_scope` verification status. Preserve that scoped verdict; 06-01 position, progress, metric, decision and session were synchronized narrowly after SDK failure. Phase 6 cache-loss checks must extend to real source balances after 06-05; see WINDOWS.md.
+- GSD state handlers reject Phase 5's existing `passed_with_scope` verification status. Preserve that scoped verdict; 06-08 position, metric, decision and session were synchronized narrowly after SDK failure. SDK roadmap/requirements/windows updates succeeded. Disk inventory is 54 plans and 44 complete summaries; Phase 6 remains 2/11. Cache-loss checks must extend to real source balances after 06-05; see WINDOWS.md.
 
 - Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
 - Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification remains pending. D-04 has now received a candidate review, but parameter experiments and lock approval remain pending. No Phase 4 completion is claimed.
@@ -115,9 +115,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-06T19:35:05Z
-Stopped at: 06-08 Task 2 awaits CR-004 exact embedded license decision after completed source recovery and passing Docker regression
-Resume file: .planning/phases/06-m4-m4-backend/06-08-PLAN.md
+Last session: 2026-11-06T23:33:00Z
+Stopped at: Completed 06-08-PLAN.md; next 06-09 has not started
+Resume file: None
 
 ### Historical qualification review (not a main-workflow gate)
 
