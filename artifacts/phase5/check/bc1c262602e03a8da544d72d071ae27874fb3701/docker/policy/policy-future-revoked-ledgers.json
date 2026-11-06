@@ -1,0 +1,1 @@
+{"hashes":{"agent":"dce367405287de76233110e0eaa57218f99eb2868ecb2fae15e8e35b49825279","hub":"0f79fe96be486c2c8ce17a08ed1ccdf20c303478f38e51b0abbbbfbb8945e905"},"snapshot_method":"VACUUM INTO; standalone backup may use delete journal","source_journal_modes":{"agent":"wal","hub":"wal"}}

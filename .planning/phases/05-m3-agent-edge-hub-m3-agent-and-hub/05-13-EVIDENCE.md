@@ -1,8 +1,8 @@
 ---
 phase: 05
 plan: '13'
-status: incremental
-plan_complete: false
+status: verified
+plan_complete: true
 updated: 2026-11-06
 ---
 
@@ -17,3 +17,13 @@ Native named TestSharePolicyProcess scenarios passed for policy-cutover, policy-
 Independent policy audit inspects six consistent Agent/Hub database snapshots, hashes, immutable coefficient bindings, actual session snapshot references, separate funded debits, share holds and unknown debt. VACUUM INTO copies are consistent backups whose journal mode may be delete; metadata separately records the running source WAL mode.
 
 Same committed-source Docker/Actions full gates and final independent audits are pending. This incremental evidence does not complete the plan or phase. Unrelated Phase 4/05-03/wave2 edits are preserved.
+
+## Final paired verdict
+
+Source `bc1c262602e03a8da544d72d071ae27874fb3701` passed clean pinned Go1.27.3 Docker Linux arm64 and Ubuntu24.04 amd64 Actions [42204137919](https://github.com/VortexWang/Vortex/actions/runs/42204137919). Actions deployment lifecycle also passed. Retained current outputs, pair.json and files.sha256 are under artifacts/phase5/check/bc1c262602e03a8da544d72d071ae27874fb3701/. Earlier pending statements are superseded by this final result.
+
+Both hosts passed all eight required actual-process cases and eight named Store/race groups, full root/Engine regression, isolated disk-full, regional failover, credential rotation, drain/upgrade, recovering and conservation checks. Independently rerun Actions audits passed policy six snapshots, recovery five snapshots/ten faults, renewal twelve snapshots and settled retention. Archive13496817615 selection retained131 current members and omitted3048 historical/binary members; archive hash and member selection are recorded. Darwin full root, Agent/Hub race, Engine runtime/share race and focused vet also passed; Linux paired evidence supplies required platform semantics.
+
+Review caught an overly narrow exact-ID filter: future-period new-session admission now accepts only validated renewals of that same funded family, retaining source/parent/issuer/epoch/snapshot and absolute bounds; unrelated grants remain excluded. TestPolicyFutureRenewalKeepsFundedFamily protects this. Existing per-session Gate interface already supports immutable snapshot IDs, so no Engine source/SQL or normative contract modification was needed. Additive policy tables retain schema16 compatibility via a version marker; upgrade regressions pass. Bounded selection retains historical data without scanning unlimited future policy rows.
+
+T-05-23/24 and the scoped G05-05 share/policy portion are covered by current process/negative/occupancy/write-failure evidence. Full 34-requirement dispositions, threat review, missing/forged-evidence tests and renewed owner UAT remain05-14. Phase5 is not complete. The exploratory05-14 Python discovery failed because its planned tests/phase5 directory does not exist yet; it is not counted as a pass and will be implemented by05-14.

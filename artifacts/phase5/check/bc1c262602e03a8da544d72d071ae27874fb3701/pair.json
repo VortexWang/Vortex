@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "source_sha": "bc1c262602e03a8da544d72d071ae27874fb3701",
+  "scope": "05-13-share-policy-runtime",
+  "production_backend_authority": false,
+  "docker": {
+    "architecture": "arm64",
+    "report": "docker/report.json"
+  },
+  "actions": {
+    "architecture": "amd64",
+    "run_id": 42204137919,
+    "url": "https://github.com/VortexWang/Vortex/actions/runs/42204137919",
+    "report": "actions/report.json",
+    "deployment": "actions/deployment/report.json"
+  },
+  "independent_audits": [
+    "policy:6-snapshots",
+    "recovery:5-snapshots/10-faults",
+    "renewal:12-snapshots",
+    "settled-retention"
+  ]
+}

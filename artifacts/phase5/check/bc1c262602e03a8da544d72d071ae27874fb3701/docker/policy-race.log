@@ -1,0 +1,46 @@
+=== RUN   TestIssuerFuturePeriodRequiresFundedDelegationAndBoundedPreissue
+--- PASS: TestIssuerFuturePeriodRequiresFundedDelegationAndBoundedPreissue (0.26s)
+=== RUN   TestPolicyTransitionPinsSessionAndSeparatesFutureFunding
+--- PASS: TestPolicyTransitionPinsSessionAndSeparatesFutureFunding (0.44s)
+=== RUN   TestPolicyFutureRenewalKeepsFundedFamily
+--- PASS: TestPolicyFutureRenewalKeepsFundedFamily (0.31s)
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/missing
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/same-source
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/wrong-node
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/wrong-issuer
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/early
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/changed-snapshot
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/revoked-future
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/late-old
+=== RUN   TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/duplicate
+--- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot (2.38s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/missing (0.27s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/same-source (0.25s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/wrong-node (0.25s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/wrong-issuer (0.26s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/early (0.26s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/changed-snapshot (0.26s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/revoked-future (0.27s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/late-old (0.28s)
+    --- PASS: TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot/duplicate (0.27s)
+=== RUN   TestPolicyMissingFutureAndUntrustedClockNeverFallBackToOldPeriod
+--- PASS: TestPolicyMissingFutureAndUntrustedClockNeverFallBackToOldPeriod (0.30s)
+=== RUN   TestPolicyMigrationFailureKeepsAuthoritativeRowsAndCanReopen
+--- PASS: TestPolicyMigrationFailureKeepsAuthoritativeRowsAndCanReopen (0.33s)
+=== RUN   TestConfigShareOccupancyRetainsUnknownAndRequiresProvenRelease
+--- PASS: TestConfigShareOccupancyRetainsUnknownAndRequiresProvenRelease (0.31s)
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain/missing-parent
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain/wrong-issuer
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain/cycle
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain/stale-revision
+=== RUN   TestShareRuntimeAdmissionRejectsHostileInstalledChain/over-capacity
+--- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain (1.48s)
+    --- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain/missing-parent (0.29s)
+    --- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain/wrong-issuer (0.30s)
+    --- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain/cycle (0.31s)
+    --- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain/stale-revision (0.29s)
+    --- PASS: TestShareRuntimeAdmissionRejectsHostileInstalledChain/over-capacity (0.30s)
+PASS
+ok  	vortex/agent/store	6.829s

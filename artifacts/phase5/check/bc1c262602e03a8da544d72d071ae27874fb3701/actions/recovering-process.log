@@ -1,0 +1,24 @@
+=== RUN   TestRecoveringProcessCatchup
+=== RUN   TestRecoveringProcessCatchup/recovering-lost-ack
+2026/11/06 10:45:43 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:43 INFO udp link drop summary link_id=c41b53dec5b5576e8ddde2caa698bf73 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRecoveringProcessCatchup/recovering-restart
+2026/11/06 10:45:43 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:43 INFO udp link drop summary link_id=c5085f057bbd15aaf8573afdabb2cd0b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRecoveringProcessCatchup/recovering-before-handoff
+2026/11/06 10:45:44 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:44 INFO udp link drop summary link_id=6f2bf843c96763fdc1d165150dc0808c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRecoveringProcessCatchup/recovering-after-catchup
+2026/11/06 10:45:44 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:44 INFO udp link drop summary link_id=5b5dd512ba42a587b2437825ecca84b6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRecoveringProcessCatchup/recovering-wrong-hash
+2026/11/06 10:45:44 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:45 INFO udp link drop summary link_id=02ff883719d3dff6c72ee93ee5248656 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRecoveringProcessCatchup (3.76s)
+    --- PASS: TestRecoveringProcessCatchup/recovering-lost-ack (0.41s)
+    --- PASS: TestRecoveringProcessCatchup/recovering-restart (0.44s)
+    --- PASS: TestRecoveringProcessCatchup/recovering-before-handoff (0.46s)
+    --- PASS: TestRecoveringProcessCatchup/recovering-after-catchup (0.44s)
+    --- PASS: TestRecoveringProcessCatchup/recovering-wrong-hash (0.41s)
+PASS
+ok  	vortex/test/phase5	3.767s

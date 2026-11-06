@@ -1,0 +1,48 @@
+--- FAIL: TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC (0.18s)
+    control_test.go:113: Hub apply result events=2 err=<nil>
+2026/11/06 07:25:59 ERROR vlink inbound handshake failed err="context canceled"
+2026/11/06 07:26:13 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:13 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:13 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/06 07:26:13 INFO relay target connected target=127.0.0.1 port=45753
+2026/11/06 07:26:13 INFO relay OPEN authorized stream_id=3 network=1
+2026/11/06 07:26:13 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/06 07:26:17 ERROR relay target bridge failed stream_id=3 err="database or disk is full (13)"
+2026/11/06 07:26:17 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/06 07:26:17 INFO udp link drop summary link_id=17b57bed1371798313908967cec61558 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 07:26:17 INFO udp link drop summary link_id=01bd1932a2fcc24ed40d24ffef61b866 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 07:26:17 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:17 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:17 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/06 07:26:18 INFO relay target connected target=127.0.0.1 port=50544
+2026/11/06 07:26:18 INFO relay OPEN authorized stream_id=3 network=2
+2026/11/06 07:26:18 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/06 07:26:22 ERROR relay target bridge failed stream_id=3 err="database or disk is full (13)"
+2026/11/06 07:26:22 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/06 07:26:22 INFO udp link drop summary link_id=f9216fc1f737b6d127767bc0b92bc557 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 07:26:22 INFO udp link drop summary link_id=ed8649548cd51b733dc853f15b500689 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 07:26:22 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:22 INFO udp link drop summary link_id=2b81413c1bba1d8f42ed74cd60c9e58c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 07:26:22 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 07:26:22 INFO udp link drop summary link_id=6d985d1640ff3e763fa92c13d05a6fbe window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+FAIL
+FAIL	vortex/agent	33.075s
+--- FAIL: TestRevokedCertificateIsRejected (0.00s)
+    identity_test.go:268: identity: local credential revoked
+FAIL
+FAIL	vortex/agent/identity	0.151s
+ok  	vortex/agent/store	9.467s
+ok  	vortex/agent/upgrade	1.099s
+?   	vortex/cmd/modelcheck	[no test files]
+?   	vortex/cmd/vortex-node	[no test files]
+?   	vortex/cmd/vortex-test-hub	[no test files]
+ok  	vortex/contracts	0.004s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/hub	1.379s
+ok  	vortex/model	0.003s
+?   	vortex/test/netns/fixture	[no test files]
+ok  	vortex/test/phase5	38.632s
+ok  	vortex/tests/phase1	0.003s
+?   	vortex/tools/phase1	[no test files]
+?   	vortex/tools/phase4	[no test files]
+FAIL

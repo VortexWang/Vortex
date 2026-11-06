@@ -1,0 +1,36 @@
+=== RUN   TestSharePolicyProcess
+=== RUN   TestSharePolicyProcess/policy-cutover
+2026/11/06 10:45:47 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:45:53 INFO udp link drop summary link_id=ed63917562de628fbde26054c90010a9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/policy-future-revoked
+2026/11/06 10:45:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:00 INFO udp link drop summary link_id=54e738ea6ee2a39de5f1984828a8b192 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/policy-hub-restart
+2026/11/06 10:46:00 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=4a33ef31e496df2a1831f1d4e5a65a1c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/share-invalid-parent
+2026/11/06 10:46:07 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=98c54c456877f166a1c3a42c1437830a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/share-invalid-issuer
+2026/11/06 10:46:07 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=0762e0e7b2a54ef693a548e4e8f33723 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/share-invalid-cycle
+2026/11/06 10:46:07 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=3b00e5135668ee7de8cefb4cc948960c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/share-invalid-capacity
+2026/11/06 10:46:07 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=ff5ff62f3e44663cb1ac6401be0bc75a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSharePolicyProcess/share-invalid-revision
+2026/11/06 10:46:07 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 10:46:07 INFO udp link drop summary link_id=28011f031be169f6e4835b318d447898 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSharePolicyProcess (22.24s)
+    --- PASS: TestSharePolicyProcess/policy-cutover (6.43s)
+    --- PASS: TestSharePolicyProcess/policy-future-revoked (6.83s)
+    --- PASS: TestSharePolicyProcess/policy-hub-restart (6.44s)
+    --- PASS: TestSharePolicyProcess/share-invalid-parent (0.17s)
+    --- PASS: TestSharePolicyProcess/share-invalid-issuer (0.18s)
+    --- PASS: TestSharePolicyProcess/share-invalid-cycle (0.17s)
+    --- PASS: TestSharePolicyProcess/share-invalid-capacity (0.18s)
+    --- PASS: TestSharePolicyProcess/share-invalid-revision (0.17s)
+PASS
+ok  	vortex/test/phase5	22.244s

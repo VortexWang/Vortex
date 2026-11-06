@@ -1,0 +1,342 @@
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.37s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.25s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.35s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.34s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.25s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.35s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.06s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.30s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.36s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.35s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.30s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.31s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.36s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.25s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.04s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.26s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+=== RUN   TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew
+--- PASS: TestRuntimeIdentityAuthenticatedControlRevocationStopsReconnectAndRenew (0.36s)
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/valid
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/dns-only
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-dns
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-eku
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/expired
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca
+=== RUN   TestRuntimeIdentityProfileAndSignerRejections/local-revoked
+--- PASS: TestRuntimeIdentityProfileAndSignerRejections (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/valid (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/dns-only (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-dns (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-eku (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/wrong-key-usage (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/tls-signer-mismatch (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/expired (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/unrelated-ca (0.00s)
+    --- PASS: TestRuntimeIdentityProfileAndSignerRejections/local-revoked (0.00s)
+=== RUN   TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation
+--- PASS: TestRuntimeIdentityConcurrentPublicationAndCurrentRevocation (0.05s)
+=== RUN   TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded
+--- PASS: TestRuntimeIdentityRevocationsDurableAdditiveAndTimeBounded (0.29s)
+=== RUN   TestRuntimeIdentityCrashPublicationAndStaleAliases
+--- PASS: TestRuntimeIdentityCrashPublicationAndStaleAliases (0.35s)
+=== RUN   TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection
+--- PASS: TestRuntimeIdentityRenewalCommitFailureKeepsPriorSelection (0.25s)
+=== RUN   TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal
+--- PASS: TestRuntimeIdentityCapturedControlRejectsExpiredPeerAndLocal (0.00s)
+PASS
+ok  	vortex/agent	14.126s
