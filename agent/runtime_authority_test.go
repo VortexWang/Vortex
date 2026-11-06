@@ -334,18 +334,40 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 				code   vlink.OpenErrorCode
 				mutate func(*vlink.OpenRequest)
 			}{
+				{"unknown-rule", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleID[0] ^= 0xff }},
+				{"stale-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision-- }},
 				{"future-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision++ }},
+				{"stale-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration-- }},
 				{"future-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration++ }},
 				{"skipped-hop", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.HopIndex++ }},
 				{"visited-local", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.Visited = []vlink.NodeID{localNode} }},
 				{"duplicate-visited", vlink.OpenProtocolError, func(r *vlink.OpenRequest) { r.Visited = []vlink.NodeID{peerNode, peerNode} }},
+				{"zero-visited", vlink.OpenProtocolError, func(r *vlink.OpenRequest) { r.Visited = []vlink.NodeID{{}} }},
+				{"too-many-visited", vlink.OpenProtocolError, func(r *vlink.OpenRequest) {
+					r.Visited = make([]vlink.NodeID, 17)
+					for i := range r.Visited {
+						r.Visited[i][0] = byte(i + 1)
+					}
+				}},
+				{"invalid-network", vlink.OpenProtocolError, func(r *vlink.OpenRequest) { r.Network = 9 }},
+				{"unspecified-client-address", vlink.OpenProtocolError, func(r *vlink.OpenRequest) { r.ClientAddress = []byte{0, 0, 0, 0} }},
 			} {
 				t.Run("funded-attack-"+attack.name, func(t *testing.T) {
 					request := vlink.OpenRequest{RuleID: rule, RuleRevision: 2, PathGeneration: 4, Network: network, ClientAddress: []byte{127, 0, 0, 1}}
 					attack.mutate(&request)
 					forged, err := mux.Open(ctx, request)
 					if err != nil {
-						t.Fatal(err)
+						if attack.name != "too-many-visited" && attack.name != "invalid-network" {
+							t.Fatalf("OPEN rejected before remote policy: %v", err)
+						}
+						balance, auditErr := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+						if auditErr != nil || balance.Initial != 4096 || balance.Remaining != 4096 || balance.Reserved != 0 || balance.Committed != 0 || balance.Unknown != 0 || targets.Load() != 0 {
+							t.Fatalf("local protocol rejection changed authority or target: %+v targets=%d err=%v", balance, targets.Load(), auditErr)
+						}
+						return
+					}
+					if attack.name == "too-many-visited" || attack.name == "invalid-network" {
+						t.Fatal("malformed OPEN passed local protocol validation")
 					}
 					frame, err := forged.Receive(ctx)
 					if err != nil {

@@ -615,3 +615,30 @@ bootstrap prerequisites. Actual Hub delegation provisioning and current-boot
 authorization/time bootstrap are still required: this file does not solve or
 bypass them. Full native process deployment, load/failure tests, idle return
 protocol and parameter locking remain incomplete. No wire contract changed.
+
+## Expanded funded runtime OPEN attack cases
+
+`TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget` now exercises
+11 forged OPEN variants for both TCP and UDP after an authenticated, durable Hub
+credit grant: unknown rule, stale/future rule revision, stale/future path
+generation, skipped hop, local loop, duplicate/zero visited node, over-limit
+visited list, invalid network, and unspecified original-client address. All 22
+checks establish the expected rejection path, zero target access and unchanged
+source ledger (initial=remaining=4096; reserved/committed/unknown=0).
+
+The over-limit visited list and invalid network are rejected by the local
+MarshalOpen preflight before a frame is sent. They are therefore client-side
+protocol guards, not claims of remote runtime rejection; ParseOpen and OpenPolicy
+protocol rejection have separate VLink test coverage. The other nine attacks
+reach the real TLS/HELLO runtime, receive the expected OPEN_ERR class with a
+nonzero correlation ID, and leave target and funds untouched. This extends
+funded-route coverage from five to eleven types per transport. It remains a
+finite route attack set, not a complete attack audit across certificates,
+control replay, tenant isolation, quotas, disk failure, multi-hop switching and
+recovery.
+
+Verification: targeted funded-runtime race test PASS; full `go test -race
+./agent/... ./hub/...` and `go vet ./agent/... ./hub/...` PASS; engine module
+`go test -race ./vlink/...` and `go vet ./vlink/...` PASS; `git diff --check`
+PASS. A combined root-module command with `./engine/vlink/...` was invalid
+because Engine is a nested Go module; corrected commands ran at each module root.
