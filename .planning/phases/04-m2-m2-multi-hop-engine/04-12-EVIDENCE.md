@@ -532,3 +532,21 @@ This is a local prerequisite, not completed idle reclaim. Timed idle tracking,
 1 MiB shrink strategy, complete unresolved-hold accounting, final unused proof,
 authenticated transfer and exactly-once issuer credit remain required. No
 wire contract was changed, and no native performance claim is added.
+
+## Final local grant settlement snapshot
+
+Schema 18 adds immutable grant_settlement_proofs. Preparation requires a matching
+persisted seal and non-active grant, reuses grant-level conservation auditing
+inside the same transaction, rejects any unresolved reserved batch, and binds
+full scope plus initial/used/unknown/unused amounts to SHA-256. Retry validates
+current ledger and stored bytes/hash rather than trusting a previous snapshot
+blindly. No balance or liability is released by preparation.
+
+Tests exercise unsealed grants, outstanding reservations, late known/unknown
+settlement, exact unused exclusion of unknown bounds, store reopen, identical
+replay, corrupted hash and injected write failure without exposed proof.
+Full Agent/Hub race and vet PASS. This snapshot is local evidence only, not
+authenticated wire proof or issuer credit. Timed idle lifecycle, shrink policy,
+proof transport, Hub reconciliation/one-time recredit and adaptive performance
+remain open. The control 1.3.0 approval does not imply an unused-credit return
+message already exists; no frozen wire artifact changed in this slice.

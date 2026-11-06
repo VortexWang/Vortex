@@ -249,6 +249,19 @@ func (s *Store) AuditAuthorizationBalance(ctx context.Context, nodeID, authoriza
 		return result, err
 	}
 	defer tx.Rollback()
+	result, err = auditAuthorizationBalanceTx(ctx, tx, nodeID, authorizationID)
+	if err != nil {
+		return AuthorizationBalance{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return AuthorizationBalance{}, err
+	}
+	return result, nil
+}
+
+func auditAuthorizationBalanceTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationID string) (AuthorizationBalance, error) {
+	var result AuthorizationBalance
+	var err error
 	var initialText, remainingText string
 	if err := tx.QueryRowContext(ctx, `SELECT initial_bytes,remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&initialText, &remainingText); err != nil {
 		return result, err
