@@ -350,3 +350,148 @@ func TestMigrationUpgradeTenantAuthority(t *testing.T) {
 		})
 	}
 }
+
+// Clearing restrictions reissues only the persisted desired state of resources
+// still authorized for this tenant. Unknown execution retains its occupation.
+func TestRestrictionAllCauses(t *testing.T) {
+	pool := testutil.Postgres(t)
+	ctx := context.Background()
+	tenant, foreign := seedTenant(t, pool), seedTenant(t, pool)
+	own := policyScope(t, tenant, auth.Owner, policy.Mutate)
+	admin := policyScope(t, tenant, auth.PlatformAdmin, policy.Restrict)
+	s := service.TenantService{Pool: pool}
+	tracer := service.Tracer{Pool: pool}
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	var seeded []generated.Operation
+	for _, kind := range []string{"owned", "granted", "expired", "foreign", "unknown"} {
+		m := mutation()
+		owner, ownerTenant := "tenant", tenant
+		if kind == "granted" || kind == "expired" {
+			owner, ownerTenant = "platform", ""
+		}
+		if kind == "foreign" {
+			ownerTenant = foreign
+		}
+		if _, err := pool.Exec(ctx, "INSERT INTO resource_ownership(resource_id,resource_kind,owner_kind,owner_tenant_id) VALUES($1,'node',$2,NULLIF($3,''))", m.ResourceID, owner, ownerTenant); err != nil {
+			t.Fatal(err)
+		}
+		if owner == "platform" {
+			until := now.Add(time.Hour)
+			if kind == "expired" {
+				until = now.Add(-time.Minute)
+			}
+			if _, err := pool.Exec(ctx, "INSERT INTO resource_grants(id,tenant_id,resource_id,version,status,valid_from,valid_until) VALUES($1,$2,$3,1,'active',$4,$5)", uuid.NewString(), tenant, m.ResourceID, now.Add(-time.Hour), until); err != nil {
+				t.Fatal(err)
+			}
+		}
+		op, err := tracer.Mutate(ctx, own, m)
+		if err != nil {
+			t.Fatal(err)
+		}
+		state := "succeeded"
+		if kind == "unknown" {
+			state = "unknown"
+		}
+		if err = tracer.Reconcile(ctx, tenant, op.ID, service.Receipt{Revision: 1, Generation: 1, State: state, Payload: []byte("restriction seed")}); err != nil {
+			t.Fatal(err)
+		}
+		seeded = append(seeded, op)
+	}
+	a := service.Restriction{Cause: "quota_exhausted", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: now.Add(-time.Minute)}
+	b := a
+	b.Cause, b.SourceID = "package_expired", uuid.NewString()
+	for _, r := range []service.Restriction{a, b} {
+		if err := s.ChangeRestriction(ctx, admin, r, uuid.NewString()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a.ClearedAt = now
+	if err := s.ChangeRestriction(ctx, admin, a, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	assertCount := func(want int) {
+		t.Helper()
+		for _, table := range []string{"operations", "tasks", "outbox"} {
+			var got int
+			if err := pool.QueryRow(ctx, "SELECT count(*) FROM "+table+" WHERE tenant_id=$1", tenant).Scan(&got); err != nil || got != want {
+				t.Fatalf("all causes recovery: %s count=%d want=%d: %v", table, got, want, err)
+			}
+		}
+	}
+	assertCount(5) // One remaining cause prohibits every recovery task.
+	b.ClearedAt = now
+	if err := s.ChangeRestriction(ctx, admin, b, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	assertCount(7) // Owned + valid grant only; unknown remains held.
+	q := generated.New(pool)
+	for i, op := range seeded {
+		desired, err := q.GetDesiredState(ctx, generated.GetDesiredStateParams{TenantID: tenant, ResourceID: op.ResourceID})
+		want := int64(1)
+		if i < 2 {
+			want = 2
+		}
+		if err != nil || desired.Revision != want || !bytes.Equal(desired.Payload, op.Payload) {
+			t.Fatalf("resource %d recovery revision/payload: %v", i, err)
+		}
+	}
+	unknown, err := q.GetOperation(ctx, generated.GetOperationParams{TenantID: tenant, ID: seeded[4].ID})
+	if err != nil || unknown.State != "unknown" || !unknown.OccupationHeld {
+		t.Fatal("unknown occupation released", err)
+	}
+	if err = s.ChangeRestriction(ctx, admin, b, uuid.NewString()); err != nil {
+		t.Fatal("clear replay", err)
+	}
+	assertCount(7)
+	// A future clear cannot make a restriction disappear before its effective time.
+	a.SourceVersion++
+	a.ClearedAt = time.Time{}
+	if err = s.ChangeRestriction(ctx, admin, a, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	a.ClearedAt = time.Now().Add(time.Hour)
+	if err = s.ChangeRestriction(ctx, admin, a, uuid.NewString()); !errors.Is(err, service.ErrConflict) {
+		t.Fatal("future clear became an early resume", err)
+	}
+}
+
+func TestRestrictionAuditRollback(t *testing.T) {
+	pool := testutil.Postgres(t)
+	ctx := context.Background()
+	tenant := seedTenant(t, pool)
+	admin := policyScope(t, tenant, auth.PlatformAdmin, policy.Restrict)
+	m := mutation()
+	if _, err := pool.Exec(ctx, "INSERT INTO resource_ownership(resource_id,resource_kind,owner_kind,owner_tenant_id) VALUES($1,'node','tenant',$2)", m.ResourceID, tenant); err != nil {
+		t.Fatal(err)
+	}
+	tracer := service.Tracer{Pool: pool}
+	op, err := tracer.Mutate(ctx, policyScope(t, tenant, auth.Owner, policy.Mutate), m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = tracer.Reconcile(ctx, tenant, op.ID, service.Receipt{Revision: 1, Generation: 1, State: "succeeded", Payload: []byte("confirmed")}); err != nil {
+		t.Fatal(err)
+	}
+	r := service.Restriction{Cause: "manual", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: time.Now().Add(-time.Minute)}
+	s := service.TenantService{Pool: pool}
+	if err = s.ChangeRestriction(ctx, admin, r, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	tables := []string{"desired_state", "operations", "tasks", "outbox", "audit_events", "control_receipts", "restriction_events", "current_restrictions"}
+	before := authoritySnapshot(t, pool, tenant, tables)
+	name := "fail_resume_" + uuid.NewString()[:8]
+	request := uuid.NewString()
+	// Inject at the final audit INSERT, after authority/task/outbox writes.
+	_, err = pool.Exec(ctx, "CREATE FUNCTION "+name+"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.request_id='"+request+"' THEN RAISE EXCEPTION 'audit resume failure'; END IF; RETURN NEW; END $$; CREATE TRIGGER "+name+" BEFORE INSERT ON audit_events FOR EACH ROW EXECUTE FUNCTION "+name+"()")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Exec(ctx, "DROP TRIGGER "+name+" ON audit_events; DROP FUNCTION "+name+"()")
+	r.ClearedAt = time.Now()
+	if err = s.ChangeRestriction(ctx, admin, r, request); err == nil {
+		t.Fatal("audit failure accepted recovery")
+	}
+	if !bytes.Equal(before, authoritySnapshot(t, pool, tenant, tables)) {
+		t.Fatal("clear/history/desired/operation/task/outbox did not roll back together")
+	}
+}
