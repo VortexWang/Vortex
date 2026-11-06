@@ -35,6 +35,7 @@ func main() {
 	cpuProfile := flag.String("cpu-profile", "", "optional diagnostic CPU profile file")
 	issuerDelay := flag.Duration("test-issuer-delay", 0, "explicit source-only process-local qualification issuer response delay")
 	renewalOnly := flag.Bool("test-issuer-renewal-only", false, "skip injected delay on first finite grant only")
+	renewalOutcome := flag.String("test-issuer-renewal-outcome", "accepted", "test-only renewal response: accepted, rejected, unknown")
 	flag.Parse()
 	if *cpuProfile != "" {
 		file, err := os.Create(*cpuProfile)
@@ -61,6 +62,9 @@ func main() {
 	defer stop()
 	if *renewalOnly && *issuerDelay == 0 {
 		fatal("renewal-only requires test-issuer-delay")
+	}
+	if *renewalOutcome != "accepted" && (*renewalOutcome != "unknown" && *renewalOutcome != "rejected" || !*renewalOnly || *issuerDelay == 0) {
+		fatal("diagnostic renewal outcome requires unknown/rejected, renewal-only and delay")
 	}
 	if *issuerDelay != 0 && (cfg.Role != config.RoleSource || cfg.SourceCredit == nil || cfg.EvidenceFile == "") {
 		fatal("test issuer delay requires source credit and evidence output")
@@ -133,6 +137,12 @@ func main() {
 				constructor = runtimeaccounting.NewDelayedRenewalCreditGate
 			}
 			delayed, err := constructor(ctx, *cfg.SourceCredit, *issuerDelay)
+			if *renewalOutcome != "accepted" {
+				if delayed != nil {
+					delayed.Close()
+				}
+				delayed, err = runtimeaccounting.NewFaultedRenewalCreditGate(ctx, *cfg.SourceCredit, *issuerDelay, runtimeaccounting.GrantOutcome(*renewalOutcome))
+			}
 			if err != nil {
 				fatal(err.Error())
 			}

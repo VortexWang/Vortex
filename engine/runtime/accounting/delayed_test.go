@@ -54,6 +54,47 @@ func TestDelayedIssuerCoalescesBeforeWrites(t *testing.T) {
 	}
 	conserved(t, g.Credit)
 }
+
+func TestFaultedRenewalUnknownCannotBeReplacedOrSpent(t *testing.T) {
+	ctx := context.Background()
+	g, err := NewFaultedRenewalCreditGate(ctx, CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, 40*time.Millisecond, GrantUnknown)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	s, err := g.Open(ctx, core.Flow{Key: "unknown-renewal"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for range 128 {
+		b, e := s.Reserve(ctx, core.LeftToRight, 1)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = b.Commit(ctx, 1); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if _, err := s.Reserve(ctx, core.LeftToRight, 1); err == nil {
+		t.Fatal("unknown renewal spent")
+	}
+	before := g.Credit.State()
+	if before.UnknownGrant != 90 || before.PendingGrant != 0 || before.Used != 128 || before.Grants != 1 {
+		t.Fatalf("unexpected frozen state: %+v", before)
+	}
+	for range 16 {
+		if _, err := s.Reserve(ctx, core.LeftToRight, 1); err == nil {
+			t.Fatal("replacement authorized")
+		}
+	}
+	g.Close()
+	after := g.Credit.State()
+	if after.UnknownGrant != before.UnknownGrant || after.GrantRecords != before.GrantRecords || after.Unissued != before.Unissued {
+		t.Fatalf("unknown released/replaced: %+v", after)
+	}
+	conserved(t, g.Credit)
+}
 func TestDelayedIssuerTimeoutDoesNotReleasePending(t *testing.T) {
 	g := delayedFixture(t, time.Second)
 	ctx := context.Background()

@@ -31,7 +31,7 @@ for name, config in configs.items():
     semantic["udp_service"] = bool(config.get("udp_service_listen"))
     semantic["target_service"] = "echo-target:18081" if config.get("target") else ""
     canonical[name] = semantic
-manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT", "PHASE4_TEST_ISSUER_DELAY", "PHASE4_TEST_ISSUER_RENEWAL_ONLY", "PHASE4_IDLE_SECONDS")},
+manifest = {"runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT", "PHASE4_TEST_ISSUER_DELAY", "PHASE4_TEST_ISSUER_RENEWAL_ONLY", "PHASE4_IDLE_SECONDS", "PHASE4_TEST_ISSUER_RENEWAL_OUTCOME")},
             "udp_socket_limits": udp_socket_limits(), "roles": canonical, "runtime_source_sha256": hashlib.sha256((root / "engine/runtime/link/supervisor.go").read_bytes()).hexdigest(),
             "workload": {"duration_seconds": float(os.getenv("MIXED_DURATION_SECONDS", "5")),
                          "tcp_streams": int(os.getenv("MIXED_TCP_STREAMS", "4")),
@@ -50,7 +50,7 @@ metadata = {"commit": command("git", "rev-parse", "HEAD"), "dirty": bool(command
                     for config in configs.values())
             ) else "qualification-only",
             "qualification": "not-qualified",
-            "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT", "PHASE4_TEST_ISSUER_DELAY", "PHASE4_TEST_ISSUER_RENEWAL_ONLY", "PHASE4_IDLE_SECONDS")},
+            "runtime_environment": {key: os.getenv(key, "default") for key in ("GOMAXPROCS", "GOGC", "CPU_PROFILE", "VORTEX_QUALIFICATION_EVENT_LIMIT", "PHASE4_TEST_ISSUER_DELAY", "PHASE4_TEST_ISSUER_RENEWAL_ONLY", "PHASE4_IDLE_SECONDS", "PHASE4_TEST_ISSUER_RENEWAL_OUTCOME")},
             "udp_socket_limits": udp_socket_limits()}
 if Path("/etc/os-release").exists():
     release_fields = {}

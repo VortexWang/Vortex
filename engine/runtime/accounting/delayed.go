@@ -13,19 +13,20 @@ import (
 // measured response delay, not a network or durable authority. Caller timeout
 // does not prove non-issuance; the delayed reply can still settle its request.
 type DelayedCreditGate struct {
-	Credit       *CreditGate
-	delay        time.Duration
-	initialDelay time.Duration
-	issued       uint64
-	ctx          context.Context
-	cancel       context.CancelFunc
-	mu           sync.Mutex
-	pending      string
-	changed      chan struct{}
-	serial       uint64
-	workers      sync.WaitGroup
-	closed       bool
-	waiters      chan struct{}
+	Credit         *CreditGate
+	delay          time.Duration
+	initialDelay   time.Duration
+	renewalOutcome GrantOutcome
+	issued         uint64
+	ctx            context.Context
+	cancel         context.CancelFunc
+	mu             sync.Mutex
+	pending        string
+	changed        chan struct{}
+	serial         uint64
+	workers        sync.WaitGroup
+	closed         bool
+	waiters        chan struct{}
 }
 
 func NewDelayedCreditGate(parent context.Context, c CreditConfig, delay time.Duration) (*DelayedCreditGate, error) {
@@ -38,7 +39,22 @@ func NewDelayedCreditGate(parent context.Context, c CreditConfig, delay time.Dur
 	}
 	credit.observeWaits = true
 	ctx, cancel := context.WithCancel(parent)
-	return &DelayedCreditGate{Credit: credit, delay: delay, initialDelay: delay, ctx: ctx, cancel: cancel, changed: make(chan struct{}), waiters: make(chan struct{}, 128)}, nil
+	return &DelayedCreditGate{Credit: credit, delay: delay, initialDelay: delay, renewalOutcome: GrantAccepted, ctx: ctx, cancel: cancel, changed: make(chan struct{}), waiters: make(chan struct{}, 128)}, nil
+}
+
+// NewFaultedRenewalCreditGate is a qualification fault fixture: the first finite
+// grant succeeds; later requests receive the selected trusted outcome. Unknown
+// remains frozen; rejected is a definitive non-issuance response, not a timeout.
+func NewFaultedRenewalCreditGate(parent context.Context, c CreditConfig, delay time.Duration, outcome GrantOutcome) (*DelayedCreditGate, error) {
+	if outcome != GrantUnknown && outcome != GrantRejected {
+		return nil, fmt.Errorf("credit: invalid diagnostic renewal outcome")
+	}
+	g, err := NewDelayedRenewalCreditGate(parent, c, delay)
+	if err != nil {
+		return nil, err
+	}
+	g.renewalOutcome = outcome
+	return g, nil
 }
 
 // NewDelayedRenewalCreditGate supplies the first finite grant without injected
@@ -72,8 +88,10 @@ func (g *DelayedCreditGate) request() (chan struct{}, error) {
 	}
 	g.pending = id
 	delay := g.delay
+	responseOutcome := g.renewalOutcome
 	if g.issued == 0 {
 		delay = g.initialDelay
+		responseOutcome = GrantAccepted
 	}
 	g.issued++
 	changed := g.changed
@@ -82,7 +100,7 @@ func (g *DelayedCreditGate) request() (chan struct{}, error) {
 		defer g.workers.Done()
 		timer := time.NewTimer(delay)
 		defer timer.Stop()
-		outcome := GrantAccepted
+		outcome := responseOutcome
 		select {
 		case <-timer.C:
 		case <-g.ctx.Done():
