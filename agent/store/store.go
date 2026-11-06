@@ -248,6 +248,10 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS demand_idle_observations (
+ scope BLOB PRIMARY KEY NOT NULL, node_id TEXT NOT NULL, rule_id TEXT NOT NULL,
+ since_latest TEXT NOT NULL, observed_latest TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS grant_settlement_proofs (
  node_id TEXT NOT NULL, grant_id TEXT NOT NULL, payload BLOB NOT NULL,
  payload_sha256 BLOB NOT NULL, PRIMARY KEY(node_id,grant_id),
@@ -444,7 +448,25 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '18')
+CREATE TRIGGER IF NOT EXISTS idle_reset_runtime_sessions_insert AFTER INSERT ON runtime_sessions BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id IN (NEW.grant_id,NEW.initial_grant_id));
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_runtime_sessions_update AFTER UPDATE ON runtime_sessions BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id IN (NEW.grant_id,NEW.initial_grant_id));
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_usage_holds_insert AFTER INSERT ON authorization_usage_holds BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id=NEW.authorization_id);
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_usage_holds_update AFTER UPDATE ON authorization_usage_holds BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id=NEW.authorization_id);
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_demands_insert AFTER INSERT ON authorization_demands BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=json_extract(NEW.scope,'$.NodeID') AND rule_id=json_extract(NEW.scope,'$.RuleID');
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_demands_update AFTER UPDATE ON authorization_demands BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=json_extract(NEW.scope,'$.NodeID') AND rule_id=json_extract(NEW.scope,'$.RuleID');
+END;
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '19')
   ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 `)
 	if err != nil {

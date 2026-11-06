@@ -550,3 +550,25 @@ authenticated wire proof or issuer credit. Timed idle lifecycle, shrink policy,
 proof transport, Hub reconciliation/one-time recredit and adaptive performance
 remain open. The control 1.3.0 approval does not imply an unused-credit return
 message already exists; no frozen wire artifact changed in this slice.
+
+## Persistent quiescence observation with activity invalidation
+
+Schema 19 adds demand_idle_observations and transactional invalidation triggers
+on runtime session insert/update, authorization hold insert/update, and demand
+insert/update. Invalidation is conservative across the entire node/rule, so
+activity on another path cannot leave an old idle interval accidentally intact.
+ObserveDemandIdle refuses to count open sessions (including old boots), pending
+holds or pending requests as idle. It computes minimum duration from the initial
+latest time bound to the current earliest bound and durably restarts the
+interval after backwards latest-time movement. It does not return funding.
+
+Tests establish an interval, create and close a session entirely between scans,
+reopen Store, and require duration zero. A pending direct reservation prevents
+idle; unknown settlement starts a fresh interval while preserving unknown=100.
+Clock rollback invalidates the old interval rather than resuming it later.
+Targeted race, vet and full Agent/Hub race PASS.
+
+Not yet an automatic shrink/reclaim controller: lifecycle observation must be
+combined atomically with grant fencing, preserved warm allowance and final
+proof dispatch before enabling timed policy. No parameter lock or performance
+claim is made by these tests.
