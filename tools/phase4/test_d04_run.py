@@ -13,6 +13,14 @@ class D04Tests(unittest.TestCase):
             self.assertEqual(case["grant_target_bytes"], 12500000 * case["grant_target_seconds"])
         self.assertTrue(all(c["grant_target_bytes"] >= 8 * 1024 * 1024 for c in candidates(0.001)))
 
+    def test_invalid_histogram_cannot_produce_review_evidence(self):
+        for buckets in ([], {}, [True], [-1, 2], [1.5], [float("nan")], [0] * 65):
+            with self.subTest(buckets=buckets), self.assertRaises(ValueError):
+                percentile_bucket(buckets, .99)
+        for percentile in (0, -1, 1.1, True, float("nan"), float("inf")):
+            with self.subTest(percentile=percentile), self.assertRaises(ValueError):
+                percentile_bucket([1], percentile)
+
     def test_percentile_reports_bucket_upper_bound(self):
         self.assertEqual(percentile_bucket([0, 1, 3, 0], .5), 7 / 1e6)
         self.assertEqual(percentile_bucket([1], .99), 1 / 1e6)

@@ -1,5 +1,7 @@
 # D-04 参数评审（2026-11-04）
 
+补充量化评审：[04-24-D04-TRADEOFF-REVIEW.md](04-24-D04-TRADEOFF-REVIEW.md)。
+
 ## Current stage boundary — 2026-11-06 owner decision
 
 M2 参数关闭按 [04-CLOSURE.md](04-CLOSURE.md) 的 P4-Q4 执行：允许有限、

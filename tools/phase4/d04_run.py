@@ -25,6 +25,12 @@ def candidates(rate_mbps=100):
 
 
 def percentile_bucket(buckets, percentile):
+    if (not isinstance(buckets, list) or not buckets or len(buckets) > 64 or
+            any(type(value) is not int or value < 0 for value in buckets)):
+        raise ValueError("invalid issuer timing histogram")
+    if (type(percentile) not in (int, float) or not math.isfinite(percentile) or
+            not 0 < percentile <= 1):
+        raise ValueError("invalid issuer timing percentile")
     count = sum(buckets)
     if not count:
         raise ValueError("no issuer timing samples")
