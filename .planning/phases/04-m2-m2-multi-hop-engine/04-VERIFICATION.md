@@ -38,6 +38,15 @@ Edge Hub durable receipt, SQLite WAL recovery, PostgreSQL authority, or
 persistent balance claim is made. D-04 remains `pending-review` and its
 parameters remain unlocked.
 
+## Current transport-mode regression — 2026-11-06
+
+The final-code Docker mode sweep passed explicit `pool`, `mux`, and adaptive
+`auto` on one clean SHA. It observed bounded link reuse, pool/mux selection and
+finite fault/integrity coverage; the result is recorded in
+`04-40-Q5-MODE-EVIDENCE.md`. This preserves Q5's Engine regression evidence,
+but the native Linux controlled-RTT gate remains open and NFR-007 is not
+promoted.
+
 ## Rejected renewal increment — 2026-11-06
 
 The delayed process-local issuer now has a regression for a definitive renewal
