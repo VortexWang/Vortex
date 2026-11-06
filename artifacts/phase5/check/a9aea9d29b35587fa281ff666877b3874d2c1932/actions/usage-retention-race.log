@@ -1,0 +1,40 @@
+=== RUN   TestSettledUsageRetentionConservativeAgeAndRestartReplay
+--- PASS: TestSettledUsageRetentionConservativeAgeAndRestartReplay (0.26s)
+=== RUN   TestSettledUsageRetentionHolesDisputesAndUnknownDebt
+--- PASS: TestSettledUsageRetentionHolesDisputesAndUnknownDebt (0.25s)
+=== RUN   TestSettledUsageRetentionAtomicFailureAndMigration
+--- PASS: TestSettledUsageRetentionAtomicFailureAndMigration (0.41s)
+=== RUN   TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged
+--- PASS: TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged (0.20s)
+=== RUN   TestSettledUsageRetentionConcurrentReplayAndPrune
+--- PASS: TestSettledUsageRetentionConcurrentReplayAndPrune (0.20s)
+=== RUN   TestSettledUsageRetentionConservativeAgeAndRestartReplay
+--- PASS: TestSettledUsageRetentionConservativeAgeAndRestartReplay (0.22s)
+=== RUN   TestSettledUsageRetentionHolesDisputesAndUnknownDebt
+--- PASS: TestSettledUsageRetentionHolesDisputesAndUnknownDebt (0.23s)
+=== RUN   TestSettledUsageRetentionAtomicFailureAndMigration
+--- PASS: TestSettledUsageRetentionAtomicFailureAndMigration (0.39s)
+=== RUN   TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged
+--- PASS: TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged (0.20s)
+=== RUN   TestSettledUsageRetentionConcurrentReplayAndPrune
+--- PASS: TestSettledUsageRetentionConcurrentReplayAndPrune (0.20s)
+=== RUN   TestSettledUsageRetentionConservativeAgeAndRestartReplay
+--- PASS: TestSettledUsageRetentionConservativeAgeAndRestartReplay (0.23s)
+=== RUN   TestSettledUsageRetentionHolesDisputesAndUnknownDebt
+--- PASS: TestSettledUsageRetentionHolesDisputesAndUnknownDebt (0.23s)
+=== RUN   TestSettledUsageRetentionAtomicFailureAndMigration
+--- PASS: TestSettledUsageRetentionAtomicFailureAndMigration (0.41s)
+=== RUN   TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged
+--- PASS: TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged (0.19s)
+=== RUN   TestSettledUsageRetentionConcurrentReplayAndPrune
+--- PASS: TestSettledUsageRetentionConcurrentReplayAndPrune (0.20s)
+PASS
+ok  	vortex/agent/store	4.838s
+=== RUN   TestRecoveryRetainsReceiptIdentityAfterUsageCompaction
+--- PASS: TestRecoveryRetainsReceiptIdentityAfterUsageCompaction (0.23s)
+=== RUN   TestRecoveryRetainsReceiptIdentityAfterUsageCompaction
+--- PASS: TestRecoveryRetainsReceiptIdentityAfterUsageCompaction (0.22s)
+=== RUN   TestRecoveryRetainsReceiptIdentityAfterUsageCompaction
+--- PASS: TestRecoveryRetainsReceiptIdentityAfterUsageCompaction (0.22s)
+PASS
+ok  	vortex/hub	1.688s

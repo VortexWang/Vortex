@@ -1,0 +1,148 @@
+{
+  "conclusion": "success",
+  "databaseId": 42181891508,
+  "headSha": "a9aea9d29b35587fa281ff666877b3874d2c1932",
+  "jobs": [
+    {
+      "completedAt": "2026-11-06T07:43:30Z",
+      "conclusion": "success",
+      "databaseId": 127773163121,
+      "name": "wave1",
+      "startedAt": "2026-11-06T07:35:37Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-06T07:35:39Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-06T07:35:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:35:41Z",
+          "conclusion": "success",
+          "name": "Checkout",
+          "number": 2,
+          "startedAt": "2026-11-06T07:35:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:35:47Z",
+          "conclusion": "success",
+          "name": "Set up Go",
+          "number": 3,
+          "startedAt": "2026-11-06T07:35:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:35:53Z",
+          "conclusion": "success",
+          "name": "Install Protoc",
+          "number": 4,
+          "startedAt": "2026-11-06T07:35:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:36:04Z",
+          "conclusion": "success",
+          "name": "Install pinned Go Protobuf generators",
+          "number": 5,
+          "startedAt": "2026-11-06T07:35:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:36:05Z",
+          "conclusion": "success",
+          "name": "Run frozen contract and traceability checks",
+          "number": 6,
+          "startedAt": "2026-11-06T07:36:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:37:12Z",
+          "conclusion": "success",
+          "name": "Run Wave 1 check",
+          "number": 7,
+          "startedAt": "2026-11-06T07:36:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:37:14Z",
+          "conclusion": "success",
+          "name": "Run Wave 2 check",
+          "number": 8,
+          "startedAt": "2026-11-06T07:37:12Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:37:14Z",
+          "conclusion": "success",
+          "name": "Prepare isolated full-disk fixture",
+          "number": 9,
+          "startedAt": "2026-11-06T07:37:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:38:49Z",
+          "conclusion": "success",
+          "name": "Run incremental durable authorization regression",
+          "number": 10,
+          "startedAt": "2026-11-06T07:37:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:24Z",
+          "conclusion": "success",
+          "name": "Run full Phase 5 recovery gate",
+          "number": 11,
+          "startedAt": "2026-11-06T07:38:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:26Z",
+          "conclusion": "success",
+          "name": "Retain recovery regression evidence",
+          "number": 12,
+          "startedAt": "2026-11-06T07:43:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:27Z",
+          "conclusion": "success",
+          "name": "Retain authorization regression evidence",
+          "number": 13,
+          "startedAt": "2026-11-06T07:43:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:27Z",
+          "conclusion": "success",
+          "name": "Post Set up Go",
+          "number": 25,
+          "startedAt": "2026-11-06T07:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:28Z",
+          "conclusion": "success",
+          "name": "Post Checkout",
+          "number": 26,
+          "startedAt": "2026-11-06T07:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-06T07:43:28Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 27,
+          "startedAt": "2026-11-06T07:43:28Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42181891508/job/127773163121"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/VortexWang/Vortex/actions/runs/42181891508"
+}

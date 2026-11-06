@@ -1,0 +1,50 @@
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent
+--- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess (2.18s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result (0.76s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result (0.71s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent (0.70s)
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor
+--- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume (1.48s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry (0.76s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor (0.72s)
+=== RUN   TestRenewalSafetyLateOldMutualTLSResultCannotInstall
+--- PASS: TestRenewalSafetyLateOldMutualTLSResultCannotInstall (1.77s)
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent
+--- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess (2.24s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result (0.75s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result (0.76s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent (0.74s)
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor
+--- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume (1.42s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry (0.72s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor (0.69s)
+=== RUN   TestRenewalSafetyLateOldMutualTLSResultCannotInstall
+--- PASS: TestRenewalSafetyLateOldMutualTLSResultCannotInstall (1.76s)
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result
+=== RUN   TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent
+--- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess (2.19s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/before-result (0.75s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/after-result (0.73s)
+    --- PASS: TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess/concurrent (0.71s)
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry
+=== RUN   TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor
+--- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume (1.42s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/exact-expiry (0.76s)
+    --- PASS: TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume/stale-anchor (0.66s)
+=== RUN   TestRenewalSafetyLateOldMutualTLSResultCannotInstall
+--- PASS: TestRenewalSafetyLateOldMutualTLSResultCannotInstall (1.78s)
+PASS
+ok  	vortex/agent	17.259s

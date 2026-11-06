@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "source_sha": "a9aea9d29b35587fa281ff666877b3874d2c1932",
+  "scope": "05-09-runtime-identity",
+  "command": "make phase5-check",
+  "production_backend_authority": false,
+  "docker": {
+    "architecture": "arm64",
+    "report": "docker/report.json",
+    "named_identity_race_passes": 70
+  },
+  "actions": {
+    "architecture": "amd64",
+    "run_id": 42181891508,
+    "url": "https://github.com/VortexWang/Vortex/actions/runs/42181891508",
+    "report": "actions/report.json",
+    "named_identity_race_passes": 70
+  }
+}

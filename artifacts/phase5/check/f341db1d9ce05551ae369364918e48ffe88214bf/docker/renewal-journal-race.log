@@ -1,0 +1,88 @@
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+PASS
+ok  	vortex/contracts	1.011s
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.59s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.24s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.22s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.19s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.22s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.23s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.23s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.23s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.22s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.22s)
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.66s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.22s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.24s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.22s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.24s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.24s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.24s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.23s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.24s)
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.69s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.24s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.24s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.26s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.33s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.21s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.21s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.21s)
+PASS
+ok  	vortex/agent/store	8.779s
