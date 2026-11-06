@@ -1,0 +1,16 @@
+ok  	vortex/agent	19.066s
+ok  	vortex/agent/identity	1.867s
+ok  	vortex/agent/store	5.992s
+ok  	vortex/agent/upgrade	4.684s
+?   	vortex/cmd/modelcheck	[no test files]
+?   	vortex/cmd/vortex-node	[no test files]
+?   	vortex/cmd/vortex-test-hub	[no test files]
+ok  	vortex/contracts	2.249s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/hub	4.669s
+ok  	vortex/model	1.393s
+?   	vortex/test/netns/fixture	[no test files]
+ok  	vortex/test/phase5	23.689s
+ok  	vortex/tests/phase1	2.680s
+?   	vortex/tools/phase1	[no test files]
+?   	vortex/tools/phase4	[no test files]

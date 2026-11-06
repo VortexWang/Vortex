@@ -286,3 +286,77 @@ cleanup integration, not creation of usage journal entries. Unknown debt, issues
 handoff evidence and disputes must survive cleanup. No plan SUMMARY or G05-01
 closure is created by this increment. All Hub tests remain protocol-backend
 fixtures, not Phase 6 production authority or Phase 4 performance qualification.
+
+## Increment: conservative settled-usage compaction (2026-11-06)
+
+Source `b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587` implements the retention
+portion of task 2 without changing the approved wire/runtime contracts or
+adding dependencies. `Store.migrateUsageRetention` is a separate additive FULL
+transaction and migration marker; failure rolls back its tables and marker,
+leaving all prior authority and usage intact. The existing renewal schema
+version remains 16. Reopen and injected migration/deletion failures are covered.
+
+`Store.PruneSettledUsage` requires Hub ownership, bounded work (1..1000),
+trusted conservative time, an exact backend usage receipt, an exact confirmed
+known-usage journal entry, and a contiguous ledger checkpoint with no earlier
+unconfirmed hole. Only observing all confirmations with a trusted upper time
+bound starts retention; historic wall-clock timestamps do not count. A later
+trusted lower bound must reach that upper bound plus seven days. Out-of-order
+ACKs, absent backend receipts, untrusted time, explicit disputes and recorded
+unknown-identity conflicts cannot authorize deletion. The bounded scan prioritizes
+mature records, then unaged records, to avoid starvation behind young records.
+
+Compaction atomically removes duplicate `usage_batches` payloads and transport
+receipts, replacing them with permanent node/batch/snapshot/hash/sequence
+`settled_usage_tombstones`. The original confirmed `hub_ledger` payload remains
+available for audit and duplicate ledger ACKs, preserving the sequence high-water
+mark. Replay through `PersistUsageLedger`, `BackendUsageConfirmed` and
+`ConfirmBackendUsage` recognizes tombstones without reinsertion or another
+backend acceptance. Changed known payloads are rejected and retained in
+`usage_disputes`; an unknown record cannot reuse a compacted known identity.
+Issues, handoffs, source balances, unknown liabilities and disputes are never
+removed. This compacts duplicate transport storage; it does not archive or
+prune the authoritative financial journal.
+
+`Issuer.ReplayLedger` invokes bounded cleanup after durable replay when a valid
+trusted clock is available. Missing/untrusted time defers cleanup. Agent stores
+cannot invoke it: their Hub ACK is not authenticated backend settlement. A
+production backend transport and Hub service scheduling are not claimed by the
+protocol-adapter tests and remain in their respective later plans.
+
+Five named `TestSettledUsageRetention*` regressions cover seven-day lower/upper
+bounds, restart replay, checkpoint holes, missing backend confirmation, disputes,
+unknown debt, FULL migration/deletion rollback, bounded scan progress, and
+concurrent prune/replay/receipt confirmation. The Hub integration test
+`TestRecoveryRetainsReceiptIdentityAfterUsageCompaction` exercises replay and
+cleanup against separate durable Hub/backend SQLite files, including untrusted
+time and post-cleanup idempotency. All six run three times under race in the
+required gate, with explicit named PASS/SKIP checks.
+
+`audit_usage_retention.py` independently opens the retained SQLite snapshot,
+verifies integrity and every surviving payload hash, confirms the exact known
+hash tombstone/checkpoint, and checks disputed, unconfirmed and unresolved
+unknown records remain. Its clock is a deterministic conservative-bound fixture;
+it does not represent seven days of production observation. Supporting native
+root/race/vet and targeted repetitions passed. Native macOS Python SQLite 3.51.0
+failed to open the raw snapshot and is not a passing audit; the pinned Linux
+container audit passed. Final same-SHA Docker/Actions evidence follows below.
+
+05-08 remains executing: renewal-specific revocation, late old-session replies
+and stale/exact-expiry trusted-time combinations still need their own evidence.
+No SUMMARY, plan completion or Phase 6 production-authority claim is made.
+
+Paired full-gate result: source `b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587`
+passed clean-clone pinned Go 1.27.3 Linux arm64 Docker and GitHub Actions
+Linux amd64 [run 42171635825](https://github.com/VortexWang/Vortex/actions/runs/42171635825).
+Both executed `make phase5-check`, the six live renewal process cases and all
+six new retention tests three times under race (18 named passes per host).
+Each retained its own compressed SQLite snapshot, hashes, raw logs, recovery
+fixtures and passing independent retention/recovery audit results. Downloaded
+Actions evidence was independently re-read again in the pinned Linux container;
+18 already-committed historical SHA evidence directories from the uploaded
+artifact were omitted from this new run's local evidence, preserving all its
+current top-level output. Raw current evidence, run metadata, `pair.json` and
+`files.sha256` are under `artifacts/phase5/check/b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587/`.
+Supporting native logs are explicitly precommit scope. The macOS Python audit
+failure is recorded as not passed and is not substituted for Linux results.

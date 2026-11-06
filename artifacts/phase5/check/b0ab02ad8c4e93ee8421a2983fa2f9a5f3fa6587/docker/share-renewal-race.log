@@ -1,0 +1,364 @@
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl
+--- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope (1.73s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid (0.31s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled (0.24s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived (0.22s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer (0.26s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule (0.24s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount (0.21s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl (0.24s)
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle
+--- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation (0.02s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle (0.00s)
+=== RUN   TestRenewalRejectsLegacySuccessBeforeInstallingAuthority
+--- PASS: TestRenewalRejectsLegacySuccessBeforeInstallingAuthority (0.26s)
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true
+--- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult (4.27s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false (1.58s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true (2.69s)
+=== RUN   TestRenewalCadenceAndCapabilityBounds
+--- PASS: TestRenewalCadenceAndCapabilityBounds (0.00s)
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl
+--- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope (1.73s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid (0.28s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled (0.23s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived (0.26s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer (0.27s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule (0.21s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount (0.24s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl (0.24s)
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle
+--- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation (0.02s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle (0.00s)
+=== RUN   TestRenewalRejectsLegacySuccessBeforeInstallingAuthority
+--- PASS: TestRenewalRejectsLegacySuccessBeforeInstallingAuthority (0.26s)
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true
+--- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult (4.28s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false (1.63s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true (2.66s)
+=== RUN   TestRenewalCadenceAndCapabilityBounds
+--- PASS: TestRenewalCadenceAndCapabilityBounds (0.00s)
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount
+=== RUN   TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl
+--- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope (1.84s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/valid (0.28s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unjournaled (0.27s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/unreceived (0.28s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/wrong-issuer (0.22s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-rule (0.25s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-amount (0.26s)
+    --- PASS: TestAuthorizationLifecycleRenewalNeedsDurableMatchingScope/expanded-ttl (0.27s)
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash
+=== RUN   TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle
+--- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation (0.02s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/valid (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-refs (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsupported-policy (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/missing-leaf (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-parent (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unknown-ref-key (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/unsafe-revision (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/duplicate-ref (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/half-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/null-correlation (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/bad-hash (0.00s)
+    --- PASS: TestAuthorizationLifecycleStrictFieldsAndLegacyIsolation/legacy-lifecycle (0.00s)
+=== RUN   TestRenewalRejectsLegacySuccessBeforeInstallingAuthority
+--- PASS: TestRenewalRejectsLegacySuccessBeforeInstallingAuthority (0.24s)
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false
+=== RUN   TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true
+--- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult (4.32s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-false (1.57s)
+    --- PASS: TestRenewalCurrentMutualTLSStreamReplaysLostResult/lost-result-true (2.75s)
+=== RUN   TestRenewalCadenceAndCapabilityBounds
+--- PASS: TestRenewalCadenceAndCapabilityBounds (0.00s)
+PASS
+ok  	vortex/agent	20.005s
+=== RUN   TestDurableEventExactReplayAndConflictAfterReopen
+--- PASS: TestDurableEventExactReplayAndConflictAfterReopen (0.32s)
+=== RUN   TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds
+--- PASS: TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds (0.39s)
+=== RUN   TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning
+--- PASS: TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning (0.51s)
+=== RUN   TestIssuerRenewalTerminalOutcomeAtomicWithDebit
+--- PASS: TestIssuerRenewalTerminalOutcomeAtomicWithDebit (0.50s)
+=== RUN   TestIssuerRenewalQuotaRejectionIsDurable
+--- PASS: TestIssuerRenewalQuotaRejectionIsDurable (0.55s)
+=== RUN   TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen
+--- PASS: TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen (0.49s)
+=== RUN   TestIssuerRenewalRejectsStaleRootWithoutDebiting
+--- PASS: TestIssuerRenewalRejectsStaleRootWithoutDebiting (0.45s)
+=== RUN   TestIssuerRenewalAtomicFailureAndConcurrentExhaustion
+--- PASS: TestIssuerRenewalAtomicFailureAndConcurrentExhaustion (0.55s)
+=== RUN   TestIssuerRenewalMigrationPreservesLegacyResult
+--- PASS: TestIssuerRenewalMigrationPreservesLegacyResult (0.58s)
+=== RUN   TestLedgerReaderCannotCreateMigrateOrMutate
+--- PASS: TestLedgerReaderCannotCreateMigrateOrMutate (0.22s)
+=== RUN   TestLedgerWriterLocksBeforeAuthoritySnapshot
+--- PASS: TestLedgerWriterLocksBeforeAuthoritySnapshot (0.30s)
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.85s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.30s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.27s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.28s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.22s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.26s)
+=== RUN   TestShareRootMustMatchSeparatelyProvisionedAnchor
+--- PASS: TestShareRootMustMatchSeparatelyProvisionedAnchor (0.28s)
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep
+--- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation (2.22s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent (0.27s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle (0.21s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer (0.22s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity (0.24s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate (0.23s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source (0.27s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time (0.25s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep (0.52s)
+=== RUN   TestShareSiblingCASAndReopenRetainOriginalAuthority
+--- PASS: TestShareSiblingCASAndReopenRetainOriginalAuthority (0.26s)
+=== RUN   TestShareWriteFailureRollsBackReferencesAndGrant
+--- PASS: TestShareWriteFailureRollsBackReferencesAndGrant (0.24s)
+=== RUN   TestDurableEventExactReplayAndConflictAfterReopen
+--- PASS: TestDurableEventExactReplayAndConflictAfterReopen (0.26s)
+=== RUN   TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds
+--- PASS: TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds (0.40s)
+=== RUN   TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning
+--- PASS: TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning (0.43s)
+=== RUN   TestIssuerRenewalTerminalOutcomeAtomicWithDebit
+--- PASS: TestIssuerRenewalTerminalOutcomeAtomicWithDebit (0.40s)
+=== RUN   TestIssuerRenewalQuotaRejectionIsDurable
+--- PASS: TestIssuerRenewalQuotaRejectionIsDurable (0.47s)
+=== RUN   TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen
+--- PASS: TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen (0.45s)
+=== RUN   TestIssuerRenewalRejectsStaleRootWithoutDebiting
+--- PASS: TestIssuerRenewalRejectsStaleRootWithoutDebiting (0.46s)
+=== RUN   TestIssuerRenewalAtomicFailureAndConcurrentExhaustion
+--- PASS: TestIssuerRenewalAtomicFailureAndConcurrentExhaustion (0.61s)
+=== RUN   TestIssuerRenewalMigrationPreservesLegacyResult
+--- PASS: TestIssuerRenewalMigrationPreservesLegacyResult (0.61s)
+=== RUN   TestLedgerReaderCannotCreateMigrateOrMutate
+--- PASS: TestLedgerReaderCannotCreateMigrateOrMutate (0.27s)
+=== RUN   TestLedgerWriterLocksBeforeAuthoritySnapshot
+--- PASS: TestLedgerWriterLocksBeforeAuthoritySnapshot (0.29s)
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.85s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.29s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.30s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.22s)
+=== RUN   TestShareRootMustMatchSeparatelyProvisionedAnchor
+--- PASS: TestShareRootMustMatchSeparatelyProvisionedAnchor (0.31s)
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep
+--- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation (1.95s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent (0.29s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle (0.23s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer (0.21s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity (0.21s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate (0.18s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source (0.17s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time (0.17s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep (0.48s)
+=== RUN   TestShareSiblingCASAndReopenRetainOriginalAuthority
+--- PASS: TestShareSiblingCASAndReopenRetainOriginalAuthority (0.26s)
+=== RUN   TestShareWriteFailureRollsBackReferencesAndGrant
+--- PASS: TestShareWriteFailureRollsBackReferencesAndGrant (0.22s)
+=== RUN   TestDurableEventExactReplayAndConflictAfterReopen
+--- PASS: TestDurableEventExactReplayAndConflictAfterReopen (0.25s)
+=== RUN   TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds
+--- PASS: TestIssuerRenewalMigrationFailureRollsBackSchemaAndFunds (0.36s)
+=== RUN   TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning
+--- PASS: TestIssuerRenewalTerminalRejectionSurvivesReopenAndProvisioning (0.47s)
+=== RUN   TestIssuerRenewalTerminalOutcomeAtomicWithDebit
+--- PASS: TestIssuerRenewalTerminalOutcomeAtomicWithDebit (0.51s)
+=== RUN   TestIssuerRenewalQuotaRejectionIsDurable
+--- PASS: TestIssuerRenewalQuotaRejectionIsDurable (0.48s)
+=== RUN   TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen
+--- PASS: TestIssuerRenewalCommitsExactResultAndReplaysAfterReopen (0.49s)
+=== RUN   TestIssuerRenewalRejectsStaleRootWithoutDebiting
+--- PASS: TestIssuerRenewalRejectsStaleRootWithoutDebiting (0.46s)
+=== RUN   TestIssuerRenewalAtomicFailureAndConcurrentExhaustion
+--- PASS: TestIssuerRenewalAtomicFailureAndConcurrentExhaustion (0.53s)
+=== RUN   TestIssuerRenewalMigrationPreservesLegacyResult
+--- PASS: TestIssuerRenewalMigrationPreservesLegacyResult (0.54s)
+=== RUN   TestLedgerReaderCannotCreateMigrateOrMutate
+--- PASS: TestLedgerReaderCannotCreateMigrateOrMutate (0.24s)
+=== RUN   TestLedgerWriterLocksBeforeAuthoritySnapshot
+--- PASS: TestLedgerWriterLocksBeforeAuthoritySnapshot (0.29s)
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.68s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.25s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.24s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.23s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.24s)
+=== RUN   TestShareRootMustMatchSeparatelyProvisionedAnchor
+--- PASS: TestShareRootMustMatchSeparatelyProvisionedAnchor (0.24s)
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time
+=== RUN   TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep
+--- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation (2.09s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/missing-parent (0.24s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/cycle (0.21s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/issuer (0.21s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/overflow-capacity (0.22s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/duplicate (0.23s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/wrong-source (0.24s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/outside-time (0.23s)
+    --- PASS: TestShareChainsRejectMissingCycleIssuerAndOverAllocation/too-deep (0.50s)
+=== RUN   TestShareSiblingCASAndReopenRetainOriginalAuthority
+--- PASS: TestShareSiblingCASAndReopenRetainOriginalAuthority (0.27s)
+=== RUN   TestShareWriteFailureRollsBackReferencesAndGrant
+--- PASS: TestShareWriteFailureRollsBackReferencesAndGrant (0.22s)
+PASS
+ok  	vortex/agent/store	29.093s

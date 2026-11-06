@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "scope": "native-precommit-supporting-tests",
+  "source_commit": "b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587",
+  "clean_committed_linux_gate": false,
+  "go": "go version go1.27.3 darwin/arm64",
+  "independent_python_audit": "native macOS Python SQLite 3.51.0 failed opening snapshot; pinned Linux audit passed; paired gate evidence separately retained"
+}

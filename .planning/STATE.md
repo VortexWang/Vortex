@@ -5,11 +5,11 @@ current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 8
 status: executing
-stopped_at: 05-08 live renewal crash/exhaustion/write failure paired; revocation/time combinations and retention next
-last_updated: "2026-11-06T05:48:00Z"
+stopped_at: 05-08 conservative Hub retention paired; renewal revocation/old-session/time combinations remain
+last_updated: "2026-11-06T06:09:56Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-08 renewal crash/WAL e4aa4c4 passed Docker/Actions42169636817 and independent recovery audits; plan remains executing
-state_head: e4aa4c47536c8958e07b0607bf63ce8bfee821d4
+last_activity_desc: 05-08 conservative retention b0ab02a passed Docker/Actions42171635825 and independent SQLite audits; plan remains executing
+state_head: b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587
 progress:
   total_phases: 8
   completed_phases: 4
@@ -31,8 +31,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
 Current Plan: 8
 Total Plans in Phase: 14
-Status: Executing — 05-08 partial; probes/reports, live renewal and crash/exhaustion/write failure verified; revocation/time combinations and safe retention remain
-Last activity: 2026-11-06 — 05-08 renewal crash/WAL e4aa4c4 passed Docker/Actions42169636817 and independent ledger audits; no plan completion claimed.
+Status: Executing — 05-08 partial; probes/reports, renewal crash/failure and conservative Hub usage compaction verified; renewal-specific revocation/old-session/time combinations remain
+Last activity: 2026-11-06 — 05-08 conservative Hub retention b0ab02a passed Docker/Actions42171635825 and independent ledger audits; no plan completion claimed.
 
 Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 executing (live renewal partial), 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 

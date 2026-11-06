@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "commit": "b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587",
+  "status": "passed",
+  "scope": "incremental-conservative-settled-usage-compaction",
+  "actions_run": 42171635825,
+  "full_plan_complete": false,
+  "production_backend_authority": false,
+  "authoritative_journal_pruned": false,
+  "seven_day_clock": "deterministic-conservative-bounds",
+  "agent_backend_settlement_cleanup": false,
+  "actions_artifact_selection": "current run top-level files; 18 preexisting nested historical SHA evidence directories omitted",
+  "docker": {
+    "report_sha256": "79761eface6c9881e6dca1b7420ceb2e2c63b7fb988c5a1f46b63b58f81e3ecf",
+    "renewal_process_cases": 6,
+    "named_retention_race_passes": 18,
+    "independent_retention_audit": "passed",
+    "independent_recovery_audit": "passed",
+    "retention_snapshot_sha256": "8d86126289c1dc7933705d3537cdafa996e38eeca84c42e9f09db465f6738cec"
+  },
+  "actions": {
+    "report_sha256": "79761eface6c9881e6dca1b7420ceb2e2c63b7fb988c5a1f46b63b58f81e3ecf",
+    "renewal_process_cases": 6,
+    "named_retention_race_passes": 18,
+    "independent_retention_audit": "passed",
+    "independent_recovery_audit": "passed",
+    "retention_snapshot_sha256": "b7444a0327dee9bd2737e738cd972ccc9fe1c129fbb42bd39c962ef1ff5d3961"
+  }
+}
