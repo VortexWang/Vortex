@@ -1,5 +1,38 @@
 # D-04 参数评审（2026-11-04）
 
+## Current reconciliation — 2026-11-06
+
+Status: **not locked; durable implementation integrated, full qualification open**.
+The historical rows below describe earlier slices and must not be read as the
+current implementation inventory.
+
+| Requirement | Current implementation/evidence | Remaining acceptance |
+| --- | --- | --- |
+| Immutable authority isolation | DemandScope, exact scoped ledger read, Agent/Hub SQLite and TLS issuer binding | Full cross-tenant/multi-hop hostile matrix and product startup wiring |
+| Cold start / dynamic target / renewal waterline | Explicit candidate parameters; 60-slot durable committed-consumption ring; scoped valid balance; opt-in adaptive control delivery | Real durable-issuer workload and controlled candidate scan; no defaults locked |
+| Coalescing / delayed responses | Persisted UUID, atomic success/refusal, replay after restart, source conservation and refusal backoff tests | Delayed/lost response injection during sustained native TCP/UDP workload |
+| Missing-authority wait | One 200 ms context covers initial attempt and retries; 128-waiter bound; scope-bound control wakeups | End-to-end native load tail latency, including cancellation and queue pressure |
+| Native correctness | Clean 382aab9: ten SQLite contention repetitions, Agent/Hub/Engine race and vet PASS on dedicated Ubuntu | Does not establish performance of the durable allocator |
+| Session block strategy | Earlier process-local block candidate sweep exists; durable gate reserves per write | Implement/measure bounded durable session-block strategy or explicitly review a different strategy; do not claim the old scan covers it |
+| Idle shrink/reclaim | No complete grant-return proof path | Persist idle lifecycle, stop/fence grant use, settle all holds, transfer exact unused proof, deduplicate issuer credit and preserve unknown liability |
+| Parameter decision | 256 KiB -> 4 MiB, 8 MiB floor, 30 s target, 30% waterline remain candidates | Review measured throughput, latency and tied-up funding together before locking |
+
+The c6a0761 formal performance pass remains valid only for that old implementation.
+It must not be relabelled as performance of 382aab9's durable settlement path.
+See 04-14-NATIVE-REGRESSION.json for the newer finite native regression hashes.
+
+### Idle proof boundary
+
+Hub HandoffHub transfers only unissued delegation remainder. It does not return
+Agent-held credits. Control 1.3.0 CreditDemandDenied proves only that one request
+issued no rights; it cannot be used as an unused-credit receipt. Expiry, closed
+transport, usage ACK and a local zero-session observation are individually
+insufficient proof for reclaim. A proper return path must fence further use,
+retain unresolved reservations/unknown upper bounds, reconcile the exact grant,
+and atomically record a one-time return at the issuer before reallocation.
+This is a substantive remaining implementation requirement, not a documentation
+exception or something covered by the native green test suite.
+
 ## 04-12 measured review
 
 The candidate inventory has now been executed as seven one-factor cases x

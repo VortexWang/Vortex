@@ -493,3 +493,20 @@ Only a terminal exit-code and inspected logs can establish pass. No new
 throughput or D-04 parameter qualification is claimed by this regression run.
 
 Native run completed: stage=complete, exit-code=0, clean measured SHA verified. All ten admission repetitions, full Agent/Hub/Engine race and vet PASS. Logs copied to artifacts/phase4/durable-382aab9; hashes in 04-14-NATIVE-REGRESSION.json. PID 81041 terminal. This replaces the above in-progress status only; performance and remaining D-04 requirements remain open.
+
+## Signer handoff demand outcome adversarial regression
+
+TestDemandOutcomesRemainImmutableAcrossSignerHandoff creates a definitive
+funding refusal and one successful issue, performs durable epoch handoff, then
+opens a second Store and replays both. Refusal remains non-issuance, the old
+success replays byte-identically, and only a fresh request uses epoch 2.
+Changing a previously successful UUID to an oversized request is a conflict
+and cannot create a contradictory denial row. Source audit remains 512 issued
+plus 512 unissued from 1024 initial after two distinct 256-byte issues.
+Targeted demand/handoff race and store vet PASS. This is a finite local test,
+not complete attack coverage or a new native measured SHA.
+
+Reconciled 04-06-D04-REVIEW.md with current durable implementation and gaps.
+Explicitly separated unissued Hub remainder transfer from Agent-held grant
+return, which lacks a complete fenced-unused-proof path. Historical parameter
+scan does not qualify the durable gate's per-write reservation strategy.
