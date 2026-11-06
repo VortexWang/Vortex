@@ -58,7 +58,7 @@
 | `RUL-001..016` | 不可变 `rule_revision`、确定性编译、路径/目标/段许可校验、Prepare/Commit/Abort、部分应用/unknown/回滚新版本。 |
 | `BE-001..006` | PostgreSQL authority、sqlc 仓储租户过滤、任务+Outbox、OpenAPI REST/SSE、对账查询索引。 |
 | `PLN-001..008` | 能力交集/最小限制、单主套餐、UTC 月度锚点、独立流量包、权益码原子兑换/预览确认。 |
-| `MTR-001..016`, `SUP-B2-001`, `SUP-B5-001` | 执行点计量、千分位系数、来源 `B_s/F_s/L_s` 守恒、快照绑定、未知负债冻结、故障上界及不可变并发配置。 |
+| `MTR-001..011, MTR-013..016`, `SUP-B2-001`, `SUP-B5-001` | 执行点计量、千分位系数、来源 `B_s/F_s/L_s` 守恒、快照绑定、未知负债冻结、故障上界及不可变并发配置。 |
 | `LIM-001..010` | 独立租约边界、`(tenant_id,node_id,kind)` 份额链、CAS/代次/boot fencing、activation-unknown 和稳定分配。 |
 </phase_requirements>
 
@@ -104,13 +104,13 @@ Phase 5 已提供可复用的持久化语义和协议适配边界：Agent/Hub �
 | PostgreSQL client | target image version, local client may differ | `psql`, `pg_isready`, migration and integration diagnostics. |
 | Docker Engine/Compose | host-specific, record output | Same-SHA local integration with PostgreSQL/Valkey and Agent/Hub. |
 | GitHub Actions | `ubuntu-24.04`, action full commit SHA | Re-run the exact local entrypoint at the same source SHA; existing workflows pin actions [VERIFIED: `.github/workflows/phase5.yml:15-26`]. |
-| OpenAPI generator | **未锁定** | Freeze a generator and license in Wave 0 before adding it; generated frontend types are a Phase 7 consumer. This is `[ASSUMED]` until tool/version review. |
+| OpenAPI generator | **不安装生成器** | Phase 6 uses handwritten Go handlers plus executable OpenAPI lint; the contract source/copy boundary is checked with `cmp --silent`, and Phase 7 owns TypeScript generation. |
 
 **Installation/lock procedure:** Add only approved Go modules at their exact locked versions; run `go mod tidy`, `GOTOOLCHAIN=local go mod verify`, `go version -m`; install sqlc/Goose from the locked artifacts, record checksums, and run a license/transitive closure scan before commit. Do not install npm packages for the backend.
 
 ## Package Legitimacy Audit
 
-No new package is recommended beyond the already approved Go candidates. The package-legitimacy seam in this environment accepts npm/PyPI/crates only; it cannot produce a meaningful Go-module verdict. The authoritative in-repo lock records Gin, pgx/v5, sqlc and Goose with source URLs, checksums, licenses and `status: locked` [VERIFIED: `docs/governance/version-lock.yaml:35-79`]. Treat any additional package, including an OpenAPI generator, as `[ASSUMED]` until its official repository/release, checksum and license are added to the version lock and reviewed.
+No new package is recommended beyond the already approved Go candidates. The authoritative in-repo lock records Gin, pgx/v5, sqlc and Goose with source URLs, checksums, licenses and `status: locked` [VERIFIED: `docs/governance/version-lock.yaml:35-79`]. Phase 6 installs no OpenAPI generator; any later dependency must pass the existing version, checksum and license gate before adoption.
 
 | Package | Registry/source | Verdict | Disposition |
 |---|---|---|---|
@@ -118,7 +118,7 @@ No new package is recommended beyond the already approved Go candidates. The pac
 | `github.com/jackc/pgx/v5 v5.11.0` | Go checksum database + official module | OK by project lock | Approved; run real PostgreSQL transaction tests. |
 | `sqlc v1.31.1` | Official sqlc release artifact | OK by project lock | Approved generator; pin binary integrity per architecture. |
 | `github.com/pressly/goose/v3 v3.29.0` | Go checksum database + official release | OK by project lock | Approved migration tool; execute separately from app startup. |
-| Any OpenAPI codegen tool | Not selected | `[ASSUMED]` | Human-verify and license-review checkpoint before install. |
+| Any OpenAPI codegen tool | Not selected because Phase 6 uses no generator | N/A | Phase 7 may select a tool under its own lock/license gate. |
 
 ## Architecture Patterns
 
@@ -281,7 +281,7 @@ Use explicit constraints and indexes: unique natural replay keys, partial unique
 
 Every mutation returns `operation_id` and accepted desired state (normally `202`); synchronous validation conflicts use stable `code`, safe `message`, `request_id`, and optional field errors. `If-Match`/`expected_revision` is required for revision mutations. Cursor tokens must encode immutable sort tuple (for example `created_at,id`), direction and scope; reject a token issued for another tenant/principal. Do not expose credentials, internal target addresses, SQL, stack traces or cross-tenant rows.
 
-SSE should use a durable domain-event table with monotonically ordered event ID, event type, aggregate ID, revision and minimal safe summary. Set `Content-Type: text/event-stream`, send `id:` and `event:` lines, flush periodically, and honor `Last-Event-ID`. If the requested ID is older than retention or has a gap, send a `resync` event or close with a documented signal; the client must refetch REST state. Gin provides only transport plumbing; event durability and authorization belong to PostgreSQL/service layers. The exact SSE helper and OpenAPI generator are not present in the repository and are `[ASSUMED]` decisions requiring Wave 0 tool/license review.
+SSE should use a durable domain-event table with monotonically ordered event ID, event type, aggregate ID, revision and minimal safe summary. Set `Content-Type: text/event-stream`, send `id:` and `event:` lines, flush periodically, and honor `Last-Event-ID`. If the requested ID is older than retention or has a gap, send a `resync` event or close with a documented signal; the client must refetch REST state. Gin provides only transport plumbing; event durability and authorization belong to PostgreSQL/service layers. Phase 6 uses handwritten SSE transport and the no-generator OpenAPI boundary recorded in 06-09.
 
 ## Common Pitfalls
 
@@ -407,32 +407,32 @@ The envelope must be canonicalized before hashing and persisted with input versi
 | # | Claim | Section | Risk if Wrong |
 |---|---|---|---|
 | A1 | The backend will be a new `backend/` module/package layout as shown; no existing backend directory was found. | Recommended Project Structure | Plan paths and module boundaries would need adjustment. |
-| A2 | `oapi-codegen` or equivalent generator will be selected during Wave 0; no generator is currently locked. | Standard Stack / REST | Unreviewed dependency could violate license/version gate. |
+| A2 | Phase 6 uses no OpenAPI code generator; handwritten backend handlers and deterministic source-to-copy comparison are locked. | Standard Stack / REST | Phase 7 TypeScript generation must consume the same source SHA and apply its own lock/license gate. |
 | A3 | `pgx.ReadCommitted` plus explicit row locks is sufficient for most flows; Serializable is limited to proven cross-row invariants. | Transaction boundaries | Incorrect isolation could permit a conservation race; concurrency tests must falsify this assumption. |
 | A4 | Canonical JSON/SHA-256 is acceptable artifact serialization; the runtime config schema does not yet prescribe a canonical byte encoding. | Compiler | Different serializer could invalidate digest/replay compatibility. |
 | A5 | PostgreSQL 18.6 is the intended server candidate; only local PostgreSQL 16.14 client is installed and no server is running. | Environment | SQL feature/image compatibility must be tested in the pinned PostgreSQL 18.6 container. |
 
 ## Open Questions
 
-1. **What exact PostgreSQL 18.6 image digest and migration directory will be locked?**
+1. **What exact PostgreSQL 18.6 image digest and migration directory will be locked? (RESOLVED)**
    - What we know: project stack and roadmap select PostgreSQL authority; the local server probe returned no response.
    - What's unclear: image provenance/digest, extensions, backup/restore test image and CI service topology.
-   - Recommendation: make Wave 0 record image digest, `SHOW server_version`, extensions and `pg_dump`/restore commands; do not claim integration until the service is running.
+   - Final choice: Wave 0 pins the PostgreSQL 18.6 image digest in `deploy/backend/compose.test.yml`, uses `backend/db/migrations/`, exports `PHASE6_DATABASE_URL` from Compose/check.sh, and records `SHOW server_version` plus image digest. Backup/restore and WAL operations are a Phase 7 contract and are not executed or claimed in Phase 6.
 
-2. **Which OpenAPI-to-Go/TypeScript generator is approved?**
+2. **Which OpenAPI-to-Go/TypeScript generator is approved? (RESOLVED)**
    - What we know: OpenAPI is source contract and frontend types must be generated; current `openapi.yaml` has no paths.
    - What's unclear: generator, template, generated-file ownership and license closure.
-   - Recommendation: select and lock one tool before API implementation; add schema lint, generated diff and TypeScript compile checks to CI.
+   - Final choice: no OpenAPI generator is installed in Phase 6. `contracts/openapi/v1/openapi.yaml` is the sole source of truth, backend handlers are handwritten, `backend/openapi/v1/openapi.yaml` is a deterministic copy artifact checked with `cmp --silent`, and Phase 7 owns TypeScript generation from the same SHA. `tools/phase6/openapi_validate.rb` is the executable structural/security lint.
 
-3. **What is the exact control adapter deployment boundary?**
+3. **What is the exact control adapter deployment boundary? (RESOLVED)**
    - What we know: Phase 5 `hub.UsageRelay`, `LedgerBackend`, and `TestServer` are fixtures/adapters; Protobuf `NodeControl`/`HubControl` is frozen.
    - What's unclear: production backend server registration, mTLS CA/identity storage and region routing ownership.
-   - Recommendation: plan an explicit `internal/control` adapter with identity verification, bounded receive/send sizes and receipt mapping; keep it behind a fake for unit tests and use real Agent/Hub in integration.
+   - Final choice: `internal/control` verifies Phase 5 mTLS identities, enforces bounded receive/send sizes, maps receipts by task/revision/idempotency, and runs against real Phase 5 Agent/Hub processes in the Wave 1 tracer. The fake adapter is supplemental unit coverage only.
 
-4. **Which retention policy applies to non-financial audit/SSE events?**
+4. **Which retention policy applies to non-financial audit/SSE events? (RESOLVED)**
    - What we know: financial/unknown/dispute evidence cannot be pruned without proof; SSE supports a retention-gap refetch.
    - What's unclear: exact event retention duration and archive destination.
-   - Recommendation: lock a minimum window and document gap behavior; retain event IDs needed by frontend caches and audit review.
+   - Final choice: Phase 6 stores durable event IDs and a documented retention window sufficient for cursor replay; a retention gap emits resync and requires REST refetch. Financial, unknown, dispute, and audit evidence is not pruned by Phase 6. Phase 7 may add archival/operations policy.
 
 ## Environment Availability
 
@@ -464,13 +464,13 @@ The envelope must be canonicalized before hashing and persisted with input versi
 
 | Requirement group | Behavior | Test type | Automated command | File exists? |
 |---|---|---|---|---|
-| `TEN-001..009`, `BE-004` | tenant scope, fixed roles, platform-admin audit, restriction projection | unit + PostgreSQL integration | `go test ./backend/internal/policy ./backend/internal/repository -run 'Tenant|Scope|Audit|Restriction'` | No; Wave 0 gap |
-| `NOD-001..014`, `PRT-001..016` | ownership, lifecycle/drain/delete guards, port conflict/common-port reservation | PostgreSQL integration | `go test ./backend/internal/service -run 'Node|Port|Group'` | No; Wave 0 gap |
-| `RUL-001..016`, `BE-002/003` | immutable revision, compiler digest replay, Prepare/Commit/Abort, superseded task | pure unit + integration | `go test ./backend/internal/compiler ./backend/internal/worker -run 'Rule|Compile|Task'` | No; Wave 0 gap |
-| `PLN-001..008` | package snapshot, monthly UTC anchor, code redemption idempotency, downgrade preview | PostgreSQL integration/property | `go test ./backend/internal/service -run 'Package|Entitlement|Subscription'` | No; Wave 0 gap |
-| `MTR-001..016`, `SUP-B2-001`, `SUP-B5-001` | per-source conservation, snapshot binding, duplicate usage, unknown liability/dispute | PostgreSQL concurrency/fault | `go test -race ./backend/internal/ledger -run 'Source|Usage|Unknown|Dispute'` | No; Wave 0 gap |
-| `LIM-001..010` | share chain CAS, boot fencing, activation-unknown, no release on lost receipt | PostgreSQL + real Agent/Hub integration | `go test -race ./backend/internal/limit ./backend/internal/control -run 'CAS|Boot|Activation'` | No; Wave 0 gap |
-| `BE-005` | OpenAPI schema, error envelope, cursor and SSE Last-Event-ID/gap refetch | HTTP integration | `go test ./backend/internal/httpapi -run 'OpenAPI|Cursor|SSE|Error'` | No; Wave 0 gap |
+| `TEN-001..009`, `BE-004` | tenant scope, fixed roles, platform-admin audit, restriction projection | unit + PostgreSQL integration | `cd backend && GOTOOLCHAIN=local go test ./internal/policy ./internal/repository -run 'Tenant|Scope|Audit|Restriction'` | No; Wave 0 gap |
+| `NOD-001..014`, `PRT-001..016` | ownership, lifecycle/drain/delete guards, port conflict/common-port reservation | PostgreSQL integration | `cd backend && GOTOOLCHAIN=local go test ./internal/service -run 'Node|Port|Group'` | No; Wave 0 gap |
+| `RUL-001..016`, `BE-002/003` | immutable revision, compiler digest replay, Prepare/Commit/Abort, superseded task | pure unit + integration | `cd backend && GOTOOLCHAIN=local go test ./internal/compiler ./internal/worker -run 'Rule|Compile|Task'` | No; Wave 0 gap |
+| `PLN-001..008` | package snapshot, monthly UTC anchor, code redemption idempotency, downgrade preview | PostgreSQL integration/property | `cd backend && GOTOOLCHAIN=local go test ./internal/service -run 'Package|Entitlement|Subscription'` | No; Wave 0 gap |
+| `MTR-001..011, MTR-013..016` | per-source conservation, snapshot binding, duplicate usage, unknown liability/dispute; MTR-012 is absent from the Phase 6 roadmap set | PostgreSQL concurrency/fault | `cd backend && GOTOOLCHAIN=local go test -race ./internal/service ./internal/worker -run 'Source|Usage|Unknown|Dispute'` | No; Wave 0 gap |
+| `LIM-001..010` | share chain CAS, boot fencing, activation-unknown, no release on lost receipt | PostgreSQL + real Agent/Hub integration | `cd backend && GOTOOLCHAIN=local go test -race ./internal/service ./internal/control -run 'CAS|Boot|Activation'` | No; Wave 0 gap |
+| `BE-005` | OpenAPI schema, error envelope, cursor and SSE Last-Event-ID/gap refetch | HTTP integration | `cd backend && GOTOOLCHAIN=local go test ./internal/httpapi -run 'OpenAPI|Cursor|SSE|Error'` | No; Wave 0 gap |
 
 ### Sampling Rate
 
@@ -481,12 +481,12 @@ The envelope must be canonicalized before hashing and persisted with input versi
 ### Wave 0 Gaps
 
 - [ ] Add PostgreSQL 18.6 Compose test service with pinned image digest and health check.
-- [ ] Add `db/migrations/` Goose baseline and `db/query/` sqlc config; verify generated code has no diff.
+- [ ] Add `backend/db/migrations/` Goose baseline and `backend/db/query/` sqlc config; verify generated code has no diff.
 - [ ] Add repository scope test fixtures for two tenants plus platform principal.
 - [ ] Add compiler golden vectors (same inputs -> same canonical bytes/digest) and invalid path/permit cases.
 - [ ] Add ledger fixtures for two independent sources, duplicate usage, disputed payload, unknown `U_bill`, and risk-budget closure.
 - [ ] Add share CAS/boot fencing integration with the real Phase 5 protocol adapter, including lost response and `activation-unknown`.
-- [ ] Add OpenAPI path/schema source, chosen generator lock, schema lint and generated TypeScript compile check.
+- [ ] Add OpenAPI path/schema source, deterministic backend copy, and executable schema lint; Phase 7 owns TypeScript generation.
 - [ ] Add same-SHA Make target used identically by local Docker and Actions; record `git rev-parse HEAD`, Go, Docker, PostgreSQL and image digest.
 
 ## Security Domain
@@ -537,7 +537,7 @@ The envelope must be canonicalized before hashing and persisted with input versi
 
 ### Tertiary (LOW confidence)
 
-- None used for normative claims. The proposed `backend/` layout, canonical JSON encoding and OpenAPI generator choice are listed as `[ASSUMED]` until the planner locks them.
+- None used for normative claims. The `backend/` layout, canonical JSON encoding, and no-generator OpenAPI boundary are locked by the Phase 6 plans and executable checks.
 
 ## Metadata
 

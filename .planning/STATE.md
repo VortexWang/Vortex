@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: V1
 milestone_name: milestone
-current_phase: 05
-current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 14
-status: complete
-stopped_at: Phase 6 context gathered
-last_updated: "2026-11-06T15:43:01.838Z"
-last_activity: 2026-11-06
-last_activity_desc: 05-14 completed on deb8b08 with Docker/Actions 42224211933; Phase 5 closed within the runtime/protocol-adapter scope.
+current_phase: 06
+current_phase_name: M4 后端业务闭环 (M4 Backend)
+current_plan: 01
+status: ready_to_execute
+stopped_at: Phase 6 planning complete; ready to execute 06-01
+last_updated: "2026-11-06T18:21:39.260Z"
+last_activity: 2026-11-07
+last_activity_desc: "Phase 6 planned: 11 plans / 11 waves / 25 tasks; independent plan review passed; implementation not started."
 progress:
   total_phases: 6
   completed_phases: 4
@@ -25,17 +25,19 @@ state_head: deb8b08e5cc8ee4e6f77bc700a4b5b36836c68c1
 See: .planning/PROJECT.md (updated 2026-11-03)
 
 **Core value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
-**Current focus:** Phase 05 — M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
+**Current focus:** Phase 06 — M4 后端业务闭环 (M4 Backend)
 
 ## Current Position
 
-Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — COMPLETE
-Current Plan: 14
-Total Plans in Phase: 14
-Status: Complete — 05-14 consolidated acceptance passed on deb8b08 with same-SHA Docker/Actions and independent raw-ledger audits.
-Last activity: 2026-11-06 — 05-14 completed on deb8b08 with Docker/Actions 42224211933; Phase 5 closed within the runtime/protocol-adapter scope.
+Phase: 06 (M4 后端业务闭环 (M4 Backend)) — READY TO EXECUTE
+Current Plan: 01
+Total Plans in Phase: 11
+Status: Ready to execute — research, patterns, validation strategy and independent plan review passed; Phase 6 implementation has not started.
+Last activity: 2026-11-07 — 11 plans / 11 dependency waves / 25 tasks; 96 requirements and 24 decisions covered. See 06-PLAN-CHECK.md.
 
-Progress: Phase 5 [██████████] 14/14 plans executed. G05-01/02/03/04/05 are resolved within protocol-adapter/static-destination scope; consolidated acceptance, independent raw audits and renewed UAT passed. Historical UAT remains retained (17 passed) alongside renewed runtime UAT (18 passed). Nyquist validation is complete for this scope.
+Progress: Phase 6 [░░░░░░░░░░] 0/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+
+Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
 ## Performance Metrics
 
@@ -103,9 +105,9 @@ Progress: Phase 5 [██████████] 14/14 plans executed. G05-01/
 
 ## Session Continuity
 
-Last session: 2026-11-06T15:43:01.817Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-m4-m4-backend/06-CONTEXT.md
+Last session: 2026-11-06T18:22:15.731Z
+Stopped at: Phase 6 planning complete; ready to execute 06-01
+Resume file: .planning/phases/06-m4-m4-backend/06-01-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)
 

@@ -156,7 +156,53 @@
 3. 套餐、流量包、权益码、计费快照、预留与结算能逐来源幂等更新；Valkey 丢失不会改变余额、所有权或已确认业务。
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
-**Plans**: TBD
+**Plans**: 11 plans in 11 dependency waves; planning and independent plan review passed. Implementation has not started.
+
+**Wave 1**
+
+- [ ] 06-01-PLAN.md — 真实后端 / PostgreSQL / Agent-Hub mTLS tracer
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 06-08-PLAN.md — 租户、固定角色、追加迁移、事务审计与 Valkey 重建
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 06-09-PLAN.md — OpenAPI 唯一来源、分阶段证据门禁与限制清除
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 06-02-PLAN.md — 节点、节点组、grant、端口预留与释放
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 06-10-PLAN.md — serving 集合、加密凭据与 Cloudflare DNS
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 06-03-PLAN.md — 不可变规则修订、确定性编译与两阶段应用
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 06-04-PLAN.md — 套餐快照、权益码、限制与降级预览
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 06-05-PLAN.md — 逐来源账本、用量幂等与未知负债
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 06-06-PLAN.md — 份额 CAS、租约、交接与限制联动
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 06-07-PLAN.md — REST、token 持久化、cursor 与 SSE
+
+**Wave 11** *(blocked on Wave 10 completion)*
+
+- [ ] 06-11-PLAN.md — 1,000 规则 / 60 秒 reconciliation 与同 SHA 最终证据
+
+**Cross-cutting constraints:** PostgreSQL 是业务和期望状态唯一权威；业务变更、审计、task/Outbox 同事务提交；未知执行与未知负债不因超时释放；规则/计费快照不可变；SQL 变更后生成并核对 sqlc 产物；OpenAPI 单一来源确定性复制；迁移只追加且验证保留已有记录；本机 Docker 与 Actions 对同一 clean SHA 保存适用证据。Phase 4 性能/D-04、Phase 7 前端与备份/WAL 恢复、Phase 8 全量验收仍归原阶段。
 
 ### Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)
 **Goal**: 中文用户和运营人员可理解并管理授权业务状态，DNS、审计、通知和恢复操作反映系统真实执行事实。
@@ -194,6 +240,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 0/TBD | Not started | - |
+| 6. M4 Backend | 0/11 | Planned — ready to execute | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
