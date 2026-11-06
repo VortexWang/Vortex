@@ -362,9 +362,6 @@ func TLSConfig(c Credential, roots *x509.CertPool, revoked func(*x509.Certificat
 		return nil, errors.New("identity: trust pool required")
 	}
 	now := time.Now()
-	if revoked != nil && revoked(c.Leaf) {
-		return nil, errors.New("identity: local credential revoked")
-	}
 	if now.Before(c.Leaf.NotBefore) || !now.Before(c.Leaf.NotAfter) {
 		return nil, errors.New("identity: local credential is outside validity interval")
 	}
