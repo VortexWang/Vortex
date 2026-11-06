@@ -12,7 +12,7 @@ func TestInjectedRenewalWaterlineDelayAndUnknown(t *testing.T) {
 	for _, percent := range []int64{20, 30, 50} {
 		t.Run(fmt.Sprint(percent), func(t *testing.T) {
 			ctx := context.Background()
-			g, err := NewInjectedCreditGate(CreditConfig{SnapshotID: "s", Budget: 1000, InitialBlock: 1, MaxBlock: 1, GrantTarget: 100, RenewPercent: percent})
+			g, err := NewInjectedCreditGate(CreditConfig{SnapshotID: "s", Budget: 1000, InitialBlock: 1, MaxBlock: 1, GrantTarget: 100, RenewPercent: percent, Observe: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -67,6 +67,10 @@ func TestInjectedRenewalWaterlineDelayAndUnknown(t *testing.T) {
 			if len(ids) != 1 || g.State().GrantRecords != 2 {
 				t.Fatalf("request did not coalesce: %+v %+v", ids, g.State())
 			}
+			observations := g.State().Observations
+			if observations == nil || observations.RenewalAttempts != 18 || observations.RenewalMerged != 15 || observations.PeakPending != 100 {
+				t.Fatalf("renewal observations=%+v", observations)
+			}
 			for id = range ids {
 			}
 			consume(percent)
@@ -81,6 +85,9 @@ func TestInjectedRenewalWaterlineDelayAndUnknown(t *testing.T) {
 			reply = GrantReply{RequestID: id, SnapshotID: "s", Amount: 100 - percent, Outcome: GrantUnknown}
 			if e := g.ApplyGrant(ctx, reply); e != nil {
 				t.Fatal(e)
+			}
+			if observations := g.State().Observations; observations == nil || observations.PeakUnknown != 100-percent {
+				t.Fatalf("unknown occupancy observations=%+v", observations)
 			}
 			if _, _, e := g.BeginRenewal(ctx, "replacement"); e == nil {
 				t.Fatal("unknown replaced")

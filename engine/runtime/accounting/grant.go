@@ -63,6 +63,9 @@ func (g *CreditGate) beginGrant(id string, amount int64) error {
 	g.requests[id] = grantRecord{amount: amount, outcome: GrantPending}
 	g.state.Unissued -= amount
 	g.state.PendingGrant += amount
+	if g.cfg.Observe {
+		g.observations.PeakPending = max(g.observations.PeakPending, g.state.PendingGrant)
+	}
 	g.state.GrantRecords++
 	return nil
 }
@@ -118,6 +121,9 @@ func (g *CreditGate) applyGrant(r GrantReply) error {
 		g.grantOwners[r.GrantID] = r.RequestID
 	case GrantUnknown:
 		g.state.UnknownGrant += old.amount
+		if g.cfg.Observe {
+			g.observations.PeakUnknown = max(g.observations.PeakUnknown, g.state.UnknownGrant)
+		}
 	case GrantRejected:
 		g.state.Unissued += old.amount
 	}
@@ -151,6 +157,9 @@ func (g *CreditGate) BeginRenewal(ctx context.Context, id string) (string, int64
 	if !g.injectedIssuer || g.faulted || id == "" || len(id) > 256 || strings.HasPrefix(id, "local:") {
 		return "", 0, ErrGrantConflict
 	}
+	if g.cfg.Observe {
+		g.observations.RenewalAttempts++
+	}
 	if g.state.UnknownGrant != 0 {
 		return "", 0, ErrGrantConflict
 	}
@@ -168,6 +177,9 @@ func (g *CreditGate) BeginRenewal(ctx context.Context, id string) (string, int64
 		pendingID, pendingAmount = requestID, record.amount
 	}
 	if pendingID != "" {
+		if g.cfg.Observe {
+			g.observations.RenewalMerged++
+		}
 		return pendingID, pendingAmount, nil
 	}
 	target := g.target()

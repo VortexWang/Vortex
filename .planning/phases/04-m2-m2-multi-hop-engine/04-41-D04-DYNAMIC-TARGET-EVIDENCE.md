@@ -35,3 +35,21 @@ provide remote in-flight merge, durable funding occupancy, idle return proof,
 or formal native-host performance qualification. No D-04 production parameter
 is locked.
 
+## Process-local observation increment — 2026-11-06
+
+The injected `CreditGate` now exposes additional bounded, opt-in observations
+for candidate review: renewal attempts and coalesced in-flight requests,
+peak pending/unknown grant occupancy, and idle-tail reclaim count/bytes. The
+observations are copied from `State()` and do not affect authorization or
+accounting transitions. Focused race tests cover the 15-of-16 coalescing
+result under concurrent renewal pressure, pending/unknown peaks, and reclaim
+of idle tails across sessions. Repository validation on this change passed
+`go test -race ./...`, `go vet ./...`, 21 Phase 4 Python tests, and the
+OrbStack `phase4-m2-check`.
+
+These fields make the process-local D-04 timeline more auditable, but they do
+not observe remote in-flight merge, durable funding occupancy, Agent/Hub
+receipt persistence, or proof-backed idle credit return. The dynamic scan
+therefore remains `measured-candidates-require-review`, with all candidate
+parameters unlocked and formal native performance qualification open.
+

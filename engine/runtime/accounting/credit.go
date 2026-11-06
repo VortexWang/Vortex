@@ -43,8 +43,14 @@ func (c CreditConfig) Validate() error {
 type CreditObservations struct {
 	Reservations     uint64     `json:"reservations"`
 	BlockAllocations uint64     `json:"block_allocations"`
+	RenewalAttempts  uint64     `json:"renewal_attempts"`
+	RenewalMerged    uint64     `json:"renewal_merged"`
+	IdleReclaims     uint64     `json:"idle_reclaims"`
+	IdleReclaimed    int64      `json:"idle_reclaimed_bytes"`
 	PeakSessions     int64      `json:"peak_sessions"`
 	PeakHeld         int64      `json:"peak_held_bytes"`
+	PeakPending      int64      `json:"peak_pending_grant_bytes"`
+	PeakUnknown      int64      `json:"peak_unknown_grant_bytes"`
 	IssuerCalls      uint64     `json:"issuer_calls"`
 	IssuerNanos      [64]uint64 `json:"issuer_nanoseconds_log2_buckets"`
 }
@@ -211,6 +217,10 @@ func (s *creditSession) reserve(ctx context.Context, d core.Direction, n int64, 
 			s.idle[other] = 0
 			g.state.Held -= tail
 			g.state.Available += tail
+			if g.cfg.Observe {
+				g.observations.IdleReclaims++
+				g.observations.IdleReclaimed += tail
+			}
 		}
 		// An idle block tail is not an unresolved write. Reclaim only these
 		// unused bytes from other sessions when the finite pool is scarce.
@@ -225,6 +235,10 @@ func (s *creditSession) reserve(ctx context.Context, d core.Direction, n int64, 
 				other.idle[j] = 0
 				g.state.Held -= tail
 				g.state.Available += tail
+				if g.cfg.Observe && tail > 0 {
+					g.observations.IdleReclaims++
+					g.observations.IdleReclaimed += tail
+				}
 			}
 		}
 		take := min(max(need, s.next[i]), g.state.Available)

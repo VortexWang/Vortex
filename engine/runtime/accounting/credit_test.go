@@ -260,7 +260,10 @@ func TestCreditZeroBudgetAndIndependentSnapshotAuthority(t *testing.T) {
 }
 
 func TestCreditReclaimsOnlyIdleTailsAcrossSessions(t *testing.T) {
-	g := creditFixture(t, 128)
+	g, err := NewCreditGate(CreditConfig{SnapshotID: "reclaim", Budget: 128, InitialBlock: 64, MaxBlock: 256, GrantTarget: 256, RenewPercent: 30, Observe: true})
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx := context.Background()
 	a, _ := g.Open(ctx, core.Flow{Key: "a"})
 	b, _ := g.Open(ctx, core.Flow{Key: "b"})
@@ -289,6 +292,9 @@ func TestCreditReclaimsOnlyIdleTailsAcrossSessions(t *testing.T) {
 	v := g.State()
 	if v.Used != 28 || v.Unknown != 100 || v.Held != 0 {
 		t.Fatal(v)
+	}
+	if v.Observations == nil || v.Observations.IdleReclaims == 0 || v.Observations.IdleReclaimed == 0 {
+		t.Fatalf("idle reclaim observations=%+v", v.Observations)
 	}
 }
 
