@@ -775,3 +775,22 @@ vet PASS, including real TLS lost-success/lost-denial recovery and funded TCP/UD
 renewal; diff check PASS. The guard is connection-local resource protection, not
 a new frozen wire message. Sustained-load reconnect latency at this boundary
 still requires measurement; no throughput or full availability claim is made.
+
+## Real TLS response-bound rotation and replay
+
+TestControlRotationDoesNotApplyOverLimitGrantAndReplaysOnce sends 4096 distinct
+valid control message envelopes over actual mTLS/gRPC carrying identical durable
+authorization updates. The 4097th envelope carries a different grant in the same
+source lineage. Connect rejects it at the identity-memory boundary before
+business application, and the source audit remains initial=remaining=4096.
+Reconnecting to a fresh authenticated stream replays the previously unprocessed
+grant: initial=remaining becomes 8192. A second connection replay keeps 8192,
+with no reserved, committed or unknown amounts. Both success and over-limit
+paths use ControlClient, not only the standalone guard helper.
+
+Targeted uncached race test PASS (6.568s overall); full Agent/Hub race and vet
+PASS; diff check PASS. This validates manual connection-boundary replay and
+exactly-once durable installation. It does not measure Run backoff, continuous
+business traffic during rotation, or dedicated-host tail latency. Test fixtures
+issue valid authorization payloads directly; actual durable Hub demand issuance
+is covered by the separate funded runtime/lost-response integration tests.
