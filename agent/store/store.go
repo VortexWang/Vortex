@@ -482,7 +482,10 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if _, err := s.db.Exec(`UPDATE runtime_sessions SET initial_grant_id=grant_id,initial_runtime_lease_id=runtime_lease_id,initial_share_lease_id=share_lease_id WHERE initial_grant_id=''`); err != nil {
 		return err
 	}
-	return s.migrateRenewalAuthority()
+	if err := s.migrateRenewalAuthority(); err != nil {
+		return err
+	}
+	return s.migrateUsageRetention()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative
@@ -898,7 +901,13 @@ func (s *Store) PersistUsageLedger(ctx context.Context, batch UsageBatch) error 
 	if len(batch.Digest) != 0 && !bytes.Equal(batch.Digest, digest[:]) {
 		return fmt.Errorf("store: usage batch digest mismatch")
 	}
-	return s.putUsageBatch(ctx, batch, digest[:], "ledgered")
+	err := s.putUsageBatch(ctx, batch, digest[:], "ledgered")
+	if errors.Is(err, ErrUsageBatchConflict) && s.owner == "hub" {
+		if evidenceErr := s.RecordUsageDispute(ctx, batch.NodeID, batch.BatchID, batch.Payload); evidenceErr != nil {
+			return fmt.Errorf("store: retain usage conflict: %w", evidenceErr)
+		}
+	}
+	return err
 }
 
 func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []byte, initialState string) error {
@@ -907,6 +916,18 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 		return err
 	}
 	defer tx.Rollback()
+	var snapshot string
+	var compactDigest []byte
+	err = tx.QueryRowContext(ctx, `SELECT snapshot_id,payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&snapshot, &compactDigest)
+	if err == nil {
+		if s.owner != "hub" || initialState != "ledgered" || batch.UnknownUpper != 0 || snapshot != batch.SnapshotID || !bytes.Equal(compactDigest, digest) {
+			return ErrUsageBatchConflict
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	var previous UsageBatch
 	var upper, created string
 	err = tx.QueryRowContext(ctx, `SELECT boot_id, snapshot_id, payload, payload_sha256, unknown_upper_bound, state, created_at FROM usage_batches WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).

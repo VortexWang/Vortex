@@ -23,7 +23,8 @@ func (s *Store) BackendUsageConfirmed(ctx context.Context, batch HubUsage) (bool
 	}
 	var kind string
 	var digest []byte
-	err := s.db.QueryRowContext(ctx, `SELECT kind,payload_sha256 FROM usage_backend_receipts WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&kind, &digest)
+	err := s.db.QueryRowContext(ctx, `SELECT kind,payload_sha256 FROM usage_backend_receipts WHERE node_id=? AND batch_id=?
+UNION ALL SELECT 'known',payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID, batch.NodeID, batch.BatchID).Scan(&kind, &digest)
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
@@ -41,6 +42,10 @@ func (s *Store) ConfirmBackendUsage(ctx context.Context, batch HubUsage, acknowl
 	if s.owner != "hub" || !bytes.Equal(digest[:], batch.Digest) || !bytes.Equal(digest[:], acknowledgedDigest) {
 		return ErrUsageBatchConflict
 	}
+	confirmed, err := s.BackendUsageConfirmed(ctx, batch)
+	if err != nil || confirmed {
+		return err
+	}
 	table := "usage_batches"
 	if batch.Kind == "unknown" {
 		table = "unknown_usage_batches"
@@ -52,6 +57,17 @@ func (s *Store) ConfirmBackendUsage(ctx context.Context, batch HubUsage, acknowl
 		return err
 	}
 	defer tx.Rollback()
+	var compactDigest []byte
+	compactErr := tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&compactDigest)
+	if compactErr == nil {
+		if batch.Kind != "known" || !bytes.Equal(compactDigest, digest[:]) {
+			return ErrUsageBatchConflict
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(compactErr, sql.ErrNoRows) {
+		return compactErr
+	}
 	var payload, storedDigest []byte
 	if err := tx.QueryRowContext(ctx, `SELECT payload,payload_sha256 FROM `+table+` WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&payload, &storedDigest); err != nil {
 		return err

@@ -48,6 +48,17 @@ func (i *Issuer) ReplayLedger(ctx context.Context, backend LedgerBackend) error 
 			return err
 		}
 	}
+	// A missing clock never establishes retention age. Authority replay still
+	// works, but optional compaction waits for trusted conservative time.
+	if i.Clock != nil {
+		now := i.Clock()
+		if now.Trusted && !now.Earliest.IsZero() && !now.Latest.Before(now.Earliest) {
+			_, err = i.Store.PruneSettledUsage(ctx, now, 1000)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 

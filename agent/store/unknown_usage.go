@@ -35,6 +35,13 @@ func unknownRecord(node string, payload []byte) (UnknownUsageRecord, error) {
 // insertUnknownUsageTx stores a typed unresolved liability. An optional legacy
 // record permits only exact migration of an unacknowledged local before-image.
 func insertUnknownUsageTx(ctx context.Context, tx *sql.Tx, r UnknownUsageRecord, state string, legacy *UsageBatch) error {
+	var compact int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, r.NodeID, r.BatchID).Scan(&compact); err != nil {
+		return err
+	}
+	if compact != 0 {
+		return ErrUsageBatchConflict
+	}
 	var oldPayload, oldBefore []byte
 	err := tx.QueryRowContext(ctx, `SELECT payload,legacy_before_image FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`, r.NodeID, r.BatchID).Scan(&oldPayload, &oldBefore)
 	if err == nil {

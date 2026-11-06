@@ -31,6 +31,8 @@ go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/r
 go test -count=1 -v ./test/phase5 -run '^TestSchedulerProcessRenewal$' > "$out/renewal-process.log" 2>&1
 go test -count=10 -race -v ./agent -run '^TestRegional' > "$out/regional-race.log" 2>&1
 go test -count=3 -race -v ./contracts ./agent/store -run '^TestRenewal' > "$out/renewal-journal-race.log" 2>&1
+PHASE5_RETENTION_EVIDENCE_DIR="$out/retention" go test -count=3 -race -v ./agent/store ./hub -run '^(TestSettledUsageRetention|TestRecoveryRetainsReceiptIdentity)' > "$out/usage-retention-race.log" 2>&1
+python3 tools/phase5/audit_usage_retention.py "$out/retention" > "$out/retention-audit.json"
 go test -count=3 -race -v ./agent ./hub ./contracts -run '^(TestScheduler|TestCurrentNodeReport|TestNodeReport)' > "$out/scheduler-race.log" 2>&1
 go test -count=3 -race -v ./agent ./agent/store -run '^(TestShare|TestIssuerRenewal|TestAuthorizationLifecycle|TestRenewalCurrent|TestRenewalCadence|TestRenewalRejects|TestRenewalCandidates|TestDurableEventExactReplay|TestLedgerReader|TestLedgerWriter)' > "$out/share-renewal-race.log" 2>&1
 (cd engine && go test -count=1 ./...) > "$out/engine-test.log" 2>&1
@@ -52,6 +54,9 @@ for name in ('TestSchedulerProcessRenewal/low-water-tcp-udp','TestSchedulerProce
 for name in ('TestRegionalStatusRejectsUnauthenticatedOrStaleBounds','TestRegionalStaleIncarnationCannotMutateAuthority','TestRegionalSwitchCancelsBlockedMutation','TestRegionalHealthyLossRestartsSweepBudget','TestRegionalFailoverRetainsUnknownDebt','TestRegionalLateAuthorizationCannotAdvanceClockOrConfig','TestRegionalRevocationAndNoHealthyPeerAreBounded'):
  log=(out/'regional-race.log').read_text()
  assert log.count(f'--- PASS: {name} ') == 10 and f'--- SKIP: {name}' not in log,name
+for name in ('TestSettledUsageRetentionConservativeAgeAndRestartReplay','TestSettledUsageRetentionHolesDisputesAndUnknownDebt','TestSettledUsageRetentionAtomicFailureAndMigration','TestSettledUsageRetentionBoundedScanDoesNotStarveUnaged','TestSettledUsageRetentionConcurrentReplayAndPrune','TestRecoveryRetainsReceiptIdentityAfterUsageCompaction'):
+ log=(out/'usage-retention-race.log').read_text()
+ assert log.count(f'--- PASS: {name} ') == 3 and f'--- SKIP: {name}' not in log,name
 assert '--- PASS: TestConcurrentCommitAbortHasOneOutcome '  in (out/'engine-race.log').read_text()
 for name in ('TestRenewalDigestAndStrictBounds','TestRenewalResultRejectsUncorrelatedOrInventedSuccess','TestRenewalJournalReopensAndRejectsChangedIntent','TestRenewalJournalReceiptIsNotInstallation','TestRenewalJournalDiskFailureAndConcurrentLineage','TestRenewalJournalInstallationRequiresExactCommittedUpdate'):
  log=(out/'renewal-journal-race.log').read_text()
