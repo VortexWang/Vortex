@@ -1,13 +1,13 @@
 package hub
 
 import (
-	"bufio"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"sync"
 	"time"
@@ -29,24 +29,44 @@ type enrollmentResponse struct {
 	Error       string `json:"error,omitempty"`
 }
 
+const enrollmentRequestLimit = 64 * 1024
+
 // EnrollmentServer is a bounded test/bootstrap endpoint. Production enrollment
 // authority and durable token lifecycle belong to the backend implementation.
+// Configure limits before Serve; do not mutate them while it is running.
+// Zero values select 64 connections and a five-second whole-request timeout.
 type EnrollmentServer struct {
-	Enroller *identity.Enroller
-	CA       []byte
-	TLS      *tls.Config
-	TTL      time.Duration
-	Roots    *x509.CertPool
-	mu       sync.RWMutex
-	revoked  map[string]struct{}
+	MaxConnections int
+	RequestTimeout time.Duration
+	Enroller       *identity.Enroller
+	CA             []byte
+	TLS            *tls.Config
+	TTL            time.Duration
+	Roots          *x509.CertPool
+	mu             sync.RWMutex
+	revoked        map[string]struct{}
 }
 
 func (s *EnrollmentServer) Serve(ctx context.Context, listener net.Listener) error {
 	if s == nil || s.Enroller == nil || s.TLS == nil || s.TTL <= 0 {
 		return errors.New("hub enrollment: incomplete test server configuration")
 	}
+	if s.MaxConnections < 0 || s.RequestTimeout < 0 {
+		return errors.New("hub enrollment: resource limits cannot be negative")
+	}
+	limit, timeout := s.MaxConnections, s.RequestTimeout
+	if limit == 0 {
+		limit = 64
+	}
+	if timeout == 0 {
+		timeout = 5 * time.Second
+	}
 	listener = tls.NewListener(listener, s.TLS.Clone())
-	defer listener.Close()
+	serveCtx, cancel := context.WithCancel(ctx)
+	var handlers sync.WaitGroup
+	stopListener := context.AfterFunc(serveCtx, func() { _ = listener.Close() })
+	defer func() { cancel(); _ = listener.Close(); handlers.Wait(); stopListener() }()
+	slots := make(chan struct{}, limit)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -55,18 +75,38 @@ func (s *EnrollmentServer) Serve(ctx context.Context, listener net.Listener) err
 			}
 			return err
 		}
-		go s.handle(conn)
+		select {
+		case slots <- struct{}{}:
+		default:
+			_ = conn.Close()
+			continue
+		}
+		// The deadline covers TLS handshake, request decode and response write.
+		if err := conn.SetDeadline(time.Now().Add(timeout)); err != nil {
+			_ = conn.Close()
+			<-slots
+			continue
+		}
+		handlers.Add(1)
+		go func() {
+			defer handlers.Done()
+			defer func() { <-slots }()
+			stopConn := context.AfterFunc(serveCtx, func() { _ = conn.Close() })
+			defer stopConn()
+			s.handle(conn)
+		}()
 	}
 }
 
 func (s *EnrollmentServer) handle(conn net.Conn) {
 	defer conn.Close()
 	var request enrollmentRequest
-	decoder := json.NewDecoder(bufio.NewReader(conn))
-	if err := decoder.Decode(&request); err != nil {
+	decoder := json.NewDecoder(io.LimitReader(conn, enrollmentRequestLimit+1))
+	if err := decoder.Decode(&request); err != nil || decoder.InputOffset() > enrollmentRequestLimit {
 		_ = json.NewEncoder(conn).Encode(enrollmentResponse{Type: "error", Error: "invalid request"})
 		return
 	}
+
 	if request.Type == "renew" {
 		s.renew(conn, request)
 		return

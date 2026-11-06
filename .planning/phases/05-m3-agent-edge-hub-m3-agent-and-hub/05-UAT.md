@@ -8,20 +8,21 @@ updated: "2026-11-06T00:50:09.654515+00:00"
 
 ## Current Test
 
-number: 1
-name: 实际节点重启与账本恢复边界
+number: 2
+name: 注册与文件升级边界
 expected: |
-  SIGKILL 后节点生成新 boot，旧授权仅结算，未完成写入的未知负债仍冻结；
-  节点经重新 Prepare、当前授权和 Commit 后恢复实际 TCP。
-  signer epoch 的 S/R 交接不改变路径 generation 或旧授权边界。
+  注册私钥在本地生成，一次令牌重复兑换被拒绝；
+  升级包签名或摘要校验失败不切换二进制，健康检查失败恢复旧版本。
+  此处验证文件安装器边界，完整服务级排空与升级集成仍待补齐。
 awaiting: user response
 
 ## Tests
 
 ### 1. 实际节点重启与账本恢复边界
 expected: 新 boot 不释放旧未知负债；实际 TCP 经新授权恢复；S/R 只转未签发 R，不延长旧授权。
-result: pending
+result: pass
 source: human
+reported: "确认"
 verification: agent/runtime_restart_test.go#TestRuntimeSIGKILLFreshBootReprepareAndRecoverDebt; agent/epoch_handoff_test.go#TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor
 
 ### 2. 注册与文件升级边界
@@ -139,9 +140,9 @@ verification: artifacts/phase5/check/79a1c0b148f77e765190ee51075adf845e5ad115/pa
 ## Summary
 
 total: 17
-passed: 15
+passed: 16
 issues: 0
-pending: 2
+pending: 1
 skipped: 0
 blocked: 0
 
