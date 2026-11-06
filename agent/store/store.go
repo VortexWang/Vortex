@@ -361,6 +361,18 @@ CREATE TABLE IF NOT EXISTS issuer_issues (
  amount_bytes TEXT NOT NULL, created_at TEXT NOT NULL,
  FOREIGN KEY(delegation_id) REFERENCES issuer_delegations(delegation_id)
 );
+CREATE TABLE IF NOT EXISTS renewal_requests (
+ request_id TEXT PRIMARY KEY NOT NULL, issuer_id TEXT NOT NULL,
+ node_id TEXT NOT NULL, boot_id TEXT NOT NULL, delegation_id TEXT NOT NULL,
+ source_id TEXT NOT NULL, rule_id TEXT NOT NULL, snapshot_id TEXT NOT NULL,
+ payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
+ state TEXT NOT NULL CHECK(state IN ('pending','received','installed','rejected')),
+ result BLOB NOT NULL DEFAULT X'', result_sha256 BLOB NOT NULL DEFAULT X'',
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS renewal_one_outstanding_lineage ON renewal_requests
+ (node_id,delegation_id,source_id,rule_id,snapshot_id)
+ WHERE state IN ('pending','received');
 CREATE TABLE IF NOT EXISTS unknown_usage_batches (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, origin_boot_id TEXT NOT NULL,
  snapshot_id TEXT NOT NULL, grant_id TEXT NOT NULL, rule_id TEXT NOT NULL,
