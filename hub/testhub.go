@@ -47,10 +47,13 @@ type TestServer struct {
 	UsageBatchLimit     int
 	AcceptUsage         bool
 	Usage               *UsageRelay
-	mu                  sync.RWMutex
-	revoked             map[string]struct{}
-	reports             map[string]NodeReportSnapshot
-	ReportObserver      func(context.Context, string, string, string, *controlv1.NodeReport) error
+	RenewalIssuer       *Issuer
+	// Test-only lost-response fault; the durable issuer has already committed.
+	DropFirstRenewalReply bool
+	mu                    sync.RWMutex
+	revoked               map[string]struct{}
+	reports               map[string]NodeReportSnapshot
+	ReportObserver        func(context.Context, string, string, string, *controlv1.NodeReport) error
 }
 
 func (s *TestServer) Revoke(serial string) {
@@ -228,6 +231,38 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		}
 		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_RenewalRequest:
+			if hello == nil || len(hello.Capabilities) != 2 || hello.Capabilities[1] != "renewal-v1" || s.RenewalIssuer == nil || s.RenewalIssuer.HubID != s.HubID || s.RenewalIssuer.Store != s.Store || len(message.ProtoReflect().GetUnknown()) != 0 {
+				return fmt.Errorf("test hub: unnegotiated renewal")
+			}
+			// Fence the prior connection through the entire durable mutation.
+			// beginReportSession uses this same lock before replacing a session.
+			s.mu.Lock()
+			current := s.reports[first.GetNodeId()]
+			if current.SessionID != hello.SessionId || current.BootID != first.GetBootId() {
+				s.mu.Unlock()
+				return fmt.Errorf("test hub: stale renewal session")
+			}
+			result, err := s.RenewalIssuer.Renew(ctx, first.GetNodeId(), first.GetBootId(), body.RenewalRequest)
+			drop := err == nil && s.DropFirstRenewalReply
+			if drop {
+				s.DropFirstRenewalReply = false
+			}
+			s.mu.Unlock()
+			if err != nil {
+				return err
+			}
+			if drop {
+				continue
+			}
+			id, err := testHubMessageID()
+			if err != nil {
+				return err
+			}
+			controlSequence++
+			if err := stream.Send(&controlv1.ControlMessage{MessageId: id, Sequence: controlSequence, Body: &controlv1.ControlMessage_RenewalResult{RenewalResult: result}}); err != nil {
+				return err
+			}
 		case *controlv1.NodeMessage_NodeReport:
 			if hello == nil {
 				return fmt.Errorf("test hub: unnegotiated node report")

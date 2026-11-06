@@ -5,6 +5,24 @@ import (
 	"time"
 )
 
+func TestAuthorityClockNeverRetreatsBelowAuthenticatedIssue(t *testing.T) {
+	local := time.Now()
+	now := local
+	c := newAuthorityClock()
+	c.now = func() time.Time { return now }
+	issued := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
+	if err := c.observe(issued, local.Add(-time.Second), local); err != nil {
+		t.Fatal(err)
+	}
+	for _, elapsed := range []time.Duration{0, time.Nanosecond, time.Millisecond, 10 * time.Millisecond, time.Second} {
+		now = local.Add(elapsed)
+		low, high, trusted := c.Bounds()
+		if !trusted || low.Before(issued) || low.After(issued.Add(elapsed)) || high.Before(issued.Add(elapsed)) {
+			t.Fatalf("elapsed=%v bounds=%v..%v trusted=%v", elapsed, low, high, trusted)
+		}
+	}
+}
+
 func TestAuthorityClockRequiresFreshResponseAndExpires(t *testing.T) {
 	local := time.Now()
 	now := local

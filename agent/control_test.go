@@ -22,6 +22,10 @@ import (
 const controlTestNodeID = "550e8400-e29b-41d4-a716-446655440000"
 
 func controlTLS(t *testing.T, clientID string) (*tls.Config, *tls.Config, *x509.CertPool) {
+	return controlTLSWithHub(t, clientID, "hub")
+}
+
+func controlTLSWithHub(t *testing.T, clientID, hubID string) (*tls.Config, *tls.Config, *x509.CertPool) {
 	t.Helper()
 	now := time.Now().UTC()
 	ca, caDER, err := identity.NewCA(now)
@@ -45,7 +49,7 @@ func controlTLS(t *testing.T, clientID string) (*tls.Config, *tls.Config, *x509.
 	}
 	pool := x509.NewCertPool()
 	pool.AddCert(ca.Certificate)
-	serverTLS, err := identity.TLSConfig(issue("hub"), pool, nil, true)
+	serverTLS, err := identity.TLSConfig(issue(hubID), pool, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +57,7 @@ func controlTLS(t *testing.T, clientID string) (*tls.Config, *tls.Config, *x509.
 	if err != nil {
 		t.Fatal(err)
 	}
-	clientTLS.ServerName = "hub"
+	clientTLS.ServerName = hubID
 	return serverTLS, clientTLS, pool
 }
 

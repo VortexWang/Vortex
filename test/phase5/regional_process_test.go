@@ -274,7 +274,9 @@ func TestRegionalProcessFailover(t *testing.T) {
 	t.Run("tcp-original-authorization", func(t *testing.T) { regionalTCPContinuity(t, binaries) })
 }
 
-func regionalTCPContinuity(t *testing.T, binaries string) {
+func regionalTCPContinuity(t *testing.T, binaries string) { regionalTrafficContinuity(t, binaries, "") }
+
+func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 	defer cancel()
@@ -346,6 +348,25 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 		t.Fatal(e)
 	}
 	defer target.Close()
+	if renewalMode != "" {
+		udp, e := net.ListenPacket("udp", target.Addr().String())
+		if e != nil {
+			t.Fatal(e)
+		}
+		defer udp.Close()
+		go func() {
+			var b [2048]byte
+			for {
+				n, addr, e := udp.ReadFrom(b[:])
+				if e != nil {
+					return
+				}
+				if _, e = udp.WriteTo(b[:n], addr); e != nil {
+					return
+				}
+			}
+		}()
+	}
 	var accepted atomic.Int64
 	go func() {
 		for {
@@ -374,6 +395,29 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 	updatePath := filepath.Join(dir, "update.json")
 	os.WriteFile(updatePath, updateRaw, 0600)
 	d := store.HubDelegation{ID: regionalBoot, HubID: regionalFirst, SourceID: regionalFirst, RuntimeSourceID: regionalSecond, ShareSourceID: regionalNode, NodeID: regionalNode, BootID: regionalBoot, BillingSnapshotID: regionalBoot, RuleID: cfg.RuleID, RuleRevision: 2, PathGeneration: 4, FencingFloor: 9, SignerEpoch: 1, RawBytes: 16384, RateBPS: 10000000, Connections: 2, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(time.Hour)}
+	if renewalMode != "" {
+		d.RawBytes = 65536
+		for i, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
+			d.ShareReferences = append(d.ShareReferences, store.ShareReference{ID: fmt.Sprintf("550e8400-e29b-41d4-a716-%012d", 970+i), SourceID: source, IssuerID: d.HubID, NodeID: d.NodeID, SignerEpoch: 1, Generation: 1, Revision: 1, RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, RateBPS: d.RateBPS, Connections: d.Connections, NotBefore: d.ValidFrom, ExpiresAt: d.ExpiresAt, HardDeadline: d.HardDeadline})
+		}
+		for _, name := range []string{"hub0.db", "agent.db"} {
+			owner := "hub"
+			if name == "agent.db" {
+				owner = "agent"
+			}
+			s, e := store.Open(filepath.Join(dir, name), owner)
+			if e != nil {
+				t.Fatal(e)
+			}
+			for _, root := range d.ShareReferences {
+				if e := s.InstallShareSourceAnchor(ctx, d.NodeID, regionalBoot, root); e != nil {
+					s.Close()
+					t.Fatal(e)
+				}
+			}
+			s.Close()
+		}
+	}
 	allocation, _ := json.Marshal(d)
 	allocationPath := filepath.Join(dir, "allocation.json")
 	os.WriteFile(allocationPath, allocation, 0600)
@@ -385,6 +429,9 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 		args := []string{"--listen", addresses[i], "--db", dbPath, "--tls-cert", cert, "--tls-key", key, "--tls-ca", caPath, "--hub-id", id, "--region", "east"}
 		if i == 0 {
 			args = append(args, "--test-delegation-template", allocationPath, "--test-config-update", updatePath)
+			if renewalMode == "lost-result" {
+				args = append(args, "--test-drop-first-renewal-reply")
+			}
 		} else {
 			s, e := store.Open(dbPath, "hub")
 			if e != nil {
@@ -392,6 +439,7 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 			}
 			other := d
 			other.HubID = id
+			other.ShareReferences = nil // fallback has no ownership of the first Hub's roots
 			if e = s.InstallHubDelegation(ctx, other, store.IssuerTime{Earliest: now, Latest: now, Trusted: true}); e != nil {
 				t.Fatal(e)
 			}
@@ -406,7 +454,12 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 	for i, id := range []string{regionalFirst, regionalSecond} {
 		hubs = append(hubs, map[string]string{"hub_id": id, "endpoint": addresses[i], "server_name": id})
 	}
-	controlRaw, _ := json.Marshal(map[string]any{"version": 1, "node_id": regionalNode, "listeners": []any{}, "rules": []any{}, "revocations": []string{}, "lifecycle": map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}})
+	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
+	if renewalMode != "" {
+		lifecycle["renew_percent"] = 30
+		lifecycle["renew_retry_min_ms"] = 1000
+	}
+	controlRaw, _ := json.Marshal(map[string]any{"version": 1, "node_id": regionalNode, "listeners": []any{}, "rules": []any{}, "revocations": []string{}, "lifecycle": lifecycle})
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
@@ -480,9 +533,13 @@ func regionalTCPContinuity(t *testing.T, binaries string) {
 			t.Fatal(e)
 		}
 		defer frame.Release()
-		if string(frame.Payload) != payload {
-			t.Fatalf("changed TCP payload: %q", frame.Payload)
+		if frame.Type != vlink.FrameData || string(frame.Payload) != payload {
+			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
+	}
+	if renewalMode != "" {
+		schedulerRenewalTraffic(t, ctx, db, dir, cfg, mux, stream, exchange)
+		return
 	}
 	exchange("before-control-switch")
 	var boot, grant, source, expires string

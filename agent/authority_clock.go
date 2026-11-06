@@ -37,7 +37,14 @@ func (c *AuthorityClock) project(now time.Time) (time.Time, time.Time, bool) {
 	}
 	// A deliberately conservative 1000 ppm envelope plus 10 ms quantization.
 	drift := elapsed/1000 + 10*time.Millisecond
-	return c.lower.Add(elapsed - drift), c.upper.Add(elapsed + drift), true
+	lower := c.lower.Add(elapsed - drift)
+	// An authenticated lower bound remains a lower bound while local clock
+	// continuity holds. Quantization uncertainty must not move it backwards
+	// immediately after observing a newly issued authorization.
+	if lower.Before(c.lower) {
+		lower = c.lower
+	}
+	return lower, c.upper.Add(elapsed + drift), true
 }
 
 func (c *AuthorityClock) Bounds() (time.Time, time.Time, bool) {

@@ -225,8 +225,30 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return result, err
 	}
 	defer tx.Rollback()
+	result, err = s.issueHubAuthorizationTx(ctx, tx, r, now, renewal, request)
+	if err != nil {
+		return IssuedAuthorization{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return IssuedAuthorization{}, err
+	}
+	return result, nil
+}
+
+// The caller owns commit/rollback so renewal outcomes and budget changes can
+// share exactly one durable transaction.
+func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r IssueRequest, now IssuerTime, renewal *controlv1.RenewalRequest, request []byte) (IssuedAuthorization, error) {
+	var result IssuedAuthorization
+	var terminal []byte
+	terminalErr := tx.QueryRowContext(ctx, `SELECT result FROM issuer_renewals WHERE request_id=?`, r.ID).Scan(&terminal)
+	if terminalErr == nil {
+		return result, ErrRenewalConflict
+	}
+	if !errors.Is(terminalErr, sql.ErrNoRows) {
+		return result, terminalErr
+	}
 	var priorRequest []byte
-	err = tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256,renewal_result FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest, &result.RenewalResult)
+	err := tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256,renewal_result FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest, &result.RenewalResult)
 	if err == nil {
 		if !bytes.Equal(priorRequest, request) {
 			return IssuedAuthorization{}, ErrAuthorizationUpdateConflict
@@ -248,7 +270,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 				return IssuedAuthorization{}, ErrRenewalConflict
 			}
 		}
-		return result, tx.Commit()
+		return result, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return result, err
@@ -315,7 +337,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return result, err
 	}
 	if r.RawBytes > remaining {
-		return result, ErrAuthorizationDenied
+		return result, ErrIssuerQuotaExhausted
 	}
 	expires := now.Latest.Add(r.TTL)
 	for _, limit := range []time.Time{d.ExpiresAt, d.HardDeadline, deadline, d.AutonomyDeadline} {
@@ -352,9 +374,6 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return IssuedAuthorization{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO issuer_issues(issue_id,delegation_id,request,payload,payload_sha256,amount_bytes,created_at,renewal_result) VALUES(?,?,?,?,?,?,?,?)`, r.ID, d.ID, request, result.Payload, result.Digest, strconv.FormatUint(r.RawBytes, 10), now.Latest.UTC().Format(time.RFC3339Nano), nonnilBytes(result.RenewalResult)); err != nil {
-		return IssuedAuthorization{}, err
-	}
-	if err := tx.Commit(); err != nil {
 		return IssuedAuthorization{}, err
 	}
 	return result, nil

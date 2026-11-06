@@ -12,7 +12,7 @@ import (
 // lifecycleStatus reports only previously committed authority. This is still
 // the explicit phase-5 protocol fixture, not a production backend adapter.
 func (s *TestServer) lifecycleStatus(ctx context.Context, hello *controlv1.LifecycleHello) (*controlv1.HubStatus, error) {
-	if hello == nil || hello.ControlVersion != "1.3.0" || hello.RegionId != s.Region || !validStatusUUID(hello.SessionId) || len(hello.Capabilities) != 1 || hello.Capabilities[0] != "status-v1" || len(hello.ProtoReflect().GetUnknown()) != 0 {
+	if hello == nil || hello.ControlVersion != "1.3.0" || hello.RegionId != s.Region || !validStatusUUID(hello.SessionId) || !validLifecycleCapabilities(hello.Capabilities, s.RenewalIssuer != nil) || len(hello.ProtoReflect().GetUnknown()) != 0 {
 		return nil, fmt.Errorf("test hub: invalid lifecycle hello")
 	}
 	snapshot, err := s.Store.HubControlSnapshot(ctx, s.HubID, time.Now())
@@ -20,6 +20,7 @@ func (s *TestServer) lifecycleStatus(ctx context.Context, hello *controlv1.Lifec
 		return nil, err
 	}
 	status := &controlv1.HubStatus{HubId: s.HubID, RegionId: s.Region, Mode: snapshot.Mode, SessionId: hello.SessionId, ControlVersion: "1.3.0", Capabilities: []string{"status-v1"}, SignerEpoch: snapshot.Epoch, ConfirmedSequence: snapshot.Confirmed, PendingTailRecords: snapshot.Pending}
+	status.Capabilities = append([]string(nil), hello.Capabilities...)
 	if !snapshot.BackendHeartbeat.IsZero() {
 		status.BackendHeartbeatAt = snapshot.BackendHeartbeat.UTC().Format(time.RFC3339Nano)
 	}
@@ -27,6 +28,10 @@ func (s *TestServer) lifecycleStatus(ctx context.Context, hello *controlv1.Lifec
 		status.AutonomyDeadline = snapshot.Deadline.UTC().Format(time.RFC3339Nano)
 	}
 	return status, nil
+}
+
+func validLifecycleCapabilities(caps []string, renewal bool) bool {
+	return len(caps) == 1 && caps[0] == "status-v1" || renewal && len(caps) == 2 && caps[0] == "status-v1" && caps[1] == "renewal-v1"
 }
 func validStatusUUID(id string) bool {
 	if len(id) != 36 {

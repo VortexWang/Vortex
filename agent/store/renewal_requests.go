@@ -59,6 +59,20 @@ func renewalIntentTx(ctx context.Context, tx *sql.Tx, requestID string) (Renewal
 // issuer is immutable. A failover cannot create another request for an unresolved
 // lineage, even with a new boot, signer epoch or path generation.
 func (s *Store) PersistRenewalIntent(ctx context.Context, issuerID string, request *controlv1.RenewalRequest) error {
+	return s.persistRenewalIntent(ctx, issuerID, request, "")
+}
+
+// PersistTriggeredRenewal binds one automatic attempt to an immutable grant.
+// A terminal refusal cannot create an unbounded stream of fresh request IDs
+// every scheduler tick; a new grant is required to establish a new trigger.
+func (s *Store) PersistTriggeredRenewal(ctx context.Context, issuerID string, request *controlv1.RenewalRequest, grantID string) error {
+	if !validIssuerUUID(grantID) {
+		return ErrAuthorizationDenied
+	}
+	return s.persistRenewalIntent(ctx, issuerID, request, grantID)
+}
+
+func (s *Store) persistRenewalIntent(ctx context.Context, issuerID string, request *controlv1.RenewalRequest, basis string) error {
 	if s.owner != "agent" || !validIssuerUUID(issuerID) {
 		return ErrAuthorizationDenied
 	}
@@ -81,6 +95,25 @@ func (s *Store) PersistRenewalIntent(ctx context.Context, issuerID string, reque
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	if basis != "" {
+		grant, _, err := readAuthorizationTx(ctx, tx, request.NodeId, basis)
+		if err != nil {
+			return err
+		}
+		issued, e1 := time.Parse(time.RFC3339Nano, grant.IssuedAt)
+		expires, e2 := time.Parse(time.RFC3339Nano, grant.ExpiresAt)
+		if e1 != nil || e2 != nil || grant.Kind != "credit_grant" || grant.ShareReferenceID == "" || grant.IssuerID != issuerID || grant.DelegationID != request.DelegationId || grant.BootID != request.BootId || grant.SourceID != request.SourceId || grant.RuleID != request.RuleId || grant.RuleRevision != request.RuleRevision || grant.PathGeneration != request.PathGeneration || grant.SignerEpoch != request.SignerEpoch || grant.BillingSnapshotID != request.BillingSnapshotId || request.RequestedRawBytes > grant.AmountBytes || time.Duration(request.RequestedTtlSeconds)*time.Second > expires.Sub(issued) {
+			return ErrRenewalConflict
+		}
+		var previous string
+		err = tx.QueryRowContext(ctx, `SELECT request_id FROM renewal_requests WHERE node_id=? AND trigger_authorization_id=?`, request.NodeId, basis).Scan(&previous)
+		if err == nil {
+			return ErrRenewalConflict
+		}
+		if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+	}
 	var outstanding string
 	err = tx.QueryRowContext(ctx, `SELECT request_id FROM renewal_requests WHERE node_id=? AND delegation_id=? AND source_id=? AND rule_id=? AND snapshot_id=? AND state IN ('pending','received')`, request.NodeId, request.DelegationId, request.SourceId, request.RuleId, request.BillingSnapshotId).Scan(&outstanding)
 	if err == nil {
@@ -90,7 +123,7 @@ func (s *Store) PersistRenewalIntent(ctx context.Context, issuerID string, reque
 		return err
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano) // observational, never an authority deadline
-	_, err = tx.ExecContext(ctx, `INSERT INTO renewal_requests(request_id,issuer_id,node_id,boot_id,delegation_id,source_id,rule_id,snapshot_id,payload,payload_sha256,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,'pending',?,?)`, request.RequestId, issuerID, request.NodeId, request.BootId, request.DelegationId, request.SourceId, request.RuleId, request.BillingSnapshotId, payload, request.RequestSha256, now, now)
+	_, err = tx.ExecContext(ctx, `INSERT INTO renewal_requests(request_id,issuer_id,node_id,boot_id,delegation_id,source_id,rule_id,snapshot_id,payload,payload_sha256,trigger_authorization_id,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,'pending',?,?)`, request.RequestId, issuerID, request.NodeId, request.BootId, request.DelegationId, request.SourceId, request.RuleId, request.BillingSnapshotId, payload, request.RequestSha256, basis, now, now)
 	if err != nil {
 		return err
 	}

@@ -210,7 +210,11 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if err != nil {
 			return err
 		}
-		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: []string{"status-v1"}, SessionId: session, RegionId: regional.Region}}}); err != nil {
+		caps := []string{"status-v1"}
+		if regional.Renewal != nil {
+			caps = append(caps, "renewal-v1")
+		}
+		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: caps, SessionId: session, RegionId: regional.Region}}}); err != nil {
 			return err
 		}
 		lastNodeSequence = sequence
@@ -266,6 +270,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		ticker.Stop()
 	}
 	lastHeartbeat := time.Now()
+	lastRenewal := time.Now()
 	reports := c.reportQueue()
 	for {
 		var response received
@@ -304,6 +309,18 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 				lastNodeSequence = seq
 				lastHeartbeat = time.Now()
+			}
+			if regional != nil && regional.Renewal != nil && time.Since(lastRenewal) >= regional.Renewal.Retry {
+				issuer, _ := issuerIdentity.Load().(string)
+				if err := c.withSession(ctx, incarnation, func() error {
+					if err := c.queueDueRenewals(ctx, issuer, *regional.Renewal); err != nil {
+						return err
+					}
+					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence)
+				}); err != nil {
+					return err
+				}
+				lastRenewal = time.Now()
 			}
 			if err := c.withSession(ctx, incarnation, func() error { return c.resumePrepared(ctx, stream, &lastNodeSequence) }); err != nil {
 				return err
@@ -427,6 +444,18 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return fmt.Errorf("agent: boot-local authority clock missing")
 				}
 				if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
+					return err
+				}
+				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
+					return err
+				}
+
+			case *controlv1.ControlMessage_RenewalResult:
+				if regional == nil || regional.Renewal == nil || !negotiated {
+					return fmt.Errorf("agent: unnegotiated renewal result")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if err := c.acceptRenewalResult(ctx, issuer, body.RenewalResult); err != nil {
 					return err
 				}
 				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {

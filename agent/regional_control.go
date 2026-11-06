@@ -25,10 +25,18 @@ type RegionalConfig struct {
 	RetryMin, RetryMax                    time.Duration
 	Probes                                *SchedulerConfig
 	ProbeReferences                       []ProbeTarget
+	Renewal                               *RenewalConfig
 	onlineOnly                            bool
 }
 
 func (r RegionalConfig) validated() (RegionalConfig, error) {
+	if r.Renewal != nil {
+		v, err := r.Renewal.validated()
+		if err != nil {
+			return r, err
+		}
+		r.Renewal = &v
+	}
 	if r.DialTimeout == 0 {
 		r.DialTimeout = 5 * time.Second
 	}
@@ -191,7 +199,7 @@ func noUnknownFields(m protoreflect.Message) bool {
 }
 
 func validateRegionalStatus(s *controlv1.HubStatus, e HubEndpoint, r *RegionalConfig, session, issuer string, now time.Time) error {
-	if s == nil || !noUnknownFields(s.ProtoReflect()) || !canonicalUUID(s.HubId) || s.HubId != e.HubID || issuer != e.ServerName || s.SessionId != session || s.RegionId != r.Region || s.ControlVersion != "1.3.0" || len(s.Capabilities) != 1 || s.Capabilities[0] != "status-v1" {
+	if s == nil || !noUnknownFields(s.ProtoReflect()) || !canonicalUUID(s.HubId) || s.HubId != e.HubID || issuer != e.ServerName || s.SessionId != session || s.RegionId != r.Region || s.ControlVersion != "1.3.0" || !validRenewalCapabilities(s.Capabilities, r.Renewal != nil) {
 		return fmt.Errorf("agent: invalid authenticated regional status")
 	}
 	for _, n := range []uint64{s.SignerEpoch, s.RecoveryTargetSequence, s.ConfirmedSequence, s.PendingTailRecords, s.RevocationRevision, s.RestrictionRevision} {
@@ -256,6 +264,8 @@ func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, e
 			ProbeTimeout   int `json:"probe_timeout_ms"`
 			ProbeWorkers   int `json:"probe_workers"`
 			ReportInterval int `json:"report_interval_seconds"`
+			RenewPercent   int `json:"renew_percent"`
+			RenewRetry     int `json:"renew_retry_min_ms"`
 		} `json:"lifecycle"`
 	}
 	if len(payload) == 0 || len(payload) > 1<<20 {
@@ -276,6 +286,9 @@ func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, e
 	v := envelope.Lifecycle
 	r := RegionalConfig{Region: v.Region.ID, DialTimeout: time.Duration(v.Dial) * time.Second, Watchdog: time.Duration(v.Watchdog) * time.Second, FailoverBudget: time.Duration(v.Budget) * time.Second, RetryMin: time.Duration(v.RetryMin) * time.Millisecond, RetryMax: time.Duration(v.RetryMax) * time.Millisecond}
 	r.Probes = &SchedulerConfig{ProbeInterval: time.Duration(v.ProbeInterval) * time.Millisecond, ProbeTimeout: time.Duration(v.ProbeTimeout) * time.Millisecond, ProbeWorkers: v.ProbeWorkers, ReportInterval: time.Duration(v.ReportInterval) * time.Second}
+	if v.RenewPercent != 0 || v.RenewRetry != 0 {
+		r.Renewal = &RenewalConfig{Percent: v.RenewPercent, Retry: time.Duration(v.RenewRetry) * time.Millisecond}
+	}
 	for _, t := range envelope.Targets {
 		r.ProbeReferences = append(r.ProbeReferences, ProbeTarget{ID: t.ID, RuleID: t.RuleID, Protocol: t.Protocol})
 	}

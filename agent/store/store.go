@@ -303,26 +303,6 @@ CREATE TABLE IF NOT EXISTS authorization_balances (
   PRIMARY KEY(node_id, authorization_id),
   FOREIGN KEY(node_id, authorization_id) REFERENCES authorization_records(node_id, authorization_id)
 );
-CREATE TABLE IF NOT EXISTS share_source_anchors (
- node_id TEXT NOT NULL,source_id TEXT NOT NULL,revision TEXT NOT NULL,
- backend_id TEXT NOT NULL,payload BLOB NOT NULL,payload_sha256 BLOB NOT NULL,
- PRIMARY KEY(node_id,source_id,revision)
-);
-CREATE TABLE IF NOT EXISTS share_source_heads (
- node_id TEXT NOT NULL,source_id TEXT NOT NULL,revision TEXT NOT NULL,
- backend_id TEXT NOT NULL,PRIMARY KEY(node_id,source_id)
-);
-CREATE TABLE IF NOT EXISTS share_references (
- node_id TEXT NOT NULL,share_id TEXT NOT NULL,revision TEXT NOT NULL,
- parent_id TEXT NOT NULL,parent_revision TEXT NOT NULL,
- rate_bps TEXT NOT NULL,connections TEXT NOT NULL,
- payload BLOB NOT NULL,payload_sha256 BLOB NOT NULL,
- PRIMARY KEY(node_id,share_id,revision)
-);
-CREATE TABLE IF NOT EXISTS share_reference_heads (
- node_id TEXT NOT NULL,share_id TEXT NOT NULL,revision TEXT NOT NULL,
- PRIMARY KEY(node_id,share_id)
-);
 CREATE TABLE IF NOT EXISTS authorization_source_owners (
   node_id TEXT NOT NULL,
   source_id TEXT NOT NULL,
@@ -469,7 +449,7 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
-  ON CONFLICT(key) DO UPDATE SET value=excluded.value;
+  ON CONFLICT(key) DO NOTHING;
 `)
 	if err != nil {
 		return fmt.Errorf("store: schema: %w", err)
@@ -490,14 +470,6 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 			return err
 		}
 	}
-	for _, column := range []string{"delegation_id", "share_reference_id", "share_revision"} {
-		if err := s.ensureColumn("authorization_records", column, "TEXT NOT NULL DEFAULT ''"); err != nil {
-			return err
-		}
-	}
-	if err := s.ensureColumn("issuer_issues", "renewal_result", "BLOB NOT NULL DEFAULT X''"); err != nil {
-		return err
-	}
 	for _, column := range []string{"initial_grant_id", "initial_runtime_lease_id", "initial_share_lease_id"} {
 		if err := s.ensureColumn("runtime_sessions", column, "TEXT NOT NULL DEFAULT ''"); err != nil {
 			return err
@@ -506,10 +478,7 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if _, err := s.db.Exec(`UPDATE runtime_sessions SET initial_grant_id=grant_id,initial_runtime_lease_id=runtime_lease_id,initial_share_lease_id=share_lease_id WHERE initial_grant_id=''`); err != nil {
 		return err
 	}
-	if _, err := s.db.Exec(`UPDATE schema_meta SET value='15' WHERE key='schema_version'`); err != nil {
-		return err
-	}
-	return nil
+	return s.migrateRenewalAuthority()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative

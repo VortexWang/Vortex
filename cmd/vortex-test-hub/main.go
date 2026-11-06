@@ -34,6 +34,7 @@ func main() {
 	delegationPath := flag.String("test-delegation-template", "", "test-only offline authenticated allocation fixture; never production backend authority")
 	updatePath := flag.String("test-config-update", "", "test-only RuntimeConfigUpdate JSON fixture")
 	reportPath := flag.String("test-report-output", "", "test-only latest observational node report; overwritten atomically")
+	dropRenewal := flag.Bool("test-drop-first-renewal-reply", false, "test-only lost renewal result after durable commit")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
@@ -127,6 +128,10 @@ func main() {
 			return s.InstallHubDelegation(ctx, sessionDelegation(node, boot), clock())
 		}
 		issuer := &hub.Issuer{Store: s, HubID: *hubID, Clock: clock}
+		if template.ShareReferences != nil {
+			server.RenewalIssuer = issuer
+			server.DropFirstRenewalReply = *dropRenewal
+		}
 		server.AuthorizationUpdate = func(node, boot string) (*controlv1.AuthorizationUpdate, error) {
 			d := sessionDelegation(node, boot)
 			return issuer.Issue(ctx, d.ID, node, boot, d.ID, 8192, time.Minute)
