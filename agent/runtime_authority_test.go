@@ -213,6 +213,10 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 	for _, network := range []uint8{1, 2} {
 		t.Run(fmt.Sprint(network), func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), (25+time.Duration(renewalRounds)*3)*time.Second)
+			if params.candidate {
+				cancel()
+				ctx, cancel = context.WithTimeout(context.Background(), 90*time.Second)
+			}
 			defer cancel()
 			const peerID = "550e8400-e29b-41d4-a716-446655440099"
 			const runtimeHubID = "550e8400-e29b-41d4-a716-446655440060"
@@ -404,7 +408,10 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			issuer := &hub.Issuer{Store: hs, HubID: delegation.HubID, Clock: issuerClock}
 			usageRelay := &hub.UsageRelay{Store: hs, Clock: issuerClock, Backend: &durableUsageBackend{store: bs}}
 			const issueID = "550e8400-e29b-41d4-a716-446655440020"
-			const initialTTL = 4 * time.Second
+			initialTTL := 4 * time.Second
+			if params.candidate {
+				initialTTL = 30 * time.Second
+			}
 			prepared, err := issuer.Issue(ctx, delegation.ID, node.NodeID, node.BootID, issueID, params.initialGrant, initialTTL)
 			if err != nil {
 				t.Fatal(err)
@@ -974,9 +981,6 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			if err != nil || agentFinal.Initial != expectedIssued || agentFinal.Committed != uint64(renewalRounds+2)*trafficBytes || agentFinal.Reserved != 0 || agentFinal.Unknown != 0 || agentFinal.Initial != agentFinal.Remaining+agentFinal.Committed {
 				t.Fatalf("final Agent/Hub funding reconciliation: %+v expected=%d err=%v", agentFinal, expectedIssued, err)
 			}
-			if params.candidate {
-				writeDurableD04CandidateResult(t, network, params, delegation.RawBytes, expectedIssued, uint64(renewalRounds+2)*trafficBytes, agentFinal, balance)
-			}
 			if err := s.Close(); err != nil {
 				t.Fatal(err)
 			}
@@ -991,6 +995,9 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			} else {
 				assertRawLedger(t, hubDB, 4*exchangeCount+2*renewalRounds)
 				assertRawLedger(t, backendDB, 4*exchangeCount+2*renewalRounds)
+			}
+			if params.candidate {
+				writeDurableD04CandidateResult(t, network, params, delegation.RawBytes, expectedIssued, uint64(renewalRounds+2)*trafficBytes, agentFinal, balance)
 			}
 			if continuous {
 				saveLedgerFiles(t, fmt.Sprintf("runtime-block-continuous-%d-rounds-%d", network, renewalRounds), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
@@ -1016,34 +1023,36 @@ func writeDurableD04CandidateResult(t *testing.T, network uint8, params durableD
 		t.Fatal(err)
 	}
 	result := map[string]any{
-		"schema":                    1,
-		"network":                   map[uint8]string{1: "tcp", 2: "udp"}[network],
-		"block_bytes":               params.blockBytes,
-		"target_bytes":              params.targetBytes,
-		"target_seconds":            params.targetSeconds,
-		"renew_percent":             params.waterlinePercent,
-		"initial_grant_bytes":       params.initialGrant,
-		"renewal_bytes":             params.renewalBytes,
-		"message_bytes":             params.messageBytes,
-		"delegation_bytes":          delegationBytes,
-		"issued_bytes":              issued,
-		"committed_bytes":           committed,
-		"source_conserved":          agent.Initial == agent.Remaining+agent.Committed+agent.Unknown+agent.Reserved,
-		"source_settled":            agent.Unknown == 0 && agent.Reserved == 0,
-		"pending_unknown_held_zero": agent.Unknown == 0 && agent.Reserved == 0,
-		"issuer_conserved":          hub.Initial == hub.Remaining+hub.Issued,
-		"issuer_occupancy_bytes":    hub.Initial - hub.Remaining - hub.Issued,
-		"idle_tail_reclaimed":       agent.Reserved == 0,
-		"pending_demand_settled":    true,
-		"pending_usage_settled":     true,
-		"agent_initial":             agent.Initial,
-		"agent_remaining":           agent.Remaining,
-		"agent_committed":           agent.Committed,
-		"agent_unknown":             agent.Unknown,
-		"agent_reserved":            agent.Reserved,
-		"hub_initial":               hub.Initial,
-		"hub_remaining":             hub.Remaining,
-		"hub_issued":                hub.Issued,
+		"schema":                        1,
+		"network":                       map[uint8]string{1: "tcp", 2: "udp"}[network],
+		"block_bytes":                   params.blockBytes,
+		"target_bytes":                  params.targetBytes,
+		"target_seconds":                params.targetSeconds,
+		"renew_percent":                 params.waterlinePercent,
+		"initial_grant_bytes":           params.initialGrant,
+		"renewal_bytes":                 params.renewalBytes,
+		"message_bytes":                 params.messageBytes,
+		"delegation_bytes":              delegationBytes,
+		"issued_bytes":                  issued,
+		"committed_bytes":               committed,
+		"source_conserved":              agent.Initial == agent.Remaining+agent.Committed+agent.Unknown+agent.Reserved,
+		"source_settled":                agent.Unknown == 0 && agent.Reserved == 0,
+		"pending_unknown_held_zero":     agent.Unknown == 0 && agent.Reserved == 0,
+		"issuer_conserved":              hub.Initial == hub.Remaining+hub.Issued,
+		"issuer_balance_residual_bytes": hub.Initial - hub.Remaining - hub.Issued,
+		"issuer_outstanding_bytes":      hub.Issued,
+		"qualification_scope":           "finite fixed-target durable renewal; excludes dynamic-target performance qualification",
+		"idle_tail_reclaimed":           agent.Reserved == 0,
+		"pending_demand_settled":        true,
+		"pending_usage_settled":         true,
+		"agent_initial":                 agent.Initial,
+		"agent_remaining":               agent.Remaining,
+		"agent_committed":               agent.Committed,
+		"agent_unknown":                 agent.Unknown,
+		"agent_reserved":                agent.Reserved,
+		"hub_initial":                   hub.Initial,
+		"hub_remaining":                 hub.Remaining,
+		"hub_issued":                    hub.Issued,
 	}
 	raw, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {

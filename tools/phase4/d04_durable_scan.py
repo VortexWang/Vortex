@@ -46,7 +46,7 @@ def run_case(case: dict, output: Path, go: str) -> dict:
         and item.get("source_settled")
         and item.get("pending_unknown_held_zero")
         and item.get("issuer_conserved")
-        and item.get("issuer_occupancy_bytes") == 0
+        and item.get("issuer_balance_residual_bytes") == 0
         and item.get("idle_tail_reclaimed")
         and item.get("pending_demand_settled")
         and item.get("pending_usage_settled")

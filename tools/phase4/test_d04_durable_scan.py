@@ -16,7 +16,7 @@ class DurableScanTests(unittest.TestCase):
                 "source_settled": True,
                 "pending_unknown_held_zero": True,
                 "issuer_conserved": True,
-                "issuer_occupancy_bytes": 0,
+                "issuer_balance_residual_bytes": 0,
                 "idle_tail_reclaimed": True,
                 "pending_demand_settled": True,
                 "pending_usage_settled": True,
