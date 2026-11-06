@@ -77,12 +77,19 @@ type HubEndpoint struct {
 	Address string
 }
 
-func (c *ControlClient) Connect(ctx context.Context, address string) error {
+func (c *ControlClient) Connect(ctx context.Context, address string) (resultErr error) {
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	type receiveFailure struct{ err error }
+	var failure atomic.Pointer[receiveFailure]
+	defer func() {
+		if f := failure.Load(); f != nil && resultErr != nil {
+			resultErr = f.err
+		}
+	}()
 	tlsConfig, err := c.tlsConfig()
 	if err != nil {
 		return err
@@ -151,6 +158,48 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
 	}
+	var replayGuard controlReplayGuard
+	// Only this loop sends messages; gRPC permits one concurrent receiver, but
+	// not multiple senders. The receiver persists ACKs while the sender may
+	// be blocked by transport flow control; other updates stay on the main loop.
+	type received struct {
+		message *controlv1.ControlMessage
+		err     error
+	}
+	incoming := make(chan received, maxControlMessageIDs+1)
+	go func() {
+		for {
+			message, err := stream.Recv()
+			if err == nil {
+				err = replayGuard.accept(message.GetSequence(), message.GetMessageId())
+				if err == nil {
+					handled, ackErr := c.applyUsageAcknowledgement(ctx, message)
+					err = ackErr
+					if handled && err == nil {
+						continue
+					}
+				}
+			}
+			if err != nil && !errors.Is(err, io.EOF) {
+				failure.CompareAndSwap(nil, &receiveFailure{err})
+				cancel()
+			}
+			select {
+			case incoming <- received{message, err}:
+			case <-ctx.Done():
+				return
+			default:
+				failure.CompareAndSwap(nil, &receiveFailure{fmt.Errorf("agent: control receive backlog limit reached")})
+				// A bounded control backlog must fail/reconnect, not deadlock
+				// the bidirectional stream while a bulk send awaits peer reads.
+				cancel()
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
 	lastNodeSequence := sequence
 	initialSendErr := c.sendPendingUsage(ctx, stream, &lastNodeSequence)
 	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
@@ -192,28 +241,6 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			return err
 		}
 	}
-	var replayGuard controlReplayGuard
-	// Only this loop sends messages; gRPC permits one concurrent receiver, but
-	// not multiple senders. Periodic outbox delivery shares sequence ordering
-	// with config responses and never races an authorization update.
-	type received struct {
-		message *controlv1.ControlMessage
-		err     error
-	}
-	incoming := make(chan received)
-	go func() {
-		for {
-			message, err := stream.Recv()
-			select {
-			case incoming <- received{message, err}:
-			case <-ctx.Done():
-				return
-			}
-			if err != nil {
-				return
-			}
-		}
-	}()
 	usageInterval := c.UsageInterval
 	if usageInterval <= 0 {
 		usageInterval = 10 * time.Second
@@ -274,9 +301,6 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		if recvErr != nil {
 			return fmt.Errorf("agent: receive control message: %w", recvErr)
 		}
-		if err := replayGuard.accept(message.GetSequence(), message.GetMessageId()); err != nil {
-			return err
-		}
 		switch body := message.GetBody().(type) {
 		case *controlv1.ControlMessage_ConfigUpdate:
 			result := c.applyConfig(ctx, body.ConfigUpdate)
@@ -306,27 +330,6 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		case *controlv1.ControlMessage_CreditDemandDenied:
 			issuer, _ := issuerIdentity.Load().(string)
 			if err := c.applyDemandDenial(ctx, issuer, body.CreditDemandDenied); err != nil {
-				return err
-			}
-		case *controlv1.ControlMessage_UsageAck:
-			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
-				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
-			}
-			if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
-				return err
-			}
-			// Notify only after durable validation. In particular an ordinary
-			// ACK must never expose unknown batches as acknowledged to a hook.
-			if c.AcknowledgeUsage != nil {
-				if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
-					return err
-				}
-			}
-		case *controlv1.ControlMessage_UnknownUsageAck:
-			if body.UnknownUsageAck == nil {
-				return fmt.Errorf("agent: missing unknown usage acknowledgement")
-			}
-			if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
 				return err
 			}
 		case *controlv1.ControlMessage_Error:
@@ -557,4 +560,36 @@ func newControlID() (string, error) {
 	id[8] = (id[8] & 0x3f) | 0x80
 	encoded := hex.EncodeToString(id[:])
 	return encoded[:8] + "-" + encoded[8:12] + "-" + encoded[12:16] + "-" + encoded[16:20] + "-" + encoded[20:], nil
+}
+
+// ACK processing is receive-side work: bulk outbound flow control must never
+// prevent durable acknowledgement. The receiver validates wire replay first.
+func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *controlv1.ControlMessage) (bool, error) {
+	switch body := message.GetBody().(type) {
+	case *controlv1.ControlMessage_UsageAck:
+		if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
+			return true, fmt.Errorf("agent: usage acknowledgement has no batch IDs")
+		}
+		if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
+			return true, err
+		}
+		// Notify only after durable validation. In particular an ordinary
+		// ACK must never expose unknown batches as acknowledged to a hook.
+		if c.AcknowledgeUsage != nil {
+			if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
+				return true, err
+			}
+		}
+	case *controlv1.ControlMessage_UnknownUsageAck:
+		if body.UnknownUsageAck == nil {
+			return true, fmt.Errorf("agent: missing unknown usage acknowledgement")
+		}
+		if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
+			return true, err
+		}
+
+	default:
+		return false, nil
+	}
+	return true, nil
 }

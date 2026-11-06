@@ -2301,3 +2301,17 @@ Performance remains unqualified; 4.216Mbps bidirectional request-response payloa
 is not the required steady-load throughput. Artifacts process-b52ff81 report
 SHA-256 4188e5b4f22bcec5f2adca8e2d93d66294afd8cf56de049aa409251b1290c2df;
 test.log 721793767e4c3be57e96695a1a35a9bb54c072e6b87bfd5f31c6c2edeceb73ed.
+
+## Receive-side durable usage acknowledgements
+
+Found control duplex deadlock: synchronous sendPendingUsage sends the entire
+outbox while the main loop cannot consume incoming responses; the receive
+worker blocks on its unbuffered channel, eventually blocking Hub ACK Send and
+therefore Hub Recv. Receiver now starts before initial outbox upload, validates
+replay ordering, and durably applies ordinary/unknown usage ACKs independently
+of outbound flow control. ACK hooks still run only after durable validation.
+Other messages stay ordered on the main loop through a bounded backlog aligned
+with the 4096-message replay window; overflow cancels/reconnects rather than
+blocking both stream directions. Receive errors preserve their original cause.
+Targeted control/unknown/ACK race tests PASS 5.802s; native backlog validation
+remains required. Authorization updates are not applied by the receive worker.
