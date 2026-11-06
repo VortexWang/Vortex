@@ -34,7 +34,13 @@ type Message struct {
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
 type TestServer struct {
+	// StallReadiness is a test-only fault: no response until stream cancellation.
+	StallReadiness      bool
+	StallAfterReadiness bool
+	PrepareSession      func(context.Context, string, string) error
 	controlv1.UnimplementedNodeControlServer
+	HubID               string
+	Region              string
 	Store               *store.Store
 	ConfigUpdate        *controlv1.RuntimeConfigUpdate
 	AuthorizationUpdate func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
@@ -82,7 +88,7 @@ func (s *TestServer) ServeTLS(ctx context.Context, ln net.Listener, config *tls.
 // ServeGRPC runs the contract-defined mTLS control service used by the node
 // process tests. It is not a production Hub authority.
 func (s *TestServer) ServeGRPC(ctx context.Context, ln net.Listener, config *tls.Config) error {
-	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(config.Clone())))
+	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(config.Clone())), grpc.MaxRecvMsgSize(1<<20), grpc.MaxSendMsgSize(1<<20))
 	controlv1.RegisterNodeControlServer(server, s)
 	go func() {
 		<-ctx.Done()
@@ -97,6 +103,10 @@ func (s *TestServer) ServeGRPC(ctx context.Context, ln net.Listener, config *tls
 
 func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage, controlv1.ControlMessage]) error {
 	ctx := stream.Context()
+	if s.StallReadiness {
+		<-ctx.Done()
+		return ctx.Err()
+	}
 	remote, ok := peer.FromContext(ctx)
 	if !ok {
 		return fmt.Errorf("test hub: control peer identity missing")
@@ -116,18 +126,61 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 	if first.GetNodeId() != certificate.DNSNames[0] || first.GetBootId() == "" || first.GetSequence() == 0 || first.GetHeartbeat() == nil {
 		return fmt.Errorf("test hub: control session identity or first heartbeat invalid")
 	}
+	if s.PrepareSession != nil {
+		if err := s.PrepareSession(ctx, first.GetNodeId(), first.GetBootId()); err != nil {
+			return err
+		}
+	}
 	receiptID := fmt.Sprintf("control/%s/%s/%d", first.GetNodeId(), first.GetBootId(), first.GetSequence())
 	if err := s.Store.RecordReceipt(ctx, receiptID, first.GetSequence()); err != nil {
 		return err
 	}
-	if s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
+	if s.HubID == "" && s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
 		return nil
 	}
 	usageReceived := 0
 	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
 	controlSequence := uint64(0)
-	if s.ConfigUpdate != nil {
+	lastNodeSequence := first.GetSequence()
+	var hello *controlv1.LifecycleHello
+	restricted := false
+	if s.HubID != "" {
+		message, e := stream.Recv()
+		if e != nil {
+			return e
+		}
+		if message.GetNodeId() != first.GetNodeId() || message.GetBootId() != first.GetBootId() || message.GetSequence() <= lastNodeSequence || len(message.ProtoReflect().GetUnknown()) != 0 {
+			return fmt.Errorf("test hub: invalid lifecycle envelope")
+		}
+		hello = message.GetLifecycleHello()
+		status, e := s.lifecycleStatus(ctx, hello)
+		if e != nil {
+			return e
+		}
+		// Durable receipt before status response, and immutable negotiated hello.
+		raw, e := proto.Marshal(hello)
+		if e != nil {
+			return e
+		}
+		if e = s.Store.AppendEvent(ctx, "lifecycle/"+hello.SessionId, "lifecycle-hello", raw); e != nil {
+			return e
+		}
+		lastNodeSequence = message.GetSequence()
+		if e = sendHubStatus(stream, status, &controlSequence); e != nil {
+			return e
+		}
+		if s.StallAfterReadiness {
+			<-ctx.Done()
+			return ctx.Err()
+		}
+		if status.Mode == "blocked" {
+			return fmt.Errorf("test hub: no lifecycle authority")
+		}
+		restricted = status.Mode != "online"
+	}
+
+	if s.ConfigUpdate != nil && !restricted {
 		messageID, err := testHubMessageID()
 		if err != nil {
 			return err
@@ -135,14 +188,14 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		update = proto.Clone(s.ConfigUpdate).(*controlv1.RuntimeConfigUpdate)
 		if err := stream.Send(&controlv1.ControlMessage{
 			MessageId: messageID,
-			Sequence:  1,
+			Sequence:  controlSequence + 1,
 			Body:      &controlv1.ControlMessage_ConfigUpdate{ConfigUpdate: update},
 		}); err != nil {
 			return err
 		}
-		controlSequence = 1
+		controlSequence++
 	}
-	if s.AuthorizationUpdate != nil {
+	if s.AuthorizationUpdate != nil && !restricted {
 		authorization, err := s.AuthorizationUpdate(first.GetNodeId(), first.GetBootId())
 		if err != nil {
 			return err
@@ -159,7 +212,6 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return nil
 		}
 	}
-	lastNodeSequence := first.GetSequence()
 	for {
 		message, err := stream.Recv()
 		if err != nil {
@@ -170,6 +222,29 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		}
 		lastNodeSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
+		case *controlv1.NodeMessage_Heartbeat:
+			if hello == nil {
+				return fmt.Errorf("test hub: unnegotiated lifecycle heartbeat")
+			}
+			status, e := s.lifecycleStatus(ctx, hello)
+			if e != nil {
+				return e
+			}
+			if e = sendHubStatus(stream, status, &controlSequence); e != nil {
+				return e
+			}
+		case *controlv1.NodeMessage_LifecycleHello:
+			if hello == nil || !proto.Equal(hello, body.LifecycleHello) {
+				return fmt.Errorf("test hub: changed lifecycle hello")
+			}
+			status, e := s.lifecycleStatus(ctx, hello)
+			if e != nil {
+				return e
+			}
+			if e = sendHubStatus(stream, status, &controlSequence); e != nil {
+				return e
+			}
+
 		case *controlv1.NodeMessage_Event:
 			if body.Event == nil || body.Event.Kind != "boot-recovery" || len(body.Event.Payload) > 1<<20 {
 				return fmt.Errorf("test hub: invalid recovery event")
@@ -203,7 +278,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[body.UnknownUsageBatch.GetBatchId()] = true
 				usageReceived++
 			}
-			if s.UsageBatchLimit <= usageReceived && update == nil {
+			if hello == nil && s.UsageBatchLimit <= usageReceived && update == nil {
 				return nil
 			}
 		case *controlv1.NodeMessage_UsageBatch:
@@ -235,7 +310,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[batch.GetBatchId()] = true
 				usageReceived++
 			}
-			if s.UsageBatchLimit <= usageReceived && update == nil {
+			if hello == nil && s.UsageBatchLimit <= usageReceived && update == nil {
 				return nil
 			}
 		case *controlv1.NodeMessage_ApplyResult:
@@ -249,7 +324,13 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if body.ApplyResult.State == "prepared" {
 				continue
 			}
-			return s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId()), "control-apply-result", payload)
+			if err := s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId()), "control-apply-result", payload); err != nil {
+				return err
+			}
+			if hello == nil {
+				return nil
+			}
+			update = nil
 		default:
 			return fmt.Errorf("test hub: unsupported node control message")
 		}

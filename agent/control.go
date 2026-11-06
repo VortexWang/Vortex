@@ -10,7 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -23,6 +25,11 @@ import (
 )
 
 type ControlClient struct {
+	beginMu          sync.Mutex
+	sessionMu        sync.Mutex
+	sessionID        uint64
+	sessionCancel    context.CancelFunc
+	currentStatus    *controlv1.HubStatus
 	Node             *Node
 	TLS              *tls.Config
 	TLSProvider      func() (*tls.Config, error)
@@ -70,16 +77,47 @@ func (c *ControlClient) Run(ctx context.Context, address string) error {
 }
 
 type HubEndpoint struct {
-	Region  string
-	Address string
+	Region     string
+	Address    string
+	HubID      string
+	ServerName string
 }
 
 func (c *ControlClient) Connect(ctx context.Context, address string) error {
+	return c.connect(ctx, HubEndpoint{Address: address}, nil)
+}
+
+func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) error {
+	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel, incarnation := c.beginSession(ctx)
 	defer cancel()
+	defer func() {
+		c.sessionMu.Lock()
+		defer c.sessionMu.Unlock()
+		if c.sessionID == incarnation {
+			c.currentStatus = nil
+		}
+	}()
+	var readiness *time.Timer
+	var watchdog *time.Timer
+	var restrictedRetry *time.Timer
+	defer func() {
+		if restrictedRetry != nil {
+			restrictedRetry.Stop()
+		}
+		if watchdog != nil {
+			watchdog.Stop()
+		}
+	}()
+	if regional != nil {
+		readiness = time.AfterFunc(regional.DialTimeout, cancel)
+		defer readiness.Stop()
+		// Includes a blocked TLS handshake and initial Send/Recv, not healthy lifetime.
+	}
+
 	tlsConfig, err := c.tlsConfig()
 	if err != nil {
 		return err
@@ -111,10 +149,14 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		}
 		return nil
 	}
+	if endpoint.ServerName != "" {
+		tlsConfig.ServerName = endpoint.ServerName
+	}
 	tlsConfig.MinVersion = tls.VersionTLS13
 	conn, err := grpc.DialContext(ctx, address,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		grpc.WithBlock(),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1<<20), grpc.MaxCallSendMsgSize(1<<20)),
 	)
 	if err != nil {
 		return fmt.Errorf("agent: control TLS/gRPC connect: %w", err)
@@ -149,10 +191,32 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
 	}
 	lastNodeSequence := sequence
-	if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
-		return err
+	var negotiated bool
+	var session string
+	if regional != nil {
+		session, err = newControlID()
+		if err != nil {
+			return err
+		}
+		sequence, err = c.Node.Store.NextControlSequence(ctx)
+		if err != nil {
+			return err
+		}
+		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: []string{"status-v1"}, SessionId: session, RegionId: regional.Region}}}); err != nil {
+			return err
+		}
+		lastNodeSequence = sequence
 	}
-	initialSendErr := c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+
+	if regional == nil {
+		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
+			return err
+		}
+	}
+	var initialSendErr error
+	if regional == nil {
+		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+	}
 	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
 		return initialSendErr
 	}
@@ -166,7 +230,10 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		err     error
 	}
 	incoming := make(chan received)
+	receiverDone := make(chan struct{})
+	defer func() { cancel(); conn.Close(); <-receiverDone }()
 	go func() {
+		defer close(receiverDone)
 		for {
 			message, err := stream.Recv()
 			select {
@@ -190,17 +257,35 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	if errors.Is(initialSendErr, io.EOF) {
 		ticker.Stop()
 	}
+	lastHeartbeat := time.Now()
 	for {
 		var response received
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-activationTicker.C:
-			if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
+			if regional != nil && !negotiated {
+				continue
+			}
+			if regional != nil && time.Since(lastHeartbeat) >= regional.Watchdog/3 {
+				seq, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: seq, Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{ObservedAt: time.Now().UTC().Format(time.RFC3339Nano)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = seq
+				lastHeartbeat = time.Now()
+			}
+			if err := c.withSession(ctx, incarnation, func() error { return c.resumePrepared(ctx, stream, &lastNodeSequence) }); err != nil {
 				return err
 			}
 			continue
 		case <-ticker.C:
+			if regional != nil && !negotiated {
+				continue
+			}
 			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
@@ -223,72 +308,135 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		if recvErr != nil {
 			return fmt.Errorf("agent: receive control message: %w", recvErr)
 		}
+		if regional != nil && message.GetSequence() > math.MaxInt64 {
+			return fmt.Errorf("agent: control sequence overflow")
+		}
 		if message.GetSequence() == 0 || message.GetSequence() <= lastControlSequence || !canonicalUUID(message.GetMessageId()) {
 			return fmt.Errorf("agent: invalid control message identity or sequence")
 		}
 		if _, duplicate := seenControlIDs[message.GetMessageId()]; duplicate {
 			return fmt.Errorf("agent: duplicate control message id")
 		}
+		if len(seenControlIDs) >= 4096 {
+			return fmt.Errorf("agent: control replay tracking exhausted")
+		}
 		seenControlIDs[message.GetMessageId()] = struct{}{}
 		lastControlSequence = message.GetSequence()
-		switch body := message.GetBody().(type) {
-		case *controlv1.ControlMessage_ConfigUpdate:
-			result := c.applyConfig(ctx, body.ConfigUpdate)
-			responseSequence, err := c.sendApplyResult(ctx, stream, result)
-			if err != nil {
-				return err
+		if err := func() error {
+			c.sessionMu.Lock()
+			defer c.sessionMu.Unlock()
+			if c.sessionID != incarnation || ctx.Err() != nil {
+				return fmt.Errorf("agent: stale control session")
 			}
-			lastNodeSequence = responseSequence
-		case *controlv1.ControlMessage_AuthorizationUpdate:
-			issuer, ok := issuerIdentity.Load().(string)
-			if !ok || issuer == "" {
-				return fmt.Errorf("agent: authenticated Hub identity missing")
-			}
-			if err := c.applyAuthorizationUpdateFrom(ctx, body.AuthorizationUpdate, issuer); err != nil {
-				return err
-			}
-			payload, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
-			if err != nil {
-				return err
-			}
-			if c.Node.clock == nil {
-				return fmt.Errorf("agent: boot-local authority clock missing")
-			}
-			if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
-				return err
-			}
-			if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
-				return err
-			}
-
-		case *controlv1.ControlMessage_UsageAck:
-			if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
-				return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
-			}
-			if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
-				return err
-			}
-			// Notify only after durable validation. In particular an ordinary
-			// ACK must never expose unknown batches as acknowledged to a hook.
-			if c.AcknowledgeUsage != nil {
-				if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
-					return err
+			if regional != nil {
+				if !noUnknownFields(message.ProtoReflect()) {
+					return fmt.Errorf("agent: unknown lifecycle field")
+				}
+				if message.GetHubStatus() == nil && !negotiated {
+					return fmt.Errorf("agent: lifecycle operation before readiness")
 				}
 			}
-		case *controlv1.ControlMessage_UnknownUsageAck:
-			if body.UnknownUsageAck == nil {
-				return fmt.Errorf("agent: missing unknown usage acknowledgement")
+			switch body := message.GetBody().(type) {
+			case *controlv1.ControlMessage_HubStatus:
+				if regional == nil {
+					return fmt.Errorf("agent: unnegotiated Hub status")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if err := validateRegionalStatus(body.HubStatus, endpoint, regional, session, issuer, time.Now()); err != nil {
+					return err
+				}
+				// Status is report data, never an authority clock/funding update.
+				c.currentStatus = proto.Clone(body.HubStatus).(*controlv1.HubStatus)
+				if body.HubStatus.Mode != "online" && restrictedRetry == nil {
+					restrictedRetry = time.AfterFunc(regional.FailoverBudget, cancel)
+				}
+				if !negotiated {
+					negotiated = true
+					readiness.Stop()
+					watchdog = time.AfterFunc(regional.Watchdog, cancel)
+					if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
+						return err
+					}
+					if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+						return err
+					}
+				} else {
+					watchdog.Reset(regional.Watchdog)
+				}
+
+			case *controlv1.ControlMessage_ConfigUpdate:
+				if regional != nil && c.currentStatus.Mode != "online" {
+					return fmt.Errorf("agent: config unavailable while Hub is restricted")
+				}
+				result := c.applyConfig(ctx, body.ConfigUpdate)
+				responseSequence, err := c.sendApplyResult(ctx, stream, result)
+				if err != nil {
+					return err
+				}
+				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_AuthorizationUpdate:
+				issuer, ok := issuerIdentity.Load().(string)
+				if !ok || issuer == "" {
+					return fmt.Errorf("agent: authenticated Hub identity missing")
+				}
+				if regional != nil && c.currentStatus.Mode != "online" {
+					payload, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+					if err != nil {
+						return err
+					}
+					if len(payload.Authorizations) > 0 {
+						return fmt.Errorf("agent: new grants unavailable while Hub is restricted")
+					}
+				}
+				if err := c.applyAuthorizationUpdateFrom(ctx, body.AuthorizationUpdate, issuer); err != nil {
+					return err
+				}
+				payload, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+				if err != nil {
+					return err
+				}
+				if c.Node.clock == nil {
+					return fmt.Errorf("agent: boot-local authority clock missing")
+				}
+				if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
+					return err
+				}
+				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
+					return err
+				}
+
+			case *controlv1.ControlMessage_UsageAck:
+				if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
+					return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
+				}
+				if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
+					return err
+				}
+				// Notify only after durable validation. In particular an ordinary
+				// ACK must never expose unknown batches as acknowledged to a hook.
+				if c.AcknowledgeUsage != nil {
+					if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
+						return err
+					}
+				}
+			case *controlv1.ControlMessage_UnknownUsageAck:
+				if body.UnknownUsageAck == nil {
+					return fmt.Errorf("agent: missing unknown usage acknowledgement")
+				}
+				if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
+					return err
+				}
+			case *controlv1.ControlMessage_Error:
+				if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
+					return fmt.Errorf("agent: malformed control error")
+				}
+				return fmt.Errorf("agent: control error %s retryable=%t", body.Error.GetCode(), body.Error.GetRetryable())
+			default:
+				return fmt.Errorf("agent: unsupported control message body")
 			}
-			if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
-				return err
-			}
-		case *controlv1.ControlMessage_Error:
-			if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
-				return fmt.Errorf("agent: malformed control error")
-			}
-			return fmt.Errorf("agent: control error %s retryable=%t", body.Error.GetCode(), body.Error.GetRetryable())
-		default:
-			return fmt.Errorf("agent: unsupported control message body")
+			return nil
+		}(); err != nil {
+			return err
 		}
 	}
 }
@@ -448,29 +596,24 @@ func (c *ControlClient) sendApplyResult(ctx context.Context, stream controlv1.No
 	return sequence, nil
 }
 
-// ConnectRegion retries only endpoints explicitly assigned to the requested region.
+// ConnectRegion attempts the configured region once, with bounded readiness.
+// Runtime callers use RunRegion for watchdog/retry ownership.
 func (c *ControlClient) ConnectRegion(ctx context.Context, region string, endpoints []HubEndpoint) error {
-	var candidates []string
-	for _, endpoint := range endpoints {
-		if endpoint.Region == region && endpoint.Address != "" {
-			candidates = append(candidates, endpoint.Address)
-		}
-	}
-	if len(candidates) == 0 {
-		return fmt.Errorf("agent: no Hub endpoints configured for region %q", region)
+	r, err := (RegionalConfig{Region: region, Endpoints: endpoints}).validated()
+	if err != nil {
+		return err
 	}
 	var last error
-	for _, address := range candidates {
-		if err := c.Connect(ctx, address); err == nil {
+	for _, e := range r.Endpoints {
+		last = c.connect(ctx, e, &r)
+		if last == nil {
 			return nil
-		} else {
-			last = err
 		}
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 	}
-	return fmt.Errorf("agent: all Hub endpoints in region %q failed: %w", region, last)
+	return fmt.Errorf("agent: configured region unavailable: %w", last)
 }
 
 func (c *ControlClient) tlsConfig() (*tls.Config, error) {

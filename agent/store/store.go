@@ -1043,6 +1043,9 @@ func (s *Store) NextControlSequence(ctx context.Context) (uint64, error) {
 	if err != nil && err != sql.ErrNoRows {
 		return 0, err
 	}
+	if current >= uint64(1<<63-1) {
+		return 0, fmt.Errorf("store: control sequence exhausted")
+	}
 	current++
 	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {

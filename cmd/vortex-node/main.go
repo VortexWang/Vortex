@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -22,6 +23,12 @@ import (
 func main() {
 	nodeID := flag.String("node-id", "node-1", "node identity")
 	dbPath := flag.String("db", "agent.db", "Agent SQLite path")
+	region := flag.String("region", "default", "configured control region")
+	controlConfig := flag.String("control-config", "", "approved runtime envelope containing lifecycle region/endpoints")
+	hubID := flag.String("hub-id", "", "configured Hub UUID for single --hub compatibility")
+	dialTimeout := flag.Duration("control-dial-timeout", 5*time.Second, "TLS and lifecycle readiness timeout")
+	watchdog := flag.Duration("control-watchdog", 15*time.Second, "current Hub status timeout")
+	failoverBudget := flag.Duration("control-failover-budget", 60*time.Second, "bounded candidate sweep budget")
 	hubAddr := flag.String("hub", "", "protocol-test Hub address")
 	enrollmentAddr := flag.String("enrollment-hub", "", "server-authenticated one-time enrollment endpoint")
 	certPath := flag.String("tls-cert", "", "node certificate PEM (legacy import path)")
@@ -52,7 +59,35 @@ func main() {
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	if *hubAddr == "" {
+	var regional agent.RegionalConfig
+	if *controlConfig != "" {
+		if *hubAddr != "" {
+			fatal(errors.New("use either control-config or hub"))
+		}
+		payload, e := os.ReadFile(*controlConfig)
+		if e != nil {
+			fatal(e)
+		}
+		regional, e = agent.RegionalConfigFromRuntime(payload, n.NodeID)
+		if e != nil {
+			fatal(e)
+		}
+		explicitRegion := false
+		flag.Visit(func(f *flag.Flag) {
+			if f.Name == "region" {
+				explicitRegion = true
+			}
+		})
+		if explicitRegion && *region != regional.Region {
+			fatal(errors.New("region differs from configured lifecycle region"))
+		}
+	} else if *hubAddr != "" {
+		if *hubID == "" {
+			*hubID = *hubName
+		}
+		regional = agent.RegionalConfig{Region: *region, Endpoints: []agent.HubEndpoint{{Region: *region, Address: *hubAddr, HubID: *hubID, ServerName: *hubName}}, DialTimeout: *dialTimeout, Watchdog: *watchdog, FailoverBudget: *failoverBudget}
+	}
+	if *hubAddr == "" && *controlConfig == "" {
 		if err := n.Start(ctx); err != nil {
 			fatal(err)
 		}
@@ -208,10 +243,14 @@ func main() {
 
 	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, Reconciler: reconciler}
 	fmt.Printf("vortex-node control reconnecting node_id=%s boot_id=%s\n", n.NodeID, n.BootID)
+	var workers sync.WaitGroup
+	workers.Add(2)
+	defer func() { cancel(); workers.Wait() }()
 	runErr := make(chan error, 1)
-	go func() { runErr <- client.Run(ctx, *hubAddr) }()
+	go func() { defer workers.Done(); runErr <- client.RunRegion(ctx, regional) }()
 	renewErr := make(chan error, 1)
 	go func() {
+		defer workers.Done()
 		renewErr <- credentialManager.RunRenewal(ctx, *enrollmentAddr, *credentialDir, s, *renewBefore, *credentialOverlap, *renewRetry)
 	}()
 	if runtimeEngine, ok := engine.(*agent.RuntimeEngine); ok {
