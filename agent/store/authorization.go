@@ -31,7 +31,7 @@ type AuthorizationUse struct {
 // The result is a snapshot, not a capability to write after a later revocation.
 func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationUse) (AuthorizationRecord, error) {
 	var record AuthorizationRecord
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return record, err
 	}
@@ -48,10 +48,10 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 
 // readAuthorizationTx also reads expired records as immutable lineage evidence.
 // It does not grant permission to use them.
-func readAuthorizationTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationID string) (AuthorizationRecord, string, error) {
+func readAuthorizationTx(ctx context.Context, tx storeTransaction, nodeID, authorizationID string) (AuthorizationRecord, string, error) {
 	var record AuthorizationRecord
 	var state, ruleRevision, pathGeneration, signerEpoch, amount, rate, connections string
-	err := tx.QueryRowContext(ctx, `SELECT authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state,issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(
+	err := tx.QueryRowContext(ctx, authorizationRecordQuery, nodeID, authorizationID).Scan(
 		&record.AuthorizationID, &record.ParentAuthorizationID, &record.SourceID, &record.Kind, &record.RuleID,
 		&ruleRevision, &pathGeneration, &signerEpoch, &record.BootID, &record.IssuedAt, &record.NotBefore,
 		&record.ExpiresAt, &record.HardDeadline, &record.BillingSnapshotID, &amount, &rate, &connections, &state, &record.IssuerID)
@@ -74,7 +74,7 @@ func readAuthorizationTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationI
 	return record, state, nil
 }
 
-func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse) (AuthorizationRecord, error) {
+func checkAuthorizationTx(ctx context.Context, tx storeTransaction, use AuthorizationUse) (AuthorizationRecord, error) {
 	var record AuthorizationRecord
 	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
 		return record, ErrAuthorityTimeUncertain
@@ -91,7 +91,7 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 
 // Only accepts a record read from this same transaction. It does not cache
 // authority across transactions or skip lineage, time, lease or session checks.
-func checkReadAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse, record AuthorizationRecord, state string) (AuthorizationRecord, error) {
+func checkReadAuthorizationTx(ctx context.Context, tx storeTransaction, use AuthorizationUse, record AuthorizationRecord, state string) (AuthorizationRecord, error) {
 	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
 		return AuthorizationRecord{}, ErrAuthorityTimeUncertain
 	}
@@ -161,7 +161,7 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 	if reservation.AuthorizationID != use.AuthorizationID || reservation.NodeID != use.NodeID || reservation.BootID != use.BootID || reservation.BatchID == "" || reservation.FlowKey == "" || reservation.Reserved == 0 || reservation.SnapshotID != use.BillingSnapshotID || reservation.RuleID != use.RuleID || (reservation.Direction != "egress" && reservation.Direction != "ingress") {
 		return "", ErrAuthorizationDenied
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return "", err
 	}
@@ -176,13 +176,13 @@ func (s *Store) ReserveAuthorizedUsage(ctx context.Context, reservation UsageRes
 	return id, nil
 }
 
-func reserveAuthorizedUsageTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, use AuthorizationUse) (string, error) {
+func reserveAuthorizedUsageTx(ctx context.Context, tx storeTransaction, reservation UsageReservation, use AuthorizationUse) (string, error) {
 	return reserveAuthorizedUsageWithRateTx(ctx, tx, reservation, use, true)
 }
 
 // Funding allocation alone is not write admission. Only the explicit block
 // allocation path may disable rate consumption; ordinary writes always charge.
-func reserveAuthorizedUsageWithRateTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, use AuthorizationUse, chargeRate bool) (string, error) {
+func reserveAuthorizedUsageWithRateTx(ctx context.Context, tx storeTransaction, reservation UsageReservation, use AuthorizationUse, chargeRate bool) (string, error) {
 	var err error
 	var priorAuth, priorReserved, priorState string
 	err = tx.QueryRowContext(ctx, `SELECT authorization_id,reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&priorAuth, &priorReserved, &priorState)
@@ -249,7 +249,7 @@ func reserveAuthorizedUsageWithRateTx(ctx context.Context, tx *sql.Tx, reservati
 	return effectiveID, nil
 }
 
-func insertUsageReservationTx(ctx context.Context, tx *sql.Tx, r UsageReservation) error {
+func insertUsageReservationTx(ctx context.Context, tx storeTransaction, r UsageReservation) error {
 	_, err := tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, r.NodeID, r.BootID, r.BatchID, r.SnapshotID, r.FlowKey, r.RuleID, r.Direction, strconv.FormatUint(r.Reserved, 10), "reserved", time.Now().UTC().Format(time.RFC3339Nano))
 	return err
 }
@@ -269,7 +269,7 @@ type AuthorizationBalance struct {
 // AuditAuthorizationBalance checks conservation for one persisted credit grant.
 func (s *Store) AuditAuthorizationBalance(ctx context.Context, nodeID, authorizationID string) (AuthorizationBalance, error) {
 	var result AuthorizationBalance
-	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	tx, err := s.beginRuntimeTx(ctx, &sql.TxOptions{ReadOnly: true})
 	if err != nil {
 		return result, err
 	}
@@ -284,7 +284,7 @@ func (s *Store) AuditAuthorizationBalance(ctx context.Context, nodeID, authoriza
 	return result, nil
 }
 
-func auditAuthorizationBalanceTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationID string) (AuthorizationBalance, error) {
+func auditAuthorizationBalanceTx(ctx context.Context, tx storeTransaction, nodeID, authorizationID string) (AuthorizationBalance, error) {
 	var result AuthorizationBalance
 	var err error
 	var initialText, remainingText string
@@ -350,7 +350,7 @@ func auditAuthorizationBalanceTx(ctx context.Context, tx *sql.Tx, nodeID, author
 // across outstanding usage holds.
 func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID string) (AuthorizationBalance, error) {
 	var result AuthorizationBalance
-	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	tx, err := s.beginRuntimeTx(ctx, &sql.TxOptions{ReadOnly: true})
 	if err != nil {
 		return result, err
 	}
@@ -448,7 +448,7 @@ func (s *Store) AuditAuthorizationSource(ctx context.Context, nodeID, sourceID s
 // signer epoch. Additional grants from that same authenticated Hub allocation
 // are independent reservations, not ownership transfers. Only the Hub knows
 // the parent's unissued budget and must reserve it before sending each grant.
-func checkSourceLineageTx(ctx context.Context, tx *sql.Tx, nodeID string, r AuthorizationRecord) error {
+func checkSourceLineageTx(ctx context.Context, tx storeTransaction, nodeID string, r AuthorizationRecord) error {
 	var id, parent, boot, snapshot, rule, revision, path, epoch, deadline, issuer string
 	err := tx.QueryRowContext(ctx, `SELECT a.authorization_id,a.parent_authorization_id,a.boot_id,a.billing_snapshot_id,a.rule_id,a.rule_revision,a.path_generation,a.signer_epoch,a.hard_deadline,a.issuer_id FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND o.source_id=?`, nodeID, r.SourceID).Scan(&id, &parent, &boot, &snapshot, &rule, &revision, &path, &epoch, &deadline, &issuer)
 	if err != nil {

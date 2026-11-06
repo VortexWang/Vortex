@@ -37,7 +37,7 @@ func sameRuntimeFamily(next, initial AuthorizationRecord) bool {
 	return next.Kind != "share_lease" || next.RateBPS <= initial.RateBPS && next.Connections <= initial.Connections
 }
 
-func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope AuthorizationUse, minimum uint64, initial *runtimeChoices) (runtimeChoices, error) {
+func selectRuntimeAuthorityTx(ctx context.Context, tx storeTransaction, scope AuthorizationUse, minimum uint64, initial *runtimeChoices) (runtimeChoices, error) {
 	var result runtimeChoices
 	if !scope.TrustedTime || scope.Earliest.IsZero() || scope.Latest.Before(scope.Earliest) {
 		return result, ErrAuthorityTimeUncertain
@@ -237,7 +237,7 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		return "", ErrAuthorityTimeUncertain
 	}
 	stage = "begin-transaction"
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return "", err
 	}

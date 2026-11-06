@@ -17,7 +17,7 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 	if s.owner != "agent" || checkpointID == "" || checkpointID == block.BatchID || used == 0 || used > block.Reserved || len(payload) == 0 {
 		return ErrUsageBatchConflict
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 	return tx.Commit()
 }
 
-func checkpointRuntimeFundingBlockTx(ctx context.Context, tx *sql.Tx, block UsageReservation, checkpointID string, used uint64, payload []byte) error {
+func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, block UsageReservation, checkpointID string, used uint64, payload []byte) error {
 	child := block
 	child.BatchID, child.Reserved = checkpointID, used
 	var priorBlock, priorReserved string
@@ -108,7 +108,7 @@ func (s *Store) CheckpointRuntimeFundingBlocks(ctx context.Context, entries []Ru
 		}
 		seen[identity] = true
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}

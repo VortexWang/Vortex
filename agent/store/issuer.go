@@ -138,7 +138,7 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 // issuerModeTx evaluates the fixed backend boundary in the same transaction
 // that spends the delegation. General online signing closes at loss; only
 // installed, node-bound delegations can still issue in restricted autonomy.
-func issuerModeTx(ctx context.Context, tx *sql.Tx, now IssuerTime) (time.Time, time.Time, error) {
+func issuerModeTx(ctx context.Context, tx storeTransaction, now IssuerTime) (time.Time, time.Time, error) {
 	if err := checkIssuerTime(now); err != nil {
 		return time.Time{}, time.Time{}, err
 	}
@@ -197,7 +197,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	return result, nil
 }
 
-func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
+func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx storeTransaction, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
 	var result IssuedAuthorization
 	if s.owner != "hub" {
 		return result, ErrAuthorizationDenied

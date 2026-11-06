@@ -20,7 +20,7 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 	if sessionID == "" || flowKey == "" || !scope.TrustedTime {
 		return result, ErrAuthorizationDenied
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return result, err
 	}
@@ -69,7 +69,7 @@ func (e *RateLimited) Error() string { return "store: share rate exhausted" }
 
 // One durable token bucket per share source, common to both directions and all
 // sessions. Reboot cannot refill it; uncertain time earns no additional tokens.
-func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n uint64) error {
+func consumeRuntimeRate(ctx context.Context, tx storeTransaction, use AuthorizationUse, n uint64) error {
 	shareUse := use
 	shareUse.Kind = "share_lease"
 	shareUse.AuthorizationID = use.ShareLeaseID
@@ -85,7 +85,7 @@ func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n
 
 // The share must have passed checkAuthorizationTx in this same transaction.
 // Never use a record cached across transactions or control updates here.
-func consumeValidatedRuntimeRateTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n uint64, share AuthorizationRecord) error {
+func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use AuthorizationUse, n uint64, share AuthorizationRecord) error {
 	if share.RateBPS == 0 {
 		return ErrAuthorizationDenied
 	}

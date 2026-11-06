@@ -32,7 +32,7 @@ func (s *Store) SealIdleGrant(ctx context.Context, scope DemandScope, grantID st
 	return tx.Commit()
 }
 
-func sealGrantTx(ctx context.Context, tx *sql.Tx, scope DemandScope, grantID string, key []byte) error {
+func sealGrantTx(ctx context.Context, tx storeTransaction, scope DemandScope, grantID string, key []byte) error {
 	var previous []byte
 	err := tx.QueryRowContext(ctx, `SELECT scope FROM sealed_grants WHERE node_id=? AND grant_id=?`, scope.NodeID, grantID).Scan(&previous)
 	if err == nil {

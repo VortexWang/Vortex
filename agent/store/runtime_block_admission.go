@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 )
 
@@ -17,7 +16,7 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	if s.owner != "agent" || scope.SessionID == "" || block.NodeID != scope.NodeID || block.BootID != scope.BootID || block.SnapshotID != scope.BillingSnapshotID || block.RuleID != scope.RuleID || n == 0 || n > block.Reserved {
 		return ErrAuthorizationDenied
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -28,7 +27,7 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	return tx.Commit()
 }
 
-func admitRuntimeFundingBlockWriteTx(ctx context.Context, tx *sql.Tx, block UsageReservation, scope AuthorizationUse, n uint64) error {
+func admitRuntimeFundingBlockWriteTx(ctx context.Context, tx storeTransaction, block UsageReservation, scope AuthorizationUse, n uint64) error {
 	var boot, snapshot, flow, rule, direction, reserved, state, auth, held, holdState string
 	var session, sessionBoot, sessionFlow, source, sessionState, grant, runtime, share string
 	err := tx.QueryRowContext(ctx, `SELECT u.boot_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,u.state,h.authorization_id,h.reserved_bytes,h.state,b.session_id,s.boot_id,s.flow_key,s.source_id,s.state,s.grant_id,s.runtime_lease_id,s.share_lease_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id JOIN runtime_sessions s ON s.node_id=b.node_id AND s.session_id=b.session_id WHERE b.node_id=? AND b.batch_id=?`, block.NodeID, block.BatchID).Scan(&boot, &snapshot, &flow, &rule, &direction, &reserved, &state, &auth, &held, &holdState, &session, &sessionBoot, &sessionFlow, &source, &sessionState, &grant, &runtime, &share)
@@ -137,7 +136,7 @@ func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []Runt
 			grouped = append(grouped, write)
 		}
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}

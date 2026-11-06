@@ -1963,3 +1963,17 @@ Artifacts: artifacts/phase4/store-profile-417ce63 (matching store.test included)
 SHA-256 benchmark.log ed4b712d913a2601153c74311c6cbd0d068d7f54898cd92f45fc0a00e775c2a1;
 cpu.pprof 7653ebf07057f38288aa54b6a7e4ad3447319930e4fb13c53d83be6110e28290;
 fragment-crash.log d515b6746dc1a965a8fb8a87004b7dfbb0fd5b9438b3915026621584cb27085b.
+
+## Prepared authorization query reuse
+
+Implemented Store-owned prepared authorization record reads bound to each runtime
+transaction with sql.Tx.StmtContext. Only compiled SQL is retained; every call
+reads the transaction's current rows. The single connection, WAL/FULL, admission
+deadline and authorization predicates are unchanged. Internal helper signatures
+accept the common transaction SQL interface, so ordinary sql.Tx callers keep
+their existing behavior. The parent statement is prepared after schema setup
+before any transaction acquires the single connection, and closes with the DB.
+Regression checks cover own-transaction revocation, rollback/commit visibility
+across transactions, and cancelled read followed by successful fresh reuse.
+Local full Store race PASS 19.145s; Agent/Hub vet and diff checks PASS. Dedicated
+host performance and process comparisons still required before claiming benefit.

@@ -18,8 +18,9 @@ import (
 // Store is the durable local authority for an Agent or Hub. Each role opens
 // its own file; WAL files are never shared between processes.
 type Store struct {
-	db    *sql.DB
-	owner string
+	db                     *sql.DB
+	owner                  string
+	authorizationStatement *sql.Stmt
 }
 
 type Info struct {
@@ -135,6 +136,11 @@ func Open(path, owner string) (*Store, error) {
 	if err := s.configure(); err != nil {
 		_ = db.Close()
 		return nil, err
+	}
+	s.authorizationStatement, err = db.Prepare(authorizationRecordQuery)
+	if err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("store: prepare authorization read: %w", err)
 	}
 	return s, nil
 }
@@ -605,7 +611,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 	return tx.Commit()
 }
 
-func settleUsageReservationTx(ctx context.Context, tx *sql.Tx, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64, typed *UnknownUsageRecord) error {
+func settleUsageReservationTx(ctx context.Context, tx storeTransaction, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64, typed *UnknownUsageRecord) error {
 	var bootID, snapshotID, flowKey, ruleID, direction, reservedText, state, usedText string
 	err := tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
 		Scan(&bootID, &snapshotID, &flowKey, &ruleID, &direction, &reservedText, &state, &usedText)

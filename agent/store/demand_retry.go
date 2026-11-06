@@ -9,7 +9,7 @@ import (
 
 var ErrDemandRetryDeferred = errors.New("store: automatic demand retry deferred")
 
-func checkDemandRetryTx(ctx context.Context, tx *sql.Tx, key []byte, now time.Time) error {
+func checkDemandRetryTx(ctx context.Context, tx storeTransaction, key []byte, now time.Time) error {
 	var reason, denied, retry string
 	err := tx.QueryRowContext(ctx, `SELECT reason,denied_at,retry_at FROM demand_retry WHERE scope=?`, key).Scan(&reason, &denied, &retry)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -31,7 +31,7 @@ func checkDemandRetryTx(ctx context.Context, tx *sql.Tx, key []byte, now time.Ti
 	return nil
 }
 
-func recordDemandRetryTx(ctx context.Context, tx *sql.Tx, key []byte, reason string, now time.Time) error {
+func recordDemandRetryTx(ctx context.Context, tx storeTransaction, key []byte, reason string, now time.Time) error {
 	var failures int
 	var denied string
 	err := tx.QueryRowContext(ctx, `SELECT failures,denied_at FROM demand_retry WHERE scope=?`, key).Scan(&failures, &denied)

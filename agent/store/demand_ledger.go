@@ -16,7 +16,7 @@ func demandScopeFor(node string, r AuthorizationRecord) DemandScope {
 
 // Called once inside a successful settlement transaction, after its duplicate
 // check. Unknown upper bounds, returns and replayed settlements never add rate.
-func recordDemandConsumptionTx(ctx context.Context, tx *sql.Tx, node, grant string, used uint64, at time.Time) error {
+func recordDemandConsumptionTx(ctx context.Context, tx storeTransaction, node, grant string, used uint64, at time.Time) error {
 	r, _, err := readAuthorizationTx(ctx, tx, node, grant)
 	if err != nil {
 		return err
