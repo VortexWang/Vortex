@@ -32,27 +32,42 @@ func (g *fundingBlockGate) Open(ctx context.Context, flow accounting.Flow) (acco
 	if err != nil {
 		return nil, err
 	}
-	return &fundingBlockSession{inner: inner.(*authorizationSession), size: g.size, blocks: make(map[accounting.Direction]*sessionFundingBlock), changed: make(chan struct{})}, nil
+	return &fundingBlockSession{inner: inner.(*authorizationSession), size: g.size, blocks: make(map[accounting.Direction]*sessionFundingBlock), changed: make(chan struct{}), idleTimeout: time.Second}, nil
 }
 
 type sessionFundingBlock struct {
-	reservation store.UsageReservation
-	inFlight    uint64
-	poisoned    bool
+	reservation    store.UsageReservation
+	inFlight       uint64
+	poisoned       bool
+	idleTimer      *time.Timer
+	idleGeneration uint64
 }
 type fundingBlockSession struct {
-	mu      sync.Mutex
-	inner   *authorizationSession
-	size    uint64
-	blocks  map[accounting.Direction]*sessionFundingBlock
-	changed chan struct{}
-	closed  bool
+	mu          sync.Mutex
+	inner       *authorizationSession
+	size        uint64
+	blocks      map[accounting.Direction]*sessionFundingBlock
+	changed     chan struct{}
+	closed      bool
+	idleTimeout time.Duration
 }
 
 func (s *fundingBlockSession) signal() { close(s.changed); s.changed = make(chan struct{}) }
 func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.Direction, n int64) (*accounting.Batch, error) {
 	for {
-		batch, wait, err := s.reserve(ctx, direction, n)
+		type attemptResult struct {
+			batch *accounting.Batch
+			wait  <-chan struct{}
+		}
+		config := s.inner.gate.config
+		result, err := withAuthorityWait(ctx, s.inner.gate.node, RuntimeScope{RuleID: config.RuleID, RuleRevision: config.RuleRevision, PathGeneration: config.PathGeneration}, func(attemptCtx context.Context) (attemptResult, error) {
+			batch, wait, err := s.reserve(attemptCtx, direction, n)
+			if errors.Is(err, errRefreshFundingBlock) {
+				batch, wait, err = s.reserve(attemptCtx, direction, n)
+			}
+			return attemptResult{batch, wait}, err
+		})
+		batch, wait := result.batch, result.wait
 		if wait != nil {
 			select {
 			case <-wait:
@@ -89,6 +104,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		return nil, nil, err
 	}
 	b := s.blocks[direction]
+	existing := b != nil
 	if b != nil && b.reservation.Reserved-b.inFlight < uint64(n) {
 		if b.inFlight > 0 {
 			return nil, s.changed, nil
@@ -98,6 +114,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		delete(s.blocks, direction)
 		b = nil
+		existing = false
 	}
 	early, late, trusted := s.inner.gate.config.Clock()
 	use := s.inner.gate.use(early, late, trusted, true)
@@ -108,19 +125,68 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		r := store.UsageReservation{NodeID: s.inner.gate.node.NodeID, BootID: s.inner.gate.node.BootID, BatchID: id, FlowKey: s.inner.flowKey, RuleID: use.RuleID, SnapshotID: use.BillingSnapshotID, Direction: dir, Reserved: s.size}
 		grant, err := s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
+		// A target is a bounded preference, not a requirement to strand usable
+		// scoped credit. Both attempts retain the same authority checks.
+		if errors.Is(err, store.ErrAuthorizationDenied) && r.Reserved > uint64(n) {
+			r.Reserved = uint64(n)
+			grant, err = s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
+		}
 		if err != nil {
 			return nil, nil, s.admissionError(err)
 		}
 		r.AuthorizationID = grant
 		b = &sessionFundingBlock{reservation: r}
 		s.blocks[direction] = b
+		s.armIdle(direction, b)
 	}
 	if err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockWrite(ctx, b.reservation, use, uint64(n)); err != nil {
+		if existing && b.inFlight == 0 && errors.Is(err, store.ErrAuthorizationDenied) {
+			if releaseErr := s.release(ctx, b); releaseErr != nil {
+				return nil, nil, s.fail(releaseErr)
+			}
+			s.stopIdle(b)
+			delete(s.blocks, direction)
+			return nil, nil, errRefreshFundingBlock
+		}
 		return nil, nil, s.admissionError(err)
 	}
+	s.stopIdle(b)
 	b.inFlight += uint64(n)
 	batch, err := accounting.NewBatch(n, func(ctx context.Context, out accounting.Outcome) error { return s.resolve(ctx, direction, b, out) })
 	return batch, nil, err
+}
+
+var errRefreshFundingBlock = errors.New("agent: refresh idle funding block")
+
+func (s *fundingBlockSession) stopIdle(b *sessionFundingBlock) {
+	b.idleGeneration++
+	if b.idleTimer != nil {
+		b.idleTimer.Stop()
+		b.idleTimer = nil
+	}
+}
+func (s *fundingBlockSession) armIdle(direction accounting.Direction, b *sessionFundingBlock) {
+	s.stopIdle(b)
+	if s.closed || b.poisoned || b.inFlight != 0 {
+		return
+	}
+	generation := b.idleGeneration
+	b.idleTimer = time.AfterFunc(s.idleTimeout, func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if s.closed || b.poisoned || b.inFlight != 0 || b.idleGeneration != generation || s.blocks[direction] != b {
+			return
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		if err := s.release(ctx, b); err != nil {
+			b.poisoned = true
+			s.fail(err)
+			return
+		}
+		delete(s.blocks, direction)
+		s.signal()
+	})
 }
 func (s *fundingBlockSession) admissionError(err error) error {
 	var limited *store.RateLimited
@@ -131,6 +197,7 @@ func (s *fundingBlockSession) admissionError(err error) error {
 }
 func (s *fundingBlockSession) fail(err error) error { s.inner.gate.fail(); s.signal(); return err }
 func (s *fundingBlockSession) release(ctx context.Context, b *sessionFundingBlock) error {
+	s.stopIdle(b)
 	if b.poisoned || b.reservation.Reserved == 0 {
 		return nil
 	}
@@ -177,6 +244,9 @@ func (s *fundingBlockSession) resolve(ctx context.Context, direction accounting.
 		}
 		delete(s.blocks, direction)
 	}
+	if b.inFlight == 0 && s.blocks[direction] == b {
+		s.armIdle(direction, b)
+	}
 	return nil
 }
 func (s *fundingBlockSession) Close() error {
@@ -191,6 +261,7 @@ func (s *fundingBlockSession) Close() error {
 	defer cancel()
 	var result error
 	for direction, b := range s.blocks {
+		s.stopIdle(b)
 		if b.inFlight == 0 {
 			if err := s.release(ctx, b); err != nil {
 				b.poisoned = true

@@ -134,3 +134,24 @@ automatic renewal, delayed responses or the native multi-hop attack matrix.
 Bounded idle block return, adaptive block sizing under partially available
 credit, and renewed-authority retry integration remain required. No candidate
 performance or final D-04 parameter claim follows from interface-level tests.
+
+## Idle return and renewal progress
+
+The experimental adapter now returns fully idle residuals after a one-second
+local timer, with a two-second settlement context. Generation checks under the
+session mutex invalidate stale callbacks; timers never return in-flight or
+poisoned bounds. Close stops timers. Storage failure faults admission and leaves
+the durable residual for recovery. One second is an experimental implementation
+value, not a measured D-04 parameter or a Hub grant-return protocol.
+
+When target-sized allocation is denied, the adapter may try the current write
+size under the identical Store authority checks. It cannot combine grants or
+borrow other scopes. An idle block whose admission is denied is settled before
+one fresh allocation attempt; current authority selection then renews the
+session. The existing bounded missing-authority wait/demand notification is
+used, retaining its 200 ms total deadline per attempt cycle.
+
+Tests cover old-expiry replacement with known usage pinned to the renewed grant,
+idle release without premature in-flight refund, and exact final scoped-credit
+consumption below the configured target. Real VLink, delayed/lost Hub response,
+performance and full hostile qualification still remain to be run in this mode.

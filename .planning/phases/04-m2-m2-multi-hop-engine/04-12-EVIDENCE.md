@@ -1200,3 +1200,32 @@ VLink transport or native performance. Every outcome currently checkpoints
 immediately and every admission persists rate. Adaptive funding size, idle
 return, renewed-authority wait/retry, real TCP/UDP renewal, the complete hostile
 matrix and dedicated-host qualification remain open. No D-04 lock is claimed.
+
+## Experimental block renewal, smaller allocation and idle return
+
+Funding-block Reserve now uses the existing scoped demand notification and
+200 ms missing-authority deadline. An existing idle block denied admission is
+returned before one fresh allocation attempt, allowing current valid leases
+and grants to replace expired ones without moving past usage. If target-size
+allocation is denied, the exact current write size is retried with identical
+Store authority checks. No unreserved byte or cross-scope credit is used.
+
+Idle residuals use a generation-checked one-second local timer. Admission stops
+the timer; outstanding writes and poisoned blocks are never refunded. Returned
+or committed callbacks re-arm only when no writers remain. Close cancels timers.
+An idle settlement failure faults the gate and retains its durable liability.
+
+New tests verify no refund during an outstanding write, eventual idle return,
+reallocation after return, exact consumption of a final 96-byte balance below a
+4000-byte target, and a live session using a renewed grant after old expiry.
+The renewal fixture initially lacked an authenticated issuer and was correctly
+rejected by the Store source-ownership check; both initial and renewed updates
+now name the same issuer. No production check was weakened. Outbox inspection
+confirms new usage references the new grant.
+
+Targeted funding-gate race PASS 2.904s. Full local Agent/Hub race PASS (Agent
+176.630s; other packages cached). Agent/Hub vet and diff checks PASS.
+One second is an experimental value, not D-04 parameter selection. These are
+Agent interface/Store tests, not live VLink or dedicated-host qualification.
+Full block-mode hostile coverage, actual renewal transport and performance
+remain open. Local hold return is not the unapproved control 1.4.0 Hub return.

@@ -2,6 +2,8 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -25,7 +27,7 @@ func fundingSession(t *testing.T) (*Node, accounting.Session) {
 		t.Fatal(err)
 	}
 	client := &ControlClient{Node: n}
-	if err := client.applyAuthorizationUpdate(context.Background(), &controlv1.AuthorizationUpdate{Generation: 4, Payload: leasedPayload(t, n.NodeID, n.BootID)}); err != nil {
+	if err := client.applyAuthorizationUpdateFrom(context.Background(), &controlv1.AuthorizationUpdate{Generation: 4, Payload: leasedPayload(t, n.NodeID, n.BootID)}, "hub-one"); err != nil {
 		t.Fatal(err)
 	}
 	now := time.Date(2026, 11, 5, 12, 1, 30, 0, time.UTC)
@@ -173,5 +175,130 @@ func TestFundingBlockGateWaitingReservationCancellation(t *testing.T) {
 	}
 	if balance := fundingBalance(t, n); balance.Remaining != 4096 || balance.Reserved != 0 {
 		t.Fatalf("cancel: %+v", balance)
+	}
+}
+
+func TestFundingBlockGateIdleReturnDoesNotRefundInFlight(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.idleTimeout = 15 * time.Millisecond
+	ctx := context.Background()
+	b, err := s.Reserve(ctx, accounting.LeftToRight, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(40 * time.Millisecond)
+	if balance := fundingBalance(t, n); balance.Reserved != 128 {
+		t.Fatalf("inflight refunded: %+v", balance)
+	}
+	if err := b.Commit(ctx, 23); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for fundingBalance(t, n).Reserved != 0 && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+	}
+	if balance := fundingBalance(t, n); balance.Reserved != 0 || balance.Committed != 23 || balance.Remaining != 4096-23 {
+		t.Fatalf("idle return: %+v", balance)
+	}
+	b, err = s.Reserve(ctx, accounting.LeftToRight, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := b.Return(ctx); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestFundingBlockGateUsesRemainingScopedCreditBelowTarget(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.size = 4000
+	ctx := context.Background()
+	first, err := s.Reserve(ctx, accounting.LeftToRight, 4000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := first.Commit(ctx, 4000); err != nil {
+		t.Fatal(err)
+	}
+	last, err := s.Reserve(ctx, accounting.LeftToRight, 96)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := last.Commit(ctx, 96); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Reserve(ctx, accounting.LeftToRight, 1); err == nil {
+		t.Fatal("unfunded write accepted")
+	}
+	if balance := fundingBalance(t, n); balance.Committed != 4096 || balance.Reserved != 0 || balance.Remaining != 0 {
+		t.Fatalf("remaining: %+v", balance)
+	}
+}
+func TestFundingBlockGateRefreshesExpiredIdleAuthority(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	ctx := context.Background()
+	b, err := s.Reserve(ctx, accounting.LeftToRight, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := b.Commit(ctx, 20); err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(leasedPayload(t, n.NodeID, n.BootID), &body); err != nil {
+		t.Fatal(err)
+	}
+	body["update_id"] = "550e8400-e29b-41d4-a716-446655440120"
+	for i, entry := range body["authorizations"].([]any) {
+		r := entry.(map[string]any)
+		r["authorization_id"] = fmt.Sprintf("550e8400-e29b-41d4-a716-44665544012%d", i+1)
+		r["issued_at"] = "2026-11-05T12:02:00Z"
+		r["not_before"] = "2026-11-05T12:02:00Z"
+		r["expires_at"] = "2026-11-05T12:06:00Z"
+	}
+	payload, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (&ControlClient{Node: n}).applyAuthorizationUpdateFrom(ctx, &controlv1.AuthorizationUpdate{Generation: 4, Payload: payload}, "hub-one"); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 11, 5, 12, 4, 0, 0, time.UTC)
+	s.mu.Lock()
+	s.inner.gate.config.Clock = func() (time.Time, time.Time, bool) { return now, now, true }
+	s.mu.Unlock()
+	b, err = s.Reserve(ctx, accounting.LeftToRight, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := b.Commit(ctx, 30); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if balance := fundingBalance(t, n); balance.Initial != 8192 || balance.Committed != 50 || balance.Reserved != 0 || balance.Remaining != 8192-50 {
+		t.Fatalf("renewal: %+v", balance)
+	}
+	batches, err := n.Store.PendingUsageOutbox(ctx, n.NodeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, entry := range batches {
+		var batch controlv1.UsageBatch
+		if err := proto.Unmarshal(entry.Payload, &batch); err != nil {
+			t.Fatal(err)
+		}
+		for _, d := range batch.Deltas {
+			if d.Bytes == 30 && d.GrantId == "550e8400-e29b-41d4-a716-446655440121" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Fatal("new usage did not bind renewed grant")
 	}
 }
