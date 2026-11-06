@@ -36,6 +36,9 @@ type Message struct {
 type TestServer struct {
 	DemandIssuer *Issuer // explicit opt-in for demand protocol fixtures
 	DemandLimit  int     // optional finite test bound
+	// DropDemandResponse injects a disconnect after durable resolution but
+	// before any response is sent. Only for protocol recovery tests.
+	DropDemandResponse bool
 	controlv1.UnimplementedNodeControlServer
 	Store               *store.Store
 	ConfigUpdate        *controlv1.RuntimeConfigUpdate
@@ -180,6 +183,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			authorization, denied, err := s.DemandIssuer.ResolveDemand(ctx, first.GetNodeId(), first.GetBootId(), body.CreditDemand)
 			if err != nil {
 				return err
+			}
+			if s.DropDemandResponse {
+				return fmt.Errorf("test hub: injected loss after durable demand resolution")
 			}
 			id, err := testHubMessageID()
 			if err != nil {

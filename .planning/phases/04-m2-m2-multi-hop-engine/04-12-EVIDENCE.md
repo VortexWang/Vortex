@@ -694,3 +694,28 @@ Snapshots are the final repetition only; runtime.log records all three.
 This qualifies the finite native correctness regression at the named SHA only.
 Sustained adaptive throughput, delayed/lost response workload, full attack scope,
 idle return reconciliation and D-04 parameter locking remain unqualified.
+
+## Lost control demand responses with actual runtime renewal
+
+The protocol TestServer has an explicit test-only DropDemandResponse injection
+immediately after ResolveDemand returns its committed outcome and before Send.
+The funded TCP/UDP runtime regression now disconnects at that boundary for the
+first adaptive renewal. Assertions establish Hub issued=7096/remaining=5192,
+Agent initial=4096/remaining=1096/committed=3000 with no reserved or unknown
+balance, and one pending request for exactly 3000 bytes. An explicit changed
+8192-byte estimate still returns that exact original request including TTL.
+A new authenticated control connection replays it, installs its existing grant,
+and completes the pending request; the same live stream continues after old
+grant expiry. Final Hub conservation checks prove no duplicate debit.
+
+The demand TLS regression also drops an oversized request's persisted denial.
+Until the denial arrives, a smaller requested amount cannot retire the original
+pending identity. Hub issued=12MiB/remaining=4MiB remains unchanged. Reconnection
+replays the denial, after which a fresh smaller request succeeds using only the
+remaining 4MiB. Existing stale-response and refusal-backoff checks still run.
+
+Targeted runtime race test PASS; full Agent/Hub race and vet PASS; diff check
+PASS. These are local finite transport-loss checks with actual SQLite/TLS and
+runtime TCP/UDP traffic. They do not establish sustained fault-load throughput,
+process-crash response recovery, all attack classes or parameter lock. No
+production protocol or frozen wire artifact changed.

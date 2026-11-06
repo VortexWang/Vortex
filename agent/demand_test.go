@@ -100,6 +100,22 @@ func TestDemandCompletesOnlyFromBoundTLSIssuer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Lose a definitive denial after it is persisted. Until the authenticated
+	// denial is actually received, even a reduced estimate must keep the old
+	// pending identity; retries must neither create authority nor consume funds.
+	stLost, ctLost, _ := controlTLSForHub(t, n.NodeID, d.HubID)
+	lost := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, DemandIssuer: &issuer, DropDemandResponse: true}, stLost)
+	if err := (&ControlClient{Node: n, TLS: ctLost, EnableCreditDemand: true}).Connect(ctx, lost.Addr().String()); err == nil {
+		t.Fatal("lost denial did not interrupt connection")
+	}
+	retained, err := as.PrepareDemand(ctx, scope, 4<<20, 2*time.Minute)
+	if err != nil || retained != oversized {
+		t.Fatalf("unseen denial retired pending identity: %+v %v", retained, err)
+	}
+	beforeDenialReplay, err := hs.AuditHubDelegation(ctx, d.ID)
+	if err != nil || beforeDenialReplay.Issued != 12<<20 || beforeDenialReplay.Remaining != 4<<20 {
+		t.Fatalf("lost denial changed funding: %+v %v", beforeDenialReplay, err)
+	}
 	transport() // only 4 MiB remains at the issuer: definitive denial
 	if err := serve(d.HubID); err != nil {
 		t.Fatal(err)

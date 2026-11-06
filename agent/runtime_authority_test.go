@@ -448,9 +448,35 @@ func TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget(t *testing.T)
 			// response. No pre-created renewal is supplied by the test.
 			demandScope := store.DemandScope{HubID: delegation.HubID, DelegationID: delegation.ID, NodeID: node.NodeID, BootID: node.BootID, SourceID: delegation.SourceID, SnapshotID: delegation.BillingSnapshotID, RuleID: delegation.RuleID, SignerEpoch: delegation.SignerEpoch, RuleRevision: delegation.RuleRevision, PathGeneration: delegation.PathGeneration}
 			adaptive := AdaptiveDemandConfig{Scope: demandScope, Policy: DemandPolicyConfig{Minimum: 4096, MaxTarget: 4096, TargetSeconds: 30, RenewPercent: 30}, TTL: 2 * time.Minute}
+			// Lose the first response after the Hub committed its debit. The
+			// Agent must retain its exact request and must not spend unseen credit.
+			lostHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DropDemandResponse: true}, serverTLS)
+			if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, lostHub.Addr().String()); err == nil {
+				t.Fatal("injected lost response did not interrupt control connection")
+			}
+			requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+			if err != nil || len(requests) != 1 || requests[0].RawBytes != 3000 {
+				t.Fatalf("lost response retired or changed pending demand: %+v %v", requests, err)
+			}
+			retained, err := s.PrepareDemand(ctx, demandScope, 8192, time.Minute)
+			if err != nil || retained != requests[0] {
+				t.Fatalf("changed estimate replaced in-flight identity: %+v %v", retained, err)
+			}
+			beforeReplay, err := hs.AuditHubDelegation(ctx, delegation.ID)
+			if err != nil || beforeReplay.Issued != 7096 || beforeReplay.Remaining != 5192 {
+				t.Fatalf("lost response was not durably funded: %+v %v", beforeReplay, err)
+			}
+			unseen, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
+			if err != nil || unseen.Initial != 4096 || unseen.Remaining != 1096 || unseen.Committed != 3000 || unseen.Reserved != 0 || unseen.Unknown != 0 {
+				t.Fatalf("unseen grant became spendable: %+v %v", unseen, err)
+			}
 			topupHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: 1}, serverTLS)
 			if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true, AdaptiveDemands: []AdaptiveDemandConfig{adaptive}}).Connect(ctx, topupHub.Addr().String()); err != nil {
 				t.Fatal(err)
+			}
+			requests, err = s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+			if err != nil || len(requests) != 0 {
+				t.Fatalf("replayed response did not complete pending demand: %+v %v", requests, err)
 			}
 			for {
 				balance, err := s.AuditAuthorizationSource(ctx, node.NodeID, delegation.SourceID)
