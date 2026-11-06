@@ -1,20 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 05-m3-agent-edge-hub-m3-agent-and-hub
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
 started: "2026-11-06T00:50:09.654515+00:00"
-updated: "2026-11-06T00:56:29.815742+00:00"
+updated: 2026-11-06T01:07:31.632Z
 ---
 
 ## Current Test
 
-number: 2
-name: 注册与文件升级边界
-expected: |
-  注册私钥在本地生成，一次令牌重复兑换被拒绝；
-  升级包签名或摘要校验失败不切换二进制，健康检查失败恢复旧版本。
-  此处验证文件安装器边界，完整服务级排空与升级集成仍待补齐。
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -27,7 +21,8 @@ verification: agent/runtime_restart_test.go#TestRuntimeSIGKILLFreshBootReprepare
 
 ### 2. 注册与文件升级边界
 expected: 注册由本地生成私钥和 CSR，一次令牌重复兑换被拒绝；签名/摘要失败不切换二进制，健康失败恢复旧版本。当前文件安装器测试不等同已交付完整服务升级。
-result: pending
+result: pass
+reported: "符合预期"
 source: human
 reason: 05-01 and 05-05 legacy summaries lack structured coverage; do not infer human acceptance from prose.
 verification: agent/registration_test.go; agent/identity/identity_test.go; agent/upgrade/installer_test.go
@@ -140,9 +135,9 @@ verification: artifacts/phase5/check/79a1c0b148f77e765190ee51075adf845e5ad115/pa
 ## Summary
 
 total: 17
-passed: 16
+passed: 17
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
