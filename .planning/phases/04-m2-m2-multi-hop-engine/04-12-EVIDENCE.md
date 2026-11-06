@@ -2008,3 +2008,20 @@ remain per operation. No grant, lease, rate or balance result is cached.
 Ordinary settlement now also uses the runtime transaction wrapper. Added same-
 transaction read-after-cancellation coverage. Full Store race PASS 20.508s;
 Agent/Hub vet PASS. Native process and benchmark comparison remain required.
+
+Clean 4b19614bc215dfd3f1fbee50e5e93577db351103 native run: single TCP and UDP
+PASS; 16-stream TCP FAIL at stream 14 round 1 with RST 0008 (0.49s), overall
+21.032s FAIL. The first admission deadline log reports only 10.278ms in
+reserveDirect and 10.195ms at begin-transaction. Reserve's 200ms deadline begins
+at enqueue, before reserveDirect; this log cannot attribute the full request
+delay to SQL. Next diagnosis needs queue/settlement wait segmentation.
+Sequential 5s profiled ordinary per-write benchmark PASS: 1482 iterations,
+4,046,096 ns/op, 91,221 B/op, 2,549 allocs/op. This single sample is faster than
+the prior samples but allocates more; it does not qualify block concurrency or
+prove statistically stable improvement. Local Hub and CLI tests PASS.
+
+Artifacts: process-4b19614 and store-profile-4b19614 under artifacts/phase4.
+SHA-256 report.json 6d0cd70009ca8eb3173cb39864eb16dab25338e1823130e93ef9119c8a7cc21f;
+test.log d856d44397c7e258e6c4a29c2f683808259eb7b1b51c11306f9edb98019b95df;
+benchmark.log b4826d90c3eb9b621e0176f322c5df2da6ea9577d04894d1c0628a6b6646ad18;
+cpu.pprof 901d7d18ee6db91b383796ad5bdd9d283d3834cbaed20103b02d31b6bf505f30.
