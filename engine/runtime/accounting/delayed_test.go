@@ -1,0 +1,108 @@
+package accounting
+
+import (
+	"context"
+	"errors"
+	"sync"
+	"testing"
+	"time"
+	core "vortex/engine/accounting"
+)
+
+func delayedFixture(t *testing.T, delay time.Duration) *DelayedCreditGate {
+	t.Helper()
+	g, err := NewDelayedCreditGate(context.Background(), CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, delay)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(g.Close)
+	return g
+}
+func TestDelayedIssuerCoalescesBeforeWrites(t *testing.T) {
+	g := delayedFixture(t, 40*time.Millisecond)
+	ctx := context.Background()
+	s, err := g.Open(ctx, core.Flow{Key: "flow"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if g.Credit.State().Available != 0 || g.Credit.State().PendingGrant != 128 {
+		t.Fatal(g.Credit.State())
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 16; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			b, err := s.Reserve(ctx, core.LeftToRight, 1)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if err = b.Commit(ctx, 1); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	wg.Wait()
+	state := g.Credit.State()
+	if state.Used != 16 || state.Grants != 1 || state.GrantRecords != 1 || state.PendingGrant != 0 {
+		t.Fatal(state)
+	}
+	conserved(t, g.Credit)
+}
+func TestDelayedIssuerTimeoutDoesNotReleasePending(t *testing.T) {
+	g := delayedFixture(t, time.Second)
+	ctx := context.Background()
+	s, err := g.Open(ctx, core.Flow{Key: "flow"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	start := time.Now()
+	_, err = s.Reserve(ctx, core.LeftToRight, 1)
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("expected bounded wait: %v", err)
+	}
+	if elapsed := time.Since(start); elapsed < 150*time.Millisecond || elapsed > 700*time.Millisecond {
+		t.Fatalf("wait=%s", elapsed)
+	}
+	state := g.Credit.State()
+	if state.PendingGrant != 128 || state.Used != 0 || state.Available != 0 {
+		t.Fatal(state)
+	}
+	g.Close()
+	state = g.Credit.State()
+	if state.UnknownGrant != 128 || state.PendingGrant != 0 || state.Unissued != 128 {
+		t.Fatal(state)
+	}
+	if _, err = s.Reserve(ctx, core.LeftToRight, 1); err == nil {
+		t.Fatal("closed issuer accepted reserve")
+	}
+	conserved(t, g.Credit)
+}
+func TestDelayedIssuerCallerCancellationKeepsRequest(t *testing.T) {
+	g := delayedFixture(t, 40*time.Millisecond)
+	ctx := context.Background()
+	s, err := g.Open(ctx, core.Flow{Key: "flow"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if _, err = s.Reserve(canceled, core.LeftToRight, 1); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+	b, err := s.Reserve(ctx, core.LeftToRight, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Commit(ctx, 1); err != nil {
+		t.Fatal(err)
+	}
+	if g.Credit.State().Grants != 1 || g.Credit.State().GrantRecords != 1 {
+		t.Fatal(g.Credit.State())
+	}
+	conserved(t, g.Credit)
+}

@@ -6,6 +6,10 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 out=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 "$root/tools/phase4/generate-qualification.sh" "$mode" "$out"
 
+if [ "$mode" = docker ] && [ -n "${PHASE4_TEST_ISSUER_DELAY:-}" ]; then
+  echo "delayed issuer experiment currently requires native launcher" >&2; exit 2
+fi
+
 if [ "$mode" = docker ]; then
 	compose_pid=
 	wait_pid=
@@ -61,10 +65,14 @@ else
 fi
 mkdir -p "$out/logs"
 for name in source relay-1 relay-2 relay-3 destination; do
+  set -- --config "$out/config/$name.json"
+  if [ "$name" = source ] && [ -n "${PHASE4_TEST_ISSUER_DELAY:-}" ]; then
+    set -- "$@" --test-issuer-delay "$PHASE4_TEST_ISSUER_DELAY"
+  fi
   if [ "${CPU_PROFILE:-0}" = 1 ]; then
-    "$bin" --config "$out/config/$name.json" --cpu-profile "$out/$name.pprof" >"$out/logs/$name.log" 2>&1 &
+    "$bin" "$@" --cpu-profile "$out/$name.pprof" >"$out/logs/$name.log" 2>&1 &
   else
-    "$bin" --config "$out/config/$name.json" >"$out/logs/$name.log" 2>&1 &
+    "$bin" "$@" >"$out/logs/$name.log" 2>&1 &
   fi
   echo $! >"$out/$name.pid"
 done
