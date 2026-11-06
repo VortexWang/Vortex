@@ -9,6 +9,17 @@ created: "2026-11-05"
 
 # Phase 04 — Security
 
+## Current ownership correction — 2026-11-06
+
+Per owner-approved [04-CLOSURE.md](04-CLOSURE.md), the production durability
+part of T-04-02 belongs to X5/X6 and cannot block Phase 4 advancement. This does
+not waive the Engine-side funded-adapter conservation/admission checks in Q2/Q3.
+The historical blocked verdict below is not the current stage-closure rule.
+Security qualification remains incomplete pending the explicit Phase 4 matrix;
+no production security acceptance or risk waiver is implied.
+
+## Historical review
+
 > In-window retroactive STRIDE review of the Phase 4 tracer implementation.
 > This is not a production security sign-off. No user risk acceptance is recorded.
 
@@ -73,4 +84,4 @@ No accepted risks.
 - [ ] `threats_open: 0` confirmed
 - [ ] `status: verified` set in frontmatter
 
-**Approval:** blocked — default unmetered forwarding is closed, but T-04-02 still requires authoritative, durable production accounting before Phase 4 advancement.
+**Historical approval:** blocked for production accounting. Superseded as a Phase 4 advancement rule by the 2026-11-06 ownership correction above.

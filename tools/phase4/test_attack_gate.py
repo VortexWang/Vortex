@@ -16,6 +16,13 @@ class AttackGateTests(unittest.TestCase):
             del report['cases'][name]
             self.assertTrue(validate(report), name)
 
+    def test_old_matrix_does_not_prove_stale_rejection(self):
+        report = self.fixture()
+        for protocol in ("tcp", "udp"):
+            for case in ("stale-revision", "stale-generation"):
+                del report["cases"][f"{protocol}/{case}"]
+        self.assertEqual(len(validate(report)), 4)
+
     def test_top_level_pass_is_insufficient(self):
         self.assertTrue(validate(dict(status='pass')))
         self.assertTrue(validate(dict(status='pass', cases=[])))
@@ -31,7 +38,7 @@ class AttackGateTests(unittest.TestCase):
         for name in list(report['cases']):
             if name.startswith('udp'):
                 del report['cases'][name]
-        self.assertEqual(len(validate(report)), 7)
+        self.assertEqual(len(validate(report)), 9)
 
 
 if __name__ == '__main__':

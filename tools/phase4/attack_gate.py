@@ -6,7 +6,8 @@ import re
 from pathlib import Path
 
 EXPECTED = {f'{protocol}/{name}': code for protocol in ('tcp', 'udp') for name, code in {
-    'unknown-rule': 7, 'future-revision': 7, 'future-generation': 7,
+    'unknown-rule': 7, 'stale-revision': 7, 'stale-generation': 7,
+    'future-revision': 7, 'future-generation': 7,
     'skipped-hop': 1, 'visited-local-loop': 1, 'duplicate-visited': 8}.items()}
 
 
@@ -42,7 +43,7 @@ def main():
     except (OSError, ValueError):
         reasons = ['report missing or invalid']
     result = dict(schema=1, status='not-qualified' if reasons else 'pass', reasons=reasons,
-                  required_cases=sorted(EXPECTED), scope='twelve configured-route TCP/UDP forged OPEN cases plus UDP link loss; excludes identity handshake and durable authority matrices')
+                  required_cases=sorted(EXPECTED), scope='sixteen configured-route TCP/UDP forged OPEN cases plus UDP link loss; excludes identity handshake and durable authority matrices')
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True)+'\n')
     print(json.dumps(result, sort_keys=True))

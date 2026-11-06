@@ -52,6 +52,8 @@ func main() {
 		mutate func(*vlink.OpenRequest)
 	}{
 		{"unknown-rule", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleID[0] ^= 255 }},
+		{"stale-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision-- }},
+		{"stale-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration-- }},
 		{"future-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision++ }},
 		{"future-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration++ }},
 		{"skipped-hop", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.HopIndex++ }},
