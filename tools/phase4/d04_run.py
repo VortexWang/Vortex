@@ -42,6 +42,37 @@ def percentile_bucket(buckets, percentile):
             return (2 ** (index + 1) - 1) / 1e6
 
 
+def summarize_observations(observations):
+    if not isinstance(observations, dict):
+        raise ValueError("credit observations are missing")
+    fields = (
+        "reservations", "block_allocations", "renewal_attempts",
+        "renewal_merged", "idle_reclaims", "idle_reclaimed_bytes",
+        "peak_sessions", "peak_held_bytes", "peak_pending_grant_bytes",
+        "peak_unknown_grant_bytes", "issuer_calls",
+    )
+    for field in fields:
+        value = observations.get(field)
+        if type(value) is not int or value < 0:
+            raise ValueError(f"invalid credit observation: {field}")
+    if observations["renewal_merged"] > observations["renewal_attempts"]:
+        raise ValueError("renewal merge count exceeds attempts")
+    if observations["block_allocations"] == 0:
+        raise ValueError("no block allocation observations")
+    attempts = observations["renewal_attempts"]
+    return dict(
+        renewal_attempts=attempts,
+        renewal_merged=observations["renewal_merged"],
+        renewal_merge_rate=(observations["renewal_merged"] / attempts) if attempts else 0.0,
+        idle_reclaims=observations["idle_reclaims"],
+        idle_reclaimed_bytes=observations["idle_reclaimed_bytes"],
+        peak_active_sessions=observations["peak_sessions"],
+        peak_held_bytes=observations["peak_held_bytes"],
+        peak_pending_grant_bytes=observations["peak_pending_grant_bytes"],
+        peak_unknown_grant_bytes=observations["peak_unknown_grant_bytes"],
+    )
+
+
 def evaluate(out):
     credit = json.loads((out / "events-source.jsonl.credit.json").read_text())
     workload = json.loads((out / "mixed-workload.json").read_text())
@@ -50,6 +81,7 @@ def evaluate(out):
     report = json.loads((out / "report.json").read_text())
     timeline = json.loads((out / "events-source.jsonl.credit-timeline.json").read_text())
     obs = credit["observations"]
+    observed = summarize_observations(obs)
     total = sum(credit[key] for key in ("unissued_bytes", "pending_grant_bytes", "unknown_grant_bytes", "available_bytes", "held_bytes", "used_bytes", "unknown_bytes"))
     settled = all(credit[key] == 0 for key in ("pending_grant_bytes", "unknown_grant_bytes", "held_bytes", "unknown_bytes", "sessions", "denials"))
     if host["dirty"] or host["authorization_mode"] != "runtime-authority" or total != credit["budget_bytes"] or not settled:
@@ -76,7 +108,7 @@ def evaluate(out):
                 issuer_wait_upper_bound_ms={str(p): percentile_bucket(buckets, p / 100) for p in (50, 95, 99)},
                 reservations_per_block=obs["reservations"] / obs["block_allocations"],
                 reservations_per_grant=obs["reservations"] / credit["grants"],
-                peak_active_sessions=obs["peak_sessions"], peak_held_bytes=obs["peak_held_bytes"],
+                **observed,
                 dynamic_target_bytes_min=min(dynamic_targets), dynamic_target_bytes_max=max(dynamic_targets),
                 unknown_upper_bound_bytes=credit["unknown_bytes"] + credit["unknown_grant_bytes"],
                 source_conserved=True, source_settled=True,

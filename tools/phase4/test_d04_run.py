@@ -1,5 +1,5 @@
 import unittest
-from d04_run import candidates, percentile_bucket
+from d04_run import candidates, percentile_bucket, summarize_observations
 
 
 class D04Tests(unittest.TestCase):
@@ -32,6 +32,47 @@ class D04Tests(unittest.TestCase):
         self.assertEqual(percentile_bucket([1], .99), 1 / 1e6)
         with self.assertRaises(ValueError):
             percentile_bucket([0, 0], .5)
+
+    def test_observation_summary_reports_merge_and_occupancy(self):
+        result = summarize_observations({
+            "reservations": 12,
+            "block_allocations": 3,
+            "renewal_attempts": 10,
+            "renewal_merged": 7,
+            "idle_reclaims": 2,
+            "idle_reclaimed_bytes": 128,
+            "peak_sessions": 4,
+            "peak_held_bytes": 512,
+            "peak_pending_grant_bytes": 256,
+            "peak_unknown_grant_bytes": 64,
+            "issuer_calls": 5,
+        })
+        self.assertEqual(result["renewal_merged"], 7)
+        self.assertEqual(result["peak_pending_grant_bytes"], 256)
+        self.assertEqual(result["idle_reclaimed_bytes"], 128)
+        self.assertAlmostEqual(result["renewal_merge_rate"], .7)
+
+    def test_observation_summary_rejects_invalid_counts(self):
+        values = {
+            "reservations": 1,
+            "block_allocations": 1,
+            "renewal_attempts": 1,
+            "renewal_merged": 1,
+            "idle_reclaims": 0,
+            "idle_reclaimed_bytes": 0,
+            "peak_sessions": 1,
+            "peak_held_bytes": 1,
+            "peak_pending_grant_bytes": 0,
+            "peak_unknown_grant_bytes": 0,
+            "issuer_calls": 1,
+        }
+        values["renewal_merged"] = 2
+        with self.assertRaises(ValueError):
+            summarize_observations(values)
+        values["renewal_merged"] = 0
+        values["block_allocations"] = 0
+        with self.assertRaises(ValueError):
+            summarize_observations(values)
 
 
 if __name__ == "__main__":
