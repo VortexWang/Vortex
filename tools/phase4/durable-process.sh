@@ -14,7 +14,7 @@ finish() {
 import hashlib, json, pathlib, sys
 out=pathlib.Path(sys.argv[1])
 log=(out/"test.log").read_text() if (out/"test.log").exists() else ""
-required=["TestDurableAuthorityProcessesTCP","TestDurableAuthorityProcessesUDP","TestDurableAuthorityProcessesConcurrentTCP"]
+required=["TestDurableAuthorityProcessesTCP","TestDurableAuthorityProcessesUDP","TestDurableAuthorityProcessesConcurrentTCP","TestDurableAuthorityProcessesConcurrentRenewal"]
 verified=[name for name in required if f"--- PASS: {name} (" in log]
 passed=sys.argv[2]=="0" and verified==required
 report={"schema":1,"status":"pass" if passed else "fail", "verified_tests":verified,
@@ -37,4 +37,4 @@ git rev-parse HEAD > "$out/sha"
 git status --porcelain > "$out/status"
 go build -o "$VORTEX_PROCESS_BIN_DIR/vortex-node" ./cmd/vortex-node
 go build -o "$VORTEX_PROCESS_BIN_DIR/vortex-test-hub" ./cmd/vortex-test-hub
-go test ./agent -run '^TestDurableAuthorityProcesses(TCP|UDP|ConcurrentTCP)$' -count=1 -v > "$out/test.log" 2>&1
+go test ./agent -run '^TestDurableAuthorityProcesses(TCP|UDP|ConcurrentTCP|ConcurrentRenewal)$' -count=1 -v > "$out/test.log" 2>&1

@@ -2111,3 +2111,15 @@ SHA-256 process report 459039c988351ca7e5b50a4dd9fe56225ccd516fdd40bcfe6f32d7189
 process test.log 34a2f80740a38617abaff6ac746f0c8efdb202c608b63ba2c88201939effcacd;
 concurrent.log bdef8c25e895c4a1c533f1b8eda06cc83c63fa9943db1ee32aec1677791f4d48;
 store-race.log cd8e223f120377a0f75cd30d0009f088b45bfc5d2684ed1e43f1a778189cb2a0.
+
+## Independent process concurrent renewal workload
+
+Added 16-stream/256-round TCP process coverage: 12,288,000 bidirectional payload
+bytes exceed the initial 8 MiB grant. It requires additional issued funds and
+retains exact three-ledger reconciliation, zero unresolved/unknown and source
+conservation checks. Existing 16-round cases are unchanged. Original 60s total
+limit and 200ms admission deadline remain unchanged; no backend heartbeat is
+forged/refreshed. Formal process script now requires all four cases, including
+ConcurrentRenewal, before reporting functional pass. This is not the D-04
+sustained multi-hop or mixed-rate workload. Local package compilation passed;
+binary integration was skipped locally because explicit binaries were absent.

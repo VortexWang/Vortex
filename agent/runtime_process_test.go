@@ -28,10 +28,18 @@ import (
 
 // Explicit binary qualification entry; ordinary unit runs do not build or
 // silently substitute in-process services for the two process boundaries.
-func TestDurableAuthorityProcessesTCP(t *testing.T)           { runDurableAuthorityProcesses(t, 1, 1) }
-func TestDurableAuthorityProcessesUDP(t *testing.T)           { runDurableAuthorityProcesses(t, 2, 1) }
-func TestDurableAuthorityProcessesConcurrentTCP(t *testing.T) { runDurableAuthorityProcesses(t, 1, 16) }
-func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount int) {
+func TestDurableAuthorityProcessesTCP(t *testing.T) { runDurableAuthorityProcesses(t, 1, 1, 16) }
+func TestDurableAuthorityProcessesUDP(t *testing.T) { runDurableAuthorityProcesses(t, 2, 1, 16) }
+func TestDurableAuthorityProcessesConcurrentTCP(t *testing.T) {
+	runDurableAuthorityProcesses(t, 1, 16, 16)
+}
+
+// Exceeds the initial 8 MiB grant and exercises automatic replenishment while
+// the same 16 streams remain open. Still bounded by the original 60s test limit.
+func TestDurableAuthorityProcessesConcurrentRenewal(t *testing.T) {
+	runDurableAuthorityProcesses(t, 1, 16, 256)
+}
+func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, rounds int) {
 	bin := os.Getenv("VORTEX_PROCESS_BIN_DIR")
 	if bin == "" {
 		t.Skip("run tools/phase4/durable-process.sh with built binaries")
@@ -142,8 +150,8 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount int) 
 	if streamCount > 1 {
 		initial, block, budget, rate = 8<<20, 256<<10, 64<<20, 100000000
 	}
-	expectedBytes := uint64(streamCount) * 48000
-	writeJSON("workload.json", map[string]any{"network": network, "streams": streamCount, "exchanges_per_stream": 16, "payload_bytes": 1500, "initial_bytes": initial, "block_bytes": block, "rate_bps": rate, "expected_bidirectional_bytes": expectedBytes, "performance_qualified": false})
+	expectedBytes := uint64(streamCount) * uint64(rounds) * 3000
+	writeJSON("workload.json", map[string]any{"network": network, "streams": streamCount, "exchanges_per_stream": rounds, "payload_bytes": 1500, "initial_bytes": initial, "block_bytes": block, "rate_bps": rate, "expected_bidirectional_bytes": expectedBytes, "performance_qualified": false})
 	d := store.HubDelegation{ID: id(104), HubID: hubID, SourceID: id(105), RuntimeSourceID: id(106), ShareSourceID: id(107), NodeID: nodeID, BillingSnapshotID: id(108), RuleID: cfg.RuleID, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, SignerEpoch: 1, FencingFloor: 8, RawBytes: budget, RateBPS: rate, Connections: 16, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(2 * time.Hour)}
 	fixture := writeJSON("authority.json", map[string]any{"delegation": d, "initial_request_id": id(109), "initial_bytes": initial, "ttl_seconds": 60})
 	demand := writeJSON("demand.json", map[string]any{"interval_ms": 100, "demands": []any{map[string]any{"scope": store.DemandScope{HubID: hubID, DelegationID: d.ID, NodeID: nodeID, SourceID: d.SourceID, SnapshotID: d.BillingSnapshotID, RuleID: cfg.RuleID, SignerEpoch: 1, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration}, "policy": DemandPolicyConfig{Minimum: initial, MaxTarget: initial, TargetSeconds: 30, RenewPercent: 30}, "ttl_seconds": 60}}})
@@ -248,13 +256,13 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount int) 
 	trafficStarted := time.Now()
 	latencies := make([][]time.Duration, streamCount)
 	for i := range latencies {
-		latencies[i] = make([]time.Duration, 16)
+		latencies[i] = make([]time.Duration, rounds)
 	}
 	results := make(chan error, streamCount)
 	for index, stream := range streams {
 		go func(index int, stream *vlink.MuxStream) {
 			message := bytes.Repeat([]byte{byte(index + 1)}, 1500)
-			for round := 0; round < 16; round++ {
+			for round := 0; round < rounds; round++ {
 				started := time.Now()
 				if network == 1 {
 					if e := stream.WriteData(ctx, message); e != nil {
@@ -358,6 +366,9 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount int) 
 	delegated, err := hubAudit.AuditHubDelegation(ctx, d.ID)
 	if err != nil || delegated.Initial != d.RawBytes || delegated.Issued != source.Initial || delegated.Initial != delegated.Remaining+delegated.Issued {
 		t.Fatalf("Hub/Agent funding reconciliation %+v agent=%+v err=%v", delegated, source, err)
+	}
+	if expectedBytes > initial && source.Initial <= initial {
+		t.Fatalf("workload did not obtain additional durable funding: initial=%d funded=%d", initial, source.Initial)
 	}
 	if err := agentAudit.Close(); err != nil {
 		t.Fatal(err)
