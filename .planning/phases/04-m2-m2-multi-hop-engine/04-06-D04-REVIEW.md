@@ -46,6 +46,12 @@ exception or something covered by the native green test suite.
 
 ### Clean current adapter scan — 2026-11-06
 
+The follow-up dynamic-target scan on `e862ffe` supersedes the fixed-ceiling
+measurement below for the current candidate evidence. All 21 trials now pass
+`target_seconds` into the runtime allocator and record the timeline from the
+8 MiB floor through the 10/30/60-second ceilings. Full ranges and the retained
+fail-closed transient are in `04-41-D04-DYNAMIC-TARGET-EVIDENCE.md`.
+
 The selector-cleanup fix on `ae858f5` enabled the executable scan to complete
 all seven one-factor cases with three repetitions (21 trials). Each trial used
 16 TCP streams plus actual roughly 100 Mbps UDP for 5 seconds per phase; all
