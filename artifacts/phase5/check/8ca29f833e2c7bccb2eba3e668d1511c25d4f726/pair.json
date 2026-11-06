@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "implementation_sha": "8ca29f833e2c7bccb2eba3e668d1511c25d4f726",
+  "entry": "make phase5-check",
+  "docker": "passed",
+  "actions": "passed",
+  "actions_run": 42150094526,
+  "snapshots_per_host": 5,
+  "fault_cases_per_host": 10,
+  "backend": "protocol-test-only",
+  "production_backend_authority": false,
+  "phase_complete": false,
+  "scope": "05-06 approved lifecycle contract freeze"
+}
