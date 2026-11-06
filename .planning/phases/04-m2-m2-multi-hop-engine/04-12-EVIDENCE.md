@@ -1804,3 +1804,22 @@ but does not exercise renewal; fixed Hub heartbeat/autonomy limits still apply.
 Clean local process rerun PASS at b8a10dc3f9e7cf5044a80dfb87b28073695c6688 (dirty=false).
 Report: /private/tmp/vortex-process-clean/report.json; SHA-256 e7ffe66c8c982a503dbad479a3635fb9e6454cbc25a7d75a44b425600e2c647f.
 This confirms only the two-process TCP functional scope described above.
+
+## Native process TCP pass and UDP functional expansion
+
+Dedicated Ubuntu clean e7ade792de46e0bbdd6b861c7857b5d6c0655b62 executed the
+independent Node/test-Hub TCP check: PASS 10.266s, dirty=false. Remote evidence
+artifacts/phase4/process-e7ade79. report.json SHA-256
+facde098a621fb0c0007c868275ed33188555c28be07d8cc5e7334b86bbcfefa;
+test.log SHA-256 e9e9acd746d11a4096827fe91fa670af3ff788d23c5a99ec4f543cdbd42ea197.
+Scope excludes later UDP and source-audit additions.
+
+Expanded the same process harness to independent UDP target sockets and VLink
+datagrams, requiring intact per-datagram boundaries. Both protocol cases now
+also reopen stopped ledgers to assert exact 48000 committed bytes, zero reserved
+and unknown balances, per-source conservation, and exact Hub-issued/Agent-
+received credit equality. All three payload ledgers remain compared exactly.
+Local development run passed both cases at /private/tmp/vortex-process-tcpudp-
+conserved (actual directory name has no newline). Report generation now requires
+explicit PASS markers for both cases; missing/skipped tests fail closed.
+This is functional evidence, not UDP offered-load or sustained qualification.

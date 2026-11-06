@@ -275,3 +275,10 @@ are retained under the evidence directory; treat it as private test material.
 The report records SHA, dirty state, binary hashes and explicit non-qualification.
 Source and echo target run in the test driver. This is not a five-process topology,
 16 concurrent streams, UDP throughput, sustained-load or certificate-renewal test.
+
+The process entry now runs TCP and UDP separately, checking UDP datagram
+boundaries and exact 48000-byte totals per protocol. After both writers stop,
+it additionally audits Agent source conservation and reconciles Agent initial
+credit against Hub durable issuance. The report requires explicit PASS markers
+for both tests, so a skipped/missing protocol cannot produce success. This adds
+UDP functional coverage only; offered-rate/loss performance is still unmeasured.

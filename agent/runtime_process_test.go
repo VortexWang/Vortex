@@ -27,7 +27,9 @@ import (
 
 // Explicit binary qualification entry; ordinary unit runs do not build or
 // silently substitute in-process services for the two process boundaries.
-func TestDurableAuthorityProcessesTCP(t *testing.T) {
+func TestDurableAuthorityProcessesTCP(t *testing.T) { runDurableAuthorityProcesses(t, 1) }
+func TestDurableAuthorityProcessesUDP(t *testing.T) { runDurableAuthorityProcesses(t, 2) }
+func runDurableAuthorityProcesses(t *testing.T, network uint8) {
 	bin := os.Getenv("VORTEX_PROCESS_BIN_DIR")
 	if bin == "" {
 		t.Skip("run tools/phase4/durable-process.sh with built binaries")
@@ -55,25 +57,46 @@ func TestDurableAuthorityProcessesTCP(t *testing.T) {
 		return a
 	}
 	hubAddr, engineAddr := address(), address()
-	target, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer target.Close()
-	go func() {
-		for {
-			c, e := target.Accept()
-			if e != nil {
-				return
-			}
-			go func() { defer c.Close(); _, _ = io.Copy(c, c) }()
+	var targetAddr string
+	if network == 1 {
+		target, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
 		}
-	}()
+		defer target.Close()
+		targetAddr = target.Addr().String()
+		go func() {
+			for {
+				c, e := target.Accept()
+				if e != nil {
+					return
+				}
+				go func() { defer c.Close(); _, _ = io.Copy(c, c) }()
+			}
+		}()
+	} else {
+		target, err := net.ListenPacket("udp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer target.Close()
+		targetAddr = target.LocalAddr().String()
+		go func() {
+			buf := make([]byte, 4096)
+			for {
+				n, peer, e := target.ReadFrom(buf)
+				if e != nil {
+					return
+				}
+				_, _ = target.WriteTo(buf[:n], peer)
+			}
+		}()
+	}
 	identities := runtimeIdentities(t, dir, nodeID, peerID)
 	cfg := identities[nodeID]
 	cfg.Role = config.RoleDestination
 	cfg.Listen = engineAddr
-	cfg.Target = target.Addr().String()
+	cfg.Target = targetAddr
 	cfg.PeerNodeID = peerID
 	cfg.ExecutionPoint = true
 	writeJSON := func(name string, v any) string {
@@ -201,7 +224,7 @@ func TestDurableAuthorityProcessesTCP(t *testing.T) {
 	hash := sha256.Sum256([]byte(cfg.RuleID))
 	var rule [16]byte
 	copy(rule[:], hash[:16])
-	stream, err := mux.Open(ctx, vlink.OpenRequest{RuleID: rule, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, Network: 1, ClientAddress: []byte{127, 0, 0, 1}})
+	stream, err := mux.Open(ctx, vlink.OpenRequest{RuleID: rule, RuleRevision: cfg.RuleRevision, PathGeneration: cfg.PathGeneration, Network: network, ClientAddress: []byte{127, 0, 0, 1}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -210,8 +233,15 @@ func TestDurableAuthorityProcessesTCP(t *testing.T) {
 	}
 	message := bytes.Repeat([]byte{0x5a}, 1500)
 	for round := 0; round < 16; round++ {
-		if err := stream.WriteData(ctx, message); err != nil {
-			t.Fatal(err)
+		if network == 1 {
+			if err := stream.WriteData(ctx, message); err != nil {
+				t.Fatal(err)
+			}
+		} else {
+			accepted, err := stream.WriteDgram(ctx, message)
+			if err != nil || !accepted {
+				t.Fatalf("datagram rejected: %v", err)
+			}
 		}
 		received := []byte{}
 		for len(received) < len(message) {
@@ -219,15 +249,23 @@ func TestDurableAuthorityProcessesTCP(t *testing.T) {
 			if e != nil {
 				t.Fatal(e)
 			}
-			if frame.Type != vlink.FrameData {
+			expectedType := vlink.FrameData
+			if network == 2 {
+				expectedType = vlink.FrameDgram
+			}
+			if frame.Type != expectedType {
 				frame.Release()
 				t.Fatalf("non-DATA frame %d", frame.Type)
+			}
+			if network == 2 && len(frame.Payload) != len(message) {
+				frame.Release()
+				t.Fatal("datagram boundary mismatch")
 			}
 			received = append(received, frame.Payload...)
 			frame.Release()
 		}
 		if !bytes.Equal(received, message) {
-			t.Fatal("TCP payload mismatch")
+			t.Fatal("payload mismatch")
 		}
 	}
 	wait(func() bool {
@@ -257,6 +295,31 @@ func TestDurableAuthorityProcessesTCP(t *testing.T) {
 	stopNode()
 	stopHub()
 	db.Close()
+	// Writers have stopped: audit durable source funds as well as usage rows.
+	agentAudit, err := store.Open(agentDB, "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer agentAudit.Close()
+	source, err := agentAudit.AuditAuthorizationSource(ctx, nodeID, d.SourceID)
+	if err != nil || source.Committed != 48000 || source.Unknown != 0 || source.Reserved != 0 || source.Initial != source.Remaining+source.Committed {
+		t.Fatalf("Agent source conservation %+v %v", source, err)
+	}
+	hubAudit, err := store.Open(hubDB, "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hubAudit.Close()
+	delegated, err := hubAudit.AuditHubDelegation(ctx, d.ID)
+	if err != nil || delegated.Initial != d.RawBytes || delegated.Issued != source.Initial || delegated.Initial != delegated.Remaining+delegated.Issued {
+		t.Fatalf("Hub/Agent funding reconciliation %+v agent=%+v err=%v", delegated, source, err)
+	}
+	if err := agentAudit.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := hubAudit.Close(); err != nil {
+		t.Fatal(err)
+	}
 	assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, 48000)
-	saveLedgerFiles(t, "process-tcp", map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+	saveLedgerFiles(t, fmt.Sprintf("process-network-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
 }
