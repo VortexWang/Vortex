@@ -312,7 +312,9 @@ func TestFundingBlockGateReclaimsOnlyIdleOppositeDirection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.Reserve(ctx, accounting.RightToLeft, 1500); err == nil {
+	waitCtx, cancel := context.WithTimeout(ctx, 20*time.Millisecond)
+	defer cancel()
+	if _, err := s.Reserve(waitCtx, accounting.RightToLeft, 1500); err == nil {
 		t.Fatal("reclaimed in-flight funding")
 	}
 	if b := fundingBalance(t, n); b.Reserved != 4096 || b.Remaining != 0 {
@@ -333,5 +335,42 @@ func TestFundingBlockGateReclaimsOnlyIdleOppositeDirection(t *testing.T) {
 	}
 	if b := fundingBalance(t, n); b.Committed != 3000 || b.Remaining != 1096 || b.Reserved != 0 {
 		t.Fatalf("reclaim conservation: %+v", b)
+	}
+}
+
+func TestFundingBlockGateResponseWaitsForOutboundCheckpoint(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.size = 4096
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	outbound, err := s.Reserve(ctx, accounting.LeftToRight, 1500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := make(chan error, 1)
+	go func() {
+		response, err := s.Reserve(ctx, accounting.RightToLeft, 1500)
+		if err == nil {
+			err = response.Commit(ctx, 1500)
+		}
+		result <- err
+	}()
+	select {
+	case err := <-result:
+		t.Fatalf("response did not wait: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+	if err := outbound.Commit(ctx, 1500); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-result; err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if b := fundingBalance(t, n); b.Committed != 3000 || b.Reserved != 0 || b.Remaining != 1096 {
+		t.Fatalf("response conservation: %+v", b)
 	}
 }

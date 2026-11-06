@@ -147,6 +147,16 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 			r.Reserved = uint64(n)
 			grant, err = s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
 		}
+		if errors.Is(err, store.ErrAuthorizationDenied) {
+			// A UDP response can arrive before the outbound write's commit
+			// callback takes the mutex. Wait for that known in-flight bound
+			// to resolve before deciding that idle-tail reclamation is impossible.
+			for otherDirection, other := range s.blocks {
+				if otherDirection != direction && other.inFlight > 0 && !other.poisoned {
+					return nil, s.changed, nil
+				}
+			}
+		}
 		if err != nil {
 			return nil, nil, s.admissionError(err)
 		}

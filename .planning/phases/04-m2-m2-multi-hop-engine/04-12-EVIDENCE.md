@@ -1263,3 +1263,21 @@ packages cached), vet/diff PASS. Initial failures and passing raw logs are kept
 in artifacts/phase4/block-integration-local with checksums.json. These are local
 results, not dedicated-host performance or the complete hostile matrix. Native
 block qualification, long-run/fault coverage and D-04 parameter lock remain open.
+
+## Native block attempt e3662bc — failed UDP response scheduling
+
+Dedicated Ubuntu clean e3662bc0710210d1f765a3020dffeff1216c3429 ran the
+ordinary/delayed real block tests. TCP passed both; UDP reset on the first
+exchange after old-authority expiry in both. Launcher stopped in trial-1 with
+exit 1; attacks/full-race/vet were not reached. Evidence is retained remotely
+in artifacts/phase4/block-e3662bc. Host stayed at socket maxima 212992.
+
+Inspection identified a possible scheduling path: UDP target response can
+request reverse funding before the outbound commit callback acquires the
+session mutex. Its outstanding upper bound cannot be reclaimed, but rejecting
+immediately can reset a fundable response. The adapter now waits on outstanding
+opposite-direction resolution, then re-enters the actual funding/admission
+checks. Cancellation still ends the wait; unknown settlement faults the gate.
+A regression holds the outbound batch unresolved and proves the response waits
+until its checkpoint, then reconciles exactly 3000 consumed / 1096 remaining.
+Native confirmation of this fix is required before closing this failure.
