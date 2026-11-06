@@ -2123,3 +2123,20 @@ forged/refreshed. Formal process script now requires all four cases, including
 ConcurrentRenewal, before reporting functional pass. This is not the D-04
 sustained multi-hop or mixed-rate workload. Local package compilation passed;
 binary integration was skipped locally because explicit binaries were absent.
+
+Clean 825f31bc7fe7fd44cf8072367702b7f303ded580 native run: original TCP/UDP/
+16-round concurrent cases PASS, ConcurrentRenewal FAIL at stream 6 round 23
+(5.74s), overall FAIL 37.813s. First deadline total 200.199ms, queue 1.070ms,
+direct 199.128ms; final Store attempt 27.172ms. Do not treat the shorter passing
+workload as sustained qualification. Failure DB contains 579 funding blocks,
+1347 reservations, 768 usage batches and 6 authorization records. The live-block
+count query plan walks all node funding blocks and joins each reservation by
+primary key; resolved history is not excluded by an indexed access path.
+Observed slow reservation holds reach 10.042ms. Another amplification source is
+visible in Agent allocation: every new direction allocation lists opposite idle
+tails for reclamation, even when available funding could fund both directions.
+Next work should measure/bound historical scans and avoid unnecessary funding
+block churn while retaining low-credit opposite-tail recovery semantics.
+Artifacts process-825f31b report SHA-256
+070ed740881eb3d26cc4ef57cc24ec8b4912fc0b2ad36a6d09ef7b43d1f94757;
+test.log b4ae8e7e814aca8bbcdea89383b147841df3b67d92798f5f919264e0eb0491a9.
