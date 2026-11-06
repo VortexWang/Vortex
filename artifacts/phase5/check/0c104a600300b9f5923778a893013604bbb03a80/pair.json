@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "commit": "0c104a600300b9f5923778a893013604bbb03a80",
+  "status": "passed",
+  "scope": "05-08-final-regression-and-finite-ledger-audits",
+  "actions_run": 42175493658,
+  "plan_completion_requires_summary": true,
+  "phase_complete": false,
+  "production_backend_authority": false,
+  "docker": {
+    "report_sha256": "0931548293de1f629dacb4d2434eaf3b595ca507ea89b919d141643576f5933a",
+    "real_process_cases": 7,
+    "named_safety_race_passes": 18,
+    "safety_snapshots": 12,
+    "independent_safety_audit": "passed",
+    "independent_retention_audit": "passed",
+    "independent_recovery_audit": "passed"
+  },
+  "actions": {
+    "report_sha256": "0931548293de1f629dacb4d2434eaf3b595ca507ea89b919d141643576f5933a",
+    "real_process_cases": 7,
+    "named_safety_race_passes": 18,
+    "safety_snapshots": 12,
+    "independent_safety_audit": "passed",
+    "independent_retention_audit": "passed",
+    "independent_recovery_audit": "passed"
+  }
+}

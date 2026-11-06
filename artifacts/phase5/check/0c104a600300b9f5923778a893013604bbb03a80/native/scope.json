@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "scope": "supporting-native-precommit",
+  "source_commit": "0c104a600300b9f5923778a893013604bbb03a80",
+  "clean_committed_linux_gate": false
+}

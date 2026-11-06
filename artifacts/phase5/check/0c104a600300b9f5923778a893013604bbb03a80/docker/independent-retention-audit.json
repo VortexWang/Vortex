@@ -1,0 +1,1 @@
+{"schema": 1, "status": "passed", "scope": "deterministic-hub-retention", "sha256": "578cf07725a138c35b17538246ef5090b0e42e74cc3d8dfdd07642a2f47a4061", "tombstones": 1, "unknown_upper_bound": 128, "production_backend_authority": false}

@@ -1,0 +1,9 @@
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/expiry-with-pending-result
+2026/11/06 14:25:51 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:562: absolute expiry stopped real TCP; original request b8fd7b6d-5e8b-4cf1-ad50-da2e332085fc remains pending, Hub keeps both grants reserved
+2026/11/06 14:25:59 INFO udp link drop summary link_id=21722f7b0bea7603de5d765a433e07bd window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (11.17s)
+    --- PASS: TestSchedulerProcessRenewal/expiry-with-pending-result (10.02s)
+PASS
+ok  	vortex/test/phase5	11.715s

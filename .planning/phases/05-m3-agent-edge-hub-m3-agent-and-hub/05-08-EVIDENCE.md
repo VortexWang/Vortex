@@ -1,16 +1,18 @@
 ---
 phase: 05
 plan: '08'
-status: incremental
-plan_complete: false
+status: verified
+plan_complete: true
 updated: 2026-11-06
 ---
 
 # 05-08 incremental runtime evidence
 
-05-08 remains executing. No SUMMARY exists and no shared requirement or gap is
-marked complete by these increments. The original plan's low-water TCP/UDP
-remote-renewal tracer and retention/fault acceptance remain required.
+Final plan status: verified on source `0c104a600300b9f5923778a893013604bbb03a80`.
+Both tasks now have same-SHA Docker/Actions evidence and independent raw-ledger
+audits. Earlier incremental entries below retain their historical partial status;
+they are not rewritten as prior completion. Shared requirement IDs remain pending
+until all declaring plans complete. Phase 5 is still executing.
 
 ## Durable request journal — 464a0c6
 
@@ -360,3 +362,92 @@ current top-level output. Raw current evidence, run metadata, `pair.json` and
 `files.sha256` are under `artifacts/phase5/check/b0ab02ad8c4e93ee8421a2983fa2f9a5f3fa6587/`.
 Supporting native logs are explicitly precommit scope. The macOS Python audit
 failure is recorded as not passed and is not substituted for Linux results.
+
+## Increment: renewal revocation, stale-session and absolute-time safety (2026-11-06)
+
+Source `0c104a600300b9f5923778a893013604bbb03a80` adds safety evidence at the
+actual existing boundaries, without changing product behavior, dependencies,
+approved contracts or time/authorization policy.
+
+- `TestRenewalSafetyRevocationDominatesDelayedAndConcurrentSuccess` uses finite
+  authenticated Hub issuance, the real Agent renewal receiver, FULL SQLite
+  transactions and the Engine's `runtimeAuthorityGate`. Revocation before
+  success, after success, and concurrent with success all deny new OPEN and
+  existing-session reservation. The source-owner check correctly rejects a
+  late grant when its owner was already revoked: the original durable success
+  remains `received` and Agent initial authority remains 4096 while Hub issued
+  authority stays 8192. When installation wins first, Agent initial authority
+  is 8192 and later revocation makes all records unusable. Both outcomes retain
+  committed 64 and unknown 128 bytes, with no synthetic release or consumption.
+  Exact success replay cannot resurrect revoked authority. Initial test
+  expectations incorrectly required installation in both orders; expectations
+  were corrected to assert the existing serializable outcomes and balances,
+  rather than changing the safe implementation.
+- `TestRenewalSafetyLateOldMutualTLSResultCannotInstall` observes the original
+  renewal request on a real mTLS stream, starts a successor connection to the
+  same authenticated issuer, then attempts delivery of a fully valid original
+  success on the old stream. The old receiver joins; the immutable request
+  remains pending, no new grant installs, authority-clock anchor is unchanged,
+  and Hub's unseen issuance remains reserved. The real current-session mutex
+  and cancellation path perform the rejection. No fake response parser or
+  test-only product bypass is used.
+- `TestRenewalSafetyTimeBoundaryCannotReleaseOrConsume` installs a valid renewal
+  and checks both a trusted adapter at the exact exclusive expiry boundary and
+  the real boot-local AuthorityClock after its maximum anchor age. New and
+  existing Engine reservations fail; committed 64/unknown 128 and conserved
+  balances remain unchanged. The exact-boundary adapter is a deterministic
+  component fixture, not a claim of nanosecond scheduling in a live process.
+- `TestSchedulerProcessRenewal/expiry-with-pending-result` runs the shipped
+  vortex-node/test-hub binaries and real VLink TCP against a ten-second hard
+  delegation deadline. The Hub commits renewal but intentionally withholds the
+  reply. After the real absolute deadline, the existing TCP stream explicitly
+  returns RST. Agent remains at initial 8192, consumed 6144, remaining 2048,
+  unknown/reserved zero; the same request/hash remains pending. Hub retains
+  issued 16384 and remaining 49152. Deadline and renewal cannot free either
+  unseen issuance or the original residual credit. This complements the prior
+  six process scenarios and the deterministic exact-boundary assertion.
+
+`audit_renewal_safety.py` independently reopens twelve SQLite snapshots from the
+six finite safety fixtures. It reconstructs the approved domain-separated
+request hash by removing protobuf field 13, compares original Agent/Hub request
+and response bytes/hashes, checks receipt states and all retained payload hashes,
+and recomputes source conservation and unknown-liability retention. No Go store
+function is imported into the auditor. Each named safety case must pass three
+times under race, with twelve snapshots and an independent passing audit. The
+full gate also requires the seventh named actual-process expiry case; SKIP or
+missing case remains failure. Native root/race/vet, three safety repetitions and
+the real expiry process case passed before commit; same-source Linux results
+are recorded below when complete. No broad Phase 5 completion is inferred.
+
+
+## Final plan gate and acceptance audit
+
+Source `0c104a600300b9f5923778a893013604bbb03a80` passed clean-clone Linux
+arm64 Docker and [Actions42175493658](https://github.com/VortexWang/Vortex/actions/runs/42175493658)
+Linux amd64 with the same `make phase5-check`. Both ran the seven actual-process
+renewal cases, six new safety cases three times under race, six retention cases
+three times under race, scheduler/probe and share/fencing/journal race suites,
+Engine race and actual full-disk/recovery regressions. Required contract checks
+used pinned generators. Independent audits re-read twelve safety snapshots,
+the settled/disputed/unknown cleanup snapshot and the five recovery snapshots
+with ten existing fault cases in each environment. All passed. Raw logs, SQLite,
+manifests, run metadata, selected current artifact contents, `pair.json` and
+`files.sha256` are retained under `artifacts/phase5/check/0c104a600300b9f5923778a893013604bbb03a80/`.
+The downloaded Actions artifact also contained 19 historical SHA directories;
+only those redundant historical copies were omitted from this new evidence set.
+
+| Plan assertion | Current authoritative evidence | Result and boundary |
+|---|---|---|
+| Actual target probes, health/version reports, configured bounds | NodeScheduler/CurrentNodeReport tests and required threefold race gate | Passed; observational snapshots never fund or refresh trusted time |
+| Finite low-water remote renewal over current stream, TCP/UDP continuity | Seven `TestSchedulerProcessRenewal` process scenarios | Passed; fixture roots are explicitly finite, not production backend provisioning |
+| Durable ID/hash, lost result/crash replay, no repeated issue | Renewal journal/Hub issue/source audits, real Hub and node SIGKILL scenarios | Passed; unseen issuance stays reserved, old boot authority is settlement-only |
+| Source exhaustion and unrecordable writes fail closed | Actual exhausted/write-failure process cases and full-disk runtime recovery suite | Passed; injected trigger is labeled separately from real SQLITE_FULL evidence |
+| Old-session, revocation, stale clock, exact and real expiry | Six named repeated safety cases, real mTLS successor, seventh process expiry | Passed; deterministic exact-time adapter and actual process deadline are separately scoped |
+| Bounded telemetry and financial retention isolation | Latest-state cache/probe tests; Hub conservative retention/audits | Passed; only duplicate settled transport payload/receipt storage compacts; original journal/tombstones, disputed and unknown debt survive; Agent Hub ACK alone cannot prune |
+| No synthetic unknown release on timeout/reconnect/crash | Source audits plus twelve safety ledger snapshots | Passed within finite tested scenarios; no unbounded model or full-product acceptance claim |
+
+Both task done criteria are satisfied at the planned runtime/protocol-adapter
+boundary. No new normative contract or dependency was introduced. Added local
+Store migrations, reader isolation, source anchors and independent audit helpers
+were necessary to make the runtime acceptance reviewable. 05-08 can close;
+05-09..05-14 and phase-wide UAT/verification remain outstanding.

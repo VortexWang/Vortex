@@ -1,0 +1,40 @@
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 06:37:10 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 06:37:11 INFO udp link drop summary link_id=1052712d801bbad19d99be1253ac22d5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 06:37:11 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 06:37:14 INFO udp link drop summary link_id=b8adaab2f811d71c24ce50dc375c878f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/hub-restart
+2026/11/06 06:37:14 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:562: SIGKILL Hub: original request 6a9be8bf-0118-483f-b767-3b3d52637235 replayed without another debit
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 06:37:17 INFO udp link drop summary link_id=9af066608902708fa6fb8eafb9dbea63 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/node-restart
+2026/11/06 06:37:18 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 06:37:19 INFO udp link drop summary link_id=b2551845eee6becec5d9124815bfdfbd window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    regional_process_test.go:562: SIGKILL Agent: new boot fenced old authority; original pending request and issuer debit retained
+=== RUN   TestSchedulerProcessRenewal/quota-exhausted
+2026/11/06 06:37:19 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:562: quota-exhausted stopped live TCP writes; source remains conserved: {Initial:8192 Remaining:0 Committed:8192 Unknown:0 Reserved:0}
+2026/11/06 06:37:20 INFO udp link drop summary link_id=29082c1db653d9db0f1df0b83cb80d36 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/write-failure
+2026/11/06 06:37:21 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:562: write-failure stopped live TCP writes; source remains conserved: {Initial:8192 Remaining:2048 Committed:6144 Unknown:0 Reserved:0}
+2026/11/06 06:37:21 INFO udp link drop summary link_id=d407dd9407278923fa2ca24029aa4f4c window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/expiry-with-pending-result
+2026/11/06 06:37:21 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:562: absolute expiry stopped real TCP; original request 822b8950-d3de-4a8e-ae79-b328a4e8daa5 remains pending, Hub keeps both grants reserved
+2026/11/06 06:37:31 INFO udp link drop summary link_id=0101040366d1dd02f98c674ac4c57283 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (22.24s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.49s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.70s)
+    --- PASS: TestSchedulerProcessRenewal/hub-restart (3.64s)
+    --- PASS: TestSchedulerProcessRenewal/node-restart (1.49s)
+    --- PASS: TestSchedulerProcessRenewal/quota-exhausted (1.44s)
+    --- PASS: TestSchedulerProcessRenewal/write-failure (0.56s)
+    --- PASS: TestSchedulerProcessRenewal/expiry-with-pending-result (10.02s)
+PASS
+ok  	vortex/test/phase5	22.241s
