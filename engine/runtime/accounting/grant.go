@@ -170,13 +170,14 @@ func (g *CreditGate) BeginRenewal(ctx context.Context, id string) (string, int64
 	if pendingID != "" {
 		return pendingID, pendingAmount, nil
 	}
-	if g.state.Available > g.cfg.GrantTarget*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
+	target := g.target()
+	if g.state.Available > target*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
 		return "", 0, nil
 	}
 	if _, exists := g.requests[id]; exists {
 		return "", 0, ErrGrantConflict
 	}
-	amount := min(g.cfg.GrantTarget-g.state.Available, g.state.Unissued)
+	amount := min(target-g.state.Available, g.state.Unissued)
 	if err := g.beginGrant(id, amount); err != nil {
 		return "", 0, err
 	}

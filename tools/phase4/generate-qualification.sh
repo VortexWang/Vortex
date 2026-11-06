@@ -11,11 +11,17 @@ credit_budget=${PHASE4_SOURCE_CREDIT_BUDGET:-1099511627776}
 credit_initial=${PHASE4_CREDIT_INITIAL_BLOCK:-4194304}
 credit_max=${PHASE4_CREDIT_MAX_BLOCK:-4194304}
 credit_target=${PHASE4_CREDIT_GRANT_TARGET:-134217728}
+credit_seconds=${PHASE4_CREDIT_TARGET_SECONDS:-0}
 credit_renew=${PHASE4_CREDIT_RENEW_PERCENT:-30}
 credit_observe=${PHASE4_CREDIT_OBSERVE:-false}
-for value in "$credit_initial" "$credit_max" "$credit_target" "$credit_renew"; do
+for value in "$credit_initial" "$credit_max" "$credit_target" "$credit_renew" "$credit_seconds"; do
   case "$value" in ''|*[!0-9]*) echo "credit parameters must be positive integers" >&2; exit 2 ;; esac
 done
+dynamic_target=
+if [ "$credit_seconds" -gt 60 ] || { [ "$credit_seconds" -gt 0 ] && [ "$credit_target" -lt 8388608 ]; }; then
+  echo "dynamic target requires 1..60 seconds and at least 8MiB ceiling" >&2; exit 2
+fi
+if [ "$credit_seconds" -gt 0 ]; then dynamic_target=",\"target_seconds\":$credit_seconds"; fi
 case "$credit_observe" in true|false) ;; *) echo "invalid credit observation flag" >&2; exit 2 ;; esac
 if [ "$credit_initial" -lt 1 ] || [ "$credit_max" -lt "$credit_initial" ] || [ "$credit_max" -gt 4194304 ] || [ "$credit_target" -lt "$credit_max" ] || [ "$credit_target" -gt 1099511627776 ] || [ "$credit_renew" -lt 1 ] || [ "$credit_renew" -gt 99 ]; then
   echo "invalid bounded credit parameters" >&2; exit 2
@@ -70,7 +76,7 @@ json() {
     auth=
     runtime_authority='"runtime_authority":true,'
     if [ "$role" = source ]; then
-      authority=",\"source_credit\":{\"snapshot_id\":\"phase4-formal/source/path-$policy_version/policy-$policy_version\",\"budget_bytes\":$credit_budget,\"initial_block_bytes\":$credit_initial,\"max_block_bytes\":$credit_max,\"grant_target_bytes\":$credit_target,\"renew_percent\":$credit_renew,\"observe\":$credit_observe}"
+      authority=",\"source_credit\":{\"snapshot_id\":\"phase4-formal/source/path-$policy_version/policy-$policy_version\",\"budget_bytes\":$credit_budget,\"initial_block_bytes\":$credit_initial,\"max_block_bytes\":$credit_max,\"grant_target_bytes\":$credit_target,\"renew_percent\":$credit_renew,\"observe\":$credit_observe$dynamic_target}"
     fi
   fi
   : > "$out/events-$name.jsonl"

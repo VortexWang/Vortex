@@ -16,16 +16,22 @@ import (
 // CreditConfig is a test-only, startup-pinned, raw-byte authority. It is not a
 // durable issuer or a billing conversion implementation. Zero budget denies.
 type CreditConfig struct {
-	Observe      bool   `json:"observe,omitempty"`
-	SnapshotID   string `json:"snapshot_id"`
-	Budget       int64  `json:"budget_bytes"`
-	InitialBlock int64  `json:"initial_block_bytes"`
-	MaxBlock     int64  `json:"max_block_bytes"`
-	GrantTarget  int64  `json:"grant_target_bytes"`
-	RenewPercent int64  `json:"renew_percent"`
+	Observe       bool   `json:"observe,omitempty"`
+	SnapshotID    string `json:"snapshot_id"`
+	Budget        int64  `json:"budget_bytes"`
+	InitialBlock  int64  `json:"initial_block_bytes"`
+	MaxBlock      int64  `json:"max_block_bytes"`
+	GrantTarget   int64  `json:"grant_target_bytes"`
+	RenewPercent  int64  `json:"renew_percent"`
+	// TargetSeconds enables a committed-byte rolling-minute estimate. Zero
+	// preserves the fixed target; when enabled GrantTarget is its ceiling.
+	TargetSeconds int64  `json:"target_seconds,omitempty"`
 }
 
 func (c CreditConfig) Validate() error {
+	if c.TargetSeconds < 0 || c.TargetSeconds > 60 || c.TargetSeconds > 0 && c.GrantTarget < 8<<20 {
+		return errors.New("credit: dynamic target needs 1..60 seconds and at least 8MiB ceiling")
+	}
 	if c.SnapshotID == "" || len(c.SnapshotID) > 256 || c.Budget < 0 || c.Budget > 1<<50 || c.InitialBlock < 1 || c.MaxBlock < c.InitialBlock || c.MaxBlock > 4<<20 || c.GrantTarget < c.MaxBlock || c.GrantTarget > 1<<40 || c.RenewPercent < 1 || c.RenewPercent > 99 {
 		return errors.New("credit: invalid finite credit configuration")
 	}
@@ -54,21 +60,22 @@ type CreditWaitObservations struct {
 }
 
 type CreditState struct {
-	Waits        *CreditWaitObservations `json:"waits,omitempty"`
-	Observations *CreditObservations     `json:"observations,omitempty"`
-	SnapshotID   string                  `json:"snapshot_id"`
-	PendingGrant int64                   `json:"pending_grant_bytes"`
-	UnknownGrant int64                   `json:"unknown_grant_bytes"`
-	GrantRecords uint64                  `json:"grant_records"`
-	Budget       int64                   `json:"budget_bytes"`
-	Unissued     int64                   `json:"unissued_bytes"`
-	Available    int64                   `json:"available_bytes"`
-	Held         int64                   `json:"held_bytes"`
-	Used         int64                   `json:"used_bytes"`
-	Unknown      int64                   `json:"unknown_bytes"`
-	Grants       uint64                  `json:"grants"`
-	Denials      uint64                  `json:"denials"`
-	Sessions     int64                   `json:"sessions"`
+	DynamicTarget int64                   `json:"dynamic_target_bytes,omitempty"`
+	Waits         *CreditWaitObservations `json:"waits,omitempty"`
+	Observations  *CreditObservations     `json:"observations,omitempty"`
+	SnapshotID    string                  `json:"snapshot_id"`
+	PendingGrant  int64                   `json:"pending_grant_bytes"`
+	UnknownGrant  int64                   `json:"unknown_grant_bytes"`
+	GrantRecords  uint64                  `json:"grant_records"`
+	Budget        int64                   `json:"budget_bytes"`
+	Unissued      int64                   `json:"unissued_bytes"`
+	Available     int64                   `json:"available_bytes"`
+	Held          int64                   `json:"held_bytes"`
+	Used          int64                   `json:"used_bytes"`
+	Unknown       int64                   `json:"unknown_bytes"`
+	Grants        uint64                  `json:"grants"`
+	Denials       uint64                  `json:"denials"`
+	Sessions      int64                   `json:"sessions"`
 }
 
 // CreditGate serializes issuance, block allocation and settlement. At all times
@@ -76,6 +83,7 @@ type CreditState struct {
 // used + unknown. Held includes idle
 // session block tails and unresolved batches; closing never frees an unknown.
 type CreditGate struct {
+	demand         demandWindow
 	injectedIssuer bool
 	waitStats      CreditWaitObservations
 	observeWaits   bool
@@ -104,6 +112,9 @@ func (g *CreditGate) State() CreditState {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	state := g.state
+	if g.cfg.TargetSeconds > 0 {
+		state.DynamicTarget = g.target()
+	}
 	if g.observeWaits {
 		observations := g.waitStats
 		state.Waits = &observations
@@ -118,10 +129,11 @@ func (g *CreditGate) replenish() {
 	if g.injectedIssuer {
 		return
 	}
-	if g.state.Available > g.cfg.GrantTarget*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
+	target := g.target()
+	if g.state.Available > target*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
 		return
 	}
-	n := min(g.cfg.GrantTarget-g.state.Available, g.state.Unissued)
+	n := min(target-g.state.Available, g.state.Unissued)
 	if n > 0 {
 		if g.cfg.Observe {
 			start := time.Now()
@@ -274,6 +286,9 @@ func (s *creditSession) reserve(ctx context.Context, d core.Direction, n int64, 
 		}
 		g.state.Held -= o.Used
 		g.state.Used += o.Used
+		if g.cfg.TargetSeconds > 0 {
+			g.demand.observe(o.Used)
+		}
 		remainder := n - o.Used
 		if s.closed {
 			g.state.Held -= remainder
