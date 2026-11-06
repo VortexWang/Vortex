@@ -25,9 +25,9 @@ test "$(go env GOVERSION)" = go1.27.3
 # Never silently claim future implementations from the current test suite.
 case "$through" in 06-01|06-08|06-09) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
-mkdir -p "$evidence"
-evidence=$(CDPATH= cd -- "$evidence" && pwd)
+evidence=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$evidence")
 case "$evidence" in "$root"|"$root"/*) echo 'evidence must be outside source checkout' >&2; exit 1;; esac
+mkdir -p "$evidence"
 if test -z "$produce"; then
   exec sh tools/phase6/evidence_manifest.sh --through-plan "$through" --expected-sha "$expected" --evidence-dir "$evidence"
 fi
@@ -65,6 +65,14 @@ import hashlib,json,os,pathlib,platform,sys
 out,sha,host,through,result=sys.argv[1:]
 p=pathlib.Path(out)
 files=['commit.txt','openapi.log','dependencies.log','tracer.log','runner.log','source-status-before.txt','source-status-after.txt','source-identity.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','build-metadata.txt']
+processes=[]
+if (p/'processes').is_dir():
+    for report in sorted((p/'processes').iterdir()):
+        if report.name.endswith('-result.json'):
+            stamp=report.name.removesuffix('-result.json')
+            processes.append({role:'processes/'+stamp+'-'+role+suffix for role,suffix in [('result','.json'),('backend','.log'),('agent','.log'),('hub','.log')]})
+(p/'processes.json').write_text(json.dumps(processes,indent=2)+'\n')
+files+=['processes.json']+[name for run in processes for name in run.values()]
 checksums={name:hashlib.sha256((p/name).read_bytes()).hexdigest() for name in files if (p/name).is_file()}
 (p/'result.json').write_text(json.dumps(dict(commit=sha,result=int(result),producer=host,through_plan=through,source_clean=not (p/'source-status-after.txt').read_text(),checksums=checksums,host=platform.platform(),run_id=os.getenv('GITHUB_RUN_ID'),run_url=('https://github.com/'+os.getenv('GITHUB_REPOSITORY','')+'/actions/runs/'+os.getenv('GITHUB_RUN_ID','')) if host=='actions' else None),indent=2)+'\n')
 PY
