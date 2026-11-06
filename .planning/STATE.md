@@ -5,11 +5,11 @@ current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 8
 status: executing
-stopped_at: 05-08 live finite TCP/UDP renewal paired; renewal fault combinations and safe retention next
-last_updated: "2026-11-06T05:10:00Z"
+stopped_at: 05-08 live renewal crash/exhaustion/write failure paired; revocation/time combinations and retention next
+last_updated: "2026-11-06T05:48:00Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-08 live finite renewal 36d244b passed Docker/Actions42165803700 and independent recovery audits; plan remains executing
-state_head: 36d244b7747dd3e16089e4fd76ee56ad66bbddbd
+last_activity_desc: 05-08 renewal crash/WAL e4aa4c4 passed Docker/Actions42169636817 and independent recovery audits; plan remains executing
+state_head: e4aa4c47536c8958e07b0607bf63ce8bfee821d4
 progress:
   total_phases: 8
   completed_phases: 4
@@ -31,8 +31,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
 Current Plan: 8
 Total Plans in Phase: 14
-Status: Executing — 05-08 partial; probes/reports and live finite TCP/UDP renewal verified; renewal fault combinations and safe retention remain
-Last activity: 2026-11-06 — 05-08 live finite renewal 36d244b passed Docker/Actions42165803700 and independent ledger audits; no plan completion claimed.
+Status: Executing — 05-08 partial; probes/reports, live renewal and crash/exhaustion/write failure verified; revocation/time combinations and safe retention remain
+Last activity: 2026-11-06 — 05-08 renewal crash/WAL e4aa4c4 passed Docker/Actions42169636817 and independent ledger audits; no plan completion claimed.
 
 Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 executing (live renewal partial), 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
@@ -102,7 +102,7 @@ Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 ex
 ## Session Continuity
 
 Last session: 2026-11-06
-Stopped at: 05-08 live TCP/UDP renewal paired; continue renewal-specific restart/revocation/disk/time faults and >=7-day safe retention inline
+Stopped at: 05-08 live TCP/UDP renewal paired; continue renewal-specific revocation/late-session/time combinations and >=7-day safe retention inline
 Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-08-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)

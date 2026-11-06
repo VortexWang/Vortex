@@ -1,0 +1,3 @@
+commit: e4aa4c47536c8958e07b0607bf63ce8bfee821d4
+go version go1.27.3 linux/amd64
+Linux 7.0.0-1017-azure x86_64

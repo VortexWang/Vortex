@@ -1,0 +1,62 @@
+ok  	vortex/agent	28.213s
+ok  	vortex/agent/identity	0.187s
+ok  	vortex/agent/store	8.289s
+ok  	vortex/agent/upgrade	1.224s
+?   	vortex/cmd/modelcheck	[no test files]
+?   	vortex/cmd/vortex-node	[no test files]
+?   	vortex/cmd/vortex-test-hub	[no test files]
+ok  	vortex/contracts	0.004s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/hub	1.127s
+ok  	vortex/model	0.003s
+?   	vortex/test/netns/fixture	[no test files]
+2026/11/06 05:23:29 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:29 INFO udp link drop summary link_id=ed6a3b6f8da4c00c0d453eb0a318b9cf window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- FAIL: TestRegionalProcessFailover (10.84s)
+    --- FAIL: TestRegionalProcessFailover/tcp-original-authorization (0.57s)
+        regional_process_test.go:277: database is locked (5) (SQLITE_BUSY)
+        regional_process_test.go:312: vortex-node imported node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:23:28Z
+            vortex-node enrolled node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:23:28Z
+            vortex-node control reconnecting node_id=550e8400-e29b-41d4-a716-446655440100 boot_id=7c64f099-65a7-8b25-c2ac-9af3a110972d
+            2026/11/06 05:23:29 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+            2026/11/06 05:23:29 INFO relay target connected target=127.0.0.1 port=44943
+            2026/11/06 05:23:29 INFO relay OPEN authorized stream_id=1 network=1
+            
+        regional_process_test.go:312: vortex-test-hub listening=127.0.0.1:39599 protocol=test-only
+            
+        regional_process_test.go:312: vortex-test-hub listening=127.0.0.1:44569 protocol=test-only
+            
+2026/11/06 05:23:30 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:32 INFO udp link drop summary link_id=5a6d3de81f5e73861ce50fc81db3f5fe window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:23:32 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:34 INFO udp link drop summary link_id=e4dd3e4f13a488433fb072d45d996bca window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:23:35 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:38 INFO udp link drop summary link_id=dbaaa9c11ef65446fa07b9a6b507c9ad window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:23:38 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:39 INFO udp link drop summary link_id=a5764b9b1ea98499cf43e44d84029b44 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:23:40 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:41 INFO udp link drop summary link_id=6e31d3d94b710da7a633889e11e26b30 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:23:41 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:23:42 INFO udp link drop summary link_id=758de352e9068badaa2bc0738b808cea window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- FAIL: TestSchedulerProcessRenewal (12.52s)
+    --- FAIL: TestSchedulerProcessRenewal/write-failure (0.60s)
+        regional_process_test.go:555: database is locked (5) (SQLITE_BUSY)
+        regional_process_test.go:312: vortex-node imported node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:23:41Z
+            vortex-node enrolled node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:23:41Z
+            vortex-node control reconnecting node_id=550e8400-e29b-41d4-a716-446655440100 boot_id=b6366068-0786-d923-0659-1a2f04456f5e
+            2026/11/06 05:23:41 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+            2026/11/06 05:23:41 INFO relay target connected target=127.0.0.1 port=41771
+            2026/11/06 05:23:41 INFO relay OPEN authorized stream_id=1 network=1
+            2026/11/06 05:23:42 INFO udp link drop summary link_id=2d5848357160db0f39d76be4b6cec8e6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+            2026/11/06 05:23:42 ERROR vlink inbound handler failed peer=550e8400-e29b-41d4-a716-446655440199 err="vlink: read frame header: EOF"
+            
+        regional_process_test.go:312: vortex-test-hub listening=127.0.0.1:38379 protocol=test-only
+            
+        regional_process_test.go:312: vortex-test-hub listening=127.0.0.1:42855 protocol=test-only
+            
+FAIL
+FAIL	vortex/test/phase5	23.580s
+ok  	vortex/tests/phase1	0.004s
+?   	vortex/tools/phase1	[no test files]
+?   	vortex/tools/phase4	[no test files]
+FAIL

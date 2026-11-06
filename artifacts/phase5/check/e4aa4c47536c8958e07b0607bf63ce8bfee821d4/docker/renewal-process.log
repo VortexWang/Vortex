@@ -1,0 +1,35 @@
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/low-water-tcp-udp
+2026/11/06 05:39:28 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 05:39:30 INFO udp link drop summary link_id=847aad0bb6fc0bca6e6b8358a66a6735 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/lost-result
+2026/11/06 05:39:30 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 05:39:32 INFO udp link drop summary link_id=9a82440679c28c0e6b8bdf2a535fb435 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/hub-restart
+2026/11/06 05:39:33 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:554: SIGKILL Hub: original request 18491569-aae1-41a5-b2c6-f6fb19a458e2 replayed without another debit
+    scheduler_process_test.go:31: actual TCP/UDP continued beyond initial grant; Agent={Initial:16384 Remaining:2048 Committed:14336 Unknown:0 Reserved:0} Hub={Initial:65536 Remaining:49152 Issued:16384} installed=1 issues=2
+2026/11/06 05:39:36 INFO udp link drop summary link_id=3a831a30b6dbef26eac5a262e18518ed window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/node-restart
+2026/11/06 05:39:36 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:39:37 INFO udp link drop summary link_id=e854400110c0d957306897e62959892a window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    regional_process_test.go:554: SIGKILL Agent: new boot fenced old authority; original pending request and issuer debit retained
+=== RUN   TestSchedulerProcessRenewal/quota-exhausted
+2026/11/06 05:39:38 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:554: quota-exhausted stopped live TCP writes; source remains conserved: {Initial:8192 Remaining:0 Committed:8192 Unknown:0 Reserved:0}
+2026/11/06 05:39:39 INFO udp link drop summary link_id=b8c6847f424ebfe7ea699797bd9a9539 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestSchedulerProcessRenewal/write-failure
+2026/11/06 05:39:39 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+    regional_process_test.go:554: write-failure stopped live TCP writes; source remains conserved: {Initial:8192 Remaining:2048 Committed:6144 Unknown:0 Reserved:0}
+2026/11/06 05:39:39 INFO udp link drop summary link_id=3da180b01306491752e6321423f9a6b1 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestSchedulerProcessRenewal (12.21s)
+    --- PASS: TestSchedulerProcessRenewal/low-water-tcp-udp (1.47s)
+    --- PASS: TestSchedulerProcessRenewal/lost-result (2.69s)
+    --- PASS: TestSchedulerProcessRenewal/hub-restart (3.67s)
+    --- PASS: TestSchedulerProcessRenewal/node-restart (1.46s)
+    --- PASS: TestSchedulerProcessRenewal/quota-exhausted (1.44s)
+    --- PASS: TestSchedulerProcessRenewal/write-failure (0.62s)
+PASS
+ok  	vortex/test/phase5	12.209s

@@ -235,3 +235,54 @@ Other workflows on this SHA remain separate: Phase 2 passed; Phase 1 run
 and Phase 3 run 42165803707 failed benchmark metric extraction despite raw Go
 benchmark PASS. Current excerpts are retained under `cross-workflow/`; neither
 historical problem was hidden or approval hashes changed in this increment.
+
+## Increment: crash recovery and WAL boundaries — e4aa4c4 (partial)
+
+Source `e4aa4c47536c8958e07b0607bf63ce8bfee821d4` passed the full clean-source
+Go 1.27.3 Linux arm64 Docker gate and
+[Actions 42169636817](https://github.com/VortexWang/Vortex/actions/runs/42169636817)
+Linux amd64 gate. Both environments pass all six actual-binary renewal process
+scenarios and 63 named share/renewal/event/reader race passes (21 tests repeated
+three times). Both recovery sets were independently re-read in pinned Linux:
+five SQLite snapshots and ten existing recovery fault cases passed per set.
+Raw logs, snapshots, audit results, pair metadata and SHA-256 manifests are at
+`artifacts/phase5/check/e4aa4c47536c8958e07b0607bf63ce8bfee821d4/`.
+
+| New required scenario | Observed result / exact scope |
+|---|---|
+| `hub-restart` | Test Hub commits renewal then holds replies; SIGKILL and restart replay the original ID/hash. Same TCP stream and later UDP continue; initial+renewal remain exactly two issues and 16384 issued bytes. |
+| `node-restart` | SIGKILL real Agent with original renewal pending and a durable 512-byte unresolved write fixture. New boot fences all old authority; original pending request/hash and issuer's 16384-byte debit remain. Agent source: initial 8192 = remaining 1536 + committed 6144 + unknown 512, reserved zero. Hub stays offline so this cannot create a new per-boot test delegation. |
+| `quota-exhausted` | Finite 8192-byte delegation yields durable `quota_exhausted`; existing TCP consumes only its remaining valid 2048 bytes. Next write receives RST; source remains initial=committed=8192, remaining zero. |
+| `write-failure` | Test-only SQLite trigger rejects reservation insertion on a real active TCP path. Next write receives RST, committed stays 6144 and no uncommitted reservation is treated as authority. This is injected storage failure, not a new physical ENOSPC proof. |
+
+The restart tracer found an actual reconnect defect: duplicate config-result
+events raised a uniqueness error and prevented renewal replay. `AppendEvent`
+now accepts only an exact owner/kind/payload replay; changed content returns
+`ErrEventConflict`. `TestDurableEventExactReplayAndConflictAfterReopen` checks
+reopen, concurrent exact replay, changed kind/payload and write failure.
+
+Earlier local Docker attempts on `a983ab9` and `e9f2f3d` failed with SQLITE_BUSY;
+their raw failed reports/root logs remain separately retained and explicitly
+failed. A connection-local observer wait alone did not fix the stale WAL snapshot.
+The final fix separates `Store.OpenReader` from startup/migration writes and uses
+IMMEDIATE transactions for write operations before reading authority. Read-only
+transactions remain deferred; busy waits stay bounded at five seconds. Regression
+tests prove a reader cannot create/migrate/mutate a ledger, handles escaped file
+paths, does not block a writer, and a second writer cannot overtake the first
+authority snapshot. Test-only debt injection remains explicitly a storage adapter
+fixture; production Agent/Hub files still each have their owning writer.
+
+Native root tests, Agent/Hub race, vet and three complete process repetitions
+passed after the final WAL fix. Earlier native fault/debt logs are marked with
+their precommit scope and do not replace the final clean Linux pair. Earlier
+Actions runs 42168061568/42168909697 passed, but their matching local Docker runs
+failed; they are not represented as paired success.
+
+05-08 remains executing. Still open: renewal-specific revocation/late-old-session
+and trusted-time/expiry combinations, and >=7-day settled usage/receipt cleanup
+under authenticated contiguous confirmation. Existing triggers already journal
+known/unknown usage; what is missing is the safe age/checkpoint/dispute/idempotency
+cleanup integration, not creation of usage journal entries. Unknown debt, issues,
+handoff evidence and disputes must survive cleanup. No plan SUMMARY or G05-01
+closure is created by this increment. All Hub tests remain protocol-backend
+fixtures, not Phase 6 production authority or Phase 4 performance qualification.

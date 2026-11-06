@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "status": "failed",
+  "commit": "a983ab9bec98f6d648b323e8974bef76b592668b",
+  "scope": "local-docker-root-test",
+  "not_qualified": true,
+  "retained_for": "SQLITE_BUSY reproduction; superseded by reader isolation and immediate writer transaction fix"
+}

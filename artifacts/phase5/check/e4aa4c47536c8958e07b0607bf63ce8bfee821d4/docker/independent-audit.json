@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "snapshots": 5,
+  "fault_cases": 10,
+  "backend": "protocol-test-only",
+  "auditor": "pinned-linux-python-sqlite-independent-reread"
+}

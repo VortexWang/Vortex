@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "scope": "precommit-native-development-regressions",
+  "source_committed_as": "e4aa4c47536c8958e07b0607bf63ce8bfee821d4",
+  "clean_checkout": false,
+  "linux_acceptance": false,
+  "notes": "earlier fault logs predate writer/read-only observer fix; final root/race/process-repeat logs include it"
+}

@@ -1,0 +1,47 @@
+ok  	vortex/agent	27.813s
+ok  	vortex/agent/identity	0.140s
+ok  	vortex/agent/store	8.347s
+ok  	vortex/agent/upgrade	1.054s
+?   	vortex/cmd/modelcheck	[no test files]
+?   	vortex/cmd/vortex-node	[no test files]
+?   	vortex/cmd/vortex-test-hub	[no test files]
+ok  	vortex/contracts	0.004s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/hub	0.936s
+ok  	vortex/model	0.004s
+?   	vortex/test/netns/fixture	[no test files]
+2026/11/06 05:31:39 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:31:40 INFO udp link drop summary link_id=383ee10a80e0d229566b1089c8599d71 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:31:41 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:31:42 INFO udp link drop summary link_id=db330e35e9c31cb6e815f5adb7d6bfb9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:31:42 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:31:44 INFO udp link drop summary link_id=27b72ace47a432b48c7d031a00622ae8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:31:45 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:31:48 INFO udp link drop summary link_id=114a8e59dbcd79a9de68d89e8e2f9414 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:31:49 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:31:50 INFO udp link drop summary link_id=4acc46b7b98034e6414fabc36fc58040 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:31:50 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:32:15 INFO udp link drop summary link_id=822d008b956c69659b0a610916a49bb6 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 05:32:15 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 05:32:15 INFO udp link drop summary link_id=b460dfa836ac4ddd09c9218d891fe186 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- FAIL: TestSchedulerProcessRenewal (35.65s)
+    --- FAIL: TestSchedulerProcessRenewal/quota-exhausted (25.01s)
+        regional_process_test.go:554: renewal fault never reached settled initial traffic: context deadline exceeded
+        regional_process_test.go:311: vortex-node imported node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:31:50Z
+            vortex-node enrolled node_id=550e8400-e29b-41d4-a716-446655440100 expires=2026-11-06T06:31:50Z
+            vortex-node control reconnecting node_id=550e8400-e29b-41d4-a716-446655440100 boot_id=e83ad7e0-0a98-ec8b-ea9e-98e6a9f5a1c7
+            2026/11/06 05:31:50 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+            2026/11/06 05:31:50 INFO relay target connected target=127.0.0.1 port=40443
+            2026/11/06 05:31:50 INFO relay OPEN authorized stream_id=1 network=1
+            2026/11/06 05:31:50 ERROR relay target bridge failed stream_id=1 err="database is locked (5) (SQLITE_BUSY)"
+            
+        regional_process_test.go:311: vortex-test-hub listening=127.0.0.1:43969 protocol=test-only
+            
+        regional_process_test.go:311: vortex-test-hub listening=127.0.0.1:44909 protocol=test-only
+            
+FAIL
+FAIL	vortex/test/phase5	45.962s
+ok  	vortex/tests/phase1	0.003s
+?   	vortex/tools/phase1	[no test files]
+?   	vortex/tools/phase4	[no test files]
+FAIL

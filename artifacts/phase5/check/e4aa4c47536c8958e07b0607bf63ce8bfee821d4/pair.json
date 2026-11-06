@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "commit": "e4aa4c47536c8958e07b0607bf63ce8bfee821d4",
+  "status": "passed",
+  "scope": "incremental-renewal-crash-exhaustion-write-failure-and-wal-locking",
+  "actions_run": 42169636817,
+  "full_plan_complete": false,
+  "production_backend_authority": false,
+  "docker": {
+    "report_sha256": "aef9fc771c2ea1e7e6d8149bc105f11c4eeb60f296daa7754ef1663e82eb04d4",
+    "renewal_process_cases": 6,
+    "named_race_passes": 63,
+    "independent_recovery_audit": "passed"
+  },
+  "actions": {
+    "report_sha256": "aef9fc771c2ea1e7e6d8149bc105f11c4eeb60f296daa7754ef1663e82eb04d4",
+    "renewal_process_cases": 6,
+    "named_race_passes": 63,
+    "independent_recovery_audit": "passed"
+  }
+}

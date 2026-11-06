@@ -1,0 +1,23 @@
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/node-restart
+2026/11/06 13:22:00 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 13:22:01 INFO udp link drop summary link_id=41ff682d5cd7a1e9e372e889b92906d0 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    regional_process_test.go:555: SIGKILL Agent: new boot fenced old authority; original pending request and issuer debit retained
+--- PASS: TestSchedulerProcessRenewal (2.85s)
+    --- PASS: TestSchedulerProcessRenewal/node-restart (1.83s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/node-restart
+2026/11/06 13:22:03 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 13:22:04 INFO udp link drop summary link_id=7126f3e2872c6016f11e1443d108b64e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    regional_process_test.go:555: SIGKILL Agent: new boot fenced old authority; original pending request and issuer debit retained
+--- PASS: TestSchedulerProcessRenewal (2.82s)
+    --- PASS: TestSchedulerProcessRenewal/node-restart (1.81s)
+=== RUN   TestSchedulerProcessRenewal
+=== RUN   TestSchedulerProcessRenewal/node-restart
+2026/11/06 13:22:06 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 13:22:07 INFO udp link drop summary link_id=2f8fb2562909b4778f655ae9714bc431 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+    regional_process_test.go:555: SIGKILL Agent: new boot fenced old authority; original pending request and issuer debit retained
+--- PASS: TestSchedulerProcessRenewal (2.86s)
+    --- PASS: TestSchedulerProcessRenewal/node-restart (1.87s)
+PASS
+ok  	vortex/test/phase5	9.147s
