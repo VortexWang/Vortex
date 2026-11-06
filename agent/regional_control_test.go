@@ -198,6 +198,10 @@ func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 			if c.CurrentHubStatus() != nil {
 				t.Fatal("disconnected Hub advertised current")
 			}
+			counters := c.RegionalCounters()
+			if counters.Attempts < 2 || counters.ReadySessions < 1 {
+				t.Fatalf("missing bounded aggregate metrics: %+v", counters)
+			}
 		})
 	}
 }
@@ -344,7 +348,7 @@ func TestRegionalLateAuthorizationCannotAdvanceClockOrConfig(t *testing.T) {
 }
 
 func TestRegionalRevocationAndNoHealthyPeerAreBounded(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	defer cancel()
 	ns, err := store.Open(filepath.Join(t.TempDir(), "node.db"), "agent")
 	if err != nil {
@@ -369,8 +373,11 @@ func TestRegionalRevocationAndNoHealthyPeerAreBounded(t *testing.T) {
 		return fmt.Errorf("test: current Hub certificate is revoked")
 	}
 	c := &ControlClient{Node: n, TLS: clientTLS}
-	err = c.RunRegion(ctx, RegionalConfig{Region: "east", Endpoints: []HubEndpoint{{Region: "east", Address: listener.Addr().String(), HubID: regionalHubID, ServerName: "hub"}}, DialTimeout: 50 * time.Millisecond, Watchdog: time.Second, FailoverBudget: 100 * time.Millisecond, RetryMin: 30 * time.Millisecond, RetryMax: 60 * time.Millisecond})
-	if err == nil || ctx.Err() == nil {
+	// Start the attempt budget after fixture key generation/FULL setup.
+	attemptCtx, stop := context.WithTimeout(ctx, 1200*time.Millisecond)
+	defer stop()
+	err = c.RunRegion(attemptCtx, RegionalConfig{Region: "east", Endpoints: []HubEndpoint{{Region: "east", Address: listener.Addr().String(), HubID: regionalHubID, ServerName: "hub"}}, DialTimeout: 500 * time.Millisecond, Watchdog: time.Second, FailoverBudget: time.Second, RetryMin: 30 * time.Millisecond, RetryMax: 60 * time.Millisecond})
+	if err == nil || attemptCtx.Err() == nil {
 		t.Fatal("unbounded or accepted revoked Hub")
 	}
 	if count := attempts.Load(); count < 1 || count > 20 {

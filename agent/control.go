@@ -25,21 +25,25 @@ import (
 )
 
 type ControlClient struct {
-	beginMu          sync.Mutex
-	sessionMu        sync.Mutex
-	sessionID        uint64
-	sessionCancel    context.CancelFunc
-	currentStatus    *controlv1.HubStatus
-	Node             *Node
-	TLS              *tls.Config
-	TLSProvider      func() (*tls.Config, error)
-	Reconciler       *Reconciler
-	MaxAttempts      int
-	RetryMin         time.Duration
-	RetryMax         time.Duration
-	Interval         time.Duration
-	UsageInterval    time.Duration
-	AcknowledgeUsage func(context.Context, []string) error
+	regionalAttempts          atomic.Uint64
+	regionalReady             atomic.Uint64
+	regionalReadinessTimeouts atomic.Uint64
+	regionalWatchdogTimeouts  atomic.Uint64
+	beginMu                   sync.Mutex
+	sessionMu                 sync.Mutex
+	sessionID                 uint64
+	sessionCancel             context.CancelFunc
+	currentStatus             *controlv1.HubStatus
+	Node                      *Node
+	TLS                       *tls.Config
+	TLSProvider               func() (*tls.Config, error)
+	Reconciler                *Reconciler
+	MaxAttempts               int
+	RetryMin                  time.Duration
+	RetryMax                  time.Duration
+	Interval                  time.Duration
+	UsageInterval             time.Duration
+	AcknowledgeUsage          func(context.Context, []string) error
 }
 
 // Run reconnects after failed or completed control streams until cancellation.
@@ -113,7 +117,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		}
 	}()
 	if regional != nil {
-		readiness = time.AfterFunc(regional.DialTimeout, cancel)
+		c.regionalAttempts.Add(1)
+		readiness = time.AfterFunc(regional.DialTimeout, func() { c.regionalReadinessTimeouts.Add(1); cancel() })
 		defer readiness.Stop()
 		// Includes a blocked TLS handshake and initial Send/Recv, not healthy lifetime.
 	}
@@ -352,8 +357,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 				if !negotiated {
 					negotiated = true
+					c.regionalReady.Add(1)
 					readiness.Stop()
-					watchdog = time.AfterFunc(regional.Watchdog, cancel)
+					watchdog = time.AfterFunc(regional.Watchdog, func() { c.regionalWatchdogTimeouts.Add(1); cancel() })
 					if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 						return err
 					}

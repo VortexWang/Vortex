@@ -96,10 +96,12 @@ func (c *ControlClient) RunRegion(ctx context.Context, config RegionalConfig) er
 				if attempt.DialTimeout > remaining {
 					attempt.DialTimeout = remaining
 				}
+				readyBefore := c.regionalReady.Load()
+				attemptStarted := time.Now()
 				_ = c.connect(ctx, endpoint, &attempt)
 				// Long-lived healthy sessions reset the retry backoff. All goroutines in
 				// connect have been joined before another incarnation can be selected.
-				if time.Since(started) >= r.Watchdog {
+				if c.regionalReady.Load() > readyBefore && time.Since(attemptStarted) >= r.Watchdog {
 					delay = r.RetryMin
 				}
 			}
@@ -263,4 +265,15 @@ func RegionalConfigFromRuntime(payload []byte, nodeID string) (RegionalConfig, e
 		r.Endpoints = append(r.Endpoints, HubEndpoint{Region: r.Region, Address: e.Endpoint, HubID: e.ID, ServerName: e.ServerName})
 	}
 	return r.validated()
+}
+
+// RegionalCounters are aggregate values, without tenant/rule/address/session
+// metric labels. Current peer identity and original bounds live separately in
+// CurrentHubStatus and cannot confer financial authority.
+type RegionalCounters struct {
+	Attempts, ReadySessions, ReadinessTimeouts, WatchdogTimeouts uint64
+}
+
+func (c *ControlClient) RegionalCounters() RegionalCounters {
+	return RegionalCounters{Attempts: c.regionalAttempts.Load(), ReadySessions: c.regionalReady.Load(), ReadinessTimeouts: c.regionalReadinessTimeouts.Load(), WatchdogTimeouts: c.regionalWatchdogTimeouts.Load()}
 }
