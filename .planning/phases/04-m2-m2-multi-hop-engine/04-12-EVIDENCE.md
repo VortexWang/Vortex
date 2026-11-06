@@ -1528,3 +1528,18 @@ no refund on close and refusal of further admission. Existing independent
 settlement and unknown-tail tests still pass. Real ordinary/delayed TCP/UDP
 block renewal race PASS 30.542s; Agent/Hub vet and diff PASS. Native concurrent
 validation and full regression remain required; D-04 is not locked.
+
+## Native grouped-settlement attempt ac5e0e5 — still failed
+
+Clean ac5e0e5557ccef7b8abb06c15985c2ccbf15a4bf on the dedicated host ran
+20 repetitions of the original 16-concurrent short-write test. All 20 failed
+with context deadlines, total 12.953s. Raw SHA/status/log/exit artifacts are in
+artifacts/phase4/concurrency-ac5e0e5 on the host. This does not establish any
+qualified performance improvement, and native full regression was not started.
+
+Admission and settlement grouping alone have not met the gate. Next work must
+measure queue wait, block funding, grouped admission, checkpoint preparation
+and transaction/commit time separately before further structural tuning. The
+128-byte fixture block forces several capacity waves; it must not be enlarged
+merely to make the test pass without measuring and preserving its requirements.
+D-04 parameter selection and full qualification remain unachieved.
