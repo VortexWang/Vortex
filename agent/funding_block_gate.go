@@ -44,17 +44,21 @@ type sessionFundingBlock struct {
 	idleGeneration uint64
 }
 type fundingBlockSession struct {
-	mu          fundingContextMutex
-	inner       *authorizationSession
-	size        uint64
-	blocks      map[accounting.Direction]*sessionFundingBlock
-	changed     chan struct{}
-	closed      bool
-	idleTimeout time.Duration
+	mu           fundingContextMutex
+	inner        *authorizationSession
+	size         uint64
+	blocks       map[accounting.Direction]*sessionFundingBlock
+	changed      chan struct{}
+	closed       bool
+	idleTimeout  time.Duration
+	queueMu      sync.Mutex
+	queue        []*fundingAdmissionRequest
+	queueRunning bool
+	queueCount   int
 }
 
 func (s *fundingBlockSession) signal() { close(s.changed); s.changed = make(chan struct{}) }
-func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.Direction, n int64) (result *accounting.Batch, resultErr error) {
+func (s *fundingBlockSession) reserveDirect(ctx context.Context, direction accounting.Direction, n int64) (result *accounting.Batch, resultErr error) {
 	started := time.Now()
 	defer func() {
 		if resultErr != nil {

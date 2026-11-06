@@ -407,3 +407,57 @@ func TestFundingBlockGateAdmissionDeadlineWhileAllocatorBusy(t *testing.T) {
 		t.Fatalf("canceled queue changed funds: %+v", balance)
 	}
 }
+
+func TestFundingBlockQueuedGroupKeepsIndependentSettlement(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	ctx := context.Background()
+	seed, err := s.Reserve(ctx, accounting.LeftToRight, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := seed.Return(ctx); err != nil {
+		t.Fatal(err)
+	}
+	wait, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+	pending := make([]*fundingAdmissionRequest, 4)
+	for i := range pending {
+		pending[i] = &fundingAdmissionRequest{ctx: wait, direction: accounting.LeftToRight, bytes: 32, result: make(chan fundingAdmissionResult, 1)}
+	}
+	s.queueMu.Lock()
+	s.queueCount = 4
+	s.queueMu.Unlock()
+	count, handled := s.admitQueuedExisting(pending)
+	if !handled || count != 4 {
+		t.Fatalf("group=%d %t", count, handled)
+	}
+	batches := make([]*accounting.Batch, 4)
+	for i, r := range pending {
+		result := <-r.result
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		batches[i] = result.batch
+	}
+	// A first child's successful Commit is already durable even while siblings
+	// remain unresolved. Grouping changes admission, not settlement semantics.
+	if err := batches[0].Commit(ctx, 17); err != nil {
+		t.Fatal(err)
+	}
+	if b := fundingBalance(t, n); b.Committed != 17 || b.Reserved != 111 {
+		t.Fatalf("first checkpoint %+v", b)
+	}
+	if err := batches[1].Return(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := batches[2].Commit(ctx, 9); err != nil {
+		t.Fatal(err)
+	}
+	if err := batches[3].MarkUnknown(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if b := fundingBalance(t, n); b.Committed != 26 || b.Unknown != 102 || b.Reserved != 0 {
+		t.Fatalf("group unknown %+v", b)
+	}
+}

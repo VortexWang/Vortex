@@ -1453,3 +1453,25 @@ No runtime queue invokes this API yet. Agent queue integration must preserve
 per-request deadlines, bounds, cancellation and unknown-commit behavior before
 re-running the failed native 16-concurrent-write test. This is persistence
 implementation progress, not concurrency qualification or a D-04 parameter lock.
+
+## Agent bounded admission queue integration
+
+Experimental block sessions now enqueue at most 64 requests with the 200 ms
+deadline anchored at enqueue. A one-millisecond experimental grouping window
+is included in that deadline. Contiguous same-direction requests fitting an
+existing residual use Store batch admission. New funding keeps its atomic
+first-write path. Every child still commits its usage independently; no
+settlement ACK is deferred until unrelated children complete.
+
+Grouped transactions inherit the earliest deadline and are canceled if any
+member cancels. Successful admission racing caller cancellation returns its
+never-delivered child allocation; spent rate is not refunded. Unknown storage
+failures fault the gate rather than silently retrying. Close and previous
+in-flight/unknown bounds retain the existing mutex serialization.
+
+Funding/queue tests repeated three times PASS 6.939s. Added direct grouped
+admission regression proves independent first-child durable checkpoint, short
+writes, returns and later unknown residual conservation. Real ordinary/delayed
+TCP/UDP block renewal race PASS 29.820s; vet/diff PASS. Native concurrency and
+full regression remain required; one-millisecond/64-request bounds are not
+D-04 parameter selections.
