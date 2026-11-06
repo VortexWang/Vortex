@@ -30,7 +30,7 @@ Full 34-ID map and exact limits: `05-REQUIREMENT-AUDIT.md`. Historical 05-02 sta
 
 ## Wave 0 / gap dependencies
 
-G05-01..05 need researched implementation plans and matching integration tests. Existing test infrastructure is available. Missing behaviors are not reclassified as manual-only checks or accepted exceptions. Runtime failover, service replacement and credential rotation must be demonstrated against actual processes before acceptance.
+G05-01/02/03/05 now have gap-mode plans 05-06..05-14 grounded in the existing audit and current source; implementation and matching integration tests remain pending. Existing test infrastructure is available. Missing behaviors are not reclassified as manual-only checks or accepted exceptions. Runtime failover, service replacement and credential rotation must be demonstrated against actual processes before acceptance.
 
 ## Manual-Only Verifications
 
@@ -42,10 +42,28 @@ Owner judgment of the reported recovery/security boundaries and operational acce
 - [x] 34 phase requirement IDs accounted for.
 - [x] No watch-mode commands.
 - [ ] Missing runtime integrations and new negative tests completed.
-- [ ] `nyquist_compliant: true` — intentionally false pending G05-01..05.
+- [ ] `nyquist_compliant: true` — intentionally false pending G05-01/02/03/05 implementation and evidence.
 
 Approval: audit complete, coverage partial; phase advancement not approved.
 
 ## Security follow-up
 
 G05-04 now resolved: `hub/enrollment_security_test.go` adds four real network tests; ten repeated race runs and same-SHA f6a5891 Docker/Actions pass. Remaining G05-01/02/03/05 implementation gaps keep Nyquist partial.
+
+## Gap-plan verification map (planned, not executed)
+
+Planning checks do not change `nyquist_compliant: false`, current requirement status or historical UAT. New tests/scripts below must be created by their owning tasks; names are future outputs, not current green evidence. Every named process case must execute with assertions; empty selection or SKIP fails acceptance.
+
+| Plan | Planned verification | Required negative boundary | State |
+|---|---|---|---|
+| 05-06 | candidate lifecycle Python fixtures; contracts_check.sh; Go contract round-trip | unapproved bytes, overflow, incompatible identity/version | Pending implementation and exact proposal approval |
+| 05-07 | TestRegionalProcessFailover + regional race regressions | stalled Hub, late old stream, no healthy peer | Pending |
+| 05-08 | TestSchedulerProcessRenewal + store/Hub race regressions | duplicate/lost response, exhaustion, revocation, disk/time failure | Pending |
+| 05-09 | TestIdentityProcessRotation + Engine/Agent race checks | revoked/expired/wrong SAN, mixed signer, publication crash | Pending |
+| 05-10 | TestNodeCommandsDrain + Docker signals/systemd unit verification | established mux new OPEN during drain, deadline, unauthorized admin | Pending |
+| 05-11 | TestUpgradeProcessRollback + installer race checks | bad signature, stop unknown, health failure, financial rollback | Pending |
+| 05-12 | TestRecoveringProcessCatchup + recovery race checks | forged ACK, crash, >1000 records, continuous tail | Pending |
+| 05-13 | TestSharePolicyProcess + Engine/share and store race checks | stale CAS, missing/cyclic parent, unknown clock, period cutover | Pending |
+| 05-14 | mandatory process gate, independent snapshot verifier, same-SHA Docker/Actions | missing/wrong SHA/skip/empty/forged evidence | Pending |
+
+New threats T-05-09..26 are planning entries, not closed audit findings. Full verification must update review/security/requirement dispositions and collect renewed UAT for new behavior. The 68 spec-less fallback edges remain explicit backstops; lack of evidence stays unverified.

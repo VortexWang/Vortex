@@ -114,7 +114,7 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 5/5 plans executed. Wave 4 (05-04) passed same-SHA Docker/Actions and raw ledger audits on `79a1c0b` (Actions `42132354600`); SUMMARY committed. Phase-wide audit now reports `gaps_found`: G05-01/02/03/05 runtime integration groups remain open; G05-04 security fix f6a5891 passed Docker/Actions 42140165239. Nyquist partial; UAT complete (17 passed, including two owner confirmations). Audit/security/UAT task complete; plan remaining gap closure before phase completion.
+**Plans**: 14 total: 5 existing plans executed, 9 gap plans (05-06..05-14) ready; no new implementation completion claimed. Wave 4 (05-04) passed same-SHA Docker/Actions and raw ledger audits on `79a1c0b` (Actions `42132354600`); SUMMARY committed. Phase-wide audit now reports `gaps_found`: G05-01/02/03/05 runtime integration groups remain open; G05-04 security fix f6a5891 passed Docker/Actions 42140165239. Nyquist partial; UAT complete (17 passed, including two owner confirmations). Audit/security/UAT task complete; Gap planning is now complete; execute the new plans before phase completion.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -124,6 +124,27 @@
 - [x] 05-03 — Grants, usage handoff and bounded autonomy (depends on 05-05)
 **Wave 4** *(blocked on Wave 3 completion)*
 - [x] 05-04 — Ledger handoff, activation recovery and evidence gate
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 05-06 — Exact lifecycle contract proposal, approval and freeze
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 05-07 — Actual regional failover and current-session fencing
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 05-08 — Probe/report scheduler, durable remote renewal and retention
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 05-09 — Control/VLink identity rotation and revocation
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 05-10 — Operational commands, Engine drain and deployment packaging
+**Wave 10** *(blocked on Wave 9 completion)*
+- [ ] 05-11 — Actual service upgrade and financial-safe rollback
+**Wave 11** *(blocked on Wave 10 completion)*
+- [ ] 05-12 — Durable recovering/caught-up state and finite catch-up barrier
+**Wave 12** *(blocked on Wave 11 completion)*
+- [ ] 05-13 — Full share-chain CAS and immutable policy cutover
+**Wave 13** *(blocked on Wave 12 completion)*
+- [ ] 05-14 — Paired process evidence and renewed phase acceptance
+
+**Cross-cutting constraints:** Unknown financial liability remains frozen through timeout, reconnect, restart, rotation and rollback. Authoritative SQLite rows are never restored from an older snapshot. Normative contracts require the exact owner-approved proposal in 05-06; later changes repeat that gate. Every integration plan starts with a real running tracer after contract approval. Docker/Actions evidence uses identical source SHA; missing/skipped scenarios cannot pass. Production backend authority stays Phase 6; Phase 4 qualification continues independently.
 
 ### Phase 6: M4 后端业务闭环 (M4 Backend)
 **Goal**: 用户和管理员可通过权威后端管理租户、节点、规则和权益；授权、额度、份额及结算由事务性业务事实控制。
