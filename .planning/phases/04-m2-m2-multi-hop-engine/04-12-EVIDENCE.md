@@ -1778,3 +1778,25 @@ fixture wiring, not yet independent-process E2E evidence. Fixed heartbeat and
 autonomy boundaries remain enforced; no fake always-online heartbeat or implicit
 budget renewal was introduced. Full process orchestration and sustained workload
 metrics remain required, as do native tests of this new entry. D-04 remains open.
+
+## Independent Node / test-Hub TCP functional harness
+
+Added tools/phase4/durable-process.sh and an explicit binary-driven integration
+test. The real vortex-node and vortex-test-hub run as separate child processes;
+source VLink driver and echo target remain in the test process. Fresh control
+mTLS credentials, finite delegation, experimental 2048-byte blocks and adaptive
+demand configuration drive sixteen 1500-byte TCP exchanges. No direct Agent
+ledger provisioning occurs. Shutdown waits for exact 48000-byte durable ACKed
+usage; all three ledgers are then checked for exact identity/payload, byte total,
+settled state and SQLite integrity. Evidence retains logs/configs/databases,
+commit/dirty state and binary hashes, with performance_qualified=false.
+
+First local attempt failed reconciliation at 46500 bytes after the driver reset
+the stream immediately after receiving the last response. This exposed the
+required asynchronous settlement drain in the driver. Corrected attempt waits
+for exact durable ACKed usage before reset and passed. Original failure retained
+at /private/tmp/vortex-process-first; corrected evidence at
+/private/tmp/vortex-process-drained. These are local dirty-tree development
+attempts, not native or clean-SHA qualification. Shell syntax, vet and diff PASS.
+The harness uses preissued valid certificates with a renewal endpoint configured
+but does not exercise renewal; fixed Hub heartbeat/autonomy limits still apply.

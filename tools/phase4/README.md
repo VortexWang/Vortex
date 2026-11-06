@@ -264,3 +264,14 @@ online backend or extend authority deadlines. Reconnect replays the initial issu
 identity and cannot replenish the budget. Continuous backend-liveness simulation,
 process orchestration, workload metrics and native qualification remain to be
 implemented. Do not use these options as production backend integration evidence.
+
+Run `VORTEX_PROCESS_EVIDENCE_DIR=/absolute/fresh/path sh tools/phase4/durable-process.sh`
+to build both binaries and execute the two-process TCP functional check. The
+harness supplies mTLS fixtures, finite durable delegation and 16 sequential
+1500-byte exchanges; it waits for the exact 48000-byte bidirectional total and
+ACKs before stopping traffic, then compares every persisted batch across Agent,
+Hub and protocol-backend ledgers. Logs, configs, databases and private test keys
+are retained under the evidence directory; treat it as private test material.
+The report records SHA, dirty state, binary hashes and explicit non-qualification.
+Source and echo target run in the test driver. This is not a five-process topology,
+16 concurrent streams, UDP throughput, sustained-load or certificate-renewal test.
