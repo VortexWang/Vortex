@@ -39,15 +39,16 @@ type TestServer struct {
 	StallAfterReadiness bool
 	PrepareSession      func(context.Context, string, string) error
 	controlv1.UnimplementedNodeControlServer
-	HubID               string
-	Region              string
-	Store               *store.Store
-	ConfigUpdate        *controlv1.RuntimeConfigUpdate
-	AuthorizationUpdate func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
-	UsageBatchLimit     int
-	AcceptUsage         bool
-	Usage               *UsageRelay
-	RenewalIssuer       *Issuer
+	HubID                string
+	Region               string
+	Store                *store.Store
+	ConfigUpdate         *controlv1.RuntimeConfigUpdate
+	AuthorizationUpdate  func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
+	AuthorizationRefresh func(nodeID, bootID string) (*controlv1.AuthorizationUpdate, error)
+	UsageBatchLimit      int
+	AcceptUsage          bool
+	Usage                *UsageRelay
+	RenewalIssuer        *Issuer
 	// Test-only lost-response fault; the durable issuer has already committed.
 	DropFirstRenewalReply bool
 	HoldRenewalReplies    bool // test-only crash barrier after durable commit
@@ -279,6 +280,22 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 		case *controlv1.NodeMessage_Heartbeat:
+			if s.AuthorizationRefresh != nil {
+				update, err := s.AuthorizationRefresh(first.GetNodeId(), first.GetBootId())
+				if err != nil {
+					return err
+				}
+				if update != nil {
+					id, err := testHubMessageID()
+					if err != nil {
+						return err
+					}
+					controlSequence++
+					if err = stream.Send(&controlv1.ControlMessage{MessageId: id, Sequence: controlSequence, Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: update}}); err != nil {
+						return err
+					}
+				}
+			}
 			if hello == nil {
 				return fmt.Errorf("test hub: unnegotiated lifecycle heartbeat")
 			}

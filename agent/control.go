@@ -452,7 +452,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err != nil {
 						return err
 					}
-					if len(payload.Authorizations) > 0 {
+					if len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0 {
 						return fmt.Errorf("agent: new grants unavailable while Hub is restricted")
 					}
 				}
@@ -585,8 +585,9 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
-		ShareReferences: payload.ShareReferences,
-		IssuerID:        issuer, Handoffs: payload.Handoffs,
+		ShareReferences:   payload.ShareReferences,
+		PolicyTransitions: payload.PolicyTransitions,
+		IssuerID:          issuer, Handoffs: payload.Handoffs,
 		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
 		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
 		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,

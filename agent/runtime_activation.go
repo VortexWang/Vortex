@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -55,6 +56,14 @@ func (a *RuntimeApplier) PrepareConfig(id [16]byte, generation uint64, payload [
 	if err := a.engine.matchesControlConfig(payload); err != nil {
 		return err
 	}
+	low, high, trusted := a.node.TrustedTime()
+	scope := a.engine.scope
+	if err := a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, FencingGeneration: generation, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+		if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) {
+			return ErrActivationPending
+		}
+		return err
+	}
 	if _, err := a.EngineApplier.Prepare(id, generation); err != nil {
 		return err
 	}
@@ -82,6 +91,9 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 		if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) {
 			return nil, ErrActivationPending
 		}
+		return nil, err
+	}
+	if err := a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, FencingGeneration: tx.Generation, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
 		return nil, err
 	}
 	if a.engine.runtime.Addr() == nil {

@@ -220,6 +220,9 @@ func persistShareReferencesTx(ctx context.Context, tx *sql.Tx, u AuthorizationUp
 			return err
 		}
 		floor, e := shareHeadTx(ctx, tx, u.NodeID, r.ID)
+		if e == nil && r.Revision > floor && r.Revision != floor+1 {
+			return ErrAuthorizationGenerationStale
+		}
 		if e == nil && r.Revision < floor {
 			return ErrAuthorizationGenerationStale
 		}
@@ -246,7 +249,7 @@ func persistShareReferencesTx(ctx context.Context, tx *sql.Tx, u AuthorizationUp
 		if err != nil {
 			return err
 		}
-		rows, err := tx.QueryContext(ctx, `SELECT r.rate_bps,r.connections FROM share_references r JOIN share_reference_heads h ON h.node_id=r.node_id AND h.share_id=r.share_id AND h.revision=r.revision WHERE r.node_id=? AND r.parent_id=? AND r.parent_revision=?`, u.NodeID, r.ParentID, strconv.FormatUint(r.ParentRevision, 10))
+		rows, err := tx.QueryContext(ctx, `SELECT r.rate_bps,r.connections FROM share_references r WHERE r.node_id=? AND r.parent_id=? AND r.parent_revision=? AND (EXISTS(SELECT 1 FROM share_reference_heads h WHERE h.node_id=r.node_id AND h.share_id=r.share_id AND h.revision=r.revision) OR EXISTS(SELECT 1 FROM config_share_holds c WHERE c.node_id=r.node_id AND c.share_id=r.share_id AND c.revision=r.revision AND c.state='held') OR EXISTS(SELECT 1 FROM authorization_records a JOIN runtime_sessions s ON s.node_id=a.node_id AND (s.initial_grant_id=a.authorization_id OR s.initial_runtime_lease_id=a.authorization_id OR s.initial_share_lease_id=a.authorization_id) WHERE a.node_id=r.node_id AND a.share_reference_id=r.share_id AND a.share_revision=r.revision AND s.state='open'))`, u.NodeID, r.ParentID, strconv.FormatUint(r.ParentRevision, 10))
 		if err != nil {
 			return err
 		}

@@ -36,6 +36,26 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 	if !scope.TrustedTime || scope.Earliest.IsZero() || scope.Latest.Before(scope.Earliest) {
 		return result, ErrAuthorityTimeUncertain
 	}
+	if initial == nil {
+		selected, err := policySnapshotTx(ctx, tx, scope)
+		if err != nil {
+			return result, err
+		}
+		if selected != "" {
+			if scope.BillingSnapshotID != "" && scope.BillingSnapshotID != selected {
+				return result, ErrAuthorizationDenied
+			}
+			scope.BillingSnapshotID = selected
+		}
+	}
+	policyIDs := map[string]string{}
+	if initial == nil {
+		var err error
+		policyIDs, err = policyAuthorityIDsTx(ctx, tx, scope)
+		if err != nil {
+			return result, err
+		}
+	}
 	// The coarse SQL filter only bounds history scanned; exact conservative
 	// expiry checks still run below. A seconds-level equality is never authority.
 	rows, err := tx.QueryContext(ctx, `SELECT authorization_id FROM authorization_records WHERE node_id=? AND boot_id=? AND rule_id=? AND rule_revision=? AND path_generation=? AND state='active' AND unixepoch(expires_at)>=unixepoch(?)`, scope.NodeID, scope.BootID, scope.RuleID, strconv.FormatUint(scope.RuleRevision, 10), strconv.FormatUint(scope.PathGeneration, 10), scope.Latest.UTC().Format(time.RFC3339Nano))
@@ -85,6 +105,19 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 	selected := map[string]AuthorizationRecord{}
 	for _, c := range candidates {
 		r := c.record
+		if expected := policyIDs[r.Kind]; expected != "" && r.AuthorizationID != expected {
+			base, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, expected)
+			if err != nil {
+				return result, err
+			}
+			compatible, err := sameRuntimeFamilyTx(ctx, tx, scope.NodeID, r, base)
+			if err != nil {
+				return result, err
+			}
+			if !compatible {
+				continue
+			}
+		}
 		if _, ok := selected[r.Kind]; ok {
 			continue
 		}

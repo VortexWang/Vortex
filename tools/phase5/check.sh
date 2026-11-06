@@ -33,6 +33,9 @@ go test -count=1 -v ./test/phase5 -run '^TestIdentityProcessRotation$' > "$out/i
 go test -count=1 -v ./test/phase5 -run '^TestNodeCommandsDrain$' > "$out/node-commands.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestUpgradeProcessRollback$' > "$out/upgrade-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestRecoveringProcessCatchup$' > "$out/recovering-process.log" 2>&1
+PHASE5_POLICY_EVIDENCE_DIR="$out/policy" go test -count=1 -v ./test/phase5 -run '^TestSharePolicyProcess$' > "$out/policy-process.log" 2>&1
+python3 tools/phase5/audit_policy.py "$out/policy" > "$out/policy-audit.json"
+go test -count=1 -race -v ./agent/store -run '^(TestPolicy|TestIssuerFuture|TestConfigShare|TestShareRuntime)' > "$out/policy-race.log" 2>&1
 go test -count=1 -race -v ./agent/store/... ./hub/... > "$out/recovering-race.log" 2>&1
 go test -race -v ./agent/upgrade ./cmd/vortex-node > "$out/upgrade-race.log" 2>&1
 go test -race ./cmd/vortex-node ./agent -run 'Test(Admin|ProcessLock|Command|Enroll)' > "$out/node-admin-race.log" 2>&1
@@ -69,6 +72,13 @@ for name in ('TestServiceFullDiskCannotStopOrSelectCandidate','TestServiceCrashB
 for name in ('TestUpgradeProcessRollback/upgrade-healthy','TestUpgradeProcessRollback/upgrade-rollback'):
  log=(out/'upgrade-process.log').read_text()
  assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
+for name in ('TestSharePolicyProcess/policy-cutover','TestSharePolicyProcess/policy-future-revoked','TestSharePolicyProcess/policy-hub-restart','TestSharePolicyProcess/share-invalid-parent','TestSharePolicyProcess/share-invalid-issuer','TestSharePolicyProcess/share-invalid-cycle','TestSharePolicyProcess/share-invalid-capacity','TestSharePolicyProcess/share-invalid-revision'):
+ log=(out/'policy-process.log').read_text()
+ assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
+for name in ('TestPolicyTransitionPinsSessionAndSeparatesFutureFunding','TestPolicyTransitionRejectsMissingFundingAndChangedSnapshot','TestIssuerFuturePeriodRequiresFundedDelegationAndBoundedPreissue','TestConfigShareOccupancyRetainsUnknownAndRequiresProvenRelease','TestShareRuntimeAdmissionRejectsHostileInstalledChain','TestPolicyMissingFutureAndUntrustedClockNeverFallBackToOldPeriod','TestPolicyMigrationFailureKeepsAuthoritativeRowsAndCanReopen','TestPolicyFutureRenewalKeepsFundedFamily'):
+ log=(out/'policy-race.log').read_text()
+ assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name
+assert json.loads((out/'policy-audit.json').read_text())['status']=='passed'
 for name in ('TestRecoveringProcessCatchup/recovering-lost-ack','TestRecoveringProcessCatchup/recovering-restart','TestRecoveringProcessCatchup/recovering-before-handoff','TestRecoveringProcessCatchup/recovering-after-catchup','TestRecoveringProcessCatchup/recovering-wrong-hash'):
  log=(out/'recovering-process.log').read_text()
  assert f'--- PASS: {name} ' in log and '--- SKIP:' not in log,name

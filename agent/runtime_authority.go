@@ -41,7 +41,7 @@ func (g *runtimeAuthorityGate) Open(ctx context.Context, flow engineaccounting.F
 		return nil, err
 	}
 	low, high, trusted := g.clock()
-	auth, err := g.node.Store.OpenRuntimeSession(ctx, store.AuthorizationUse{NodeID: g.node.NodeID, BootID: g.node.BootID, RuleID: g.scope.RuleID, RuleRevision: g.scope.RuleRevision, PathGeneration: g.scope.PathGeneration, FencingGeneration: fence, Earliest: low, Latest: high, TrustedTime: trusted}, id, flow.Key)
+	auth, err := g.node.openRuntimePolicy(ctx, store.AuthorizationUse{NodeID: g.node.NodeID, BootID: g.node.BootID, RuleID: g.scope.RuleID, RuleRevision: g.scope.RuleRevision, PathGeneration: g.scope.PathGeneration, FencingGeneration: fence, Earliest: low, Latest: high, TrustedTime: trusted}, id, flow.Key)
 	if err != nil {
 		if !errors.Is(err, store.ErrAuthorizationDenied) && !errors.Is(err, store.ErrAuthorityTimeUncertain) && !errors.Is(err, store.ErrConfigGenerationStale) {
 			g.faulted.Store(true)

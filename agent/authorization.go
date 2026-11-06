@@ -18,7 +18,7 @@ const authorizationSchemaVersion = "1.1.0"
 
 type authorizationPayload struct {
 	ShareReferences        []store.ShareReference    `json:"share_references,omitempty"`
-	PolicyTransitions      []json.RawMessage         `json:"policy_transitions,omitempty"`
+	PolicyTransitions      []store.PolicyTransition  `json:"policy_transitions,omitempty"`
 	RenewalRequestID       string                    `json:"renewal_request_id,omitempty"`
 	RenewalRequestSHA256   string                    `json:"renewal_request_sha256,omitempty"`
 	Handoffs               []store.EpochHandoff      `json:"epoch_handoffs,omitempty"`
@@ -131,10 +131,34 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 		if required.ShareReferences == nil || required.PolicyTransitions == nil || result.ShareReferences == nil || result.PolicyTransitions == nil || len(result.ShareReferences) > 4096 || len(result.PolicyTransitions) > 64 || result.SignerEpoch > math.MaxInt64 || result.PathGeneration > math.MaxInt64 || result.FencingGenerationFloor > math.MaxInt64 {
 			return result, fmt.Errorf("invalid_authorization: missing lifecycle collections or unsafe counters")
 		}
-		// Policy cutover is enabled by its own runtime slice. Until then known
-		// nonempty transitions fail closed rather than silently being discarded.
-		if len(result.PolicyTransitions) > 0 {
-			return result, fmt.Errorf("unsupported_authorization: policy transitions not installed")
+		var policyFields []map[string]json.RawMessage
+		if err := json.Unmarshal(*required.PolicyTransitions, &policyFields); err != nil {
+			return result, err
+		}
+		for _, fields := range policyFields {
+			for _, key := range []string{"transition_id", "rule_id", "path_generation", "old_snapshot", "new_snapshot", "effective_at", "preissue_seconds", "guard_seconds", "future_source_id", "future_credit_authorization_id", "future_runtime_authorization_id", "future_share_authorization_id"} {
+				if v, ok := fields[key]; !ok || bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+					return result, fmt.Errorf("invalid_authorization: missing policy field")
+				}
+			}
+			for _, key := range []string{"old_snapshot", "new_snapshot"} {
+				var binding map[string]json.RawMessage
+				if err := json.Unmarshal(fields[key], &binding); err != nil {
+					return result, err
+				}
+				for _, name := range []string{"snapshot_id", "rule_id", "execution_node_id", "path_generation", "policy_revision", "coefficient_milli"} {
+					if v, ok := binding[name]; !ok || bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+						return result, fmt.Errorf("invalid_authorization: missing snapshot field")
+					}
+				}
+			}
+		}
+		seenPolicies := map[string]bool{}
+		for _, p := range result.PolicyTransitions {
+			if err := store.ValidatePolicyTransition(p); err != nil || seenPolicies[p.ID] {
+				return result, fmt.Errorf("invalid_authorization: invalid or duplicate policy transition")
+			}
+			seenPolicies[p.ID] = true
 		}
 		var refs []map[string]json.RawMessage
 		if err := json.Unmarshal(*required.ShareReferences, &refs); err != nil {

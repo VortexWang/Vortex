@@ -98,6 +98,7 @@ type AuthorizationRecord struct {
 }
 
 type AuthorizationUpdate struct {
+	PolicyTransitions      []PolicyTransition
 	ShareReferences        []ShareReference
 	Handoffs               []EpochHandoff
 	IssuerID               string
@@ -491,7 +492,10 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if err := s.migrateCredentialRevocations(); err != nil {
 		return err
 	}
-	return s.migrateRecoveryMode()
+	if err := s.migrateRecoveryMode(); err != nil {
+		return err
+	}
+	return s.migratePolicyTransitions()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative
@@ -874,6 +878,10 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 				}
 			}
 		}
+	}
+
+	if err := persistPolicyTransitionsTx(ctx, tx, update); err != nil {
+		return err
 	}
 
 	_, err = tx.ExecContext(ctx, `INSERT INTO authorization_updates(node_id,update_id,boot_id,payload,payload_sha256,signer_epoch,path_generation,fencing_generation_floor,created_at) VALUES(?,?,?,?,?,?,?,?,?)`, update.NodeID, update.UpdateID, update.BootID, update.Payload, digest[:], strconv.FormatUint(update.SignerEpoch, 10), strconv.FormatUint(update.PathGeneration, 10), strconv.FormatUint(update.FencingGenerationFloor, 10), time.Now().UTC().Format(time.RFC3339Nano))

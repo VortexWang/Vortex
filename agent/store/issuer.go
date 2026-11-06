@@ -22,6 +22,7 @@ import (
 // bytes. Billing-unit conversion and backend source allocation precede this
 // boundary. No node request can install or change it.
 type HubDelegation struct {
+	PreissueSeconds                                         uint64           `json:",omitempty"`
 	ShareReferences                                         []ShareReference `json:",omitempty"`
 	ID, HubID, SourceID, RuntimeSourceID, ShareSourceID     string
 	NodeID, BootID, RuleID, BillingSnapshotID               string
@@ -128,7 +129,10 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 			return err
 		}
 	}
-	if now.Earliest.Before(d.BackendHeartbeat) || !now.Latest.Before(d.BackendHeartbeat.Add(BackendLossGrace)) || now.Earliest.Before(d.ValidFrom) || !now.Latest.Before(d.ExpiresAt) {
+	if d.PreissueSeconds > 86400 || d.ValidFrom.After(now.Latest.Add(time.Duration(d.PreissueSeconds)*time.Second)) {
+		return ErrAuthorityTimeUncertain
+	}
+	if now.Earliest.Before(d.BackendHeartbeat) || !now.Latest.Before(d.BackendHeartbeat.Add(BackendLossGrace)) || !now.Latest.Before(d.ExpiresAt) {
 		return ErrNewAuthorityInAutonomy
 	}
 	if err := persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline); err != nil {
@@ -336,7 +340,7 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 	if err != nil {
 		return result, err
 	}
-	if now.Earliest.Before(d.ValidFrom) || !now.Latest.Before(d.ExpiresAt) || !now.Latest.Before(d.HardDeadline) {
+	if d.PreissueSeconds > 86400 || now.Earliest.Before(d.ValidFrom.Add(-time.Duration(d.PreissueSeconds)*time.Second)) || !now.Latest.Before(d.ExpiresAt) || !now.Latest.Before(d.HardDeadline) {
 		return result, ErrAuthorityExpired
 	}
 	remaining, err := strconv.ParseUint(remainingText, 10, 64)
@@ -346,7 +350,11 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 	if r.RawBytes > remaining {
 		return result, ErrIssuerQuotaExhausted
 	}
-	expires := now.Latest.Add(r.TTL)
+	start := now.Latest
+	if d.ValidFrom.After(start) {
+		start = d.ValidFrom
+	}
+	expires := start.Add(r.TTL)
 	for _, limit := range []time.Time{d.ExpiresAt, d.HardDeadline, deadline, d.AutonomyDeadline} {
 		if expires.After(limit) {
 			expires = limit
@@ -358,7 +366,7 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 			hard = limit
 		}
 	}
-	if !expires.After(now.Latest) {
+	if !expires.After(start) {
 		return result, ErrAuthorityExpired
 	}
 	result.Payload, err = buildIssuedPayload(d, r, now.Latest, expires, hard, heartbeat, deadline)
@@ -418,7 +426,12 @@ func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, 
 		if kind == "share_lease" {
 			source = d.ShareSourceID
 		}
-		a := map[string]any{"authorization_id": id, "parent_authorization_id": d.ID, "source_id": source, "kind": kind, "rule_id": d.RuleID, "rule_revision": d.RuleRevision, "path_generation": d.PathGeneration, "issued_at": issued.UTC().Format(time.RFC3339Nano), "not_before": issued.UTC().Format(time.RFC3339Nano), "expires_at": expires.UTC().Format(time.RFC3339Nano), "hard_deadline": hard.UTC().Format(time.RFC3339Nano)}
+		a := map[string]any{"authorization_id": id, "parent_authorization_id": d.ID, "source_id": source, "kind": kind, "rule_id": d.RuleID, "rule_revision": d.RuleRevision, "path_generation": d.PathGeneration, "issued_at": issued.UTC().Format(time.RFC3339Nano), "not_before": func() string {
+			if d.ValidFrom.After(issued) {
+				return d.ValidFrom.UTC().Format(time.RFC3339Nano)
+			}
+			return issued.UTC().Format(time.RFC3339Nano)
+		}(), "expires_at": expires.UTC().Format(time.RFC3339Nano), "hard_deadline": hard.UTC().Format(time.RFC3339Nano)}
 		if leaves != nil {
 			a["share_reference_id"] = leaves[source].ID
 			a["delegation_id"] = d.ID

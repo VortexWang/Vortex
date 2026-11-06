@@ -39,6 +39,8 @@ func main() {
 	recoveryRequest := flag.String("test-recovery-request", "", "test-only offline handoff JSON path; not production provisioning")
 	recoveryBackend := flag.String("test-recovery-backend", "", "test-only mutual TLS ledger backend URL")
 	recoveryBackendName := flag.String("test-recovery-backend-name", "", "test backend certificate identity")
+	policyFixture := flag.String("test-policy-transition", "", "test-only funded future delegation and approved transition JSON")
+	refreshPath := flag.String("test-authorization-refresh", "", "test-only exact approved AuthorizationUpdate JSON delivered on heartbeat")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
@@ -70,6 +72,22 @@ func main() {
 	}
 	config := &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}, ClientCAs: pool, ClientAuth: tls.RequireAndVerifyClientCert}
 	server := &hub.TestServer{Store: s, HubID: *hubID, Region: *region, StallReadiness: *stall, StallAfterReadiness: *stallAfter, AcceptUsage: *hubID != ""}
+	if *refreshPath != "" {
+		server.AuthorizationRefresh = func(node, boot string) (*controlv1.AuthorizationUpdate, error) {
+			raw, err := os.ReadFile(*refreshPath)
+			if os.IsNotExist(err) {
+				return nil, nil
+			}
+			if err != nil || len(raw) > 2<<20 {
+				return nil, fmt.Errorf("invalid refresh fixture")
+			}
+			var update controlv1.AuthorizationUpdate
+			if err = json.Unmarshal(raw, &update); err != nil {
+				return nil, err
+			}
+			return &update, nil
+		}
+	}
 	if *reportPath != "" {
 		server.ReportObserver = func(_ context.Context, nodeID, bootID, sessionID string, r *controlv1.NodeReport) error {
 			raw, err := json.Marshal(struct {
@@ -139,7 +157,14 @@ func main() {
 		}
 		server.AuthorizationUpdate = func(node, boot string) (*controlv1.AuthorizationUpdate, error) {
 			d := sessionDelegation(node, boot)
-			return issuer.Issue(ctx, d.ID, node, boot, d.ID, 8192, time.Minute)
+			old, err := issuer.Issue(ctx, d.ID, node, boot, d.ID, 8192, time.Minute)
+			if err != nil {
+				return nil, err
+			}
+			if *policyFixture != "" {
+				return testPolicyDelivery(ctx, s, issuer, *policyFixture, node, boot, old)
+			}
+			return old, nil
 		}
 	}
 	if *recoveryRequest != "" {

@@ -431,6 +431,36 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			s.Close()
 		}
 	}
+	var policyPath string
+	if strings.HasPrefix(renewalMode, "policy-") {
+		policyPath = preparePolicyProcess(t, ctx, dir, d, renewalMode)
+	}
+	if strings.HasPrefix(renewalMode, "share-invalid-") {
+		valid, err := store.Open(filepath.Join(dir, "hub0.db"), "hub")
+		if err != nil {
+			t.Fatal(err)
+		}
+		at := time.Now().UTC()
+		if err = valid.InstallHubDelegation(ctx, d, store.IssuerTime{Earliest: at, Latest: at, Trusted: true}); err != nil {
+			valid.Close()
+			t.Fatal(err)
+		}
+		valid.Close()
+		switch renewalMode {
+		case "share-invalid-parent":
+			d.ShareReferences[0].ParentID = regionalSecond
+			d.ShareReferences[0].ParentRevision = 1
+		case "share-invalid-issuer":
+			d.ShareReferences[0].IssuerID = regionalSecond
+		case "share-invalid-cycle":
+			d.ShareReferences[0].ParentID = d.ShareReferences[0].ID
+			d.ShareReferences[0].ParentRevision = 1
+		case "share-invalid-capacity":
+			d.ShareReferences[0].RateBPS++
+		case "share-invalid-revision":
+			d.ShareReferences[0].Revision++
+		}
+	}
 	allocation, _ := json.Marshal(d)
 	allocationPath := filepath.Join(dir, "allocation.json")
 	os.WriteFile(allocationPath, allocation, 0600)
@@ -444,6 +474,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		if i == 0 && strings.HasPrefix(renewalMode, "recovering-") {
 			args = append(args, recoveringHubArgs(t, ctx, dir, ca, der)...)
 		}
+		if i == 0 && policyPath != "" {
+			args = append(args, "--test-policy-transition", policyPath, "--test-authorization-refresh", filepath.Join(dir, "policy-refresh.json"))
+		}
 		if i == 0 {
 			args = append(args, "--test-delegation-template", allocationPath, "--test-config-update", updatePath)
 			if renewalMode == "lost-result" {
@@ -452,10 +485,10 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			if renewalMode == "expiry-with-pending-result" {
 				args = append(args, "--test-hold-renewal-replies")
 			}
-			if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "recovering-") || strings.HasPrefix(renewalMode, "upgrade-") {
+			if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "recovering-") || strings.HasPrefix(renewalMode, "policy-") || strings.HasPrefix(renewalMode, "upgrade-") {
 				restartArgs := append([]string(nil), args...)
 				restartHub = func() { first = start("vortex-test-hub", restartArgs...) }
-				if !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
+				if !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") && !strings.HasPrefix(renewalMode, "policy-") {
 					args = append(args, "--test-hold-renewal-replies")
 				}
 			}
@@ -485,7 +518,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
 	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") && !strings.HasPrefix(renewalMode, "policy-") {
 		lifecycle["renew_percent"] = 30
 		lifecycle["renew_retry_min_ms"] = 1000
 	}
@@ -493,7 +526,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
-	if strings.HasPrefix(renewalMode, "commands-") || strings.HasPrefix(renewalMode, "upgrade-") || strings.HasPrefix(renewalMode, "recovering-") {
+	if strings.HasPrefix(renewalMode, "commands-") || strings.HasPrefix(renewalMode, "upgrade-") || strings.HasPrefix(renewalMode, "recovering-") || strings.HasPrefix(renewalMode, "policy-") {
 		seed, err := store.Open(nodePath, "agent")
 		if err != nil {
 			t.Fatal(err)
@@ -542,6 +575,15 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		t.Fatal(e)
 	}
 	defer db.Close()
+	if strings.HasPrefix(renewalMode, "share-invalid-") {
+		peer := engineConfig(peerID)
+		peer.Role = config.RoleSource
+		peer.Peer = cfg.Listen
+		peer.NextHopNodeID = regionalNode
+		peer.ServiceListen = "127.0.0.1:0"
+		exerciseInvalidShareProcess(t, ctx, db, filepath.Join(dir, "hub0.db"), peer, cfg, func() int64 { return accepted.Load() })
+		return
+	}
 	for {
 		var state string
 		e = db.QueryRowContext(ctx, "SELECT state FROM config_results WHERE version=1").Scan(&state)
@@ -610,6 +652,10 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		if frame.Type != vlink.FrameData || string(frame.Payload) != payload {
 			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
+	}
+	if strings.HasPrefix(renewalMode, "policy-") {
+		exercisePolicyProcess(t, ctx, dir, renewalMode, db, cfg, mux, stream, exchange, func() { killProcess(t, first); restartHub() })
+		return
 	}
 	if strings.HasPrefix(renewalMode, "recovering-") {
 		exerciseRecoveringProcess(t, ctx, dir, renewalMode, db, exchange, func() { killProcess(t, first); restartHub() })
@@ -696,7 +742,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		exerciseUpgradeProcess(t, ctx, binaries, renewalMode, nodePath, peer, nodeArgs, nodeProcess, exchange, func(path string, args ...string) *exec.Cmd { freshConfig(); return start(path, args...) })
 		return
 	}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") && !strings.HasPrefix(renewalMode, "policy-") {
 		fault := func() bool {
 			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
 				killProcess(t, first)

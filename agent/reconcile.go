@@ -117,6 +117,12 @@ func (r *Reconciler) ApplyConfig(ctx context.Context, txID string, version uint6
 			return err
 		}
 		if err = preparer.PrepareConfig(id, generation, record.Payload); err != nil {
+			if errors.Is(err, ErrActivationPending) {
+				if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepared", ""); saveErr != nil {
+					return saveErr
+				}
+				return err
+			}
 			if saveErr := r.Store.SaveConfigResult(ctx, txID, version, "prepare-failed", err.Error()); saveErr != nil {
 				return errors.Join(err, saveErr)
 			}

@@ -72,6 +72,9 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 			return ErrConfigRequestConflict
 		}
 		target = "released"
+		if _, err := tx.ExecContext(ctx, `UPDATE config_share_holds SET state='released' WHERE transaction_id=?`, id); err != nil {
+			return err
+		}
 		if _, err := tx.ExecContext(ctx, `UPDATE activation_holds SET state='released' WHERE transaction_id=?`, id); err != nil {
 			return err
 		}
