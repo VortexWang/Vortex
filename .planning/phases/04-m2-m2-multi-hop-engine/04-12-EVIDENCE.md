@@ -510,3 +510,25 @@ Reconciled 04-06-D04-REVIEW.md with current durable implementation and gaps.
 Explicitly separated unissued Hub remainder transfer from Agent-held grant
 return, which lacks a complete fenced-unused-proof path. Historical parameter
 scan does not qualify the durable gate's per-write reservation strategy.
+
+## Local immutable grant fence for later idle proof
+
+Schema 17 introduces sealed_grants. Explicit SealIdleGrant checks full demand
+scope and rejects any open session referencing the grant, including its initial
+anchor after renewal. It atomically changes an active credit grant to
+settlement_only and records immutable scope. Replays match exactly. It does
+not alter balances, acknowledge unused funds or invoke issuer reallocation.
+Outstanding reservations may still settle under original grant identity, and
+unknown upper bounds remain frozen. Existing authorization paths reject new
+use of settlement_only grants after store reopen.
+
+Tests cover active-session denial, repeated/conflicting seal, restart, direct
+reservation bypass, late unknown settlement and write-failure rollback. Ten
+concurrent seal/admission trials require exactly one winner. Targeted race
+PASS; Agent/Hub full race PASS before adding concurrency assertions; additional
+targeted race includes them. Store vet PASS.
+
+This is a local prerequisite, not completed idle reclaim. Timed idle tracking,
+1 MiB shrink strategy, complete unresolved-hold accounting, final unused proof,
+authenticated transfer and exactly-once issuer credit remain required. No
+wire contract was changed, and no native performance claim is added.
