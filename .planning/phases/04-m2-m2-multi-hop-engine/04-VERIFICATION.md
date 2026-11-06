@@ -1,6 +1,6 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-verified: 2026-11-05
+verified: 2026-11-06
 status: gaps_found
 score: implementation closed; Phase 4 qualification gaps retained; durable integration transferred to Phase 5/6
 behavior_unverified: 5
@@ -14,6 +14,29 @@ behavior_unverified: 5
 Implementation is closed; qualification remains gaps_found. Persistent Agent/Hub
 and production backend work belong to Phase 5/6, not Phase 4 closure blockers.
 No previous failed check is promoted to pass.
+
+## Clean Docker runtime-authority evidence — 2026-11-06
+
+The clean `e5bcb03f146ff2dba0400e4a03e43efcadc8027d` build passed the bounded
+Docker runtime-authority mixed workload and the same-SHA comparison. Runtime
+accounting reconciled exactly in both directions, source credit was conserved
+and settled, and the finite forged-OPEN, bypass, 64 MiB integrity and relay-2
+failure checks passed. The independent TLS comparison is retained with the
+runtime-authority semantic manifest; its same-load TCP ratio was `0.5946`,
+below the `0.70` diagnostic threshold. Details and output directories are in
+`04-37-CLEAN-DOCKER-RUNTIME-EVIDENCE.md`.
+
+This remains a five-second, four-stream Docker run on an OrbStack development
+VM. It is not the dedicated Ubuntu host, 60-second warmup, repeated 300-second
+trial set, or resource-isolated evidence required by P4-Q1. Therefore the
+formal performance status remains `not-qualified`; no NFR-003/NFR-005 result
+is promoted. The finite attack results improve the enumerated NFR-006 evidence
+but do not claim exhaustive coverage.
+
+The source authority is still an in-process qualification adapter. No Agent or
+Edge Hub durable receipt, SQLite WAL recovery, PostgreSQL authority, or
+persistent balance claim is made. D-04 remains `pending-review` and its
+parameters remain unlocked.
 
 ## Rejected renewal increment — 2026-11-06
 
