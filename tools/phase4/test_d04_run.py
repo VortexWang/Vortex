@@ -13,6 +13,12 @@ class D04Tests(unittest.TestCase):
             self.assertEqual(case["grant_target_bytes"], 12500000 * case["grant_target_seconds"])
         self.assertTrue(all(c["grant_target_bytes"] >= 8 * 1024 * 1024 for c in candidates(0.001)))
 
+    def test_target_seconds_is_the_dynamic_target_factor(self):
+        cases = candidates(100)
+        self.assertEqual(cases[0]["grant_target_seconds"], 30)
+        self.assertEqual(cases[3]["grant_target_seconds"], 10)
+        self.assertEqual(cases[4]["grant_target_seconds"], 60)
+
     def test_invalid_histogram_cannot_produce_review_evidence(self):
         for buckets in ([], {}, [True], [-1, 2], [1.5], [float("nan")], [0] * 65):
             with self.subTest(buckets=buckets), self.assertRaises(ValueError):

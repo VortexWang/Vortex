@@ -48,6 +48,7 @@ def evaluate(out):
     host = json.loads((out / "host.json").read_text())
     short = json.loads((out / "short-flow-latency.json").read_text())
     report = json.loads((out / "report.json").read_text())
+    timeline = json.loads((out / "events-source.jsonl.credit-timeline.json").read_text())
     obs = credit["observations"]
     total = sum(credit[key] for key in ("unissued_bytes", "pending_grant_bytes", "unknown_grant_bytes", "available_bytes", "held_bytes", "used_bytes", "unknown_bytes"))
     settled = all(credit[key] == 0 for key in ("pending_grant_bytes", "unknown_grant_bytes", "held_bytes", "unknown_bytes", "sessions", "denials"))
@@ -55,6 +56,18 @@ def evaluate(out):
         raise ValueError("unclean, unauthorized or unconserved D-04 trial")
     if report.get("runtime_correctness") != "pass" or not report.get("qualification_metrics", {}).get("source_credit_conserved"):
         raise ValueError("target accounting did not reconcile")
+    samples = timeline.get("Samples") or timeline.get("samples")
+    if not isinstance(samples, list) or not samples:
+        raise ValueError("dynamic target timeline is missing")
+    dynamic_targets = []
+    for sample in samples:
+        state = sample.get("State") or sample.get("state") or {}
+        value = state.get("DynamicTarget") if "DynamicTarget" in state else state.get("dynamic_target_bytes")
+        if type(value) is not int or value < 0:
+            raise ValueError("invalid dynamic target timeline")
+        dynamic_targets.append(value)
+    if max(dynamic_targets) == 0:
+        raise ValueError("dynamic target never became observable")
     buckets = obs["issuer_nanoseconds_log2_buckets"]
     if sum(buckets) != obs["issuer_calls"] or obs["issuer_calls"] != credit["grants"]:
         raise ValueError("issuer observation count mismatch")
@@ -64,6 +77,7 @@ def evaluate(out):
                 reservations_per_block=obs["reservations"] / obs["block_allocations"],
                 reservations_per_grant=obs["reservations"] / credit["grants"],
                 peak_active_sessions=obs["peak_sessions"], peak_held_bytes=obs["peak_held_bytes"],
+                dynamic_target_bytes_min=min(dynamic_targets), dynamic_target_bytes_max=max(dynamic_targets),
                 unknown_upper_bound_bytes=credit["unknown_bytes"] + credit["unknown_grant_bytes"],
                 source_conserved=True, source_settled=True,
                 short_flow_median_ms=short["median_ms"], short_flow_samples_ms=short["samples_ms"],
@@ -92,6 +106,7 @@ def main():
             env = dict(os.environ, BACKEND="native", PHASE4_FORMAL="1", PHASE4_TRIAL_ID=f"d04-{case['id']}-{repeat}",
                        QUALIFICATION_DIR=str(out), MIXED_DURATION_SECONDS=str(args.duration), MIXED_TCP_STREAMS="16",
                        MIXED_UDP_MBPS=str(args.rate_mbps), D04_SHORT_SAMPLES="50", PHASE4_CREDIT_OBSERVE="true",
+                       PHASE4_CREDIT_TARGET_SECONDS=str(case["grant_target_seconds"]),
                        PHASE4_CREDIT_INITIAL_BLOCK=str(case["block_bytes"]), PHASE4_CREDIT_MAX_BLOCK=str(4 * 1024 * 1024),
                        PHASE4_CREDIT_GRANT_TARGET=str(case["grant_target_bytes"]), PHASE4_CREDIT_RENEW_PERCENT=str(case["waterline_percent"]))
             print(f"running {case['id']} trial {repeat}", flush=True)
