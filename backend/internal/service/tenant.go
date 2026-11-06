@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -76,14 +78,14 @@ func validRestriction(r Restriction) bool {
 	return false
 }
 
-// ChangeRestriction serializes the immutable event and current projection on
-// the tenant row. Later domain services use the same AuditWriter callback to
-// add their concrete desired state/task/outbox changes before audit commits.
+// ChangeRestriction serializes history, projection and recovery on the tenant
+// row. Recovery only reissues persisted desired state of currently authorized
+// resources. It never treats missing execution confirmation as stopped.
 func (s TenantService) ChangeRestriction(ctx context.Context, scope TenantScope, r Restriction, requestID string) error {
 	if !scope.Allows(policy.Restrict) {
 		return ErrScope
 	}
-	if !validRestriction(r) {
+	if !validRestriction(r) || (!r.ClearedAt.IsZero() && r.ClearedAt.After(time.Now())) {
 		return ErrConflict
 	}
 	kind := "applied"
@@ -92,7 +94,8 @@ func (s TenantService) ChangeRestriction(ctx context.Context, scope TenantScope,
 	}
 	event := repository.Audit{Action: "restriction." + kind, ResourceID: r.SourceID, RequestID: requestID, Reason: "business restriction transition", After: []byte(`{"cause":"` + r.Cause + `","event":"` + kind + `"}`)}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Restrict, &event, func(q *generated.Queries) error {
-		if _, err := q.LockTenant(ctx, scope.TenantID()); err != nil {
+		tenant, err := q.LockTenant(ctx, scope.TenantID())
+		if err != nil {
 			return err
 		}
 		previous, err := q.GetRestrictionEvent(ctx, generated.GetRestrictionEventParams{TenantID: scope.TenantID(), Cause: r.Cause, SourceID: r.SourceID, SourceVersion: r.SourceVersion, EventKind: kind})
@@ -134,8 +137,77 @@ func (s TenantService) ChangeRestriction(ctx context.Context, scope TenantScope,
 		if count != 1 {
 			return ErrConflict
 		}
+		if kind == "cleared" && tenant.AccountState == "active" {
+			return resumeAuthorizedResources(ctx, q, scope.TenantID(), id)
+		}
 		return nil
 	})
+}
+
+// Every recovery operation/task/outbox is committed with the final clear event
+// and its audit by AuditWriter. A replay returns before this function, so it
+// cannot reissue rights. No balances, shares or old occupations are released.
+func resumeAuthorizedResources(ctx context.Context, q *generated.Queries, tenantID, eventID string) error {
+	at := timestamp(time.Now())
+	active, err := q.ListCurrentRestrictions(ctx, generated.ListCurrentRestrictionsParams{TenantID: tenantID, AtTime: at})
+	if err != nil || len(active) != 0 {
+		return err
+	}
+	resources, err := q.ListTenantResources(ctx, generated.ListTenantResourcesParams{TenantID: pgtype.Text{String: tenantID, Valid: true}, AtTime: at})
+	if err != nil {
+		return err
+	}
+	// Lock operation rows in the generated query's stable ID order, so concurrent
+	// receipts cannot turn an unknown observation into inferred free capacity.
+	rows, err := q.ListAuthority(ctx, tenantID)
+	if err != nil {
+		return err
+	}
+	blocked := map[string]bool{}
+	generation := map[string]int64{}
+	for _, row := range rows {
+		op, e := q.LockOperation(ctx, generated.LockOperationParams{TenantID: tenantID, ID: row.ID})
+		if e != nil {
+			return e
+		}
+		if op.Generation > generation[op.ResourceID] {
+			generation[op.ResourceID] = op.Generation
+		}
+		if op.State != "succeeded" && op.State != "failed" {
+			blocked[op.ResourceID] = true
+		}
+	}
+	for _, resource := range resources {
+		if blocked[resource.ResourceID] {
+			continue
+		}
+		desired, e := q.GetDesiredState(ctx, generated.GetDesiredStateParams{TenantID: tenantID, ResourceID: resource.ResourceID})
+		if errors.Is(e, pgx.ErrNoRows) {
+			continue // Registry ownership alone never invents a desired configuration.
+		}
+		if e != nil {
+			return e
+		}
+		if desired.Revision == int64(^uint64(0)>>1) || generation[resource.ResourceID] == int64(^uint64(0)>>1) {
+			return ErrConflict
+		}
+		if _, e = q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: tenantID, ResourceID: resource.ResourceID, TargetKind: desired.TargetKind, Revision: desired.Revision + 1, ExpectedRevision: desired.Revision, Payload: desired.Payload, PayloadSha256: desired.PayloadSha256}); e != nil {
+			return e
+		}
+		id := uuid.NewString()
+		key := "restriction-resume/" + eventID + "/" + resource.ResourceID
+		digest := sha256.Sum256([]byte(fmt.Sprintf("%s/%d/%x", key, desired.Revision+1, desired.PayloadSha256)))
+		if _, e = q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: tenantID, ResourceID: resource.ResourceID, IdempotencyKey: key, RequestSha256: digest[:], TargetKind: desired.TargetKind, TargetRevision: desired.Revision + 1, ExpectedRevision: desired.Revision, Generation: generation[resource.ResourceID] + 1, Payload: desired.Payload}); e != nil {
+			return e
+		}
+		if e = q.InsertTask(ctx, generated.InsertTaskParams{ID: id, TenantID: tenantID, OperationID: id}); e != nil {
+			return e
+		}
+		if e = q.InsertOutbox(ctx, generated.InsertOutboxParams{TenantID: tenantID, OperationID: id}); e != nil {
+			return e
+		}
+	}
+	return nil
 }
 
 func (s TenantService) Restrictions(ctx context.Context, scope TenantScope, at time.Time, requestID string) ([]generated.CurrentRestriction, error) {
