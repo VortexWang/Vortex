@@ -22,10 +22,17 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 		return err
 	}
 	defer tx.Rollback()
+	if err := checkpointRuntimeFundingBlockTx(ctx, tx, block, checkpointID, used, payload); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func checkpointRuntimeFundingBlockTx(ctx context.Context, tx *sql.Tx, block UsageReservation, checkpointID string, used uint64, payload []byte) error {
 	child := block
 	child.BatchID, child.Reserved = checkpointID, used
 	var priorBlock, priorReserved string
-	err = tx.QueryRowContext(ctx, `SELECT block_id,prior_reserved FROM runtime_block_checkpoints WHERE node_id=? AND batch_id=?`, block.NodeID, checkpointID).Scan(&priorBlock, &priorReserved)
+	err := tx.QueryRowContext(ctx, `SELECT block_id,prior_reserved FROM runtime_block_checkpoints WHERE node_id=? AND batch_id=?`, block.NodeID, checkpointID).Scan(&priorBlock, &priorReserved)
 	if err == nil {
 		if priorBlock != block.BatchID || priorReserved != strconv.FormatUint(block.Reserved, 10) {
 			return ErrUsageBatchConflict
@@ -33,7 +40,7 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 		if err := settleUsageReservationTx(ctx, tx, child, "committed", used, payload, 0, nil); err != nil {
 			return err
 		}
-		return tx.Commit()
+		return nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -70,6 +77,46 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 	}
 	if err := settleUsageReservationTx(ctx, tx, child, "committed", used, payload, 0, nil); err != nil {
 		return err
+	}
+	return nil
+}
+
+// RuntimeBlockCheckpoint preserves each child's independent outbox identity.
+// For multiple entries against one block, Block.Reserved must describe the
+// residual immediately before that entry, in the supplied order.
+type RuntimeBlockCheckpoint struct {
+	Block        UsageReservation
+	CheckpointID string
+	Used         uint64
+	Payload      []byte
+}
+
+// CheckpointRuntimeFundingBlocks commits up to 64 known outcomes together.
+// The allocator must hold ownership until this returns; none of the associated
+// Engine Commit callbacks may acknowledge success before the transaction does.
+// Exact replay uses the original ordered residuals and payloads.
+func (s *Store) CheckpointRuntimeFundingBlocks(ctx context.Context, entries []RuntimeBlockCheckpoint) error {
+	if s.owner != "agent" || len(entries) == 0 || len(entries) > 64 {
+		return ErrUsageBatchConflict
+	}
+	type key struct{ node, id string }
+	seen := make(map[key]bool, len(entries))
+	for _, entry := range entries {
+		identity := key{entry.Block.NodeID, entry.CheckpointID}
+		if entry.CheckpointID == "" || entry.CheckpointID == entry.Block.BatchID || entry.Used == 0 || entry.Used > entry.Block.Reserved || len(entry.Payload) == 0 || seen[identity] {
+			return ErrUsageBatchConflict
+		}
+		seen[identity] = true
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, entry := range entries {
+		if err := checkpointRuntimeFundingBlockTx(ctx, tx, entry.Block, entry.CheckpointID, entry.Used, entry.Payload); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

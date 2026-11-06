@@ -201,3 +201,21 @@ checkpoint cooperation. Do not return a Batch until group admission commits;
 canceled committed entries may waste rate tokens but must release only proven
 unused in-memory credit. Unknown commit results fault the group. The current
 runtime does not yet invoke this API, so native concurrency remains failed.
+
+## Group checkpoint persistence seam
+
+CheckpointRuntimeFundingBlocks commits up to 64 ordered known checkpoints in
+one transaction. Each child retains its batch ID, payload and exact prior
+residual; multiple entries for one parent supply successive residuals. A later
+failure rolls back earlier outbox/hold/demand-window changes. Exact replay
+remains valid after old-boot recovery settles the residual. Duplicate child
+identities within one call are rejected. The single-checkpoint API shares the
+transactional helper.
+
+Next Agent integration must enqueue settlement callbacks independently of the
+admission worker, so admission waiting for capacity cannot deadlock the
+checkpoint that frees it. Each callback waits for the group commit before
+returning success. Canceled or uncertain groups retain their durable residual
+and fault further admission; never release their tails based on an uncommitted
+in-memory outcome. Unknown outcomes require serialization with known groups.
+The new Store API is not yet called by runtime settlement.

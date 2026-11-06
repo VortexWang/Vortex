@@ -1492,3 +1492,22 @@ committed. Simply returning success for memory-only consumption would violate
 the existing accounting.Batch resolver boundary and is not an acceptable fix.
 The queue implementation remains experimental; D-04 and native concurrency
 qualification remain open.
+
+## Ordered group checkpoint transaction
+
+Added CheckpointRuntimeFundingBlocks for at most 64 known outcomes per SQLite
+transaction, preserving independent child identities/payloads and ordered prior
+residuals. Existing single-checkpoint logic is shared inside the transaction.
+A successful return occurs only after every child outbox, funding split and
+demand-consumption observation commits. Any failure rolls the whole group back.
+
+Tests inject failure in the second child's outbox insert and prove no first-
+child usage or partial residual persists. Successful exact replay is stable,
+changed payload is rejected, and close/reopen freezes only the 700-byte residual
+after two known checkpoints totaling 300 bytes. Exact replay after that recovery
+still preserves conservation. Invalid residual order, duplicate identity,
+overflow, over-64 group and canceled context all leave original funding intact.
+Targeted race PASS 3.007s; full Store race PASS 16.924s; Agent/Hub vet and diff
+PASS. These are Store transaction tests, not process-kill or native performance
+qualification. Agent settlement queue integration remains required; runtime
+currently still invokes individual checkpoints. D-04 stays open.
