@@ -28,8 +28,18 @@ func TestRuntimeBlockCheckpointCrashWorker(t *testing.T) {
 	ctx := context.Background()
 	entries := checkpointCrashEntries()
 	if os.Getenv("VORTEX_BLOCK_CRASH_STAGE") == "after" {
-		if err := s.CheckpointRuntimeFundingBlocks(ctx, entries); err != nil {
-			t.Fatal(err)
+		// Seed two caller groups so the crash also exercises coordinator delivery
+		// after a shared durable transaction, before either caller consumes its ACK.
+		var requests []*checkpointRequest
+		for _, entry := range entries {
+			requests = append(requests, &checkpointRequest{ctx: ctx, entries: []RuntimeBlockCheckpoint{entry}, result: make(chan error, 1)})
+		}
+		s.checkpoints.pending, s.checkpoints.count, s.checkpoints.running = requests, len(requests), true
+		s.drainCheckpoints()
+		for _, request := range requests {
+			if len(request.result) != 1 {
+				t.Fatal("coordinator did not deliver durable outcome")
+			}
 		}
 	} else {
 		tx, err := s.db.BeginTx(ctx, nil)

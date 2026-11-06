@@ -2369,3 +2369,19 @@ This closes the observed fixed-heartbeat fixture accounting gap, not full D-04:
 report performance_qualified=false and certificate_renewal_exercised=false;
 five-process durable integration, attack/fault matrix, parameter scan and same-SHA
 formal qualification remain outstanding. No authority deadline or rate relaxed.
+
+## Coordinator interruption coverage
+
+Added deterministic two-session coordinator tests: hold the runtime transaction
+slot until a combined group is observed waiting, assert no caller is acknowledged,
+then cancel one member or close Store. Both callers fail, coordinator drains,
+reopened SQLite has zero partial outbox rows and the full 2000-byte reservation.
+Twice replaying the original requests commits exactly 200 bytes and retains 1800.
+Race repeated five times PASS 3.125s. SIGKILL after-commit fixture now drains two
+caller groups through the coordinator and is killed before callers consume their
+buffered results; parent validates WAL recovery, residual unknown freezing and
+idempotent replay. Existing before-commit case still injects directly inside the
+SQL transaction, not a coordinator mid-commit interruption. Combined targeted
+race suite repeated three times PASS 4.093s. Mid-commit cancellation and real
+cross-session SIGKILL coverage are still outstanding; do not mark full fault
+matrix complete from these tests.
