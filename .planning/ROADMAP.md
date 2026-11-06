@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 2/11 plans executed in 11 dependency waves; 06-01 and 06-08 complete. Owner approved CR-004 A separately from CR-003; exact artifact/source/use matching passes the full license/toolchain gate and same-source Docker normal/race regression on 7d43e1d2. 06-09 is next and has not started. Final phase acceptance, real source balances, Actions/native amd64 and remaining domain requirements are pending.
+**Plans**: 2/11 plans complete in 11 dependency waves; 06-01 and 06-08 complete. 06-09 source c1e6b766 passed clean Docker dependency/license/sqlc and full normal/race regressions, with all-cause recovery and 96-item ownership. Its Task 1 remains at an authentication checkpoint: nodeox lacks push permission, real Actions and paired acceptance are unpassed. No 06-09 complete SUMMARY exists. Final phase acceptance, real source balances, native amd64 and remaining domains stay pending.
 
 **Wave 1**
 
@@ -191,7 +191,7 @@
 
 **Wave 3** *(ready after Wave 2; not started)*
 
-- [ ] 06-09-PLAN.md — OpenAPI 唯一来源、分阶段证据门禁与限制清除
+- [ ] 06-09-PLAN.md — 实现及 clean Docker normal/race 已通过；GitHub 写权限认证与真实 Actions 同 SHA 配对待完成
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 2/11 | In progress — 06-08 complete; 06-09 next | - |
+| 6. M4 Backend | 2/11 | In progress — 06-09 authentication checkpoint | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

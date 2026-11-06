@@ -39,8 +39,8 @@ created: "2026-11-07"
 | 06-01-01 | 1 | desired state 到 Agent/Hub receipt 的端到端 tracer | 自动化；执行 06-01-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-08-01 | 2 | tenant scope, roles and transaction-scoped audit | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-08-02 | 2 | sqlc/toolchain reproducibility and Valkey loss gate | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | 自动化；执行 06-09-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-09-02 | 3 | all restriction causes must clear | 自动化；执行 06-09-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
+| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | c1e6b766 clean Docker producer 通过；paired 实测因缺 Actions 失败，认证 checkpoint | ✅ 已实现 | ⬜ pending Actions/pair |
+| 06-09-02 | 3 | all restriction causes must clear | c1e6b766 真实 PG normal/race、全 Docker 与 audit rollback 通过 | ✅ 已实现 | ✅ passed implemented scope |
 | 06-02-01 | 4 | 节点组、成员、grant 与生命周期服务 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-02-02 | 4 | 端口预留、限制保留和释放确认 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-10-01 | 5 | serving eligibility and encrypted DNS credential boundary | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |

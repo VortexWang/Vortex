@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 09
 status: executing
-stopped_at: Completed 06-08-PLAN.md; 06-09 is next and has not started
-last_updated: "2026-11-06T23:33:00Z"
+stopped_at: 06-09 Task 2 verified; Task 1 awaits GitHub write authentication and real Actions pairing
+last_updated: "2026-11-06T23:54:10Z"
 last_activity: 2026-11-06
-last_activity_desc: "06-08 complete; CR-004 A approved and enforced; full gate and same-source Docker normal/race pass on 7d43e1d2."
+last_activity_desc: "06-09 code and clean Docker pass on c1e6b766; Actions unrun because nodeox push is denied; checkpoint persisted, plan not complete."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 44
-state_head: 677dcafe
+state_head: bbbac76d
 ---
 
 # Project State
@@ -32,8 +32,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 09
 Total Plans in Phase: 11
-Status: Executing — 06-01 and 06-08 complete (2/11). Both CR-003 A and separately approved CR-004 A are implemented. Next plan 06-09 has not started; final Phase 6 acceptance remains pending.
-Last activity: 2026-11-06 — source 7d43e1d2 passed clean-clone full dependency gate (exit 0), all three exact generator artifacts, seven closure rejection experiments and Docker backend normal/race including real Agent/blocked-Hub processes. Evidence b1a92d72; completion SUMMARY 677dcafe. Actions/native amd64 not run; caller Phase 4/5 work preserved.
+Status: Executing — 06-01 and 06-08 complete (2/11). 06-09 implementation is committed and Task 2 verified; Task 1 awaits GitHub write authentication and real same-SHA Actions pairing. No 06-09 complete SUMMARY or final Phase 6 acceptance is claimed.
+Last activity: 2026-11-06 — final source c1e6b766 passed clean-clone full dependency/license/sqlc gate and Docker backend normal/race including real Agent/blocked-Hub processes. Twelve rejection experiments passed. Evidence bbbac76d; paired gate actually failed because Actions result is missing. Git dry-run push returned 403 for nodeox. Caller Phase 4/5 work is unchanged.
 
 Progress: Phase 6 [██░░░░░░░░░] 2/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -71,6 +71,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Decisions
 
+- 06-09 uses one OpenAPI source and a deterministic backend copy with dependency-free Ruby lint; Phase 7 owns TypeScript generation. All 96 requirements have primary plan owners, but only implemented producers are required through 06-09. Docker producer success is separate from the mandatory paired gate. Last-cause recovery reissues only authorized persisted desired state and preserves pending/unknown occupation in the same audit/task/Outbox transaction.
+
 - 06-08 preserves applied 00001 and adds immutable tenant restrictions in 00002. Owner approved CR-003 A with 按推荐 and independently approved CR-004 A with a. Exact official artifact/usage/module/source/asset matching now passes all three sqlc artifacts without widening allowed_spdx or runtime/distribution rights. Full 42-module and embedded-source review reconstructs all 120 selected libc/runtime objects. TEN-002/009 and future source-balance validation remain pending for later domain plans/06-11.
 
 - 06-01 uses real Agent NodeControl receipts; HubControl remains authenticated persistent liveness, blocked with signer epoch zero. Financial authority remains 06-05/06-06. Clean committed-clone Docker evidence is separate from the dirty caller checkout and unrun Actions.
@@ -91,6 +93,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 - Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
 
 ### Blockers/Concerns
+
+- 06-09 authentication checkpoint: nodeox is the only stored gh account, target repository push=false, and the actual git push dry-run returned 403. Restore VortexWang or another write-authorized account through the agent-opened browser login; then push exact source c1e6b766, collect real Actions, and run the unchanged paired gate. Task 2 normal/race passes locally; TEN-009 stays pending until 06-09 completes. See phases/06-m4-m4-backend/06-09-CHECKPOINT.md and WINDOWS item 4.
 
 - 06-08 license decision is resolved: CR-004 A approved and enforced, full gate exit 0 on 7d43e1d2. WINDOWS 2/3 are fixed; balance debt 1 stays open for 06-05/06-11. TEN-002 still requires later domain ownership coverage; TEN-009 full business-resume coverage remains pending. GitHub Actions and native amd64 evidence are not claimed.
 
@@ -115,9 +119,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-06T23:33:00Z
-Stopped at: Completed 06-08-PLAN.md; next 06-09 has not started
-Resume file: None
+Last session: 2026-11-06T23:54:10Z
+Stopped at: 06-09 Task 2 verified; Task 1 awaits GitHub write authentication and real Actions pairing
+Resume file: phases/06-m4-m4-backend/06-09-CHECKPOINT.md
 
 ### Historical qualification review (not a main-workflow gate)
 
