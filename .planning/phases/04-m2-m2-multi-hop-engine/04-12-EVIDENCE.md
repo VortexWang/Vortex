@@ -1758,3 +1758,23 @@ plus size/live-replacement boundary checks PASS locally 14.049s; vet/diff PASS.
 No authority is granted by this option and no wire schema changed. README makes
 clear that current d04_run.py does not yet drive this durable process entry.
 Multi-process sustained workload and parameter lock remain outstanding.
+
+## Protocol-test Hub binary durable authority fixture
+
+Added explicit paired --authority-fixture / --fixture-backend-db options to the
+existing protocol-test Hub. Strict single-object JSON input is capped at 1 MiB;
+caller supplies finite delegation, rate/share, absolute time boundaries and a
+stable initial request identity. Boot identity binds only at the authenticated
+control callback; wrong-node and different-boot replay are rejected by fixture
+and immutable Store checks. TLS Hub identity must match the fixture, and the
+backend cannot alias the Hub database. Initial issuance and adaptive demands
+use the existing durable issuer; known/unknown usage uses a separate durable
+protocol-backend adapter, returning its digest only after persistence.
+
+Three local race repetitions PASS 2.202s: persisted initial issue survives
+reopening without another debit, wrong node/new boot rejected, and known usage
+replay succeeds through durable backend confirmation. Vet/diff PASS. This is
+fixture wiring, not yet independent-process E2E evidence. Fixed heartbeat and
+autonomy boundaries remain enforced; no fake always-online heartbeat or implicit
+budget renewal was introduced. Full process orchestration and sustained workload
+metrics remain required, as do native tests of this new entry. D-04 remains open.

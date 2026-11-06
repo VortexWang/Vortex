@@ -248,3 +248,19 @@ This exposes the durable allocator for independent-process workloads. Existing
 use this option; it cannot qualify durable Hub performance. Required follow-up
 is a same-SHA multi-process durable workload with raw ledger reconciliation,
 16 streams, actual UDP offered load and the controlled candidate matrix.
+
+The protocol-test Hub now accepts paired `--authority-fixture FILE` and
+`--fixture-backend-db FILE` options. The JSON object has `delegation` (explicit
+`store.HubDelegation` fields), `initial_request_id`, `initial_bytes`, and
+`ttl_seconds`. All identities, budgets, rates and absolute time boundaries are
+operator-supplied test inputs. `Delegation.BootID` must be empty; the first
+mTLS-authenticated node heartbeat binds it durably. A different boot cannot reuse
+that delegation. The Hub certificate CN and sole DNS SAN must match its HubID.
+The backend database must be a separate file, including through filesystem aliases.
+
+This fixture uses local wall time as explicitly test-only trusted time. Its fixed
+BackendHeartbeat/AutonomyDeadline still apply; it does not simulate an always-
+online backend or extend authority deadlines. Reconnect replays the initial issue
+identity and cannot replenish the budget. Continuous backend-liveness simulation,
+process orchestration, workload metrics and native qualification remain to be
+implemented. Do not use these options as production backend integration evidence.
