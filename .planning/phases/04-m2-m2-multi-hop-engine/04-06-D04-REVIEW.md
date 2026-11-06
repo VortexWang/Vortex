@@ -125,3 +125,19 @@ Gate/块管理”的状态。当前标准混合负载脚本仍未开启该 Gate�
 授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
 ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
 04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。
+
+## Durable per-write accounting baseline — 2026-11-06
+
+A clean native run of the real Agent Store reserve/settle path at commit
+`d46ca8e793a9b7f79c5e65ca011401bdbd76bdde` measured approximately 6 ms per
+operation across three payload sizes, with median accounting capacity rising
+from 0.18 MB/s at 1,200 bytes to 10.14 MB/s at 65,536 bytes. SQLite WAL/FULL,
+source conservation and pending outbox cardinality were checked for every
+sample. Full command, five-sample ranges, host details and hashes are in
+`04-17-NATIVE-ACCOUNTING.json` and `artifacts/phase4/durable-accounting-d46ca8e/`.
+
+This isolates durable per-write cost only. It does not compare authorization
+block policies, include transport or Hub issuance, or establish user-visible
+throughput. Keep the existing D-04 candidates unlocked until the planned
+five-process authorized TCP/UDP scan compares durable bounded blocks and
+per-write accounting while recording latency and held-funding costs.

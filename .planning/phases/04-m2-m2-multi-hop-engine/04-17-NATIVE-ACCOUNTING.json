@@ -1,0 +1,76 @@
+{
+  "kind": "native-agent-store-durable-accounting-microbenchmark",
+  "measured_commit": "d46ca8e793a9b7f79c5e65ca011401bdbd76bdde",
+  "branch": "phase4-runtime-authority-qualification",
+  "clean_worktree_at_start": true,
+  "host": {
+    "os": "Ubuntu 24.04.5 LTS",
+    "kernel": "Linux 7.0.0-42-generic x86_64",
+    "cpu": "Intel Xeon E5-2630 v2 @ 2.60GHz; 12 online CPUs",
+    "go": "go1.27.3 linux/amd64",
+    "socket_buffer_max_and_default_bytes": 212992
+  },
+  "command": "go test ./agent/store -run '^$' -bench '^BenchmarkRuntimeDurableAccounting$' -benchtime=1000x -count=5 -cpu=1",
+  "exit_code": 0,
+  "result": "PASS",
+  "samples_per_payload_size": 5,
+  "iterations_per_sample": 1000,
+  "storage": "SQLite WAL with synchronous=FULL; benchmark fails if either setting differs",
+  "cases": [
+    {
+      "payload_bytes": 1200,
+      "median_ns_per_op": 6819216,
+      "range_ns_per_op": [
+        6111055,
+        6871282
+      ],
+      "median_reported_accounting_MBps": 0.18
+    },
+    {
+      "payload_bytes": 16384,
+      "median_ns_per_op": 6032030,
+      "range_ns_per_op": [
+        5881862,
+        6278394
+      ],
+      "median_reported_accounting_MBps": 2.72
+    },
+    {
+      "payload_bytes": 65536,
+      "median_ns_per_op": 6459973,
+      "range_ns_per_op": [
+        5513908,
+        6570591
+      ],
+      "median_reported_accounting_MBps": 10.14
+    }
+  ],
+  "post_run_assertions": "Each sample checks exact source conservation (initial=committed, remaining=reserved=unknown=0) and one pending UsageBatch outbox row per operation.",
+  "scope_limit": "Serial single-session Store microbenchmark only. It sends no network traffic, excludes Hub issuance and session authorization blocks, is not a VLink throughput or Phase 4 qualification result, and does not select or lock D-04 parameters.",
+  "artifacts": {
+    "benchmark.log": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/benchmark.log",
+      "sha256": "54db6982dc2af96e4dae05f6df0807e5a97b9e85fb3e5a200f40dfb48f1726d6"
+    },
+    "commit": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/commit",
+      "sha256": "2c7b8508c9d6391300b37b7caaa638dd8ac81401a8229eb79da7842cd0e1febf"
+    },
+    "exit-code": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/exit-code",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "git-status": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/git-status",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "host": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/host",
+      "sha256": "d68f81da09f97af71a006a4a45465fd736d1ae5666f11cf8b36e441334c63f73"
+    },
+    "stage": {
+      "path": "artifacts/phase4/durable-accounting-d46ca8e/stage",
+      "sha256": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1"
+    }
+  }
+}

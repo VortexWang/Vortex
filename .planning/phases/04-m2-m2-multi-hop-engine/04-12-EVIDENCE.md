@@ -818,3 +818,12 @@ cost before evaluating a different reservation strategy.
 Local Darwin arm64 smoke: 100 iterations per size PASS with conservation/outbox
 checks; roughly 0.61–0.67 ms/op and 2920–2922 allocations/op. Store vet and diff
 check PASS. Native results must be recorded separately at a clean measured SHA.
+
+
+## Dedicated-host durable accounting baseline — 2026-11-06
+
+Ran `BenchmarkRuntimeDurableAccounting` at clean commit `d46ca8e793a9b7f79c5e65ca011401bdbd76bdde` on the dedicated Ubuntu 24.04.5 x86_64 host (Go 1.27.3, Intel Xeon E5-2630 v2, 12 online CPUs). The exact command was `go test ./agent/store -run '^$' -bench '^BenchmarkRuntimeDurableAccounting$' -benchtime=1000x -count=5 -cpu=1`. Socket buffer max/default values were all 212,992 bytes and were not changed.
+
+All 15 samples passed. Median reserve-plus-settle operation times were 6.819 ms for 1,200 bytes (0.18 MB/s accounting capacity), 6.032 ms for 16,384 bytes (2.72 MB/s), and 6.460 ms for 65,536 bytes (10.14 MB/s). Each benchmark verifies SQLite WAL/FULL, exact source conservation after the run, and one pending UsageBatch outbox row for each operation. The complete outputs, clean SHA/status and checksums are retained in `artifacts/phase4/durable-accounting-d46ca8e/`; the manifest is `04-17-NATIVE-ACCOUNTING.json`.
+
+The roughly 6 ms per-operation cost is sensitive to write granularity and motivates a measured comparison with bounded session blocks. This result remains a serial Store microbenchmark: it includes no network transfer, Hub issuance or session blocks and is not VLink throughput, a Phase 4 gate, or a D-04 parameter selection. The planned real five-process one-factor candidate scan and its TCP/UDP, latency, allocation and conservation measurements remain outstanding; D-04 remains unlocked.
