@@ -101,6 +101,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261105-gva | Phase 4 UDP tuning portability and closure evidence | 2026-11-05 | f2c9020 | complete | [261105-gva-phase-4-optimization-and-closure](./quick/261105-gva-phase-4-optimization-and-closure/) |
 | 261106-syi | Add explicit delayed rejected-renewal runtime evidence | 2026-11-06 | pending | complete | [261106-syi-add-explicit-delayed-rejected-renewal-ru](./quick/261106-syi-add-explicit-delayed-rejected-renewal-ru/) |
 | 261106-t8z | Add delayed late-accepted renewal recovery evidence | 2026-11-06 | pending | complete | [261106-t8z-add-delayed-late-accepted-renewal-recove](./quick/261106-t8z-add-delayed-late-accepted-renewal-recove/) |
+| 261106-vxa | Add bounded D-04 renewal/occupancy observations | 2026-11-06 | 786183f | complete | [261106-vxa-phase-4-d-04-text](./quick/261106-vxa-phase-4-d-04-text/) |
 
 
 ## Session Continuity
