@@ -2540,6 +2540,35 @@ This proves wiring and outcome classification, not a candidate matrix result.
 Native dedicated-host delay/failure trials and bounded in-flight peak occupancy
 remain required before parameter lock.
 
+## P4-Q4 renewal-only 600ms pressure (5bfb9b2)
+
+Clean 5bfb9b2e0ecf593d43e303071f6db24a6137b856 separates initial finite grant
+from renewal delay. Dedicated Ubuntu five-process runs use 600ms renewal delay,
+375000000-byte fixed target, 256KiB initial / 4MiB max blocks, 16 TCP streams,
+15s per baseline/mixed phase and 100Mbps offered UDP. Evidence and raw-file
+SHA256 values: 04-27-NATIVE-RENEWAL-DELAY.json.
+
+20% and 30% exit 1: baseline TCP terminates at ~1.40s with connection resets.
+Each records 16 Reserve timeouts; final refusals 17/19 include 1/3 cancellations.
+Mixed UDP loss is respectively 0% / 6.676441%; neither trial qualifies even where
+the subsequent mixed phase completes. No report.json was generated for these
+failed runs. Launcher exit 0 means the scan completed, not all candidates passed.
+
+50% exits 0: runtime correctness pass, 88 shortages/waits all succeed, zero
+timeout/cancel/final refusal; mixed TCP 1009.277 Mbps, UDP 99.9648 Mbps, zero loss.
+Source used 8981973128 equals both 4490986564-byte directions. All three source
+budgets conserve and finish with zero sessions/held/pending/unknown. This does
+not establish end-to-end reconciliation for the failed runs. All driver kernel
+RcvbufErrors are zero. Live sysctl confirms rmem_max/wmem_max restored to 212992.
+
+The pressure results support earlier replenishment at this fixed target and
+latency; they do not establish a statistical winner or justify widening the
+200ms bound. Each waterline was run once. Performance remains not-qualified;
+dynamic target, occupancy/fault matrix and final qualification remain open.
+No Agent/Hub persistence requirement is introduced. Local runtime subtree and
+relay command race suites passed for this source before deployment (accounting
+2.380s, config 1.473s, link 2.026s, relay 2.539s, topology 3.003s, command 2.595s).
+
 ## P4-Q4 dedicated-host delayed issuer waterlines
 
 Clean 5239ba54fe5e2a05f4718f87aa304bc7e8b8baa5, Ubuntu 24.04.5 x86_64:

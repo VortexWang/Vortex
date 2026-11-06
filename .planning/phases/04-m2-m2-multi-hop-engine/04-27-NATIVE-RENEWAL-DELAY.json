@@ -1,0 +1,915 @@
+{
+  "commit": "5bfb9b2e0ecf593d43e303071f6db24a6137b856",
+  "remote_root": "/root/VORTEX-phase4-accounting/artifacts/phase4/delay-scan-5bfb9b2",
+  "sysctl_restored": {
+    "rmem_max": 212992,
+    "wmem_max": 212992
+  },
+  "performance_qualification": "not-qualified",
+  "trials": [
+    {
+      "waterline": 20,
+      "exit": 1,
+      "files": {
+        "events-source.jsonl.credit.json": {
+          "sha256": "092193e3b976ec8f3fdd9ccef203aa88c38883f04a39d960a01e28cee2bea01a",
+          "data": {
+            "waits": {
+              "attempts": 438774,
+              "shortfalls": 346,
+              "waits": 346,
+              "wait_succeeded": 329,
+              "timed_out": 16,
+              "cancelled": 1,
+              "final_failures": 17
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 15,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1094897611264,
+            "available_bytes": 207107000,
+            "held_bytes": 0,
+            "used_bytes": 4406909512,
+            "unknown_bytes": 0,
+            "grants": 15,
+            "denials": 17,
+            "sessions": 0
+          }
+        },
+        "mixed-workload.json": {
+          "sha256": "fccd49c8d68e5668166399283feffbd2a3a8b29560f473c56533eb8b4be86350",
+          "data": {
+            "baseline": {
+              "connections": 16,
+              "duration_seconds": 1.3967563369951677,
+              "errors": [
+                "TCP recv: [Errno 104] Connection reset by peer"
+              ],
+              "first_byte_latency_ms": [
+                10.477046002051793,
+                13.324065992492251,
+                14.413652999792248,
+                14.343303992063738,
+                13.80667400371749,
+                13.551013995311223,
+                13.980345000163652,
+                15.522229005000554,
+                15.381039003841579,
+                16.104720998555422,
+                15.856604994041845,
+                22.35727000515908,
+                28.72360400215257,
+                27.884298004209995,
+                28.475672006607056,
+                30.257930004154332
+              ],
+              "received_bytes": 185204480,
+              "sent_bytes": 189857792,
+              "throughput_mbps": 1060.76901228702
+            },
+            "driver": {
+              "cpu_count": 12,
+              "machine": "x86_64",
+              "release": "7.0.0-42-generic",
+              "system": "Linux"
+            },
+            "duration_seconds_per_phase": 15,
+            "host": "127.0.0.1",
+            "kernel_udp_driver_delta": {
+              "IgnoredMulti": 0,
+              "InCsumErrors": 0,
+              "InDatagrams": 624788,
+              "InErrors": 0,
+              "MemErrors": 0,
+              "NoPorts": 0,
+              "OutDatagrams": 624788,
+              "RcvbufErrors": 0,
+              "SndbufErrors": 0
+            },
+            "mixed": {
+              "errors": [],
+              "tcp": {
+                "connections": 16,
+                "duration_seconds": 15.018221461010398,
+                "errors": [],
+                "first_byte_latency_ms": [
+                  23.855684994487092,
+                  28.497383987996727,
+                  27.064506997703575,
+                  28.281647988478653,
+                  28.808015005779453,
+                  29.392767988611013,
+                  32.42842201143503,
+                  34.07775498635601,
+                  36.041963001480326,
+                  36.998527008108795,
+                  39.09843300061766,
+                  40.35061100148596,
+                  38.912915988476016,
+                  39.173526005470194,
+                  39.6547870041104,
+                  46.75190399575513
+                ],
+                "received_bytes": 1828519936,
+                "sent_bytes": 1828519936,
+                "throughput_mbps": 974.0274190240796
+              },
+              "udp_bytes_received": 187436400,
+              "udp_loss": 0,
+              "udp_payload_mbps": 99.96608,
+              "udp_received": 156197,
+              "udp_sent": 156197,
+              "udp_socket_receive_buffer_bytes": 8388608,
+              "udp_unique_received": 156197
+            },
+            "schema": 1,
+            "target_baseline": {
+              "tcp_bytes_received": 189792256,
+              "tcp_bytes_sent": 189792256,
+              "udp_bytes_received": 0,
+              "udp_bytes_sent": 0,
+              "udp_datagrams_received": 0,
+              "udp_datagrams_sent": 0
+            },
+            "target_mixed": {
+              "tcp_bytes_received": 1828519936,
+              "tcp_bytes_sent": 1828519936,
+              "udp_bytes_received": 187436400,
+              "udp_bytes_sent": 187436400,
+              "udp_datagrams_received": 156197,
+              "udp_datagrams_sent": 156197
+            },
+            "target_total": {
+              "tcp_bytes_received": 2018312192,
+              "tcp_bytes_sent": 2018312192,
+              "udp_bytes_received": 187436400,
+              "udp_bytes_sent": 187436400,
+              "udp_datagrams_received": 156197,
+              "udp_datagrams_sent": 156197
+            },
+            "tcp_retention": 0.918227632728519,
+            "tcp_streams": 16,
+            "udp_target_mbps": 100
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "eccab6be66ece13f49efdef9aa6cab3f9683f8f68433a0df94615eb5b053c7eb",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 20,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2"
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "600ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    },
+    {
+      "waterline": 30,
+      "exit": 1,
+      "files": {
+        "events-source.jsonl.credit.json": {
+          "sha256": "a14d5dfc6b72d1ae617c2c836b3efcc7a228db6132063921f61ed920010d4e8d",
+          "data": {
+            "waits": {
+              "attempts": 405635,
+              "shortfalls": 353,
+              "waits": 353,
+              "wait_succeeded": 334,
+              "timed_out": 16,
+              "cancelled": 3,
+              "final_failures": 19
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 16,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1095156346101,
+            "available_bytes": 367285283,
+            "held_bytes": 0,
+            "used_bytes": 3987996392,
+            "unknown_bytes": 0,
+            "grants": 16,
+            "denials": 19,
+            "sessions": 0
+          }
+        },
+        "mixed-workload.json": {
+          "sha256": "d3dd7ce720ca95a4fb542f512e06f33372dfacfd32ce7b229c046ded6c58c52f",
+          "data": {
+            "baseline": {
+              "connections": 16,
+              "duration_seconds": 1.3988964309974108,
+              "errors": [
+                "TCP recv: [Errno 104] Connection reset by peer",
+                "TCP recv: [Errno 104] Connection reset by peer",
+                "TCP recv: [Errno 104] Connection reset by peer"
+              ],
+              "first_byte_latency_ms": [
+                5.802793995826505,
+                8.886805997462943,
+                13.341963000129908,
+                13.631741996505298,
+                17.276586004300043,
+                16.71679998980835,
+                17.913780990056694,
+                17.594378005014732,
+                17.275987993343733,
+                18.893753993324935,
+                21.14406999316998,
+                19.414939000853337,
+                22.509033005917445,
+                22.554141003638506,
+                26.27120600664057,
+                27.227140992181376
+              ],
+              "received_bytes": 185400960,
+              "sent_bytes": 189792256,
+              "throughput_mbps": 1060.2698292270825
+            },
+            "driver": {
+              "cpu_count": 12,
+              "machine": "x86_64",
+              "release": "7.0.0-42-generic",
+              "system": "Linux"
+            },
+            "duration_seconds_per_phase": 15,
+            "host": "127.0.0.1",
+            "kernel_udp_driver_delta": {
+              "IgnoredMulti": 1,
+              "InCsumErrors": 0,
+              "InDatagrams": 593480,
+              "InErrors": 0,
+              "MemErrors": 0,
+              "NoPorts": 1,
+              "OutDatagrams": 593480,
+              "RcvbufErrors": 0,
+              "SndbufErrors": 0
+            },
+            "mixed": {
+              "errors": [],
+              "tcp": {
+                "connections": 16,
+                "duration_seconds": 15.02301749799517,
+                "errors": [],
+                "first_byte_latency_ms": [
+                  21.541334994253702,
+                  19.449573999736458,
+                  20.793913005036302,
+                  20.62288000888657,
+                  20.937120003509335,
+                  20.394415012560785,
+                  20.681947993580252,
+                  23.10151999699883,
+                  21.087866989546455,
+                  21.39217899821233,
+                  21.96978199935984,
+                  25.39604200865142,
+                  26.463664005859755,
+                  26.93523099878803,
+                  27.21920100157149,
+                  26.97346400236711
+                ],
+                "received_bytes": 1631584256,
+                "sent_bytes": 1631584256,
+                "throughput_mbps": 868.8450272884185
+              },
+              "udp_bytes_received": 174915600,
+              "udp_loss": 0.06676441024130712,
+              "udp_payload_mbps": 93.28832,
+              "udp_received": 145763,
+              "udp_sent": 156191,
+              "udp_socket_receive_buffer_bytes": 8388608,
+              "udp_unique_received": 145763
+            },
+            "schema": 1,
+            "target_baseline": {
+              "tcp_bytes_received": 189595616,
+              "tcp_bytes_sent": 189595616,
+              "udp_bytes_received": 0,
+              "udp_bytes_sent": 0,
+              "udp_datagrams_received": 0,
+              "udp_datagrams_sent": 0
+            },
+            "target_mixed": {
+              "tcp_bytes_received": 1631584256,
+              "tcp_bytes_sent": 1631584256,
+              "udp_bytes_received": 174915600,
+              "udp_bytes_sent": 174915600,
+              "udp_datagrams_received": 145763,
+              "udp_datagrams_sent": 145763
+            },
+            "target_total": {
+              "tcp_bytes_received": 1821179872,
+              "tcp_bytes_sent": 1821179872,
+              "udp_bytes_received": 174915600,
+              "udp_bytes_sent": 174915600,
+              "udp_datagrams_received": 145763,
+              "udp_datagrams_sent": 145763
+            },
+            "tcp_retention": 0.8194565226115985,
+            "tcp_streams": 16,
+            "udp_target_mbps": 100
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "0c7d001ffa8b003c3bc9d1a90f8cd559158d911df85905a77f6c11274ccedc01",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 30,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2"
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "600ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    },
+    {
+      "waterline": 50,
+      "exit": 0,
+      "files": {
+        "events-source.jsonl.credit.json": {
+          "sha256": "ca214c0494a3ac72fc4d562bd0e03b21832a485fa9414d2f916888aa943bfa23",
+          "data": {
+            "waits": {
+              "attempts": 591541,
+              "shortfalls": 88,
+              "waits": 88,
+              "wait_succeeded": 88,
+              "timed_out": 0,
+              "cancelled": 0,
+              "final_failures": 0
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 48,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1090196431648,
+            "available_bytes": 333223000,
+            "held_bytes": 0,
+            "used_bytes": 8981973128,
+            "unknown_bytes": 0,
+            "grants": 48,
+            "denials": 0,
+            "sessions": 0
+          }
+        },
+        "mixed-workload.json": {
+          "sha256": "e8a53c4b74630a2a8300f252c8d4c2c59413e960a922781135b18c84089b8ebe",
+          "data": {
+            "baseline": {
+              "connections": 16,
+              "duration_seconds": 15.019225746000302,
+              "errors": [],
+              "first_byte_latency_ms": [
+                5.8193339937133715,
+                8.659280996653251,
+                10.074723002617247,
+                10.353748002671637,
+                13.514366990420967,
+                12.893435006844811,
+                13.49271900835447,
+                13.025931009906344,
+                12.91214200318791,
+                13.632016998599283,
+                16.12914500583429,
+                16.010302992071956,
+                16.90773900190834,
+                15.742888004751876,
+                24.111115009873174,
+                24.66425199236255
+              ],
+              "received_bytes": 2407661568,
+              "sent_bytes": 2407661568,
+              "throughput_mbps": 1282.4424420898915
+            },
+            "driver": {
+              "cpu_count": 12,
+              "machine": "x86_64",
+              "release": "7.0.0-42-generic",
+              "system": "Linux"
+            },
+            "duration_seconds_per_phase": 15,
+            "host": "127.0.0.1",
+            "kernel_udp_driver_delta": {
+              "IgnoredMulti": 1,
+              "InCsumErrors": 0,
+              "InDatagrams": 624780,
+              "InErrors": 0,
+              "MemErrors": 0,
+              "NoPorts": 0,
+              "OutDatagrams": 624780,
+              "RcvbufErrors": 0,
+              "SndbufErrors": 0
+            },
+            "mixed": {
+              "errors": [],
+              "tcp": {
+                "connections": 16,
+                "duration_seconds": 15.02771487699647,
+                "errors": [],
+                "first_byte_latency_ms": [
+                  9.388278005644679,
+                  10.548549005761743,
+                  10.261623989208601,
+                  13.232746001449414,
+                  14.706935995491222,
+                  15.263050008798018,
+                  16.567318001762033,
+                  16.485543994349428,
+                  16.221523997955956,
+                  19.014588004210964,
+                  21.13140698929783,
+                  21.799091002321802,
+                  40.123330007190816,
+                  40.33532900211867,
+                  40.44818399415817,
+                  41.06283999863081
+                ],
+                "received_bytes": 1895890944,
+                "sent_bytes": 1895890944,
+                "throughput_mbps": 1009.2770375366207
+              },
+              "udp_bytes_received": 187434000,
+              "udp_loss": 0,
+              "udp_payload_mbps": 99.9648,
+              "udp_received": 156195,
+              "udp_sent": 156195,
+              "udp_socket_receive_buffer_bytes": 8388608,
+              "udp_unique_received": 156195
+            },
+            "schema": 1,
+            "target_baseline": {
+              "tcp_bytes_received": 2407661568,
+              "tcp_bytes_sent": 2407661568,
+              "udp_bytes_received": 0,
+              "udp_bytes_sent": 0,
+              "udp_datagrams_received": 0,
+              "udp_datagrams_sent": 0
+            },
+            "target_mixed": {
+              "tcp_bytes_received": 1895890944,
+              "tcp_bytes_sent": 1895890944,
+              "udp_bytes_received": 187434000,
+              "udp_bytes_sent": 187434000,
+              "udp_datagrams_received": 156195,
+              "udp_datagrams_sent": 156195
+            },
+            "target_total": {
+              "tcp_bytes_received": 4303552512,
+              "tcp_bytes_sent": 4303552512,
+              "udp_bytes_received": 187434000,
+              "udp_bytes_sent": 187434000,
+              "udp_datagrams_received": 156195,
+              "udp_datagrams_sent": 156195
+            },
+            "tcp_retention": 0.7869959730059187,
+            "tcp_streams": 16,
+            "udp_target_mbps": 100
+          }
+        },
+        "report.json": {
+          "sha256": "1d5fcd78d8db0fc3abbacf65694c4eae28a5c2c38674a589d9ac01f2e2d88851",
+          "data": {
+            "accounting": {
+              "left_to_right": 4490986564,
+              "right_to_left": 4490986564
+            },
+            "authorization_mode": "runtime-authority",
+            "classified_drops": {
+              "kernel_rcvbuf_driver_scope": 0,
+              "oversized": 0,
+              "queue_full": 0,
+              "receive_queue_full": 0,
+              "source_capacity": 0,
+              "source_queue_full": 0,
+              "window_full": 0
+            },
+            "commit": "5bfb9b2e0ecf593d43e303071f6db24a6137b856",
+            "d_04": {
+              "status": "pending-review"
+            },
+            "dirty": false,
+            "end_to_end_received_bytes": 4490986564,
+            "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+            "nfr_003": {
+              "mixed_tcp_mbps": 1009.2770375366207,
+              "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+              "status": "not-qualified",
+              "tcp_only_retention": 0.7869959730059187
+            },
+            "nfr_005": {
+              "loss_threshold_met": true,
+              "reason": "Short diagnostic run; host and duration qualification remain open",
+              "status": "not-qualified",
+              "udp_loss": 0
+            },
+            "nfr_006": {
+              "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+              "status": "not-qualified"
+            },
+            "nfr_007": {
+              "reason": "independent path latency baseline is missing",
+              "status": "not-qualified"
+            },
+            "performance_qualification": "not-qualified",
+            "qualification_metrics": {
+              "duration_seconds": 15,
+              "mixed_tcp_mbps": 1009.2770375366207,
+              "source_credit_conserved": true,
+              "source_credit_settled": true,
+              "tcp_streams": 16,
+              "udp_loss": 0,
+              "udp_offered_mbps": 99.9648
+            },
+            "returned_reservations": {},
+            "runtime_correctness": "pass",
+            "schema": 1,
+            "semantic_manifest_sha256": "9b5471edc7d08a2f936b35de0b9fd5b077c6922f1a1f1f7128ad63e793ea00fd",
+            "trial_id": "delay600-waterline-50"
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "5f5cb548d331e7d5f5416e5b6ea5c9215c7a2ade46b4474ec19cd8c87b9452c4",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 50,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2"
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "600ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    }
+  ]
+}
