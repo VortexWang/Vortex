@@ -99,3 +99,22 @@ rmem_max/wmem_max 恢复 212992。此组是动态目标实际接线证据，但�
 检查通过（04-31-CURRENT-ATTACK-EVIDENCE.json）。有限覆盖登记见
 04-29-CURRENT-COVERAGE.md；最终独立 TLS、Docker/Actions 和原生完整
 资格仍分别待验证，不混用本地与原生结果成为一个 pass。
+
+## 有界占用时序接线（94737c3）
+
+Observe 开启时，每秒采样 CreditState，最多 3600 份周期记录，另外保留
+关闭后的最终状态；超限显式记录 dropped_periodic_samples。不在默认热路径
+开启采样，不以离散样本最大值冒充真实瞬时峰值。
+
+专用 Ubuntu 的 30s 动态目标/30% 水位/40ms 续申实验通过正确性：
+16 TCP、15s 双阶段；mixed TCP 993.679Mbps，UDP 99.97056Mbps、零丢包。
+37 份采样覆盖 35.965s，无采样上限丢弃，每份均满足逐来源守恒；从
+8MiB 初始目标增长至 375000000-byte 上限。175 次等待全部成功，50 次
+授权，最终 sessions/held/pending/unknown 均零，双向计量总和
+8887885032 bytes 与 source used 一致。原始时序/报告/配置及校验和见
+04-32-NATIVE-CREDIT-TIMELINE.json。sysctl 两个 max 已恢复 212992。
+
+此轮未覆盖 60s 以上闲置，不能证明实际进程的闲置收缩曲线；故障导致的
+unknown 时序也尚未采得。延迟 issuer 的旧 issuer_nanoseconds 直方图
+仍为零，不能用它声称实际续申延迟分位数；Waits 仅证明结果计数。
+命令与 accounting race 通过，采样器并发停止/保留最终样本回归通过。
