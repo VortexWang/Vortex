@@ -1,0 +1,104 @@
+=== RUN   TestInstallerStagesAndAtomicallyActivatesSignedArtifact
+--- PASS: TestInstallerStagesAndAtomicallyActivatesSignedArtifact (0.03s)
+=== RUN   TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary
+=== RUN   TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary/digest
+=== RUN   TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary/signature
+--- PASS: TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary (0.00s)
+    --- PASS: TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary/digest (0.00s)
+    --- PASS: TestInstallerRejectsDigestOrSignatureBeforeChangingActiveBinary/signature (0.00s)
+=== RUN   TestInstallerHealthFailureRestoresStateAndPreviousBinary
+--- PASS: TestInstallerHealthFailureRestoresStateAndPreviousBinary (0.02s)
+=== RUN   TestInstallerIrreversibleMigrationBlocksRollback
+--- PASS: TestInstallerIrreversibleMigrationBlocksRollback (0.02s)
+=== RUN   TestInstallerRestartAfterActivationRetainsUnknownState
+--- PASS: TestInstallerRestartAfterActivationRetainsUnknownState (0.02s)
+=== RUN   TestInstallerRecoversPreActivationCrashBoundaries
+=== RUN   TestInstallerRecoversPreActivationCrashBoundaries/before-stage
+=== RUN   TestInstallerRecoversPreActivationCrashBoundaries/staged
+=== RUN   TestInstallerRecoversPreActivationCrashBoundaries/after-drain
+=== RUN   TestInstallerRecoversPreActivationCrashBoundaries/before-activate
+--- PASS: TestInstallerRecoversPreActivationCrashBoundaries (0.03s)
+    --- PASS: TestInstallerRecoversPreActivationCrashBoundaries/before-stage (0.00s)
+    --- PASS: TestInstallerRecoversPreActivationCrashBoundaries/staged (0.01s)
+    --- PASS: TestInstallerRecoversPreActivationCrashBoundaries/after-drain (0.01s)
+    --- PASS: TestInstallerRecoversPreActivationCrashBoundaries/before-activate (0.01s)
+=== RUN   TestInstallerHealthyTransactionRecoversAgainstCandidate
+--- PASS: TestInstallerHealthyTransactionRecoversAgainstCandidate (0.01s)
+=== RUN   TestInstallerCanApplyNextTransactionAndArchivesPreviousState
+--- PASS: TestInstallerCanApplyNextTransactionAndArchivesPreviousState (0.02s)
+=== RUN   TestInstallerCanRetrySameTransactionAfterStagingCrash
+--- PASS: TestInstallerCanRetrySameTransactionAfterStagingCrash (0.01s)
+=== RUN   TestInstallerRecoversCrashDuringRollback
+=== RUN   TestInstallerRecoversCrashDuringRollback/before-rollback-state
+=== RUN   TestInstallerRecoversCrashDuringRollback/after-rollback-state
+--- PASS: TestInstallerRecoversCrashDuringRollback (0.03s)
+    --- PASS: TestInstallerRecoversCrashDuringRollback/before-rollback-state (0.01s)
+    --- PASS: TestInstallerRecoversCrashDuringRollback/after-rollback-state (0.01s)
+=== RUN   TestInstallerDiskAndCompatibilityPreflightKeepOldBinary
+=== RUN   TestInstallerDiskAndCompatibilityPreflightKeepOldBinary/disk
+=== RUN   TestInstallerDiskAndCompatibilityPreflightKeepOldBinary/compatibility
+--- PASS: TestInstallerDiskAndCompatibilityPreflightKeepOldBinary (0.00s)
+    --- PASS: TestInstallerDiskAndCompatibilityPreflightKeepOldBinary/disk (0.00s)
+    --- PASS: TestInstallerDiskAndCompatibilityPreflightKeepOldBinary/compatibility (0.00s)
+=== RUN   TestInstallerDrainDeadlineFailureLeavesPreviousBinaryActive
+--- PASS: TestInstallerDrainDeadlineFailureLeavesPreviousBinaryActive (0.03s)
+=== RUN   TestServiceStopUnknownCannotActivateAndRecoveryUsesSameTransaction
+--- PASS: TestServiceStopUnknownCannotActivateAndRecoveryUsesSameTransaction (0.02s)
+=== RUN   TestServiceRollbackStopsCandidateBeforeRestoringBinary
+--- PASS: TestServiceRollbackStopsCandidateBeforeRestoringBinary (0.02s)
+=== RUN   TestServiceRollbackStopFailureRetainsDurableIntent
+--- PASS: TestServiceRollbackStopFailureRetainsDurableIntent (0.02s)
+=== RUN   TestServiceInstallerJournalLockAcrossInstances
+--- PASS: TestServiceInstallerJournalLockAcrossInstances (0.01s)
+=== RUN   TestServiceStaleActiveLinkCannotBeOverwritten
+--- PASS: TestServiceStaleActiveLinkCannotBeOverwritten (0.01s)
+=== RUN   TestSystemdServiceRejectsCommandInjectionAndUnselectedRelease
+--- PASS: TestSystemdServiceRejectsCommandInjectionAndUnselectedRelease (0.00s)
+=== RUN   TestForwardingProbeCannotUseQualificationOrInventEmptyRule
+--- PASS: TestForwardingProbeCannotUseQualificationOrInventEmptyRule (0.00s)
+=== RUN   TestServiceReleaseTargetCannotEscapeThroughDirectorySymlink
+--- PASS: TestServiceReleaseTargetCannotEscapeThroughDirectorySymlink (0.00s)
+=== RUN   TestServiceCrashAfterSelectionRecoversSameTransactionWithFreshWitness
+--- PASS: TestServiceCrashAfterSelectionRecoversSameTransactionWithFreshWitness (0.01s)
+=== RUN   TestServiceRecoveredCandidateDigestCannotBeChanged
+--- PASS: TestServiceRecoveredCandidateDigestCannotBeChanged (0.02s)
+=== RUN   TestServiceFullDiskCannotStopOrSelectCandidate
+--- PASS: TestServiceFullDiskCannotStopOrSelectCandidate (0.00s)
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/before-stage
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/staged
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/before-drain
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/after-drain
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/after-service-stop
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/before-activate
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/after-activate
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/before-health
+=== RUN   TestServiceCrashBoundariesRetainOneTransaction/healthy
+--- PASS: TestServiceCrashBoundariesRetainOneTransaction (0.09s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/before-stage (0.00s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/staged (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/before-drain (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/after-drain (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/after-service-stop (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/before-activate (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/after-activate (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/before-health (0.01s)
+    --- PASS: TestServiceCrashBoundariesRetainOneTransaction/healthy (0.01s)
+=== RUN   TestFailedHealthRollsBack
+--- PASS: TestFailedHealthRollsBack (0.00s)
+=== RUN   TestIrreversibleMigrationBlocksRollback
+--- PASS: TestIrreversibleMigrationBlocksRollback (0.00s)
+=== RUN   TestDrainReceivesBoundedContext
+--- PASS: TestDrainReceivesBoundedContext (0.02s)
+=== RUN   TestHealthFailureRestoresCompatibilitySnapshotBeforeRollback
+--- PASS: TestHealthFailureRestoresCompatibilitySnapshotBeforeRollback (0.00s)
+PASS
+ok  	vortex/agent/upgrade	(cached)
+=== RUN   TestCommandDispatchRejectsUnknownAndPrivateTokenLeaks
+--- PASS: TestCommandDispatchRejectsUnknownAndPrivateTokenLeaks (0.00s)
+=== RUN   TestEnrollCommandUsesLocalCSRAndRejectsSecondWriter
+--- PASS: TestEnrollCommandUsesLocalCSRAndRejectsSecondWriter (0.27s)
+=== RUN   TestUpgradePreflightReadsExistingSchemaWithoutMigrating
+--- PASS: TestUpgradePreflightReadsExistingSchemaWithoutMigrating (0.24s)
+PASS
+ok  	vortex/cmd/vortex-node	1.525s
