@@ -113,6 +113,13 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	mode, modeErr := stateValue(ctx, tx, "authority_mode")
+	if modeErr != nil && !errors.Is(modeErr, sql.ErrNoRows) {
+		return modeErr
+	}
+	if mode == AutonomyRecovering {
+		return ErrNewAuthorityInAutonomy
+	}
 	if d.ShareReferences != nil {
 		if _, err := delegationShareLeaves(d); err != nil {
 			return err
@@ -171,7 +178,7 @@ func issuerModeTx(ctx context.Context, tx *sql.Tx, now IssuerTime) (time.Time, t
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
-	if mode != AutonomyOnline && mode != AutonomyOffline {
+	if mode != AutonomyOnline && mode != AutonomyOffline && mode != AutonomyRecovering {
 		return time.Time{}, time.Time{}, ErrAuthorityExpired
 	}
 	if !now.Latest.Before(deadline) {

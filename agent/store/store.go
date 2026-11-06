@@ -488,7 +488,10 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if err := s.migrateUsageRetention(); err != nil {
 		return err
 	}
-	return s.migrateCredentialRevocations()
+	if err := s.migrateCredentialRevocations(); err != nil {
+		return err
+	}
+	return s.migrateRecoveryMode()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative

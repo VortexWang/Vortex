@@ -441,6 +441,9 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		cert, key := processCredential(t, dir, id, ca, der)
 		dbPath := filepath.Join(dir, fmt.Sprintf("hub%d.db", i))
 		args := []string{"--listen", addresses[i], "--db", dbPath, "--tls-cert", cert, "--tls-key", key, "--tls-ca", caPath, "--hub-id", id, "--region", "east"}
+		if i == 0 && strings.HasPrefix(renewalMode, "recovering-") {
+			args = append(args, recoveringHubArgs(t, ctx, dir, ca, der)...)
+		}
 		if i == 0 {
 			args = append(args, "--test-delegation-template", allocationPath, "--test-config-update", updatePath)
 			if renewalMode == "lost-result" {
@@ -449,10 +452,10 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			if renewalMode == "expiry-with-pending-result" {
 				args = append(args, "--test-hold-renewal-replies")
 			}
-			if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "upgrade-") {
+			if renewalMode == "hub-restart" || renewalMode == "node-restart" || strings.HasPrefix(renewalMode, "recovering-") || strings.HasPrefix(renewalMode, "upgrade-") {
 				restartArgs := append([]string(nil), args...)
 				restartHub = func() { first = start("vortex-test-hub", restartArgs...) }
-				if !strings.HasPrefix(renewalMode, "upgrade-") {
+				if !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
 					args = append(args, "--test-hold-renewal-replies")
 				}
 			}
@@ -482,7 +485,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		hubs = hubs[:1] // recovery must use the original issuer, never a fallback owner
 	}
 	lifecycle := map[string]any{"region": map[string]any{"region_id": "east", "hubs": hubs}, "dial_timeout_seconds": 1, "watchdog_seconds": 2, "failover_budget_seconds": 5, "retry_min_ms": 20, "retry_max_ms": 50}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
 		lifecycle["renew_percent"] = 30
 		lifecycle["renew_retry_min_ms"] = 1000
 	}
@@ -490,7 +493,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	controlPath := filepath.Join(dir, "control.json")
 	os.WriteFile(controlPath, controlRaw, 0600)
 	nodePath := filepath.Join(dir, "agent.db")
-	if strings.HasPrefix(renewalMode, "commands-") || strings.HasPrefix(renewalMode, "upgrade-") {
+	if strings.HasPrefix(renewalMode, "commands-") || strings.HasPrefix(renewalMode, "upgrade-") || strings.HasPrefix(renewalMode, "recovering-") {
 		seed, err := store.Open(nodePath, "agent")
 		if err != nil {
 			t.Fatal(err)
@@ -608,6 +611,10 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 			t.Fatalf("unexpected TCP frame type=%v payload=%q", frame.Type, frame.Payload)
 		}
 	}
+	if strings.HasPrefix(renewalMode, "recovering-") {
+		exerciseRecoveringProcess(t, ctx, dir, renewalMode, db, exchange, func() { killProcess(t, first); restartHub() })
+		return
+	}
 	if strings.HasPrefix(renewalMode, "upgrade-") {
 		freshConfig := func() {
 			// Protocol-test backend explicitly supplies fresh fenced configuration for
@@ -689,7 +696,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		exerciseUpgradeProcess(t, ctx, binaries, renewalMode, nodePath, peer, nodeArgs, nodeProcess, exchange, func(path string, args ...string) *exec.Cmd { freshConfig(); return start(path, args...) })
 		return
 	}
-	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") {
+	if renewalMode != "" && renewalMode != "identity-rotation" && !strings.HasPrefix(renewalMode, "commands-") && !strings.HasPrefix(renewalMode, "upgrade-") && !strings.HasPrefix(renewalMode, "recovering-") {
 		fault := func() bool {
 			return schedulerRenewalFault(t, ctx, db, dir, renewalMode, stream, exchange, func() {
 				killProcess(t, first)

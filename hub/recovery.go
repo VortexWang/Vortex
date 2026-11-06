@@ -31,10 +31,20 @@ func (i *Issuer) Recover(ctx context.Context, request store.HandoffRequest, back
 
 // ReplayLedger is bounded so continuous new traffic cannot starve recovery.
 // The next invocation resumes from persisted receipts without clearing debt.
-func (i *Issuer) ReplayLedger(ctx context.Context, backend LedgerBackend) error {
+func (i *Issuer) ReplayLedger(ctx context.Context, backend LedgerBackend) (resultErr error) {
 	if i == nil || i.Store == nil || backend == nil {
 		return fmt.Errorf("hub: ledger backend unavailable")
 	}
+	// A post-barrier tail error must not hold a confirmed finite prefix hostage.
+	// Completion still checks current time, signer ownership and all prefix holes
+	// transactionally, including on a lost/invalid later receipt.
+	defer func() {
+		if i.Clock != nil {
+			if _, err := i.Store.CompleteRecovery(ctx, i.Clock()); resultErr == nil {
+				resultErr = err
+			}
+		}
+	}()
 	records, err := i.Store.PendingLedger(ctx, 1000)
 	if err != nil {
 		return err

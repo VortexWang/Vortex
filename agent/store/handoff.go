@@ -151,7 +151,7 @@ func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime
 	if _, err = tx.ExecContext(ctx, `UPDATE issuer_epochs SET signer_epoch=?,state='open' WHERE hub_id=?`, strconv.FormatUint(r.ToEpoch, 10), r.HubID); err != nil {
 		return result, err
 	}
-	for key, value := range map[string]string{"backend_heartbeat": r.Heartbeat.UTC().Format(time.RFC3339Nano), "authority_mode": AutonomyOnline, "signer_epoch_open": "true"} {
+	for key, value := range map[string]string{"backend_heartbeat": r.Heartbeat.UTC().Format(time.RFC3339Nano), "authority_mode": AutonomyRecovering, "signer_epoch_open": "true"} {
 		if err = putState(ctx, tx, key, value, r.Heartbeat); err != nil {
 			return result, err
 		}
@@ -165,6 +165,12 @@ func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime
 	}
 	sum := sha256.Sum256(record)
 	if _, err = tx.ExecContext(ctx, `INSERT INTO hub_ledger(kind,record_id,payload,payload_sha256) VALUES('handoff',?,?,?)`, r.ID, record, sum[:]); err != nil {
+		return result, err
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO hub_recoveries(handoff_id,target_sequence,completed) SELECT ?,MAX(sequence),0 FROM hub_ledger`, r.ID); err != nil {
+		return result, err
+	}
+	if err = putState(ctx, tx, "recovery_handoff_id", r.ID, r.Heartbeat); err != nil {
 		return result, err
 	}
 	return result, tx.Commit()

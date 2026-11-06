@@ -12,6 +12,7 @@ const BackendLossGrace = 30 * time.Second
 
 const (
 	AutonomyOnline        = "online"
+	AutonomyRecovering    = "recovering"
 	AutonomyOffline       = "autonomous"
 	AutonomyExpired       = "expired"
 	AutonomyTimeUncertain = "time_uncertain"
@@ -91,6 +92,23 @@ func (s *Store) RecordBackendHeartbeat(ctx context.Context, heartbeat, hardDeadl
 			return ErrAuthorityHandoffRequired
 		}
 	}
+	// Reconnect can refresh liveness, never the frozen recovery scope/deadline.
+	if mode == AutonomyRecovering {
+		deadline := deadlineFromTx(ctx, tx)
+		if deadline.IsZero() {
+			return ErrAuthorityTimeUncertain
+		}
+		if hardDeadline.Before(deadline) {
+			deadline = hardDeadline
+		}
+		if err := putState(ctx, tx, "backend_heartbeat", heartbeat.UTC().Format(time.RFC3339Nano), heartbeat); err != nil {
+			return err
+		}
+		if err := putState(ctx, tx, "autonomy_deadline", deadline.UTC().Format(time.RFC3339Nano), heartbeat); err != nil {
+			return err
+		}
+		return tx.Commit()
+	}
 	from := modeOrOnline(mode)
 	if err := putState(ctx, tx, "backend_heartbeat", heartbeat.UTC().Format(time.RFC3339Nano), heartbeat); err != nil {
 		return err
@@ -149,6 +167,16 @@ func (s *Store) CurrentAutonomyStatus(ctx context.Context, now time.Time, truste
 	switch mode {
 	case AutonomyExpired:
 		status.Mode = AutonomyExpired
+	case AutonomyRecovering:
+		status.Mode = AutonomyRecovering
+		if !now.Before(deadline) {
+			if err := s.transitionAutonomy(ctx, AutonomyRecovering, AutonomyExpired, now, heartbeat, deadline); err != nil {
+				return AutonomyStatus{}, err
+			}
+			status.Mode = AutonomyExpired
+		} else if now.Before(heartbeat) {
+			status.Mode = AutonomyTimeUncertain
+		}
 	case AutonomyOffline:
 		if !now.Before(deadline) {
 			if err := s.transitionAutonomy(ctx, AutonomyOffline, AutonomyExpired, now, heartbeat, deadline); err != nil {
@@ -187,13 +215,13 @@ func (s *Store) CurrentAutonomyStatus(ctx context.Context, now time.Time, truste
 	if err != nil {
 		return AutonomyStatus{}, err
 	}
-	if status.Mode != AutonomyOnline && status.SignerEpochOpen {
+	if status.Mode != AutonomyOnline && status.Mode != AutonomyRecovering && status.SignerEpochOpen {
 		return AutonomyStatus{}, ErrSignerEpochOpenInAutonomy
 	}
 	if status.Mode == AutonomyOnline {
 		status.AllowsNewAuthorization = status.SignerEpochOpen
 		status.AllowsExistingRenewal = true
-	} else if status.Mode == AutonomyOffline && now.Before(deadline) {
+	} else if (status.Mode == AutonomyOffline || status.Mode == AutonomyRecovering) && now.Before(deadline) {
 		status.AllowsExistingRenewal = true
 	}
 	return status, nil
@@ -219,7 +247,7 @@ func (s *Store) CheckAuthorization(ctx context.Context, now time.Time, trustedCl
 	if status.Mode == AutonomyOffline && status.SignerEpochOpen {
 		return ErrSignerEpochOpenInAutonomy
 	}
-	if status.Mode == AutonomyOffline {
+	if status.Mode == AutonomyOffline || status.Mode == AutonomyRecovering {
 		return ErrNewAuthorityInAutonomy
 	}
 	return nil

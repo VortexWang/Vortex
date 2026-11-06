@@ -36,6 +36,9 @@ func main() {
 	reportPath := flag.String("test-report-output", "", "test-only latest observational node report; overwritten atomically")
 	dropRenewal := flag.Bool("test-drop-first-renewal-reply", false, "test-only lost renewal result after durable commit")
 	holdRenewal := flag.Bool("test-hold-renewal-replies", false, "test-only crash barrier: retain results without sending replies")
+	recoveryRequest := flag.String("test-recovery-request", "", "test-only offline handoff JSON path; not production provisioning")
+	recoveryBackend := flag.String("test-recovery-backend", "", "test-only mutual TLS ledger backend URL")
+	recoveryBackendName := flag.String("test-recovery-backend-name", "", "test backend certificate identity")
 	flag.Parse()
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
@@ -138,6 +141,12 @@ func main() {
 			d := sessionDelegation(node, boot)
 			return issuer.Issue(ctx, d.ID, node, boot, d.ID, 8192, time.Minute)
 		}
+	}
+	if *recoveryRequest != "" {
+		if *recoveryBackend == "" || *recoveryBackendName == "" {
+			panic("test recovery requires backend and exact TLS identity")
+		}
+		go runTestRecovery(ctx, s, *hubID, *recoveryRequest, *recoveryBackend, *recoveryBackendName, cert, pool)
 	}
 	if err := server.ServeGRPC(ctx, ln, config); err != nil && ctx.Err() == nil {
 		panic(err)

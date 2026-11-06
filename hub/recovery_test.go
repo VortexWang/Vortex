@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -106,4 +107,73 @@ func TestRecoveryReplaysDurablePrefixAndTailAfterLostACK(t *testing.T) {
 	if _, err = issuer.Recover(ctx, h, backend); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// The backend here is a protocol test boundary, never production authority.
+func TestRecoveryBoundedReplayReachesCapturedBarrierWithLiveTail(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	now := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
+	d := store.HubDelegation{ID: "550e8400-e29b-41d4-a716-446655440100", HubID: "550e8400-e29b-41d4-a716-446655440101", SourceID: "550e8400-e29b-41d4-a716-446655440102", RuntimeSourceID: "550e8400-e29b-41d4-a716-446655440103", ShareSourceID: "550e8400-e29b-41d4-a716-446655440104", NodeID: "550e8400-e29b-41d4-a716-446655440105", BootID: "550e8400-e29b-41d4-a716-446655440106", BillingSnapshotID: "550e8400-e29b-41d4-a716-446655440107", RuleID: "rule", RuleRevision: 1, PathGeneration: 3, FencingFloor: 3, SignerEpoch: 1, RawBytes: 1024, RateBPS: 100000, Connections: 1, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(2 * time.Hour)}
+	clock := store.IssuerTime{Earliest: now.Add(time.Second), Latest: now.Add(2 * time.Second), Trusted: true}
+	if err = s.InstallHubDelegation(ctx, d, clock); err != nil {
+		t.Fatal(err)
+	}
+	appendTail := func(n int) {
+		t.Helper()
+		if err := s.PersistUsageLedger(ctx, store.UsageBatch{NodeID: d.NodeID, BootID: d.BootID, BatchID: fmt.Sprint(n), SnapshotID: d.BillingSnapshotID, Payload: []byte(fmt.Sprint(n))}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for n := 0; n < 1001; n++ {
+		appendTail(n)
+	}
+	h := store.HandoffRequest{ID: "550e8400-e29b-41d4-a716-446655440800", HubID: d.HubID, FromEpoch: 1, ToEpoch: 2, Heartbeat: now.Add(time.Minute)}
+	clock = store.IssuerTime{Earliest: h.Heartbeat, Latest: h.Heartbeat.Add(time.Second), Trusted: true}
+	if _, err = s.HandoffHub(ctx, h, clock); err != nil {
+		t.Fatal(err)
+	}
+	issuer := &Issuer{Store: s, HubID: d.HubID, Clock: func() store.IssuerTime { return clock }}
+	tailIndex := 0
+	backend := &appendingLedgerBackend{appendTail: func() { appendTail(2000 + tailIndex); tailIndex++ }, records: map[int64][]byte{}, failAfter: 1002}
+	if err = issuer.ReplayLedger(ctx, backend); err != nil {
+		t.Fatal(err)
+	}
+	v, err := s.HubControlSnapshot(ctx, d.HubID, clock.Latest)
+	if err != nil || v.Mode != store.AutonomyRecovering || v.Confirmed != 1000 {
+		t.Fatalf("first bound %+v %v", v, err)
+	}
+	if err = issuer.ReplayLedger(ctx, backend); err == nil {
+		t.Fatal("post-barrier tail receipt unexpectedly available")
+	}
+	v, err = s.HubControlSnapshot(ctx, d.HubID, clock.Latest)
+	if err != nil || v.Mode != store.AutonomyOnline || v.Pending == 0 {
+		t.Fatalf("barrier/tail %+v %v", v, err)
+	}
+}
+
+type appendingLedgerBackend struct {
+	appendTail func()
+	records    map[int64][]byte
+	next       int
+	failAfter  int
+}
+
+func (b *appendingLedgerBackend) AcceptLedger(ctx context.Context, r store.LedgerRecord) ([]byte, error) {
+	if b.failAfter > 0 && b.next >= b.failAfter {
+		return nil, errors.New("lost post-barrier tail receipt")
+	}
+	// Persisted acceptance is modeled by the existing FULL backend test above;
+	// this fixture isolates finite replay batching and adds tail every delivery.
+	if p, ok := b.records[r.Sequence]; ok && !bytes.Equal(p, r.Payload) {
+		return nil, errors.New("conflict")
+	}
+	b.records[r.Sequence] = append([]byte(nil), r.Payload...)
+	b.next++
+	b.appendTail()
+	return r.Digest, nil
 }
