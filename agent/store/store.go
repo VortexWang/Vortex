@@ -253,6 +253,12 @@ CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
  direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
  FOREIGN KEY(node_id,batch_id) REFERENCES usage_reservations(node_id,batch_id)
 );
+CREATE TABLE IF NOT EXISTS runtime_funding_requests (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, minimum_bytes TEXT NOT NULL,
+ preferred_bytes TEXT NOT NULL, allocated_bytes TEXT NOT NULL, idle_digest TEXT NOT NULL,
+ PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,batch_id) REFERENCES runtime_funding_blocks(node_id,batch_id)
+);
 CREATE TABLE IF NOT EXISTS runtime_block_checkpoints (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, block_id TEXT NOT NULL,
  prior_reserved TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),

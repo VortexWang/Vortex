@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -10,7 +12,10 @@ import (
 	"time"
 )
 
-type runtimeChoices struct{ grant, runtime, share AuthorizationRecord }
+type runtimeChoices struct {
+	grant, runtime, share AuthorizationRecord
+	available             uint64
+}
 
 // Same-session renewal keeps the initial source/issuer/epoch and absolute
 // limits. It never interprets a new lease as proof of ownership transfer.
@@ -121,6 +126,7 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 			if remaining < minimum {
 				continue
 			}
+			result.available = remaining
 		}
 		selected[r.Kind] = r
 	}
@@ -141,7 +147,7 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 // bytes atomically. Its snapshot and initial ownership are immutable; changing
 // the selected IDs never moves old usage holds or refunds their liabilities.
 func (s *Store) ReserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse) (string, error) {
-	return s.reserveRuntimeUsage(ctx, r, scope, false)
+	return s.reserveRuntimeUsage(ctx, r, scope, false, nil)
 }
 
 // ReserveRuntimeFundingBlock reserves money, not permission to forward bytes.
@@ -152,10 +158,43 @@ func (s *Store) ReserveRuntimeFundingBlock(ctx context.Context, r UsageReservati
 	if s.owner != "agent" || r.Reserved > 4<<20 {
 		return "", ErrAuthorizationDenied
 	}
-	return s.reserveRuntimeUsage(ctx, r, scope, true)
+	return s.reserveRuntimeUsage(ctx, r, scope, true, nil)
 }
 
-func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool) (result string, resultErr error) {
+// ReserveRuntimeFundingBlockUpTo selects at least minimum and at most the
+// requested preferred size in the same transaction as the funding debit.
+// The result is funding only; write admission remains mandatory. Exact retries
+// retain their original bounds and allocated size, never allocate again.
+func (s *Store) ReserveRuntimeFundingBlockUpTo(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64) (UsageReservation, error) {
+	return s.ReserveRuntimeFundingBlockReplacingIdle(ctx, r, scope, minimum, nil)
+}
+
+// ReserveRuntimeFundingBlockReplacingIdle atomically returns caller-proven idle
+// same-session tails and reserves replacement funding. The exclusive allocator
+// must join all writers before listing a tail. Failed allocation returns none.
+func (s *Store) ReserveRuntimeFundingBlockReplacingIdle(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation) (UsageReservation, error) {
+	if len(idle) > 1 || s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 {
+		return UsageReservation{}, ErrAuthorizationDenied
+	}
+	encoded, _ := json.Marshal(idle)
+	digest := fmt.Sprintf("%x", sha256.Sum256(encoded))
+	bounds := &fundingBlockRange{minimum: minimum, preferred: r.Reserved, idle: idle, idleDigest: digest}
+	id, err := s.reserveRuntimeUsage(ctx, r, scope, true, bounds)
+	if err != nil {
+		return UsageReservation{}, err
+	}
+	r.AuthorizationID = id
+	r.Reserved = bounds.allocated
+	return r, nil
+}
+
+type fundingBlockRange struct {
+	minimum, preferred, allocated uint64
+	idle                          []UsageReservation
+	idleDigest                    string
+}
+
+func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool, bounds *fundingBlockRange) (result string, resultErr error) {
 	started := time.Now()
 	stage := "validate"
 	defer func() {
@@ -218,6 +257,34 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		if blockSession.Valid != fundingBlock || fundingBlock && (blockSession.String != scope.SessionID || blockDirection.String != r.Direction) {
 			return "", ErrUsageBatchConflict
 		}
+		if fundingBlock {
+			var minimum, preferred, allocated, idleDigest string
+			requestErr := tx.QueryRowContext(ctx, `SELECT minimum_bytes,preferred_bytes,allocated_bytes,idle_digest FROM runtime_funding_requests WHERE node_id=? AND batch_id=?`, r.NodeID, r.BatchID).Scan(&minimum, &preferred, &allocated, &idleDigest)
+			if bounds == nil {
+				if requestErr == nil {
+					return "", ErrUsageBatchConflict
+				}
+				if !errors.Is(requestErr, sql.ErrNoRows) {
+					return "", requestErr
+				}
+			} else {
+				if requestErr != nil {
+					if errors.Is(requestErr, sql.ErrNoRows) {
+						return "", ErrUsageBatchConflict
+					}
+					return "", requestErr
+				}
+				if minimum != strconv.FormatUint(bounds.minimum, 10) || preferred != strconv.FormatUint(bounds.preferred, 10) || idleDigest != bounds.idleDigest {
+					return "", ErrUsageBatchConflict
+				}
+				amount, err := strconv.ParseUint(allocated, 10, 64)
+				if err != nil || amount < bounds.minimum || amount > bounds.preferred {
+					return "", ErrUsageBatchConflict
+				}
+				r.Reserved = amount
+				bounds.allocated = amount
+			}
+		}
 		held, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, heldID)
 		if err != nil {
 			return "", err
@@ -246,6 +313,23 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	if !errors.Is(err, sql.ErrNoRows) {
 		return "", err
 	}
+	if bounds != nil {
+		for _, tail := range bounds.idle {
+			if tail.NodeID != r.NodeID || tail.BootID != r.BootID || tail.FlowKey != r.FlowKey || tail.RuleID != r.RuleID || tail.SnapshotID != r.SnapshotID || tail.Direction == r.Direction || tail.BatchID == r.BatchID {
+				return "", ErrUsageBatchConflict
+			}
+			var session string
+			if err := tx.QueryRowContext(ctx, `SELECT session_id FROM runtime_funding_blocks WHERE node_id=? AND batch_id=?`, tail.NodeID, tail.BatchID).Scan(&session); err != nil {
+				return "", err
+			}
+			if session != scope.SessionID {
+				return "", ErrUsageBatchConflict
+			}
+			if err := settleUsageReservationTx(ctx, tx, tail, "returned", 0, nil, 0, nil); err != nil {
+				return "", err
+			}
+		}
+	}
 	if fundingBlock {
 		// One unresolved block per direction, plus a per-node durable cap.
 		// Resolved rows remain as immutable replay evidence, not live capacity.
@@ -259,9 +343,20 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	}
 	scope.ExistingSession = true
 	stage = "select-authority"
-	chosen, err := selectRuntimeAuthorityTx(ctx, tx, scope, r.Reserved, &initial)
+	minimum := r.Reserved
+	if bounds != nil {
+		minimum = bounds.minimum
+	}
+	chosen, err := selectRuntimeAuthorityTx(ctx, tx, scope, minimum, &initial)
 	if err != nil {
 		return "", err
+	}
+	if bounds != nil {
+		r.Reserved = bounds.preferred
+		if chosen.available < r.Reserved {
+			r.Reserved = chosen.available
+		}
+		bounds.allocated = r.Reserved
 	}
 	stage = "check-session-limit"
 	var count uint64
@@ -288,6 +383,11 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	if fundingBlock {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_funding_blocks(node_id,batch_id,session_id,direction) VALUES(?,?,?,?)`, r.NodeID, r.BatchID, scope.SessionID, r.Direction); err != nil {
 			return "", err
+		}
+		if bounds != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_funding_requests(node_id,batch_id,minimum_bytes,preferred_bytes,allocated_bytes,idle_digest) VALUES(?,?,?,?,?,?)`, r.NodeID, r.BatchID, strconv.FormatUint(bounds.minimum, 10), strconv.FormatUint(bounds.preferred, 10), strconv.FormatUint(r.Reserved, 10), bounds.idleDigest); err != nil {
+				return "", err
+			}
 		}
 	}
 	stage = "commit"

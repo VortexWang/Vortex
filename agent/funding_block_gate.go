@@ -124,29 +124,15 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 			return nil, nil, s.fail(err)
 		}
 		r := store.UsageReservation{NodeID: s.inner.gate.node.NodeID, BootID: s.inner.gate.node.BootID, BatchID: id, FlowKey: s.inner.flowKey, RuleID: use.RuleID, SnapshotID: use.BillingSnapshotID, Direction: dir, Reserved: s.size}
-		grant, err := s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
-		reclaimed := false
-		if errors.Is(err, store.ErrAuthorizationDenied) {
-			// The opposite direction may hold proven-unused credit from this
-			// same session. Return it before requesting more funding; never
-			// reclaim in-flight or uncertain bounds.
-			for otherDirection, other := range s.blocks {
-				if otherDirection == direction || other.inFlight != 0 || other.poisoned {
-					continue
-				}
-				if releaseErr := s.release(ctx, other); releaseErr != nil {
-					return nil, nil, s.fail(releaseErr)
-				}
-				delete(s.blocks, otherDirection)
-				reclaimed = true
+		var idle []store.UsageReservation
+		var idleDirection accounting.Direction
+		for otherDirection, other := range s.blocks {
+			if otherDirection != direction && other.inFlight == 0 && !other.poisoned {
+				idle = append(idle, other.reservation)
+				idleDirection = otherDirection
 			}
 		}
-		// A target is a bounded preference, not a requirement to strand usable
-		// scoped credit. Both attempts retain the same authority checks.
-		if errors.Is(err, store.ErrAuthorizationDenied) && (reclaimed || r.Reserved > uint64(n)) {
-			r.Reserved = uint64(n)
-			grant, err = s.inner.gate.node.Store.ReserveRuntimeFundingBlock(ctx, r, use)
-		}
+		funded, err := s.inner.gate.node.Store.ReserveRuntimeFundingBlockReplacingIdle(ctx, r, use, uint64(n), idle)
 		if errors.Is(err, store.ErrAuthorizationDenied) {
 			// A UDP response can arrive before the outbound write's commit
 			// callback takes the mutex. Wait for that known in-flight bound
@@ -160,8 +146,11 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		if err != nil {
 			return nil, nil, s.admissionError(err)
 		}
-		r.AuthorizationID = grant
-		b = &sessionFundingBlock{reservation: r}
+		if len(idle) > 0 {
+			s.stopIdle(s.blocks[idleDirection])
+			delete(s.blocks, idleDirection)
+		}
+		b = &sessionFundingBlock{reservation: funded}
 		s.blocks[direction] = b
 		s.armIdle(direction, b)
 	}

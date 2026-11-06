@@ -1302,3 +1302,27 @@ b41827d66884272766255a247d2a04ce2f6f8b6e0705aae565c839f31068f993.
 04-22-NATIVE-BLOCK-ATTEMPTS.json records measured SHAs and file hashes.
 Socket maxima stayed 212992. No timeout increase, kernel tuning or protocol
 change was made. D-04 and full native block qualification remain open.
+
+## Atomic preferred/minimum block selection and idle replacement
+
+ReserveRuntimeFundingBlockUpTo selects a live grant with at least the write
+minimum, then reserves min(preferred, available) inside the same transaction.
+The chosen amount comes from the balance already read during authority
+selection. Durable request metadata pins minimum, preferred, allocated amount
+and the idle-return request digest. Exact retries retain the old allocation;
+changed bounds, changed return identities and strict-mode replay are rejected.
+
+ReserveRuntimeFundingBlockReplacingIdle returns at most one proven-idle
+opposite-direction same-session tail in that transaction before selecting new
+funding. Failure rolls back both the return and replacement. Agent supplies only
+joined, non-poisoned tails and removes them from memory only after commit.
+This removes separate target-size failure, tail-return commit and smaller-size
+retry transactions from the new-block path. Per-write rate admission and the
+200 ms deadline remain unchanged.
+
+Initial Agent real renewal/funding race PASS 31.309s; after adding request
+digest pinning, Store funding/admission race PASS 3.967s and Agent/Hub vet PASS.
+Tests include below-target allocation, idempotency, request mutation, strict
+replay rejection, impossible replacement rollback, injected request-marker
+failure and exact final conservation. Native confirmation and full regression
+for the final commit remain required. No D-04 parameter selection is claimed.
