@@ -192,8 +192,7 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 			return err
 		}
 	}
-	lastControlSequence := uint64(0)
-	seenControlIDs := make(map[string]struct{})
+	var replayGuard controlReplayGuard
 	// Only this loop sends messages; gRPC permits one concurrent receiver, but
 	// not multiple senders. Periodic outbox delivery shares sequence ordering
 	// with config responses and never races an authorization update.
@@ -275,14 +274,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		if recvErr != nil {
 			return fmt.Errorf("agent: receive control message: %w", recvErr)
 		}
-		if message.GetSequence() == 0 || message.GetSequence() <= lastControlSequence || !canonicalUUID(message.GetMessageId()) {
-			return fmt.Errorf("agent: invalid control message identity or sequence")
+		if err := replayGuard.accept(message.GetSequence(), message.GetMessageId()); err != nil {
+			return err
 		}
-		if _, duplicate := seenControlIDs[message.GetMessageId()]; duplicate {
-			return fmt.Errorf("agent: duplicate control message id")
-		}
-		seenControlIDs[message.GetMessageId()] = struct{}{}
-		lastControlSequence = message.GetSequence()
 		switch body := message.GetBody().(type) {
 		case *controlv1.ControlMessage_ConfigUpdate:
 			result := c.applyConfig(ctx, body.ConfigUpdate)

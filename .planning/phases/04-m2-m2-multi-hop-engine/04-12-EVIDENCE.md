@@ -755,3 +755,23 @@ Targeted seal/proof race tests PASS; full Agent/Hub race and vet PASS; diff chec
 PASS. No production behavior or frozen contract changed. The unapproved 1.4.0
 proposal remains pending; this independent local seal invariant is required
 regardless of any future return wire protocol. D-04 remains unlocked.
+
+## Bounded control response replay state for sustained sessions
+
+Inspection found ControlClient kept every response message UUID in an unbounded
+per-connection map. Continuous usage ACKs and adaptive demands could grow it
+indefinitely. controlReplayGuard now enforces a 4096-ID hard bound while retaining
+all earlier IDs for duplicate detection. Invalid sequence/UUID, duplicate IDs,
+and messages past the bound are rejected before business application and do not
+mutate the guard. Connect exits and its existing cancellation/connection cleanup
+runs; Run uses the existing bounded reconnect backoff. No old IDs are evicted to
+silently weaken replay checks. Durable demand/outbox identities remain the
+cross-connection recovery mechanism; the bound itself grants no authority.
+
+Tests fill the exact bound, retry the oldest ID with a newer sequence, submit
+100 additional unique IDs, assert unchanged bounded state, and verify malformed
+or stale messages cannot poison the next valid sequence. Full Agent/Hub race and
+vet PASS, including real TLS lost-success/lost-denial recovery and funded TCP/UDP
+renewal; diff check PASS. The guard is connection-local resource protection, not
+a new frozen wire message. Sustained-load reconnect latency at this boundary
+still requires measurement; no throughput or full availability claim is made.
