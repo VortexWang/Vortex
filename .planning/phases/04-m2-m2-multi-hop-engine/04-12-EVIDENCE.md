@@ -1892,3 +1892,25 @@ incomplete evidence and must not be treated as successful capture. Profiling
 adds overhead and is diagnostic only. Default runtime parameters and SQLite FULL
 remain unchanged. CLI tests cover disabled mode, fresh-directory capture and
 refusal to overwrite prior evidence. Native profile capture is the next step.
+
+## Native CPU/block capture and same-transaction read deduplication
+
+Clean c18eadac04291f0276dc80154aefbd988e076df6 dedicated-host instrumented
+16-stream process run failed again (0.429s) and gracefully emitted all profiles.
+Artifacts: artifacts/phase4/profile-c18eada, including matching node-real binary.
+CPU capture duration 379.94ms, 400ms samples; Tx queries account for 170ms
+(42.5%), initial funding reservation path 150ms (37.5%). Block capture shows
+DB.conn 3.37s cumulative wait and BeginTx 3.25s; these are aggregate goroutine
+waits, not single-operation latency. Startup/shutdown are included, and short
+sampling means these percentages must not be treated as precise steady-state
+attribution. CPU SHA-256 aec68704f84c51babbd4de4354b52a286390fe1b99de39b375440daf3011e482;
+block 5f2e4baad23cf61b8057395635b2dc1993edd1646cca5106953bd40234229e52;
+mutex 4765f79a47505d1595f2949e9d401eb72582ab52b1883381da0300e8ed126bfb.
+
+Removed one redundant authorization-record query per examined candidate:
+selectRuntimeAuthorityTx already reads the record and state, so it now passes
+that same-transaction value to a private validation helper. All original scope,
+trusted-time, state, lineage, deadline, lease and session checks remain; no
+cross-transaction authority cache exists. Ordinary callers still read then
+validate normally. Full Store race PASS 17.353s. This is a bounded query reduction,
+not proof the native deadline is fixed; clean native retest remains required.

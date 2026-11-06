@@ -86,6 +86,18 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 	if err != nil {
 		return AuthorizationRecord{}, err
 	}
+	return checkReadAuthorizationTx(ctx, tx, use, record, state)
+}
+
+// Only accepts a record read from this same transaction. It does not cache
+// authority across transactions or skip lineage, time, lease or session checks.
+func checkReadAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse, record AuthorizationRecord, state string) (AuthorizationRecord, error) {
+	if !use.TrustedTime || use.Earliest.IsZero() || use.Latest.Before(use.Earliest) {
+		return AuthorizationRecord{}, ErrAuthorityTimeUncertain
+	}
+	if use.NodeID == "" || use.BootID == "" || use.AuthorizationID == "" || use.Kind == "" || use.RuleID == "" || use.RuleRevision == 0 || use.PathGeneration == 0 || record.AuthorizationID != use.AuthorizationID {
+		return AuthorizationRecord{}, ErrAuthorizationDenied
+	}
 	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || (record.Kind == "credit_grant" || record.BillingSnapshotID != "") && record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
 	}

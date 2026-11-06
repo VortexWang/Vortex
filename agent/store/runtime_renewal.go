@@ -86,7 +86,7 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 		if selected["credit_grant"].AuthorizationID != "" && selected["runtime_lease"].AuthorizationID != "" && selected["share_lease"].AuthorizationID != "" {
 			break
 		}
-		r, _, err := readAuthorizationTx(ctx, tx, scope.NodeID, c.id)
+		r, state, err := readAuthorizationTx(ctx, tx, scope.NodeID, c.id)
 		if err != nil {
 			return result, err
 		}
@@ -108,7 +108,7 @@ func selectRuntimeAuthorityTx(ctx context.Context, tx *sql.Tx, scope Authorizati
 		if scope.BillingSnapshotID == "" {
 			use.BillingSnapshotID = r.BillingSnapshotID
 		}
-		if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
+		if _, err := checkReadAuthorizationTx(ctx, tx, use, r, state); err != nil {
 			if errors.Is(err, ErrAuthorizationDenied) {
 				continue
 			}
