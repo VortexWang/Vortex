@@ -374,3 +374,36 @@ func TestFundingBlockGateResponseWaitsForOutboundCheckpoint(t *testing.T) {
 		t.Fatalf("response conservation: %+v", b)
 	}
 }
+
+func TestFundingBlockGateAdmissionDeadlineWhileAllocatorBusy(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	s.mu.Lock()
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { _, err := s.Reserve(ctx, accounting.LeftToRight, 1); done <- err }()
+	select {
+	case err := <-done:
+		if err != context.DeadlineExceeded {
+			t.Fatalf("deadline: %v", err)
+		}
+	case <-time.After(time.Second):
+		s.mu.Unlock()
+		t.Fatal("allocator lock ignored admission cancellation")
+	}
+	s.mu.Unlock()
+	b, err := s.Reserve(context.Background(), accounting.LeftToRight, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := b.Return(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if balance := fundingBalance(t, n); balance.Remaining != 4096 || balance.Reserved != 0 {
+		t.Fatalf("canceled queue changed funds: %+v", balance)
+	}
+}

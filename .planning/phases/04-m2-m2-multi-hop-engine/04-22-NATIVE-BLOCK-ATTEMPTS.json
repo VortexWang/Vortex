@@ -171,6 +171,21 @@
         "trial-3/runtime-block-2-rounds-2-delay-true-ledgers.json": "073c921d86ba85ee4f0340fc0de5f69f2e63981621287104ebccc624eb99b8b0",
         "trial-3.log": "e0e8e17f0012dc2d80b0de6b7daf6104aabb9046ad8cf81c57ba7c1e7edd3ba8"
       }
+    },
+    {
+      "directory": "artifacts/phase4/concurrency-f64d74a",
+      "sha": "f64d74ac6e537045ba057a07fe104c6797d2c963",
+      "exit_code": 1,
+      "passes": 0,
+      "failures": 20,
+      "archive_sha256": "a5df879475660a268565f292341f08944079aba813827cad988a8f62eae3fb55",
+      "files": {
+        "exit-code": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "launcher.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "race.log": "c8f64d4467b184e9f8bb3b08ea3cc1b3b7d5444de3502663d456c489bebef43e",
+        "sha": "113c6a7238356b3ff0998fa13c5e8933ce212f2d5b1d7aff5066c44afce8d630",
+        "status": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
     }
   ]
 }

@@ -1407,3 +1407,27 @@ Full Store race PASS 14.830s; Agent funding and real block renewal race PASS
 grant, current runtime and current share separately; every next admission fails
 without changing rate tokens (targeted race PASS 3.598s). Vet/diff PASS. Native
 concurrency verification is still required; the prior failure remains open.
+
+## Native distinct-authority concurrency test: 0/20 pass
+
+Clean f64d74ac6e537045ba057a07fe104c6797d2c963 on the dedicated host failed
+all 20 repetitions of TestFundingBlockGateConcurrentShortWritesAndClose,
+17.184s total. Query deduplication alone does not meet concurrent admission
+latency. Logs include admissions returning after 536ms while queued on the
+ordinary mutex, despite their 200ms context budget. Archive verified:
+a5df879475660a268565f292341f08944079aba813827cad988a8f62eae3fb55.
+04-22 manifest retains raw hashes; this failure remains open.
+
+Allocator ownership now uses a context-aware mutex for admission. Canceled
+queue waits return without changing funds or faulting unrelated requests.
+Settlement/close still acquire ownership without dropping liabilities. A test
+holds the allocator locked until a 20ms admission cancels, then proves another
+valid admission succeeds and all funds reconcile. Funding-gate race PASS
+3.117s; Agent/Hub vet and diff PASS. This corrects cancellation semantics, not
+the underlying serialized FULL-commit throughput. Bounded batch admission and
+rate/checkpoint persistence design remain required before native concurrency
+and D-04 can be claimed.
+
+After the cancellation change, real ordinary/delayed TCP/UDP block renewal
+race PASS locally 29.977s. Native cancellation and full regression remain
+unrun for this final change; no native concurrency closure is claimed.

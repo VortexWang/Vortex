@@ -44,7 +44,7 @@ type sessionFundingBlock struct {
 	idleGeneration uint64
 }
 type fundingBlockSession struct {
-	mu          sync.Mutex
+	mu          fundingContextMutex
 	inner       *authorizationSession
 	size        uint64
 	blocks      map[accounting.Direction]*sessionFundingBlock
@@ -98,7 +98,9 @@ func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.
 	}
 }
 func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.Direction, n int64) (*accounting.Batch, <-chan struct{}, error) {
-	s.mu.Lock()
+	if err := s.mu.LockContext(ctx); err != nil {
+		return nil, nil, err
+	}
 	defer s.mu.Unlock()
 	if s.closed || s.inner.gate.isFaulted() || n <= 0 || uint64(n) > s.size {
 		return nil, nil, accounting.ErrDenied
@@ -299,3 +301,29 @@ func (s *fundingBlockSession) Close() error {
 	// callbacks release tails only after every writer has resolved.
 	return errors.Join(result, s.inner.Close())
 }
+
+// A queued admission must honor its original deadline before it owns the
+// allocator. Settlement and close retain blocking ownership to preserve bounds.
+type fundingContextMutex struct {
+	once  sync.Once
+	token chan struct{}
+}
+
+func (m *fundingContextMutex) LockContext(ctx context.Context) error {
+	m.once.Do(func() { m.token = make(chan struct{}, 1) })
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	select {
+	case m.token <- struct{}{}:
+		if err := ctx.Err(); err != nil {
+			<-m.token
+			return err
+		}
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+func (m *fundingContextMutex) Lock()   { _ = m.LockContext(context.Background()) }
+func (m *fundingContextMutex) Unlock() { <-m.token }
