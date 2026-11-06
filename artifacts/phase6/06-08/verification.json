@@ -1,35 +1,27 @@
 {
   "status": "blocked",
-  "source_commit": "6a661137160000a9401920744170f07560353832",
+  "source_commit": "838c7391561d945f6e006f1a2dd7460c3fe89e84",
   "docker": {
-    "status": "passed",
-    "architecture": "linux/arm64 native OrbStack",
-    "normal": true,
-    "race": true,
-    "real_processes": true,
-    "clean_committed_clone": true,
-    "tests": [
-      "TestValkeyLossRebuildAllProducedAuthority",
-      "TestTracerRealProcesses",
-      "TestTenantRepositoryScopeAndPlatformAudit",
-      "TestTenantRestrictionsIndependentAndImmutable",
-      "TestTenantPlatformOwnershipGrant",
-      "TestTenantAuditRollbackSharedAuthority",
-      "TestMigrationUpgradeTenantAuthority"
-    ]
+    "commit": "838c7391561d945f6e006f1a2dd7460c3fe89e84",
+    "result": 0,
+    "source": "/tmp/vortex-phase6-clean.WOZLfl/source",
+    "source_clean": true,
+    "actions": "not_run"
   },
   "dependency_gate": {
-    "status": "blocked",
     "exit_code": 1,
-    "reason": "sqlc official generator links non-allowlisted MPL-2.0 mysql driver",
-    "protoc_checksum": "passed",
-    "goose_module_checksum": "passed",
-    "sqlc_checksum_and_two_generation_cmp": "passed",
-    "backend_compiled_license_closure": "24 modules reviewed; Linux amd64/arm64 and host",
-    "generator_full_closure": "not passed"
+    "status": "blocked",
+    "approved_exception": "CR-003",
+    "pending_decision": "CR-004",
+    "findings": [
+      "MIT-0",
+      "GPL-2.0-or-later WITH Bison-exception-2.2"
+    ],
+    "unresolved_source_gaps": [],
+    "evidence": "artifacts/phase6/06-08/838c7391/license"
   },
   "actions": "not_run",
   "caller_checkout_clean": false,
-  "source_balances": "not produced until 06-05; WINDOWS entry remains open",
+  "source_balances": "not produced until 06-05; WINDOWS entry 1 remains open",
   "hub_signer": "blocked; epoch zero; funded forwarding not tested"
 }
