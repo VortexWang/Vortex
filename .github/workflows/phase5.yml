@@ -59,6 +59,8 @@ jobs:
         run: |
           git ls-files --others --exclude-standard
           make phase5-check
+      - name: Verify consolidated evidence manifest
+        run: python3 -m unittest discover -s tests/phase5
       - name: Verify node deployment lifecycle
         env:
           PHASE5_DEPLOYMENT_EVIDENCE_DIR: artifacts/phase5/check/deployment

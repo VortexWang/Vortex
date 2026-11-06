@@ -308,6 +308,12 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		if e = cmd.Start(); e != nil {
 			t.Fatal(e)
 		}
+		binary, e := os.ReadFile(executable)
+		if e != nil {
+			t.Fatal(e)
+		}
+		digest := sha256.Sum256(binary)
+		t.Logf("process-start name=%s pid=%d binary_sha256=%x", filepath.Base(name), cmd.Process.Pid, digest)
 		t.Cleanup(func() {
 			if cmd.ProcessState == nil {
 				cmd.Process.Kill()
@@ -596,6 +602,11 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		case <-time.After(20 * time.Millisecond):
 		}
 	}
+	var currentBoot string
+	if e = db.QueryRowContext(ctx, `SELECT boot_id FROM authorization_records WHERE state='active' LIMIT 1`).Scan(&currentBoot); e != nil {
+		t.Fatal(e)
+	}
+	t.Logf("runtime-active node_id=%s boot_id=%s path_generation=%d", regionalNode, currentBoot, cfg.PathGeneration)
 	peer := engineConfig(peerID)
 	peer.Role = config.RoleSource
 	peer.Peer = cfg.Listen

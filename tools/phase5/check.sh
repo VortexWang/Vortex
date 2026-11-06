@@ -21,6 +21,12 @@ finish() {
  status=failed
  [ "$code" -ne 0 ] || status=passed
  printf '{"schema":1,"status":"%s","commit":"%s","scope":"phase5-runtime-regressions","backend":"protocol-test-only","production_backend_authority":false}\n' "$status" "$sha" > "$out/report.json"
+ if [ "$code" -eq 0 ]; then
+  if ! sh tools/phase5/gap_check.sh "$out" "$sha"; then
+   code=1
+   printf '{"schema":1,"status":"failed","commit":"%s","scope":"phase5-runtime-regressions","backend":"protocol-test-only","production_backend_authority":false}\n' "$sha" > "$out/report.json"
+  fi
+ fi
  cat "$out/report.json"
  exit "$code"
 }
