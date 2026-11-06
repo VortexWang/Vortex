@@ -2315,3 +2315,14 @@ with the 4096-message replay window; overflow cancels/reconnects rather than
 blocking both stream directions. Receive errors preserve their original cause.
 Targeted control/unknown/ACK race tests PASS 5.802s; native backlog validation
 remains required. Authorization updates are not applied by the receive worker.
+
+Clean f1709632ccc45b7a32886e3fe59b2336eb28dcce native process suite still FAIL:
+extended traffic completes and all 8192 Agent batches become hub_acked; Hub
+has all 8192 ledgered rows. Protocol backend has only 7049 rows (10,573,500 bytes
+versus 12,288,000), so final three-ledger assertion FAILS (42.43s; suite 74.367s).
+This run demonstrates ACK deadlock removal, not end-to-end accounting completion.
+The test stops Hub after Agent ACK drain, which may precede backend delivery;
+next investigate Hub forwarding/retry and explicit backend drain condition,
+without treating a Hub-local durable ACK as proof of backend delivery. Preserve
+this failure and verify recovery of outstanding Hub rows before broad closure.
+Artifacts: artifacts/phase4/process-f170963.
