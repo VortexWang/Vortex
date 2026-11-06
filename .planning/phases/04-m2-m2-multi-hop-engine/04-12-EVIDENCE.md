@@ -794,3 +794,27 @@ exactly-once durable installation. It does not measure Run backoff, continuous
 business traffic during rotation, or dedicated-host tail latency. Test fixtures
 issue valid authorization payloads directly; actual durable Hub demand issuance
 is covered by the separate funded runtime/lost-response integration tests.
+
+## Durable per-write cost benchmark entry point
+
+BenchmarkRuntimeDurableAccounting measures the existing Store runtime-session
+reserve + deterministic known-usage payload + settle path for 1200, 16384 and
+65536 raw bytes. Each calibration installs a finite exactly sufficient fixture
+grant through PersistAuthorizationUpdate, with runtime/share leases, and uses
+actual WAL/FULL SQLite. Timed operations include gate checks, rate-bucket work,
+transactional pre-debit, settlement, durable consumption window and pending
+usage outbox insert. Afterwards it closes the session and checks exact source
+conservation and one pending outbox row per iteration. No SQL balance refill,
+non-durable sync mode or disabled metering is used.
+
+This is a serial, one-session Store microbenchmark with injected trusted local
+time and a deliberately nonbinding rate share. It transmits no network bytes,
+does not exercise Hub issuance, does not implement session authorization blocks,
+and excludes startup/final audit time. MB/s is accounting capacity only, not
+VLink throughput or a Phase 4 gate. Fixed-size payloads model write granularity,
+not D-04 grant/block candidate choices. Use it to profile the existing per-write
+cost before evaluating a different reservation strategy.
+
+Local Darwin arm64 smoke: 100 iterations per size PASS with conservation/outbox
+checks; roughly 0.61–0.67 ms/op and 2920–2922 allocations/op. Store vet and diff
+check PASS. Native results must be recorded separately at a clean measured SHA.
