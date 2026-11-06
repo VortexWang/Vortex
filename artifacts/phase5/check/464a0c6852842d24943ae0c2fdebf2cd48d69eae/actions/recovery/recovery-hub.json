@@ -1,0 +1,13 @@
+{
+  "Info": {
+    "Owner": "hub",
+    "SQLiteVersion": "3.54.1",
+    "JournalMode": "wal",
+    "Synchronous": "2"
+  },
+  "SHA256": "05553c3f95ad341ef29d77fc7bdeff577efa338c6f893b3a11033f19d8d9967e",
+  "Checkpoint": "3",
+  "Records": 3,
+  "Transfers": 1,
+  "Scope": "protocol-test-only"
+}

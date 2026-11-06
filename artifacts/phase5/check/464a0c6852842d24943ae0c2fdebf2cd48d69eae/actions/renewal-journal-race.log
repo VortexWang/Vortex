@@ -1,0 +1,40 @@
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+=== RUN   TestRenewalDigestAndStrictBounds
+--- PASS: TestRenewalDigestAndStrictBounds (0.00s)
+=== RUN   TestRenewalResultRejectsUncorrelatedOrInventedSuccess
+--- PASS: TestRenewalResultRejectsUncorrelatedOrInventedSuccess (0.00s)
+PASS
+ok  	vortex/contracts	1.017s
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.15s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.12s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.11s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.12s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.14s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.12s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.11s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.12s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.14s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.12s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.11s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.12s)
+PASS
+ok  	vortex/agent/store	2.500s

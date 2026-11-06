@@ -1,0 +1,423 @@
+=== RUN   TestActivationTransitionsRejectLateAndConcurrentResults
+--- PASS: TestActivationTransitionsRejectLateAndConcurrentResults (0.20s)
+=== RUN   TestCorruptAppliedVersionDoesNotResolveUnknown
+--- PASS: TestCorruptAppliedVersionDoesNotResolveUnknown (0.12s)
+=== RUN   TestAuthorizedReservationRollbackOnDiskWriteFailure
+--- PASS: TestAuthorizedReservationRollbackOnDiskWriteFailure (0.15s)
+=== RUN   TestAuthorizedSettlementFailureRetainsWholeUpperBound
+--- PASS: TestAuthorizedSettlementFailureRetainsWholeUpperBound (0.20s)
+=== RUN   TestAuthorizedReservationDuplicatePayloadAndConservation
+--- PASS: TestAuthorizedReservationDuplicatePayloadAndConservation (0.46s)
+=== RUN   TestAuthorizationAuditRejectsOverflow
+--- PASS: TestAuthorizationAuditRejectsOverflow (0.14s)
+=== RUN   TestDuplicateAuthorizedReservationCannotReviveRevokedGrant
+--- PASS: TestDuplicateAuthorizedReservationCannotReviveRevokedGrant (0.14s)
+=== RUN   TestAuthorizedSettlementCannotChangeGrantIdentity
+--- PASS: TestAuthorizedSettlementCannotChangeGrantIdentity (0.14s)
+=== RUN   TestAuthorizationHeartbeatCommitsAtomicallyAndCannotExtendByReplay
+--- PASS: TestAuthorizationHeartbeatCommitsAtomicallyAndCannotExtendByReplay (0.16s)
+=== RUN   TestSourceTopupKeepsUnknownAndRefundsInOriginalGrant
+--- PASS: TestSourceTopupKeepsUnknownAndRefundsInOriginalGrant (0.16s)
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/parent
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/signer
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/boot
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/rule
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/revision
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/path
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/snapshot
+=== RUN   TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/deadline
+--- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary (1.13s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/parent (0.14s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/signer (0.13s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/boot (0.13s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/rule (0.15s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/revision (0.14s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/path (0.15s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/snapshot (0.16s)
+    --- PASS: TestTopupCannotChangeDelegationEpochBootScopeOrBoundary/deadline (0.14s)
+=== RUN   TestSourceTopupRejectsMissingOrChangedIssuer
+=== RUN   TestSourceTopupRejectsMissingOrChangedIssuer/#00
+=== RUN   TestSourceTopupRejectsMissingOrChangedIssuer/another-hub
+--- PASS: TestSourceTopupRejectsMissingOrChangedIssuer (0.29s)
+    --- PASS: TestSourceTopupRejectsMissingOrChangedIssuer/#00 (0.15s)
+    --- PASS: TestSourceTopupRejectsMissingOrChangedIssuer/another-hub (0.14s)
+=== RUN   TestAutonomyUsesFixedHeartbeatDeadlineAcrossRestart
+--- PASS: TestAutonomyUsesFixedHeartbeatDeadlineAcrossRestart (0.22s)
+=== RUN   TestAutonomyTimeUncertaintyAndLateHeartbeatFailClosed
+--- PASS: TestAutonomyTimeUncertaintyAndLateHeartbeatFailClosed (0.13s)
+=== RUN   TestFreshHeartbeatBeforeGraceRenewsOnlyFromOnlineMode
+--- PASS: TestFreshHeartbeatBeforeGraceRenewsOnlyFromOnlineMode (0.13s)
+=== RUN   TestAutonomyRejectsHeartbeatWithoutFixedDeadline
+--- PASS: TestAutonomyRejectsHeartbeatWithoutFixedDeadline (0.13s)
+=== RUN   TestHubControlSnapshotNeverCreatesOrRefreshesAuthority
+--- PASS: TestHubControlSnapshotNeverCreatesOrRefreshesAuthority (0.27s)
+=== RUN   TestControlSequenceExhaustionPersistsAcrossReopen
+--- PASS: TestControlSequenceExhaustionPersistsAcrossReopen (0.15s)
+=== RUN   TestSuccessorGrantsConsumeOnlyTransferredRAndKeepOldRights
+--- PASS: TestSuccessorGrantsConsumeOnlyTransferredRAndKeepOldRights (0.18s)
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-issuer
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-parent
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-boot
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/gap
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/revoked-root
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/changed-replay
+=== RUN   TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/fork
+--- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer (0.95s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-issuer (0.13s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-parent (0.15s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/wrong-boot (0.15s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/gap (0.13s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/revoked-root (0.13s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/changed-replay (0.13s)
+    --- PASS: TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer/fork (0.13s)
+=== RUN   TestHandoffCrashWorker
+--- PASS: TestHandoffCrashWorker (0.00s)
+=== RUN   TestHandoffSIGKILLRecovery
+=== RUN   TestHandoffSIGKILLRecovery/before
+=== RUN   TestHandoffSIGKILLRecovery/after
+--- PASS: TestHandoffSIGKILLRecovery (0.53s)
+    --- PASS: TestHandoffSIGKILLRecovery/before (0.25s)
+    --- PASS: TestHandoffSIGKILLRecovery/after (0.28s)
+=== RUN   TestHandoffFullDiskDoesNotPartiallyTransfer
+--- PASS: TestHandoffFullDiskDoesNotPartiallyTransfer (0.28s)
+=== RUN   TestHandoffPreservesIssuedRightsAndTransfersOnlyR
+--- PASS: TestHandoffPreservesIssuedRightsAndTransfersOnlyR (0.33s)
+=== RUN   TestHandoffRevokesBeforeMovingAndRollsBackOnInvalidRevocation
+--- PASS: TestHandoffRevokesBeforeMovingAndRollsBackOnInvalidRevocation (0.17s)
+=== RUN   TestConcurrentHandoffHasSingleSuccessor
+--- PASS: TestConcurrentHandoffHasSingleSuccessor (0.16s)
+=== RUN   TestIssuerPersistsBeforeResponseAndReplaysAfterRestart
+--- PASS: TestIssuerPersistsBeforeResponseAndReplaysAfterRestart (0.19s)
+=== RUN   TestIssuerConcurrentAutonomyConservesSource
+--- PASS: TestIssuerConcurrentAutonomyConservesSource (0.16s)
+=== RUN   TestIssuerRefusesExpandedScopeUnknownTimeAndClosedEpoch
+--- PASS: TestIssuerRefusesExpandedScopeUnknownTimeAndClosedEpoch (0.17s)
+=== RUN   TestIssuerBoundsExpiryAndDoesNotRefundExpiredGrants
+--- PASS: TestIssuerBoundsExpiryAndDoesNotRefundExpiredGrants (0.13s)
+=== RUN   TestIssuerCommitFailureDoesNotConsumeOrRespond
+--- PASS: TestIssuerCommitFailureDoesNotConsumeOrRespond (0.13s)
+=== RUN   TestRenewalJournalReopensAndRejectsChangedIntent
+--- PASS: TestRenewalJournalReopensAndRejectsChangedIntent (0.15s)
+=== RUN   TestRenewalJournalInstallationRequiresExactCommittedUpdate
+--- PASS: TestRenewalJournalInstallationRequiresExactCommittedUpdate (0.13s)
+=== RUN   TestRenewalJournalReceiptIsNotInstallation
+--- PASS: TestRenewalJournalReceiptIsNotInstallation (0.13s)
+=== RUN   TestRenewalJournalDiskFailureAndConcurrentLineage
+--- PASS: TestRenewalJournalDiskFailureAndConcurrentLineage (0.12s)
+=== RUN   TestRuntimeShareSlotsPersistAcrossStoreReopen
+--- PASS: TestRuntimeShareSlotsPersistAcrossStoreReopen (0.20s)
+=== RUN   TestRuntimeFencingAdvanceBlocksNewAdmissionButRetainsSession
+--- PASS: TestRuntimeFencingAdvanceBlocksNewAdmissionButRetainsSession (0.20s)
+=== RUN   TestRuntimeRateAndClosedSessionCannotAllocateBytes
+--- PASS: TestRuntimeRateAndClosedSessionCannotAllocateBytes (0.20s)
+=== RUN   TestRuntimeRenewalKeepsOldUnknownAndOriginalBatchIdentity
+--- PASS: TestRuntimeRenewalKeepsOldUnknownAndOriginalBatchIdentity (0.33s)
+=== RUN   TestRuntimeRenewalRollsBackSessionRateAndBalanceOnWriteFailure
+--- PASS: TestRuntimeRenewalRollsBackSessionRateAndBalanceOnWriteFailure (0.23s)
+=== RUN   TestRuntimeRenewalCannotResetRateOrReviveClosedSession
+--- PASS: TestRuntimeRenewalCannotResetRateOrReviveClosedSession (0.23s)
+=== RUN   TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors
+=== RUN   TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/untrusted
+=== RUN   TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/deadline
+=== RUN   TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/revoked
+=== RUN   TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/migrated
+--- PASS: TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors (0.79s)
+    --- PASS: TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/untrusted (0.18s)
+    --- PASS: TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/deadline (0.18s)
+    --- PASS: TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/revoked (0.18s)
+    --- PASS: TestRuntimeRenewalHonorsRevocationTimeAndMigratedAnchors/migrated (0.25s)
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/issuer
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/source
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/parent
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/snapshot
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/epoch
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/boot
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/path
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/deadline
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/rate
+=== RUN   TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/connections
+--- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits (1.67s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/issuer (0.16s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/source (0.16s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/parent (0.16s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/snapshot (0.15s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/epoch (0.15s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/boot (0.15s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/path (0.15s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/deadline (0.20s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/rate (0.21s)
+    --- PASS: TestRuntimeRenewalRejectsChangedOwnershipAndAbsoluteLimits/connections (0.18s)
+=== RUN   TestRuntimeRenewalDuplexConcurrencyReservesOncePerBatch
+--- PASS: TestRuntimeRenewalDuplexConcurrencyReservesOncePerBatch (0.25s)
+=== RUN   TestDurableEventSurvivesReopen
+--- PASS: TestDurableEventSurvivesReopen (0.15s)
+=== RUN   TestUsageOutboxSurvivesRestartAndLocalAckRetainsHandoff
+--- PASS: TestUsageOutboxSurvivesRestartAndLocalAckRetainsHandoff (0.18s)
+=== RUN   TestUsageBatchIdentityIsIdempotentAndPayloadBound
+--- PASS: TestUsageBatchIdentityIsIdempotentAndPayloadBound (0.12s)
+=== RUN   TestUsageOutboxWriteFailureCannotBeSentOrAcknowledged
+--- PASS: TestUsageOutboxWriteFailureCannotBeSentOrAcknowledged (0.12s)
+=== RUN   TestUsageReservationIsDurableAndSettlementCreatesOutboxAtomically
+--- PASS: TestUsageReservationIsDurableAndSettlementCreatesOutboxAtomically (0.14s)
+=== RUN   TestAuthorizationUpdateFencesEpochsAndIsPayloadBound
+--- PASS: TestAuthorizationUpdateFencesEpochsAndIsPayloadBound (0.14s)
+=== RUN   TestReceiptIsIdempotent
+--- PASS: TestReceiptIsIdempotent (0.14s)
+=== RUN   TestControlSequenceAndStateSurviveReopen
+--- PASS: TestControlSequenceAndStateSurviveReopen (0.16s)
+=== RUN   TestControlReceiptCommitsHeartbeatAndRejectsSequenceConflict
+--- PASS: TestControlReceiptCommitsHeartbeatAndRejectsSequenceConflict (0.11s)
+=== RUN   TestRevokedCredentialCannotBeReplacedByOrdinarySave
+--- PASS: TestRevokedCredentialCannotBeReplacedByOrdinarySave (0.11s)
+=== RUN   TestRevokedCredentialCannotBeReactivatedByRotation
+--- PASS: TestRevokedCredentialCannotBeReactivatedByRotation (0.12s)
+=== RUN   TestUnknownSettlementIsAtomicAndAckNeverRefundsGrant
+--- PASS: TestUnknownSettlementIsAtomicAndAckNeverRefundsGrant (0.18s)
+=== RUN   TestUnknownUsageCommitReplayAndTypeIsolation
+=== RUN   TestUnknownUsageCommitReplayAndTypeIsolation/agent
+=== RUN   TestUnknownUsageCommitReplayAndTypeIsolation/hub
+--- PASS: TestUnknownUsageCommitReplayAndTypeIsolation (0.31s)
+    --- PASS: TestUnknownUsageCommitReplayAndTypeIsolation/agent (0.16s)
+    --- PASS: TestUnknownUsageCommitReplayAndTypeIsolation/hub (0.15s)
+=== RUN   TestLegacyUnknownMigrationPreservesBeforeImageAndNeverReplaysAcknowledged
+--- PASS: TestLegacyUnknownMigrationPreservesBeforeImageAndNeverReplaysAcknowledged (0.12s)
+PASS
+ok  	vortex/agent/store	15.491s
+=== RUN   TestAuthorityClockRequiresFreshResponseAndExpires
+--- PASS: TestAuthorityClockRequiresFreshResponseAndExpires (0.00s)
+=== RUN   TestAuthorityClockRejectsDelayedOrContradictoryEvidence
+--- PASS: TestAuthorityClockRejectsDelayedOrContradictoryEvidence (0.00s)
+=== RUN   TestAuthorityClockReplayDoesNotTurnTimeBackAfterExpiry
+--- PASS: TestAuthorityClockReplayDoesNotTurnTimeBackAfterExpiry (0.00s)
+=== RUN   TestAuthorizationUpdateValidationAndDurableApply
+--- PASS: TestAuthorizationUpdateValidationAndDurableApply (0.15s)
+=== RUN   TestAuthorizationUpdateRejectsDuplicateKeysAndMissingRestrictions
+--- PASS: TestAuthorizationUpdateRejectsDuplicateKeysAndMissingRestrictions (0.00s)
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/missing_not_before
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/null_not_before
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/null_optional_amount
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_rate
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_connections
+=== RUN   TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_snapshot
+--- PASS: TestAuthorizationRecordsRejectSchemaViolations (0.01s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/missing_not_before (0.00s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/null_not_before (0.00s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/null_optional_amount (0.00s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_rate (0.00s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_connections (0.00s)
+    --- PASS: TestAuthorizationRecordsRejectSchemaViolations/invalid_optional_snapshot (0.00s)
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/untrusted_time
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/crosses_not-before
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/crosses_expiry
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_boot
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_snapshot
+=== RUN   TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_rule_revision
+--- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries (0.19s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/untrusted_time (0.00s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/crosses_not-before (0.00s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/crosses_expiry (0.01s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_boot (0.00s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_snapshot (0.00s)
+    --- PASS: TestStoredAuthorizationTimeRevocationBootAndEpochBoundaries/wrong_rule_revision (0.00s)
+=== RUN   TestRestartDoesNotReviveStoredAuthorization
+--- PASS: TestRestartDoesNotReviveStoredAuthorization (0.19s)
+=== RUN   TestAuthorizationGateAtomicallyConsumesAndReconcilesQuota
+--- PASS: TestAuthorizationGateAtomicallyConsumesAndReconcilesQuota (0.21s)
+=== RUN   TestConcurrentAuthorizedReservationsCannotOverdrawGrant
+--- PASS: TestConcurrentAuthorizedReservationsCannotOverdrawGrant (0.16s)
+=== RUN   TestSignerEpochCannotTransferSourceWithoutHandoffEvidence
+--- PASS: TestSignerEpochCannotTransferSourceWithoutHandoffEvidence (0.15s)
+=== RUN   TestRestartFreezesAuthorizedReservationAndRecoversUnknownBound
+--- PASS: TestRestartFreezesAuthorizedReservationAndRecoversUnknownBound (0.19s)
+=== RUN   TestAuthorizationGateLatchesPersistenceFailureAcrossSessions
+--- PASS: TestAuthorizationGateLatchesPersistenceFailureAcrossSessions (0.20s)
+=== RUN   TestLeasedGateRequiresLiveRuntimeShareAndCreditForEveryReservation
+--- PASS: TestLeasedGateRequiresLiveRuntimeShareAndCreditForEveryReservation (0.17s)
+=== RUN   TestApplyRuntimeConfigIsValidatedAndIdempotent
+--- PASS: TestApplyRuntimeConfigIsValidatedAndIdempotent (0.14s)
+=== RUN   TestApplyRuntimeConfigRejectsMalformedIdentityAndDigest
+--- PASS: TestApplyRuntimeConfigRejectsMalformedIdentityAndDigest (0.13s)
+=== RUN   TestActivationUnknownSurvivesSQLiteReopenAndReplay
+--- PASS: TestActivationUnknownSurvivesSQLiteReopenAndReplay (0.16s)
+=== RUN   TestControlHubRejectsUnverifiedPeerChain
+--- PASS: TestControlHubRejectsUnverifiedPeerChain (0.26s)
+=== RUN   TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC
+--- PASS: TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC (0.29s)
+=== RUN   TestControlClientHandsOffDurableUsageBeforeHubAck
+--- PASS: TestControlClientHandsOffDurableUsageBeforeHubAck (0.30s)
+=== RUN   TestPendingUnknownUsageNeverUsesOrdinaryWireOrAck
+--- PASS: TestPendingUnknownUsageNeverUsesOrdinaryWireOrAck (0.16s)
+=== RUN   TestControlClientRejectsCertificateNodeMismatch
+--- PASS: TestControlClientRejectsCertificateNodeMismatch (0.31s)
+=== RUN   TestControlRunnerReconnectsAfterServerClosesStream
+--- PASS: TestControlRunnerReconnectsAfterServerClosesStream (0.30s)
+=== RUN   TestAuthenticatedAuthorizationCarriesBackendHeartbeatNotHubContact
+--- PASS: TestAuthenticatedAuthorizationCarriesBackendHeartbeatNotHubContact (0.29s)
+=== RUN   TestEngineApplierReconcilesAndRetainsUnknown
+--- PASS: TestEngineApplierReconcilesAndRetainsUnknown (0.13s)
+=== RUN   TestRuntimeEngineStartsAndStopsThroughNode
+2026/11/06 03:41:18 ERROR vlink inbound handshake failed err="context canceled"
+--- PASS: TestRuntimeEngineStartsAndStopsThroughNode (0.13s)
+=== RUN   TestRuntimeEngineStartReturnsListenerConflict
+--- PASS: TestRuntimeEngineStartReturnsListenerConflict (0.00s)
+=== RUN   TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor
+--- PASS: TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor (0.50s)
+=== RUN   TestNodeStartsThroughEngineBoundary
+--- PASS: TestNodeStartsThroughEngineBoundary (0.13s)
+=== RUN   TestReconcilerPersistsActivationUnknownBeforeReturning
+--- PASS: TestReconcilerPersistsActivationUnknownBeforeReturning (0.13s)
+=== RUN   TestDirectReconcileRetainsFencingAndUnknownAcrossReopen
+--- PASS: TestDirectReconcileRetainsFencingAndUnknownAcrossReopen (0.16s)
+=== RUN   TestRecoveryQueriesExecutionBeforeReleasingResources
+=== RUN   TestRecoveryQueriesExecutionBeforeReleasingResources/missing-after-restart
+=== RUN   TestRecoveryQueriesExecutionBeforeReleasingResources/lost-ack-executed
+--- PASS: TestRecoveryQueriesExecutionBeforeReleasingResources (0.36s)
+    --- PASS: TestRecoveryQueriesExecutionBeforeReleasingResources/missing-after-restart (0.17s)
+    --- PASS: TestRecoveryQueriesExecutionBeforeReleasingResources/lost-ack-executed (0.20s)
+=== RUN   TestRecoveryReleasesOnlyAbortedExecution
+--- PASS: TestRecoveryReleasesOnlyAbortedExecution (0.15s)
+=== RUN   TestRecoveryAcceptsMatchingAbortProof
+--- PASS: TestRecoveryAcceptsMatchingAbortProof (0.17s)
+=== RUN   TestNewExecutorCannotForgeOldAbortProof
+--- PASS: TestNewExecutorCannotForgeOldAbortProof (0.15s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (3.66s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.55s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.66s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.44s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.50s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.49s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.28s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.47s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (0.97s)
+=== RUN   TestRegisterGeneratesLocalKeyAndPersistsIssuedCredential
+--- PASS: TestRegisterGeneratesLocalKeyAndPersistsIssuedCredential (0.25s)
+=== RUN   TestRuntimeCommitRejectsAdvancedAuthorizationFence
+--- PASS: TestRuntimeCommitRejectsAdvancedAuthorizationFence (0.13s)
+=== RUN   TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget
+=== RUN   TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget/1
+2026/11/06 03:41:27 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:27 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:27 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/06 03:41:27 INFO relay target connected target=127.0.0.1 port=36673
+2026/11/06 03:41:27 INFO relay OPEN authorized stream_id=3 network=1
+2026/11/06 03:41:27 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+    runtime_authority_test.go:425: same stream renewed after initial expiry 2026-11-06T03:41:31.828533915Z; two directional batches per grant
+2026/11/06 03:41:31 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/06 03:41:31 INFO udp link drop summary link_id=488fecfce4ff2b589b4e447c552ff208 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 03:41:31 INFO udp link drop summary link_id=13706b3828e93cd253eb44ec0a04976e window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+=== RUN   TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget/2
+2026/11/06 03:41:32 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:32 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:32 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/06 03:41:32 INFO relay target connected target=127.0.0.1 port=43367
+2026/11/06 03:41:32 INFO relay OPEN authorized stream_id=3 network=2
+2026/11/06 03:41:32 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+    runtime_authority_test.go:425: same stream renewed after initial expiry 2026-11-06T03:41:36.528062692Z; two directional batches per grant
+2026/11/06 03:41:36 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/06 03:41:36 INFO udp link drop summary link_id=4861d3fa64d9ac1516f30f4b6245f0d5 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 03:41:36 INFO udp link drop summary link_id=01c16ed72bee6c3c7bac91be25c707c8 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget (9.44s)
+    --- PASS: TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget/1 (4.75s)
+    --- PASS: TestRuntimeAutomaticallyUsesDurableLeaseAuthorityBeforeTarget/2 (4.70s)
+=== RUN   TestRuntimeRestartWorker
+--- PASS: TestRuntimeRestartWorker (0.00s)
+=== RUN   TestRuntimeSIGKILLFreshBootReprepareAndRecoverDebt
+2026/11/06 03:41:37 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:37 INFO udp link drop summary link_id=587d4f2b25d9cba685cd584fc992c9d9 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/06 03:41:37 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/06 03:41:37 INFO udp link drop summary link_id=c739ee9726f10ead4e3a6391af847a84 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+--- PASS: TestRuntimeSIGKILLFreshBootReprepareAndRecoverDebt (1.02s)
+=== RUN   TestUnknownLiabilitySurvivesBadAckLostAckAndRestart
+=== RUN   TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/lost-ack
+=== RUN   TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/wrong-hash
+=== RUN   TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/ordinary-ack
+=== RUN   TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/old-peer
+--- PASS: TestUnknownLiabilitySurvivesBadAckLostAckAndRestart (1.29s)
+    --- PASS: TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/lost-ack (0.37s)
+    --- PASS: TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/wrong-hash (0.31s)
+    --- PASS: TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/ordinary-ack (0.30s)
+    --- PASS: TestUnknownLiabilitySurvivesBadAckLostAckAndRestart/old-peer (0.31s)
+=== RUN   TestUsageOnlineBackendAckAndAutonomousRetention
+=== RUN   TestUsageOnlineBackendAckAndAutonomousRetention/known/online-lost-ack
+=== RUN   TestUsageOnlineBackendAckAndAutonomousRetention/known/autonomous
+=== RUN   TestUsageOnlineBackendAckAndAutonomousRetention/unknown/online-lost-ack
+=== RUN   TestUsageOnlineBackendAckAndAutonomousRetention/unknown/autonomous
+--- PASS: TestUsageOnlineBackendAckAndAutonomousRetention (2.09s)
+    --- PASS: TestUsageOnlineBackendAckAndAutonomousRetention/known/online-lost-ack (0.49s)
+    --- PASS: TestUsageOnlineBackendAckAndAutonomousRetention/known/autonomous (0.49s)
+    --- PASS: TestUsageOnlineBackendAckAndAutonomousRetention/unknown/online-lost-ack (0.54s)
+    --- PASS: TestUsageOnlineBackendAckAndAutonomousRetention/unknown/autonomous (0.58s)
+=== RUN   TestControlReportsNewUsageWithoutReconnecting
+--- PASS: TestControlReportsNewUsageWithoutReconnecting (0.25s)
+=== RUN   TestNodeUsageSinkPersistsCommittedAndUnknownBounds
+--- PASS: TestNodeUsageSinkPersistsCommittedAndUnknownBounds (0.12s)
+=== RUN   TestNodeCreditBookPersistsEngineUsageToSQLite
+--- PASS: TestNodeCreditBookPersistsEngineUsageToSQLite (0.12s)
+=== RUN   TestNodeRestartFreezesUnresolvedEngineReservation
+--- PASS: TestNodeRestartFreezesUnresolvedEngineReservation (0.14s)
+PASS
+ok  	vortex/agent	28.248s
+=== RUN   TestEnrollmentRejectsOversizeWithoutConsumingToken
+--- PASS: TestEnrollmentRejectsOversizeWithoutConsumingToken (0.02s)
+=== RUN   TestEnrollmentStalledRequestTimesOut
+--- PASS: TestEnrollmentStalledRequestTimesOut (0.15s)
+=== RUN   TestEnrollmentCancellationClosesStalledTLS
+--- PASS: TestEnrollmentCancellationClosesStalledTLS (0.00s)
+=== RUN   TestEnrollmentRejectsConnectionsAboveLimit
+--- PASS: TestEnrollmentRejectsConnectionsAboveLimit (0.00s)
+=== RUN   TestRecoveryReplaysDurablePrefixAndTailAfterLostACK
+--- PASS: TestRecoveryReplaysDurablePrefixAndTailAfterLostACK (0.23s)
+=== RUN   TestProtocolTestHubPersistsHelloReceipt
+--- PASS: TestProtocolTestHubPersistsHelloReceipt (0.15s)
+=== RUN   TestTLSHelloBindsCertificateIdentity
+--- PASS: TestTLSHelloBindsCertificateIdentity (0.18s)
+PASS
+ok  	vortex/hub	1.758s

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "commit": "29b30852331798028073d5f20bab37c026541102",
+  "status": "passed",
+  "scope": "incremental-probes-reports-and-renewal-journal",
+  "actions_run": 42158960763,
+  "full_plan_complete": false,
+  "production_backend_authority": false,
+  "docker": {
+    "report_sha256": "d764f8fdd239bc4371e288558111a3f7b4107f414e73302fce894db614d54537",
+    "scheduler_race_passes": 24,
+    "renewal_journal_race_passes": 18
+  },
+  "actions": {
+    "report_sha256": "d764f8fdd239bc4371e288558111a3f7b4107f414e73302fce894db614d54537",
+    "scheduler_race_passes": 24,
+    "renewal_journal_race_passes": 18
+  }
+}

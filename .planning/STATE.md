@@ -5,11 +5,11 @@ current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 current_plan: 8
 status: executing
-stopped_at: 05-07 complete; executing dependency-ready 05-08
-last_updated: "2026-11-06T03:18:54.070Z"
+stopped_at: 05-08 incremental probes/reports/journal paired; remote renewal and retention next
+last_updated: "2026-11-06T03:59:00Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-07 regional runtime passed paired Docker/Actions; proceeding to scheduler
-state_head: ec155ad92d5a6d940fc0f22a051872fb0d982c60
+last_activity_desc: 05-08 incremental runtime 29b3085 passed Docker/Actions42158960763; plan remains executing
+state_head: 29b30852331798028073d5f20bab37c026541102
 progress:
   total_phases: 8
   completed_phases: 4
@@ -31,10 +31,10 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
 Current Plan: 8
 Total Plans in Phase: 14
-Status: Executing — 05-07 complete; 05-08 scheduler next
-Last activity: 2026-11-06 — regional runtime ec155ad passed Docker/Actions42154985414 and independent ledger audits.
+Status: Executing — 05-08 partial; probes/reports and renewal journal verified; live remote renewal/retention remain
+Last activity: 2026-11-06 — 05-08 incremental runtime 29b3085 passed Docker/Actions42158960763 and independent ledger audits; no plan completion claimed.
 
-Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 dependency-ready, 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 executing (probes/reports/journal partial), 05-09..05-14 dependency-waiting. G05-01/02/03/05 remain open; G05-04 resolved. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 
@@ -102,7 +102,7 @@ Progress: Phase 5 [████░░░░░░] 7/14 plans executed; 05-08 de
 ## Session Continuity
 
 Last session: 2026-11-05
-Stopped at: 05-07 complete; continue 05-08 inline
+Stopped at: 05-08 partial paired evidence committed; continue remote renewal prerequisites and retention inline
 Resume file: .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-08-PLAN.md
 
 ### Historical qualification review (not a main-workflow gate)

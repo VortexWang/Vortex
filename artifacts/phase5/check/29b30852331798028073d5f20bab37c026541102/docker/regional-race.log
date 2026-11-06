@@ -1,0 +1,522 @@
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (5.07s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.65s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.97s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.86s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.80s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.78s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.52s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.73s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.25s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.68s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.71s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.97s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.64s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.72s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.64s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.53s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.75s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.25s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.79s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.75s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.96s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.88s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.63s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.56s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.36s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.64s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.30s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (5.08s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.79s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.94s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.85s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.73s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.76s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.40s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.58s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.19s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.02s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.60s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.86s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.62s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.43s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.50s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.30s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.51s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.14s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.60s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.70s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.83s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.90s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.60s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.57s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.38s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.58s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.10s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (5.06s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.70s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.92s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.99s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.79s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.66s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.43s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.64s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.10s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.04s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.57s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.74s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.56s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.57s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.60s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.36s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.56s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.11s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.20s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.59s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.78s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.58s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.58s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.67s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.47s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.72s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.30s)
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow
+=== RUN   TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat
+--- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/expired (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unbounded (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/old-session (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/blocked (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/stale-online (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unsupported-cap (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/unknown-field (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/foreign-region (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/wrong-hub (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-mode (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/no-epoch (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/overflow (0.00s)
+    --- PASS: TestRegionalStatusRejectsUnauthenticatedOrStaleBounds/future-heartbeat (0.00s)
+=== RUN   TestRegionalStaleIncarnationCannotMutateAuthority
+--- PASS: TestRegionalStaleIncarnationCannotMutateAuthority (0.00s)
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (4.05s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (0.61s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (0.77s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.57s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.55s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.55s)
+=== RUN   TestRegionalConfigurationAndRetryBounds
+--- PASS: TestRegionalConfigurationAndRetryBounds (0.00s)
+=== RUN   TestRegionalLateAuthorizationCannotAdvanceClockOrConfig
+--- PASS: TestRegionalLateAuthorizationCannotAdvanceClockOrConfig (0.36s)
+=== RUN   TestRegionalRevocationAndNoHealthyPeerAreBounded
+--- PASS: TestRegionalRevocationAndNoHealthyPeerAreBounded (1.54s)
+=== RUN   TestRegionalSwitchCancelsBlockedMutation
+--- PASS: TestRegionalSwitchCancelsBlockedMutation (0.00s)
+=== RUN   TestRegionalHealthyLossRestartsSweepBudget
+--- PASS: TestRegionalHealthyLossRestartsSweepBudget (1.17s)
+PASS
+ok  	vortex/agent	78.897s
