@@ -158,7 +158,25 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	}
 	var demandCursor string
 	var demandTicks <-chan time.Time
+	var demandWake <-chan struct{}
+	var lastDemandWake time.Time
 	if c.EnableCreditDemand {
+		// Register only scopes bound to this authenticated Hub. A different
+		// connection must not consume another Hub's wakeups.
+		issuer, _ := issuerIdentity.Load().(string)
+		var scopes []AdaptiveDemandConfig
+		for _, config := range c.AdaptiveDemands {
+			if config.Scope.HubID == issuer {
+				scopes = append(scopes, config)
+			}
+		}
+		var release func()
+		demandWake, release, err = c.Node.subscribeDemands(scopes)
+		if err != nil {
+			return err
+		}
+		defer release()
+
 		interval := c.DemandInterval
 		if interval == 0 {
 			interval = time.Second
@@ -169,7 +187,7 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		demandTicker := time.NewTicker(interval)
 		defer demandTicker.Stop()
 		demandTicks = demandTicker.C
-		issuer, _ := issuerIdentity.Load().(string)
+		issuer, _ = issuerIdentity.Load().(string)
 		if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
 			return err
 		}
@@ -211,6 +229,20 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-demandWake:
+			if time.Since(lastDemandWake) < 25*time.Millisecond {
+				continue
+			}
+			lastDemandWake = time.Now()
+			demandCursor = ""
+			issuer, _ := issuerIdentity.Load().(string)
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+				demandWake = nil
+			}
+			continue
 		case <-demandTicks:
 			issuer, _ := issuerIdentity.Load().(string)
 			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {

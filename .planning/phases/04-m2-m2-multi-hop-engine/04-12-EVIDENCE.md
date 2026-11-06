@@ -438,3 +438,23 @@ expired-scope suppression, cap/rollback, plus real mTLS replay of old success
 after a newer denial. Full Agent/Hub race and vet PASS; additional mTLS
 anti-replay targeted race PASS. Remaining waiting/idle/workload/qualification
 requirements are unchanged and still open.
+
+## Missing-authority retry and control wakeups
+
+Runtime Open and session Reserve now retry a durable authorization denial only
+when an opt-in control subscription matches the rule/revision/path. The Agent
+coalesces wakeups per control consumer; control sends through its existing
+single-sender loop with a 25 ms wake-send throttle. Subscribers are scoped to
+the authenticated Hub and removed on disconnect. At most 128 callers wait;
+excess callers retain immediate denial. Missing-authority retry uses a 200 ms
+context and 10 ms transactional recheck cadence. A notification never grants
+permission and transport timeout never retires the persisted request.
+
+Unit tests exercise no subscriber, wrong scope, asynchronous availability,
+200 ms retry deadline, cancellation and storage failure without retry. Full
+Agent/Hub race and vet PASS. No actual end-to-end wait qualification is claimed:
+the initial database attempt precedes the retry deadline, SQLite/context return
+latency and rate-limit waits are separate, and scheduler delay can add latency.
+Dedicated-host measurement must establish the total admission requirement or
+drive further changes before D-04 can be locked. Idle proof protocol, production
+startup configuration, full attack coverage and durable performance remain open.
