@@ -14,6 +14,16 @@ import (
 	"vortex/engine/vlink"
 )
 
+// Observe live WAL files with the same bounded writer wait as Store. The
+// pragma is connection-local, so apply it in the DSN rather than a pooled Exec.
+func openProcessLedger(path string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(5000)")
+	if err == nil {
+		db.SetMaxOpenConns(1)
+	}
+	return db, err
+}
+
 func killProcess(t *testing.T, child *exec.Cmd) {
 	t.Helper()
 	if err := child.Process.Kill(); err != nil {
@@ -65,7 +75,7 @@ func schedulerRenewalFault(t *testing.T, ctx context.Context, db *sql.DB, dir, m
 	if mode == "hub-restart" || mode == "node-restart" {
 		// The Hub commits the terminal outcome but holds every reply. This is
 		// a deterministic crash point, not a race against the one-second retry.
-		hdb, err := sql.Open("sqlite", filepath.Join(dir, "hub0.db"))
+		hdb, err := openProcessLedger(filepath.Join(dir, "hub0.db"))
 		if err != nil {
 			t.Fatal(err)
 		}

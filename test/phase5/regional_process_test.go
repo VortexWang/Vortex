@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
-	"database/sql"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -140,7 +139,7 @@ func TestRegionalProcessFailover(t *testing.T) {
 				}
 				s.Close()
 				if i == 0 && (fault == "autonomous" || fault == "recovering") {
-					db, e := sql.Open("sqlite", path)
+					db, e := openProcessLedger(path)
 					if e != nil {
 						t.Fatal(e)
 					}
@@ -188,7 +187,7 @@ func TestRegionalProcessFailover(t *testing.T) {
 				t.Fatal(e)
 			}
 			node := launch("vortex-node", "--node-id", regionalNode, "--db", nodePath, "--control-config", cfgPath, "--hub-name", regionalSecond, "--enrollment-hub", addresses[1], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m")
-			db, e := sql.Open("sqlite", filepath.Join(dir, "hub1.db"))
+			db, e := openProcessLedger(filepath.Join(dir, "hub1.db"))
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -212,7 +211,7 @@ func TestRegionalProcessFailover(t *testing.T) {
 			if time.Since(start) > 5*time.Second {
 				t.Fatal("process failover exceeded configured sweep budget")
 			}
-			nd, e := sql.Open("sqlite", nodePath)
+			nd, e := openProcessLedger(nodePath)
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -477,7 +476,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 	nodePath := filepath.Join(dir, "agent.db")
 	nodeArgs := []string{"--node-id", regionalNode, "--db", nodePath, "--engine-config", enginePath, "--control-config", controlPath, "--hub-name", regionalFirst, "--enrollment-hub", addresses[0], "--tls-ca", caPath, "--tls-cert", nodeCert, "--tls-key", nodeKey, "--credential-dir", filepath.Join(dir, "credentials"), "--renew-before", "1m"}
 	nodeProcess := start("vortex-node", nodeArgs...)
-	db, e := sql.Open("sqlite", nodePath)
+	db, e := openProcessLedger(nodePath)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -593,7 +592,7 @@ func regionalTrafficContinuity(t *testing.T, binaries, renewalMode string) {
 		t.Fatal(e)
 	}
 	_ = first.Wait()
-	secondDB, e := sql.Open("sqlite", filepath.Join(dir, "hub1.db"))
+	secondDB, e := openProcessLedger(filepath.Join(dir, "hub1.db"))
 	if e != nil {
 		t.Fatal(e)
 	}

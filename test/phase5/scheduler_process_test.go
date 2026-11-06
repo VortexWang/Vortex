@@ -130,7 +130,7 @@ func schedulerRenewalTraffic(t *testing.T, ctx context.Context, db *sql.DB, dir 
 	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM renewal_requests WHERE state='installed'`).Scan(&terminal); err != nil {
 		t.Fatal(err)
 	}
-	hdb, err := sql.Open("sqlite", filepath.Join(dir, "hub0.db"))
+	hdb, err := openProcessLedger(filepath.Join(dir, "hub0.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
