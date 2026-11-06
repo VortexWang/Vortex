@@ -54,11 +54,18 @@ func (n *Node) wakeDemand(scope RuntimeScope) bool {
 }
 
 // Retry only a missing durable authorization, only while an opt-in control
-// consumer for this exact runtime scope exists. The first attempt is unchanged.
+// consumer for this exact runtime scope exists. The same deadline covers the
+// first transactional attempt and every retry; it is never reset after denial.
 // Each retry re-enters the actual transactional gate; a wakeup is not authority.
 func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, attempt func(context.Context) (T, error)) (T, error) {
-	value, err := attempt(ctx)
-	if !errors.Is(err, store.ErrAuthorizationDenied) || ctx.Err() != nil || !n.wakeDemand(scope) {
+	if err := ctx.Err(); err != nil {
+		var zero T
+		return zero, err
+	}
+	waitCtx, cancel := context.WithTimeout(ctx, missingAuthorityWait)
+	defer cancel()
+	value, err := attempt(waitCtx)
+	if !errors.Is(err, store.ErrAuthorizationDenied) || waitCtx.Err() != nil || !n.wakeDemand(scope) {
 		return value, err
 	}
 	n.demandMu.Lock()
@@ -73,8 +80,7 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 	default:
 		return value, err
 	}
-	waitCtx, cancel := context.WithTimeout(ctx, missingAuthorityWait)
-	defer cancel()
+
 	timer := time.NewTicker(10 * time.Millisecond)
 	defer timer.Stop()
 	for {

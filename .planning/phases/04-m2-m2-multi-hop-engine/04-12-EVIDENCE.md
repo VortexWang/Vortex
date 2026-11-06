@@ -458,3 +458,17 @@ latency and rate-limit waits are separate, and scheduler delay can add latency.
 Dedicated-host measurement must establish the total admission requirement or
 drive further changes before D-04 can be locked. Idle proof protocol, production
 startup configuration, full attack coverage and durable performance remain open.
+
+## Initial authority attempt shares the retry deadline
+
+withAuthorityWait now creates its 200 ms context before the first transactional
+authority check and passes that same context to every retry. Already-cancelled
+callers never enter the transaction. This supersedes the previous slice's
+limitation that the first database attempt was outside the retry budget.
+TestAuthorityDeadlineIncludesInitialAttempt consumes 120 ms on initial denial
+and asserts the second attempt receives the exact original deadline. Existing
+no-subscriber, wrong-scope, storage-failure and cancellation tests remain passing.
+Full Agent/Hub race and vet PASS. This proves deadline propagation, not a
+hard real-time latency guarantee: native SQLite cancellation/lock contention
+and scheduler latency still require dedicated-host measurement. Rate shaping
+waits remain distinct from missing-authorization waiting.
