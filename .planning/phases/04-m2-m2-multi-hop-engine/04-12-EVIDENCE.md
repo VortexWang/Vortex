@@ -1586,3 +1586,17 @@ The dedicated host full uncached non-race Agent/Hub regression is running at
 ac5e0e5; its result is not yet claimed here. Symbolization of the earlier CPU
 profile was repaired using the preserved matching agent.test binary; checkptr
 and race overhead remain evident. No D-04 parameter or phase completion claimed.
+
+## Native full non-race regression completed
+
+Dedicated Ubuntu at clean runtime SHA
+ac5e0e5557ccef7b8abb06c15985c2ccbf15a4bf completed
+`go test ./agent/... ./hub/... -count=1` with exit 0: Agent 202.891s,
+identity 0.030s, Store 8.207s, upgrade 0.241s, Hub 0.212s. Raw remote log
+artifacts/phase4/plain-full-ac5e0e5/test.log SHA-256:
+066c533d8fd61b081ee153361ce47b5819c216ad14b8b7b85d6c123d2b9fad5a.
+This is uncached native functional evidence without race instrumentation. It
+excludes the later test-only de71f90 addition; that addition has separate local
+race evidence above. Prior native race deadline failures remain failures.
+Neither this suite nor process-local d04_run.py establishes sustained durable
+Hub issuance performance or completes the D-04 parameter scan.
