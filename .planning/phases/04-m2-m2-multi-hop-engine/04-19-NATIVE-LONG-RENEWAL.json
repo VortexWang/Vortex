@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "status": "native-correctness-pass",
+  "measured_commit": "23a9ea3f1d8a8b499dc637d47438b4f57d1cea60",
+  "clean": true,
+  "trials": 3,
+  "renewal_rounds_per_transport_per_trial": 32,
+  "transports": [
+    "TCP",
+    "UDP"
+  ],
+  "source_audit": {
+    "status": "pass",
+    "results": [
+      {
+        "trial": 1,
+        "network": 1,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      },
+      {
+        "trial": 1,
+        "network": 2,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      },
+      {
+        "trial": 2,
+        "network": 1,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      },
+      {
+        "trial": 2,
+        "network": 2,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      },
+      {
+        "trial": 3,
+        "network": 1,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      },
+      {
+        "trial": 3,
+        "network": 2,
+        "batch_count": 68,
+        "all_batch_ids_and_payload_hashes_match": true,
+        "initial": 104192,
+        "remaining": 2192,
+        "holds": {
+          "committed": 102000
+        }
+      }
+    ]
+  },
+  "full_race": "pass",
+  "vet": "pass",
+  "exit_code": 0,
+  "local_artifacts": "artifacts/phase4/long-renewal-23a9ea3",
+  "archive_sha256": "0d7fbbca87dd9f18d2af2d4fb95434da2eab80fd0562d9f0f6b63e78e6588ae1",
+  "files": {
+    "commit": "4288f782b972afa2ebff1d3a62ea0e090a04f07f69693798d2d86a3c64b1061f",
+    "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "full-race.log": "602d8bfab06828c8b6ee819fca9afd64531b667e61dd60bbabca5732bcfc16ea",
+    "git-status": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host": "de86b1615478eb4fbf3a0c6e90e1c6836fc3154fee7540ba5c559386b45c334a",
+    "snapshot-audit.json": "1d01cdd0a49635e4758a3ad3f68364175766f5f1b532806ad25979471913b4bf",
+    "stage": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1",
+    "trial-1/ledgers/runtime-continuous-1-rounds-32-agent.sqlite.gz": "9995cc11447272fe94d2076fd2c042d7ec3b8650e32ed271fbc4714378db1357",
+    "trial-1/ledgers/runtime-continuous-1-rounds-32-backend.sqlite.gz": "89a52c75f32a08bd86cd1c68740cc44ba644be00d12ff0a235555acfb30ce42e",
+    "trial-1/ledgers/runtime-continuous-1-rounds-32-hub.sqlite.gz": "44126904068c8b2f58a00ee37d2143269124f505b0c2410491b212665c36b9f7",
+    "trial-1/ledgers/runtime-continuous-1-rounds-32-ledgers.json": "9218da7be07a94b20577be4c76e0b1562bc9db42d04ac4e88fef6332c43c54cd",
+    "trial-1/ledgers/runtime-continuous-2-rounds-32-agent.sqlite.gz": "97a6c31b8a507456463e967f07216e2884ba7aac8e86ffe9ff1356ff67eebf9d",
+    "trial-1/ledgers/runtime-continuous-2-rounds-32-backend.sqlite.gz": "287ed7a07aa4e3383f310212587e15aa68f1b2b6d9af8facbfdcca8801c35c5c",
+    "trial-1/ledgers/runtime-continuous-2-rounds-32-hub.sqlite.gz": "91b0252a9bc8a4dab9ebcb5ce9126ce33a7544952bdc85b69024f470bf3737c3",
+    "trial-1/ledgers/runtime-continuous-2-rounds-32-ledgers.json": "106b69b2d6969844adb766f0e408b2798b3a2c85844f8d19cd2abcb29b7bf7a3",
+    "trial-1.log": "28d9a0754efd851305224b3a6035c730c7074c215dd4fb1b3723c235ef90cd17",
+    "trial-2/ledgers/runtime-continuous-1-rounds-32-agent.sqlite.gz": "22b961d39f254f9c9cdf42e7ffa8c75df32f090aefd1cdb87e6418fef679a345",
+    "trial-2/ledgers/runtime-continuous-1-rounds-32-backend.sqlite.gz": "408dba8cc3a08b5b20c3fea7a28eb270ee18015647f6129642eeff3a40184c5c",
+    "trial-2/ledgers/runtime-continuous-1-rounds-32-hub.sqlite.gz": "c0ae8284ad77fd93dbfd564870be808ce5e679fce56bf7709f7b2b13aed389e7",
+    "trial-2/ledgers/runtime-continuous-1-rounds-32-ledgers.json": "c5f9bf96a14da9c502bf03736bb083f3c5003c10f60a0c114b5e5ac5e99c337e",
+    "trial-2/ledgers/runtime-continuous-2-rounds-32-agent.sqlite.gz": "bcff1233a6b952f8aafafef20df5c6936000e80c3da128d84c6d57a9f17b1339",
+    "trial-2/ledgers/runtime-continuous-2-rounds-32-backend.sqlite.gz": "19315b64dcf3e6fafcc87c3da6523b55356fca880f007622e1eda39cb0f01581",
+    "trial-2/ledgers/runtime-continuous-2-rounds-32-hub.sqlite.gz": "bc9cf9f5e34f5eedfd4919fe563d75556f15e2c9bb0ec0172da1af532678d2ea",
+    "trial-2/ledgers/runtime-continuous-2-rounds-32-ledgers.json": "56b11436c5a2a08f971f256daa7810984a84ceadbf177687bdcf9235ac028f92",
+    "trial-2.log": "961f03f299643c55afcf0bafa759648fd457d26050217d2b95cf812a03d9f048",
+    "trial-3/ledgers/runtime-continuous-1-rounds-32-agent.sqlite.gz": "fed525768c70d47480305ab8adea0830574dece5ca1cef273d7a41a0bf3fd309",
+    "trial-3/ledgers/runtime-continuous-1-rounds-32-backend.sqlite.gz": "2d05ac2ca25e412053599a4d507762ef56fc09354df764bf34c2575f66854cc8",
+    "trial-3/ledgers/runtime-continuous-1-rounds-32-hub.sqlite.gz": "2e43ecaf40765ea61ca8627511d29695237101cb3122ac8cdc013edde1c5d6db",
+    "trial-3/ledgers/runtime-continuous-1-rounds-32-ledgers.json": "04a3177b7a968667b71ce8709a83e52cf7a8071ba6e0e523fbab373e14d066b6",
+    "trial-3/ledgers/runtime-continuous-2-rounds-32-agent.sqlite.gz": "e58b862fc6068820f7c5c940595096b8982e47d936134374c0b8b54bc73cc15a",
+    "trial-3/ledgers/runtime-continuous-2-rounds-32-backend.sqlite.gz": "ce6235254c5c5f6dd2c7ec924e50dfb9ef77c304c718840e11f0b8fc705b044f",
+    "trial-3/ledgers/runtime-continuous-2-rounds-32-hub.sqlite.gz": "3610aad5bf3a0518da9cad0d230691a7284f85b6b30957ad8a746b54cf6491b3",
+    "trial-3/ledgers/runtime-continuous-2-rounds-32-ledgers.json": "e7e0c60e0882dd59701aeac60d5c80a57b6f396c481f7e4092c82c947ee24c01",
+    "trial-3.log": "0c06c98cd90f3387a5628ac06d31bbe33317ae2cb225d737d95e7f0ccc1d1de4",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Finite controlled renewal test using actual runtime, SQLite and mTLS; not throughput or tail-latency qualification.",
+    "Protocol backend fixture is not production backend transport.",
+    "No conclusion that intermittent timeouts are impossible under other load.",
+    "D-04 parameters remain unlocked; full attack campaign, durable block strategy and approved grant return remain open."
+  ]
+}

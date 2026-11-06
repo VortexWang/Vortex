@@ -158,3 +158,16 @@ Sustained durable-authority traffic, lost/delayed control responses under load,
 funding occupancy, idle-return proof and formal same-SHA qualification remain
 required. The unbuffered failed baseline remains visible in the diagnostic
 archive; temporary buffer maxima were restored after the successful scan.
+
+## Native durable renewal update — 23a9ea3
+
+Three clean native race trials now each complete 32 TCP and 32 UDP adaptive
+renewals with real mTLS, durable Agent/Hub issuance and a protocol-backend usage
+fixture. Snapshot audits verify all 68 batches per transport and exact source
+conservation, with no pending requests or open sessions. Full Agent/Hub native
+race and vet also pass; see 04-19-NATIVE-LONG-RENEWAL.json.
+
+This establishes the controlled multi-cycle integration slice after reducing
+exhausted-grant planning queries. It does not qualify throughput/latency at
+production load or implement a durable block allocator. Keep parameter lock,
+complete hostile coverage, sustained mixed load and idle return open.

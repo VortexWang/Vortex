@@ -1008,3 +1008,34 @@ Clean-stage results, before/after long-run logs and exact diagnostic source are
 retained in artifacts/phase4/long-renewal-diagnostics/results.tar.gz. Remote
 archive hash verified: 1349db5389998b23ed53c97d8e675e09aa5a982ac01c2122d4667acbed82b7f1.
 Downloaded diagnostic files were byte-compared with local source.
+
+## Clean native 32-round renewal qualification slice — 23a9ea3
+
+Dedicated Ubuntu at clean commit 23a9ea3f1d8a8b499dc637d47438b4f57d1cea60
+completed three independent uncached race runs of
+TestRuntimeLongLivedDurableAdaptiveRenewal: 106.998s, 108.912s, 107.975s.
+Each run includes TCP then UDP, 32 consumption-driven renewals per transport,
+with separate saved Agent/Hub/protocol-backend SQLite snapshots. All three
+passed, followed by full Agent/Hub race (Agent 196.602s, Store 38.693s) and vet;
+launcher stage=complete and exit=0. No 200ms timeout adjustment or socket-buffer
+change was made. Prior failures remain recorded, not replaced by these results.
+
+Independently opened all 18 saved databases read-only after decompression,
+verified original snapshot hashes and PRAGMA integrity_check, and compared
+batch IDs plus payload hashes across each Agent/Hub/backend triple. All six
+triples have exactly 68 matching batches, Agent state hub_acked and Hub/backend
+state ledgered. Each Agent has initial=104192, remaining=2192, committed holds
+=102000 with no other hold states, no open sessions and no pending demands.
+These totals include the initial exchanges plus the 32 renewal rounds.
+
+All 35 downloaded evidence files match their remote SHA-256 manifest.
+`04-19-NATIVE-LONG-RENEWAL.json` records the measured SHA, six snapshot audits,
+checksums and scope. Raw logs, 18 SQLite archives and audit results are at
+artifacts/phase4/long-renewal-23a9ea3. Full transfer archive SHA-256 is
+0d7fbbca87dd9f18d2af2d4fb95434da2eab80fd0562d9f0f6b63e78e6588ae1.
+
+This closes the pending same-SHA native validation of the 32-round controlled
+renewal slice. It does not prove arbitrary long-run latency, eliminate every
+possible timeout, implement durable session blocks, cover the complete attack
+matrix, supply production backend transport, or lock D-04 parameters. Broader
+qualification and grant-return contract approval remain separate open work.
