@@ -1369,3 +1369,25 @@ Local Agent funding/real-renewal race PASS 32.012s; Store targeted race PASS
 4.335s after adding first-admission replay/rate/rollback assertions. Agent/Hub
 vet and diff checks PASS. Native and complete regression remain outstanding.
 No timeout increase or D-04 lock is claimed.
+
+## Native b2bdd42: renewal slice passes; concurrent admission still fails
+
+Dedicated clean b2bdd42b00ef94cf62910943d44a98b5e33b9540 passed all three
+independent ordinary+delayed TCP/UDP renewal trials (37.515s, 37.470s, 36.756s).
+Store funding/admission attack tests repeated three times PASS 35.730s.
+Uncached full native suite then failed TestFundingBlockGateConcurrentShortWrites
+AndClose: concurrent same-session admissions exhausted the unchanged 200 ms
+budget. Agent failed 273.639s; Store passed 55.769s, Hub 1.930s, identity and
+upgrade passed. Launcher exit=1 at full-race; native vet was not reached.
+This remains a failed qualification, not a stable concurrency/performance pass.
+
+Local full race on the same implementation passed Agent 210.580s, Store
+16.520s and Hub 3.110s. This difference is retained explicitly. The next
+optimization must address serialized concurrent admission and repeated
+authority/rate persistence without moving the deadline or bypassing revocation.
+
+Native diagnostic ec07301 logs and b2bdd42 trial/attack/full-suite evidence were
+downloaded, archive hash verified against remote:
+9e7b85d736a6acc22a1889f062d022d9a82478904d34baa6fbd9190d9834cfbd.
+04-22 manifest records all raw hashes. D-04, complete hostile coverage and
+formal Phase 4 qualification remain open.
