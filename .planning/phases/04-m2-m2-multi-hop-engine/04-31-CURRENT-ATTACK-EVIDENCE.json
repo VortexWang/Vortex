@@ -1,0 +1,132 @@
+{
+  "raw_directory": "/private/tmp/vortex-attacks-172b0a7",
+  "files": {
+    "sha": {
+      "sha256": "a2091f3eefb8e96de2fb7e47643a1927c6ed5a32eb96c73234a4e36cdc1f9fb1",
+      "content": "172b0a70f9dcd8cd64264a23904739d2419a45a5\n"
+    },
+    "status": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content": ""
+    },
+    "forged-open.json": {
+      "sha256": "b86e7794d8dac11f257555a599aad52f4f0a9b8d65f057f6ae75ed02d12f9e8e",
+      "content": {
+        "cases": {
+          "tcp/duplicate-visited": {
+            "code": 8,
+            "correlation_id": "c8abd59587c0a5baf5c73779d5c19402",
+            "status": "pass"
+          },
+          "tcp/future-generation": {
+            "code": 7,
+            "correlation_id": "ea4271aa690946f46772d9e8e98af8d6",
+            "status": "pass"
+          },
+          "tcp/future-revision": {
+            "code": 7,
+            "correlation_id": "b7f27f72489ac9b3c5ea2eec0db56ddd",
+            "status": "pass"
+          },
+          "tcp/skipped-hop": {
+            "code": 1,
+            "correlation_id": "8d45e1c7d44224807e5111ed8bc00864",
+            "status": "pass"
+          },
+          "tcp/stale-generation": {
+            "code": 7,
+            "correlation_id": "2b1235429dc5d9e5f8c2c4e3e02f80dc",
+            "status": "pass"
+          },
+          "tcp/stale-revision": {
+            "code": 7,
+            "correlation_id": "b0c07356be6ec350e148db0077b297eb",
+            "status": "pass"
+          },
+          "tcp/unknown-rule": {
+            "code": 7,
+            "correlation_id": "17d2798219b19ce7c0e16a1bdd07c208",
+            "status": "pass"
+          },
+          "tcp/visited-local-loop": {
+            "code": 1,
+            "correlation_id": "89237427f532c2bb374d3c5813b2b4c7",
+            "status": "pass"
+          },
+          "udp-link-loss": {
+            "status": "pass"
+          },
+          "udp/duplicate-visited": {
+            "code": 8,
+            "correlation_id": "33335ce5a5739a7b0d6d1925697a1312",
+            "status": "pass"
+          },
+          "udp/future-generation": {
+            "code": 7,
+            "correlation_id": "9745722ae2c533998ad2142ce01671e1",
+            "status": "pass"
+          },
+          "udp/future-revision": {
+            "code": 7,
+            "correlation_id": "1bc2be6f5d5776a185783bd381af90ee",
+            "status": "pass"
+          },
+          "udp/skipped-hop": {
+            "code": 1,
+            "correlation_id": "629b842560ac16e5e46eb9b72b163e49",
+            "status": "pass"
+          },
+          "udp/stale-generation": {
+            "code": 7,
+            "correlation_id": "039307e1bc9a5b4644c8789aa431c760",
+            "status": "pass"
+          },
+          "udp/stale-revision": {
+            "code": 7,
+            "correlation_id": "c400d605395b69e4872cfb100823233f",
+            "status": "pass"
+          },
+          "udp/unknown-rule": {
+            "code": 7,
+            "correlation_id": "b600463f38b0dd15cf522a8ce6d323ad",
+            "status": "pass"
+          },
+          "udp/visited-local-loop": {
+            "code": 1,
+            "correlation_id": "1bfb17016fdade80bf7f2e228446cd37",
+            "status": "pass"
+          }
+        },
+        "scope": "runtime TLS/HELLO, static local policy, UDP session link loss; not exhaustive fault qualification",
+        "status": "pass"
+      }
+    },
+    "attack-gate.json": {
+      "sha256": "c066740b10472273b630864971786c56dfde79ea3d9bac51297535ce101ef551",
+      "content": {
+        "reasons": [],
+        "required_cases": [
+          "tcp/duplicate-visited",
+          "tcp/future-generation",
+          "tcp/future-revision",
+          "tcp/skipped-hop",
+          "tcp/stale-generation",
+          "tcp/stale-revision",
+          "tcp/unknown-rule",
+          "tcp/visited-local-loop",
+          "udp/duplicate-visited",
+          "udp/future-generation",
+          "udp/future-revision",
+          "udp/skipped-hop",
+          "udp/stale-generation",
+          "udp/stale-revision",
+          "udp/unknown-rule",
+          "udp/visited-local-loop"
+        ],
+        "schema": 1,
+        "scope": "sixteen configured-route TCP/UDP forged OPEN cases plus UDP link loss; excludes identity handshake and durable authority matrices",
+        "status": "pass"
+      }
+    }
+  }
+}

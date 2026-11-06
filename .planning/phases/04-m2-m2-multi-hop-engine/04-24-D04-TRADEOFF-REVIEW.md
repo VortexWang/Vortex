@@ -79,3 +79,23 @@ mixed TCP 1009.277Mbps、UDP 99.9648Mbps、零丢包。三组逐来源额度均
 在 600ms 延迟条件下需要重新评估续申提前量。50% 仅获得本条件下的
 单次支持，尚缺重复、动态目标及占用证据。保持 200ms 等待上限，
 不调整默认值，也不将这些 15s 短测冒充正式性能资格。
+
+## 动态目标原生接线验证（172b0a7）
+
+专用 Ubuntu 五进程，30s 动态目标、8MiB floor、375000000-byte ceiling，
+首次供额不延迟、续申 40ms，16 TCP、每阶段 15s、100Mbps UDP。
+20/30/50% 水位均 exit 0、runtime_correctness pass，逐来源守恒并结清。
+mixed TCP 分别 994.932/987.820/994.448Mbps，UDP 99.968/99.968/99.96416Mbps，
+全部零丢包；155/143/166 次等待均成功，无 timeout/cancel/final refusal。
+申请 44/49/66 次，最终目标均达到上限；sessions/held/pending/unknown 均零。
+
+完整报告、credit 和 semantic manifest 及 SHA256 见
+04-30-NATIVE-DYNAMIC-TARGET.json。脚本独立脱离 SSH 运行，结束后确认
+rmem_max/wmem_max 恢复 212992。此组是动态目标实际接线证据，但没有
+时间序列证明目标何时触顶，也没有证明长时间闲置或各目标秒数的性能。
+每水位仅一次，不能以吞吐相近锁定参数。D-04 保持 pending-review。
+
+同一干净 172b0a7 本地 Engine 全包 race 通过；17 项真实进程 OPEN/断链
+检查通过（04-31-CURRENT-ATTACK-EVIDENCE.json）。有限覆盖登记见
+04-29-CURRENT-COVERAGE.md；最终独立 TLS、Docker/Actions 和原生完整
+资格仍分别待验证，不混用本地与原生结果成为一个 pass。

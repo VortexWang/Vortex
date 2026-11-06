@@ -1,0 +1,691 @@
+{
+  "remote_directory": "/root/VORTEX-phase4-accounting/artifacts/phase4/dynamic-scan-172b0a7",
+  "rmem_max_restored": 212992,
+  "wmem_max_restored": 212992,
+  "trials": [
+    {
+      "waterline": 20,
+      "exit": 0,
+      "files": {
+        "report.json": {
+          "sha256": "02422a758a701f0cece18f2c48426c188e8b0ee18b9179f526631491aa3a976b",
+          "data": {
+            "accounting": {
+              "left_to_right": 4455275444,
+              "right_to_left": 4455275444
+            },
+            "authorization_mode": "runtime-authority",
+            "classified_drops": {
+              "kernel_rcvbuf_driver_scope": 0,
+              "oversized": 0,
+              "queue_full": 0,
+              "receive_queue_full": 0,
+              "source_capacity": 0,
+              "source_queue_full": 0,
+              "window_full": 0
+            },
+            "commit": "172b0a70f9dcd8cd64264a23904739d2419a45a5",
+            "d_04": {
+              "status": "pending-review"
+            },
+            "dirty": false,
+            "end_to_end_received_bytes": 4455275444,
+            "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+            "nfr_003": {
+              "mixed_tcp_mbps": 994.9315975837733,
+              "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+              "status": "not-qualified",
+              "tcp_only_retention": 0.7783409460557927
+            },
+            "nfr_005": {
+              "loss_threshold_met": true,
+              "reason": "Short diagnostic run; host and duration qualification remain open",
+              "status": "not-qualified",
+              "udp_loss": 0
+            },
+            "nfr_006": {
+              "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+              "status": "not-qualified"
+            },
+            "nfr_007": {
+              "reason": "independent path latency baseline is missing",
+              "status": "not-qualified"
+            },
+            "performance_qualification": "not-qualified",
+            "qualification_metrics": {
+              "duration_seconds": 15,
+              "mixed_tcp_mbps": 994.9315975837733,
+              "source_credit_conserved": true,
+              "source_credit_settled": true,
+              "tcp_streams": 16,
+              "udp_loss": 0,
+              "udp_offered_mbps": 99.968
+            },
+            "returned_reservations": {},
+            "runtime_correctness": "pass",
+            "schema": 1,
+            "semantic_manifest_sha256": "b506725bbb79b801753e8c89db7064e548a7fd48703307aa784522b1cbe11846",
+            "trial_id": "dynamic40-waterline-20"
+          }
+        },
+        "events-source.jsonl.credit.json": {
+          "sha256": "cb2b22c20887fe4bb4f2420d5205e197446badc4363f7d18b1f7ea6c5fe4295b",
+          "data": {
+            "dynamic_target_bytes": 375000000,
+            "waits": {
+              "attempts": 590492,
+              "shortfalls": 155,
+              "waits": 155,
+              "wait_succeeded": 155,
+              "timed_out": 0,
+              "cancelled": 0,
+              "final_failures": 0
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 44,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1090302505944,
+            "available_bytes": 298570944,
+            "held_bytes": 0,
+            "used_bytes": 8910550888,
+            "unknown_bytes": 0,
+            "grants": 44,
+            "denials": 0,
+            "sessions": 0
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "b2595d815080e33e505ec57d55f23070843b06ec7e8af6a55f6a9da3cb4bada3",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 20,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2",
+                  "target_seconds": 30
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "40ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    },
+    {
+      "waterline": 30,
+      "exit": 0,
+      "files": {
+        "report.json": {
+          "sha256": "31476adad07c33914defb47dcd12ce74d5a720412060061ef5a60aa5cbd62943",
+          "data": {
+            "accounting": {
+              "left_to_right": 4438563764,
+              "right_to_left": 4438563764
+            },
+            "authorization_mode": "runtime-authority",
+            "classified_drops": {
+              "kernel_rcvbuf_driver_scope": 0,
+              "oversized": 0,
+              "queue_full": 0,
+              "receive_queue_full": 0,
+              "source_capacity": 0,
+              "source_queue_full": 0,
+              "window_full": 0
+            },
+            "commit": "172b0a70f9dcd8cd64264a23904739d2419a45a5",
+            "d_04": {
+              "status": "pending-review"
+            },
+            "dirty": false,
+            "end_to_end_received_bytes": 4438563764,
+            "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+            "nfr_003": {
+              "mixed_tcp_mbps": 987.8200037448485,
+              "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+              "status": "not-qualified",
+              "tcp_only_retention": 0.7740765856119801
+            },
+            "nfr_005": {
+              "loss_threshold_met": true,
+              "reason": "Short diagnostic run; host and duration qualification remain open",
+              "status": "not-qualified",
+              "udp_loss": 0
+            },
+            "nfr_006": {
+              "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+              "status": "not-qualified"
+            },
+            "nfr_007": {
+              "reason": "independent path latency baseline is missing",
+              "status": "not-qualified"
+            },
+            "performance_qualification": "not-qualified",
+            "qualification_metrics": {
+              "duration_seconds": 15,
+              "mixed_tcp_mbps": 987.8200037448485,
+              "source_credit_conserved": true,
+              "source_credit_settled": true,
+              "tcp_streams": 16,
+              "udp_loss": 0,
+              "udp_offered_mbps": 99.968
+            },
+            "returned_reservations": {},
+            "runtime_correctness": "pass",
+            "schema": 1,
+            "semantic_manifest_sha256": "202288e25c345cb1cb5441cfb4e7f49fd8a5b3238b4d5adcb9100bd39edff929",
+            "trial_id": "dynamic40-waterline-30"
+          }
+        },
+        "events-source.jsonl.credit.json": {
+          "sha256": "9feb8d6dbc00fbdc596a49ac2889addb7612f02d4f24b84575edd6aa8b00794a",
+          "data": {
+            "dynamic_target_bytes": 375000000,
+            "waits": {
+              "attempts": 588460,
+              "shortfalls": 143,
+              "waits": 143,
+              "wait_succeeded": 143,
+              "timed_out": 0,
+              "cancelled": 0,
+              "final_failures": 0
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 49,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1090388751320,
+            "available_bytes": 245748928,
+            "held_bytes": 0,
+            "used_bytes": 8877127528,
+            "unknown_bytes": 0,
+            "grants": 49,
+            "denials": 0,
+            "sessions": 0
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "3cdbb62ee100559918d54b2a88ed7fdad91dda3c100b64cdbe12743279113c07",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 30,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2",
+                  "target_seconds": 30
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "40ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    },
+    {
+      "waterline": 50,
+      "exit": 0,
+      "files": {
+        "report.json": {
+          "sha256": "2d9d55f0d5163567deebc2e8bfbb1b64d39e72da7d2304b8facea2ccf164699c",
+          "data": {
+            "accounting": {
+              "left_to_right": 4447862676,
+              "right_to_left": 4447862676
+            },
+            "authorization_mode": "runtime-authority",
+            "classified_drops": {
+              "kernel_rcvbuf_driver_scope": 0,
+              "oversized": 0,
+              "queue_full": 0,
+              "receive_queue_full": 0,
+              "source_capacity": 0,
+              "source_queue_full": 0,
+              "window_full": 0
+            },
+            "commit": "172b0a70f9dcd8cd64264a23904739d2419a45a5",
+            "d_04": {
+              "status": "pending-review"
+            },
+            "dirty": false,
+            "end_to_end_received_bytes": 4447862676,
+            "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+            "nfr_003": {
+              "mixed_tcp_mbps": 994.4476119261816,
+              "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+              "status": "not-qualified",
+              "tcp_only_retention": 0.7798875437870687
+            },
+            "nfr_005": {
+              "loss_threshold_met": true,
+              "reason": "Short diagnostic run; host and duration qualification remain open",
+              "status": "not-qualified",
+              "udp_loss": 0
+            },
+            "nfr_006": {
+              "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+              "status": "not-qualified"
+            },
+            "nfr_007": {
+              "reason": "independent path latency baseline is missing",
+              "status": "not-qualified"
+            },
+            "performance_qualification": "not-qualified",
+            "qualification_metrics": {
+              "duration_seconds": 15,
+              "mixed_tcp_mbps": 994.4476119261816,
+              "source_credit_conserved": true,
+              "source_credit_settled": true,
+              "tcp_streams": 16,
+              "udp_loss": 0,
+              "udp_offered_mbps": 99.96416
+            },
+            "returned_reservations": {},
+            "runtime_correctness": "pass",
+            "schema": 1,
+            "semantic_manifest_sha256": "666151fbb7588df7e85dfc3b7406e501b263d4fef528aef2a66c1ca663b4916b",
+            "trial_id": "dynamic40-waterline-50"
+          }
+        },
+        "events-source.jsonl.credit.json": {
+          "sha256": "815e1d95fb1e7143fefd8cde660c94b28c79293e4930568da90615666389e77e",
+          "data": {
+            "dynamic_target_bytes": 375000000,
+            "waits": {
+              "attempts": 587212,
+              "shortfalls": 166,
+              "waits": 166,
+              "wait_succeeded": 166,
+              "timed_out": 0,
+              "cancelled": 0,
+              "final_failures": 0
+            },
+            "snapshot_id": "phase4-formal/source/path-2/policy-2",
+            "pending_grant_bytes": 0,
+            "unknown_grant_bytes": 0,
+            "grant_records": 66,
+            "budget_bytes": 1099511627776,
+            "unissued_bytes": 1090386916312,
+            "available_bytes": 228986112,
+            "held_bytes": 0,
+            "used_bytes": 8895725352,
+            "unknown_bytes": 0,
+            "grants": 66,
+            "denials": 0,
+            "sessions": 0
+          }
+        },
+        "semantic-manifest.json": {
+          "sha256": "ba3a1b60ac01b0ce403be79d8a35a5329448b87b105003d33d5a352c018a181e",
+          "data": {
+            "roles": {
+              "destination": {
+                "execution_point": true,
+                "hop_index": 3,
+                "next_hop_node_id": "",
+                "node_id": "00000000-0000-0000-0000-000000000005",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000004",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "destination",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "echo-target:18081",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-1": {
+                "execution_point": false,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+                "node_id": "00000000-0000-0000-0000-000000000002",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000001",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-2": {
+                "execution_point": false,
+                "hop_index": 1,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+                "node_id": "00000000-0000-0000-0000-000000000003",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "relay-3": {
+                "execution_point": false,
+                "hop_index": 2,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+                "node_id": "00000000-0000-0000-0000-000000000004",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000003",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "relay",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "target_service": "",
+                "tcp_service": false,
+                "transport_mode": "mux",
+                "udp_service": false,
+                "version": 1
+              },
+              "source": {
+                "execution_point": true,
+                "hop_index": 0,
+                "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+                "node_id": "00000000-0000-0000-0000-000000000001",
+                "path_generation": 2,
+                "peer_node_id": "00000000-0000-0000-0000-000000000002",
+                "pool_max_links": 4,
+                "pool_min_links": 1,
+                "role": "source",
+                "rule_id": "qualification-rule",
+                "rule_revision": 2,
+                "runtime_authority": true,
+                "source_credit": {
+                  "budget_bytes": 1099511627776,
+                  "grant_target_bytes": 375000000,
+                  "initial_block_bytes": 262144,
+                  "max_block_bytes": 4194304,
+                  "observe": false,
+                  "renew_percent": 50,
+                  "snapshot_id": "phase4-formal/source/path-2/policy-2",
+                  "target_seconds": 30
+                },
+                "target_service": "",
+                "tcp_service": true,
+                "transport_mode": "mux",
+                "udp_service": true,
+                "version": 1
+              }
+            },
+            "runtime_environment": {
+              "CPU_PROFILE": "default",
+              "GOGC": "default",
+              "GOMAXPROCS": "default",
+              "PHASE4_TEST_ISSUER_DELAY": "40ms",
+              "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+              "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+            },
+            "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+            "udp_socket_limits": {
+              "rmem_default": 212992,
+              "rmem_max": 67108864,
+              "wmem_default": 212992,
+              "wmem_max": 67108864
+            },
+            "workload": {
+              "duration_seconds": 15,
+              "tcp_streams": 16,
+              "udp_mbps": 100,
+              "udp_payload_bytes": 1200
+            }
+          }
+        }
+      }
+    }
+  ]
+}
