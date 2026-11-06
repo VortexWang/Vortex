@@ -501,3 +501,44 @@ func TestFundingBlockSettlementGroupCanceledPreservesWholeBound(t *testing.T) {
 		t.Fatal("faulted group admitted")
 	}
 }
+
+func TestFundingBlockUnknownPrecedesQueuedKnownCheckpoint(t *testing.T) {
+	n, session := fundingSession(t)
+	s := session.(*fundingBlockSession)
+	ctx := context.Background()
+	first, err := s.Reserve(ctx, accounting.LeftToRight, 40)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := s.Reserve(ctx, accounting.LeftToRight, 40)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.mu.Lock()
+	block := s.blocks[accounting.LeftToRight]
+	s.mu.Unlock()
+	// Force the ordering at the worker boundary: the known result has not yet
+	// reached its durable transaction when another child freezes the same block.
+	if err := second.MarkUnknown(ctx); err != nil {
+		t.Fatal(err)
+	}
+	group := []*fundingSettlementRequest{{ctx: ctx, direction: accounting.LeftToRight, block: block, outcome: accounting.Outcome{Resolution: accounting.Committed, Reserved: first.Reserved(), Used: 20}}}
+	if err := s.commitSettlementGroup(group); err != accounting.ErrDenied {
+		t.Fatalf("late checkpoint: %v", err)
+	}
+	s.mu.Lock()
+	remaining := block.inFlight
+	s.mu.Unlock()
+	if remaining != 0 {
+		t.Fatalf("in-flight after both outcomes: %d", remaining)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if b := fundingBalance(t, n); b.Committed != 0 || b.Unknown != 128 || b.Reserved != 0 || b.Remaining != 4096-128 {
+		t.Fatalf("late known outcome changed frozen liability: %+v", b)
+	}
+	if _, err := s.Reserve(ctx, accounting.RightToLeft, 1); err == nil {
+		t.Fatal("frozen session admitted")
+	}
+}

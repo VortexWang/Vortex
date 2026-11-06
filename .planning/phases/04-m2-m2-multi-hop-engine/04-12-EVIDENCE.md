@@ -1568,3 +1568,21 @@ sustained durable-authority performance, or D-04 candidate qualification. Keep
 the production deadline unchanged. Further work must distinguish race safety
 and production latency, retain raw profiles, and measure transaction phases
 before additional tuning. D-04 and Phase 4 remain open.
+
+## Unknown outcome overtakes queued known checkpoint
+
+Added a deterministic worker-boundary regression for two admitted children of
+one funding block: an unknown outcome freezes the full 128-byte residual before
+the other child's known checkpoint reaches its transaction. The delayed group
+must be denied, clear its in-flight count exactly once, retain all 128 bytes as
+unknown, record no overlapping committed consumption, refund nothing on close,
+and refuse subsequent admission. This complements the existing known-before-
+unknown ordering. It tests the worker boundary directly, not OS scheduling or
+process-kill recovery.
+
+New ordering, canceled-group, and independent-settlement race tests repeated
+three times PASS (2.711s). Original production deadlines remain unchanged.
+The dedicated host full uncached non-race Agent/Hub regression is running at
+ac5e0e5; its result is not yet claimed here. Symbolization of the earlier CPU
+profile was repaired using the preserved matching agent.test binary; checkptr
+and race overhead remain evident. No D-04 parameter or phase completion claimed.
