@@ -17,6 +17,10 @@ import (
 const authorizationSchemaVersion = "1.1.0"
 
 type authorizationPayload struct {
+	ShareReferences        []store.ShareReference    `json:"share_references,omitempty"`
+	PolicyTransitions      []json.RawMessage         `json:"policy_transitions,omitempty"`
+	RenewalRequestID       string                    `json:"renewal_request_id,omitempty"`
+	RenewalRequestSHA256   string                    `json:"renewal_request_sha256,omitempty"`
 	Handoffs               []store.EpochHandoff      `json:"epoch_handoffs,omitempty"`
 	SchemaVersion          string                    `json:"schema_version"`
 	UpdateID               string                    `json:"update_id"`
@@ -34,6 +38,8 @@ type authorizationPayload struct {
 }
 
 type authorizationRecord struct {
+	ShareReferenceID      string    `json:"share_reference_id,omitempty"`
+	DelegationID          string    `json:"delegation_id,omitempty"`
 	AuthorizationID       string    `json:"authorization_id"`
 	ParentAuthorizationID string    `json:"parent_authorization_id"`
 	SourceID              string    `json:"source_id"`
@@ -63,6 +69,10 @@ type authorizationRestrictions struct {
 }
 
 type authorizationRequired struct {
+	ShareReferences        *json.RawMessage `json:"share_references"`
+	PolicyTransitions      *json.RawMessage `json:"policy_transitions"`
+	RenewalRequestID       *string          `json:"renewal_request_id"`
+	RenewalRequestSHA256   *string          `json:"renewal_request_sha256"`
 	Handoffs               *json.RawMessage `json:"epoch_handoffs"`
 	SchemaVersion          *string          `json:"schema_version"`
 	UpdateID               *string          `json:"update_id"`
@@ -107,7 +117,7 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
 		return result, fmt.Errorf("invalid_authorization: multiple JSON values")
 	}
-	if (result.SchemaVersion != authorizationSchemaVersion && result.SchemaVersion != "1.0.0") || result.NodeID != nodeID || result.BootID != bootID || result.PathGeneration != generation || generation == 0 {
+	if (result.SchemaVersion != authorizationSchemaVersion && result.SchemaVersion != "1.0.0" && result.SchemaVersion != "1.2.0") || result.NodeID != nodeID || result.BootID != bootID || result.PathGeneration != generation || generation == 0 {
 		return result, fmt.Errorf("identity_mismatch: authorization schema, node, boot or path generation mismatch")
 	}
 	if !canonicalUUID(result.UpdateID) || !canonicalUUID(result.NodeID) || !canonicalUUID(result.BootID) || result.SignerEpoch == 0 || result.FencingGenerationFloor == 0 || result.Authorizations == nil || result.Revocations == nil || len(result.Authorizations) > 4096 || len(result.Revocations) > 4096 {
@@ -117,11 +127,52 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 	if err := json.Unmarshal(payload, &envelopeFields); err != nil {
 		return result, err
 	}
-	if raw, present := envelopeFields["epoch_handoffs"]; present && (result.SchemaVersion != "1.1.0" || bytes.Equal(bytes.TrimSpace(raw), []byte("null"))) {
+	if result.SchemaVersion == "1.2.0" {
+		if required.ShareReferences == nil || required.PolicyTransitions == nil || result.ShareReferences == nil || result.PolicyTransitions == nil || len(result.ShareReferences) > 4096 || len(result.PolicyTransitions) > 64 || result.SignerEpoch > math.MaxInt64 || result.PathGeneration > math.MaxInt64 || result.FencingGenerationFloor > math.MaxInt64 {
+			return result, fmt.Errorf("invalid_authorization: missing lifecycle collections or unsafe counters")
+		}
+		// Policy cutover is enabled by its own runtime slice. Until then known
+		// nonempty transitions fail closed rather than silently being discarded.
+		if len(result.PolicyTransitions) > 0 {
+			return result, fmt.Errorf("unsupported_authorization: policy transitions not installed")
+		}
+		var refs []map[string]json.RawMessage
+		if err := json.Unmarshal(*required.ShareReferences, &refs); err != nil {
+			return result, err
+		}
+		seen := map[string]bool{}
+		for i, r := range result.ShareReferences {
+			for _, key := range []string{"share_id", "parent_share_id", "parent_revision", "source_id", "allowed_issuer_hub_id", "subject_node_id", "signer_epoch", "share_generation", "revision", "rule_id", "rule_revision", "path_generation", "rate_bps", "connections", "not_before", "expires_at", "hard_deadline"} {
+				v, ok := refs[i][key]
+				if !ok || bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+					return result, fmt.Errorf("invalid_authorization: missing share reference field")
+				}
+			}
+			if err := store.ValidateShareReference(r); err != nil || seen[r.ID] {
+				return result, fmt.Errorf("invalid_authorization: invalid or duplicate share reference")
+			}
+			seen[r.ID] = true
+		}
+		_, hasID := envelopeFields["renewal_request_id"]
+		_, hasDigest := envelopeFields["renewal_request_sha256"]
+		if hasID || hasDigest {
+			hash, err := hex.DecodeString(result.RenewalRequestSHA256)
+			if !hasID || !hasDigest || required.RenewalRequestID == nil || required.RenewalRequestSHA256 == nil || !canonicalUUID(result.RenewalRequestID) || err != nil || len(hash) != 32 || hex.EncodeToString(hash) != result.RenewalRequestSHA256 {
+				return result, fmt.Errorf("invalid_authorization: incomplete renewal correlation")
+			}
+		}
+	} else {
+		for _, key := range []string{"share_references", "policy_transitions", "renewal_request_id", "renewal_request_sha256"} {
+			if _, ok := envelopeFields[key]; ok {
+				return result, fmt.Errorf("invalid_authorization: lifecycle field on legacy schema")
+			}
+		}
+	}
+	if raw, present := envelopeFields["epoch_handoffs"]; present && ((result.SchemaVersion != "1.1.0" && result.SchemaVersion != "1.2.0") || bytes.Equal(bytes.TrimSpace(raw), []byte("null"))) {
 		return result, fmt.Errorf("invalid_authorization: unsupported or null handoffs")
 	}
 	if required.Handoffs != nil {
-		if result.SchemaVersion != "1.1.0" || result.Handoffs == nil || len(result.Handoffs) > 4096 {
+		if (result.SchemaVersion != "1.1.0" && result.SchemaVersion != "1.2.0") || result.Handoffs == nil || len(result.Handoffs) > 4096 {
 			return result, fmt.Errorf("invalid_authorization: unsupported handoffs")
 		}
 		var raw []map[string]json.RawMessage
@@ -156,6 +207,17 @@ func validateAuthorizationUpdate(payload []byte, nodeID, bootID string, generati
 		return result, fmt.Errorf("invalid_authorization: invalid authorization records")
 	}
 	for i, a := range result.Authorizations {
+		if result.SchemaVersion == "1.2.0" {
+			if !canonicalUUID(a.ShareReferenceID) || !canonicalUUID(a.DelegationID) || a.RuleRevision > math.MaxInt64 {
+				return result, fmt.Errorf("invalid_authorization: missing share/delegation binding")
+			}
+		} else {
+			for _, key := range []string{"share_reference_id", "delegation_id"} {
+				if _, ok := rawAuthorizations[i][key]; ok {
+					return result, fmt.Errorf("invalid_authorization: share binding on legacy schema")
+				}
+			}
+		}
 		for _, field := range []string{"authorization_id", "parent_authorization_id", "source_id", "kind", "rule_id", "rule_revision", "path_generation", "issued_at", "not_before", "expires_at", "hard_deadline"} {
 			value, present := rawAuthorizations[i][field]
 			if !present || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {

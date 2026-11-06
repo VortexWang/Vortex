@@ -64,6 +64,16 @@ func readAuthorizationTx(ctx context.Context, tx *sql.Tx, nodeID, authorizationI
 	if err := tx.QueryRowContext(ctx, `SELECT issuer_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&record.IssuerID); err != nil {
 		return AuthorizationRecord{}, "", err
 	}
+	var shareRevision string
+	if err := tx.QueryRowContext(ctx, `SELECT delegation_id,share_reference_id,share_revision FROM authorization_records WHERE node_id=? AND authorization_id=?`, nodeID, authorizationID).Scan(&record.DelegationID, &record.ShareReferenceID, &shareRevision); err != nil {
+		return AuthorizationRecord{}, "", err
+	}
+	if record.ShareReferenceID != "" {
+		record.ShareRevision, err = strconv.ParseUint(shareRevision, 10, 63)
+		if err != nil {
+			return AuthorizationRecord{}, "", err
+		}
+	}
 	for _, field := range []struct {
 		text  string
 		value *uint64
@@ -99,6 +109,9 @@ func checkAuthorizationTx(ctx context.Context, tx *sql.Tx, use AuthorizationUse)
 		if err := checkSourceLineageTx(ctx, tx, use.NodeID, record); err != nil {
 			return AuthorizationRecord{}, err
 		}
+	}
+	if err := checkAuthorizationShareTx(ctx, tx, use.NodeID, record, !use.ExistingSession); err != nil {
+		return AuthorizationRecord{}, err
 	}
 
 	notBefore, e1 := time.Parse(time.RFC3339Nano, record.NotBefore)

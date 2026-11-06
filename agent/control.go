@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -480,10 +481,36 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	if err != nil {
 		return err
 	}
+	if payload.RenewalRequestID != "" {
+		intent, err := c.Node.Store.RenewalIntent(ctx, payload.RenewalRequestID)
+		if err != nil {
+			return err
+		}
+		r := intent.Request
+		if intent.IssuerID != issuer || intent.Result == nil || intent.Result.Code != "ok" || intent.Result.AuthorizationUpdate == nil || !bytes.Equal(intent.Result.AuthorizationUpdate.Payload, update.Payload) || hex.EncodeToString(r.RequestSha256) != payload.RenewalRequestSHA256 || r.NodeId != payload.NodeID || r.BootId != payload.BootID || r.PathGeneration != payload.PathGeneration || r.SignerEpoch != payload.SignerEpoch || r.FencingGeneration != payload.FencingGenerationFloor {
+			return fmt.Errorf("invalid_authorization: renewal has no matching durable response")
+		}
+		var grants int
+		for _, a := range payload.Authorizations {
+			if a.DelegationID != r.DelegationId || a.RuleID != r.RuleId || a.RuleRevision != r.RuleRevision || a.ExpiresAt.Sub(a.IssuedAt) > time.Duration(r.RequestedTtlSeconds)*time.Second {
+				return fmt.Errorf("invalid_authorization: renewal expanded requested scope")
+			}
+			if a.Kind == "credit_grant" {
+				grants++
+				if a.SourceID != r.SourceId || a.BillingSnapshotID != r.BillingSnapshotId || a.AmountBytes == nil || *a.AmountBytes != r.RequestedRawBytes {
+					return fmt.Errorf("invalid_authorization: renewal changed funded source or amount")
+				}
+			}
+		}
+		if grants != 1 {
+			return fmt.Errorf("invalid_authorization: renewal requires one requested credit grant")
+		}
+	}
 	digest := sha256.Sum256(update.GetPayload())
 	records := make([]store.AuthorizationRecord, 0, len(payload.Authorizations))
 	for _, authorization := range payload.Authorizations {
 		record := store.AuthorizationRecord{
+			ShareReferenceID: authorization.ShareReferenceID, DelegationID: authorization.DelegationID,
 			AuthorizationID: authorization.AuthorizationID, ParentAuthorizationID: authorization.ParentAuthorizationID,
 			SourceID: authorization.SourceID, Kind: authorization.Kind, RuleID: authorization.RuleID,
 			RuleRevision: authorization.RuleRevision, PathGeneration: authorization.PathGeneration,
@@ -506,7 +533,8 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
-		IssuerID: issuer, Handoffs: payload.Handoffs,
+		ShareReferences: payload.ShareReferences,
+		IssuerID:        issuer, Handoffs: payload.Handoffs,
 		NodeID: c.Node.NodeID, BootID: c.Node.BootID, UpdateID: payload.UpdateID,
 		Payload: update.GetPayload(), Digest: digest[:], SignerEpoch: payload.SignerEpoch,
 		PathGeneration: payload.PathGeneration, FencingGenerationFloor: payload.FencingGenerationFloor,

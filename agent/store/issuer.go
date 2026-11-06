@@ -13,6 +13,8 @@ import (
 	"math"
 	"strconv"
 	"time"
+	"vortex/contracts"
+	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 // HubDelegation is installed only by the authenticated backend adapter. It is
@@ -20,6 +22,7 @@ import (
 // bytes. Billing-unit conversion and backend source allocation precede this
 // boundary. No node request can install or change it.
 type HubDelegation struct {
+	ShareReferences                                         []ShareReference `json:",omitempty"`
 	ID, HubID, SourceID, RuntimeSourceID, ShareSourceID     string
 	NodeID, BootID, RuleID, BillingSnapshotID               string
 	SignerEpoch, RuleRevision, PathGeneration, FencingFloor uint64
@@ -36,15 +39,17 @@ type IssuerTime struct {
 // IssueRequest names only a pre-existing delegation and the receiving boot.
 // It cannot create rules, ports, DNS entries, registrations or share transfers.
 type IssueRequest struct {
+	RenewalPayload                          []byte `json:",omitempty"`
 	ID, HubID, DelegationID, NodeID, BootID string
 	RawBytes                                uint64
 	TTL                                     time.Duration
 }
 
 type IssuedAuthorization struct {
-	Generation uint64
-	Payload    []byte
-	Digest     []byte
+	RenewalResult []byte
+	Generation    uint64
+	Payload       []byte
+	Digest        []byte
 }
 
 func validIssuerUUID(s string) bool {
@@ -107,6 +112,14 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+	if d.ShareReferences != nil {
+		if _, err := delegationShareLeaves(d); err != nil {
+			return err
+		}
+		if err := persistShareReferencesTx(ctx, tx, AuthorizationUpdate{IssuerID: d.HubID, NodeID: d.NodeID, SignerEpoch: d.SignerEpoch, PathGeneration: d.PathGeneration, ShareReferences: d.ShareReferences}); err != nil {
+			return err
+		}
 	}
 	if now.Earliest.Before(d.BackendHeartbeat) || !now.Latest.Before(d.BackendHeartbeat.Add(BackendLossGrace)) || now.Earliest.Before(d.ValidFrom) || !now.Latest.Before(d.ExpiresAt) {
 		return ErrNewAuthorityInAutonomy
@@ -192,6 +205,17 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	if !validIssuerUUID(r.ID) || r.RawBytes == 0 || r.RawBytes > math.MaxInt64 || r.TTL <= 0 || r.TTL > 300*time.Second {
 		return result, ErrAuthorizationDenied
 	}
+	var renewal *controlv1.RenewalRequest
+	if len(r.RenewalPayload) > 0 {
+		var err error
+		renewal, err = contracts.DecodeRenewalRequest(r.RenewalPayload)
+		if err != nil {
+			return result, err
+		}
+		if renewal.RequestId != r.ID || renewal.NodeId != r.NodeID || renewal.BootId != r.BootID || renewal.DelegationId != r.DelegationID || renewal.RequestedRawBytes != r.RawBytes || time.Duration(renewal.RequestedTtlSeconds)*time.Second != r.TTL {
+			return result, ErrRenewalConflict
+		}
+	}
 	request, err := json.Marshal(r)
 	if err != nil {
 		return result, err
@@ -202,7 +226,7 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	}
 	defer tx.Rollback()
 	var priorRequest []byte
-	err = tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256 FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest)
+	err = tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256,renewal_result FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest, &result.RenewalResult)
 	if err == nil {
 		if !bytes.Equal(priorRequest, request) {
 			return IssuedAuthorization{}, ErrAuthorizationUpdateConflict
@@ -218,6 +242,12 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 			return IssuedAuthorization{}, err
 		}
 		result.Generation = envelope.PathGeneration
+		if renewal != nil {
+			expected, e := contracts.EncodeRenewalResult(renewal, &controlv1.RenewalResult{RequestId: renewal.RequestId, RequestSha256: renewal.RequestSha256, Code: "ok", AuthorizationUpdate: &controlv1.AuthorizationUpdate{Generation: result.Generation, Payload: result.Payload}})
+			if e != nil || !bytes.Equal(expected, result.RenewalResult) {
+				return IssuedAuthorization{}, ErrRenewalConflict
+			}
+		}
 		return result, tx.Commit()
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
@@ -253,6 +283,25 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	d.SignerEpoch, err = strconv.ParseUint(ownerEpoch, 10, 64)
 	if err != nil || d.SignerEpoch == 0 {
 		return result, ErrAuthorizationDenied
+	}
+	// Provisioning may have advanced a source root since this delegation was
+	// installed. Recheck it in the spending transaction; historical grants may
+	// drain, but an obsolete root must never mint new authority.
+	if d.ShareReferences != nil {
+		leaves, err := delegationShareLeaves(d)
+		if err != nil {
+			return result, err
+		}
+		for _, leaf := range leaves {
+			if err := checkShareChainTx(ctx, tx, d.NodeID, d.HubID, leaf, true); err != nil {
+				return result, err
+			}
+		}
+	}
+	if renewal != nil {
+		if d.ShareReferences == nil || renewal.SourceId != d.SourceID || renewal.RuleId != d.RuleID || renewal.RuleRevision != d.RuleRevision || renewal.PathGeneration != d.PathGeneration || renewal.FencingGeneration != d.FencingFloor || renewal.SignerEpoch != d.SignerEpoch || renewal.BillingSnapshotId != d.BillingSnapshotID {
+			return result, ErrAuthorizationDenied
+		}
 	}
 	heartbeat, deadline, err := issuerModeTx(ctx, tx, now)
 	if err != nil {
@@ -291,12 +340,18 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 		return IssuedAuthorization{}, err
 	}
 	result.Generation = d.PathGeneration
+	if renewal != nil {
+		result.RenewalResult, err = contracts.EncodeRenewalResult(renewal, &controlv1.RenewalResult{RequestId: renewal.RequestId, RequestSha256: renewal.RequestSha256, Code: "ok", AuthorizationUpdate: &controlv1.AuthorizationUpdate{Generation: result.Generation, Payload: result.Payload}})
+		if err != nil {
+			return IssuedAuthorization{}, err
+		}
+	}
 	issuedHash := sha256.Sum256(result.Payload)
 	result.Digest = issuedHash[:]
 	if _, err := tx.ExecContext(ctx, `UPDATE issuer_delegations SET remaining_bytes=? WHERE delegation_id=?`, strconv.FormatUint(remaining-r.RawBytes, 10), d.ID); err != nil {
 		return IssuedAuthorization{}, err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO issuer_issues(issue_id,delegation_id,request,payload,payload_sha256,amount_bytes,created_at) VALUES(?,?,?,?,?,?,?)`, r.ID, d.ID, request, result.Payload, result.Digest, strconv.FormatUint(r.RawBytes, 10), now.Latest.UTC().Format(time.RFC3339Nano)); err != nil {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO issuer_issues(issue_id,delegation_id,request,payload,payload_sha256,amount_bytes,created_at,renewal_result) VALUES(?,?,?,?,?,?,?,?)`, r.ID, d.ID, request, result.Payload, result.Digest, strconv.FormatUint(r.RawBytes, 10), now.Latest.UTC().Format(time.RFC3339Nano), nonnilBytes(result.RenewalResult)); err != nil {
 		return IssuedAuthorization{}, err
 	}
 	if err := tx.Commit(); err != nil {
@@ -306,6 +361,14 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 }
 
 func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, heartbeat, deadline time.Time) ([]byte, error) {
+	var leaves map[string]ShareReference
+	if d.ShareReferences != nil {
+		var err error
+		leaves, err = delegationShareLeaves(d)
+		if err != nil {
+			return nil, err
+		}
+	}
 	newID := func() (string, error) {
 		var id [16]byte
 		if _, err := rand.Read(id[:]); err != nil {
@@ -330,6 +393,10 @@ func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, 
 			source = d.ShareSourceID
 		}
 		a := map[string]any{"authorization_id": id, "parent_authorization_id": d.ID, "source_id": source, "kind": kind, "rule_id": d.RuleID, "rule_revision": d.RuleRevision, "path_generation": d.PathGeneration, "issued_at": issued.UTC().Format(time.RFC3339Nano), "not_before": issued.UTC().Format(time.RFC3339Nano), "expires_at": expires.UTC().Format(time.RFC3339Nano), "hard_deadline": hard.UTC().Format(time.RFC3339Nano)}
+		if leaves != nil {
+			a["share_reference_id"] = leaves[source].ID
+			a["delegation_id"] = d.ID
+		}
 		if kind == "share_lease" {
 			a["rate_bps"] = d.RateBPS
 			a["connections"] = d.Connections
@@ -340,7 +407,67 @@ func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, 
 		}
 		entries = append(entries, a)
 	}
-	return json.Marshal(map[string]any{"schema_version": "1.0.0", "update_id": r.ID, "node_id": d.NodeID, "boot_id": d.BootID, "signer_epoch": d.SignerEpoch, "path_generation": d.PathGeneration, "fencing_generation_floor": d.FencingFloor, "issued_at": issued.UTC().Format(time.RFC3339Nano), "backend_heartbeat_at": heartbeat.UTC().Format(time.RFC3339Nano), "autonomy_deadline": deadline.UTC().Format(time.RFC3339Nano), "authorizations": entries, "revocations": []string{}, "restrictions": map[string]bool{"existing_rules_only": true, "existing_shares_only": true, "existing_delegated_balances_only": true, "new_rules": false, "new_ports": false, "dns_changes": false, "registrations": false, "cross_node_rebalance": false}})
+	payload := map[string]any{"schema_version": "1.0.0", "update_id": r.ID, "node_id": d.NodeID, "boot_id": d.BootID, "signer_epoch": d.SignerEpoch, "path_generation": d.PathGeneration, "fencing_generation_floor": d.FencingFloor, "issued_at": issued.UTC().Format(time.RFC3339Nano), "backend_heartbeat_at": heartbeat.UTC().Format(time.RFC3339Nano), "autonomy_deadline": deadline.UTC().Format(time.RFC3339Nano), "authorizations": entries, "revocations": []string{}, "restrictions": map[string]bool{"existing_rules_only": true, "existing_shares_only": true, "existing_delegated_balances_only": true, "new_rules": false, "new_ports": false, "dns_changes": false, "registrations": false, "cross_node_rebalance": false}}
+	if leaves != nil {
+		payload["schema_version"] = "1.2.0"
+		payload["share_references"] = d.ShareReferences
+		payload["policy_transitions"] = []any{}
+	}
+	if len(r.RenewalPayload) > 0 {
+		req, err := contracts.DecodeRenewalRequest(r.RenewalPayload)
+		if err != nil {
+			return nil, err
+		}
+		payload["renewal_request_id"] = req.RequestId
+		payload["renewal_request_sha256"] = hex.EncodeToString(req.RequestSha256)
+	}
+	return json.Marshal(payload)
+}
+
+func nonnilBytes(b []byte) []byte {
+	if b == nil {
+		return []byte{}
+	}
+	return b
+}
+
+func delegationShareLeaves(d HubDelegation) (map[string]ShareReference, error) {
+	if len(d.ShareReferences) == 0 || len(d.ShareReferences) > 4096 {
+		return nil, ErrAuthorizationDenied
+	}
+	parents := map[string]bool{}
+	ids := map[string]bool{}
+	for _, r := range d.ShareReferences {
+		if err := ValidateShareReference(r); err != nil {
+			return nil, err
+		}
+		if ids[r.ID] {
+			return nil, ErrAuthorizationDenied
+		}
+		ids[r.ID] = true
+		if r.ParentID != "" {
+			parents[r.ParentID] = true
+		}
+	}
+	leaves := map[string]ShareReference{}
+	for _, r := range d.ShareReferences {
+		if parents[r.ID] {
+			continue
+		}
+		if _, exists := leaves[r.SourceID]; exists {
+			return nil, ErrAuthorizationDenied
+		}
+		if r.NodeID != d.NodeID || r.IssuerID != d.HubID || r.SignerEpoch != d.SignerEpoch || r.RuleID != d.RuleID || r.RuleRevision != d.RuleRevision || r.PathGeneration != d.PathGeneration || d.ValidFrom.Before(r.NotBefore) || d.ExpiresAt.After(r.ExpiresAt) || d.HardDeadline.After(r.HardDeadline) || d.RateBPS > r.RateBPS || d.Connections > r.Connections {
+			return nil, ErrAuthorizationDenied
+		}
+		leaves[r.SourceID] = r
+	}
+	for _, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
+		if _, ok := leaves[source]; !ok {
+			return nil, ErrAuthorizationDenied
+		}
+	}
+	return leaves, nil
 }
 
 // CloseHubSigner is irreversible here. Handoff and remainder transfer require

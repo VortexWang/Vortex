@@ -74,6 +74,9 @@ type UsageReservation struct {
 }
 
 type AuthorizationRecord struct {
+	DelegationID          string
+	ShareReferenceID      string
+	ShareRevision         uint64
 	IssuerID              string
 	AuthorizationID       string
 	ParentAuthorizationID string
@@ -95,6 +98,7 @@ type AuthorizationRecord struct {
 }
 
 type AuthorizationUpdate struct {
+	ShareReferences        []ShareReference
 	Handoffs               []EpochHandoff
 	IssuerID               string
 	BackendHeartbeat       time.Time
@@ -299,6 +303,26 @@ CREATE TABLE IF NOT EXISTS authorization_balances (
   PRIMARY KEY(node_id, authorization_id),
   FOREIGN KEY(node_id, authorization_id) REFERENCES authorization_records(node_id, authorization_id)
 );
+CREATE TABLE IF NOT EXISTS share_source_anchors (
+ node_id TEXT NOT NULL,source_id TEXT NOT NULL,revision TEXT NOT NULL,
+ backend_id TEXT NOT NULL,payload BLOB NOT NULL,payload_sha256 BLOB NOT NULL,
+ PRIMARY KEY(node_id,source_id,revision)
+);
+CREATE TABLE IF NOT EXISTS share_source_heads (
+ node_id TEXT NOT NULL,source_id TEXT NOT NULL,revision TEXT NOT NULL,
+ backend_id TEXT NOT NULL,PRIMARY KEY(node_id,source_id)
+);
+CREATE TABLE IF NOT EXISTS share_references (
+ node_id TEXT NOT NULL,share_id TEXT NOT NULL,revision TEXT NOT NULL,
+ parent_id TEXT NOT NULL,parent_revision TEXT NOT NULL,
+ rate_bps TEXT NOT NULL,connections TEXT NOT NULL,
+ payload BLOB NOT NULL,payload_sha256 BLOB NOT NULL,
+ PRIMARY KEY(node_id,share_id,revision)
+);
+CREATE TABLE IF NOT EXISTS share_reference_heads (
+ node_id TEXT NOT NULL,share_id TEXT NOT NULL,revision TEXT NOT NULL,
+ PRIMARY KEY(node_id,share_id)
+);
 CREATE TABLE IF NOT EXISTS authorization_source_owners (
   node_id TEXT NOT NULL,
   source_id TEXT NOT NULL,
@@ -466,12 +490,23 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 			return err
 		}
 	}
+	for _, column := range []string{"delegation_id", "share_reference_id", "share_revision"} {
+		if err := s.ensureColumn("authorization_records", column, "TEXT NOT NULL DEFAULT ''"); err != nil {
+			return err
+		}
+	}
+	if err := s.ensureColumn("issuer_issues", "renewal_result", "BLOB NOT NULL DEFAULT X''"); err != nil {
+		return err
+	}
 	for _, column := range []string{"initial_grant_id", "initial_runtime_lease_id", "initial_share_lease_id"} {
 		if err := s.ensureColumn("runtime_sessions", column, "TEXT NOT NULL DEFAULT ''"); err != nil {
 			return err
 		}
 	}
 	if _, err := s.db.Exec(`UPDATE runtime_sessions SET initial_grant_id=grant_id,initial_runtime_lease_id=runtime_lease_id,initial_share_lease_id=share_lease_id WHERE initial_grant_id=''`); err != nil {
+		return err
+	}
+	if _, err := s.db.Exec(`UPDATE schema_meta SET value='15' WHERE key='schema_version'`); err != nil {
 		return err
 	}
 	return nil
@@ -730,6 +765,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	if err := persistShareReferencesTx(ctx, tx, update); err != nil {
+		return err
+	}
 	for _, id := range revocations {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 			return err
@@ -774,6 +812,18 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	}
 	for _, record := range records {
 		record.IssuerID = update.IssuerID
+		if update.ShareReferences != nil && (record.ShareReferenceID == "" || record.DelegationID == "") {
+			return ErrAuthorizationDenied
+		}
+		if record.ShareReferenceID != "" {
+			record.ShareRevision, err = shareHeadTx(ctx, tx, update.NodeID, record.ShareReferenceID)
+			if err != nil {
+				return err
+			}
+			if err := checkAuthorizationShareTx(ctx, tx, update.NodeID, record, true); err != nil {
+				return err
+			}
+		}
 		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
 			return fmt.Errorf("store: authorization record does not match update identity or fencing")
 		}
@@ -798,6 +848,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 			return err
 		}
 		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET issuer_id=? WHERE node_id=? AND authorization_id=?`, update.IssuerID, update.NodeID, record.AuthorizationID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET delegation_id=?,share_reference_id=?,share_revision=? WHERE node_id=? AND authorization_id=?`, record.DelegationID, record.ShareReferenceID, strconv.FormatUint(record.ShareRevision, 10), update.NodeID, record.AuthorizationID); err != nil {
 			return err
 		}
 		if record.Kind == "credit_grant" {
