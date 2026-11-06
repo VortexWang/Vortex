@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"strconv"
 )
 
@@ -21,9 +22,16 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 		return err
 	}
 	defer tx.Rollback()
+	if err := admitRuntimeFundingBlockWriteTx(ctx, tx, block, scope, n); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func admitRuntimeFundingBlockWriteTx(ctx context.Context, tx *sql.Tx, block UsageReservation, scope AuthorizationUse, n uint64) error {
 	var boot, snapshot, flow, rule, direction, reserved, state, auth, held, holdState string
 	var session, sessionBoot, sessionFlow, source, sessionState, grant, runtime, share string
-	err = tx.QueryRowContext(ctx, `SELECT u.boot_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,u.state,h.authorization_id,h.reserved_bytes,h.state,b.session_id,s.boot_id,s.flow_key,s.source_id,s.state,s.grant_id,s.runtime_lease_id,s.share_lease_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id JOIN runtime_sessions s ON s.node_id=b.node_id AND s.session_id=b.session_id WHERE b.node_id=? AND b.batch_id=?`, block.NodeID, block.BatchID).Scan(&boot, &snapshot, &flow, &rule, &direction, &reserved, &state, &auth, &held, &holdState, &session, &sessionBoot, &sessionFlow, &source, &sessionState, &grant, &runtime, &share)
+	err := tx.QueryRowContext(ctx, `SELECT u.boot_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,u.state,h.authorization_id,h.reserved_bytes,h.state,b.session_id,s.boot_id,s.flow_key,s.source_id,s.state,s.grant_id,s.runtime_lease_id,s.share_lease_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id JOIN runtime_sessions s ON s.node_id=b.node_id AND s.session_id=b.session_id WHERE b.node_id=? AND b.batch_id=?`, block.NodeID, block.BatchID).Scan(&boot, &snapshot, &flow, &rule, &direction, &reserved, &state, &auth, &held, &holdState, &session, &sessionBoot, &sessionFlow, &source, &sessionState, &grant, &runtime, &share)
 	if err != nil {
 		return err
 	}
@@ -72,6 +80,72 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	}
 	if err := consumeValidatedRuntimeRateTx(ctx, tx, scope, n, shareRecord); err != nil {
 		return err
+	}
+	return nil
+}
+
+// RuntimeBlockAdmission is one bounded write against an already funded block.
+// The allocator must retain exclusive ownership of all blocks until the batch
+// returns and include existing in-flight bytes in its own capacity accounting.
+type RuntimeBlockAdmission struct {
+	Block UsageReservation
+	Scope AuthorizationUse
+	Bytes uint64
+}
+
+// AdmitRuntimeFundingBlockBatch checks at most 64 writes and commits their rate
+// debits together. Any denial or error rolls the entire batch back. Successful
+// calls are not retry capabilities: repeated calls debit rate again. No caller
+// may begin a write before this method successfully returns.
+func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []RuntimeBlockAdmission) error {
+	if s.owner != "agent" || len(writes) == 0 || len(writes) > 64 {
+		return ErrAuthorizationDenied
+	}
+	// Coalesce only exact block/scope identities. Use conservative time union so
+	// batching cannot grant validity or rate refill outside any caller's bounds.
+	type identity struct{ node, batch string }
+	grouped := make([]RuntimeBlockAdmission, 0, len(writes))
+	positions := make(map[identity]int, len(writes))
+	for _, write := range writes {
+		b, u := write.Block, write.Scope
+		if u.SessionID == "" || b.NodeID != u.NodeID || b.BootID != u.BootID || b.SnapshotID != u.BillingSnapshotID || b.RuleID != u.RuleID || write.Bytes == 0 || write.Bytes > b.Reserved {
+			return ErrAuthorizationDenied
+		}
+		if !u.TrustedTime || u.Earliest.IsZero() || u.Latest.Before(u.Earliest) {
+			return ErrAuthorityTimeUncertain
+		}
+		key := identity{b.NodeID, b.BatchID}
+		if index, ok := positions[key]; ok {
+			prior := &grouped[index]
+			normalized := u
+			normalized.Earliest, normalized.Latest = prior.Scope.Earliest, prior.Scope.Latest
+			if prior.Block != b || prior.Scope != normalized {
+				return ErrUsageBatchConflict
+			}
+			if write.Bytes > b.Reserved-prior.Bytes {
+				return ErrAuthorizationDenied
+			}
+			prior.Bytes += write.Bytes
+			if u.Earliest.Before(prior.Scope.Earliest) {
+				prior.Scope.Earliest = u.Earliest
+			}
+			if u.Latest.After(prior.Scope.Latest) {
+				prior.Scope.Latest = u.Latest
+			}
+		} else {
+			positions[key] = len(grouped)
+			grouped = append(grouped, write)
+		}
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, write := range grouped {
+		if err := admitRuntimeFundingBlockWriteTx(ctx, tx, write.Block, write.Scope, write.Bytes); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

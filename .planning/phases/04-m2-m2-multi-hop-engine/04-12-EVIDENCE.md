@@ -1431,3 +1431,25 @@ and D-04 can be claimed.
 After the cancellation change, real ordinary/delayed TCP/UDP block renewal
 race PASS locally 29.977s. Native cancellation and full regression remain
 unrun for this final change; no native concurrency closure is claimed.
+
+## Bounded Store batch admission primitive
+
+AdmitRuntimeFundingBlockBatch now validates up to 64 writes and commits shared
+rate debits in one transaction. Exact block/scope matches coalesce; their sum
+cannot exceed the persisted residual. Time intervals are conservatively united
+(earliest minimum, latest maximum), so batching cannot extend validity or
+create extra refill. Different scopes sharing a batch identity are rejected.
+A failure in any group rolls back all preceding rate updates. No permission
+exists until the batch transaction returns successfully. Exclusive allocator
+ownership and existing in-flight bounds remain the caller's responsibility.
+
+Targeted batch+admission race PASS 4.537s; full Store race PASS 15.186s; Agent/Hub
+vet and diff PASS. Tests cover 16 coalesced writes, exact rate exhaustion,
+cross-direction rollback on later denial, aggregate residual overflow, scope
+and identity mutation, expired/uncertain time, 65-entry limit and cancellation.
+The single-write API delegates to the same transactional validation helper.
+
+No runtime queue invokes this API yet. Agent queue integration must preserve
+per-request deadlines, bounds, cancellation and unknown-commit behavior before
+re-running the failed native 16-concurrent-write test. This is persistence
+implementation progress, not concurrency qualification or a D-04 parameter lock.

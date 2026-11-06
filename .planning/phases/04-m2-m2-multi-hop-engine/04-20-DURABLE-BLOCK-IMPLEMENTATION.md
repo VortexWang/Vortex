@@ -184,3 +184,20 @@ issued totals, exact metered payload bytes, zero unresolved/unknown balance and
 source conservation. Three repetitions of both ordinary and delayed modes
 passed after this sequencing correction. This is 12 TCP/UDP subcases, not the
 complete attack or sustained-load matrix.
+
+## Bounded group admission persistence seam
+
+AdmitRuntimeFundingBlockBatch supports up to 64 existing-block writes in one
+transaction, coalescing exact block/scope identities and checking aggregate
+bytes against the residual. It unions conservative time bounds, validates every
+distinct group and debits shared rate atomically. Any later denial rolls back
+earlier rate changes. The limit is an implementation bound, not a D-04 value.
+
+The Agent must still own every participating block and account for existing
+in-flight writes. This Store API alone is not a concurrent allocator or a
+capability cache. Next: integrate a bounded session queue with per-request
+deadlines, cancellation before/after commit, fair grouping by direction, and
+checkpoint cooperation. Do not return a Batch until group admission commits;
+canceled committed entries may waste rate tokens but must release only proven
+unused in-memory credit. Unknown commit results fault the group. The current
+runtime does not yet invoke this API, so native concurrency remains failed.
