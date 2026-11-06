@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: V1
 current_phase: 05
 current_phase_name: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
-current_plan: 12
+current_plan: 13
 status: executing
-stopped_at: Completed 05-11; next 05-12 durable recovering checkpoint barrier
-last_updated: "2026-11-06T09:34:31.618Z"
+stopped_at: Completed 05-12; next 05-13 share-chain and immutable policy cutover
+last_updated: "2026-11-06T10:08:07.290Z"
 last_activity: 2026-11-06
-last_activity_desc: 05-11 completed on5ca72e0 Docker/Actions42193600373; 05-12 next; Phase5 executing
-state_head: 63ddab6b2f8ba7bfcc2a3fbeba4e88dd7f73682a
+last_activity_desc: 05-12 completed on1c06bc9 Docker/Actions42198081076; 05-13 next; Phase5 executing
+state_head: 25044f6bf011039e0311256e6ce68367ad277520
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 42
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 05 (M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)) — EXECUTING
-Current Plan: 12
+Current Plan: 13
 Total Plans in Phase: 14
-Status: Executing — 05-11 complete with signed actual-node upgrade/rollback and paired evidence; 05-12 next
-Last activity: 2026-11-06 — 05-11 completed on5ca72e0 with Docker/Actions42193600373 and independent raw-ledger audits; Phase5 remains incomplete.
+Status: Executing — 05-12 complete with durable recovery barrier and paired evidence; 05-13 next
+Last activity: 2026-11-06 — 05-12 completed on1c06bc9 with Docker/Actions42198081076 and independent raw-ledger audits; Phase5 remains incomplete.
 
-Progress: Phase 5 [██████░░░░] 11/14 plans executed; 05-12 ready, 05-13..05-14 dependency-waiting. G05-01/02/03/04 resolved within protocol-adapter/static-destination scope; G05-05 remains open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
+Progress: Phase 5 [██████░░░░] 12/14 plans executed; 05-13 ready, 05-14 dependency-waiting. G05-01/02/03/04 resolved within protocol-adapter/static-destination scope; G05-05 recovery barrier verified; share/policy and consolidated acceptance remain open. Historical UAT complete (17 passed); new runtime flows require fresh evidence/UAT. Nyquist remains partial.
 
 ## Performance Metrics
 

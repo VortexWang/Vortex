@@ -114,7 +114,7 @@
 3. Edge Hub 仅在区域额度、原份额和硬截止内自治；HUB 分区/重启发生时关闭旧签发权并按单一代次和交接证据恢复。
 4. 恢复账本轮转在单个本地事务封存前缀并转移原 R，不复制授权；后端尚未追平时持续尾账按唯一 ID 幂等上报。
 5. 节点激活状态区分 prepared、activation-unknown、active 和 released；Commit/Abort 竞争、迟到回执及重启未知均保留占用，只有规范证明可释放。
-**Plans**: 14 total:11 executed. 05-11 signed actual-node upgrade/rollback completed on `5ca72e0` with Docker/Actions42193600373 and independent ledger audits. 05-12 durable recovering barrier is next;05-13..05-14 remain dependency-waiting. G05-01/02/03/04 resolved within the Phase 5 protocol-adapter/static-destination scope; G05-05 remains open. Phase-wide verification/UAT must be refreshed after all gap plans; historical UAT (17 passed) is retained. Production backend remains Phase 6; Phase 4 work stays separate.
+**Plans**: 14 total:12 executed. 05-12 durable recovering barrier completed on `1c06bc9` with Docker/Actions42198081076 and independent ledger audits. 05-13 share/policy cutover is next;05-14 remains dependency-waiting. G05-01/02/03/04 resolved within the Phase 5 protocol-adapter/static-destination scope; G05-05 remains open. Phase-wide verification/UAT must be refreshed after all gap plans; historical UAT (17 passed) is retained. Production backend remains Phase 6; Phase 4 work stays separate.
 **Wave 1**
 - [x] 05-01 — Startable node and durable local store
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -138,7 +138,7 @@
 **Wave 10** *(blocked on Wave 9 completion)*
 - [x] 05-11 — Actual service upgrade and financial-safe rollback
 **Wave 11** *(blocked on Wave 10 completion)*
-- [ ] 05-12 — Durable recovering/caught-up state and finite catch-up barrier
+- [x] 05-12 — Durable recovering/caught-up state and finite catch-up barrier
 **Wave 12** *(blocked on Wave 11 completion)*
 - [ ] 05-13 — Full share-chain CAS and immutable policy cutover
 **Wave 13** *(blocked on Wave 12 completion)*
@@ -193,7 +193,7 @@
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
-| 5. M3 Agent and Edge Hub | 11/14 | Implementation verified; phase acceptance pending | - |
+| 5. M3 Agent and Edge Hub | 12/14 | Implementation verified; phase acceptance pending | - |
 | 6. M4 Backend | 0/TBD | Not started | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
