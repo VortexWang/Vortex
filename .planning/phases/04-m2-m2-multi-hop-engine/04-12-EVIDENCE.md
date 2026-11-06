@@ -2473,3 +2473,22 @@ HELLO / freshness race suite repeated three times PASS 16.436s, exit 0, raw
 artifacts/phase4/hello-0824be8/test.log. Local full VLink race suite PASS 6.642s;
 local combined identity suite PASS 6.350s. These demonstrate the listed handshake
 boundaries only; current process attack matrix and Actions remain distinct.
+
+## P4-Q4 injectable issuer and waterline failure boundaries
+
+Added explicit NewInjectedCreditGate constructor for the M2 test adapter. It
+suppresses synchronous auto-issuance; BeginRenewal prepares scoped finite grants
+and coalesces concurrent callers onto one pending request. Unknown grants block
+replacement until evidence resolves them; completed request IDs cannot be reused.
+Existing default constructor and runtime JSON configuration remain unchanged.
+No network endpoint, durable authority, or production grant-return protocol added.
+
+Candidate 20/30/50% waterline tests consume actual reserved/committed bytes to
+exact boundaries, coalesce 16 concurrent requests, withhold reply while remaining
+credit is spent, assert pending cannot fund another write, mark unknown, reject
+unproven release, then accept/replay a late grant exactly once. Separate cases
+cover cancellation, rejection and new-ID retry. Conservation checked throughout.
+Targeted race tests repeated three times PASS 1.580s. This is deterministic
+response ordering, not elapsed-delay latency or five-process workload evidence.
+Remaining: connect the injection controller to a real topology experiment,
+bounded waiting/clock scheduling, dynamic target and temporal occupancy review.

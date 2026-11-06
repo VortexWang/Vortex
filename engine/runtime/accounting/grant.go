@@ -126,3 +126,59 @@ func (g *CreditGate) applyGrant(r GrantReply) error {
 	g.requests[r.RequestID] = old
 	return nil
 }
+
+// NewInjectedCreditGate disables synchronous local issuance. A test controller
+// drives BeginRenewal/ApplyGrant; no network, persistence or production issuer
+// is implied. Selection is immutable after construction.
+func NewInjectedCreditGate(c CreditConfig) (*CreditGate, error) {
+	g, err := NewCreditGate(c)
+	if err != nil {
+		return nil, err
+	}
+	g.injectedIssuer = true
+	return g, nil
+}
+
+// BeginRenewal coalesces callers onto one pending request. Unknown issuance
+// blocks replacement until evidence resolves it; elapsed time never frees it.
+// A zero amount means the waterline has not been reached or funds are exhausted.
+func (g *CreditGate) BeginRenewal(ctx context.Context, id string) (string, int64, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return "", 0, err
+	}
+	if !g.injectedIssuer || g.faulted || id == "" || len(id) > 256 || strings.HasPrefix(id, "local:") {
+		return "", 0, ErrGrantConflict
+	}
+	if g.state.UnknownGrant != 0 {
+		return "", 0, ErrGrantConflict
+	}
+	// BeginGrant remains a low-level fault-injection API. Refuse ambiguous
+	// multiple pending requests rather than choosing an arbitrary map entry.
+	pendingID := ""
+	var pendingAmount int64
+	for requestID, record := range g.requests {
+		if record.outcome != GrantPending {
+			continue
+		}
+		if pendingID != "" {
+			return "", 0, ErrGrantConflict
+		}
+		pendingID, pendingAmount = requestID, record.amount
+	}
+	if pendingID != "" {
+		return pendingID, pendingAmount, nil
+	}
+	if g.state.Available > g.cfg.GrantTarget*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
+		return "", 0, nil
+	}
+	if _, exists := g.requests[id]; exists {
+		return "", 0, ErrGrantConflict
+	}
+	amount := min(g.cfg.GrantTarget-g.state.Available, g.state.Unissued)
+	if err := g.beginGrant(id, amount); err != nil {
+		return "", 0, err
+	}
+	return id, amount, nil
+}

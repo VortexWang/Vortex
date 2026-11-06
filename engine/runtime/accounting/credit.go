@@ -65,15 +65,16 @@ type CreditState struct {
 // used + unknown. Held includes idle
 // session block tails and unresolved batches; closing never frees an unknown.
 type CreditGate struct {
-	mu           sync.Mutex
-	cfg          CreditConfig
-	state        CreditState
-	observations CreditObservations
-	requests     map[string]grantRecord
-	grantOwners  map[string]string
-	sessions     map[*creditSession]struct{}
-	usageSink    core.UsageSink
-	faulted      bool
+	injectedIssuer bool
+	mu             sync.Mutex
+	cfg            CreditConfig
+	state          CreditState
+	observations   CreditObservations
+	requests       map[string]grantRecord
+	grantOwners    map[string]string
+	sessions       map[*creditSession]struct{}
+	usageSink      core.UsageSink
+	faulted        bool
 }
 
 func NewCreditGate(c CreditConfig) (*CreditGate, error) {
@@ -97,6 +98,9 @@ func (g *CreditGate) State() CreditState {
 	return state
 }
 func (g *CreditGate) replenish() {
+	if g.injectedIssuer {
+		return
+	}
 	if g.state.Available > g.cfg.GrantTarget*g.cfg.RenewPercent/100 || g.state.Unissued == 0 {
 		return
 	}
