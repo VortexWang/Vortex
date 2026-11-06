@@ -20,3 +20,7 @@ objective: Parameterize durable funding-block D-04 qualification workload and ru
 - Candidate parameters are parsed with bounded, fail-closed validation.
 - Scan output is reproducible, keeps failures, and identifies the exact commit and host.
 - D-04 is locked only if durable TCP/UDP evidence demonstrates conservation, settlement, issuer occupancy, and idle-tail behavior across the required matrix; otherwise the remaining gap is documented truthfully.
+
+## CI evidence repair within scope
+
+Repair benchmark result parsing when Go benchmark names and metrics are separated by structured logs; preserve raw logs and numeric criteria. Pin the Phase 4 PR checkout to its actual head SHA so CI metadata and host evidence identify the tested source. The pre-existing VLink frozen-contract mismatch remains a separately recorded owner-review debt; do not alter approvals.
