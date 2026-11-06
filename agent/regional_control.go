@@ -103,6 +103,9 @@ func (c *ControlClient) RunRegion(ctx context.Context, config RegionalConfig) er
 				// connect have been joined before another incarnation can be selected.
 				if c.regionalReady.Load() > readyBefore && time.Since(attemptStarted) >= r.Watchdog {
 					delay = r.RetryMin
+					// Healthy stream lifetime is outside the candidate sweep budget. A
+					// disconnect after hours must still reach the next endpoint immediately.
+					started = time.Now()
 				}
 			}
 		}
