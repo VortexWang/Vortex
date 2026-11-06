@@ -472,3 +472,24 @@ Full Agent/Hub race and vet PASS. This proves deadline propagation, not a
 hard real-time latency guarantee: native SQLite cancellation/lock contention
 and scheduler latency still require dedicated-host measurement. Rate shaping
 waits remain distinct from missing-authorization waiting.
+
+## Native durable-regression dispatch (382aab9)
+
+Added actual SQLite contention tests. Local writer-lock admission failed with
+SQLITE_BUSY in 364.375 microseconds without creating a runtime session or
+changing funding. A held sole database connection caused queued admission to
+respect its 40 ms context deadline with no session insert. Three race repeats
+PASS; these are finite local tests, not native performance qualification.
+
+Clean commit 382aab9f4283dfbd24c0fc38c8a2282b257a2a1d was transferred by Git
+bundle to the dedicated Ubuntu host, cloned separately at
+/root/VORTEX-phase4-durable-382aab9. Previous c6a0761 checkout and formal
+performance evidence were preserved. Detached launcher
+/tmp/phase4-durable-check.sh, PID 81041, runs ten admission repetitions, full
+Agent/Hub/Engine race and vet. Output: artifacts/phase4/durable-382aab9/
+(commit, git-status, host, stage, exit-code and per-scope logs). At dispatch
+verification the live process was in admission dependency/build preparation.
+Only a terminal exit-code and inspected logs can establish pass. No new
+throughput or D-04 parameter qualification is claimed by this regression run.
+
+Native run completed: stage=complete, exit-code=0, clean measured SHA verified. All ten admission repetitions, full Agent/Hub/Engine race and vet PASS. Logs copied to artifacts/phase4/durable-382aab9; hashes in 04-14-NATIVE-REGRESSION.json. PID 81041 terminal. This replaces the above in-progress status only; performance and remaining D-04 requirements remain open.
