@@ -43,7 +43,7 @@ GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-backend ./cmd/vortex-b
 GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-control-peer ./cmd/vortex-control-peer
 export GORACE=halt_on_error=1
 GOTOOLCHAIN=local go test -race ./... -count=1 -v
-if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03; then
+if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-04; then
   cd ..
   (
     GOTOOLCHAIN=local go test ./contracts ./agent/... ./cmd/vortex-node -p 1 -count=1 -v

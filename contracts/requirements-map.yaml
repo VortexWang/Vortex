@@ -1578,7 +1578,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageCatalogSnapshotAndSubscriptionImmutable",
+        "TestPackageMonthlyAnchorAndCapabilityIntersection"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-002",
@@ -1586,7 +1593,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageSubscriptionConcurrentPrimaryAndAuditRollback",
+        "TestPackageLifecycleMonthlyExpiryAndReplay"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-006",
@@ -1594,7 +1608,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageDurableSnapshotProductionCompileAndHistory"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-007",
@@ -1602,7 +1622,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestEntitlementRenewalMonthlyNoneDurationAndIndependentSources"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-008",
@@ -1610,7 +1636,16 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestEntitlementAtomicRedemptionContract",
+        "TestEntitlementDifferentPackageConfirmationAtomic",
+        "TestEntitlementRedeemConcurrentUsesAndRequestConflict",
+        "TestEntitlementAuditRollbackExpiredRevokedApplicability"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-003",
@@ -1618,7 +1653,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestDowngradePreviewConfirmDueAuthority"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-004",
@@ -1626,7 +1667,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestRestrictionAllCauses",
+        "TestRestrictionBlocksDispatchButPreservesLateObservation"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-005",
@@ -1634,7 +1682,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestRestrictionAllowsStopRevisionAndCompile",
+        "TestPackageLifecycleAuditRollbackAndUnknownRetention"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-001",

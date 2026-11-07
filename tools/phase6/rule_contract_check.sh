@@ -1,5 +1,5 @@
 #!/bin/sh
-# Validate the exact approved review unit and its recorded owner freeze.
+# Validate historical approval, unchanged wire, and current candidate separately.
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
@@ -19,4 +19,4 @@ for name in vortex.pb.go vortex_grpc.pb.go; do
 done
 python3 tools/phase6/rule_contract_check.py "$work"
 python3 tools/phase1/contracts.py check-map
-echo 'Rule contract: two clean generations, unchanged legacy schema, exact-baseline wire compatibility and recorded owner freeze passed'
+echo 'Rule contract: two clean generations, historical CR-005 approval, unchanged legacy wire/schema and exact CR-006 candidate passed; freeze checked separately'

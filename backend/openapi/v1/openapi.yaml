@@ -7,6 +7,118 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/packages/{package_id}:
+    parameters:
+      - {name: package_id, in: path, required: true, schema: {type: string, format: uuid}}
+    put:
+      operationId: putPackageCatalog
+      x-vortex-implementation-plan: 06-07
+      description: Platform administrator only. If-Match is the current catalog version, 0 for creation. Every edit appends an immutable version; existing subscriptions, sources and billing snapshots retain their stored terms. This operation never charges a payment or renews a subscription.
+      parameters:
+        - {name: If-Match, in: header, required: true, schema: {type: string, pattern: '^[0-9]+$'}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name, terms]
+              properties:
+                name: {type: string, minLength: 1, maxLength: 128}
+                terms: {$ref: '#/components/schemas/PackageTerms'}
+      responses:
+        '200': {description: Immutable catalog version, content: {application/json: {schema: {$ref: '#/components/schemas/PackageVersion'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/subscription/preview:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: previewPackageChange
+      x-vortex-implementation-plan: 06-07
+      description: Read-only repeatable-read preview; no token, audit, task or rights are issued. The digest pins subscription, immutable catalog version, tenant status, rules, source expirations, port occupation and restriction history. Amounts discarded are issuance upper bounds, never available ledger balances; unknown liability remains frozen.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PackageChangeInput'}
+      responses:
+        '200': {description: Fixed impact for explicit effective time, content: {application/json: {schema: {$ref: '#/components/schemas/PackageChangePreview'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/subscription/confirm:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: confirmPackageChange
+      x-vortex-implementation-plan: 06-07
+      description: Confirm the exact preview digest and inputs with a non-past effective_at. If-Match is the preview subscription_version. Current actor is rechecked in the transaction and at due execution. Returns a durable pending operation; subscription and restrictions change only at due execution. Stale impact or revoked actor fails the operation without partial changes. Explicit administrative issuance and code-backed confirmation are separate operations; this route consumes no entitlement code.
+      parameters:
+        - {name: If-Match, in: header, required: true, schema: {type: string, pattern: '^[1-9][0-9]*$'}}
+        - {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 1, maxLength: 128}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PackageChangeConfirmation'}
+      responses:
+        '202': {description: Persisted future operation or exact replay, content: {application/json: {schema: {$ref: '#/components/schemas/PackageResult'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/entitlement-redemptions/preview:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: previewEntitlementChange
+      x-vortex-implementation-plan: 06-07
+      description: Preview a package-kind code against an existing primary subscription. Read-only; binds exact code hash, actor, package version, code duration and amount to the complete impact digest. Catalog capabilities and reset policy remain pinned; code duration and amount become immutable grant snapshot terms. Raw codes are never logged or returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EntitlementChangeInput'}
+      responses:
+        '200': {description: Code-bound immutable impact, content: {application/json: {schema: {$ref: '#/components/schemas/PackageChangePreview'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/entitlement-redemptions/confirm:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: confirmEntitlementChange
+      x-vortex-implementation-plan: 06-07
+      description: Lock the exact applicable unrevoked unexpired code and consume one use in the same transaction as redemption, snapshot, pending change, operation, task, outbox and audit. If-Match is the preview subscription_version. The globally unique idempotency key binds actor, code hash, keep_rules, effective_at and digest; exact replay succeeds even after exhaustion. Changed inputs conflict. No early activation. A due change rejected for stale authority retains the consumed redemption; there is no silent refund or reissue.
+      parameters:
+        - {name: If-Match, in: header, required: true, schema: {type: string, pattern: '^[1-9][0-9]*$'}}
+        - {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 1, maxLength: 128}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EntitlementChangeConfirmation'}
+      responses:
+        '202': {description: Consumed code and durable pending operation or exact replay, content: {application/json: {schema: {$ref: '#/components/schemas/PackageResult'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/entitlement-redemptions:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -42,7 +154,7 @@ paths:
       x-vortex-implementation-plan: 06-07
       description: Stored immutable subscription terms and original UTC monthly anchor. Catalog edits affect future issuance only. Traffic is billed as execution bytes multiplied by the immutable path coefficient.
       responses:
-        '200': {description: Immutable primary subscription, content: {application/json: {schema: {$ref: '#/components/schemas/PackageResult'}}}}
+        '200': {description: Immutable primary subscription and stored terms, content: {application/json: {schema: {$ref: '#/components/schemas/SubscriptionSummary'}}}}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -290,6 +402,103 @@ components:
       type: http
       scheme: bearer
   schemas:
+    PackageVersion:
+      type: object
+      additionalProperties: false
+      required: [package_id, version, terms]
+      properties:
+        package_id: {type: string, format: uuid}
+        version: {type: integer, minimum: 1}
+        terms: {$ref: '#/components/schemas/PackageTerms'}
+    SubscriptionSummary:
+      type: object
+      additionalProperties: false
+      required: [subscription_id, snapshot_id, version, anchor_at, expires_at, terms]
+      properties:
+        subscription_id: {type: string, format: uuid}
+        snapshot_id: {type: string, format: uuid}
+        version: {type: integer, minimum: 1}
+        anchor_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        terms: {$ref: '#/components/schemas/PackageTerms'}
+    PackageChangeInput:
+      type: object
+      additionalProperties: false
+      required: [package_id, package_version, keep_rules, effective_at]
+      properties:
+        package_id: {type: string, format: uuid}
+        package_version: {type: integer, minimum: 1}
+        keep_rules: {type: array, maxItems: 10000, uniqueItems: true, items: {type: string, format: uuid}}
+        effective_at: {type: string, format: date-time}
+    PackageChangeConfirmation:
+      type: object
+      additionalProperties: false
+      required: [package_id, package_version, keep_rules, effective_at, digest]
+      properties:
+        package_id: {type: string, format: uuid}
+        package_version: {type: integer, minimum: 1}
+        keep_rules: {type: array, maxItems: 10000, uniqueItems: true, items: {type: string, format: uuid}}
+        effective_at: {type: string, format: date-time}
+        digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+    EntitlementChangeInput:
+      type: object
+      additionalProperties: false
+      required: [code, keep_rules, effective_at]
+      properties:
+        code: {type: string, minLength: 16, maxLength: 256, writeOnly: true}
+        keep_rules: {type: array, maxItems: 10000, uniqueItems: true, items: {type: string, format: uuid}}
+        effective_at: {type: string, format: date-time}
+    EntitlementChangeConfirmation:
+      type: object
+      additionalProperties: false
+      required: [code, keep_rules, effective_at, digest]
+      properties:
+        code: {type: string, minLength: 16, maxLength: 256, writeOnly: true}
+        keep_rules: {type: array, maxItems: 10000, uniqueItems: true, items: {type: string, format: uuid}}
+        effective_at: {type: string, format: date-time}
+        digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+    PackageChangePreview:
+      type: object
+      additionalProperties: false
+      required: [digest, package_id, package_version, subscription_version, effective_at, keep_rules, lost_capabilities, invalid_rules, new_restrictions, discarded_amounts, affected_resources]
+      properties:
+        digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+        package_id: {type: string, format: uuid}
+        package_version: {type: integer, minimum: 1}
+        subscription_version: {type: integer, minimum: 1}
+        effective_at: {type: string, format: date-time}
+        keep_rules: {type: array, items: {type: string, format: uuid}}
+        lost_capabilities: {type: array, items: {type: string}}
+        invalid_rules: {type: array, items: {type: string, format: uuid}}
+        affected_resources: {type: array, items: {type: string, format: uuid}}
+        new_restrictions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [rule_id, reason]
+            properties:
+              rule_id: {type: string, format: uuid}
+              reason: {type: string, enum: [capability_or_limit_lost, quantity_exceeded]}
+        discarded_amounts:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [source_id, issued_amount_upper_bound, disposition]
+            properties:
+              source_id: {type: string, format: uuid}
+              issued_amount_upper_bound: {type: integer, minimum: 0}
+              disposition: {type: string, const: expire_source_without_releasing_liability}
+        entitlement:
+          type: object
+          additionalProperties: false
+          required: [code_hash, actor_id, duration_days, amount]
+          properties:
+            code_hash: {type: string, pattern: '^[0-9a-f]{64}$'}
+            actor_id: {type: string, format: uuid}
+            duration_days: {type: integer, minimum: 1, maximum: 36500}
+            amount: {type: integer, minimum: 0}
     PackageTerms:
       type: object
       additionalProperties: false

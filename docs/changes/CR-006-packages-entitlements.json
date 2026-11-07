@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "id": "CR-006",
+  "status": "pending-owner-approval",
+  "created": "2026-11-08",
+  "plan": "06-04",
+  "baseline_source": "fc63d57406f9f0e3eebe99ad276f95b004add710",
+  "prior_approval": {
+    "path": "docs/changes/CR-005-APPROVAL.json",
+    "sha256": "f7d421b277a64dcabc3afe198a38d55fb023bb4223f1d0ae084d38f7ef4ace33",
+    "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4"
+  },
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.0.0",
+      "version": "2.1.0",
+      "kind": "compatible"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.0.0",
+      "version": "2.1.0",
+      "kind": "compatible"
+    }
+  ],
+  "candidate_versions": {
+    "vortex.database": "2.1.0",
+    "vortex.public-api": "2.1.0",
+    "vortex.control.v1": "1.4.0",
+    "vortex.runtime-config": "1.2.0",
+    "vortex.vlink.v1": "1.0.0",
+    "vortex.authorization.v1": "1.2.0"
+  },
+  "artifacts": [
+    {
+      "path": "contracts/versions.yaml",
+      "sha256": "98736a525c3ee2835ba57f654cd93ac3fb401054cb8d0f49ab09ad60d497367b",
+      "baseline_sha256": "fab62137e478dff37f47f0c967123ccfe03e59c8f08fac9c1d24b8ad8f936e30"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.proto",
+      "sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "baseline_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.md",
+      "sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee",
+      "baseline_sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.schema.json",
+      "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a",
+      "baseline_sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+    },
+    {
+      "path": "contracts/protobuf/v1/identity-profile.json",
+      "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070",
+      "baseline_sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+    },
+    {
+      "path": "contracts/runtime/config.schema.json",
+      "sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "baseline_sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.pb.go",
+      "sha256": "df4eff65729496e62bacb6738225ffc2e53f0d3dbaa86843ff30f22417d01f97",
+      "baseline_sha256": "df4eff65729496e62bacb6738225ffc2e53f0d3dbaa86843ff30f22417d01f97"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex_grpc.pb.go",
+      "sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+      "baseline_sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+    },
+    {
+      "path": "contracts/requirements-map.yaml",
+      "sha256": "9a22c9046c2b50aeab80194c00354ec6464759650bf2c49e9b06a78bbcb98c9d",
+      "baseline_sha256": "5b6fe1f6ade48a1697204dee02d6008058e5818e485d223d4d6c45d692c3710c"
+    },
+    {
+      "path": "contracts/database/schema.sql",
+      "sha256": "b562cea62a7bd105f8cae8b65f7d55331bbb6d8300401fd79fa889108ec37004",
+      "baseline_sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc"
+    },
+    {
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "sha256": "20b19bc70178dc912a313885c3ad56755bb5c048f80155b19364fbb5efa6c67b",
+      "baseline_sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81"
+    },
+    {
+      "path": "backend/openapi/v1/openapi.yaml",
+      "sha256": "20b19bc70178dc912a313885c3ad56755bb5c048f80155b19364fbb5efa6c67b",
+      "baseline_sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81"
+    },
+    {
+      "path": "backend/db/migrations/00001_authority.sql",
+      "sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272",
+      "baseline_sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272"
+    },
+    {
+      "path": "backend/db/migrations/00002_tenant_policy.sql",
+      "sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200",
+      "baseline_sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200"
+    },
+    {
+      "path": "backend/db/migrations/00003_nodes_ports.sql",
+      "sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6",
+      "baseline_sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6"
+    },
+    {
+      "path": "backend/db/migrations/00004_entry_group_domains.sql",
+      "sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2",
+      "baseline_sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2"
+    },
+    {
+      "path": "backend/db/migrations/00005_rules_compile.sql",
+      "sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c",
+      "baseline_sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c"
+    },
+    {
+      "path": "backend/db/migrations/00006_packages_entitlements.sql",
+      "sha256": "f874982c3f057e67075cc789e8edb81c90e53f3abe8e3022eed9923fb8f99130",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/CHANGELOG.md",
+      "sha256": "3d10fafcd0b3a290798a60f8aa0319bcd76b67b9355065f43f74f34e75e9a522",
+      "baseline_sha256": "c8857f495ccca2465bee93faaf212a60af0630f82559bc11daae41fff30fde50"
+    }
+  ],
+  "authorization": "06-04 implementation and candidate preparation are authorized. No owner has approved these exact CR-006 bytes; existing CR-005 approval is not expanded.",
+  "compatibility": [
+    "00001..00005 unchanged; additive 00006 upgrade preserves seeded 00005 authoritative rows and unknown observations.",
+    "Mutable catalog creates new versions; old package/source/billing terms remain immutable; only 00006 creates billing_snapshots.",
+    "New subscription and package operations extend API 2.0.0 without changing existing rule, tenant or DNS operations. HTTP adapters are explicitly 06-07.",
+    "Code grant duration and amount are persisted in the immutable snapshot; package version supplies capabilities, price and reset policy. Same-package live renewal keeps existing snapshot and source identity.",
+    "Cross-package code preview binds code hash, actor, exact version and complete impact; confirm locks and consumes a use with redemption/snapshot/change/task/outbox/audit in one transaction.",
+    "Confirmation accepts only non-past effective_at; due worker rechecks current actor and impact. Exact replay remains available after code exhaustion; changed actor/code/input conflicts.",
+    "Accepted future grant consumption is final even if due execution rejects stale authority; no automatic refund/reissue is claimed.",
+    "Restrictions clear only their own sources; no activation while any relevant cause remains. Expiry appends disabled revisions; unknown occupation and liabilities are never converted into free rights.",
+    "Control 1.4.0, runtime 1.2.0, VLink and authorization artifacts remain byte-identical to the CR-005 approved baseline."
+  ],
+  "verification": {
+    "required_tests": [
+      "TestPackageMigrationUpgradeSeeded00005",
+      "TestEntitlementDifferentPackageConfirmationAtomic",
+      "TestPackageLifecycleMonthlyExpiryAndReplay",
+      "TestPackageLifecycleAuditRollbackAndUnknownRetention",
+      "TestRestrictionAllowsStopRevisionAndCompile",
+      "TestDowngradePreviewConfirmDueAuthority",
+      "TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation"
+    ],
+    "producer": "tools/phase6/check.sh --through-plan 06-04",
+    "pending": "Same-commit clean-clone Docker result is recorded separately; final paired Actions gate remains 06-11. Candidate validation is not freeze approval."
+  },
+  "excluded_claims": [
+    "No HTTP implementation before 06-07.",
+    "No funded ledger, signer epochs or lease authority synthesized; 06-05/06-06 producers remain required.",
+    "No online payment or auto-renewal.",
+    "Cross-builds are compilation evidence, not native dual-architecture execution or performance acceptance.",
+    "No Phase 5 approval or acceptance expansion."
+  ],
+  "freeze_gate": "Owner approval of this exact JSON hash and its listed normative artifacts is required before database/public-api 2.1.0 freeze. Runtime producer can record result=0 with acceptance_complete=false; paired acceptance rejects pending freeze."
+}

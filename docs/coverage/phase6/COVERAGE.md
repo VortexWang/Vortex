@@ -3,7 +3,7 @@
 All 96 Phase 6 requirements have an explicit primary plan owner below. Ownership
 is not acceptance: TEN-002 still requires later domain resource ownership checks.
 Through-plan order is 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04, 06-05,
-06-06, 06-07, 06-11. The implemented producer currently supports through 06-03;
+06-06, 06-07, 06-11. The implemented producer currently supports through 06-04;
 later plans extend it with actual producers before their evidence becomes required.
 Future files are neither required by 06-02 nor replaced by fixture results.
 
@@ -72,14 +72,14 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | RUL-016 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
 | BE-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
 | BE-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| PLN-001 | 06-04 | pending producer in 06-04 | pending |
-| PLN-002 | 06-04 | pending producer in 06-04 | pending |
-| PLN-003 | 06-04 | pending producer in 06-04 | pending |
-| PLN-004 | 06-04 | pending producer in 06-04 | pending |
-| PLN-005 | 06-04 | pending producer in 06-04 | pending |
-| PLN-006 | 06-04 | pending producer in 06-04 | pending |
-| PLN-007 | 06-04 | pending producer in 06-04 | pending |
-| PLN-008 | 06-04 | pending producer in 06-04 | pending |
+| PLN-001 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-002 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-003 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-004 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-005 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
 | MTR-001 | 06-05 | pending producer in 06-05 | pending |
 | MTR-002 | 06-05 | pending producer in 06-05 | pending |
 | MTR-003 | 06-05 | pending producer in 06-05 | pending |
