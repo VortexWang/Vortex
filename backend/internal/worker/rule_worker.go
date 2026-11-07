@@ -24,6 +24,12 @@ type RuleWorker struct {
 }
 
 func (w RuleWorker) Once(ctx context.Context) (bool, error) {
+	if w.Adapter == nil {
+		return false, errors.New("rule adapter required")
+	}
+	if e := w.Recover(ctx); e != nil {
+		return false, e
+	}
 	tx, e := w.Pool.Begin(ctx)
 	if e != nil {
 		return false, e
@@ -77,6 +83,59 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 		return true, e
 	}
 	return true, (service.RuleOrchestrator{Pool: w.Pool}).Receipt(persist, scope, task.ID, receipt, uuid.NewString())
+}
+
+// Recover closes the crash window between durable running and receipt commit.
+// It synthesizes uncertainty, never success; the next task queries the same
+// transaction and immutable artifact. Timed out revisions use a new rollback.
+func (w RuleWorker) Recover(ctx context.Context) error {
+	q := generated.New(w.Pool)
+	if e := q.ExpireRuleLeases(ctx); e != nil {
+		return e
+	}
+	unknowns, e := q.UnobservedRuleUnknowns(ctx)
+	if e != nil {
+		return e
+	}
+	o := service.RuleOrchestrator{Pool: w.Pool}
+	for _, task := range unknowns {
+		b, e := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: task.TenantID, TaskID: task.ID})
+		if e != nil {
+			return e
+		}
+		d, e := q.RuleDeploymentByInput(ctx, generated.RuleDeploymentByInputParams{TenantID: task.TenantID, RuleID: b.RuleID, RuleRevision: b.RuleRevision, InputDigest: b.InputDigest})
+		if e != nil {
+			return e
+		}
+		scope, e := service.NewTenantScope(d.CreatedBy, task.TenantID, task.TenantID)
+		if e != nil {
+			return e
+		}
+		c, _, _, e := service.RuleCommand(ctx, q, task.TenantID, task.ID)
+		if e != nil {
+			return e
+		}
+		r := &controlv1.RuleReceipt{Phase: c.Phase, TransactionId: c.TransactionId, TaskKey: c.TaskKey, TargetRevision: c.TargetRevision, IdempotencyKey: c.IdempotencyKey, ArtifactSha256: c.ArtifactSha256, FencingGeneration: c.FencingGeneration, State: "unknown", ErrorCode: "worker_restart_unknown"}
+		if e = o.Receipt(ctx, scope, task.ID, r, uuid.NewString()); e != nil && !errors.Is(e, service.ErrConflict) && !errors.Is(e, service.ErrStaleReceipt) {
+			return e
+		}
+	}
+	expired, e := q.ExpiredRuleDeployments(ctx)
+	if e != nil {
+		return e
+	}
+	for _, d := range expired {
+		scope, e := service.NewTenantScope(d.CreatedBy, d.TenantID, d.TenantID)
+		if e != nil {
+			return e
+		}
+		if _, e = o.Rollback(ctx, scope, d.ID, uuid.NewString()); e != nil {
+			if e = o.FailRollback(ctx, scope, d.ID, uuid.NewString()); e != nil {
+				return e
+			}
+		}
+	}
+	return nil
 }
 
 func (w RuleWorker) Run(ctx context.Context) error {

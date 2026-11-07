@@ -275,6 +275,18 @@ func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantS
 		if e = q.SupersedePendingRuleCompiles(ctx, generated.SupersedePendingRuleCompilesParams{TenantID: scope.TenantID(), RuleID: in.ID}); e != nil {
 			return e
 		}
+		obsolete, e := q.SupersedePendingRuleDeliveries(ctx, generated.SupersedePendingRuleDeliveriesParams{TenantID: scope.TenantID(), RuleID: in.ID, TargetRevision: expected + 1})
+		if e != nil {
+			return e
+		}
+		for _, task := range obsolete {
+			if e = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: scope.TenantID(), ID: task.OperationID, State: "superseded"}); e != nil {
+				return e
+			}
+			if e = q.MarkDelivered(ctx, generated.MarkDeliveredParams{TenantID: scope.TenantID(), OperationID: task.OperationID}); e != nil {
+				return e
+			}
+		}
 		if _, e = q.AdvanceRuleHead(ctx, generated.AdvanceRuleHeadParams{TenantID: scope.TenantID(), ID: in.ID, ExpectedRevision: expected}); e != nil {
 			return e
 		}

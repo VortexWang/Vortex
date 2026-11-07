@@ -244,7 +244,7 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 	switch {
 	case allActive:
 		state = "running"
-	case allPrepared && (d.State == "preparing" || d.State == "unknown"):
+	case allPrepared && d.State != "failed" && d.State != "superseded":
 		state = "committing"
 		for _, m := range members {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
@@ -264,11 +264,42 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 				return e
 			}
 		}
+		if m.State == "prepared" && (failed || d.State == "failed" || d.State == "superseded") {
+			if e = queueRulePhase(ctx, q, scope, d, m, "abort"); e != nil {
+				return e
+			}
+		} else if m.State == "prepared" && (d.State == "committing" || d.State == "partial") {
+			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
+				return e
+			}
+		}
 	}
 	if e = q.SetRuleDeploymentState(ctx, generated.SetRuleDeploymentStateParams{TenantID: d.TenantID, ID: d.ID, State: state}); e != nil {
 		return e
 	}
 	return q.SetRuleSync(ctx, generated.SetRuleSyncParams{TenantID: d.TenantID, ID: d.RuleID, ActiveRevision: d.RuleRevision, SyncStatus: state})
+}
+
+// FailRollback records a rejected current-rights/resource check. No execution
+// or occupation fact is removed; unknown members remain queryable.
+func (s RuleOrchestrator) FailRollback(ctx context.Context, scope TenantScope, id, request string) error {
+	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.rollback.denied", ResourceID: id, RequestID: request, Reason: "current authorization/resource recheck failed; retain occupation"}, func(q *generated.Queries) error {
+		d, e := q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: scope.TenantID(), ID: id})
+		if e != nil {
+			return e
+		}
+		if d.RollbackRevision != 0 || d.State == "running" {
+			return nil
+		}
+		if e = q.SetRuleRollbackRevision(ctx, generated.SetRuleRollbackRevisionParams{TenantID: scope.TenantID(), ID: id, RollbackRevision: -1}); e != nil {
+			return e
+		}
+		d.State = "failed"
+		if e = q.SetRuleDeploymentState(ctx, generated.SetRuleDeploymentStateParams{TenantID: scope.TenantID(), ID: id, State: "failed"}); e != nil {
+			return e
+		}
+		return reconcileRuleDeployment(ctx, q, scope, d)
+	})
 }
 
 // Timeout never fabricates a stop receipt. Rollback appends a new revision of

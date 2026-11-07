@@ -48,6 +48,8 @@ CREATE TABLE rule_compile_requests (
 CREATE INDEX rule_compile_request_rule ON rule_compile_requests(tenant_id,rule_id,rule_revision);
 CREATE TRIGGER rule_compile_request_immutable BEFORE UPDATE OR DELETE ON rule_compile_requests FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
+ALTER TABLE operations DROP CONSTRAINT operations_state_check;
+ALTER TABLE operations ADD CONSTRAINT operations_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query'));
@@ -109,6 +111,8 @@ CREATE TABLE rule_delivery_receipts (
 CREATE TRIGGER rule_binding_immutable BEFORE UPDATE OR DELETE ON rule_delivery_bindings FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TRIGGER rule_delivery_receipt_immutable BEFORE UPDATE OR DELETE ON rule_delivery_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
+ALTER TABLE operations DROP CONSTRAINT operations_state_check;
+ALTER TABLE operations ADD CONSTRAINT operations_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));

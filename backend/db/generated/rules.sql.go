@@ -179,6 +179,15 @@ func (q *Queries) EnsureRuleHead(ctx context.Context, arg EnsureRuleHeadParams) 
 	return err
 }
 
+const expireRuleLeases = `-- name: ExpireRuleLeases :exec
+UPDATE tasks t SET state='unknown',lease_until=NULL WHERE t.state IN ('leased','running') AND t.lease_until<now() AND EXISTS(SELECT 1 FROM rule_delivery_bindings b WHERE b.tenant_id=t.tenant_id AND b.task_id=t.id)
+`
+
+func (q *Queries) ExpireRuleLeases(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, expireRuleLeases)
+	return err
+}
+
 const expiredRuleDeployments = `-- name: ExpiredRuleDeployments :many
 SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE deadline<=now() AND state IN ('preparing','committing','partial','unknown') AND rollback_revision=0 ORDER BY deadline LIMIT 100
 `
@@ -568,7 +577,7 @@ func (q *Queries) InsertRuleTarget(ctx context.Context, arg InsertRuleTargetPara
 }
 
 const leaseRuleDelivery = `-- name: LeaseRuleDelivery :one
-UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second') ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
 `
 
 func (q *Queries) LeaseRuleDelivery(ctx context.Context, leaseToken pgtype.Text) (Task, error) {
@@ -910,4 +919,76 @@ type SupersedePendingRuleCompilesParams struct {
 func (q *Queries) SupersedePendingRuleCompiles(ctx context.Context, arg SupersedePendingRuleCompilesParams) error {
 	_, err := q.db.Exec(ctx, supersedePendingRuleCompiles, arg.TenantID, arg.RuleID)
 	return err
+}
+
+const supersedePendingRuleDeliveries = `-- name: SupersedePendingRuleDeliveries :many
+UPDATE tasks t SET state='superseded' WHERE t.tenant_id=$1 AND t.state='pending' AND EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id WHERE b.tenant_id=t.tenant_id AND b.task_id=t.id AND d.rule_id=$2 AND d.rule_revision<$3 AND b.phase IN ('prepare','commit')) RETURNING t.id, t.tenant_id, t.operation_id, t.state, t.lease_token, t.lease_until, t.attempts, t.task_kind
+`
+
+type SupersedePendingRuleDeliveriesParams struct {
+	TenantID       string
+	RuleID         string
+	TargetRevision int64
+}
+
+func (q *Queries) SupersedePendingRuleDeliveries(ctx context.Context, arg SupersedePendingRuleDeliveriesParams) ([]Task, error) {
+	rows, err := q.db.Query(ctx, supersedePendingRuleDeliveries, arg.TenantID, arg.RuleID, arg.TargetRevision)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Task{}
+	for rows.Next() {
+		var i Task
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.OperationID,
+			&i.State,
+			&i.LeaseToken,
+			&i.LeaseUntil,
+			&i.Attempts,
+			&i.TaskKind,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const unobservedRuleUnknowns = `-- name: UnobservedRuleUnknowns :many
+SELECT t.id, t.tenant_id, t.operation_id, t.state, t.lease_token, t.lease_until, t.attempts, t.task_kind FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id WHERE t.state='unknown' AND NOT EXISTS(SELECT 1 FROM rule_delivery_receipts r WHERE r.tenant_id=t.tenant_id AND r.task_id=t.id) ORDER BY t.id LIMIT 100
+`
+
+func (q *Queries) UnobservedRuleUnknowns(ctx context.Context) ([]Task, error) {
+	rows, err := q.db.Query(ctx, unobservedRuleUnknowns)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Task{}
+	for rows.Next() {
+		var i Task
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.OperationID,
+			&i.State,
+			&i.LeaseToken,
+			&i.LeaseUntil,
+			&i.Attempts,
+			&i.TaskKind,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

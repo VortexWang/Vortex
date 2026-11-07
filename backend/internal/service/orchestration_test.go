@@ -9,11 +9,86 @@ import (
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/compiler"
 	"vortex/backend/internal/service"
+	"vortex/backend/internal/worker"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 func receipt(c *controlv1.RuleCommand, state string) *controlv1.RuleReceipt {
 	return &controlv1.RuleReceipt{Phase: c.Phase, TransactionId: c.TransactionId, TaskKey: c.TaskKey, TargetRevision: c.TargetRevision, IdempotencyKey: c.IdempotencyKey, ArtifactSha256: c.ArtifactSha256, FencingGeneration: c.FencingGeneration, State: state}
+}
+
+func TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	s := service.RuleService{Pool: f.pool}
+	o := service.RuleOrchestrator{Pool: f.pool}
+	in := ruleInput(f.group)
+	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := f.pool.Exec(ctx, `UPDATE rule_heads SET active_revision=1,sync_status='running' WHERE tenant_id=$1 AND id=$2`, f.tenant, in.ID); e != nil {
+		t.Fatal(e)
+	}
+	in.Name = "bad revision"
+	if _, e := s.Mutate(ctx, f.scope, in, 1, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	r, e := s.CompileRevision(ctx, f.scope, in.ID, 2, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 2, PathGeneration: 4}, 2, 4, 6, uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	d, e := o.Begin(ctx, f.scope, in.ID, 2, r.InputDigest, uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	request := uuid.NewString()
+	failAudit(t, f.pool, request)
+	tables := []string{"rule_heads", "rule_revisions", "rule_deployments", "rule_delivery_bindings", "tasks", "operations", "outbox", "audit_events"}
+	before := authoritySnapshot(t, f.pool, f.tenant, tables)
+	if _, e = o.Rollback(ctx, f.scope, d.ID, request); e == nil {
+		t.Fatal("rollback escaped failed audit")
+	}
+	if !bytes.Equal(before, authoritySnapshot(t, f.pool, f.tenant, tables)) {
+		t.Fatal("partial rollback transaction")
+	}
+	// Persist one running task, then lose the worker before transport/receipt.
+	var task string
+	if e = f.pool.QueryRow(ctx, `SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 ORDER BY node_id LIMIT 1`, f.tenant, d.ID).Scan(&task); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = f.pool.Exec(ctx, `UPDATE tasks SET state='running',lease_until=now()-interval '1 second' WHERE tenant_id=$1 AND id=$2`, f.tenant, task); e != nil {
+		t.Fatal(e)
+	}
+	w := worker.RuleWorker{Pool: f.pool}
+	if e = w.Recover(ctx); e != nil {
+		t.Fatal(e)
+	}
+	var unknown, queries int
+	if e = f.pool.QueryRow(ctx, `SELECT count(*) FROM rule_deployment_members WHERE tenant_id=$1 AND deployment_id=$2 AND state='unknown'`, f.tenant, d.ID).Scan(&unknown); e != nil || unknown != 1 {
+		t.Fatal("crash erased uncertainty", e, unknown)
+	}
+	if e = f.pool.QueryRow(ctx, `SELECT count(*) FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 AND phase='query'`, f.tenant, d.ID).Scan(&queries); e != nil || queries != 1 {
+		t.Fatal("crash lacks query", e, queries)
+	}
+	if _, e = f.pool.Exec(ctx, `UPDATE rule_deployments SET deadline=now()-interval '1 second' WHERE tenant_id=$1 AND id=$2`, f.tenant, d.ID); e != nil {
+		t.Fatal(e)
+	}
+	if e = w.Recover(ctx); e != nil {
+		t.Fatal(e)
+	}
+	var desired, active, rollback int64
+	if e = f.pool.QueryRow(ctx, `SELECT h.desired_revision,h.active_revision,d.rollback_revision FROM rule_heads h JOIN rule_deployments d ON d.tenant_id=h.tenant_id AND d.rule_id=h.id WHERE d.tenant_id=$1 AND d.id=$2`, f.tenant, d.ID).Scan(&desired, &active, &rollback); e != nil || desired != 3 || active != 1 || rollback != 3 {
+		t.Fatal("timeout failed to append monotonic rollback", e, desired, active, rollback)
+	}
+	var held bool
+	var state string
+	if e = f.pool.QueryRow(ctx, `SELECT occupation_held,state FROM operations WHERE tenant_id=$1 AND id=$2`, f.tenant, task).Scan(&held, &state); e != nil || !held || state != "unknown" {
+		t.Fatal("rollback freed in-flight unknown", e, held, state)
+	}
+	var pending, superseded int
+	if e = f.pool.QueryRow(ctx, `SELECT count(*) FILTER(WHERE t.state='pending'),count(*) FILTER(WHERE t.state='superseded') FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id WHERE b.tenant_id=$1 AND b.deployment_id=$2 AND b.phase='prepare'`, f.tenant, d.ID).Scan(&pending, &superseded); e != nil || pending != 0 || superseded != 1 {
+		t.Fatal("only pending obsolete work should supersede", e, pending, superseded)
+	}
 }
 func TestApplyPrepareCommitUnknownAndLateReceipt(t *testing.T) {
 	f := newPortFixture(t)

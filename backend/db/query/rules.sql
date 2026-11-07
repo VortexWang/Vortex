@@ -84,7 +84,7 @@ INSERT INTO rule_delivery_bindings(tenant_id,task_id,deployment_id,node_id,phase
 SELECT b.*,d.rule_id,d.rule_revision,d.input_digest,m.boot_id,m.transaction_id,m.artifact_digest,m.fencing_generation,m.state AS member_state,o.idempotency_key FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id JOIN rule_deployment_members m ON m.tenant_id=b.tenant_id AND m.deployment_id=b.deployment_id AND m.node_id=b.node_id JOIN operations o ON o.tenant_id=b.tenant_id AND o.id=b.task_id WHERE b.tenant_id=$1 AND b.task_id=$2;
 
 -- name: LeaseRuleDelivery :one
-UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
+UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second') ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
 
 -- name: InsertRuleReceipt :exec
 INSERT INTO rule_delivery_receipts(tenant_id,task_id,receipt_sha256,payload) VALUES($1,$2,$3,$4);
@@ -100,3 +100,12 @@ SELECT * FROM rule_deployments WHERE deadline<=now() AND state IN ('preparing','
 
 -- name: SetRuleRollbackRevision :exec
 UPDATE rule_deployments SET rollback_revision=$3 WHERE tenant_id=$1 AND id=$2;
+
+-- name: SupersedePendingRuleDeliveries :many
+UPDATE tasks t SET state='superseded' WHERE t.tenant_id=sqlc.arg(tenant_id) AND t.state='pending' AND EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id WHERE b.tenant_id=t.tenant_id AND b.task_id=t.id AND d.rule_id=sqlc.arg(rule_id) AND d.rule_revision<sqlc.arg(target_revision) AND b.phase IN ('prepare','commit')) RETURNING t.*;
+
+-- name: ExpireRuleLeases :exec
+UPDATE tasks t SET state='unknown',lease_until=NULL WHERE t.state IN ('leased','running') AND t.lease_until<now() AND EXISTS(SELECT 1 FROM rule_delivery_bindings b WHERE b.tenant_id=t.tenant_id AND b.task_id=t.id);
+
+-- name: UnobservedRuleUnknowns :many
+SELECT t.* FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id WHERE t.state='unknown' AND NOT EXISTS(SELECT 1 FROM rule_delivery_receipts r WHERE r.tenant_id=t.tenant_id AND r.task_id=t.id) ORDER BY t.id LIMIT 100;
