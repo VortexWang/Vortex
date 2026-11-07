@@ -4,18 +4,18 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 04
+current_plan: 05
 status: executing
-stopped_at: Completed 06-03-PLAN.md; next dependency plan 06-04
-last_updated: "2026-11-07T10:13:50Z"
+stopped_at: Completed 06-04-PLAN.md; next dependency plan 06-05
+last_updated: "2026-11-07T23:00:25Z"
 last_activity: 2026-11-07
-last_activity_desc: "06-03 complete: owner-approved CR-005 and clean source fc63d574 Docker normal/race, runtime, builds and real Cloudflare passed; summary a9f2e190. Phase 6 is 6/11; next 06-04. Final Actions pairing remains pending."
+last_activity_desc: "06-04 complete: exact owner-approved CR-006, clean source 9db5da0e Docker normal/race, contracts and real Cloudflare passed; SUMMARY 1775a7ed. Phase 6 is 7/11; next 06-05; final Actions pairing remains 06-11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
-  completed_plans: 48
-state_head: a9f2e190
+  completed_plans: 49
+state_head: 1775a7ed
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 04
+Current Plan: 05
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10 and 06-03 complete (6/11). Next dependency plan is 06-04; final Phase 6 acceptance remains pending.
-Last activity: 2026-11-07 — owner explicitly approved CR-005; four selected freezes, exact generation/wire/schema, clean source fc63d574 Linux arm64 Docker normal/race (212 backend and 1,282 component PASS lines), real mTLS/sockets/recovery, dual-architecture compilation and real Cloudflare CRUD passed. Evidence 6b74cc5b; SUMMARY a9f2e190. No final Actions pairing or funded 06-04/05 producer acceptance is claimed.
+Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete (7/11). Next dependency plan is 06-05; final Phase 6 acceptance remains pending.
+Last activity: 2026-11-07 — user explicitly approved CR-006 exact proposal 60487b77; database/API2.1 frozen. Clean source 9db5da0e passed full Linux arm64 Docker normal/race, real processes, four freezes, generated/wire/schema/map, dual-architecture compilation and real Cloudflare CRUD. Evidence28e4f153; SUMMARY1775a7ed. Final Actions pairing and funded ledger/lease producers remain later-plan work.
 
-Progress: Phase 6 [██████░░░░░] 6/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [███████░░░░] 7/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -70,10 +70,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | Phase 06 P02 | 32min | 2 tasks | 63 files before summary/state metadata, including raw evidence |
 | Phase 06 P10 | 124min multi-session | 2 tasks | 107 files before summary/state metadata, including raw evidence |
 | Phase 06 P03 | 378min multi-session | 3 tasks | 199 files before summary/state metadata, including raw evidence |
+| Phase 06 P04 | multi-session including owner approval | 3 tasks | 232 files before summary/state metadata, including raw evidence |
 
 ## Accumulated Context
 
 ### Decisions
+
+- 06-04: user explicitly approved CR-006 exact proposal 60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d; DB/API2.1 frozen with CR005 history unchanged. Confirmation consumes code atomically; future failure does not refund. Offline/revoked expiry persists authoritative limits/source expiry while actual stop stays pending and unknown occupation is retained. Source9db5da0e local producer passed; next06-05, final Actions06-11.
 
 - 06-03: owner-approved CR-005 exact proposal b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4 freezes database/API2.0, control1.4 and runtime1.2. Separate negotiated phased commands preserve legacy auto-apply. Missing immutable billing input stays pending; obsolete observations cannot create fresh Commit work. Source fc63d574 passed local Docker; final pairing remains 06-11.
 
@@ -106,6 +109,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Blockers/Concerns
 
+- 06-04 owner freeze is resolved, all three tasks and eight PLN requirements complete; source9db5da0e clean local acceptance passed. SDK advance/metric/decision/session again rejected historical Phase5 passed_with_scope; update-progress skipped unscoped phase. Only current Phase6 state was synchronized narrowly; roadmap/requirements SDK writes succeeded. Disk inventory now has49 complete summaries, Phase6 seven of eleven.
+
 - 06-03 approval/runtime gate is resolved: CR-005-APPROVAL.json records the actual owner response; selected freezes and clean source fc63d574 normal/race pass. WINDOWS 6/7 fixed with source-bound evidence. The separate historical VLink hash mismatch remains deferred. SDK state handlers again rejected historical Phase 5 passed_with_scope; only current Phase 6 state was synchronized manually.
 
 - 06-09 authentication checkpoint is resolved: user completed browser login, VortexWang push permission was verified, exact source a9481584 passed actual Actions 42316152923 and local Docker, and both paired gates passed. TEN-009 is complete; WINDOWS item 4 is fixed. Prior 403 and two actual failed CI runs remain documented in the resolved checkpoint/summary and raw evidence.
@@ -133,8 +138,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-07T09:25:12Z
-Stopped at: Completed 06-03-PLAN.md; next dependency plan 06-04
+Last session: 2026-11-07T23:00:25Z
+Stopped at: Completed 06-04-PLAN.md; next dependency plan 06-05
 Resume file: None
 
 ### Historical qualification review (not a main-workflow gate)

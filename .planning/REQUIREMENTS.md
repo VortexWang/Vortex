@@ -182,14 +182,14 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## PLN Requirements
 
-- [ ] **PLN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (665-665; SHA-256 recorded there).
-- [ ] **PLN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (666-666; SHA-256 recorded there).
-- [ ] **PLN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (667-667; SHA-256 recorded there).
-- [ ] **PLN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (668-668; SHA-256 recorded there).
-- [ ] **PLN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (672-682; SHA-256 recorded there).
-- [ ] **PLN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (683-683; SHA-256 recorded there).
-- [ ] **PLN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (684-684; SHA-256 recorded there).
-- [ ] **PLN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (685-685; SHA-256 recorded there).
+- [x] **PLN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (665-665; SHA-256 recorded there).
+- [x] **PLN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (666-666; SHA-256 recorded there).
+- [x] **PLN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (667-667; SHA-256 recorded there).
+- [x] **PLN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (668-668; SHA-256 recorded there).
+- [x] **PLN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (672-682; SHA-256 recorded there).
+- [x] **PLN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (683-683; SHA-256 recorded there).
+- [x] **PLN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (684-684; SHA-256 recorded there).
+- [x] **PLN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (685-685; SHA-256 recorded there).
 
 ## MTR Requirements
 
@@ -497,14 +497,14 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | BE-004 | Phase 6 | Complete |
 | BE-005 | Phase 6 | Pending |
 | BE-006 | Phase 6 | Pending |
-| PLN-001 | Phase 6 | Pending |
-| PLN-002 | Phase 6 | Pending |
-| PLN-006 | Phase 6 | Pending |
-| PLN-007 | Phase 6 | Pending |
-| PLN-008 | Phase 6 | Pending |
-| PLN-003 | Phase 6 | Pending |
-| PLN-004 | Phase 6 | Pending |
-| PLN-005 | Phase 6 | Pending |
+| PLN-001 | Phase 6 | Complete |
+| PLN-002 | Phase 6 | Complete |
+| PLN-006 | Phase 6 | Complete |
+| PLN-007 | Phase 6 | Complete |
+| PLN-008 | Phase 6 | Complete |
+| PLN-003 | Phase 6 | Complete |
+| PLN-004 | Phase 6 | Complete |
+| PLN-005 | Phase 6 | Complete |
 | MTR-001 | Phase 6 | Pending |
 | MTR-002 | Phase 6 | Pending |
 | MTR-003 | Phase 6 | Pending |

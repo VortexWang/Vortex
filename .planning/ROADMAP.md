@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 6/11 plans executed in 11 dependency waves: 06-01, 06-08, 06-09, 06-02, 06-10 and 06-03 complete. Owner-approved source fc63d574 passed clean local Linux arm64 Docker backend/Agent/Engine normal/race, four selected freezes, generated/wire/schema, dual-architecture compilation and real Cloudflare CRUD; evidence6b74cc5b, SUMMARYa9f2e190. Next plan is 06-04. Missing formal billing/source producers, HTTP/frontend presentation, final same-SHA Actions pairing and remaining phase acceptance stay with their later plans. Historical Phase 4/5 acceptance and separate VLink hash debt are unchanged.
+**Plans**: 7/11 plans executed in 11 dependency waves: 06-01, 06-08, 06-09, 06-02, 06-10 and 06-03 complete. Owner-approved source fc63d574 passed clean local Linux arm64 Docker backend/Agent/Engine normal/race, four selected freezes, generated/wire/schema, dual-architecture compilation and real Cloudflare CRUD; evidence6b74cc5b, SUMMARYa9f2e190. Next plan is 06-04. Missing formal billing/source producers, HTTP/frontend presentation, final same-SHA Actions pairing and remaining phase acceptance stay with their later plans. Historical Phase 4/5 acceptance and separate VLink hash debt are unchanged.
 
 **Wave 1**
 
@@ -207,7 +207,7 @@
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 06-04-PLAN.md — 套餐快照、权益码、限制与降级预览
+- [x] 06-04-PLAN.md — 套餐快照、权益码、限制与降级预览
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 6/11 | In Progress — 06-03 complete; next 06-04 | - |
+| 6. M4 Backend | 7/11 | In Progress — 06-04 complete; next 06-05 | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

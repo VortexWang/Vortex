@@ -116,3 +116,7 @@ actuals 按磁盘 ledger 基线到 summary 前 HEAD 测量26个提交、232个�
 ## Self-Check: PASSED
 
 已核对源/批准/证据文件存在，所有上列提交均为HEAD祖先，proposal hash和新结果checksums准确；ledger与测量HEAD一致。最新clone clean且关键普通/race测试、五类批准反例和三项manifest反例均通过预期断言。当前checkpoint已解决。
+
+## State Synchronization
+
+SUMMARY 提交 `1775a7ed` 后实际运行 SDK advance/metric/decision/session，均被历史 Phase5 `passed_with_scope` 拒绝；update-progress 因unscoped跳过。未改该历史验证，仅窄同步当前 Phase6 7/11、总49 summaries、next06-05及本计划metric/decision/session。SDK roadmap/requirements 更新成功，八个PLN需求完成；未自行启动06-05。
