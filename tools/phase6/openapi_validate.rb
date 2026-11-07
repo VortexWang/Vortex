@@ -22,7 +22,10 @@ begin
       if v['properties']
         check(v['additionalProperties'] == false, 'public objects must exclude undeclared fields')
         v['properties'].each_key do |name|
-          check(!name.match?(/password|secret|private_key|credential|runtime|vlink|wire|payload|target|boot_id|signer_epoch/i), "internal/secret property #{name}")
+          # A rule's user-authored destination list is business input. Keep
+          # runtime/transport target fields forbidden everywhere else.
+          rule_destination = name == 'targets' && v.equal?(doc.dig('components', 'schemas', 'RuleInput'))
+          check(rule_destination || !name.match?(/password|secret|private_key|credential|runtime|vlink|wire|payload|target|boot_id|signer_epoch/i), "internal/secret property #{name}")
         end
       end
       v.each_value { |x| visit.call(x) }

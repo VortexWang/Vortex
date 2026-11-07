@@ -7,6 +7,33 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/rules/{rule_id}:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+      - {name: rule_id, in: path, required: true, schema: {type: string, format: uuid}}
+    put:
+      operationId: reviseRule
+      x-vortex-implementation-plan: 06-07
+      description: Append an immutable rule revision. If-Match is the expected current revision (0 for creation). Stale writes return RULE_REVISION_CONFLICT. Returns accepted desired state and asynchronous operation; activation is reported separately. Targets and paths remain fixed for each existing session; new sessions may choose another healthy path. Resolved destination addresses are checked at the exit.
+      parameters:
+        - {name: If-Match, in: header, required: true, schema: {type: string, pattern: '^[0-9]+$'}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RuleInput'}
+      responses:
+        '202':
+          description: Immutable desired revision accepted. Impact is hot, rebuild or stop; disruptive changes must be displayed before commit.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RuleMutationSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/node-groups/{group_id}/serving:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -222,6 +249,46 @@ components:
       type: http
       scheme: bearer
   schemas:
+    RuleInput:
+      type: object
+      additionalProperties: false
+      required: [id, name, protocol, mode, path, targets, scheduling, proxy_protocol, enabled]
+      properties:
+        id: {type: string, format: uuid}
+        name: {type: string, minLength: 1, maxLength: 128}
+        protocol: {type: string, enum: [tcp, udp, tcp_udp]}
+        mode: {type: string, enum: [direct, tunnel, multi_hop]}
+        port: {type: integer, minimum: 0, maximum: 65535, default: 0}
+        path: {type: array, minItems: 1, maxItems: 32, uniqueItems: true, items: {type: string, format: uuid}}
+        directions: {type: array, maxItems: 31, items: {type: string, enum: [auto, forward, reverse]}}
+        targets:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items:
+            type: object
+            additionalProperties: false
+            required: [address, weight, priority]
+            properties:
+              address: {type: string, minLength: 1, maxLength: 260}
+              weight: {type: integer, minimum: 1, maximum: 10000}
+              priority: {type: integer, minimum: 0}
+        scheduling: {type: string, enum: [weighted_round_robin, primary_backup]}
+        proxy_protocol: {type: string, enum: ['off', v1, v2]}
+        idle_timeout_seconds: {type: integer, minimum: 10, maximum: 86400, default: 60}
+        rate_limit: {type: integer, minimum: 0}
+        connection_limit: {type: integer, minimum: 0}
+        enabled: {type: boolean}
+    RuleMutationSummary:
+      type: object
+      additionalProperties: false
+      required: [rule_id, revision, operation_id, change_class, sync_status]
+      properties:
+        rule_id: {type: string, format: uuid}
+        revision: {type: integer, minimum: 1}
+        operation_id: {type: string, format: uuid}
+        change_class: {type: string, enum: [hot, rebuild, stop]}
+        sync_status: {type: string, enum: [pending, preparing, committing, running, partial, unknown, failed]}
     ServingSummary:
       type: object
       additionalProperties: false

@@ -178,6 +178,9 @@ func (s NodeService) SetMembers(ctx context.Context, scope TenantScope, group st
 		if err = q.MarkGroupPortRevalidation(ctx, group); err != nil {
 			return err
 		}
+		if err = invalidateRules(ctx, q, scope, "group", group); err != nil {
+			return err
+		}
 		return domainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
 	})
 }
@@ -364,6 +367,9 @@ func (s NodeService) SetGrant(ctx context.Context, scope TenantScope, resource s
 		if e = q.AppendGrantHistory(ctx, generated.AppendGrantHistoryParams{TenantID: scope.TenantID(), ID: grantID}); e != nil {
 			return e
 		}
+		if e = invalidateRules(ctx, q, scope, "grant", resource); e != nil {
+			return e
+		}
 		return domainTask(ctx, q, scope, resource, "grant.revalidate_rules", "resource_change", expected+1)
 	})
 }
@@ -391,6 +397,9 @@ func (s NodeService) SetPermit(ctx context.Context, scope TenantScope, from, to 
 		}
 		permit, e := q.PutSegmentPermit(ctx, generated.PutSegmentPermitParams{TenantID: scope.TenantID(), FromGroupID: from, ToGroupID: to, Allowed: allowed, ExpectedVersion: expected})
 		if e != nil {
+			return e
+		}
+		if e = invalidateRules(ctx, q, scope, "permit", from+"/"+to); e != nil {
 			return e
 		}
 		return domainTask(ctx, q, scope, from, "segment.revalidate_rules", "resource_change", permit.Version)

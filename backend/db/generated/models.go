@@ -257,6 +257,55 @@ type RestrictionEvent struct {
 	ClearedAt     pgtype.Timestamptz
 }
 
+type RuleDependency struct {
+	TenantID       string
+	RuleID         string
+	Revision       int64
+	DependencyKind string
+	DependencyID   string
+	Version        string
+}
+
+type RuleHead struct {
+	TenantID        string
+	ID              string
+	DesiredRevision int64
+	ActiveRevision  int64
+	SyncStatus      string
+}
+
+type RuleRevision struct {
+	TenantID      string
+	RuleID        string
+	Revision      int64
+	Payload       []byte
+	PayloadSha256 []byte
+	CreatedBy     string
+	CreatedAt     pgtype.Timestamptz
+	ChangeClass   string
+	RollbackOf    int64
+}
+
+type RuleSegment struct {
+	TenantID      string
+	RuleID        string
+	Revision      int64
+	Hop           int32
+	FromGroupID   string
+	ToGroupID     string
+	Direction     string
+	PermitVersion int64
+}
+
+type RuleTarget struct {
+	TenantID string
+	RuleID   string
+	Revision int64
+	Address  string
+	Weight   int32
+	Priority int32
+}
+
 type SegmentPermit struct {
 	TenantID    string
 	FromGroupID string
