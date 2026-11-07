@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 03
 status: executing
-stopped_at: Completed 06-10-PLAN.md; next dependency plan 06-03
-last_updated: "2026-11-07T03:04:00Z"
+stopped_at: 06-03 candidate verified; awaiting exact CR-005 owner approval
+last_updated: "2026-11-07T09:25:12Z"
 last_activity: 2026-11-07
-last_activity_desc: "06-10 complete: source de6f14d6 passes clean Docker full normal/race and real Cloudflare CRUD; next 06-03. Final same-SHA Actions pairing remains pending."
+last_activity_desc: "06-03 candidate f285137b passes clean Docker normal/race, runtime, compilation and real Cloudflare CRUD; CR-005 exact contract approval pending. Evidence/checkpoint 7e5e9619. Phase remains 5/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 47
-state_head: 6660002e
+state_head: 7e5e9619
 ---
 
 # Project State
@@ -32,8 +32,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 03
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08, 06-09, 06-02 and 06-10 complete (5/11). Next dependency-ordered plan is 06-03; final Phase 6 acceptance remains pending.
-Last activity: 2026-11-07 — source de6f14d6 passed clean local Linux arm64 Docker full normal/race (122 PASS lines, zero skips/race warnings), dependency/license/sqlc/OpenAPI and real Cloudflare create/read/update/delete with TTL60, DNS-only, encrypted storage and exact-name cleanup. Evidence 6660002e is committed. NOD-012/PRT-004 remain pending for compiler and real Agent port consumers in 06-03/07. No new-source Actions/paired result is claimed; 06-11 must pair its final source. Caller Phase 4/5 work is unchanged.
+Status: Executing — 06-01, 06-08, 06-09, 06-02 and 06-10 complete (5/11). 06-03 implementation is present and candidate-tested; exact CR-005 owner approval and full close-out remain pending before 06-04. Final Phase 6 acceptance remains pending.
+Last activity: 2026-11-07 — candidate source f285137b passed clean Linux arm64 Docker backend normal/race (204 PASS lines), Agent/contracts/Engine normal/race (1,282 PASS lines), deterministic sqlc/OpenAPI/dependency/license and exact candidate compatibility checks, Linux amd64/arm64 cross-compilation and real Cloudflare CRUD. Zero skips/failures/race warnings. Evidence/checkpoint committed at 7e5e9619. Four frozen contract checks remain failed pending owner approval of CR-005 SHA b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4. No 06-03 SUMMARY, Actions pairing or phase completion is claimed. Caller Phase 4/5 work is preserved.
 
 Progress: Phase 6 [█████░░░░░░] 5/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -103,6 +103,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Blockers/Concerns
 
+- 06-03 awaits exact CR-005 contract approval (database/public-api 2.0.0, control 1.4.0, runtime 1.2.0). See 06-03-CHECKPOINT.md and evidence 7e5e9619. WINDOWS 6/7 predate the now-passing runtime tests; keep open until signed contract acceptance/plan close-out. SDK record-session again rejected historical Phase 5 passed_with_scope; only current Phase 6 state was synchronized manually.
+
 - 06-09 authentication checkpoint is resolved: user completed browser login, VortexWang push permission was verified, exact source a9481584 passed actual Actions 42316152923 and local Docker, and both paired gates passed. TEN-009 is complete; WINDOWS item 4 is fixed. Prior 403 and two actual failed CI runs remain documented in the resolved checkpoint/summary and raw evidence.
 
 - 06-08 license decision is resolved: CR-004 A approved and enforced, full gate exit 0 on 7d43e1d2. WINDOWS 2/3/4 are fixed; balance debt 1 stays open for 06-05/06-11. TEN-002 still requires later domain ownership coverage. 06-09 adds actual same-source Actions/native amd64 functional/race evidence for implemented scope; dedicated performance and final phase acceptance remain pending.
@@ -128,9 +130,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-07T03:04:00Z
-Stopped at: Completed 06-10-PLAN.md; next dependency plan 06-03
-Resume file: None
+Last session: 2026-11-07T09:25:12Z
+Stopped at: 06-03 candidate verified; awaiting exact CR-005 owner approval
+Resume file: .planning/phases/06-m4-m4-backend/06-03-CHECKPOINT.md
 
 ### Historical qualification review (not a main-workflow gate)
 
