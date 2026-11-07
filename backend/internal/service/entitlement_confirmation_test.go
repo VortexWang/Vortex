@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"sync"
 	"testing"
 	"time"
 	"vortex/backend/db/generated"
@@ -50,6 +51,15 @@ func TestEntitlementDifferentPackageConfirmationAtomic(t *testing.T) {
 	if e = json.Unmarshal(raw, &p); e != nil {
 		t.Fatal(e)
 	}
+	if _, e = f.pool.Exec(ctx, "UPDATE users SET state='suspended' WHERE id=$1", f.scope.ActorID()); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = api.ConfirmEntitlement(ctx, f.scope, code, nil, at, p.Digest, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrScope) {
+		t.Fatal("revoked actor confirmed grant", e)
+	}
+	if _, e = f.pool.Exec(ctx, "UPDATE users SET state='active' WHERE id=$1", f.scope.ActorID()); e != nil {
+		t.Fatal(e)
+	}
 	request := uuid.NewString()
 	failAudit(t, f.pool, request)
 	if _, e = api.ConfirmEntitlement(ctx, f.scope, code, nil, at, p.Digest, uuid.NewString(), request); e == nil {
@@ -74,6 +84,21 @@ func TestEntitlementDifferentPackageConfirmationAtomic(t *testing.T) {
 	replay, e := api.ConfirmEntitlement(ctx, f.scope, code, nil, at, p.Digest, key, uuid.NewString())
 	if e != nil || replay != result {
 		t.Fatal("exact replay", e)
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			r, e := api.ConfirmEntitlement(ctx, f.scope, code, nil, at, p.Digest, key, uuid.NewString())
+			if e != nil || r != result {
+				t.Error("concurrent exact replay", r, e)
+			}
+		}()
+	}
+	wg.Wait()
+	if _, e = api.ConfirmEntitlement(ctx, f.scope, code, nil, at, p.Digest, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("exhausted code accepted on fresh key", e)
 	}
 	if _, e = api.ConfirmEntitlement(ctx, f.scope, other, nil, at, p.Digest, key, uuid.NewString()); !errors.Is(e, service.ErrConflict) {
 		t.Fatal("key conflict", e)
