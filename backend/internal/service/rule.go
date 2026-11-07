@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"sort"
 	"strconv"
 
@@ -257,11 +258,8 @@ func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantS
 		if head.DesiredRevision != expected {
 			return ErrRuleRevisionConflict
 		}
-		inputs, e := resolveRule(ctx, q, scope, in)
-		if e != nil {
-			return e
-		}
 		class := "rebuild"
+		pureStop := false
 		if expected > 0 {
 			old, e := q.GetRuleRevision(ctx, generated.GetRuleRevisionParams{TenantID: scope.TenantID(), RuleID: in.ID, Revision: expected})
 			if e != nil {
@@ -272,6 +270,18 @@ func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantS
 				return e
 			}
 			class = compiler.ChangeClass(prior, in)
+			// Removing execution authority must not depend on current node health
+			// or a grant still permitting activation. Only the exact persisted
+			// revision with Enabled changed to false may reuse stored dependencies.
+			prior.Enabled = false
+			pureStop = !in.Enabled && reflect.DeepEqual(prior, in)
+		}
+		inputs := ruleInputs{}
+		if !pureStop {
+			inputs, e = resolveRule(ctx, q, scope, in)
+			if e != nil {
+				return e
+			}
 		}
 		body, e := json.Marshal(in)
 		if e != nil {
@@ -292,7 +302,18 @@ func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantS
 				return e
 			}
 		}
+		if pureStop {
+			if e = q.CopyStopRuleSegments(ctx, generated.CopyStopRuleSegmentsParams{TenantID: scope.TenantID(), RuleID: in.ID, OldRevision: expected, NewRevision: expected + 1}); e != nil {
+				return e
+			}
+			if e = q.CopyStopRuleDependencies(ctx, generated.CopyStopRuleDependenciesParams{TenantID: scope.TenantID(), RuleID: in.ID, OldRevision: expected, NewRevision: expected + 1}); e != nil {
+				return e
+			}
+		}
 		for _, id := range in.Path {
+			if pureStop {
+				continue
+			}
 			if e = q.InsertRuleDependency(ctx, generated.InsertRuleDependencyParams{TenantID: scope.TenantID(), RuleID: in.ID, Revision: expected + 1, DependencyKind: "group", DependencyID: id, Version: inputs.members[id].MemberSetVersion}); e != nil {
 				return e
 			}

@@ -90,7 +90,7 @@ func TestPackageLifecycleExpiryIndependentOfNodeAuthority(t *testing.T) {
 				t.Errorf("source expiry absent: %v %v", expired, e)
 			}
 			ports, e := q.TenantPackagePorts(ctx, f.tenant)
-			if e != nil || len(ports) != 1 || ports[0].State != "retained" || !ports[0].FirstEffectiveAt.Valid || !ports[0].FirstEffectiveAt.Time.Equal(sub.ExpiresAt) || !ports[0].RetainedUntil.Time.Equal(sub.ExpiresAt.AddDate(0,0,7)) {
+			if e != nil || len(ports) != 1 || ports[0].State != "retained" || !ports[0].FirstEffectiveAt.Valid || !ports[0].FirstEffectiveAt.Time.Equal(sub.ExpiresAt) || !ports[0].RetainedUntil.Time.Equal(sub.ExpiresAt.AddDate(0, 0, 7)) {
 				t.Errorf("conservative retention missing: %v %v", ports, e)
 			}
 			var unknown int
@@ -100,6 +100,19 @@ func TestPackageLifecycleExpiryIndependentOfNodeAuthority(t *testing.T) {
 			var enabled bool
 			if e := f.pool.QueryRow(ctx, "SELECT (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean FROM rule_heads h JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision WHERE h.tenant_id=$1 AND h.id=$2", f.tenant, r.ID).Scan(&enabled); e != nil || enabled {
 				t.Errorf("durable stop desire absent: %v %v", enabled, e)
+			}
+			var active, pending int
+			if e := f.pool.QueryRow(ctx, "SELECT active_revision,(SELECT count(*) FROM rule_compile_requests c JOIN tasks t ON t.tenant_id=c.tenant_id AND t.id=c.task_id WHERE c.tenant_id=h.tenant_id AND c.rule_id=h.id AND c.rule_revision=h.desired_revision AND c.input_digest IS NULL AND t.state='pending') FROM rule_heads h WHERE h.tenant_id=$1 AND h.id=$2", f.tenant, r.ID).Scan(&active, &pending); e != nil || active != 0 || pending != 1 {
+				t.Errorf("stop fabricated execution or lost pending work: %d %d %v", active, pending, e)
+			}
+			var copied bool
+			if e := f.pool.QueryRow(ctx, "SELECT (SELECT jsonb_agg(to_jsonb(d)-'revision' ORDER BY dependency_kind,dependency_id) FROM rule_dependencies d WHERE tenant_id=$1 AND rule_id=$2 AND revision=1) = (SELECT jsonb_agg(to_jsonb(d)-'revision' ORDER BY dependency_kind,dependency_id) FROM rule_dependencies d WHERE tenant_id=$1 AND rule_id=$2 AND revision=2)", f.tenant, r.ID).Scan(&copied); e != nil || !copied {
+				t.Errorf("stop did not preserve recorded dependency provenance: %v %v", copied, e)
+			}
+			r.Enabled = false
+			r.Targets[0].Address = "192.0.2.99:443"
+			if _, e := (service.RuleService{Pool: f.pool}).Mutate(ctx, f.scope, r, 2, uuid.NewString()); e == nil {
+				t.Error("disabled edit bypassed current node/grant validation")
 			}
 		})
 	}

@@ -23,6 +23,16 @@ INSERT INTO rule_segments(tenant_id,rule_id,revision,hop,from_group_id,to_group_
 -- name: InsertRuleDependency :exec
 INSERT INTO rule_dependencies(tenant_id,rule_id,revision,dependency_kind,dependency_id,version) VALUES($1,$2,$3,$4,$5,$6);
 
+-- name: CopyStopRuleSegments :exec
+INSERT INTO rule_segments(tenant_id,rule_id,revision,hop,from_group_id,to_group_id,direction,permit_version)
+SELECT r.tenant_id,r.rule_id,sqlc.arg(new_revision)::bigint,r.hop,r.from_group_id,r.to_group_id,r.direction,r.permit_version
+FROM rule_segments r WHERE r.tenant_id=$1 AND r.rule_id=$2 AND r.revision=sqlc.arg(old_revision)::bigint;
+
+-- name: CopyStopRuleDependencies :exec
+INSERT INTO rule_dependencies(tenant_id,rule_id,revision,dependency_kind,dependency_id,version)
+SELECT r.tenant_id,r.rule_id,sqlc.arg(new_revision)::bigint,r.dependency_kind,r.dependency_id,r.version
+FROM rule_dependencies r WHERE r.tenant_id=$1 AND r.rule_id=$2 AND r.revision=sqlc.arg(old_revision)::bigint;
+
 -- name: DependentRuleHeads :many
 SELECT h.* FROM rule_heads h WHERE h.tenant_id=$1 AND EXISTS(SELECT 1 FROM rule_dependencies d WHERE d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.revision=h.desired_revision AND d.dependency_kind=$2 AND d.dependency_id=$3) ORDER BY h.id FOR UPDATE;
 

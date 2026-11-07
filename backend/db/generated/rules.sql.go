@@ -147,6 +147,52 @@ func (q *Queries) CommitRuleArtifact(ctx context.Context, arg CommitRuleArtifact
 	return err
 }
 
+const copyStopRuleDependencies = `-- name: CopyStopRuleDependencies :exec
+INSERT INTO rule_dependencies(tenant_id,rule_id,revision,dependency_kind,dependency_id,version)
+SELECT r.tenant_id,r.rule_id,$3::bigint,r.dependency_kind,r.dependency_id,r.version
+FROM rule_dependencies r WHERE r.tenant_id=$1 AND r.rule_id=$2 AND r.revision=$4::bigint
+`
+
+type CopyStopRuleDependenciesParams struct {
+	TenantID    string
+	RuleID      string
+	NewRevision int64
+	OldRevision int64
+}
+
+func (q *Queries) CopyStopRuleDependencies(ctx context.Context, arg CopyStopRuleDependenciesParams) error {
+	_, err := q.db.Exec(ctx, copyStopRuleDependencies,
+		arg.TenantID,
+		arg.RuleID,
+		arg.NewRevision,
+		arg.OldRevision,
+	)
+	return err
+}
+
+const copyStopRuleSegments = `-- name: CopyStopRuleSegments :exec
+INSERT INTO rule_segments(tenant_id,rule_id,revision,hop,from_group_id,to_group_id,direction,permit_version)
+SELECT r.tenant_id,r.rule_id,$3::bigint,r.hop,r.from_group_id,r.to_group_id,r.direction,r.permit_version
+FROM rule_segments r WHERE r.tenant_id=$1 AND r.rule_id=$2 AND r.revision=$4::bigint
+`
+
+type CopyStopRuleSegmentsParams struct {
+	TenantID    string
+	RuleID      string
+	NewRevision int64
+	OldRevision int64
+}
+
+func (q *Queries) CopyStopRuleSegments(ctx context.Context, arg CopyStopRuleSegmentsParams) error {
+	_, err := q.db.Exec(ctx, copyStopRuleSegments,
+		arg.TenantID,
+		arg.RuleID,
+		arg.NewRevision,
+		arg.OldRevision,
+	)
+	return err
+}
+
 const dependentRuleHeads = `-- name: DependentRuleHeads :many
 SELECT h.tenant_id, h.id, h.desired_revision, h.active_revision, h.sync_status FROM rule_heads h WHERE h.tenant_id=$1 AND EXISTS(SELECT 1 FROM rule_dependencies d WHERE d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.revision=h.desired_revision AND d.dependency_kind=$2 AND d.dependency_id=$3) ORDER BY h.id FOR UPDATE
 `
