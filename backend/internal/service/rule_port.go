@@ -11,7 +11,7 @@ import (
 func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope TenantScope, in compiler.CompileInput) error {
 	p := in.PortBinding
 	if p == nil {
-		return nil
+		return ErrConflict
 	}
 	a, e := lockAllocation(ctx, q, scope, p.ID)
 	if e != nil {
@@ -74,11 +74,11 @@ func deploymentPortInput(ctx context.Context, q *generated.Queries, scope Tenant
 	return in, e
 }
 
-// Only an unsent legacy reservation task can be replaced. A leased or unknown
-// task could already own sockets and must converge before a new owner takes over.
+// Transfer an unsent legacy reservation or a fully active previous deployment.
+// Any unobserved execution must converge before a new owner takes over.
 func bindRulePortPrepare(ctx context.Context, q *generated.Queries, scope TenantScope, d generated.RuleDeployment) error {
 	in, e := deploymentPortInput(ctx, q, scope, d)
-	if e != nil || in.PortBinding == nil {
+	if e != nil {
 		return e
 	}
 	if e = validateRulePortMembers(ctx, q, scope, in); e != nil {
@@ -105,27 +105,59 @@ func bindRulePortPrepare(ctx context.Context, q *generated.Queries, scope Tenant
 		if e != nil {
 			return e
 		}
-		if old.TaskKind != "port_prepare" || old.State != "pending" {
-			return ErrConflict
-		}
-		n, e := q.SupersedeUnsentPortTask(ctx, generated.SupersedeUnsentPortTaskParams{TenantID: scope.TenantID(), ID: old.ID})
-		if e != nil {
-			return e
-		}
-		if n != 1 {
-			return ErrConflict
-		}
-		if e = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: scope.TenantID(), ID: old.OperationID, State: "superseded"}); e != nil {
-			return e
-		}
-		if e = q.MarkDelivered(ctx, generated.MarkDeliveredParams{TenantID: scope.TenantID(), OperationID: old.OperationID}); e != nil {
-			return e
+		if old.TaskKind == "rule_prepare" && old.State == "succeeded" {
+			b, err := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: scope.TenantID(), TaskID: old.ID})
+			if err != nil {
+				return err
+			}
+			previous, err := q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: scope.TenantID(), ID: b.DeploymentID})
+			if err != nil {
+				return err
+			}
+			members, err := q.RuleDeploymentMembers(ctx, generated.RuleDeploymentMembersParams{TenantID: scope.TenantID(), DeploymentID: b.DeploymentID})
+			if err != nil {
+				return err
+			}
+			if previous.RuleID != d.RuleID || previous.State != "running" || b.BootID != row.BootID {
+				return ErrConflict
+			}
+			for _, m := range members {
+				if m.State != "active" {
+					return ErrConflict
+				}
+			}
+			// The new immutable artifact must advance the runtime fence. The
+			// reservation remains occupied throughout the transfer.
+			next, err := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: scope.TenantID(), TaskID: task})
+			if err != nil {
+				return err
+			}
+			if next.FencingGeneration <= b.FencingGeneration {
+				return ErrConflict
+			}
+		} else {
+			if old.TaskKind != "port_prepare" || old.State != "pending" {
+				return ErrConflict
+			}
+			n, e := q.SupersedeUnsentPortTask(ctx, generated.SupersedeUnsentPortTaskParams{TenantID: scope.TenantID(), ID: old.ID})
+			if e != nil {
+				return e
+			}
+			if n != 1 {
+				return ErrConflict
+			}
+			if e = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: scope.TenantID(), ID: old.OperationID, State: "superseded"}); e != nil {
+				return e
+			}
+			if e = q.MarkDelivered(ctx, generated.MarkDeliveredParams{TenantID: scope.TenantID(), OperationID: old.OperationID}); e != nil {
+				return e
+			}
 		}
 		if e = q.BindRulePortPrepare(ctx, generated.BindRulePortPrepareParams{TenantID: scope.TenantID(), AllocationID: in.PortBinding.ID, NodeID: row.NodeID, PrepareTaskID: task}); e != nil {
 			return e
 		}
 	}
-	return nil
+	return q.SetPortAllocationState(ctx, generated.SetPortAllocationStateParams{TenantID: scope.TenantID(), ID: in.PortBinding.ID, State: "preparing"})
 }
 
 func recordRulePortReceipt(ctx context.Context, q *generated.Queries, scope TenantScope, d generated.RuleDeployment, b generated.RuleDeliveryRow, task, lease, state string) error {

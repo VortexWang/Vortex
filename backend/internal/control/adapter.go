@@ -46,6 +46,8 @@ type ruleRequest struct {
 	boot    string
 	result  chan ruleOutcome
 	ctx     context.Context
+	proof   *service.PortProof
+	scope   service.TenantScope
 }
 type ruleOutcome struct {
 	receipt *controlv1.RuleReceipt
@@ -62,13 +64,25 @@ type session struct {
 }
 
 func (a *Adapter) DeliverRule(ctx context.Context, node, boot string, c *controlv1.RuleCommand) (*controlv1.RuleReceipt, error) {
+	return a.deliverRule(ctx, node, boot, ruleRequest{command: c, boot: boot, result: make(chan ruleOutcome, 1), ctx: ctx})
+}
+
+func (a *Adapter) DeliverPortRelease(ctx context.Context, scope service.TenantScope, node, boot string, c *controlv1.RuleCommand, proof service.PortProof) error {
+	if a.Ports == nil {
+		return errors.New("port proof authority unavailable")
+	}
+	r := ruleRequest{command: c, boot: boot, result: make(chan ruleOutcome, 1), ctx: ctx, proof: &proof, scope: scope}
+	_, err := a.deliverRule(ctx, node, boot, r)
+	return err
+}
+
+func (a *Adapter) deliverRule(ctx context.Context, node, boot string, r ruleRequest) (*controlv1.RuleReceipt, error) {
 	a.mu.Lock()
 	s := a.nodes[node]
 	a.mu.Unlock()
 	if s == nil {
 		return nil, errors.New("target disconnected")
 	}
-	r := ruleRequest{command: c, boot: boot, result: make(chan ruleOutcome, 1), ctx: ctx}
 	select {
 	case s.rules <- r:
 	case <-s.done:
@@ -93,6 +107,7 @@ type Adapter struct {
 	mu      sync.Mutex
 	nodes   map[string]*session
 	Observe func(context.Context, string, string, []byte) error
+	Ports   *service.PortService
 }
 
 func (a *Adapter) Deliver(ctx context.Context, op generated.Operation) (service.Receipt, error) {
@@ -279,7 +294,17 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				if receipt.Phase != c.Phase || receipt.TaskKey != c.TaskKey || receipt.IdempotencyKey != c.IdempotencyKey || receipt.TargetRevision != c.TargetRevision || receipt.FencingGeneration != c.FencingGeneration || !bytes.Equal(receipt.TransactionId, c.TransactionId) || !bytes.Equal(receipt.ArtifactSha256, c.ArtifactSha256) {
 					continue
 				}
-				pendingRule.result <- ruleOutcome{receipt: receipt}
+				var proofErr error
+				if pendingRule.proof != nil {
+					if receipt.State != "released" {
+						proofErr = errors.New("port release execution unknown")
+					} else {
+						proof := *pendingRule.proof
+						proof.Result = "released"
+						proofErr = a.Ports.RecordReleaseProof(stream.Context(), pendingRule.scope, proof, uuid.NewString())
+					}
+				}
+				pendingRule.result <- ruleOutcome{receipt: receipt, err: proofErr}
 				pendingRule = nil
 				continue
 			}

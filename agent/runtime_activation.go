@@ -230,6 +230,12 @@ func (a *RuntimeApplier) Abort(id [16]byte) (any, error) {
 	return a.EngineApplier.Abort(id)
 }
 
+// ReleaseRule is scoped to the exact prepared/active transaction. Engine proves
+// all sockets and flows for this rule stopped before Agent persists a receipt.
+func (a *RuntimeApplier) ReleaseRule(ctx context.Context, id [16]byte) error {
+	return a.rules.Release(ctx, id)
+}
+
 func (e *RuntimeEngine) matchesControlConfig(raw []byte) error {
 	var object map[string]json.RawMessage
 	if err := json.Unmarshal(raw, &object); err != nil {

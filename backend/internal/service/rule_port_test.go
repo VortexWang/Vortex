@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -36,6 +37,41 @@ type portRuleAdapter func(context.Context, string, string, *controlv1.RuleComman
 
 func (f portRuleAdapter) DeliverRule(ctx context.Context, node, boot string, c *controlv1.RuleCommand) (*controlv1.RuleReceipt, error) {
 	return f(ctx, node, boot, c)
+}
+
+func reserveRulePort(t *testing.T, f *portFixture, in service.RuleInput) {
+	t.Helper()
+	req := f.request(t, in.Port)
+	req.RuleID = in.ID
+	req.Protocols = []string{in.Protocol}
+	if in.Protocol == "tcp_udp" {
+		req.Protocols = []string{"tcp", "udp"}
+	}
+	if _, err := f.ports.PreparePortReservation(context.Background(), f.scope, req, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRuleFixedPortRejectsUnallocatedCompilePaths(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	s := service.RuleService{Pool: f.pool}
+	in := ruleInput(f.group)
+	m, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	before := authoritySnapshot(t, f.pool, f.tenant, []string{"rule_compile_inputs", "rule_artifacts", "tasks", "operations", "outbox", "audit_events"})
+	if _, e = s.CompileRevision(ctx, f.scope, in.ID, 1, b, 2, 3, 4, uuid.NewString()); e == nil {
+		t.Fatal("legacy compile bypassed durable fixed port authority")
+	}
+	if _, e = s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 3, 4, uuid.NewString()); e == nil {
+		t.Fatal("fixed port compile binding bypassed allocation")
+	}
+	if string(before) != string(authoritySnapshot(t, f.pool, f.tenant, []string{"rule_compile_inputs", "rule_artifacts", "tasks", "operations", "outbox", "audit_events"})) {
+		t.Fatal("rejected compile changed authority")
+	}
 }
 
 func TestRuleAutoPortConsumesDurableAllocation(t *testing.T) {
@@ -172,6 +208,12 @@ func TestRuleAutoPortRejectsMissingOrChangedMemberAllocation(t *testing.T) {
 }
 
 func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
+	for _, auto := range []bool{true, false} {
+		t.Run(fmt.Sprintf("auto=%t", auto), func(t *testing.T) { testRulePortActualLifecycle(t, auto) })
+	}
+}
+
+func testRulePortActualLifecycle(t *testing.T, auto bool) {
 	// A worker intentionally leases across tenants. Give this real execution
 	// test its own database so unrelated pending test deliveries cannot run here.
 	admin := testutil.Postgres(t)
@@ -251,13 +293,15 @@ func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
 	}
 	s := service.RuleService{Pool: f.pool}
 	in := ruleInput(f.group)
-	in.Port = 0
+	if auto {
+		in.Port = 0
+	}
 	in.Protocol = "tcp_udp"
 	m, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}
-	req := f.request(t, 0)
+	req := f.request(t, in.Port)
 	req.RuleID = in.ID
 	a, e := f.ports.PreparePortReservation(ctx, f.scope, req, uuid.NewString())
 	if e != nil {
@@ -300,7 +344,12 @@ func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer ln.Close()
-	server := &hub.TestServer{Store: hs, AuthorizationUpdate: func(string, string) (*controlv1.AuthorizationUpdate, error) { return auth, nil }}
+	var authMu sync.Mutex
+	server := &hub.TestServer{Store: hs, AuthorizationUpdate: func(string, string) (*controlv1.AuthorizationUpdate, error) {
+		authMu.Lock()
+		defer authMu.Unlock()
+		return auth, nil
+	}}
 	go func() {
 		_ = server.ServeGRPC(ctx, ln, &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{serverPair}, ClientCAs: roots, ClientAuth: tls.RequireAndVerifyClientCert})
 	}()
@@ -320,7 +369,13 @@ func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
 	// Deliver production RuleCommand/RuleReceipt over the actual authenticated
 	// backend adapter and Agent client, then inject loss after the wire receipt.
 	connected := make(chan struct{})
-	adapter := &control.Adapter{Observe: func(context.Context, string, string, []byte) error { close(connected); return nil }}
+	var authenticated context.Context
+	ports := service.PortService{Pool: f.pool, NodeCA: ca.certificate}
+	adapter := &control.Adapter{Ports: &ports, Observe: func(ctx context.Context, _ string, _ string, _ []byte) error {
+		authenticated = ctx
+		close(connected)
+		return nil
+	}}
 	backendListener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {
 		t.Fatal(e)
@@ -407,6 +462,19 @@ func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
 	if e = f.pool.QueryRow(ctx, `SELECT state FROM port_allocations WHERE tenant_id=$1 AND id=$2`, f.tenant, a.ID).Scan(&allocationState); e != nil || allocationState != "preparing" {
 		t.Fatal("unknown committed or freed allocation", e, allocationState)
 	}
+	// A new fence cannot take socket ownership while the actual prior commit
+	// lacks a receipt. The failed handoff leaves its reservations and tasks intact.
+	newCompile, err := s.CompileRevision(ctx, f.scope, in.ID, 1, b, 2, 3, 5, uuid.NewString())
+	if err != nil {
+		t.Fatal(err)
+	}
+	beforeHandoff := authoritySnapshot(t, f.pool, f.tenant, []string{"port_allocations", "port_reservations", "rule_deployments", "rule_delivery_bindings", "operations", "tasks", "outbox", "audit_events"})
+	if _, err = (service.RuleOrchestrator{Pool: f.pool}).Begin(ctx, f.scope, in.ID, 1, newCompile.InputDigest, uuid.NewString()); !errors.Is(err, service.ErrConflict) {
+		t.Fatal("unknown actual commit handed sockets to new fence", err)
+	}
+	if string(beforeHandoff) != string(authoritySnapshot(t, f.pool, f.tenant, []string{"port_allocations", "port_reservations", "rule_deployments", "rule_delivery_bindings", "operations", "tasks", "outbox", "audit_events"})) {
+		t.Fatal("failed unknown handoff changed occupation")
+	}
 	if _, e = f.pool.Exec(ctx, `UPDATE operations SET created_at=now()-interval '2 seconds' WHERE tenant_id=$1 AND id IN(SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND phase='query')`, f.tenant); e != nil {
 		t.Fatal(e)
 	}
@@ -424,4 +492,143 @@ func TestRulePortActualAgentSocketsUnknownAndQuery(t *testing.T) {
 	if e = o.Receipt(ctx, f.scope, prepared.TaskKey, prepared, uuid.NewString()); !errors.Is(e, service.ErrStaleReceipt) {
 		t.Fatal("stale generation", e)
 	}
+	prepared.FencingGeneration--
+	// The second immutable revision reuses the same durable physical allocation
+	// and actual Engine sockets, with a new billing scope and monotone fence.
+	in.Name = "复用端口的新版本"
+	m, e = s.Mutate(ctx, f.scope, in, 1, uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	b = compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 2, PathGeneration: 4}
+	d.ID, d.SourceID, d.RuntimeSourceID, d.ShareSourceID = uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+	d.RuleRevision, d.PathGeneration, d.FencingFloor, d.BillingSnapshotID = 2, 4, 5, b.ID
+	if e = hs.InstallHubDelegation(ctx, d, clock()); e != nil {
+		t.Fatal(e)
+	}
+	nextAuth, e := (&hub.Issuer{Store: hs, HubID: hubID, Clock: clock}).Issue(ctx, d.ID, node.NodeID, node.BootID, uuid.NewString(), 8192, time.Minute)
+	if e != nil {
+		t.Fatal(e)
+	}
+	authMu.Lock()
+	auth = nextAuth
+	authMu.Unlock()
+	if e = (&agent.ControlClient{Node: node, Reconciler: reconciler, TLS: &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{clientPair}, RootCAs: roots, ServerName: hubID}}).Connect(ctx, ln.Addr().String()); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 4, 5, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	if e = s.ConsumeCompile(ctx, f.scope, m.OperationID, uuid.NewString()); e != nil {
+		t.Fatal("completed rule allocation could not reapply", e)
+	}
+	assertHeld()
+	w.Adapter = adapter
+	run()
+	run()
+	assertHeld()
+	var allocations, reservations int
+	if e = f.pool.QueryRow(ctx, `SELECT count(*) FROM port_allocations WHERE tenant_id=$1`, f.tenant).Scan(&allocations); e != nil || allocations != 1 {
+		t.Fatal("duplicated allocation", e, allocations)
+	}
+	if e = f.pool.QueryRow(ctx, `SELECT count(*) FROM port_reservations WHERE tenant_id=$1`, f.tenant).Scan(&reservations); e != nil || reservations != 2 {
+		t.Fatal("duplicated physical ownership", e, reservations)
+	}
+	// Old artifact release cannot stop the new incarnation, even over mTLS.
+	old, _, _, e := service.RuleCommand(ctx, generated.New(f.pool), f.tenant, prepared.TaskKey)
+	if e != nil {
+		t.Fatal(e)
+	}
+	old.Phase, old.TaskKey, old.IdempotencyKey = "release", uuid.NewString(), uuid.NewString()
+	if r, err := adapter.DeliverRule(ctx, node.NodeID, node.BootID, old); err != nil || r.State != "unknown" {
+		t.Fatal("stale stop accepted", err, r)
+	}
+	assertHeld()
+	if e = ports.RequestRelease(ctx, f.scope, a.ID, "explicit", uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	var releaseProof service.PortProof
+	pw := worker.PortWorker{Pool: f.pool, Adapter: portReleaseAdapter(func(ctx context.Context, scope service.TenantScope, id, boot string, c *controlv1.RuleCommand, p service.PortProof) error {
+		releaseProof = p
+		// Before any network execution the release task must already be durable.
+		var state string
+		if err := f.pool.QueryRow(ctx, `SELECT state FROM tasks WHERE tenant_id=$1 AND id=$2`, f.tenant, p.TaskID).Scan(&state); err != nil || state != "running" {
+			t.Fatal("release sent before durable running", err, state)
+		}
+		before := authoritySnapshot(t, f.pool, f.tenant, []string{"port_allocations", "port_reservations", "release_proofs", "tasks", "operations", "outbox", "audit_events"})
+		for _, bad := range []service.PortProof{func() service.PortProof { x := p; x.LeaseToken = uuid.NewString(); return x }(), func() service.PortProof { x := p; x.Generation++; return x }(), func() service.PortProof { x := p; x.Revision++; return x }(), func() service.PortProof { x := p; x.BootID = uuid.NewString(); return x }()} {
+			bad.Result = "released"
+			if err := ports.RecordReleaseProof(authenticated, scope, bad, uuid.NewString()); !errors.Is(err, service.ErrStaleReceipt) {
+				t.Fatal("stale release proof accepted", err, bad)
+			}
+		}
+		if string(before) != string(authoritySnapshot(t, f.pool, f.tenant, []string{"port_allocations", "port_reservations", "release_proofs", "tasks", "operations", "outbox", "audit_events"})) {
+			t.Fatal("stale proof changed authority")
+		}
+		return errors.New("disconnected before stop")
+	})}
+	if worked, err := pw.Once(ctx); err != nil || !worked {
+		t.Fatal(worked, err)
+	}
+	assertHeld()
+	assertOccupied := func() {
+		t.Helper()
+		var state string
+		if err := f.pool.QueryRow(ctx, `SELECT state FROM port_allocations WHERE tenant_id=$1 AND id=$2`, f.tenant, a.ID).Scan(&state); err != nil || state != "releasing" {
+			t.Fatal("absent stop proof released occupation", err, state)
+		}
+		conflictReq := req
+		conflictReq.RuleID, conflictReq.Port = uuid.NewString(), a.Port
+		if _, err := ports.PreparePortReservation(ctx, f.scope, conflictReq, uuid.NewString()); err == nil {
+			t.Fatal("unknown stop permitted overlapping reservation")
+		}
+	}
+	assertOccupied()
+	pw.Adapter = portReleaseAdapter(func(ctx context.Context, scope service.TenantScope, id, boot string, c *controlv1.RuleCommand, p service.PortProof) error {
+		releaseProof = p
+		r, err := adapter.DeliverRule(ctx, id, boot, c)
+		if err != nil || r.State != "released" {
+			t.Fatal("actual Engine stop failed", err, r)
+		}
+		return errors.New("lost actual closed-socket receipt")
+	})
+	if worked, err := pw.Once(ctx); err != nil || !worked {
+		t.Fatal(worked, err)
+	}
+	assertOccupied()
+	// The listener is actually closed, but this observation alone is not a
+	// release proof. Retrying the same durable task recovers the Agent receipt.
+	addr := fmt.Sprintf(":%d", a.Port)
+	tcp, err := net.Listen("tcp", addr)
+	if err != nil {
+		t.Fatal("TCP still open", err)
+	}
+	tcp.Close()
+	ua, _ := net.ResolveUDPAddr("udp", addr)
+	udp, err := net.ListenUDP("udp", ua)
+	if err != nil {
+		t.Fatal("UDP still open", err)
+	}
+	udp.Close()
+	pw.Adapter = adapter
+	if worked, err := pw.Once(ctx); err != nil || !worked {
+		t.Fatal(worked, err)
+	}
+	if e = f.pool.QueryRow(ctx, `SELECT state FROM port_allocations WHERE tenant_id=$1 AND id=$2`, f.tenant, a.ID).Scan(&allocationState); e != nil || allocationState != "released" {
+		t.Fatal("proof did not release", e, allocationState)
+	}
+	// The prior attempt lease cannot overwrite the successful retry proof.
+	releaseProof.Result = "released"
+	if e = ports.RecordReleaseProof(authenticated, f.scope, releaseProof, uuid.NewString()); !errors.Is(e, service.ErrConflict) {
+		t.Fatal("old release lease rewrote proof", e)
+	}
+	if _, e = ports.PreparePortReservation(ctx, f.scope, req, uuid.NewString()); e != nil {
+		t.Fatal("proof-backed port could not be allocated again", e)
+	}
+}
+
+type portReleaseAdapter func(context.Context, service.TenantScope, string, string, *controlv1.RuleCommand, service.PortProof) error
+
+func (f portReleaseAdapter) DeliverPortRelease(ctx context.Context, scope service.TenantScope, node, boot string, c *controlv1.RuleCommand, p service.PortProof) error {
+	return f(ctx, scope, node, boot, c, p)
 }

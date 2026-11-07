@@ -115,3 +115,18 @@ SELECT count(*) FROM port_reservations WHERE node_id=$1 AND state<>'released';
 
 -- name: RegisterNodeIncarnation :one
 UPDATE nodes SET boot_id=$2,generation=$3,version=version+1 WHERE id=$1 AND generation<=$3 AND (boot_id='' OR boot_id=$2 OR generation<$3) RETURNING *;
+
+-- name: LeasePortRelease :one
+UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1
+WHERE id=(SELECT t.id FROM tasks t JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id
+WHERE t.task_kind='port_release' AND t.state IN ('pending','unknown')
+AND o.delivered_at IS NULL ORDER BY t.attempts,o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
+
+-- name: PortReleaseBinding :one
+SELECT p.allocation_id,p.node_id,p.boot_id,p.generation,p.prepare_task_id,d.created_by
+FROM port_reservations p JOIN rule_delivery_bindings b ON b.tenant_id=p.tenant_id AND b.task_id=p.prepare_task_id
+JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id
+WHERE p.tenant_id=$1 AND p.release_task_id=$2 ORDER BY p.protocol LIMIT 1;
+
+-- name: ExpirePortReleaseLeases :exec
+UPDATE tasks SET state='unknown',lease_until=NULL WHERE task_kind='port_release' AND state IN ('leased','running') AND lease_until<now();

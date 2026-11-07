@@ -493,6 +493,34 @@ func (s PortService) RecordReleaseProof(ctx context.Context, scope TenantScope, 
 	}
 	return s.recordProof(ctx, scope, p, request)
 }
+
+// ReleaseUnknown records only uncertainty. Unlike a success proof it conveys
+// no authority to free sockets and therefore needs no node impersonation.
+func (s PortService) ReleaseUnknown(ctx context.Context, scope TenantScope, p PortProof, request string) error {
+	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.release_unknown", ResourceID: p.AllocationID, RequestID: request, Reason: "stop proof absent; retain physical occupation"}, func(q *generated.Queries) error {
+		a, err := lockAllocation(ctx, q, scope, p.AllocationID)
+		if err != nil {
+			return err
+		}
+		if a.State == "released" || a.State == "aborted" {
+			return nil
+		}
+		t, err := q.LockPortTask(ctx, generated.LockPortTaskParams{TenantID: scope.TenantID(), ID: p.TaskID})
+		if err != nil {
+			return err
+		}
+		if t.TaskKind != "port_release" || !t.LeaseToken.Valid || t.LeaseToken.String != p.LeaseToken || (t.State != "running" && t.State != "leased") {
+			return ErrStaleReceipt
+		}
+		if err = q.MarkNodePortUnknown(ctx, generated.MarkNodePortUnknownParams{TenantID: scope.TenantID(), AllocationID: p.AllocationID, NodeID: p.NodeID}); err != nil {
+			return err
+		}
+		if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: scope.TenantID(), ID: p.TaskID, State: "unknown"}); err != nil {
+			return err
+		}
+		return q.ReconcileTask(ctx, generated.ReconcileTaskParams{TenantID: scope.TenantID(), OperationID: p.TaskID, State: "unknown"})
+	})
+}
 func (s PortService) recordProof(ctx context.Context, scope TenantScope, p PortProof, request string) error {
 	fingerprint, e := s.verifiedNode(ctx, p.NodeID)
 	if e != nil {

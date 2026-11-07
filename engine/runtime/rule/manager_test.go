@@ -172,3 +172,39 @@ func TestPrepareCommitHotSessionAndAbortRealSockets(t *testing.T) {
 		t.Fatal("real writes bypassed accounting")
 	}
 }
+
+func TestReleaseProvesClosedSocketsAndReapplyBindsFreshEndpoint(t *testing.T) {
+	m := New(func(Artifact) (accounting.Gate, error) { return &testGate{}, nil })
+	t.Cleanup(func() { m.Stop(context.Background()) })
+	a := artifact(t, echoTarget(t, "a"))
+	id := [16]byte{71}
+	if err := m.Prepare(id, a); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Commit(id); err != nil {
+		t.Fatal(err)
+	}
+	c := dialRule(t, a)
+	roundtrip(t, c, "ax")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := m.Release(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	if tx, _ := m.Query(id); tx.State != apply.Released {
+		t.Fatal("no released proof", tx)
+	}
+	if c, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", a.Intent.Rule.Port), time.Second); err == nil {
+		c.Close()
+		t.Fatal("released socket remained open")
+	}
+	a.RuleRevision, a.FencingGeneration = 2, 2
+	next := [16]byte{72}
+	if err := m.Prepare(next, a); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Commit(next); err != nil {
+		t.Fatal(err)
+	}
+	roundtrip(t, dialRule(t, a), "ax")
+}

@@ -32,7 +32,7 @@ func (r *Reconciler) ApplyRuleCommand(ctx context.Context, node string, c *contr
 	if r == nil || r.Store == nil || r.Apply == nil || !canonicalUUID(node) || len(c.TransactionId) != 16 || len(c.TaskKey) == 0 || len(c.TaskKey) > 128 || len(c.IdempotencyKey) == 0 || len(c.IdempotencyKey) > 128 || c.TargetRevision == 0 || c.FencingGeneration == 0 || len(c.ArtifactSha256) != 32 || !noUnknownFields(c.ProtoReflect()) {
 		return out
 	}
-	if c.Phase != "prepare" && c.Phase != "commit" && c.Phase != "query" && c.Phase != "abort" {
+	if c.Phase != "prepare" && c.Phase != "commit" && c.Phase != "query" && c.Phase != "abort" && c.Phase != "release" {
 		return out
 	}
 	digest := sha256.Sum256(c.Payload)
@@ -144,6 +144,15 @@ func (r *Reconciler) ApplyRuleCommand(ctx context.Context, node string, c *contr
 		return out
 	}
 	switch c.Phase {
+	case "release":
+		releaser, ok := r.Apply.(interface {
+			ReleaseRule(context.Context, [16]byte) error
+		})
+		if !ok || releaser.ReleaseRule(ctx, id) != nil {
+			out.State = "unknown"
+			out.ErrorCode = "activation_unknown"
+			return out
+		}
 	case "commit":
 		if tx.State == apply.Prepared {
 			if e = r.Store.SaveConfigResult(ctx, idText, c.TargetRevision, "committing", ""); e != nil {
@@ -183,7 +192,13 @@ func (r *Reconciler) ApplyRuleCommand(ctx context.Context, node string, c *contr
 		out.State = "prepared"
 	case apply.Active:
 		out.State = "active"
-	case apply.Aborted, apply.Released:
+	case apply.Released:
+		if c.Phase == "release" {
+			out.State = "released"
+		} else {
+			out.State = "aborted"
+		}
+	case apply.Aborted:
 		out.State = "aborted"
 	default:
 		out.State = "unknown"

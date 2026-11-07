@@ -90,7 +90,7 @@ func lockedCompileInput(ctx context.Context, q *generated.Queries, scope TenantS
 	if e != nil {
 		return compiler.CompileInput{}, e
 	}
-	if len(allocations) > 1 || (len(allocations) == 0 && rule.Port == 0) {
+	if len(allocations) != 1 {
 		return compiler.CompileInput{}, ErrConflict
 	}
 	if len(allocations) == 1 {

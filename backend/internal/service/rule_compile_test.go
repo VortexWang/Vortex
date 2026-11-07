@@ -18,6 +18,7 @@ func TestCompileWorkerMissingSnapshotThenReadyRestart(t *testing.T) {
 	ctx := context.Background()
 	s := service.RuleService{Pool: f.pool}
 	in := ruleInput(f.group)
+	reserveRulePort(t, f, in)
 	m, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
@@ -117,6 +118,7 @@ func TestCompileWorkerAuditRollback(t *testing.T) {
 	ctx := context.Background()
 	s := service.RuleService{Pool: f.pool}
 	in := ruleInput(f.group)
+	reserveRulePort(t, f, in)
 	m, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
@@ -154,6 +156,7 @@ func TestCompileWorkerMissingSnapshotPreservesPriorAuthority(t *testing.T) {
 	ctx := context.Background()
 	s := service.RuleService{Pool: f.pool}
 	in := ruleInput(f.group)
+	reserveRulePort(t, f, in)
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}

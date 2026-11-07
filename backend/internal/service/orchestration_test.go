@@ -23,6 +23,7 @@ func TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery(t *testing.T) {
 	s := service.RuleService{Pool: f.pool}
 	o := service.RuleOrchestrator{Pool: f.pool}
 	in := ruleInput(f.group)
+	reserveRulePort(t, f, in)
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
@@ -56,7 +57,7 @@ func TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery(t *testing.T) {
 	if e = f.pool.QueryRow(ctx, `SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 ORDER BY node_id LIMIT 1`, f.tenant, d.ID).Scan(&task); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = f.pool.Exec(ctx, `UPDATE tasks SET state='running',lease_until=now()-interval '1 second' WHERE tenant_id=$1 AND id=$2`, f.tenant, task); e != nil {
+	if _, e = f.pool.Exec(ctx, `UPDATE tasks SET state='running',lease_token='crashed-worker',lease_until=now()-interval '1 second' WHERE tenant_id=$1 AND id=$2`, f.tenant, task); e != nil {
 		t.Fatal(e)
 	}
 	w := worker.RuleWorker{Pool: f.pool}
@@ -96,6 +97,7 @@ func TestApplyPrepareCommitUnknownAndLateReceipt(t *testing.T) {
 	s := service.RuleService{Pool: f.pool}
 	o := service.RuleOrchestrator{Pool: f.pool}
 	in := ruleInput(f.group)
+	reserveRulePort(t, f, in)
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
@@ -151,7 +153,11 @@ func TestApplyPrepareCommitUnknownAndLateReceipt(t *testing.T) {
 	}
 	accept := func(c *controlv1.RuleCommand, state string) {
 		t.Helper()
-		if e = o.Receipt(ctx, f.scope, c.TaskKey, receipt(c, state), uuid.NewString()); e != nil {
+		lease := uuid.NewString()
+		if _, e = f.pool.Exec(ctx, `UPDATE tasks SET state='running',lease_token=$3 WHERE tenant_id=$1 AND id=$2`, f.tenant, c.TaskKey, lease); e != nil {
+			t.Fatal(e)
+		}
+		if e = o.ReceiptWithLease(ctx, f.scope, c.TaskKey, lease, receipt(c, state), uuid.NewString()); e != nil {
 			t.Fatal(e)
 		}
 	}

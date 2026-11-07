@@ -155,6 +155,15 @@ func (q *Queries) CountNodePortOccupation(ctx context.Context, nodeID string) (i
 	return count, err
 }
 
+const expirePortReleaseLeases = `-- name: ExpirePortReleaseLeases :exec
+UPDATE tasks SET state='unknown',lease_until=NULL WHERE task_kind='port_release' AND state IN ('leased','running') AND lease_until<now()
+`
+
+func (q *Queries) ExpirePortReleaseLeases(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, expirePortReleaseLeases)
+	return err
+}
+
 const finishPortTask = `-- name: FinishPortTask :exec
 UPDATE tasks SET state='succeeded',lease_until=NULL WHERE tenant_id=$1 AND id=$2
 `
@@ -350,6 +359,29 @@ func (q *Queries) InsertPortReservation(ctx context.Context, arg InsertPortReser
 	return err
 }
 
+const leasePortRelease = `-- name: LeasePortRelease :one
+UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1
+WHERE id=(SELECT t.id FROM tasks t JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id
+WHERE t.task_kind='port_release' AND t.state IN ('pending','unknown')
+AND o.delivered_at IS NULL ORDER BY t.attempts,o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+`
+
+func (q *Queries) LeasePortRelease(ctx context.Context, leaseToken pgtype.Text) (Task, error) {
+	row := q.db.QueryRow(ctx, leasePortRelease, leaseToken)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.OperationID,
+		&i.State,
+		&i.LeaseToken,
+		&i.LeaseUntil,
+		&i.Attempts,
+		&i.TaskKind,
+	)
+	return i, err
+}
+
 const listTenantPortAllocations = `-- name: ListTenantPortAllocations :many
 SELECT id, tenant_id, rule_id, group_id, member_set_version, port, listen_address, protocols, purpose, state, first_effective_at, retained_until, needs_revalidation, version FROM port_allocations WHERE tenant_id=$1 AND state NOT IN ('released','aborted') ORDER BY group_id,id
 `
@@ -508,6 +540,41 @@ type MarkNodePortUnknownParams struct {
 func (q *Queries) MarkNodePortUnknown(ctx context.Context, arg MarkNodePortUnknownParams) error {
 	_, err := q.db.Exec(ctx, markNodePortUnknown, arg.TenantID, arg.AllocationID, arg.NodeID)
 	return err
+}
+
+const portReleaseBinding = `-- name: PortReleaseBinding :one
+SELECT p.allocation_id,p.node_id,p.boot_id,p.generation,p.prepare_task_id,d.created_by
+FROM port_reservations p JOIN rule_delivery_bindings b ON b.tenant_id=p.tenant_id AND b.task_id=p.prepare_task_id
+JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id
+WHERE p.tenant_id=$1 AND p.release_task_id=$2 ORDER BY p.protocol LIMIT 1
+`
+
+type PortReleaseBindingParams struct {
+	TenantID      string
+	ReleaseTaskID pgtype.Text
+}
+
+type PortReleaseBindingRow struct {
+	AllocationID  string
+	NodeID        string
+	BootID        string
+	Generation    int64
+	PrepareTaskID string
+	CreatedBy     string
+}
+
+func (q *Queries) PortReleaseBinding(ctx context.Context, arg PortReleaseBindingParams) (PortReleaseBindingRow, error) {
+	row := q.db.QueryRow(ctx, portReleaseBinding, arg.TenantID, arg.ReleaseTaskID)
+	var i PortReleaseBindingRow
+	err := row.Scan(
+		&i.AllocationID,
+		&i.NodeID,
+		&i.BootID,
+		&i.Generation,
+		&i.PrepareTaskID,
+		&i.CreatedBy,
+	)
+	return i, err
 }
 
 const portReservations = `-- name: PortReservations :many

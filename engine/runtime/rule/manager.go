@@ -48,6 +48,7 @@ type Manager struct {
 	linkFactory func(Artifact, Member) (*link.Supervisor, error)
 	workers     sync.WaitGroup
 	stopped     bool
+	releasing   map[string]bool
 }
 
 func New(gate GateFactory) *Manager {
@@ -95,6 +96,9 @@ func (m *Manager) Prepare(id [16]byte, a Artifact) error {
 		return errors.New("unsupported_config: VLink identity transport unavailable")
 	}
 	old := m.active[a.RuleID]
+	if m.releasing[a.RuleID] {
+		return apply.ErrConflict
+	}
 	if old != nil && a.FencingGeneration <= old.a.FencingGeneration {
 		return apply.ErrConflict
 	}
@@ -104,7 +108,7 @@ func (m *Manager) Prepare(id [16]byte, a Artifact) error {
 		return apply.ErrConflict
 	}
 	if model.Enabled && a.Intent.Role == "entry" {
-		if old != nil && old.endpoint != nil && old.a.Intent.Rule.Port == model.Port && old.a.Intent.Rule.Protocol == model.Protocol {
+		if old != nil && old.state == apply.Active && old.endpoint != nil && old.a.Intent.Rule.Port == model.Port && old.a.Intent.Rule.Protocol == model.Protocol {
 			t.endpoint = old.endpoint
 		} else {
 			ep := &endpoint{connections: map[net.Conn]struct{}{}}
@@ -136,6 +140,9 @@ func (m *Manager) Commit(id [16]byte) error {
 	defer m.mu.Unlock()
 	t := m.tx[id]
 	if t == nil {
+		return apply.ErrConflict
+	}
+	if m.releasing[t.a.RuleID] {
 		return apply.ErrConflict
 	}
 	if t.state == apply.Active {
@@ -203,6 +210,67 @@ func (m *Manager) Abort(id [16]byte) error {
 	}
 	t.state = apply.Aborted
 	return nil
+}
+
+// Release stops every historical socket/flow for the exact current rule
+// incarnation. A stale transaction cannot stop a newer prepared or active edit.
+func (m *Manager) Release(ctx context.Context, id [16]byte) error {
+	m.mu.Lock()
+	t := m.tx[id]
+	if t == nil {
+		m.mu.Unlock()
+		return apply.ErrConflict
+	}
+	if t.state == apply.Released {
+		m.mu.Unlock()
+		return nil
+	}
+	for _, other := range m.tx {
+		if other.a.RuleID == t.a.RuleID && other.a.FencingGeneration > t.a.FencingGeneration {
+			m.mu.Unlock()
+			return apply.ErrConflict
+		}
+	}
+	if m.releasing == nil {
+		m.releasing = map[string]bool{}
+	}
+	m.releasing[t.a.RuleID] = true
+	eps := map[*endpoint]bool{}
+	for _, other := range m.tx {
+		if other.a.RuleID != t.a.RuleID {
+			continue
+		}
+		if other.cancel != nil {
+			other.cancel()
+		}
+		if other.endpoint != nil {
+			eps[other.endpoint] = true
+			other.endpoint.stop(true)
+		}
+		other.state = apply.ActivationUnknown
+	}
+	m.mu.Unlock()
+	done := make(chan struct{})
+	go func() {
+		for ep := range eps {
+			ep.wg.Wait()
+		}
+		close(done)
+	}()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-done:
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		for _, other := range m.tx {
+			if other.a.RuleID == t.a.RuleID {
+				other.state = apply.Released
+			}
+		}
+		delete(m.releasing, t.a.RuleID)
+		return nil
+	}
 }
 func (e *endpoint) stop(force bool) {
 	if e == nil {
