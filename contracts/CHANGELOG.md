@@ -76,3 +76,14 @@ HTTP implementations remain 06-07. Online payment/auto-renewal, ledger funding,
 signer/lease production and native dual-architecture acceptance are not claimed.
 Monthly issuance/expiry and disabled revisions use durable workers; subsequent
 funded deployment consumers remain 06-05/06-06.
+
+## Phase 6 packages and entitlements (06-04 approved)
+
+The owner explicitly approved CR-006 with “批准 CR-006”, including consumption
+on successful confirmation and no automatic refund or use restoration on later
+application failure. The immutable proposal SHA-256 remains
+`60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d`.
+Approval is recorded in `docs/changes/CR-006-APPROVAL.json` and two appended
+`docs/governance/contract-review.yaml` records. Database/API 2.1.0 are frozen;
+only approval metadata and this appended notice differ from candidate bytes.
+The earlier candidate section remains an immutable historical statement.

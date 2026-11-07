@@ -8,15 +8,15 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "2.0.0",
-      "sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc",
+      "version": "2.1.0",
+      "sha256": "b562cea62a7bd105f8cae8b65f7d55331bbb6d8300401fd79fa889108ec37004",
       "decision": "approved"
     },
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "2.0.0",
-      "sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81",
+      "version": "2.1.0",
+      "sha256": "20b19bc70178dc912a313885c3ad56755bb5c048f80155b19364fbb5efa6c67b",
       "decision": "approved"
     },
     {
@@ -206,6 +206,28 @@
       "approved_at": "2026-11-07T09:33:05Z",
       "decision": "approved",
       "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.database",
+      "from": "2.0.0",
+      "version": "2.1.0",
+      "proposal_sha256": "60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d",
+      "contract_sha256": "b562cea62a7bd105f8cae8b65f7d55331bbb6d8300401fd79fa889108ec37004",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T20:45:23Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-006-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.0.0",
+      "version": "2.1.0",
+      "proposal_sha256": "60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d",
+      "contract_sha256": "20b19bc70178dc912a313885c3ad56755bb5c048f80155b19364fbb5efa6c67b",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T20:45:23Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-006-APPROVAL.json"
     }
   ]
 }
