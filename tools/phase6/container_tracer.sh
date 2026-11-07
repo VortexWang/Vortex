@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 test "$(GOTOOLCHAIN=local go env GOVERSION)" = go1.27.3
+# The Linux runner owns the bind mount as a different uid from container root.
+# Trust only this exact checkout in the ephemeral container, retain Go's VCS
+# stamping, and independently check the source identity before building.
+git config --global --add safe.directory "$PWD"
+test "$(git rev-parse HEAD)" = "$PHASE6_EXPECTED_SHA"
 go version
 uname -a
 date -u '+%Y-%m-%dT%H:%M:%SZ'
