@@ -1,4 +1,4 @@
-"""Exact candidate review checks; never rewrite the approved freeze record."""
+"""Verify the exact owner-approved CR-005 review unit and legacy compatibility."""
 import hashlib
 import json
 from pathlib import Path
@@ -15,20 +15,43 @@ def protoc(source, kind, text=None, data=None):
     return subprocess.check_output(args, input=text.encode() if text is not None else data)
 
 proposal = load('docs/changes/CR-005-rule-two-phase.json')
-assert proposal['status'] == 'pending-owner-approval', 'candidate checker requires an unsigned proposal'
+approval = load('docs/changes/CR-005-APPROVAL.json')
+proposal_hash = hashlib.sha256((ROOT / 'docs/changes/CR-005-rule-two-phase.json').read_bytes()).hexdigest()
+assert approval['status'] == 'approved' and approval['owner_response'] == '批准 CR-005'
+assert approval['proposal_sha256'] == proposal_hash == 'b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4', 'approved proposal changed'
+catalog = load('contracts/versions.yaml')
+changes = {row['contract_id']: row for row in proposal['changes']}
 for row in proposal['artifacts']:
-    assert hashlib.sha256((ROOT / row['path']).read_bytes()).hexdigest() == row['sha256'], 'candidate hash changed: '+row['path']
+    raw = (ROOT / row['path']).read_bytes()
+    if row['path'] == 'contracts/versions.yaml':
+        assert hashlib.sha256(raw).hexdigest() == approval['frozen_catalog_sha256'], 'frozen catalog changed'
+        original_catalog = json.loads(raw)
+        for entry in original_catalog['contracts']:
+            if entry['id'] in changes:
+                assert entry['status'] == 'frozen', 'approved contract is not frozen'
+                entry['status'] = 'candidate'
+        raw = (json.dumps(original_catalog, indent=2)+'\n').encode()
+        assert row['sha256'] == approval['candidate_catalog_sha256']
+    assert hashlib.sha256(raw).hexdigest() == row['sha256'], 'approved candidate hash changed: '+row['path']
 schema = load('contracts/runtime/config.schema.json')
 assert schema['$defs']['legacy'] == json.loads(git_bytes('contracts/runtime/config.schema.json')), 'legacy schema changed'
-assert (ROOT / 'docs/governance/contract-review.yaml').read_bytes() == git_bytes('docs/governance/contract-review.yaml'), 'historical owner review changed without separate approval'
-assert {x['id']:x['version'] for x in load('contracts/versions.yaml')['contracts']} | {} == proposal['candidate_versions'], 'candidate catalog mismatch'
+review = load('docs/governance/contract-review.yaml')
+historical = json.loads(git_bytes('docs/governance/contract-review.yaml'))
+old_approvals = historical['change_approvals']
+assert review['change_approvals'][:len(old_approvals)] == old_approvals, 'historical approvals rewritten'
+assert review['change_approvals'][len(old_approvals):] == approval['changes'], 'signed approval history mismatch'
+assert len(approval['changes']) == len(changes), 'missing or duplicate approval'
+for row in approval['changes']:
+    change = changes[row['contract_id']]
+    assert row['decision'] == 'approved' and row['proposal_sha256'] == proposal_hash
+    assert row['from'] == change['from'] and row['version'] == change['version']
+    assert row['reviewer'] == approval['reviewer'] and row['approved_at'] == approval['recorded_at']
+    subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-frozen', '--contract-id', row['contract_id']], cwd=ROOT, check=True)
+assert {x['id']:x['version'] for x in catalog['contracts']} == proposal['candidate_versions'], 'approved catalog version mismatch'
 assert (ROOT / 'contracts/openapi/v1/openapi.yaml').read_bytes() == (ROOT / 'backend/openapi/v1/openapi.yaml').read_bytes(), 'OpenAPI copy differs'
 for path in sorted((ROOT / 'backend/db/migrations').glob('0000[1-4]*.sql')):
     assert path.read_bytes() == git_bytes(str(path.relative_to(ROOT))), 'applied migration rewritten: '+path.name
 subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-change', '--base', proposal['baseline_source']], cwd=ROOT, check=True)
-for row in load('contracts/versions.yaml')['contracts']:
-    if row['id'] in {c['contract_id'] for c in proposal['changes']}:
-        assert row['status'] == 'candidate', 'unsigned candidate marked frozen'
 work=Path(sys.argv[1]); old=work/'baseline.proto'
 old.write_bytes(git_bytes('contracts/protobuf/v1/vortex.proto'))
 current=ROOT/'contracts/protobuf/v1/vortex.proto'
@@ -43,4 +66,4 @@ for kind,text in [
 new=protoc(current,'ControlMessage',text='sequence:4 rule_command{phase:"prepare" task_key:"key" target_revision:2}')
 decoded=protoc(old,'ControlMessage',data=new).decode()
 assert 'config_update' not in decoded and '18 {' in decoded, 'new rule body aliases legacy auto-apply body'
-print('Exact CR-005 candidate hashes and legacy wire/schema compatibility passed')
+print('Exact owner-approved CR-005 hashes, frozen records and legacy wire/schema compatibility passed')

@@ -1,6 +1,6 @@
 # CR-005 — revision-scoped rule control and runtime artifact
 
-Status: pending owner approval. Review the exact JSON manifest and its SHA-256 recorded in contracts/CHANGELOG.md. The existing approved contract-review.yaml is preserved; implementation and passing tests do not imply a separate owner signature.
+Status: approved by the owner in-session with “批准 CR-005”. The exact JSON manifest remains unchanged at SHA-256 b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4. The subsequent approval is recorded separately in CR-005-APPROVAL.json and appended contract-review.yaml history; passing tests alone did not grant approval.
 
 06-03 requires real fixed-member Prepare/Commit/query and authenticated port-release execution. The legacy RuntimeConfigUpdate auto-apply path cannot encode that distinction safely. Control 1.4.0 adds separate RuleCommand/RuleReceipt oneof tags and opt-in initial Heartbeat capability; runtime 1.2.0 adds the immutable artifact branch while preserving the full old schema. Old nodes receive no new phased body. Hub lifecycle stays 1.3.0, and Engine remains process-local without a control client or database.
 

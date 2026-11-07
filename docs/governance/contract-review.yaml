@@ -8,22 +8,22 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "1.0.0",
-      "sha256": "11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2",
+      "version": "2.0.0",
+      "sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc",
       "decision": "approved"
     },
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "1.0.0",
-      "sha256": "b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191",
+      "version": "2.0.0",
+      "sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81",
       "decision": "approved"
     },
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.3.0",
-      "sha256": "4a2458c511e9d5d9db0d567280445f6648d6482484ab19984a7c1a3289a05571",
+      "version": "1.4.0",
+      "sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
       "decision": "approved",
       "artifacts": [
         {
@@ -32,7 +32,7 @@
         },
         {
           "path": "contracts/protobuf/v1/lifecycle.md",
-          "sha256": "65874c4e00fa78159105e3a080e1898d923b67c0903556f99d10a516a09cd9c6"
+          "sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee"
         },
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
@@ -43,8 +43,8 @@
     {
       "id": "vortex.runtime-config",
       "path": "contracts/runtime/config.schema.json",
-      "version": "1.1.0",
-      "sha256": "2e29ae94f438a2f79b16d7e755bb81875c8b8668dd5b52c15bde819cfe17469f",
+      "version": "1.2.0",
+      "sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
       "decision": "approved"
     },
     {
@@ -148,6 +148,64 @@
       "reviewer": "user-approved-in-session",
       "approved_at": "2026-11-06T02:21:16.718444+00:00",
       "decision": "approved"
+    },
+    {
+      "contract_id": "vortex.database",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.3.0",
+      "version": "1.4.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ]
+    },
+    {
+      "contract_id": "vortex.runtime-config",
+      "from": "1.1.0",
+      "version": "1.2.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
     }
   ]
 }

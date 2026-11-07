@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "id": "CR-005",
+  "status": "approved",
+  "proposal_path": "docs/changes/CR-005-rule-two-phase.json",
+  "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+  "owner_response": "批准 CR-005",
+  "reviewer": "user-approved-in-session",
+  "recorded_at": "2026-11-07T09:33:05Z",
+  "candidate_catalog_sha256": "97bd1a7b865d8f0e087b319db98e7efa4c9eb543624431d7b2d32da961eb5bfc",
+  "frozen_catalog_sha256": "fab62137e478dff37f47f0c967123ccfe03e59c8f08fac9c1d24b8ad8f936e30",
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.3.0",
+      "version": "1.4.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ]
+    },
+    {
+      "contract_id": "vortex.runtime-config",
+      "from": "1.1.0",
+      "version": "1.2.0",
+      "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+      "contract_sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-07T09:33:05Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-005-APPROVAL.json"
+    }
+  ]
+}

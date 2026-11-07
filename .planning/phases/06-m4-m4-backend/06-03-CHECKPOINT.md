@@ -1,20 +1,21 @@
 ---
 phase: 06-m4-m4-backend
 plan: 03
-status: awaiting-owner-contract-approval
+status: owner-approved-reverification-in-progress
 source_commit: f285137bdebc2c541327922fbdc4ed41516cfe69
 proposal_sha256: b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4
 ---
 
-# 06-03 contract approval checkpoint
+# 06-03 contract approval and reverification checkpoint
 
 Implementation is present in commits da7b5fcc through f285137b. This is an
-incomplete plan checkpoint, not a completion SUMMARY. No approval is inferred
+incomplete plan checkpoint, not a completion SUMMARY. The owner subsequently explicitly approved CR-005 with “批准 CR-005”. Approval
+is recorded separately in docs/changes/CR-005-APPROVAL.json; it was never inferred
 from the instruction to continue Phase 6.
 
 ## Reviewable decision
 
-Approve the exact `docs/changes/CR-005-rule-two-phase.json` review unit, SHA-256
+Owner approved the exact `docs/changes/CR-005-rule-two-phase.json` review unit, SHA-256
 `b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4`:
 
 | Contract | Proposed version | Compatibility |
@@ -26,9 +27,9 @@ Approve the exact `docs/changes/CR-005-rule-two-phase.json` review unit, SHA-256
 
 The proposal pins all normative/generated artifact hashes and explains migration
 limits. `docs/governance/contract-review.yaml:66` explicitly requires owner
-approval of normative changes. Its historical approvals remain unchanged.
+approval of normative changes. Prior approval-history entries remain unchanged; four new approvals now bind the accepted bytes.
 
-## Verified current evidence
+## Historical candidate evidence (before approval)
 
 Evidence directory:
 `artifacts/phase6/06-03/f285137bdebc2c541327922fbdc4ed41516cfe69/docker/`.
@@ -69,3 +70,21 @@ no invented snapshots or funding may be used to close acceptance.
 If rejected, revise the implementation and regenerate the exact proposal review
 unit. Never sign an approval on behalf of the owner or mark 06-03 complete while
 the freeze remains pending. Preserve unrelated caller Phase 4/5 changes.
+
+## Approval and post-approval work
+
+- Actual owner response: “批准 CR-005” (repeated in-session). No extra approval
+  is required for this exact review unit. The immutable proposal JSON and all
+  normative candidate bytes remain unchanged; catalog statuses become frozen
+  with the before/after hashes recorded in CR-005-APPROVAL.json.
+- Four selected frozen checks, exact approved hash checks, two clean protobuf
+  generations and legacy wire/schema compatibility pass after approval. The
+  all-contract check still reports the pre-existing VLink hash mismatch; this
+  approval does not authorize rewriting that separate historical record.
+- Post-checkpoint audit found that a late old Prepare/query observation could
+  recreate old Commit tasks. RED c21acb0e proved all three cases on real PostgreSQL.
+  Fix 4e902c49 serializes on the rule head before deployment/task locks, refreshes
+  observed state, and queues only abort/query for obsolete prepared/unknown work.
+  Fresh-database normal/race regression and two clean sqlc generations pass.
+- Exact committed-source Docker producer must be rerun with these changes.
+  Acceptance and final same-SHA Actions pairing remain unclaimed.
