@@ -32,10 +32,18 @@ SELECT * FROM package_changes WHERE state='pending' AND effective_at<=sqlc.arg(a
 SELECT * FROM package_changes WHERE tenant_id=$1 AND id=$2 FOR UPDATE;
 -- name: FinishPackageChange :exec
 UPDATE package_changes SET state=$3 WHERE tenant_id=$1 AND id=$2 AND state='pending';
--- name: ExpiringPackageTenants :many
-SELECT tenant_id FROM subscriptions WHERE expires_at<=now() ORDER BY tenant_id;
--- name: LivePackageTenants :many
-SELECT tenant_id FROM subscriptions WHERE expires_at>now() ORDER BY tenant_id;
+-- name: DuePackageLifecycle :many
+SELECT s.tenant_id FROM subscriptions s JOIN package_snapshots p ON p.tenant_id=s.tenant_id AND p.id=s.snapshot_id WHERE s.anchor_at<=sqlc.arg(at_time) AND (
+ (s.expires_at<=sqlc.arg(at_time) AND NOT EXISTS (
+ SELECT 1 FROM current_restrictions r WHERE r.tenant_id=s.tenant_id AND r.cause='package_expired'
+ AND r.source_id=s.id AND r.source_version=s.version AND r.cleared_at IS NULL))
+ OR (s.expires_at>sqlc.arg(at_time) AND (
+ EXISTS (SELECT 1 FROM current_restrictions r WHERE r.tenant_id=s.tenant_id AND r.cause='package_expired' AND r.source_id=s.id AND r.cleared_at IS NULL AND r.effective_at<=sqlc.arg(at_time))
+ OR NOT EXISTS (SELECT 1 FROM traffic_sources f WHERE f.tenant_id=s.tenant_id AND f.snapshot_id=s.snapshot_id AND f.kind='base'
+ AND (p.terms->>'traffic_reset'='none' OR (f.issued_at<=sqlc.arg(at_time)
+ AND GREATEST(f.expires_at,COALESCE((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=f.tenant_id AND e.source_id=f.id),f.expires_at))>sqlc.arg(at_time)
+ AND NOT EXISTS (SELECT 1 FROM source_expirations e WHERE e.tenant_id=f.tenant_id AND e.source_id=f.id AND e.effective_at<=sqlc.arg(at_time))))))))
+ ORDER BY s.tenant_id LIMIT 32;
 
 -- name: LockPackageActor :one
 SELECT id,role,state FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE;

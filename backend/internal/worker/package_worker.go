@@ -20,7 +20,12 @@ func (w PackageWorker) Once(ctx context.Context) (bool, error) {
 	if w.Now != nil {
 		at = w.Now().UTC()
 	}
-	return (service.PackageService{Pool: w.Pool}).ProcessDuePackageChanges(ctx, at)
+	s := service.PackageService{Pool: w.Pool}
+	worked, e := s.ProcessDuePackageChanges(ctx, at)
+	if e != nil || worked {
+		return worked, e
+	}
+	return s.ProcessPackageLifecycle(ctx, at)
 }
 func (w PackageWorker) Run(ctx context.Context) error {
 	ticker := time.NewTicker(time.Second)

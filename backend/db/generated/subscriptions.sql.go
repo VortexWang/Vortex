@@ -250,6 +250,40 @@ func (q *Queries) DuePackageChanges(ctx context.Context, atTime pgtype.Timestamp
 	return items, nil
 }
 
+const duePackageLifecycle = `-- name: DuePackageLifecycle :many
+SELECT s.tenant_id FROM subscriptions s JOIN package_snapshots p ON p.tenant_id=s.tenant_id AND p.id=s.snapshot_id WHERE s.anchor_at<=$1 AND (
+ (s.expires_at<=$1 AND NOT EXISTS (
+ SELECT 1 FROM current_restrictions r WHERE r.tenant_id=s.tenant_id AND r.cause='package_expired'
+ AND r.source_id=s.id AND r.source_version=s.version AND r.cleared_at IS NULL))
+ OR (s.expires_at>$1 AND (
+ EXISTS (SELECT 1 FROM current_restrictions r WHERE r.tenant_id=s.tenant_id AND r.cause='package_expired' AND r.source_id=s.id AND r.cleared_at IS NULL AND r.effective_at<=$1)
+ OR NOT EXISTS (SELECT 1 FROM traffic_sources f WHERE f.tenant_id=s.tenant_id AND f.snapshot_id=s.snapshot_id AND f.kind='base'
+ AND (p.terms->>'traffic_reset'='none' OR (f.issued_at<=$1
+ AND GREATEST(f.expires_at,COALESCE((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=f.tenant_id AND e.source_id=f.id),f.expires_at))>$1
+ AND NOT EXISTS (SELECT 1 FROM source_expirations e WHERE e.tenant_id=f.tenant_id AND e.source_id=f.id AND e.effective_at<=$1)))))))
+ ORDER BY s.tenant_id LIMIT 32
+`
+
+func (q *Queries) DuePackageLifecycle(ctx context.Context, atTime pgtype.Timestamptz) ([]string, error) {
+	rows, err := q.db.Query(ctx, duePackageLifecycle, atTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var tenant_id string
+		if err := rows.Scan(&tenant_id); err != nil {
+			return nil, err
+		}
+		items = append(items, tenant_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const expireSource = `-- name: ExpireSource :exec
 INSERT INTO source_expirations(tenant_id,source_id,effective_at,reason) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING
 `
@@ -269,30 +303,6 @@ func (q *Queries) ExpireSource(ctx context.Context, arg ExpireSourceParams) erro
 		arg.Reason,
 	)
 	return err
-}
-
-const expiringPackageTenants = `-- name: ExpiringPackageTenants :many
-SELECT tenant_id FROM subscriptions WHERE expires_at<=now() ORDER BY tenant_id
-`
-
-func (q *Queries) ExpiringPackageTenants(ctx context.Context) ([]string, error) {
-	rows, err := q.db.Query(ctx, expiringPackageTenants)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []string{}
-	for rows.Next() {
-		var tenant_id string
-		if err := rows.Scan(&tenant_id); err != nil {
-			return nil, err
-		}
-		items = append(items, tenant_id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const extendSubscription = `-- name: ExtendSubscription :one
@@ -379,30 +389,6 @@ func (q *Queries) ListTrafficSources(ctx context.Context, tenantID string) ([]Tr
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const livePackageTenants = `-- name: LivePackageTenants :many
-SELECT tenant_id FROM subscriptions WHERE expires_at>now() ORDER BY tenant_id
-`
-
-func (q *Queries) LivePackageTenants(ctx context.Context) ([]string, error) {
-	rows, err := q.db.Query(ctx, livePackageTenants)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []string{}
-	for rows.Next() {
-		var tenant_id string
-		if err := rows.Scan(&tenant_id); err != nil {
-			return nil, err
-		}
-		items = append(items, tenant_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
