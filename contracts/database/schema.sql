@@ -506,6 +506,14 @@ CREATE TABLE package_changes (
  FOREIGN KEY(tenant_id,task_id) REFERENCES operations(tenant_id,id)
 );
 CREATE UNIQUE INDEX one_pending_package_change ON package_changes(tenant_id) WHERE state='pending';
+-- Package restrictions can stop one rule without suspending compliant siblings.
+ALTER TABLE restriction_events ADD COLUMN resource_id text;
+ALTER TABLE current_restrictions ADD COLUMN resource_id text;
+ALTER TABLE restriction_events ADD FOREIGN KEY(tenant_id,resource_id) REFERENCES rule_heads(tenant_id,id);
+ALTER TABLE current_restrictions ADD FOREIGN KEY(tenant_id,resource_id) REFERENCES rule_heads(tenant_id,id);
+ALTER TABLE restriction_events ADD CHECK(resource_id IS NULL OR cause='quantity_exceeded');
+ALTER TABLE current_restrictions ADD CHECK(resource_id IS NULL OR cause='quantity_exceeded');
+ALTER TABLE package_changes ADD COLUMN created_by_platform boolean NOT NULL DEFAULT false;
 CREATE TABLE source_expirations (
  tenant_id text NOT NULL, source_id text NOT NULL, effective_at timestamptz NOT NULL,
  reason text NOT NULL CHECK(reason IN ('period_end','replacement','expiry')),
