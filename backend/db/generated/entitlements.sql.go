@@ -75,6 +75,28 @@ func (q *Queries) CreateEntitlementCode(ctx context.Context, arg CreateEntitleme
 	return err
 }
 
+const getEntitlementCode = `-- name: GetEntitlementCode :one
+SELECT code_hash, kind, package_id, package_version, duration_days, amount, remaining_uses, valid_until, applicable_tenant, revoked FROM entitlement_codes WHERE code_hash=$1
+`
+
+func (q *Queries) GetEntitlementCode(ctx context.Context, codeHash []byte) (EntitlementCode, error) {
+	row := q.db.QueryRow(ctx, getEntitlementCode, codeHash)
+	var i EntitlementCode
+	err := row.Scan(
+		&i.CodeHash,
+		&i.Kind,
+		&i.PackageID,
+		&i.PackageVersion,
+		&i.DurationDays,
+		&i.Amount,
+		&i.RemainingUses,
+		&i.ValidUntil,
+		&i.ApplicableTenant,
+		&i.Revoked,
+	)
+	return i, err
+}
+
 const lockEntitlementCode = `-- name: LockEntitlementCode :one
 SELECT code_hash, kind, package_id, package_version, duration_days, amount, remaining_uses, valid_until, applicable_tenant, revoked FROM entitlement_codes WHERE code_hash=$1 FOR UPDATE
 `

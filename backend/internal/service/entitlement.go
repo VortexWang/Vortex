@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -62,10 +63,78 @@ func lockedCode(ctx context.Context, q *generated.Queries, tenant, code string) 
 	if e != nil {
 		return c, e
 	}
-	if c.Revoked || c.RemainingUses <= 0 || !time.Now().Before(c.ValidUntil.Time) || c.ApplicableTenant.Valid && c.ApplicableTenant.String != tenant {
+	if !codeApplicable(c, tenant) {
 		return c, ErrEntitlementInvalid
 	}
 	return c, nil
+}
+
+func codeApplicable(c generated.EntitlementCode, tenant string) bool {
+	return !c.Revoked && c.RemainingUses > 0 && time.Now().Before(c.ValidUntil.Time) && (!c.ApplicableTenant.Valid || c.ApplicableTenant.String == tenant)
+}
+func codeBinding(c generated.EntitlementCode, actor string) *entitlementBinding {
+	return &entitlementBinding{CodeHash: hex.EncodeToString(c.CodeHash), ActorID: actor, DurationDays: c.DurationDays, Amount: c.Amount}
+}
+
+// PreviewEntitlement is read-only; the digest binds the exact code grant and
+// actor to the same impact inputs used by ordinary package changes.
+func (s PackageService) PreviewEntitlement(ctx context.Context, scope TenantScope, code string, keep []string, at time.Time) (json.RawMessage, error) {
+	if !scope.Allows(policy.Mutate) || scope.Platform() {
+		return nil, ErrScope
+	}
+	if len(code) < 16 || len(code) > 256 {
+		return nil, ErrEntitlementInvalid
+	}
+	var preview downgradePreview
+	e := pgx.BeginTxFunc(ctx, s.Pool, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(tx pgx.Tx) error {
+		q := generated.New(tx)
+		hash := sha256.Sum256([]byte(code))
+		c, e := q.GetEntitlementCode(ctx, hash[:])
+		if errors.Is(e, pgx.ErrNoRows) {
+			return ErrEntitlementInvalid
+		}
+		if e != nil {
+			return e
+		}
+		if c.Kind != "package" || !codeApplicable(c, scope.TenantID()) {
+			return ErrEntitlementInvalid
+		}
+		preview, e = previewDowngrade(ctx, q, scope, c.PackageID, c.PackageVersion, keep, at)
+		if e != nil {
+			return e
+		}
+		preview = bindEntitlement(preview, codeBinding(c, scope.ActorID()))
+		return nil
+	})
+	if e != nil {
+		return nil, e
+	}
+	return json.Marshal(preview)
+}
+
+// Accepted future grants are consumed at confirmation. Failed due changes do
+// not silently refund or reissue an already accepted entitlement.
+func (s PackageService) ConfirmEntitlement(ctx context.Context, scope TenantScope, code string, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
+	if len(code) < 16 || len(code) > 256 {
+		return PackageResult{}, ErrEntitlementInvalid
+	}
+	return s.confirmPackageChange(ctx, scope, "", 0, code, keep, at, digest, key, request)
+}
+
+// Code duration and amount are immutable grant terms; catalog capability and
+// reset policy remain pinned to the code's exact package version.
+func entitlementSnapshot(ctx context.Context, q *generated.Queries, tenant string, c generated.EntitlementCode) (generated.PackageSnapshot, PackageTerms, error) {
+	v, e := q.GetPackageVersion(ctx, generated.GetPackageVersionParams{PackageID: c.PackageID, Version: c.PackageVersion})
+	var p PackageTerms
+	if e != nil {
+		return generated.PackageSnapshot{}, p, e
+	}
+	if e = json.Unmarshal(v.Terms, &p); e != nil {
+		return generated.PackageSnapshot{}, p, e
+	}
+	p.DurationDays, p.TrafficBytes = c.DurationDays, c.Amount
+	snap, e := q.AppendPackageSnapshot(ctx, generated.AppendPackageSnapshotParams{ID: uuid.NewString(), TenantID: tenant, PackageID: c.PackageID, PackageVersion: c.PackageVersion, Terms: auditJSON(p)})
+	return snap, p, e
 }
 func (s PackageService) RedeemEntitlement(ctx context.Context, scope TenantScope, code, key, request string) (PackageResult, error) {
 	var result PackageResult
@@ -132,7 +201,7 @@ func redeemCode(ctx context.Context, q *generated.Queries, scope TenantScope, c 
 		}
 	}
 	if c.Kind == "traffic" {
-		snap, _, e := packageSnapshot(ctx, q, scope.TenantID(), c.PackageID, c.PackageVersion)
+		snap, _, e := entitlementSnapshot(ctx, q, scope.TenantID(), c)
 		if e != nil {
 			return PackageResult{}, e
 		}
@@ -205,7 +274,7 @@ func redeemCode(ctx context.Context, q *generated.Queries, scope TenantScope, c 
 	if exists && old.PackageID != c.PackageID {
 		return PackageResult{}, ErrPackageConfirmationRequired
 	}
-	snap, p, e := packageSnapshot(ctx, q, scope.TenantID(), c.PackageID, c.PackageVersion)
+	snap, p, e := entitlementSnapshot(ctx, q, scope.TenantID(), c)
 	if e != nil {
 		return PackageResult{}, e
 	}

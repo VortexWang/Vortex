@@ -28,17 +28,32 @@ type packageRuleLoss struct {
 	Reason string `json:"reason"`
 }
 type downgradePreview struct {
-	Digest              string            `json:"digest"`
-	PackageID           string            `json:"package_id"`
-	PackageVersion      int64             `json:"package_version"`
-	SubscriptionVersion int64             `json:"subscription_version"`
-	EffectiveAt         time.Time         `json:"effective_at"`
-	KeepRules           []string          `json:"keep_rules"`
-	LostCapabilities    []string          `json:"lost_capabilities"`
-	InvalidRules        []string          `json:"invalid_rules"`
-	NewRestrictions     []packageRuleLoss `json:"new_restrictions"`
-	DiscardedAmounts    []packageDiscard  `json:"discarded_amounts"`
-	AffectedResources   []string          `json:"affected_resources"`
+	Digest              string              `json:"digest"`
+	PackageID           string              `json:"package_id"`
+	PackageVersion      int64               `json:"package_version"`
+	SubscriptionVersion int64               `json:"subscription_version"`
+	EffectiveAt         time.Time           `json:"effective_at"`
+	KeepRules           []string            `json:"keep_rules"`
+	LostCapabilities    []string            `json:"lost_capabilities"`
+	InvalidRules        []string            `json:"invalid_rules"`
+	NewRestrictions     []packageRuleLoss   `json:"new_restrictions"`
+	DiscardedAmounts    []packageDiscard    `json:"discarded_amounts"`
+	AffectedResources   []string            `json:"affected_resources"`
+	Entitlement         *entitlementBinding `json:"entitlement,omitempty"`
+}
+
+type entitlementBinding struct {
+	CodeHash     string `json:"code_hash"`
+	ActorID      string `json:"actor_id"`
+	DurationDays int32  `json:"duration_days"`
+	Amount       int64  `json:"amount"`
+}
+
+func bindEntitlement(p downgradePreview, b *entitlementBinding) downgradePreview {
+	p.Entitlement = b
+	d := sha256.Sum256(auditJSON(p))
+	p.Digest = hex.EncodeToString(d[:])
+	return p
 }
 
 // A stale in-memory scope never authorizes a new package transition. The actor
@@ -296,6 +311,10 @@ func previewDowngrade(ctx context.Context, q *generated.Queries, scope TenantSco
 }
 
 func (s PackageService) ConfirmDowngrade(ctx context.Context, scope TenantScope, pkg string, version int64, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
+	return s.confirmPackageChange(ctx, scope, pkg, version, "", keep, at, digest, key, request)
+}
+
+func (s PackageService) confirmPackageChange(ctx context.Context, scope TenantScope, pkg string, version int64, code string, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
 	var result PackageResult
 	if !scope.Allows(policy.Mutate) || scope.Platform() {
 		return result, ErrScope
@@ -303,11 +322,17 @@ func (s PackageService) ConfirmDowngrade(ctx context.Context, scope TenantScope,
 	at = at.UTC().Truncate(time.Microsecond)
 	payload := struct {
 		Kind, Package string
+		Actor         string
+		CodeHash      string
 		Version       int64
 		Keep          []string
 		At            time.Time
 		Digest        string
-	}{"package_change", pkg, version, append([]string{}, keep...), at, digest}
+	}{Kind: "package_change", Package: pkg, Actor: scope.ActorID(), Version: version, Keep: append([]string{}, keep...), At: at, Digest: digest}
+	if code != "" {
+		hash := sha256.Sum256([]byte(code))
+		payload.Kind, payload.CodeHash = "entitlement_change", hex.EncodeToString(hash[:])
+	}
 	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "package.change.confirm", ResourceID: scope.TenantID(), RequestID: request, Reason: "confirm fixed downgrade inputs and explicit effective time"}, func(q *generated.Queries) error {
 		if e := packageActor(ctx, q, scope, policy.Mutate); e != nil {
 			return e
@@ -326,14 +351,34 @@ func (s PackageService) ConfirmDowngrade(ctx context.Context, scope TenantScope,
 		if e != nil {
 			return e
 		}
+		var c generated.EntitlementCode
+		if code != "" {
+			c, e = lockedCode(ctx, q, scope.TenantID(), code)
+			if e != nil {
+				return e
+			}
+			if c.Kind != "package" {
+				return ErrEntitlementInvalid
+			}
+			pkg, version = c.PackageID, c.PackageVersion
+		}
 		preview, e := previewDowngrade(ctx, q, scope, pkg, version, keep, at)
 		if e != nil {
 			return e
 		}
+		if code != "" {
+			preview = bindEntitlement(preview, codeBinding(c, scope.ActorID()))
+		}
 		if preview.Digest != digest {
 			return ErrConflict
 		}
-		snap, p, e := packageSnapshot(ctx, q, scope.TenantID(), pkg, version)
+		var snap generated.PackageSnapshot
+		var p PackageTerms
+		if code != "" {
+			snap, p, e = entitlementSnapshot(ctx, q, scope.TenantID(), c)
+		} else {
+			snap, p, e = packageSnapshot(ctx, q, scope.TenantID(), pkg, version)
+		}
 		if e != nil {
 			return e
 		}
@@ -346,7 +391,20 @@ func (s PackageService) ConfirmDowngrade(ctx context.Context, scope TenantScope,
 			return e
 		}
 		result = PackageResult{SubscriptionID: sub.ID, SnapshotID: snap.ID, OperationID: op.ID, Version: sub.Version + 1, AnchorAt: at, ExpiresAt: at.AddDate(0, 0, int(p.DurationDays))}
-		return savePackageRequest(ctx, q, scope.TenantID(), key, payload, result)
+		if e = savePackageRequest(ctx, q, scope.TenantID(), key, payload, result); e != nil {
+			return e
+		}
+		if code != "" {
+			n, e := q.ConsumeEntitlementCode(ctx, c.CodeHash)
+			if e != nil {
+				return e
+			}
+			if n != 1 {
+				return ErrEntitlementInvalid
+			}
+			return q.AppendEntitlementRedemption(ctx, generated.AppendEntitlementRedemptionParams{RequestKey: key, TenantID: scope.TenantID(), CodeHash: c.CodeHash, Result: auditJSON(result)})
+		}
+		return nil
 	})
 	if e != nil {
 		return PackageResult{}, e
@@ -401,6 +459,12 @@ func (s PackageService) applyPackageChange(ctx context.Context, scope TenantScop
 		fresh, e := previewDowngrade(ctx, q, scope, stored.PackageID, stored.PackageVersion, stored.KeepRules, stored.EffectiveAt)
 		if e != nil {
 			return e
+		}
+		if stored.Entitlement != nil {
+			if stored.Entitlement.ActorID != scope.ActorID() {
+				return ErrScope
+			}
+			fresh = bindEntitlement(fresh, stored.Entitlement)
 		}
 		if fresh.Digest != stored.Digest {
 			return ErrConflict
