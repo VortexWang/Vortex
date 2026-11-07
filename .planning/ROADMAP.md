@@ -9,7 +9,7 @@
 - [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
 - [x] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。 (completed 2026-11-04)
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
-- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；`0c2ba71` 的 Ubuntu 24.04 native 候选正式门禁（300s warmup、3×300s、独立 TLS、100 Mbps UDP）返回 pass，完整81组D-04候选矩阵与独立审计通过，但正式性能资格化、D-04参数锁定和持久化权威仍按用户决定保留为验收债务。持久化 Agent/Hub 权威移交 Phase 5/6，不阻塞实现关闭。
+- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；`0c2ba71` 的 Ubuntu 24.04 native 30%与50%候选正式门禁（300s warmup、3×300s、独立 TLS、100 Mbps UDP）返回 pass，完整81组D-04候选矩阵与独立审计通过，但正式性能资格化、D-04参数锁定和持久化权威仍按用户决定保留为验收债务。持久化 Agent/Hub 权威移交 Phase 5/6，不阻塞实现关闭。
 - [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(current)*
 - [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
 - [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。

@@ -19,7 +19,7 @@
 | P4-Q1 | NFR-003/005；fe2a4ba 已通过既有专用机门禁 | 选择最终 Engine tracer 提交，以有界、可审计进程内授权适配器运行五进程三中继；同 SHA 60s warmup、3×300s、独立 TLS、实际 100 Mbps UDP 和规定资源条件；Docker/Actions 分别留证 | **native gate evidence pass，正式性能资格化验收债务仍保留**：`0c2ba71` Ubuntu 24.04 native host 使用300s warmup、3×300s、独立 TLS、100 Mbps UDP；gate `pass`，候选原始 artifacts 在远端 `formal-provisional-256k-30s-50pct` |
 | P4-Q2 | NFR-006；有限完整性、绕行、伪造 OPEN、恢复用例通过 | 将身份、修订、路径、配置和故障覆盖列成有限可审计清单；运行当前配置对应的全部用例，保留 payload/顺序/绕行拒绝证据 | 当前提交有限矩阵通过；普遍未来攻击覆盖仍不声称，见 04-43 |
 | P4-Q3 | NFR-039/040/044；已有政策、份额和快照有限切片 | 在 tracer 注入边界核验政策时间、份额 CAS/排空、迟到/丢失回执、快照绑定和逐来源守恒；逐项对照原需求，不要求 SQLite/生产后端 | 当前提交 Engine/tracer 边界通过；远端/持久化 authority 仍移交，见 04-43 |
-| P4-Q4 | D-04；完整81次动态矩阵和正式候选已留证 | 块64/256/1024 KiB、目标10/30/60s（8 MiB floor）、水位20/30/50%；短流/16 TCP/混合UDP、等待/占用/未知上界/守恒；覆盖动态消耗目标、在途合并、200ms有界等待、失败/未知响应与闲置收缩的安全语义；完成最终参数评审。允许测试issuer，明确等待指标测量边界 | **矩阵与候选证据通过，参数仍未锁定**；正式候选为50%而中心比较倾向30%，保留用户要求的D-04锁定债务 |
+| P4-Q4 | D-04；完整81次动态矩阵和正式候选已留证 | 块64/256/1024 KiB、目标10/30/60s（8 MiB floor）、水位20/30/50%；短流/16 TCP/混合UDP、等待/占用/未知上界/守恒；覆盖动态消耗目标、在途合并、200ms有界等待、失败/未知响应与闲置收缩的安全语义；完成最终参数评审。允许测试issuer，明确等待指标测量边界 | **矩阵与候选证据通过，参数仍未锁定**；30%和50%候选均各自通过正式门禁，保留用户要求的D-04锁定债务 |
 | P4-Q5 | NFR-007；91e409e pool/mux 原生时延门禁通过 | 保留已通过的 SHA 范围；若最终 Engine 数据路径变化则执行相应回归，不把 Agent 持久化延迟当作旧证据 | **当前提交已通过 Engine/tracer gate**：native pool/mux 50 samples each, additional median 0.991/1.050 ms; auto observed both modes; Agent/Hub persistence remains out of scope |
 
 Q4 的 Phase 4 参数结论必须标明适配器与负载条件；生产 Agent/Hub 延迟及

@@ -45,8 +45,8 @@ manifest. Only `warmup300/report.json` matches the formal trial workload digest
 `f1fae018…`; the old gate JSON does not record input paths. Therefore its
 `warmup_seconds=60` field does not establish that the 60-second report was the
 matching gate input. The original gate file and hash below are preserved.
-The final 0c2ba71 qualification is being collected with an explicit 300-second
-warmup path and matching formal durations; its result remains pending.
+The subsequent 0c2ba71 candidate qualifications used explicit 300-second
+warmup paths and matching formal durations; both machine gates passed.
 
 Summary hashes (raw event JSONL remains on the host) are:
 
@@ -173,3 +173,33 @@ implementation is complete, while the following remain intentionally open:
   later integration concern.
 - Persistent Agent/Hub authority and PostgreSQL business authority: owned by
   the Phase 5/6 handoff, not claimed by this Phase 4 tracer evidence.
+
+## Center candidate formal follow-up — 2026-11-07
+
+Clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` also completed a separate
+256 KiB / 30 s / 30% candidate run in
+`/root/Vortex-phase4-final-0c2ba71/artifacts/phase4/formal-provisional-256k-30s-30pct`.
+The 300-second warmup and three 300-second trials use semantic digest
+`84a3e5c9e6efe6b8496ba6cd1a33fe92ecf9d5cad3c4e0182a14e6a03fec2de6`.
+Trial TCP throughput was 628.675400 / 631.912733 / 636.537656 Mbps; actual
+UDP rates were 99.998368 / 99.998112 / 99.997408 Mbps with zero loss. Each
+trial conserved and settled source credit. Independent TLS mixed TCP measured
+568.820579 Mbps; the runtime/TLS ratio was 1.119048221. The machine gate
+returned `pass`, runner exit was 0, and socket maxima restored to 212992 each.
+
+The gate SHA256 is
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+(The 30% and 50% gate files contain the same verdict fields and therefore have
+the same hash; they do not identify a workload.) The 30% comparison SHA256 is
+`9a427d3e8fc5e1ada784c82218ceafbd550f563570e5ef9f4e0f3a6e2557d81f`;
+trial-1 host SHA256 is
+`dffe1deb3456fb01f5d665163b2d24bf3ee2f2b3147efd794a964a3a25bfb206`.
+
+The center candidate now has its own formal-duration evidence. The comparison
+supports recommending 256 KiB initial / 4 MiB maximum block, 8 MiB demand
+floor, 30 s horizon with explicit 375000000-byte cap, 30% renewal waterline,
+and unchanged 200 ms reservation wait for this Engine/in-process adapter.
+This is a measured recommendation, not a production parameter approval.
+The user-required formal qualification and D-04 lock debts remain retained;
+`locked=false` / `gaps_found` are unchanged. Production persistence authority
+and requalification remain Phase 5/6 handoffs.

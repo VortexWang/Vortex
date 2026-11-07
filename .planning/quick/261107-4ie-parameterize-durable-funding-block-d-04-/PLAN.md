@@ -1,6 +1,6 @@
 ---
 quick_id: 261107-4ie
-status: in_progress
+status: complete
 objective: Parameterize durable funding-block D-04 qualification workload and run native candidate evidence.
 ---
 

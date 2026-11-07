@@ -27,7 +27,7 @@ current-code evidence for the bounded Q2/Q3/Q4/Q5 slices in
 [04-43-CURRENT-SHA-EVIDENCE.md](04-43-CURRENT-SHA-EVIDENCE.md). Q2's 16-case
 attack matrix and eight recovery cases pass; Q3's snapshot and TCP/UDP credit
 boundaries pass; Q4's full 81 candidate trials pass the independent raw audit
-and remain `locked=false`; a separate 50% formal candidate gate also passes;
+and remain `locked=false`; separate 30% and 50% formal candidate gates also pass;
 and Docker `pool`/`mux`/`auto` mode regression passes.
 
 These results close the finite implementation and current Engine/tracer
