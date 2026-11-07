@@ -65,22 +65,22 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## RUL Requirements
 
-- [ ] **RUL-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (390-390; SHA-256 recorded there).
-- [ ] **RUL-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (391-391; SHA-256 recorded there).
-- [ ] **RUL-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (392-392; SHA-256 recorded there).
-- [ ] **RUL-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (393-393; SHA-256 recorded there).
-- [ ] **RUL-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (394-394; SHA-256 recorded there).
-- [ ] **RUL-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (395-395; SHA-256 recorded there).
-- [ ] **RUL-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (401-401; SHA-256 recorded there).
-- [ ] **RUL-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (402-402; SHA-256 recorded there).
-- [ ] **RUL-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (403-403; SHA-256 recorded there).
-- [ ] **RUL-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (409-409; SHA-256 recorded there).
-- [ ] **RUL-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (410-410; SHA-256 recorded there).
-- [ ] **RUL-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (411-411; SHA-256 recorded there).
-- [ ] **RUL-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (412-412; SHA-256 recorded there).
-- [ ] **RUL-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (432-432; SHA-256 recorded there).
-- [ ] **RUL-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (433-433; SHA-256 recorded there).
-- [ ] **RUL-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (434-434; SHA-256 recorded there).
+- [x] **RUL-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (390-390; SHA-256 recorded there).
+- [x] **RUL-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (391-391; SHA-256 recorded there).
+- [x] **RUL-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (392-392; SHA-256 recorded there).
+- [x] **RUL-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (393-393; SHA-256 recorded there).
+- [x] **RUL-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (394-394; SHA-256 recorded there).
+- [x] **RUL-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (395-395; SHA-256 recorded there).
+- [x] **RUL-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (401-401; SHA-256 recorded there).
+- [x] **RUL-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (402-402; SHA-256 recorded there).
+- [x] **RUL-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (403-403; SHA-256 recorded there).
+- [x] **RUL-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (409-409; SHA-256 recorded there).
+- [x] **RUL-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (410-410; SHA-256 recorded there).
+- [x] **RUL-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (411-411; SHA-256 recorded there).
+- [x] **RUL-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (412-412; SHA-256 recorded there).
+- [x] **RUL-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (432-432; SHA-256 recorded there).
+- [x] **RUL-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (433-433; SHA-256 recorded there).
+- [x] **RUL-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (434-434; SHA-256 recorded there).
 
 ## ENG Requirements
 
@@ -174,8 +174,8 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 ## BE Requirements
 
 - [x] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
-- [ ] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
-- [ ] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
+- [x] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
+- [x] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
 - [x] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
 - [ ] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
 - [ ] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
@@ -395,22 +395,22 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | PRT-013 | Phase 6 | Complete |
 | PRT-014 | Phase 6 | Complete |
 | PRT-015 | Phase 6 | Complete |
-| RUL-001 | Phase 6 | Pending |
-| RUL-002 | Phase 6 | Pending |
-| RUL-003 | Phase 6 | Pending |
-| RUL-004 | Phase 6 | Pending |
-| RUL-005 | Phase 6 | Pending |
-| RUL-006 | Phase 6 | Pending |
-| RUL-007 | Phase 6 | Pending |
-| RUL-008 | Phase 6 | Pending |
-| RUL-009 | Phase 6 | Pending |
-| RUL-010 | Phase 6 | Pending |
-| RUL-011 | Phase 6 | Pending |
-| RUL-012 | Phase 6 | Pending |
-| RUL-013 | Phase 6 | Pending |
-| RUL-014 | Phase 6 | Pending |
-| RUL-015 | Phase 6 | Pending |
-| RUL-016 | Phase 6 | Pending |
+| RUL-001 | Phase 6 | Complete |
+| RUL-002 | Phase 6 | Complete |
+| RUL-003 | Phase 6 | Complete |
+| RUL-004 | Phase 6 | Complete |
+| RUL-005 | Phase 6 | Complete |
+| RUL-006 | Phase 6 | Complete |
+| RUL-007 | Phase 6 | Complete |
+| RUL-008 | Phase 6 | Complete |
+| RUL-009 | Phase 6 | Complete |
+| RUL-010 | Phase 6 | Complete |
+| RUL-011 | Phase 6 | Complete |
+| RUL-012 | Phase 6 | Complete |
+| RUL-013 | Phase 6 | Complete |
+| RUL-014 | Phase 6 | Complete |
+| RUL-015 | Phase 6 | Complete |
+| RUL-016 | Phase 6 | Complete |
 | ENG-001 | Phase 2 | Complete |
 | ENG-002 | Phase 2 | Complete |
 | ENG-003 | Phase 2 | Complete |
@@ -492,8 +492,8 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | HUB-017 | Phase 5 | Pending |
 | HUB-018 | Phase 5 | Pending |
 | BE-001 | Phase 6 | Complete |
-| BE-002 | Phase 6 | Pending |
-| BE-003 | Phase 6 | Pending |
+| BE-002 | Phase 6 | Complete |
+| BE-003 | Phase 6 | Complete |
 | BE-004 | Phase 6 | Complete |
 | BE-005 | Phase 6 | Pending |
 | BE-006 | Phase 6 | Pending |

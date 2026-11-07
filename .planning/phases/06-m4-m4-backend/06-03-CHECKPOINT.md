@@ -1,7 +1,7 @@
 ---
 phase: 06-m4-m4-backend
 plan: 03
-status: owner-approved-reverification-in-progress
+status: resolved-plan-complete
 source_commit: f285137bdebc2c541327922fbdc4ed41516cfe69
 proposal_sha256: b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4
 ---
@@ -88,3 +88,7 @@ the freeze remains pending. Preserve unrelated caller Phase 4/5 changes.
   Fresh-database normal/race regression and two clean sqlc generations pass.
 - Exact committed-source Docker producer must be rerun with these changes.
   Acceptance and final same-SHA Actions pairing remain unclaimed.
+
+## Resolved close-out
+
+Owner-approved source `fc63d57406f9f0e3eebe99ad276f95b004add710` passed the complete clean local Docker producer (exit0), all four selected frozen checks, generated/wire/schema compatibility, backend and component normal/race, dual-architecture compilation and real Cloudflare CRUD. Evidence is committed at `6b74cc5b`; canonical completion is `06-03-SUMMARY.md` (`a9f2e190`). This checkpoint is resolved; next plan is 06-04. Final Actions pairing remains 06-11.

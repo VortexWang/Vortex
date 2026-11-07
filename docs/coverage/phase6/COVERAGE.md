@@ -3,7 +3,7 @@
 All 96 Phase 6 requirements have an explicit primary plan owner below. Ownership
 is not acceptance: TEN-002 still requires later domain resource ownership checks.
 Through-plan order is 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04, 06-05,
-06-06, 06-07, 06-11. The implemented producer currently supports through 06-02;
+06-06, 06-07, 06-11. The implemented producer currently supports through 06-03;
 later plans extend it with actual producers before their evidence becomes required.
 Future files are neither required by 06-02 nor replaced by fixture results.
 
@@ -54,24 +54,24 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | PRT-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
 | PRT-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
 | PRT-016 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| RUL-001 | 06-03 | pending producer in 06-03 | pending |
-| RUL-002 | 06-03 | pending producer in 06-03 | pending |
-| RUL-003 | 06-03 | pending producer in 06-03 | pending |
-| RUL-004 | 06-03 | pending producer in 06-03 | pending |
-| RUL-005 | 06-03 | pending producer in 06-03 | pending |
-| RUL-006 | 06-03 | pending producer in 06-03 | pending |
-| RUL-007 | 06-03 | pending producer in 06-03 | pending |
-| RUL-008 | 06-03 | pending producer in 06-03 | pending |
-| RUL-009 | 06-03 | pending producer in 06-03 | pending |
-| RUL-010 | 06-03 | pending producer in 06-03 | pending |
-| RUL-011 | 06-03 | pending producer in 06-03 | pending |
-| RUL-012 | 06-03 | pending producer in 06-03 | pending |
-| RUL-013 | 06-03 | pending producer in 06-03 | pending |
-| RUL-014 | 06-03 | pending producer in 06-03 | pending |
-| RUL-015 | 06-03 | pending producer in 06-03 | pending |
-| RUL-016 | 06-03 | pending producer in 06-03 | pending |
-| BE-002 | 06-03 | pending producer in 06-03 | pending |
-| BE-003 | 06-03 | pending producer in 06-03 | pending |
+| RUL-001 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-004 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-005 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-006 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-007 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-008 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-009 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-010 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-011 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-012 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-013 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-014 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-015 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| RUL-016 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| BE-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
+| BE-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
 | PLN-001 | 06-04 | pending producer in 06-04 | pending |
 | PLN-002 | 06-04 | pending producer in 06-04 | pending |
 | PLN-003 | 06-04 | pending producer in 06-04 | pending |

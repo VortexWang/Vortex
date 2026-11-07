@@ -45,9 +45,9 @@ created: "2026-11-07"
 | 06-02-02 | 4 | 端口预留、限制保留和释放确认 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-10-01 | 5 | serving eligibility and encrypted DNS credential boundary | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-10-02 | 5 | controlled Cloudflare CRUD and fail-closed evidence | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-01 | 6 | immutable rule revisions 与输入校验 | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-02 | 6 | deterministic compiler 与 immutable per-node artifacts | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-03 | 6 | revision-scoped Prepare/Commit/rollback/unknown worker | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
+| 06-03-01 | 6 | immutable rule revisions 与输入校验 | source fc63d574 approved-freeze clean Docker full normal/race; evidence6b74cc5b, SUMMARYa9f2e190 | ✅ 已实现 | ✅ passed backend plan scope; final pairing06-11 |
+| 06-03-02 | 6 | deterministic compiler 与 immutable per-node artifacts | source fc63d574 approved-freeze clean Docker full normal/race; evidence6b74cc5b, SUMMARYa9f2e190 | ✅ 已实现 | ✅ passed backend plan scope; final pairing06-11 |
+| 06-03-03 | 6 | revision-scoped Prepare/Commit/rollback/unknown worker | source fc63d574 approved-freeze clean Docker full normal/race; evidence6b74cc5b, SUMMARYa9f2e190 | ✅ 已实现 | ✅ passed backend plan scope; final pairing06-11 |
 | 06-04-01 | 7 | catalog 与 immutable subscription/billing snapshot | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-04-02 | 7 | entitlement code atomic redemption | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-04-03 | 7 | restriction projection 与 downgrade preview/confirm | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |

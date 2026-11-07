@@ -126,3 +126,12 @@ Actuals use chars/4 over the realized committed diff from the on-disk plan ledge
 ## Self-Check: PASSED
 
 Created source/audit/evidence files exist; all listed task/evidence/approval commits are ancestors of HEAD. Final source clone stayed clean; stored evidence checksums and named normal/race tests passed the copied manifest. Immutable approved proposal bytes and the measured commit ledger were verified before close-out.
+
+## State Synchronization
+
+The required SDK advance/metric/decision/session writes were attempted after the
+SUMMARY commit and rejected the existing Phase 5 `passed_with_scope` verdict;
+update-progress skipped its unscoped phase. That historical verification was
+preserved. Only current Phase 6 position/metrics/decision/session were synchronized
+narrowly to 6/11 and next 06-04. SDK roadmap, all 18 requirements and WINDOWS 6/7
+updates succeeded; source-balance debt 1 and final pairing remain open.
