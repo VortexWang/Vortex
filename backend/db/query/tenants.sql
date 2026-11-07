@@ -53,7 +53,7 @@ WHERE tenant_id=$1 AND cause=$2 AND source_id=$3 AND source_version=$4 AND clear
 SELECT * FROM current_restrictions WHERE tenant_id=$1 AND cause=$2 AND source_id=$3;
 
 -- name: ListCurrentRestrictions :many
-SELECT * FROM current_restrictions WHERE tenant_id=$1 AND cleared_at IS NULL AND effective_at<=sqlc.arg(at_time) ORDER BY cause,source_id;
+SELECT * FROM current_restrictions WHERE tenant_id=$1 AND resource_id IS NULL AND cleared_at IS NULL AND effective_at<=sqlc.arg(at_time) ORDER BY cause,source_id;
 
 -- name: ListRestrictionHistory :many
 SELECT * FROM restriction_events WHERE tenant_id=$1 ORDER BY cause,source_id,source_version,event_kind;

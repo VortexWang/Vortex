@@ -13,7 +13,7 @@ import (
 
 const appendRestrictionEvent = `-- name: AppendRestrictionEvent :one
 INSERT INTO restriction_events(id,tenant_id,cause,source_id,source_version,event_kind,effective_at,cleared_at)
-VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at, resource_id
 `
 
 type AppendRestrictionEventParams struct {
@@ -48,6 +48,7 @@ func (q *Queries) AppendRestrictionEvent(ctx context.Context, arg AppendRestrict
 		&i.EventKind,
 		&i.EffectiveAt,
 		&i.ClearedAt,
+		&i.ResourceID,
 	)
 	return i, err
 }
@@ -113,7 +114,7 @@ func (q *Queries) ClearCurrentRestriction(ctx context.Context, arg ClearCurrentR
 }
 
 const getCurrentRestriction = `-- name: GetCurrentRestriction :one
-SELECT tenant_id, cause, source_id, source_version, event_id, effective_at, cleared_at FROM current_restrictions WHERE tenant_id=$1 AND cause=$2 AND source_id=$3
+SELECT tenant_id, cause, source_id, source_version, event_id, effective_at, cleared_at, resource_id FROM current_restrictions WHERE tenant_id=$1 AND cause=$2 AND source_id=$3
 `
 
 type GetCurrentRestrictionParams struct {
@@ -133,6 +134,7 @@ func (q *Queries) GetCurrentRestriction(ctx context.Context, arg GetCurrentRestr
 		&i.EventID,
 		&i.EffectiveAt,
 		&i.ClearedAt,
+		&i.ResourceID,
 	)
 	return i, err
 }
@@ -165,7 +167,7 @@ func (q *Queries) GetPlatformResource(ctx context.Context, resourceID string) (R
 }
 
 const getRestrictionEvent = `-- name: GetRestrictionEvent :one
-SELECT id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at FROM restriction_events WHERE tenant_id=$1 AND cause=$2 AND source_id=$3 AND source_version=$4 AND event_kind=$5
+SELECT id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at, resource_id FROM restriction_events WHERE tenant_id=$1 AND cause=$2 AND source_id=$3 AND source_version=$4 AND event_kind=$5
 `
 
 type GetRestrictionEventParams struct {
@@ -194,6 +196,7 @@ func (q *Queries) GetRestrictionEvent(ctx context.Context, arg GetRestrictionEve
 		&i.EventKind,
 		&i.EffectiveAt,
 		&i.ClearedAt,
+		&i.ResourceID,
 	)
 	return i, err
 }
@@ -311,7 +314,7 @@ func (q *Queries) InsertTenantUser(ctx context.Context, arg InsertTenantUserPara
 }
 
 const listCurrentRestrictions = `-- name: ListCurrentRestrictions :many
-SELECT tenant_id, cause, source_id, source_version, event_id, effective_at, cleared_at FROM current_restrictions WHERE tenant_id=$1 AND cleared_at IS NULL AND effective_at<=$2 ORDER BY cause,source_id
+SELECT tenant_id, cause, source_id, source_version, event_id, effective_at, cleared_at, resource_id FROM current_restrictions WHERE tenant_id=$1 AND resource_id IS NULL AND cleared_at IS NULL AND effective_at<=$2 ORDER BY cause,source_id
 `
 
 type ListCurrentRestrictionsParams struct {
@@ -336,6 +339,7 @@ func (q *Queries) ListCurrentRestrictions(ctx context.Context, arg ListCurrentRe
 			&i.EventID,
 			&i.EffectiveAt,
 			&i.ClearedAt,
+			&i.ResourceID,
 		); err != nil {
 			return nil, err
 		}
@@ -348,7 +352,7 @@ func (q *Queries) ListCurrentRestrictions(ctx context.Context, arg ListCurrentRe
 }
 
 const listRestrictionHistory = `-- name: ListRestrictionHistory :many
-SELECT id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at FROM restriction_events WHERE tenant_id=$1 ORDER BY cause,source_id,source_version,event_kind
+SELECT id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at, resource_id FROM restriction_events WHERE tenant_id=$1 ORDER BY cause,source_id,source_version,event_kind
 `
 
 func (q *Queries) ListRestrictionHistory(ctx context.Context, tenantID string) ([]RestrictionEvent, error) {
@@ -369,6 +373,7 @@ func (q *Queries) ListRestrictionHistory(ctx context.Context, tenantID string) (
 			&i.EventKind,
 			&i.EffectiveAt,
 			&i.ClearedAt,
+			&i.ResourceID,
 		); err != nil {
 			return nil, err
 		}

@@ -133,7 +133,7 @@ func (s PortService) PreparePortReservation(ctx context.Context, scope TenantSco
 		in.ListenAddress = ip.Unmap().String()
 	}
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.prepare", ResourceID: in.RuleID, RequestID: request, Reason: "reserve whole fixed member set"}, func(q *generated.Queries) error {
-		if e := activeTenant(ctx, q, scope); e != nil {
+		if e := activeRule(ctx, q, scope, in.RuleID); e != nil {
 			return e
 		}
 		// Platform actions still need this tenant's grant; selected scope does not
@@ -251,7 +251,7 @@ func (s PortService) CommitPortReservation(ctx context.Context, scope TenantScop
 		if a.State != "preparing" || a.NeedsRevalidation {
 			return ErrConflict
 		}
-		if e = activeTenant(ctx, q, scope); e != nil {
+		if e = activeRule(ctx, q, scope, a.RuleID); e != nil {
 			return e
 		}
 		if _, e = q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: a.GroupID, TenantID: scope.TenantID(), PlatformRead: false}); e != nil {
@@ -309,7 +309,11 @@ func (s PortService) release(ctx context.Context, scope TenantScope, id, reason,
 			if e != nil {
 				return e
 			}
-			if len(active) == 0 {
+			local, e := q.RuleHasPackageRestriction(ctx, generated.RuleHasPackageRestrictionParams{TenantID: scope.TenantID(), ResourceID: pgtype.Text{String: a.RuleID, Valid: true}, AtTime: timestamp(time.Now())})
+			if e != nil {
+				return e
+			}
+			if len(active) == 0 && !local {
 				return ErrConflict
 			}
 			for _, r := range active {
@@ -425,6 +429,13 @@ func clearTenantPortClocks(ctx context.Context, q *generated.Queries, scope Tena
 		if a.State != "retained" {
 			continue
 		}
+		local, e := q.RuleHasPackageRestriction(ctx, generated.RuleHasPackageRestrictionParams{TenantID: scope.TenantID(), ResourceID: pgtype.Text{String: a.RuleID, Valid: true}, AtTime: timestamp(time.Now())})
+		if e != nil {
+			return e
+		}
+		if local {
+			continue
+		}
 		if _, e = lockAllocation(ctx, q, scope, a.ID); e != nil {
 			return e
 		}
@@ -446,7 +457,7 @@ func (s PortService) ResumeRetainedPort(ctx context.Context, scope TenantScope, 
 		if a.State != "retained" || a.NeedsRevalidation {
 			return ErrConflict
 		}
-		if e = activeTenant(ctx, q, scope); e != nil {
+		if e = activeRule(ctx, q, scope, a.RuleID); e != nil {
 			return e
 		}
 		snap, e := snapshot(ctx, q, scope, a.GroupID)

@@ -58,6 +58,7 @@ type CurrentRestriction struct {
 	EventID       string
 	EffectiveAt   pgtype.Timestamptz
 	ClearedAt     pgtype.Timestamptz
+	ResourceID    pgtype.Text
 }
 
 type DesiredState struct {
@@ -207,16 +208,17 @@ type PackageCatalog struct {
 }
 
 type PackageChange struct {
-	ID              string
-	TenantID        string
-	SubscriptionID  string
-	SnapshotID      string
-	ExpectedVersion int64
-	EffectiveAt     pgtype.Timestamptz
-	Preview         []byte
-	CreatedBy       string
-	TaskID          string
-	State           string
+	ID                string
+	TenantID          string
+	SubscriptionID    string
+	SnapshotID        string
+	ExpectedVersion   int64
+	EffectiveAt       pgtype.Timestamptz
+	Preview           []byte
+	CreatedBy         string
+	TaskID            string
+	State             string
+	CreatedByPlatform bool
 }
 
 type PackageRequest struct {
@@ -333,6 +335,7 @@ type RestrictionEvent struct {
 	EventKind     string
 	EffectiveAt   pgtype.Timestamptz
 	ClearedAt     pgtype.Timestamptz
+	ResourceID    pgtype.Text
 }
 
 type RuleArtifact struct {

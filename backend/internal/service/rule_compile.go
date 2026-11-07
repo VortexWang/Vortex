@@ -118,6 +118,11 @@ func (s RuleService) ConsumeCompile(ctx context.Context, scope TenantScope, task
 		if e != nil {
 			return e
 		}
+		if in.Rule.Enabled {
+			if e = activeRule(ctx, q, scope, in.Rule.ID); e != nil {
+				return e
+			}
+		}
 		r, e := repository.PersistCompilation(ctx, q, in)
 		if e != nil {
 			return e

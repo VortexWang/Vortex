@@ -99,7 +99,14 @@ INSERT INTO rule_delivery_bindings(tenant_id,task_id,deployment_id,node_id,phase
 SELECT b.*,d.rule_id,d.rule_revision,d.input_digest,m.boot_id,m.transaction_id,m.artifact_digest,m.fencing_generation,m.state AS member_state,o.idempotency_key FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id JOIN rule_deployment_members m ON m.tenant_id=b.tenant_id AND m.deployment_id=b.deployment_id AND m.node_id=b.node_id JOIN operations o ON o.tenant_id=b.tenant_id AND o.id=b.task_id WHERE b.tenant_id=$1 AND b.task_id=$2;
 
 -- name: LeaseRuleDelivery :one
-UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second') ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
+UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id
+JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id
+JOIN rule_revisions r ON r.tenant_id=d.tenant_id AND r.rule_id=d.rule_id AND r.revision=d.rule_revision
+WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second')
+AND (b.phase IN ('query','abort') OR NOT (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean OR (
+ EXISTS(SELECT 1 FROM tenants a WHERE a.id=t.tenant_id AND a.account_state='active')
+ AND NOT EXISTS(SELECT 1 FROM current_restrictions cr WHERE cr.tenant_id=t.tenant_id AND (cr.resource_id IS NULL OR cr.resource_id=d.rule_id) AND cr.cleared_at IS NULL AND cr.effective_at<=now())))
+ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
 
 -- name: InsertRuleReceipt :exec
 INSERT INTO rule_delivery_receipts(tenant_id,task_id,receipt_sha256,payload) VALUES($1,$2,$3,$4);

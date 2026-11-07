@@ -57,8 +57,13 @@ func (s PackageService) ProduceBillingSnapshot(ctx context.Context, scope Tenant
 		if e = json.Unmarshal(rev.Payload, &in); e != nil {
 			return e
 		}
-		if !rulePermitted(in, p) {
+		if in.Enabled && !rulePermitted(in, p) {
 			return compiler.Unauthorized
+		}
+		if in.Enabled {
+			if e = activeRule(ctx, q, scope, rule); e != nil {
+				return e
+			}
 		}
 		old, e := q.FindBillingSnapshot(ctx, generated.FindBillingSnapshotParams{TenantID: scope.TenantID(), RuleID: rule, RuleRevision: revision, PathGeneration: path, PackageSnapshotID: snap.ID})
 		if e == nil {

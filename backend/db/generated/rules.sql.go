@@ -643,7 +643,14 @@ func (q *Queries) InsertRuleTarget(ctx context.Context, arg InsertRuleTargetPara
 }
 
 const leaseRuleDelivery = `-- name: LeaseRuleDelivery :one
-UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second') ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id JOIN operations op ON op.tenant_id=t.tenant_id AND op.id=t.operation_id
+JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id
+JOIN rule_revisions r ON r.tenant_id=d.tenant_id AND r.rule_id=d.rule_id AND r.revision=d.rule_revision
+WHERE t.state='pending' AND o.delivered_at IS NULL AND (b.phase<>'query' OR op.created_at<=now()-interval '1 second')
+AND (b.phase IN ('query','abort') OR NOT (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean OR (
+ EXISTS(SELECT 1 FROM tenants a WHERE a.id=t.tenant_id AND a.account_state='active')
+ AND NOT EXISTS(SELECT 1 FROM current_restrictions cr WHERE cr.tenant_id=t.tenant_id AND (cr.resource_id IS NULL OR cr.resource_id=d.rule_id) AND cr.cleared_at IS NULL AND cr.effective_at<=now())))
+ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
 `
 
 func (q *Queries) LeaseRuleDelivery(ctx context.Context, leaseToken pgtype.Text) (Task, error) {

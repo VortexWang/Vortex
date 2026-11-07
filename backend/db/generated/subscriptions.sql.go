@@ -12,19 +12,20 @@ import (
 )
 
 const appendPackageChange = `-- name: AppendPackageChange :one
-INSERT INTO package_changes(id,tenant_id,subscription_id,snapshot_id,expected_version,effective_at,preview,created_by,task_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state
+INSERT INTO package_changes(id,tenant_id,subscription_id,snapshot_id,expected_version,effective_at,preview,created_by,task_id,created_by_platform) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state, created_by_platform
 `
 
 type AppendPackageChangeParams struct {
-	ID              string
-	TenantID        string
-	SubscriptionID  string
-	SnapshotID      string
-	ExpectedVersion int64
-	EffectiveAt     pgtype.Timestamptz
-	Preview         []byte
-	CreatedBy       string
-	TaskID          string
+	ID                string
+	TenantID          string
+	SubscriptionID    string
+	SnapshotID        string
+	ExpectedVersion   int64
+	EffectiveAt       pgtype.Timestamptz
+	Preview           []byte
+	CreatedBy         string
+	TaskID            string
+	CreatedByPlatform bool
 }
 
 func (q *Queries) AppendPackageChange(ctx context.Context, arg AppendPackageChangeParams) (PackageChange, error) {
@@ -38,6 +39,7 @@ func (q *Queries) AppendPackageChange(ctx context.Context, arg AppendPackageChan
 		arg.Preview,
 		arg.CreatedBy,
 		arg.TaskID,
+		arg.CreatedByPlatform,
 	)
 	var i PackageChange
 	err := row.Scan(
@@ -51,6 +53,7 @@ func (q *Queries) AppendPackageChange(ctx context.Context, arg AppendPackageChan
 		&i.CreatedBy,
 		&i.TaskID,
 		&i.State,
+		&i.CreatedByPlatform,
 	)
 	return i, err
 }
@@ -119,6 +122,66 @@ func (q *Queries) AppendTrafficSource(ctx context.Context, arg AppendTrafficSour
 	return i, err
 }
 
+const applyPackageRuleRestriction = `-- name: ApplyPackageRuleRestriction :exec
+WITH event AS (
+ INSERT INTO restriction_events(id,tenant_id,cause,source_id,source_version,event_kind,effective_at,resource_id)
+ VALUES($1,$2,'quantity_exceeded',$3,$4,'applied',$5,$6) RETURNING id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at, resource_id
+)
+INSERT INTO current_restrictions(tenant_id,cause,source_id,source_version,event_id,effective_at,resource_id)
+SELECT tenant_id,cause,source_id,source_version,id,effective_at,resource_id FROM event
+`
+
+type ApplyPackageRuleRestrictionParams struct {
+	ID            string
+	TenantID      string
+	SourceID      string
+	SourceVersion int64
+	EffectiveAt   pgtype.Timestamptz
+	ResourceID    pgtype.Text
+}
+
+func (q *Queries) ApplyPackageRuleRestriction(ctx context.Context, arg ApplyPackageRuleRestrictionParams) error {
+	_, err := q.db.Exec(ctx, applyPackageRuleRestriction,
+		arg.ID,
+		arg.TenantID,
+		arg.SourceID,
+		arg.SourceVersion,
+		arg.EffectiveAt,
+		arg.ResourceID,
+	)
+	return err
+}
+
+const clearPackageRuleRestriction = `-- name: ClearPackageRuleRestriction :exec
+WITH event AS (
+ INSERT INTO restriction_events(id,tenant_id,cause,source_id,source_version,event_kind,effective_at,cleared_at,resource_id)
+ SELECT $1,cr.tenant_id,cr.cause,cr.source_id,cr.source_version,'cleared',cr.effective_at,$4,cr.resource_id
+ FROM current_restrictions cr WHERE cr.tenant_id=$2 AND cr.event_id=$3 AND cr.resource_id IS NOT NULL AND cr.cleared_at IS NULL
+ RETURNING id, tenant_id, cause, source_id, source_version, event_kind, effective_at, cleared_at, resource_id
+)
+UPDATE current_restrictions SET event_id=event.id,cleared_at=event.cleared_at FROM event
+WHERE current_restrictions.tenant_id=event.tenant_id AND current_restrictions.cause=event.cause
+AND current_restrictions.source_id=event.source_id AND current_restrictions.source_version=event.source_version
+AND current_restrictions.resource_id=event.resource_id
+`
+
+type ClearPackageRuleRestrictionParams struct {
+	ID        string
+	TenantID  string
+	EventID   string
+	ClearedAt pgtype.Timestamptz
+}
+
+func (q *Queries) ClearPackageRuleRestriction(ctx context.Context, arg ClearPackageRuleRestrictionParams) error {
+	_, err := q.db.Exec(ctx, clearPackageRuleRestriction,
+		arg.ID,
+		arg.TenantID,
+		arg.EventID,
+		arg.ClearedAt,
+	)
+	return err
+}
+
 const createSubscription = `-- name: CreateSubscription :one
 INSERT INTO subscriptions(id,tenant_id,snapshot_id,anchor_at,expires_at) VALUES($1,$2,$3,$4,$5) RETURNING id, tenant_id, snapshot_id, anchor_at, expires_at, version
 `
@@ -152,11 +215,11 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 }
 
 const duePackageChanges = `-- name: DuePackageChanges :many
-SELECT id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state FROM package_changes WHERE state='pending' AND effective_at<=now() ORDER BY effective_at,id LIMIT 32
+SELECT id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state, created_by_platform FROM package_changes WHERE state='pending' AND effective_at<=$1 ORDER BY effective_at,id LIMIT 32
 `
 
-func (q *Queries) DuePackageChanges(ctx context.Context) ([]PackageChange, error) {
-	rows, err := q.db.Query(ctx, duePackageChanges)
+func (q *Queries) DuePackageChanges(ctx context.Context, atTime pgtype.Timestamptz) ([]PackageChange, error) {
+	rows, err := q.db.Query(ctx, duePackageChanges, atTime)
 	if err != nil {
 		return nil, err
 	}
@@ -175,6 +238,7 @@ func (q *Queries) DuePackageChanges(ctx context.Context) ([]PackageChange, error
 			&i.CreatedBy,
 			&i.TaskID,
 			&i.State,
+			&i.CreatedByPlatform,
 		); err != nil {
 			return nil, err
 		}
@@ -346,8 +410,30 @@ func (q *Queries) LivePackageTenants(ctx context.Context) ([]string, error) {
 	return items, nil
 }
 
+const lockPackageActor = `-- name: LockPackageActor :one
+SELECT id,role,state FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE
+`
+
+type LockPackageActorParams struct {
+	TenantID string
+	ID       string
+}
+
+type LockPackageActorRow struct {
+	ID    string
+	Role  string
+	State string
+}
+
+func (q *Queries) LockPackageActor(ctx context.Context, arg LockPackageActorParams) (LockPackageActorRow, error) {
+	row := q.db.QueryRow(ctx, lockPackageActor, arg.TenantID, arg.ID)
+	var i LockPackageActorRow
+	err := row.Scan(&i.ID, &i.Role, &i.State)
+	return i, err
+}
+
 const lockPackageChange = `-- name: LockPackageChange :one
-SELECT id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state FROM package_changes WHERE tenant_id=$1 AND id=$2 FOR UPDATE
+SELECT id, tenant_id, subscription_id, snapshot_id, expected_version, effective_at, preview, created_by, task_id, state, created_by_platform FROM package_changes WHERE tenant_id=$1 AND id=$2 FOR UPDATE
 `
 
 type LockPackageChangeParams struct {
@@ -369,7 +455,19 @@ func (q *Queries) LockPackageChange(ctx context.Context, arg LockPackageChangePa
 		&i.CreatedBy,
 		&i.TaskID,
 		&i.State,
+		&i.CreatedByPlatform,
 	)
+	return i, err
+}
+
+const lockPackagePlatformActor = `-- name: LockPackagePlatformActor :one
+SELECT id, role, state FROM platform_principals WHERE id=$1 FOR SHARE
+`
+
+func (q *Queries) LockPackagePlatformActor(ctx context.Context, id string) (PlatformPrincipal, error) {
+	row := q.db.QueryRow(ctx, lockPackagePlatformActor, id)
+	var i PlatformPrincipal
+	err := row.Scan(&i.ID, &i.Role, &i.State)
 	return i, err
 }
 
@@ -389,6 +487,39 @@ func (q *Queries) LockSubscription(ctx context.Context, tenantID string) (Subscr
 		&i.Version,
 	)
 	return i, err
+}
+
+const packageRuleRestrictions = `-- name: PackageRuleRestrictions :many
+SELECT tenant_id, cause, source_id, source_version, event_id, effective_at, cleared_at, resource_id FROM current_restrictions WHERE tenant_id=$1 AND resource_id IS NOT NULL AND cleared_at IS NULL ORDER BY cause,source_id
+`
+
+func (q *Queries) PackageRuleRestrictions(ctx context.Context, tenantID string) ([]CurrentRestriction, error) {
+	rows, err := q.db.Query(ctx, packageRuleRestrictions, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CurrentRestriction{}
+	for rows.Next() {
+		var i CurrentRestriction
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.Cause,
+			&i.SourceID,
+			&i.SourceVersion,
+			&i.EventID,
+			&i.EffectiveAt,
+			&i.ClearedAt,
+			&i.ResourceID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const replaceSubscription = `-- name: ReplaceSubscription :one
@@ -421,6 +552,37 @@ func (q *Queries) ReplaceSubscription(ctx context.Context, arg ReplaceSubscripti
 		&i.Version,
 	)
 	return i, err
+}
+
+const retainPackageReservations = `-- name: RetainPackageReservations :exec
+UPDATE port_reservations SET state='retained' WHERE tenant_id=$1 AND allocation_id=$2 AND state NOT IN ('released','unknown','releasing')
+`
+
+type RetainPackageReservationsParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) RetainPackageReservations(ctx context.Context, arg RetainPackageReservationsParams) error {
+	_, err := q.db.Exec(ctx, retainPackageReservations, arg.TenantID, arg.AllocationID)
+	return err
+}
+
+const ruleHasPackageRestriction = `-- name: RuleHasPackageRestriction :one
+SELECT EXISTS(SELECT 1 FROM current_restrictions WHERE tenant_id=$1 AND resource_id=$2 AND cleared_at IS NULL AND effective_at<=$3)
+`
+
+type RuleHasPackageRestrictionParams struct {
+	TenantID   string
+	ResourceID pgtype.Text
+	AtTime     pgtype.Timestamptz
+}
+
+func (q *Queries) RuleHasPackageRestriction(ctx context.Context, arg RuleHasPackageRestrictionParams) (bool, error) {
+	row := q.db.QueryRow(ctx, ruleHasPackageRestriction, arg.TenantID, arg.ResourceID, arg.AtTime)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const sourceEffectiveExpiry = `-- name: SourceEffectiveExpiry :one

@@ -9,6 +9,11 @@ import (
 )
 
 func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope TenantScope, in compiler.CompileInput) error {
+	if in.Rule.Enabled {
+		if e := activeRule(ctx, q, scope, in.Rule.ID); e != nil {
+			return e
+		}
+	}
 	p := in.PortBinding
 	if p == nil {
 		return ErrConflict
@@ -17,7 +22,7 @@ func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope Te
 	if e != nil {
 		return e
 	}
-	if a.RuleID != in.Rule.ID || a.GroupID != p.GroupID || a.MemberSetVersion != p.MemberSetVersion || a.Port != p.Port || a.ListenAddress != p.ListenAddress || a.NeedsRevalidation || (a.State != "preparing" && a.State != "committed") {
+	if a.RuleID != in.Rule.ID || a.GroupID != p.GroupID || a.MemberSetVersion != p.MemberSetVersion || a.Port != p.Port || a.ListenAddress != p.ListenAddress || a.NeedsRevalidation || (a.State != "preparing" && a.State != "committed" && (in.Rule.Enabled || a.State != "retained")) {
 		return ErrConflict
 	}
 	if len(a.Protocols) != len(p.Protocols) {
@@ -58,7 +63,7 @@ func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope Te
 	}
 	for _, row := range rows {
 		n, ok := members[row.NodeID]
-		if !ok || row.BootID != n.BootID || row.Generation != n.Generation || !protocols[row.Protocol] || row.Port != p.Port || row.ListenAddress != p.ListenAddress || row.State == "released" || row.State == "releasing" || row.State == "retained" {
+		if !ok || row.BootID != n.BootID || row.Generation != n.Generation || !protocols[row.Protocol] || row.Port != p.Port || row.ListenAddress != p.ListenAddress || row.State == "released" || row.State == "releasing" || (row.State == "retained" && in.Rule.Enabled) {
 			return ErrConflict
 		}
 	}
@@ -157,6 +162,9 @@ func bindRulePortPrepare(ctx context.Context, q *generated.Queries, scope Tenant
 			return e
 		}
 	}
+	if !in.Rule.Enabled {
+		return nil
+	}
 	return q.SetPortAllocationState(ctx, generated.SetPortAllocationStateParams{TenantID: scope.TenantID(), ID: in.PortBinding.ID, State: "preparing"})
 }
 
@@ -226,7 +234,7 @@ func recordRulePortReceipt(ctx context.Context, q *generated.Queries, scope Tena
 			}
 		}
 		if all {
-			if e = activeTenant(ctx, q, scope); e != nil {
+			if e = activeRule(ctx, q, scope, in.Rule.ID); e != nil {
 				return e
 			}
 			a, e := q.GetPortAllocation(ctx, generated.GetPortAllocationParams{TenantID: scope.TenantID(), ID: p})

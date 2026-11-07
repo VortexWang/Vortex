@@ -129,6 +129,14 @@ func resolveRule(ctx context.Context, q *generated.Queries, scope TenantScope, i
 	if e := activeTenant(ctx, q, scope); e != nil {
 		return r, e
 	}
+	if in.Enabled {
+		if e := activeRule(ctx, q, scope, in.ID); e != nil {
+			return r, e
+		}
+	}
+	if e := rulePackageTerms(ctx, q, scope, in); e != nil {
+		return r, e
+	}
 	ids := append([]string(nil), in.Path...)
 	sort.Strings(ids)
 	nodes := map[string]bool{}
@@ -237,6 +245,9 @@ func (s RuleService) mutate(ctx context.Context, scope TenantScope, in RuleInput
 func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantScope, in RuleInput, expected, rollbackOf int64) (RuleMutation, error) {
 	var result RuleMutation
 	err := func() error {
+		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
+			return e
+		}
 		if e := activeTenant(ctx, q, scope); e != nil {
 			return e
 		}
