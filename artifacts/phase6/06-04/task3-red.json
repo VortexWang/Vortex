@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/downgrade_red_test.py",
+  "exitCode": 1,
+  "output": "test_future_confirmation (__main__.DowngradeAuthority) ... FAIL\n\n======================================================================\nFAIL: test_future_confirmation (__main__.DowngradeAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/downgrade_red_test.py\", line 14, in test_future_confirmation\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestDowngradePreviewConfirmDueAuthority\n2026/11/07 18:38:18 goose: no migrations to run. current version: 6\n    restriction_test.go:31: read-only downgrade preview and atomic future confirmation service missing\n--- FAIL: TestDowngradePreviewConfirmDueAuthority (0.10s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.451s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.922s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_future_confirmation",
+  "targetFile": "tools/phase6/downgrade_red_test.py",
+  "expected": "PostgreSQL preview and future change execute atomically",
+  "actual": "runtime assertion: downgrade lifecycle service missing",
+  "semanticAssessment": "Actual PostgreSQL migrated and fixture/rule created; target fails on missing planned lifecycle interface, not compilation or setup."
+}

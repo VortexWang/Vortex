@@ -1,0 +1,8 @@
+{
+  "valid": false,
+  "errors": [
+    "vortex.database: frozen contract must have a valid SemVer version and status frozen",
+    "vortex.database: frozen version does not match its approved review record",
+    "vortex.database: approved review hash is missing or stale"
+  ]
+}
