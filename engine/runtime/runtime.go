@@ -14,6 +14,7 @@ import (
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/link"
 	"vortex/engine/runtime/relay"
+	"vortex/engine/runtime/rule"
 	"vortex/engine/vlink"
 )
 
@@ -30,6 +31,7 @@ type Runtime struct {
 	addr       net.Addr
 	mu         sync.Mutex
 	started    bool
+	rules      *rule.Manager
 }
 
 // Done reports the serving goroutine's terminal error.
@@ -110,7 +112,10 @@ func (r *Runtime) Start(parent context.Context) error {
 	r.addr = listener.Addr()
 	r.started = true
 	go func() {
-		err := r.supervisor.ServeListener(r.ctx, listener, func(ctx context.Context, mux *vlink.MuxLink, _ vlink.NodeID) error {
+		err := r.supervisor.ServeListener(r.ctx, listener, func(ctx context.Context, mux *vlink.MuxLink, peer vlink.NodeID) error {
+			if r.rules != nil && r.rules.HasRules() {
+				return r.rules.ServeLink(ctx, mux, peer)
+			}
 			return r.service.ServeLink(ctx, mux)
 		})
 		r.supervisor.Close()
@@ -120,6 +125,18 @@ func (r *Runtime) Start(parent context.Context) error {
 		r.mu.Unlock()
 		close(r.done)
 	}()
+	return nil
+}
+
+// SetRuleManager adds artifact routing before Start. Legacy static admission
+// remains unchanged until a committed rule is installed.
+func (r *Runtime) SetRuleManager(manager *rule.Manager) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.started || manager == nil {
+		return errors.New("runtime: rule manager must be installed before Start")
+	}
+	r.rules = manager
 	return nil
 }
 

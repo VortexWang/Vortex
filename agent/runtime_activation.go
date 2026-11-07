@@ -14,7 +14,9 @@ import (
 	engineaccounting "vortex/engine/accounting"
 	"vortex/engine/apply"
 	"vortex/engine/runtime/config"
+	"vortex/engine/runtime/link"
 	ruleruntime "vortex/engine/runtime/rule"
+	"vortex/engine/vlink"
 )
 
 var ErrActivationPending = errors.New("agent: prepared configuration awaits boot-local authority")
@@ -40,8 +42,36 @@ func (n *Node) RuntimeApplier() (*RuntimeApplier, error) {
 	e.activationRequired.Store(true)
 	a := &RuntimeApplier{EngineApplier: EngineApplier{Manager: apply.NewManager()}, node: n, engine: e, prepared: map[[16]byte]bool{}, ruleTransactions: map[[16]byte]ruleruntime.Artifact{}}
 	a.rules = ruleruntime.New(func(artifact ruleruntime.Artifact) (engineaccounting.Gate, error) {
-		return &ruleAuthorityGate{node: n, scope: RuntimeScope{RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration)}, fence: uint64(artifact.FencingGeneration)}, nil
+		return &ruleAuthorityGate{node: n, scope: RuntimeScope{RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration)}, fence: uint64(artifact.FencingGeneration), snapshot: artifact.BillingSnapshotID}, nil
 	})
+	if err := a.rules.SetLinkFactory(func(artifact ruleruntime.Artifact, peer ruleruntime.Member) (*link.Supervisor, error) {
+		if e.credentials == nil {
+			return nil, fmt.Errorf("agent: managed VLink credentials required")
+		}
+		cfg := e.config
+		cfg.Peer = net.JoinHostPort(peer.PublicAddress, strconv.Itoa(int(peer.LinkPort)))
+		cfg.NextHopNodeID = peer.ID
+		cfg.PeerNodeID = ""
+		cfg.PathGeneration = uint64(artifact.PathGeneration)
+		supervisor, err := link.NewManaged(cfg)
+		if err != nil {
+			return nil, err
+		}
+		boot, err := vlink.ParseNodeID(n.BootID)
+		if err != nil {
+			return nil, err
+		}
+		if err = supervisor.SetIdentityProvider(e.credentials.RuntimeIdentity, vlink.BootID(boot)); err != nil {
+			return nil, err
+		}
+		return supervisor, nil
+	}); err != nil {
+		return nil, err
+	}
+	if err := e.runtime.SetRuleManager(a.rules); err != nil {
+		return nil, err
+	}
+	e.rules = a.rules
 	return a, nil
 }
 
@@ -98,7 +128,7 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 	if artifact, ok := a.ruleTransactions[id]; ok {
 		low, high, trusted := a.node.TrustedTime()
 		if artifact.Intent.Rule.Enabled {
-			if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+			if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
 				return nil, err
 			}
 		}
@@ -179,7 +209,7 @@ func (a *RuntimeApplier) PrepareRuleArtifact(id [16]byte, generation uint64, raw
 	}
 	if artifact.Intent.Rule.Enabled {
 		low, high, trusted := a.node.TrustedTime()
-		if err = a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: generation, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+		if err = a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: generation, BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
 			return err
 		}
 	}

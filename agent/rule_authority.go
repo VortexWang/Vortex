@@ -10,10 +10,11 @@ import (
 // Each immutable rule generation owns its own gate. Existing sessions keep
 // their old generation; a listener change cannot substitute billing authority.
 type ruleAuthorityGate struct {
-	node    *Node
-	scope   RuntimeScope
-	fence   uint64
-	faulted atomic.Bool
+	node     *Node
+	scope    RuntimeScope
+	fence    uint64
+	snapshot string
+	faulted  atomic.Bool
 }
 
 func (g *ruleAuthorityGate) Open(ctx context.Context, flow accounting.Flow) (accounting.Session, error) {
@@ -25,7 +26,7 @@ func (g *ruleAuthorityGate) Open(ctx context.Context, flow accounting.Flow) (acc
 		return nil, e
 	}
 	low, high, trusted := g.node.TrustedTime()
-	auth, e := g.node.openRuntimePolicy(ctx, store.AuthorizationUse{NodeID: g.node.NodeID, BootID: g.node.BootID, RuleID: g.scope.RuleID, RuleRevision: g.scope.RuleRevision, PathGeneration: g.scope.PathGeneration, FencingGeneration: g.fence, Earliest: low, Latest: high, TrustedTime: trusted}, id, flow.Key)
+	auth, e := g.node.openRuntimePolicy(ctx, store.AuthorizationUse{NodeID: g.node.NodeID, BootID: g.node.BootID, RuleID: g.scope.RuleID, RuleRevision: g.scope.RuleRevision, PathGeneration: g.scope.PathGeneration, FencingGeneration: g.fence, BillingSnapshotID: g.snapshot, Earliest: low, Latest: high, TrustedTime: trusted}, id, flow.Key)
 	if e != nil {
 		return nil, e
 	}

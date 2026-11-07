@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"strconv"
+	"vortex/engine/vlink"
 )
 
 type Target struct {
@@ -55,7 +56,9 @@ type Intent struct {
 	Role            string    `json:"role"`
 	Hop             int       `json:"hop_index"`
 	AllowedUpstream []string  `json:"allowed_upstream_node_ids"`
+	UpstreamMembers []Member  `json:"upstream_members"`
 	NextMembers     []Member  `json:"next_members"`
+	NextScheduling  string    `json:"next_scheduling"`
 	Segments        []Segment `json:"segments"`
 	SessionStable   bool      `json:"session_stable"`
 }
@@ -100,6 +103,60 @@ func Decode(raw []byte) (Artifact, error) {
 	}
 	if m.Port < 1 || m.Port > 65535 {
 		return a, errors.New("invalid_config: unallocated port")
+	}
+	for _, id := range []string{a.RuleID, a.TenantID, a.NodeID, a.BootID, a.BillingSnapshotID} {
+		if _, err := vlink.ParseNodeID(id); err != nil {
+			return a, errors.New("invalid_config: canonical identity required")
+		}
+	}
+	if m.Mode != "direct" && m.Mode != "tunnel" {
+		return a, errors.New("invalid_config: mode")
+	}
+	if m.Scheduling != "weighted_round_robin" && m.Scheduling != "primary_backup" {
+		return a, errors.New("invalid_config: scheduling")
+	}
+	if m.ProxyProtocol != "off" && m.ProxyProtocol != "v1" && m.ProxyProtocol != "v2" {
+		return a, errors.New("invalid_config: PROXY protocol")
+	}
+	if m.IdleTimeoutSeconds < 1 || m.IdleTimeoutSeconds > 86400 || a.Intent.Hop < 0 || a.Intent.Hop >= len(m.Path) || len(m.Path) > 16 || len(a.Intent.Segments) != len(m.Path)-1 {
+		return a, errors.New("invalid_config: path")
+	}
+	wantRole := "relay"
+	if a.Intent.Hop == 0 {
+		wantRole = "entry"
+	} else if a.Intent.Hop == len(m.Path)-1 {
+		wantRole = "exit"
+	}
+	if a.Intent.Role != wantRole {
+		return a, errors.New("invalid_config: role")
+	}
+	if m.Mode == "direct" && len(m.Path) != 1 || m.Mode == "tunnel" && len(m.Path) < 2 {
+		return a, errors.New("invalid_config: path mode")
+	}
+	for i, segment := range a.Intent.Segments {
+		if segment.Hop != i || segment.From != m.Path[i] || segment.To != m.Path[i+1] || segment.Direction != "forward" && segment.Direction != "reverse" {
+			return a, errors.New("invalid_config: segment")
+		}
+	}
+	seen := map[string]bool{a.NodeID: true}
+	for _, members := range [][]Member{a.Intent.UpstreamMembers, a.Intent.NextMembers} {
+		if len(members) > 256 {
+			return a, errors.New("invalid_config: members")
+		}
+		for _, member := range members {
+			if seen[member.ID] || member.LinkPort < 1 || member.LinkPort > 65535 || member.Weight < 1 || member.Weight > 10000 || member.Priority < 0 || !member.Online {
+				return a, errors.New("invalid_config: member")
+			}
+			seen[member.ID] = true
+			for _, id := range []string{member.ID, member.BootID} {
+				if _, err := vlink.ParseNodeID(id); err != nil {
+					return a, errors.New("invalid_config: member identity")
+				}
+			}
+		}
+	}
+	if a.Intent.Hop > 0 && len(a.Intent.UpstreamMembers) == 0 || a.Intent.Hop < len(m.Path)-1 && len(a.Intent.NextMembers) == 0 {
+		return a, errors.New("invalid_config: missing hop members")
 	}
 	for _, t := range m.Targets {
 		host, port, e := net.SplitHostPort(t.Address)

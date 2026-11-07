@@ -76,7 +76,9 @@ func TestCompileCanonicalDigestReplay(t *testing.T) {
 	if c.InputDigest != a.InputDigest || !bytes.Equal(c.Artifacts[0].Canonical, a.Artifacts[0].Canonical) {
 		t.Fatal("pinned replay differs")
 	}
-	if a.InputDigest != "486471a55d696f7d1a549c10036c51140e6f670a865356f26d2e0e11853b958f" || a.Artifacts[0].Digest != "3e7a4d6082624d040afc42684d403b739244c68950f369969c4ffd0d1c3a6f55" {
+	// Runtime-config 1.2 adds the pinned upstream incarnation/address set;
+	// input bytes remain identical, while the versioned artifact gains fields.
+	if a.InputDigest != "486471a55d696f7d1a549c10036c51140e6f670a865356f26d2e0e11853b958f" || a.Artifacts[0].Digest != "4de67e9b880280ff7f44860dda9f0bb859e5f644ea8f3026fc91b3f9aeadf232" {
 		t.Fatal("golden replay changed", a.InputDigest, a.Artifacts[0].Digest)
 	}
 }

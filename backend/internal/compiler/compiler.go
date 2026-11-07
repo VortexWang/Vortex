@@ -79,7 +79,9 @@ type Intent struct {
 	Role            string    `json:"role"`
 	Hop             int       `json:"hop_index"`
 	AllowedUpstream []string  `json:"allowed_upstream_node_ids"`
+	UpstreamMembers []Member  `json:"upstream_members"`
 	NextMembers     []Member  `json:"next_members"`
+	NextScheduling  string    `json:"next_scheduling"`
 	Segments        []Segment `json:"segments"`
 	SessionStable   bool      `json:"session_stable"`
 }
@@ -277,20 +279,24 @@ func Compile(ctx context.Context, in CompileInput) Result {
 			role = "exit"
 		}
 		upstream := []string{}
+		upstreamMembers := []Member{}
 		next := []Member{}
+		nextScheduling := ""
 		if hop > 0 {
+			upstreamMembers = append(upstreamMembers, groups[in.Rule.Path[hop-1]].Members...)
 			for _, n := range groups[in.Rule.Path[hop-1]].Members {
 				upstream = append(upstream, n.ID)
 			}
 		}
 		if hop+1 < len(in.Rule.Path) {
 			next = append(next, groups[in.Rule.Path[hop+1]].Members...)
+			nextScheduling = groups[in.Rule.Path[hop+1]].Scheduling
 		}
 		for _, node := range groups[id].Members {
 			if ctx.Err() != nil {
 				return fail(Invalid)
 			}
-			env := Envelope{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: node.ID, BootID: node.BootID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration, BillingSnapshotID: in.Billing.ID, InputDigest: result.InputDigest, InputVersions: versions, Intent: Intent{Rule: in.Rule, Role: role, Hop: hop, AllowedUpstream: upstream, NextMembers: next, Segments: segments, SessionStable: true}}
+			env := Envelope{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: node.ID, BootID: node.BootID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration, BillingSnapshotID: in.Billing.ID, InputDigest: result.InputDigest, InputVersions: versions, Intent: Intent{Rule: in.Rule, Role: role, Hop: hop, AllowedUpstream: upstream, UpstreamMembers: upstreamMembers, NextMembers: next, NextScheduling: nextScheduling, Segments: segments, SessionStable: true}}
 			body, e := json.Marshal(env)
 			if e != nil || len(body) > 524288 {
 				return fail(Invalid)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -168,6 +169,8 @@ type MuxLink struct {
 	done                    chan struct{}
 	closeOnce               sync.Once
 	peerID                  NodeID
+	peerBoot                BootID
+	peerGeneration          uint64
 	limiter                 *FrameLimiter
 	observer                Observer
 	dgrams                  *scheduler.Scheduler
@@ -200,6 +203,21 @@ type MuxStream struct {
 type RemoteOpenAuthorizer func(context.Context, NodeID, OpenRequest) (io.Closer, error)
 
 func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloConfig, config MuxConfig) (*MuxLink, NodeID, error) {
+	var peerBoot BootID
+	var peerGeneration uint64
+	verify := hello.VerifyPeer
+	if verify == nil {
+		return nil, NodeID{}, errors.New("vlink: peer verifier required")
+	}
+	hello.VerifyPeer = func(ctx context.Context, cert *x509.Certificate, message HelloMessage) error {
+		if verify != nil {
+			if err := verify(ctx, cert, message); err != nil {
+				return err
+			}
+		}
+		peerBoot, peerGeneration = message.LocalBootID, message.LocalGeneration
+		return nil
+	}
 	peer, err := HandshakeHello(ctx, conn, hello)
 	if err != nil {
 		forceCloseTLS(conn)
@@ -211,8 +229,12 @@ func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloCon
 		return nil, NodeID{}, err
 	}
 	mux.peerID = peer
+	mux.peerBoot, mux.peerGeneration = peerBoot, peerGeneration
 	return mux, peer, nil
 }
+
+// PeerIncarnation is authenticated by the TLS-exporter-bound HELLO transcript.
+func (m *MuxLink) PeerIncarnation() (BootID, uint64) { return m.peerBoot, m.peerGeneration }
 
 func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if conn == nil {

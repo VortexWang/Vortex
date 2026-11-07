@@ -1,9 +1,11 @@
 package rule
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -14,6 +16,8 @@ import (
 	"vortex/engine/accounting"
 	"vortex/engine/apply"
 	corerelay "vortex/engine/relay"
+	"vortex/engine/runtime/link"
+	"vortex/engine/vlink"
 )
 
 type GateFactory func(Artifact) (accounting.Gate, error)
@@ -22,6 +26,7 @@ type transaction struct {
 	state    apply.State
 	endpoint *endpoint
 	gate     accounting.Gate
+	cancel   context.CancelFunc
 }
 type endpoint struct {
 	tcp         net.Listener
@@ -33,12 +38,16 @@ type endpoint struct {
 	wg          sync.WaitGroup
 }
 type Manager struct {
-	mu       sync.Mutex
-	instance string
-	tx       map[[16]byte]*transaction
-	active   map[string]*transaction
-	gate     GateFactory
-	next     uint64
+	mu          sync.Mutex
+	instance    string
+	tx          map[[16]byte]*transaction
+	active      map[string]*transaction
+	gate        GateFactory
+	next        uint64
+	links       map[string]map[*vlink.MuxLink]struct{}
+	linkFactory func(Artifact, Member) (*link.Supervisor, error)
+	workers     sync.WaitGroup
+	stopped     bool
 }
 
 func New(gate GateFactory) *Manager {
@@ -46,7 +55,7 @@ func New(gate GateFactory) *Manager {
 	if _, e := rand.Read(id[:]); e != nil {
 		panic(e)
 	}
-	return &Manager{instance: hex.EncodeToString(id[:]), tx: map[[16]byte]*transaction{}, active: map[string]*transaction{}, gate: gate}
+	return &Manager{instance: hex.EncodeToString(id[:]), tx: map[[16]byte]*transaction{}, active: map[string]*transaction{}, gate: gate, links: map[string]map[*vlink.MuxLink]struct{}{}}
 }
 func (m *Manager) InstanceID() string { return m.instance }
 func (m *Manager) Query(id [16]byte) (apply.Transaction, bool) {
@@ -65,7 +74,9 @@ func (m *Manager) Prepare(id [16]byte, a Artifact) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if old := m.tx[id]; old != nil {
-		if old.a.RuleID != a.RuleID || old.a.RuleRevision != a.RuleRevision || old.a.FencingGeneration != a.FencingGeneration {
+		x, _ := json.Marshal(old.a)
+		y, _ := json.Marshal(a)
+		if !bytes.Equal(x, y) {
 			return apply.ErrConflict
 		}
 		return nil
@@ -77,8 +88,11 @@ func (m *Manager) Prepare(id [16]byte, a Artifact) error {
 	if e != nil {
 		return e
 	}
-	if a.Intent.Rule.Mode != "direct" {
-		return errors.New("unsupported_config: VLink rule runtime not prepared")
+	if m.stopped {
+		return errors.New("rule: runtime stopped")
+	}
+	if a.Intent.Rule.Mode != "direct" && m.linkFactory == nil {
+		return errors.New("unsupported_config: VLink identity transport unavailable")
 	}
 	old := m.active[a.RuleID]
 	if old != nil && a.FencingGeneration <= old.a.FencingGeneration {
@@ -86,7 +100,10 @@ func (m *Manager) Prepare(id [16]byte, a Artifact) error {
 	}
 	t := &transaction{a: a, state: apply.Prepared, gate: gate}
 	model := a.Intent.Rule
-	if model.Enabled {
+	if a.Intent.Hop < 0 || a.Intent.Hop > len(a.Intent.Segments) {
+		return apply.ErrConflict
+	}
+	if model.Enabled && a.Intent.Role == "entry" {
 		if old != nil && old.endpoint != nil && old.a.Intent.Rule.Port == model.Port && old.a.Intent.Rule.Protocol == model.Protocol {
 			t.endpoint = old.endpoint
 		} else {
@@ -152,8 +169,15 @@ func (m *Manager) Commit(id [16]byte) error {
 	}
 	t.state = apply.Active
 	m.active[t.a.RuleID] = t
-	if old != nil && old.endpoint != t.endpoint {
-		old.state = apply.Released
+	if t.a.Intent.Rule.Enabled && t.a.Intent.Hop > 0 && t.a.Intent.Segments[t.a.Intent.Hop-1].Direction == "reverse" {
+		ctx, cancel := context.WithCancel(context.Background())
+		t.cancel = cancel
+		for _, peer := range t.a.Intent.UpstreamMembers {
+			m.workers.Add(1)
+			go func(peer Member) { defer m.workers.Done(); m.maintainReverse(ctx, t.a, peer) }(peer)
+		}
+	}
+	if old != nil && (old.endpoint != t.endpoint || !t.a.Intent.Rule.Enabled) {
 		old.endpoint.stop(false)
 	}
 	return nil
@@ -203,13 +227,22 @@ func (e *endpoint) stop(force bool) {
 }
 func (m *Manager) Stop(ctx context.Context) error {
 	m.mu.Lock()
+	m.stopped = true
+	for _, links := range m.links {
+		for mux := range links {
+			mux.Close(context.Canceled)
+		}
+	}
 	eps := map[*endpoint]bool{}
 	for _, t := range m.tx {
+		if t.cancel != nil {
+			t.cancel()
+		}
 		if t.endpoint != nil {
 			eps[t.endpoint] = true
 			t.endpoint.stop(true)
 		}
-		t.state = apply.Released
+		t.state = apply.ActivationUnknown
 	}
 	m.mu.Unlock()
 	done := make(chan struct{})
@@ -217,12 +250,18 @@ func (m *Manager) Stop(ctx context.Context) error {
 		for ep := range eps {
 			ep.wg.Wait()
 		}
+		m.workers.Wait()
 		close(done)
 	}()
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-done:
+		m.mu.Lock()
+		for _, t := range m.tx {
+			t.state = apply.Released
+		}
+		m.mu.Unlock()
 		return nil
 	}
 }
@@ -241,17 +280,22 @@ func (m *Manager) serveTCP(ctx context.Context, ep *endpoint) {
 			defer ep.wg.Done()
 			defer c.Close()
 			defer func() { ep.mu.Lock(); delete(ep.connections, c); ep.mu.Unlock() }()
-			target, e := m.dial(ctx, t, "tcp")
+			session, e := t.gate.Open(ctx, accounting.Flow{Key: c.RemoteAddr().String(), RuleID: t.a.RuleID})
+			if e != nil {
+				return
+			}
+			defer session.Close()
+			target, e := m.connect(ctx, t, "tcp", c.RemoteAddr())
 			if e != nil {
 				return
 			}
 			defer target.Close()
-			if t.a.Intent.Rule.ProxyProtocol != "off" {
+			if t.a.Intent.Rule.Mode == "direct" && t.a.Intent.Rule.ProxyProtocol != "off" {
 				if e = writeProxy(target, c, t.a.Intent.Rule.ProxyProtocol); e != nil {
 					return
 				}
 			}
-			_, _ = corerelay.TCPWithGate(ctx, c, target, t.gate, nil)
+			_, _ = corerelay.TCPWithGate(ctx, c, target, oneSessionGate{session}, nil)
 		}()
 	}
 }
@@ -386,7 +430,7 @@ func (m *Manager) serveUDP(ctx context.Context, ep *endpoint) {
 			if e != nil {
 				continue
 			}
-			conn, e := m.dial(ctx, t, "udp")
+			conn, e := m.connect(ctx, t, "udp", peer)
 			if e != nil {
 				session.Close()
 				continue
