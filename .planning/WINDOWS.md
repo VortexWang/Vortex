@@ -2,9 +2,9 @@
 schema_version: 1
 open_count: 1
 waived_count: 0
-fixed_count: 3
-total_count: 4
-last_updated: 2026-11-07T00:14:19.743Z
+fixed_count: 4
+total_count: 5
+last_updated: 2026-11-07T03:02:36.326Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,7 @@ last_updated: 2026-11-07T00:14:19.743Z
 | 2 | 06 | deviation | tools/phase6/dependency_lock_check.sh |  | sqlc v1.31.1 official generator links go-sql-driver/mysql v1.9.3 MPL-2.0 outside the current license allowlist; CR-003 owner decision required. | fixed |  | 2026-11-06T19:34:36.869Z | 2026-11-06T23:10:22.626Z |
 | 3 | 06 | deviation | tools/phase6/sqlc_license_check.py |  | CR-003 exact mysql/MPL exception is approved and implemented; Task 2 still rejects exact sqlc embedded MIT-0 and Bison output-exception expressions pending CR-004. Linked sysroot source closure was reconstructed; no unknown-license waiver requested. | fixed | Owner a approved CR-004 A; 7d43e1d2 enforces exact source/artifact/use scope, full gate exit 0; evidence b1a92d72. | 2026-11-06T23:10:22.700Z | 2026-11-06T23:31:52.608Z |
 | 4 | 06 | unrun-verify | .github/workflows/phase6.yml |  | 06-09 real Actions execution and Docker/Actions pairing remain unpassed: nodeox has no push permission; exact source c1e6b766 Docker normal/race passed. | fixed | Browser authentication restored VortexWang; final source a9481584 passed actual Actions 42316152923, Docker and both paired gates. Raw evidence 32698c0d; summary 843d12f6. | 2026-11-06T23:51:43.970Z | 2026-11-07T00:14:19.743Z |
+| 5 | 06 | unrun-verify | tools/phase6/cloudflare_integration.sh |  | PRT-015 real controlled Cloudflare CRUD remains unexecuted: dedicated token, zone and reviewed identity-bound policy configuration are absent; fixture tests are not live evidence. | fixed |  | 2026-11-07T01:20:49.407Z | 2026-11-07T03:02:36.326Z |
 
 ````json
 [
@@ -72,6 +73,19 @@ last_updated: 2026-11-07T00:14:19.743Z
     "reason": "Browser authentication restored VortexWang; final source a9481584 passed actual Actions 42316152923, Docker and both paired gates. Raw evidence 32698c0d; summary 843d12f6.",
     "recorded_at": "2026-11-06T23:51:43.970Z",
     "resolved_at": "2026-11-07T00:14:19.743Z",
+    "milestone": null
+  },
+  {
+    "id": 5,
+    "kind": "unrun-verify",
+    "phase": "06",
+    "file": "tools/phase6/cloudflare_integration.sh",
+    "line": null,
+    "description": "PRT-015 real controlled Cloudflare CRUD remains unexecuted: dedicated token, zone and reviewed identity-bound policy configuration are absent; fixture tests are not live evidence.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-11-07T01:20:49.407Z",
+    "resolved_at": "2026-11-07T03:02:36.326Z",
     "milestone": null
   }
 ]

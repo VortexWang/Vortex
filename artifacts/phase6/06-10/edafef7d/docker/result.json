@@ -1,0 +1,25 @@
+{
+  "commit": "edafef7d3a41d90494c64b5988d349fae4217eb0",
+  "result": 92,
+  "producer": "docker",
+  "through_plan": "06-10",
+  "external_checks": {
+    "cloudflare": {
+      "status": "not_run"
+    }
+  },
+  "acceptance_complete": false,
+  "source_clean": true,
+  "checksums": {
+    "commit.txt": "99e1e54e10c14309b81907cfca4b1de2cb19687155752628336157059042aaa4",
+    "openapi.log": "5e4fc14afb27d18b9470d218a6da4117a0f4fceedd0b991690873d0a04196411",
+    "dependencies.log": "8d140509f1bbe3fa3631f0f07e6a9107d9c8f33d6fc8add53b04362a39e455dd",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "744a9f77c8665e739e7485e77ffa168dc441143bf11d068c71a2dd203081b3d6",
+    "processes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "run_url": null
+}

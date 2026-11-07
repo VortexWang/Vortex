@@ -1,0 +1,439 @@
+ Network vortex-phase6-0610-ce643cb4_default Creating 
+ Network vortex-phase6-0610-ce643cb4_default Creating 
+ Network vortex-phase6-0610-ce643cb4_default Created 
+ Network vortex-phase6-0610-ce643cb4_default Created 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Creating 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Creating 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Created 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Created 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Starting 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Starting 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Started 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Started 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Waiting 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Waiting 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Healthy 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Healthy 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Running 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Running 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gomod Creating 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gocache Creating 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gocache Creating 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gomod Creating 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gomod Created 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gomod Created 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gocache Created 
+ Volume vortex-phase6-0610-ce643cb4_phase6-gocache Created 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Waiting 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Waiting 
+ Container vortex-phase6-0610-ce643cb4-valkey-1 Healthy 
+ Container vortex-phase6-0610-ce643cb4-postgres-1 Healthy 
+ Container vortex-phase6-0610-ce643cb4-backend-test-run-1374cd2b15ef Creating 
+ Container vortex-phase6-0610-ce643cb4-backend-test-run-1374cd2b15ef Created 
+go version go1.27.3 linux/arm64
+Linux 3c230d07dcb8 7.2.12-orbstack-00394-gbecdd6130068 #1 SMP PREEMPT Thu Oct 22 22:17:17 UTC 2026 aarch64 GNU/Linux
+2026-11-07T02:56:47Z
+all modules verified
+go: downloading github.com/jackc/pgx/v5 v5.11.0
+go: downloading google.golang.org/grpc v1.85.0
+go: downloading github.com/pressly/goose/v3 v3.29.0
+go: downloading github.com/google/uuid v1.6.0
+go: downloading google.golang.org/protobuf v1.36.12
+go: downloading github.com/sethvargo/go-retry v0.5.0
+go: downloading go.uber.org/multierr v1.11.0
+go: downloading github.com/jackc/puddle/v2 v2.2.3
+go: downloading github.com/jackc/pgpassfile v1.0.0
+go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+go: downloading golang.org/x/text v0.43.0
+go: downloading golang.org/x/net v0.61.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8
+go: downloading github.com/mfridman/interpolate v0.0.2
+go: downloading golang.org/x/sync v0.24.0
+go: downloading golang.org/x/sys v0.49.0
+go: downloading modernc.org/sqlite v1.61.1
+go: downloading modernc.org/libc v1.79.0
+go: downloading github.com/dustin/go-humanize v1.1.0
+go: downloading modernc.org/mathutil v1.7.1
+go: downloading modernc.org/memory v1.12.1
+go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+2026/11/07 02:57:37 OK   00001_authority.sql (4.7ms)
+2026/11/07 02:57:37 OK   00002_tenant_policy.sql (3.74ms)
+2026/11/07 02:57:37 OK   00003_nodes_ports.sql (7.89ms)
+2026/11/07 02:57:37 OK   00004_entry_group_domains.sql (911.17µs)
+2026/11/07 02:57:37 goose: successfully migrated database to version: 4
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/auth	[no test files]
+=== RUN   TestCredentialCryptoScopeAndRecovery
+--- PASS: TestCredentialCryptoScopeAndRecovery (0.00s)
+=== RUN   TestCredentialEncryptedScopedAuditAndRollback
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestCredentialEncryptedScopedAuditAndRollback (0.01s)
+=== RUN   TestCredentialErrorsRedactProviderSecrets
+--- PASS: TestCredentialErrorsRedactProviderSecrets (0.00s)
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/dedicated
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/different_token
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/other_zone
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/wildcard
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/extra_permission
+--- PASS: TestDNSCredentialPolicyIdentityAndExactZone (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/dedicated (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/different_token (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/other_zone (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/wildcard (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/extra_permission (0.00s)
+=== RUN   TestDNSBoundedRetryRedactionAndNoBlindCreate
+--- PASS: TestDNSBoundedRetryRedactionAndNoBlindCreate (0.30s)
+=== RUN   TestDNSReconcileIdempotentOwnershipAndCleanup
+--- PASS: TestDNSReconcileIdempotentOwnershipAndCleanup (0.00s)
+=== RUN   TestDNSUpdateAndMissingProxyResponseFailClosed
+--- PASS: TestDNSUpdateAndMissingProxyResponseFailClosed (0.00s)
+PASS
+ok  	vortex/backend/internal/control	0.323s
+=== RUN   TestTenantRoleScopeMatrix
+=== RUN   TestTenantRoleScopeMatrix/platform_admin
+=== RUN   TestTenantRoleScopeMatrix/operator
+=== RUN   TestTenantRoleScopeMatrix/auditor
+=== RUN   TestTenantRoleScopeMatrix/owner
+=== RUN   TestTenantRoleScopeMatrix/member
+--- PASS: TestTenantRoleScopeMatrix (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/platform_admin (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/operator (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/auditor (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/owner (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/member (0.00s)
+PASS
+ok  	vortex/backend/internal/policy	0.001s
+?   	vortex/backend/internal/repository	[no test files]
+=== RUN   TestValkeyLossRebuildAllProducedAuthority
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestValkeyLossRebuildAllProducedAuthority (0.02s)
+=== RUN   TestNodeGroupAuthoritySchema
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGroupAuthoritySchema (0.01s)
+=== RUN   TestNodeGroupOwnershipAndStableMembers
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGroupOwnershipAndStableMembers (0.01s)
+=== RUN   TestNodeGrantValidityHistoryAndAudit
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGrantValidityHistoryAndAudit (0.01s)
+=== RUN   TestNodeLifecycleDrainDeleteAndAuditRollback
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestNodeLifecycleDrainDeleteAndAuditRollback (0.01s)
+=== RUN   TestNodeSegmentPermitIndependentOfGrants
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestNodeSegmentPermitIndependentOfGrants (0.01s)
+=== RUN   TestPortReservationProofSchema
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortReservationProofSchema (0.00s)
+=== RUN   TestPortPlatformCrossTenantPhysicalConflict
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortPlatformCrossTenantPhysicalConflict (0.01s)
+=== RUN   TestReleaseOldBootAndDisconnectRetainOccupation
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestReleaseOldBootAndDisconnectRetainOccupation (0.02s)
+=== RUN   TestPortAtomicFixedMembersAndServing
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortAtomicFixedMembersAndServing (0.02s)
+=== RUN   TestPortNoCommonPortAndMemberChanges
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortNoCommonPortAndMemberChanges (0.02s)
+=== RUN   TestPortConcurrentWildcardConflict
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortConcurrentWildcardConflict (0.02s)
+=== RUN   TestPortProofAuthenticationAndGenerationFence
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortProofAuthenticationAndGenerationFence (0.02s)
+=== RUN   TestPortRestrictionClockAndProofBackedRelease
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortRestrictionClockAndProofBackedRelease (0.03s)
+=== RUN   TestPortRetentionClearReapplyAndManualHold
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortRetentionClearReapplyAndManualHold (0.03s)
+=== RUN   TestPortAuditRollbackAndForeignAllocation
+2026/11/07 02:57:47 goose: no migrations to run. current version: 4
+--- PASS: TestPortAuditRollbackAndForeignAllocation (0.02s)
+=== RUN   TestPortRestrictionAuditRollbackSameTransaction
+2026/11/07 02:57:48 goose: no migrations to run. current version: 4
+--- PASS: TestPortRestrictionAuditRollbackSameTransaction (0.03s)
+=== RUN   TestTracerRealProcesses
+2026/11/07 02:57:48 goose: no migrations to run. current version: 4
+    process_test.go:312: real backend/Agent/Hub processes succeeded operation=9ba1f2d6-fd87-47c8-b690-2569504913d6 duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (7.33s)
+=== RUN   TestServingRejectsDeletedMember
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestServingRejectsDeletedMember (0.02s)
+=== RUN   TestDNSDurableServingRecomputeAndUnknownReplay
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestDNSDurableServingRecomputeAndUnknownReplay (0.02s)
+=== RUN   TestDNSAuditRollbackAndCurrentRole
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestDNSAuditRollbackAndCurrentRole (0.01s)
+=== RUN   TestDNSEntryGroupDomainBinding
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestDNSEntryGroupDomainBinding (0.01s)
+=== RUN   TestServingCurrentSnapshotAndUnknown
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestServingCurrentSnapshotAndUnknown (0.01s)
+=== RUN   TestServingAllCommittedRulesAndFailedNewRule
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestServingAllCommittedRulesAndFailedNewRule (0.02s)
+=== RUN   TestServingPlatformAggregatesAllCommittedTenantRules
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestServingPlatformAggregatesAllCommittedTenantRules (0.02s)
+=== RUN   TestTenantRestrictionSchema
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRestrictionSchema (0.00s)
+=== RUN   TestTenantRepositoryScopeAndPlatformAudit
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRepositoryScopeAndPlatformAudit (0.01s)
+=== RUN   TestTenantRestrictionsIndependentAndImmutable
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRestrictionsIndependentAndImmutable (0.01s)
+=== RUN   TestTenantPlatformOwnershipGrant
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTenantPlatformOwnershipGrant (0.01s)
+=== RUN   TestTenantAuditRollbackSharedAuthority
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTenantAuditRollbackSharedAuthority (0.01s)
+=== RUN   TestMigrationUpgradeTenantAuthority
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+=== RUN   TestMigrationUpgradeTenantAuthority/seeded00001
+2026/11/07 02:57:55 OK   00001_authority.sql (3.96ms)
+2026/11/07 02:57:55 goose: successfully migrated database to version: 1
+2026/11/07 02:57:55 OK   00002_tenant_policy.sql (4.19ms)
+2026/11/07 02:57:55 OK   00003_nodes_ports.sql (8.23ms)
+2026/11/07 02:57:55 OK   00004_entry_group_domains.sql (957.58µs)
+2026/11/07 02:57:55 goose: successfully migrated database to version: 4
+=== RUN   TestMigrationUpgradeTenantAuthority/empty
+2026/11/07 02:57:55 OK   00001_authority.sql (5.75ms)
+2026/11/07 02:57:55 goose: successfully migrated database to version: 1
+2026/11/07 02:57:55 OK   00002_tenant_policy.sql (4.19ms)
+2026/11/07 02:57:55 OK   00003_nodes_ports.sql (7.98ms)
+2026/11/07 02:57:55 OK   00004_entry_group_domains.sql (917.71µs)
+2026/11/07 02:57:55 goose: successfully migrated database to version: 4
+--- PASS: TestMigrationUpgradeTenantAuthority (0.07s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/seeded00001 (0.04s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/empty (0.04s)
+=== RUN   TestRestrictionAllCauses
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAllCauses (0.01s)
+=== RUN   TestRestrictionAuditRollback
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAuditRollback (0.01s)
+=== RUN   TestRestrictionAllCausesAccountState
+=== RUN   TestRestrictionAllCausesAccountState/suspended
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+=== RUN   TestRestrictionAllCausesAccountState/banned
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAllCausesAccountState (0.01s)
+    --- PASS: TestRestrictionAllCausesAccountState/suspended (0.01s)
+    --- PASS: TestRestrictionAllCausesAccountState/banned (0.01s)
+=== RUN   TestTracerDesiredStateReceipt
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTracerDesiredStateReceipt (0.01s)
+=== RUN   TestTracerTransactionRollback
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTracerTransactionRollback (0.01s)
+=== RUN   TestTracerConcurrentMutation
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestTracerConcurrentMutation (0.01s)
+=== RUN   TestValkeyLossRebuild
+2026/11/07 02:57:55 goose: no migrations to run. current version: 4
+--- PASS: TestValkeyLossRebuild (0.01s)
+PASS
+ok  	vortex/backend/internal/service	7.892s
+?   	vortex/backend/internal/testutil	[no test files]
+?   	vortex/backend/internal/worker	[no test files]
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/auth	[no test files]
+=== RUN   TestCredentialCryptoScopeAndRecovery
+--- PASS: TestCredentialCryptoScopeAndRecovery (0.00s)
+=== RUN   TestCredentialEncryptedScopedAuditAndRollback
+2026/11/07 02:58:28 goose: no migrations to run. current version: 4
+2026/11/07 02:58:28 goose: no migrations to run. current version: 4
+--- PASS: TestCredentialEncryptedScopedAuditAndRollback (0.05s)
+=== RUN   TestCredentialErrorsRedactProviderSecrets
+--- PASS: TestCredentialErrorsRedactProviderSecrets (0.00s)
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/dedicated
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/different_token
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/other_zone
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/wildcard
+=== RUN   TestDNSCredentialPolicyIdentityAndExactZone/extra_permission
+--- PASS: TestDNSCredentialPolicyIdentityAndExactZone (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/dedicated (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/different_token (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/other_zone (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/wildcard (0.00s)
+    --- PASS: TestDNSCredentialPolicyIdentityAndExactZone/extra_permission (0.00s)
+=== RUN   TestDNSBoundedRetryRedactionAndNoBlindCreate
+--- PASS: TestDNSBoundedRetryRedactionAndNoBlindCreate (0.31s)
+=== RUN   TestDNSReconcileIdempotentOwnershipAndCleanup
+--- PASS: TestDNSReconcileIdempotentOwnershipAndCleanup (0.00s)
+=== RUN   TestDNSUpdateAndMissingProxyResponseFailClosed
+--- PASS: TestDNSUpdateAndMissingProxyResponseFailClosed (0.00s)
+PASS
+ok  	vortex/backend/internal/control	1.369s
+=== RUN   TestTenantRoleScopeMatrix
+=== RUN   TestTenantRoleScopeMatrix/platform_admin
+=== RUN   TestTenantRoleScopeMatrix/operator
+=== RUN   TestTenantRoleScopeMatrix/auditor
+=== RUN   TestTenantRoleScopeMatrix/owner
+=== RUN   TestTenantRoleScopeMatrix/member
+--- PASS: TestTenantRoleScopeMatrix (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/platform_admin (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/operator (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/auditor (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/owner (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/member (0.00s)
+PASS
+ok  	vortex/backend/internal/policy	1.006s
+?   	vortex/backend/internal/repository	[no test files]
+=== RUN   TestValkeyLossRebuildAllProducedAuthority
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestValkeyLossRebuildAllProducedAuthority (0.03s)
+=== RUN   TestNodeGroupAuthoritySchema
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGroupAuthoritySchema (0.02s)
+=== RUN   TestNodeGroupOwnershipAndStableMembers
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGroupOwnershipAndStableMembers (0.03s)
+=== RUN   TestNodeGrantValidityHistoryAndAudit
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestNodeGrantValidityHistoryAndAudit (0.02s)
+=== RUN   TestNodeLifecycleDrainDeleteAndAuditRollback
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestNodeLifecycleDrainDeleteAndAuditRollback (0.03s)
+=== RUN   TestNodeSegmentPermitIndependentOfGrants
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestNodeSegmentPermitIndependentOfGrants (0.02s)
+=== RUN   TestPortReservationProofSchema
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortReservationProofSchema (0.02s)
+=== RUN   TestPortPlatformCrossTenantPhysicalConflict
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortPlatformCrossTenantPhysicalConflict (0.06s)
+=== RUN   TestReleaseOldBootAndDisconnectRetainOccupation
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestReleaseOldBootAndDisconnectRetainOccupation (0.06s)
+=== RUN   TestPortAtomicFixedMembersAndServing
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortAtomicFixedMembersAndServing (0.07s)
+=== RUN   TestPortNoCommonPortAndMemberChanges
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortNoCommonPortAndMemberChanges (0.06s)
+=== RUN   TestPortConcurrentWildcardConflict
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortConcurrentWildcardConflict (0.06s)
+=== RUN   TestPortProofAuthenticationAndGenerationFence
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortProofAuthenticationAndGenerationFence (0.07s)
+=== RUN   TestPortRestrictionClockAndProofBackedRelease
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortRestrictionClockAndProofBackedRelease (0.07s)
+=== RUN   TestPortRetentionClearReapplyAndManualHold
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortRetentionClearReapplyAndManualHold (0.07s)
+=== RUN   TestPortAuditRollbackAndForeignAllocation
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortAuditRollbackAndForeignAllocation (0.05s)
+=== RUN   TestPortRestrictionAuditRollbackSameTransaction
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+--- PASS: TestPortRestrictionAuditRollbackSameTransaction (0.07s)
+=== RUN   TestTracerRealProcesses
+2026/11/07 02:58:29 goose: no migrations to run. current version: 4
+    process_test.go:312: real backend/Agent/Hub processes succeeded operation=a884e8c5-b99e-46c0-94dc-55753df90bab duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (6.87s)
+=== RUN   TestServingRejectsDeletedMember
+2026/11/07 02:58:36 goose: no migrations to run. current version: 4
+--- PASS: TestServingRejectsDeletedMember (0.07s)
+=== RUN   TestDNSDurableServingRecomputeAndUnknownReplay
+2026/11/07 02:58:36 goose: no migrations to run. current version: 4
+--- PASS: TestDNSDurableServingRecomputeAndUnknownReplay (0.07s)
+=== RUN   TestDNSAuditRollbackAndCurrentRole
+2026/11/07 02:58:36 goose: no migrations to run. current version: 4
+--- PASS: TestDNSAuditRollbackAndCurrentRole (0.05s)
+=== RUN   TestDNSEntryGroupDomainBinding
+2026/11/07 02:58:36 goose: no migrations to run. current version: 4
+--- PASS: TestDNSEntryGroupDomainBinding (0.04s)
+=== RUN   TestServingCurrentSnapshotAndUnknown
+2026/11/07 02:58:36 goose: no migrations to run. current version: 4
+--- PASS: TestServingCurrentSnapshotAndUnknown (0.06s)
+=== RUN   TestServingAllCommittedRulesAndFailedNewRule
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestServingAllCommittedRulesAndFailedNewRule (0.06s)
+=== RUN   TestServingPlatformAggregatesAllCommittedTenantRules
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestServingPlatformAggregatesAllCommittedTenantRules (0.10s)
+=== RUN   TestTenantRestrictionSchema
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRestrictionSchema (0.02s)
+=== RUN   TestTenantRepositoryScopeAndPlatformAudit
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRepositoryScopeAndPlatformAudit (0.02s)
+=== RUN   TestTenantRestrictionsIndependentAndImmutable
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTenantRestrictionsIndependentAndImmutable (0.02s)
+=== RUN   TestTenantPlatformOwnershipGrant
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTenantPlatformOwnershipGrant (0.02s)
+=== RUN   TestTenantAuditRollbackSharedAuthority
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTenantAuditRollbackSharedAuthority (0.02s)
+=== RUN   TestMigrationUpgradeTenantAuthority
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+=== RUN   TestMigrationUpgradeTenantAuthority/seeded00001
+2026/11/07 02:58:37 OK   00001_authority.sql (6.09ms)
+2026/11/07 02:58:37 goose: successfully migrated database to version: 1
+2026/11/07 02:58:37 OK   00002_tenant_policy.sql (6ms)
+2026/11/07 02:58:37 OK   00003_nodes_ports.sql (11.9ms)
+2026/11/07 02:58:37 OK   00004_entry_group_domains.sql (1.18ms)
+2026/11/07 02:58:37 goose: successfully migrated database to version: 4
+=== RUN   TestMigrationUpgradeTenantAuthority/empty
+2026/11/07 02:58:37 OK   00001_authority.sql (5.61ms)
+2026/11/07 02:58:37 goose: successfully migrated database to version: 1
+2026/11/07 02:58:37 OK   00002_tenant_policy.sql (5.59ms)
+2026/11/07 02:58:37 OK   00003_nodes_ports.sql (13.12ms)
+2026/11/07 02:58:37 OK   00004_entry_group_domains.sql (2.25ms)
+2026/11/07 02:58:37 goose: successfully migrated database to version: 4
+--- PASS: TestMigrationUpgradeTenantAuthority (0.21s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/seeded00001 (0.09s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/empty (0.10s)
+=== RUN   TestRestrictionAllCauses
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAllCauses (0.03s)
+=== RUN   TestRestrictionAuditRollback
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAuditRollback (0.02s)
+=== RUN   TestRestrictionAllCausesAccountState
+=== RUN   TestRestrictionAllCausesAccountState/suspended
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+=== RUN   TestRestrictionAllCausesAccountState/banned
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestRestrictionAllCausesAccountState (0.05s)
+    --- PASS: TestRestrictionAllCausesAccountState/suspended (0.02s)
+    --- PASS: TestRestrictionAllCausesAccountState/banned (0.03s)
+=== RUN   TestTracerDesiredStateReceipt
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTracerDesiredStateReceipt (0.04s)
+=== RUN   TestTracerTransactionRollback
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTracerTransactionRollback (0.02s)
+=== RUN   TestTracerConcurrentMutation
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestTracerConcurrentMutation (0.04s)
+=== RUN   TestValkeyLossRebuild
+2026/11/07 02:58:37 goose: no migrations to run. current version: 4
+--- PASS: TestValkeyLossRebuild (0.02s)
+PASS
+ok  	vortex/backend/internal/service	9.658s
+?   	vortex/backend/internal/testutil	[no test files]
+?   	vortex/backend/internal/worker	[no test files]
