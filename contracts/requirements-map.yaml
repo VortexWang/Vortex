@@ -230,9 +230,18 @@
       "id": "NOD-012",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "NOD-013",
@@ -278,9 +287,18 @@
       "id": "PRT-004",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "PRT-005",
@@ -382,129 +400,273 @@
       "id": "RUL-001",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-002",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-003",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-004",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-005",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-006",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-007",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-008",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-009",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-010",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-011",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-012",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-013",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-014",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-015",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-016",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "ENG-001",
@@ -1356,17 +1518,35 @@
       "id": "BE-002",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "BE-003",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "BE-004",

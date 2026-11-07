@@ -4,7 +4,7 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.4.0. Approval is bound by the exact governance record.
+// CONTRACT 1.4.0 candidate. Owner freeze approval is pending in governance.
 // Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
 
 service NodeControl {
@@ -119,7 +119,7 @@ message RuntimeConfigUpdate {
 // RuleCommand is an additive, explicitly phased control path. Older 1.3
 // readers never receive this oneof; they continue to use RuntimeConfigUpdate.
 message RuleCommand {
-  string phase = 1; // prepare, commit, query, abort
+  string phase = 1; // prepare, commit, query, abort, release
   bytes transaction_id = 2;
   string task_key = 3;
   uint64 target_revision = 4;
@@ -138,7 +138,7 @@ message RuleReceipt {
   string idempotency_key = 5;
   bytes artifact_sha256 = 6;
   uint64 fencing_generation = 7;
-  string state = 8; // prepared, active, aborted, unknown
+  string state = 8; // prepared, active, aborted, released, failed, unknown
   string error_code = 9;
   bytes payload = 10;
 }

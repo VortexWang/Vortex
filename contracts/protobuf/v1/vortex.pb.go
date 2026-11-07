@@ -1209,7 +1209,7 @@ func (x *RuntimeConfigUpdate) GetExpectedVersion() uint64 {
 // readers never receive this oneof; they continue to use RuntimeConfigUpdate.
 type RuleCommand struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // prepare, commit, query, abort
+	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // prepare, commit, query, abort, release
 	TransactionId     []byte                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
 	TaskKey           string                 `protobuf:"bytes,3,opt,name=task_key,json=taskKey,proto3" json:"task_key,omitempty"`
 	TargetRevision    uint64                 `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
@@ -1324,7 +1324,7 @@ type RuleReceipt struct {
 	IdempotencyKey    string                 `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
 	ArtifactSha256    []byte                 `protobuf:"bytes,6,opt,name=artifact_sha256,json=artifactSha256,proto3" json:"artifact_sha256,omitempty"`
 	FencingGeneration uint64                 `protobuf:"varint,7,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
-	State             string                 `protobuf:"bytes,8,opt,name=state,proto3" json:"state,omitempty"` // prepared, active, aborted, unknown
+	State             string                 `protobuf:"bytes,8,opt,name=state,proto3" json:"state,omitempty"` // prepared, active, aborted, released, failed, unknown
 	ErrorCode         string                 `protobuf:"bytes,9,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	Payload           []byte                 `protobuf:"bytes,10,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields     protoimpl.UnknownFields

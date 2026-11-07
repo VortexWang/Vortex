@@ -156,6 +156,11 @@ func Compile(ctx context.Context, in CompileInput) Result {
 	if e != nil {
 		return fail(Invalid)
 	}
+	// Desired rules may describe longer paths, but only emit artifacts within
+	// the process-local runtime's executable resource bounds.
+	if len(in.Rule.Path) > 16 {
+		return fail(Invalid)
+	}
 	if in.Revision < 1 || in.PathGeneration < 1 || in.FencingGeneration < 1 || in.SignerEpoch < 1 || in.ValidAt.IsZero() {
 		return fail(Invalid)
 	}
@@ -173,7 +178,7 @@ func Compile(ctx context.Context, in CompileInput) Result {
 	versions := map[string]string{}
 	for i, g := range in.Groups {
 		g.ID, e = canonID(g.ID)
-		if e != nil || groups[g.ID].ID != "" || g.Version < 1 || !validDigest(g.MemberSetVersion) || (g.OwnerKind != "tenant" && g.OwnerKind != "platform") || len(g.Members) == 0 || len(g.Members) > 1024 {
+		if e != nil || groups[g.ID].ID != "" || g.Version < 1 || !validDigest(g.MemberSetVersion) || (g.OwnerKind != "tenant" && g.OwnerKind != "platform") || len(g.Members) == 0 || len(g.Members) > 256 {
 			return fail(MemberMismatch)
 		}
 		if g.Scheduling != "dns" && g.Scheduling != "weighted_round_robin" && g.Scheduling != "primary_backup" {
