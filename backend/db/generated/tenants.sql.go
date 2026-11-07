@@ -449,7 +449,7 @@ func (q *Queries) ListTenantResources(ctx context.Context, arg ListTenantResourc
 }
 
 const listTenantTasks = `-- name: ListTenantTasks :many
-SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts FROM tasks WHERE tenant_id=$1 ORDER BY id
+SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind FROM tasks WHERE tenant_id=$1 ORDER BY id
 `
 
 func (q *Queries) ListTenantTasks(ctx context.Context, tenantID string) ([]Task, error) {
@@ -469,6 +469,7 @@ func (q *Queries) ListTenantTasks(ctx context.Context, tenantID string) ([]Task,
 			&i.LeaseToken,
 			&i.LeaseUntil,
 			&i.Attempts,
+			&i.TaskKind,
 		); err != nil {
 			return nil, err
 		}

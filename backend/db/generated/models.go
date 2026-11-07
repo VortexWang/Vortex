@@ -56,6 +56,81 @@ type DesiredState struct {
 	PayloadSha256 []byte
 }
 
+type EncryptedCredential struct {
+	ID         string
+	TenantID   string
+	ZoneID     string
+	Ciphertext []byte
+	Nonce      []byte
+	KeyVersion int64
+	Scope      []string
+	CreatedAt  pgtype.Timestamptz
+}
+
+type GrantHistory struct {
+	ID         int64
+	GrantID    string
+	TenantID   string
+	ResourceID string
+	Version    int64
+	Status     string
+	ValidFrom  pgtype.Timestamptz
+	ValidUntil pgtype.Timestamptz
+	RecordedAt pgtype.Timestamptz
+}
+
+type Node struct {
+	ID             string
+	Name           string
+	Region         string
+	HubID          string
+	Capabilities   []string
+	PublicAddress  string
+	ProgramVersion string
+	Health         string
+	Lifecycle      string
+	PortMin        int32
+	PortMax        int32
+	LinkPort       int32
+	ControlPort    int32
+	MetricsPort    int32
+	Capacity       int64
+	BootID         string
+	Generation     int64
+	DrainDeadline  pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+	Version        int64
+}
+
+type NodeDependency struct {
+	TenantID     string
+	NodeID       string
+	DependencyID string
+	Kind         string
+	Amount       int64
+}
+
+type NodeGroup struct {
+	ID                     string
+	Name                   string
+	Purpose                string
+	Scheduling             string
+	HealthIntervalSeconds  int32
+	HealthTimeoutSeconds   int32
+	BillingMultiplierMilli int64
+	BillingVersion         int64
+	MemberVersion          int64
+	Version                int64
+	DeletedAt              pgtype.Timestamptz
+}
+
+type NodeGroupMember struct {
+	GroupID  string
+	NodeID   string
+	Weight   int32
+	Priority int32
+}
+
 type Operation struct {
 	ID               string
 	TenantID         string
@@ -77,6 +152,17 @@ type Outbox struct {
 	TenantID    string
 	OperationID string
 	DeliveredAt pgtype.Timestamptz
+}
+
+type PlatformGrant struct {
+	ID         string
+	TenantID   string
+	ResourceID string
+	OwnerKind  string
+	Version    int64
+	Status     string
+	ValidFrom  pgtype.Timestamptz
+	ValidUntil pgtype.Timestamptz
 }
 
 type PlatformPrincipal struct {
@@ -114,6 +200,14 @@ type RestrictionEvent struct {
 	ClearedAt     pgtype.Timestamptz
 }
 
+type SegmentPermit struct {
+	TenantID    string
+	FromGroupID string
+	ToGroupID   string
+	Version     int64
+	Allowed     bool
+}
+
 type Task struct {
 	ID          string
 	TenantID    string
@@ -122,6 +216,7 @@ type Task struct {
 	LeaseToken  pgtype.Text
 	LeaseUntil  pgtype.Timestamptz
 	Attempts    int32
+	TaskKind    string
 }
 
 type Tenant struct {

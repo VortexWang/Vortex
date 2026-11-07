@@ -13,7 +13,7 @@ import (
 
 const expireLeases = `-- name: ExpireLeases :many
 UPDATE tasks SET state='unknown',lease_until=NULL WHERE id IN
-(SELECT id FROM tasks WHERE state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts
+(SELECT id FROM tasks WHERE state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
 `
 
 func (q *Queries) ExpireLeases(ctx context.Context) ([]Task, error) {
@@ -33,6 +33,7 @@ func (q *Queries) ExpireLeases(ctx context.Context) ([]Task, error) {
 			&i.LeaseToken,
 			&i.LeaseUntil,
 			&i.Attempts,
+			&i.TaskKind,
 		); err != nil {
 			return nil, err
 		}
@@ -326,8 +327,8 @@ func (q *Queries) InsertTask(ctx context.Context, arg InsertTaskParams) error {
 const leaseTask = `-- name: LeaseTask :one
 UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1
 WHERE id=(SELECT t.id FROM tasks t JOIN outbox o ON o.operation_id=t.operation_id
-WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1)
-RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts
+WHERE t.state='pending' AND t.task_kind='control' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1)
+RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
 `
 
 func (q *Queries) LeaseTask(ctx context.Context, leaseToken pgtype.Text) (Task, error) {
@@ -341,6 +342,7 @@ func (q *Queries) LeaseTask(ctx context.Context, leaseToken pgtype.Text) (Task, 
 		&i.LeaseToken,
 		&i.LeaseUntil,
 		&i.Attempts,
+		&i.TaskKind,
 	)
 	return i, err
 }
@@ -416,7 +418,7 @@ func (q *Queries) LockOperation(ctx context.Context, arg LockOperationParams) (O
 }
 
 const lockTask = `-- name: LockTask :one
-SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE
+SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE
 `
 
 type LockTaskParams struct {
@@ -435,6 +437,7 @@ func (q *Queries) LockTask(ctx context.Context, arg LockTaskParams) (Task, error
 		&i.LeaseToken,
 		&i.LeaseUntil,
 		&i.Attempts,
+		&i.TaskKind,
 	)
 	return i, err
 }

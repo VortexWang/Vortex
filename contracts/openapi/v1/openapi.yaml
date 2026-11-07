@@ -7,6 +7,59 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/nodes/{node_id}:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+      - {name: node_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getNode
+      x-vortex-implementation-plan: 06-07
+      description: Tenant ownership or currently valid grant is required; platform reads are audited.
+      responses:
+        '200':
+          description: Scoped node business state.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/NodeSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    patch:
+      operationId: transitionNode
+      x-vortex-implementation-plan: 06-07
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/NodeTransition'}
+      responses:
+        '202':
+          description: Accepted desired lifecycle; execution and occupation remain receipt-bound.
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/node-groups/{group_id}:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+      - {name: group_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getNodeGroup
+      x-vortex-implementation-plan: 06-07
+      responses:
+        '200':
+          description: Authorized group with stable member-set version.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/NodeGroupSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/restrictions:
     parameters:
       - name: tenant_id
@@ -126,6 +179,36 @@ components:
           type: array
           items: {$ref: '#/components/schemas/Restriction'}
         next_cursor: {type: [string, 'null'], maxLength: 512}
+    NodeSummary:
+      type: object
+      additionalProperties: false
+      required: [id, name, region, owner_kind, lifecycle, version]
+      properties:
+        id: {type: string, format: uuid}
+        name: {type: string, minLength: 1, maxLength: 128}
+        region: {type: string}
+        owner_kind: {type: string, enum: [platform, tenant]}
+        lifecycle: {type: string, enum: [pending, online, draining, offline, disabled]}
+        version: {type: integer, minimum: 1}
+    NodeTransition:
+      type: object
+      additionalProperties: false
+      required: [lifecycle, expected_version]
+      properties:
+        lifecycle: {type: string, enum: [pending, online, draining, offline, disabled]}
+        expected_version: {type: integer, minimum: 1}
+        drain_seconds: {type: integer, minimum: 1, maximum: 86400, default: 300}
+    NodeGroupSummary:
+      type: object
+      additionalProperties: false
+      required: [id, purpose, scheduling, billing_multiplier_milli, billing_version, member_set_version]
+      properties:
+        id: {type: string, format: uuid}
+        purpose: {type: string, enum: [entry, relay, exit]}
+        scheduling: {type: string, enum: [dns, weighted_round_robin, primary_backup]}
+        billing_multiplier_milli: {type: integer, minimum: 0}
+        billing_version: {type: integer, minimum: 1}
+        member_set_version: {type: string, pattern: '^[a-f0-9]{64}$'}
     BusinessEvent:
       type: object
       additionalProperties: false

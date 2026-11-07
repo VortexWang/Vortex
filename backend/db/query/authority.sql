@@ -31,7 +31,7 @@ VALUES($1,$2,$3,$4,$5,$6,$7,$8);
 -- name: LeaseTask :one
 UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1
 WHERE id=(SELECT t.id FROM tasks t JOIN outbox o ON o.operation_id=t.operation_id
-WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1)
+WHERE t.state='pending' AND t.task_kind='control' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1)
 RETURNING *;
 
 -- name: MarkRunning :execrows
