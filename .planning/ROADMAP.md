@@ -9,7 +9,7 @@
 - [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
 - [x] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。 (completed 2026-11-04)
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
-- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；`0c2ba71` 的 Ubuntu 24.04 native 30%与50%候选正式门禁（300s warmup、3×300s、独立 TLS、100 Mbps UDP）返回 pass，完整81组D-04候选矩阵与独立审计通过，Q1阶段资格已通过；D-04最终参数锁定等待所有者确认，详见04-45审计。持久化 Agent/Hub 权威移交 Phase 5/6，不阻塞实现关闭。
+- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现与阶段资格验收完成（2026-11-07）；P4-Q1..Q5通过，81次D-04矩阵与30%中心参数正式门禁通过，所有者确认参数锁定。生产Agent/Hub/PostgreSQL权威与生产参数复验保留Phase 5/6归属。
 - [ ] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(current)*
 - [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
 - [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。
@@ -91,18 +91,18 @@
 3. 同节点/boot 的份额修改通过 prepare、关闭旧续租权、CAS 和执行回执切换，速率/连接降额在规定排空条件满足前保留旧占用。
 4. 两阶段配置应用具有幂等 Prepare/Commit/Abort，失败和丢失回执不产生双活代次、重复资源释放或未授权会话。
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
-**Plans**: 11/11 executed; implementation closed by owner decision on 2026-11-05. `04-VERIFICATION.md` remains `gaps_found`; Phase 4 qualification and D-04 approval remain evidence-gated; durable authority is transferred to Phase 5/6, not a Phase 4 blocker. Current closure register: [04-CLOSURE.md](phases/04-m2-m2-multi-hop-engine/04-CLOSURE.md).
+**Plans**: 11/11 executed; implementation and P4-Q1..Q5 qualification complete. Owner confirmed the measured D-04 table on 2026-11-07. See [04-45-FINAL-ACCEPTANCE-AUDIT.md](phases/04-m2-m2-multi-hop-engine/04-45-FINAL-ACCEPTANCE-AUDIT.md) and [04-CLOSURE.md](phases/04-m2-m2-multi-hop-engine/04-CLOSURE.md). Production durable authority remains Phase 5/6.
 - [x] 04-01 — Startable runtime config and accounting adapter
 - [x] 04-02 — Supervised VLink relay and stream bridge
 - [x] 04-03 — Five-process Docker/native topology
 - [x] 04-04 — Mixed TCP/UDP workload and evidence gate
 - [x] 04-05 — Native/Actions qualification and report
-- [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (execution record recovered; formal qualification gaps remain open for Phase 4 verification)
+- [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (stage qualification passed; historical evidence preserved)
 - [x] 04-07 — Fail-closed source authorization (G-04-01 closed; production accounting remains out of scope)
 - [x] 04-08 — Wire policy-time and snapshot accounting (runtime slice; full NFR-039/NFR-044 remain open)
 - [x] 04-09 — Wire share CAS and lease drain (G-04-040; process-local runtime slice, durable authority remains open)
-- [x] 04-10 — Early TCP DATA and finite attack matrix (G-04-006/G-04-007; timeline qualification remains open)
-- [x] 04-11 — D-04 parameter scan and formal qualification gate (G-04-003/G-04-005/G-D04; candidates remain unlocked and formal gate not-qualified)
+- [x] 04-10 — Early TCP DATA and finite attack matrix (finite attacks and controlled pool/mux timeline qualification passed)
+- [x] 04-11 — D-04 parameter scan and formal qualification gate (81 trials audited; center-profile formal gate passed; owner-confirmed stage parameter lock)
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 **Goal**: 节点可安全注册、持久运行和上报，Edge Hub 在有效边界内自治并在失联、重启和账本转接期间保守维持或停止授权。

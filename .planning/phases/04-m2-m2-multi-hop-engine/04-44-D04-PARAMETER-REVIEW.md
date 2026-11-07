@@ -1,16 +1,39 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-status: in_progress
-locked: false
+status: complete
+locked: true
 scope: Engine / in-process qualification adapter
 ---
 
 # D-04 parameter review
 
-This review applies the Phase 4 boundary in [04-CLOSURE.md](04-CLOSURE.md).
-It does not approve production Agent/Hub parameters, change the frozen control
-contract or claim PostgreSQL authority. The complete native dynamic matrix and both formal candidate gates are
-audited below. Parameter approval and formal acceptance debts remain retained.
+## Owner-confirmed final decision — 2026-11-07
+
+The project owner replied **“确认”** to the concrete D-04 table after the full
+matrix and center-profile formal qualification. D-04 is now **locked for the
+Phase 4 Engine/process-local adapter**, and P4-Q1..Q5 are accepted within that
+stage boundary. The machine-readable decision is [04-D04-LOCK.json](04-D04-LOCK.json).
+
+| Parameter | Confirmed value |
+| --- | --- |
+| Initial block per direction | 256 KiB |
+| Maximum adaptive block per direction | 4 MiB |
+| Demand floor | 8 MiB |
+| Committed-consumption observation window | 60 s |
+| Target horizon and explicit cap | 30 s; 375000000 bytes maximum |
+| Renewal waterline | 30% |
+| Reservation wait limit | 200 ms |
+
+The 81-trial matrix, independent raw audits and separate center-profile formal
+run support this decision; see [04-45-FINAL-ACCEPTANCE-AUDIT.md](04-45-FINAL-ACCEPTANCE-AUDIT.md).
+The nine failed 600 ms availability trials remain failed. Production Agent/Hub
+parameters require Phase 5 requalification; PostgreSQL authority remains Phase
+6. No production default or grant-return protocol change is implied.
+
+The earlier pending/unlocked statements below are historical observations,
+superseded by this explicit owner decision. Their measured sources, failures,
+and hashes remain unchanged.
+
 
 ## Evidence inventory
 

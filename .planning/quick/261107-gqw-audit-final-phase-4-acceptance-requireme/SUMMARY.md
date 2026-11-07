@@ -1,15 +1,18 @@
 ---
 quick_id: 261107-gqw
-status: incomplete
-remaining: explicit owner parameter confirmation
+status: complete
+completed: 2026-11-07
 ---
 
-The final audit maps P4-Q1..Q5 to current raw evidence, checks the unchanged
-Engine tree and effective 6d3d36a3 minimum-host baseline, and independently
-recomputes all four center-profile formal runs. Rate/UDP sequence/flow/target/
-source totals and funded conservation pass. Native socket settings restored;
-all formal runners terminal. Q1/Q2/Q3/Q5 meet the stage boundary. Q4 technical
-evidence meets the stage boundary; the canonical review's explicit owner lock
-confirmation is pending via the user-input tool. No production default approval
-or cross-phase persistence claim was fabricated. Overall Phase 4 remains
-pending that decision, not permanently held by stale debt wording.
+# Phase 4 final acceptance
+
+The full requirement audit and independent raw formal audit pass. The owner
+replied “确认” to the concrete D-04 table, resolving the sole pending decision.
+P4-Q1..Q5 pass, and the Phase 4 Engine/process-local parameter set is locked in
+04-D04-LOCK.json. Current verification, closure, canonical plan evidence,
+Roadmap and State now record completion. Historical failures, measured sources
+and Phase 5/6 production-authority handoffs remain unchanged.
+
+No runtime or product default was changed in this closing task. The final check
+validates the lock against the actually measured center config, report hashes,
+formal gate, matrix audit, unchanged Engine tree and all closure metadata.

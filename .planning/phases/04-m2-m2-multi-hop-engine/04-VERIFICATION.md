@@ -1,9 +1,9 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-verified: 2026-11-06
-status: gaps_found
-score: implementation closed; Phase 4 qualification gaps retained; durable integration transferred to Phase 5/6
-behavior_unverified: 3
+verified: 2026-11-07
+status: passed
+score: P4-Q1..Q5 passed; owner-confirmed D-04 lock; production durability transferred to Phase 5/6
+behavior_unverified: 0
 ---
 
 # Phase 4 Verification — current qualification review
@@ -18,19 +18,19 @@ local Docker and Actions regression are separately retained. The matrix passed
 81 raw audits; the center-profile formal accounting was also independently
 recomputed from rates, UDP sequences, flow identities and target/source totals.
 
-Q4 technical evidence and the concrete 256 KiB / 30 s / 30% proposal are ready.
-The explicit owner lock confirmation required by 04-06-D04-REVIEW was requested
-and is pending. Therefore `gaps_found` currently identifies that remaining
-decision; it is not a permanent hold on already satisfied Q1 requirements.
-Production persistent authority belongs to Phase 5/6 and is not a Phase 4
-closure blocker. Historical notes below retain their original evidence scope.
+Q4 technical evidence and the concrete 256 KiB / 30 s / 30% parameter
+proposal are accepted: the owner replied “确认” to the full table on 2026-11-07.
+`04-D04-LOCK.json` records initial/max block, floor, horizon/cap, waterline and
+wait bound. P4-Q1..Q5 now pass. No Phase 4 requirement remains open under
+04-CLOSURE's effective boundary. Production persistence, production parameter
+requalification and whole-system acceptance remain Phase 5/6/8 work.
 
-## Current scope decision — 2026-11-06
+## Historical verification increments
 
-[04-CLOSURE.md](04-CLOSURE.md) defines the current Phase 4 gates P4-Q1..Q5.
-Implementation is closed; qualification remains gaps_found. Persistent Agent/Hub
-and production backend work belong to Phase 5/6, not Phase 4 closure blockers.
-No previous failed check is promoted to pass.
+All dated records below retain their original source and result. Earlier
+`gaps_found`, unqualified or unlocked statements describe their own past slices
+and are superseded for current Phase 4 status by the final audit and confirmed
+lock above. No historical failed test is relabeled as passing.
 
 ## Bounded early TCP DATA increment — 2026-11-06
 

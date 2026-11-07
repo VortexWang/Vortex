@@ -77,11 +77,11 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Pending Todos
 
-- Phase 4: clean `0c2ba71` now has separate 30% and 50% formal candidate gate passes (300s warmup, 3×300s trials, independent TLS, 100 Mbps UDP), and clean `2543fb7` has a full 81-trial D-04 matrix with independent audit pass. Q1 stage qualification is satisfied under the effective baseline; Q4 technical evidence is complete and its explicit owner lock confirmation is pending. D-04 remains `locked=false` until that confirmation. Persisted Agent/Hub/PostgreSQL authority remains a Phase 5/6 handoff. Overall Phase 4 verification stays `gaps_found`.
+- Phase 4 complete (2026-11-07): P4-Q1..Q5 passed under the Engine/tracer scope. The owner confirmed D-04 256KiB→4MiB / 8MiB floor / 30s target capped at375000000 bytes / 30% / 200ms. Clean 0c2ba71 formal and same-source Docker/Actions evidence, 81 matrix audits and the final raw accounting audit are recorded in04-45. Production authority/requalification remains a Phase 5/6 handoff.
 
 ### Blockers/Concerns
 
-- Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
+- Historical implementation/performance notes below describe earlier slices; current Phase 4 acceptance is the passed04-45 audit and owner-confirmed04-D04-LOCK.json.
 - Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification remains pending. D-04 has now received a candidate review, but parameter experiments and lock approval remain pending. No Phase 4 completion is claimed.
 
 ## Deferred Items
@@ -109,6 +109,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 | 261107-0pg | Reconcile current Phase 4 evidence and native-host access boundary | 2026-11-07 | pending | complete | [261107-0pg-continue-phase-4-qualification-evidence-](./quick/261107-0pg-continue-phase-4-qualification-evidence-/) |
 | 261107-3wc | Record native Phase 4 formal gate and controlled-RTT evidence | 2026-11-07 | pending | complete | [261107-3wc-record-native-phase-4-formal-gate-and-mo](./quick/261107-3wc-record-native-phase-4-formal-gate-and-mo/) |
 | 261107-4ie | Complete durable/dynamic D-04 matrices and separate formal candidate evidence; debts retained | 2026-11-07 | pending | complete | [261107-4ie](./quick/261107-4ie-parameterize-durable-funding-block-d-04-/) |
+| 261107-gqw | Final Phase 4 requirement audit and owner-confirmed D-04 lock | 2026-11-07 | see git history | complete | [261107-gqw](./quick/261107-gqw-audit-final-phase-4-acceptance-requireme/) |
 
 
 ## Session Continuity

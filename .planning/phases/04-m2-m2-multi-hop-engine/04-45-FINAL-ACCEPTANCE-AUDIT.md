@@ -1,6 +1,6 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-status: awaiting_parameter_confirmation
+status: passed
 source_sha: 0c2ba71c0653ca1c806dc3df1db93d847544011b
 engine_tree: dacb5480c65c5563ed9a954482766b270730263d
 ---
@@ -41,7 +41,7 @@ and semantic hashes; fifteen-second Docker and hosted CI are regression only.
 | Q4 candidate scan | 64/256/1024 KiB x 10/30/60 s x 20/30/50%; three repeats, short/16TCP/UDP | Native 2543fb7 full 81-trial matrix; independent raw counters/config/timeline/target formula/65 s idle audit pass; 27-row comparison in 04-44 | Met |
 | Q4 dynamic/safety | Committed-consumption target, bounded merge/wait, timeout/cancel/reject/unknown, idle safety | Native sampled formula/idle audit; delayed/renewal/demand/credit tests inspect prewrite, coalescing, 200 ms deadline, late acceptance exactly once, frozen unknown, only idle-tail reclaim | Met; no issuer grant return claim |
 | Q4 stress limitations | Preserve failure, do not expand deadline to force pass | All nine 600 ms renewal trials fail availability; resets/UDP loss retained; 200 ms wait unchanged | Limitation recorded; no 600 ms availability claim |
-| Q4 final decision | Concrete reviewed parameters and owner lock confirmation | 256 KiB initial, 4 MiB max, 8 MiB floor, 30 s horizon capped at 375000000 bytes, 30% waterline, 200 ms wait. Three center-profile formal trials and TLS pass; owner confirmation requested as required by 04-06-D04-REVIEW | Only pending Phase 4 decision |
+| Q4 final decision | Concrete reviewed parameters and owner lock confirmation | 256 KiB initial, 4 MiB max, 8 MiB floor, 30 s horizon capped at 375000000 bytes, 30% waterline, 200 ms wait. Three center-profile formal trials and TLS pass; owner explicitly replied “确认” to this table; recorded in 04-D04-LOCK.json | Met and locked for Phase 4 |
 | Q5 controlled RTT/modes | Preserve passed data-path identity or rerun changed path | Native edb1849c pool/mux 50 samples each, additional median 0.991130/1.049556 ms; auto observed both. Engine tree identical at edb1849c/2543fb7/0c2ba71/current; same-source CI modes pass | Met; persistence latency excluded |
 
 ## Required artifacts and checks
@@ -50,8 +50,8 @@ The canonical deliverables `04-06-D04-REVIEW.md`,
 `04-06-QUALIFICATION-MATRIX.md`, and `04-11-EVIDENCE.md` now reference the full
 matrix, distinct candidate profiles and explicit limits. `04-43` retains source
 identities; `04-44` contains every comparison and the proposed parameter table.
-`04-CLOSURE`, `04-VERIFICATION`, ROADMAP and STATE will receive the final
-verdict only after the explicit parameter confirmation. Earlier failures and
+`04-CLOSURE`, `04-VERIFICATION`, ROADMAP and STATE record the final
+passed verdict following the explicit parameter confirmation. Earlier failures and
 stale historical statements remain labeled historical, not silently rewritten.
 
 Local 37 Phase 4 Python tests, full matrix raw auditor, both formal gates and
@@ -63,10 +63,10 @@ Phase 1 frozen-contract hash and Phase 5 full-disk CI failures remain separate
 records. The draft CI PR is not merged; Phase 4 qualification does not imply
 product release, production PostgreSQL authority or all-phase CI success.
 
-## Remaining decision
+## Completion decision
 
-The earlier phrase “user-required debts must remain” was too broad: the active
-goal requires resolving them where evidence permits. Q1 technical qualification
-is satisfied under the effective baseline. Q4 has a complete, reviewable proposal
-and awaits the owner's explicit lock confirmation requested by the canonical
-review. No new technical blocker is established by the old wording alone.
+The owner replied “确认” to the proposed parameter table on 2026-11-07.
+That resolves the final Q4 decision; all five Phase 4 qualification items now
+pass within the effective Engine/tracer boundary. The confirmed values and
+measurement scope are recorded in `04-D04-LOCK.json`. Historical failures and
+X5/X6 handoffs remain unchanged. No required Phase 4 work remains.

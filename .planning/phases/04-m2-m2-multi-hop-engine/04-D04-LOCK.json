@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "phase": "04-m2-m2-multi-hop-engine",
+  "status": "locked",
+  "locked": true,
+  "scope": "Phase 4 Engine / process-local qualification adapter only",
+  "approval": {
+    "by": "project owner",
+    "message": "确认",
+    "recorded_at_utc": "2026-11-07T04:25:51Z",
+    "reference": "User confirmation of the concrete D-04 parameter table in this session"
+  },
+  "parameters": {
+    "initial_block_bytes_per_direction": 262144,
+    "max_block_bytes_per_direction": 4194304,
+    "demand_floor_bytes": 8388608,
+    "consumption_window_seconds": 60,
+    "target_seconds": 30,
+    "target_cap_bytes": 375000000,
+    "renew_percent": 30,
+    "reservation_wait_max_ms": 200
+  },
+  "measured_source_sha": "0c2ba71c0653ca1c806dc3df1db93d847544011b",
+  "engine_tree": "dacb5480c65c5563ed9a954482766b270730263d",
+  "evidence": {
+    "matrix_source_sha": "2543fb745d942ddf710c02d502a3675b9b3c7fe9",
+    "matrix_summary_sha256": "135a289cdf96d46c4b3668befa45e87c289403c669541fe7fb5b1932abc4566a",
+    "matrix_audit_sha256": "bfe95ec5ac574c6fbf529378c6f95f35c9f8ba1dab6927ecb7d529e444c7b9b4",
+    "formal_semantic_sha256": "84a3e5c9e6efe6b8496ba6cd1a33fe92ecf9d5cad3c4e0182a14e6a03fec2de6",
+    "comparison_sha256": "9a427d3e8fc5e1ada784c82218ceafbd550f563570e5ef9f4e0f3a6e2557d81f",
+    "actions_run": "https://github.com/nodeox/VORTEX/actions/runs/42308608919",
+    "final_audit": "04-45-FINAL-ACCEPTANCE-AUDIT.md"
+  },
+  "limits": [
+    "600 ms renewal-response pressure availability failed in all nine trials; the 200 ms wait is unchanged.",
+    "Idle demand shrink and block-tail settlement do not authorize issuer grant return.",
+    "Production Agent/Hub latency, persistence and parameter requalification belong to Phase 5/6.",
+    "This lock does not change product defaults, the control contract, or release status."
+  ]
+}
