@@ -1,0 +1,35 @@
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 0.005s
+
+OK
+sqlc v1.31.1: two clean generations and committed source match byte-for-byte
+go: downloading github.com/jackc/pgx/v5 v5.11.0
+go: downloading github.com/google/uuid v1.6.0
+go: downloading google.golang.org/grpc v1.85.0
+go: downloading github.com/pressly/goose/v3 v3.29.0
+go: downloading google.golang.org/protobuf v1.36.12
+go: downloading github.com/jackc/pgpassfile v1.0.0
+go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+go: downloading golang.org/x/text v0.43.0
+go: downloading github.com/jackc/puddle/v2 v2.2.3
+go: downloading golang.org/x/sys v0.49.0
+go: downloading modernc.org/sqlite v1.61.1
+go: downloading github.com/sethvargo/go-retry v0.5.0
+go: downloading go.uber.org/multierr v1.11.0
+go: downloading golang.org/x/net v0.61.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8
+go: downloading golang.org/x/sync v0.24.0
+go: downloading github.com/mfridman/interpolate v0.0.2
+go: downloading modernc.org/libc v1.79.0
+go: downloading modernc.org/mathutil v1.7.1
+go: downloading modernc.org/memory v1.12.1
+go: downloading github.com/dustin/go-humanize v1.1.0
+go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+Traceback (most recent call last):
+  File "/home/runner/work/Vortex/Vortex/tools/phase6/dependency_lock_check.py", line 102, in <module>
+    main()
+  File "/home/runner/work/Vortex/Vortex/tools/phase6/dependency_lock_check.py", line 59, in main
+    assert actual == reviewed["compiled_modules"], "dependency/license bytes changed; review the new closure"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: dependency/license bytes changed; review the new closure
