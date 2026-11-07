@@ -18,6 +18,13 @@ if test -z "${CLOUDFLARE_TOKEN_POLICY_FILE:-}" && test -z "${CLOUDFLARE_POLICY_T
   missing=true
 fi
 test "$missing" = false || exit 78
+if test -n "${CLOUDFLARE_TOKEN_POLICY_FILE:-}"; then
+  case "$CLOUDFLARE_TOKEN_POLICY_FILE" in
+    /*) ;;
+    *) CLOUDFLARE_TOKEN_POLICY_FILE="$root/$CLOUDFLARE_TOKEN_POLICY_FILE";;
+  esac
+  export CLOUDFLARE_TOKEN_POLICY_FILE
+fi
 export GOTOOLCHAIN=local
 test "$(go env GOVERSION)" = go1.27.3 || { echo 'Go 1.27.3 required' >&2; exit 1; }
 cd backend
