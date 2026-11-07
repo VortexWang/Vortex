@@ -213,7 +213,7 @@ func redeemCode(ctx context.Context, q *generated.Queries, scope TenantScope, c 
 		if e != nil {
 			return PackageResult{}, e
 		}
-		return PackageResult{SnapshotID: snap.ID, SourceID: source.ID, OperationID: op.ID, Version: 1, AnchorAt: now, ExpiresAt: source.ExpiresAt.Time}, nil
+		return PackageResult{SnapshotID: snap.ID, SourceID: source.ID, OperationID: op.ID, Version: 1, AnchorAt: now, ExpiresAt: source.ExpiresAt.Time.UTC()}, nil
 	}
 	live := exists && now.Before(sub.ExpiresAt.Time)
 	if c.Kind == "duration" && !live {

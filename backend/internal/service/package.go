@@ -270,7 +270,7 @@ func minTime(a, b time.Time) time.Time {
 	return b
 }
 func packageResult(s generated.Subscription, source, op string) PackageResult {
-	return PackageResult{SubscriptionID: s.ID, SnapshotID: s.SnapshotID, SourceID: source, OperationID: op, Version: s.Version, AnchorAt: s.AnchorAt.Time, ExpiresAt: s.ExpiresAt.Time}
+	return PackageResult{SubscriptionID: s.ID, SnapshotID: s.SnapshotID, SourceID: source, OperationID: op, Version: s.Version, AnchorAt: s.AnchorAt.Time.UTC(), ExpiresAt: s.ExpiresAt.Time.UTC()}
 }
 func (s PackageService) Subscription(ctx context.Context, scope TenantScope, request string) (generated.Subscription, PackageTerms, error) {
 	var sub generated.Subscription
