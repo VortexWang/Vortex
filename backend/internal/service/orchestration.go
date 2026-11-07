@@ -24,6 +24,22 @@ import (
 // I/O: every next phase and its audit/outbox commit before a worker sends it.
 type RuleOrchestrator struct{ Pool *pgxpool.Pool }
 
+// Serialize revision decisions before locking deployments/tasks. Mutation and
+// compile already take this head lock first; a late receipt must not enqueue
+// activation concurrently with the transaction superseding its pending work.
+func lockRuleDeployment(ctx context.Context, q *generated.Queries, tenant, id string) (generated.RuleDeployment, generated.RuleHead, error) {
+	d, e := q.GetRuleDeployment(ctx, generated.GetRuleDeploymentParams{TenantID: tenant, ID: id})
+	if e != nil {
+		return d, generated.RuleHead{}, e
+	}
+	h, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: tenant, ID: d.RuleID})
+	if e != nil {
+		return d, h, e
+	}
+	d, e = q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: tenant, ID: id})
+	return d, h, e
+}
+
 func (s RuleOrchestrator) Begin(ctx context.Context, scope TenantScope, rule string, revision int64, input, request string) (generated.RuleDeployment, error) {
 	var result generated.RuleDeployment
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.prepare", ResourceID: rule, RequestID: request, Reason: "pin committed artifact member set"}, func(q *generated.Queries) error {
@@ -159,7 +175,13 @@ func (s RuleOrchestrator) ReceiptWithLease(ctx context.Context, scope TenantScop
 		if e != nil {
 			return e
 		}
-		d, e := q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: scope.TenantID(), ID: b.DeploymentID})
+		d, head, e := lockRuleDeployment(ctx, q, scope.TenantID(), b.DeploymentID)
+		if e != nil {
+			return e
+		}
+		// Member state is mutable. Refresh it after serializing on the head so
+		// another receipt cannot make the pre-lock observation stale.
+		b, e = q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: scope.TenantID(), TaskID: task})
 		if e != nil {
 			return e
 		}
@@ -239,11 +261,11 @@ func (s RuleOrchestrator) ReceiptWithLease(ctx context.Context, scope TenantScop
 				return e
 			}
 		}
-		return reconcileRuleDeployment(ctx, q, scope, d)
+		return reconcileRuleDeployment(ctx, q, scope, d, head)
 	})
 }
 
-func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope TenantScope, d generated.RuleDeployment) error {
+func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope TenantScope, d generated.RuleDeployment, head generated.RuleHead) error {
 	members, e := q.RuleDeploymentMembers(ctx, generated.RuleDeploymentMembersParams{TenantID: d.TenantID, DeploymentID: d.ID})
 	if e != nil {
 		return e
@@ -256,11 +278,12 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 		failed = failed || m.State == "failed"
 		anyActive = anyActive || m.State == "active"
 	}
+	obsolete := head.DesiredRevision != d.RuleRevision || d.State == "superseded"
 	state := d.State
 	switch {
 	case allActive:
 		state = "running"
-	case allPrepared && d.State != "failed" && d.State != "superseded":
+	case allPrepared && !obsolete && d.State != "failed":
 		state = "committing"
 		for _, m := range members {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
@@ -273,6 +296,8 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 		state = "unknown"
 	case failed:
 		state = "failed"
+	case obsolete:
+		state = "superseded"
 	}
 	for _, m := range members {
 		if m.State == "unknown" {
@@ -280,11 +305,11 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 				return e
 			}
 		}
-		if m.State == "prepared" && (failed || d.State == "failed" || d.State == "superseded") {
+		if m.State == "prepared" && (obsolete || failed || d.State == "failed") {
 			if e = queueRulePhase(ctx, q, scope, d, m, "abort"); e != nil {
 				return e
 			}
-		} else if m.State == "prepared" && (d.State == "committing" || d.State == "partial") {
+		} else if m.State == "prepared" && !obsolete && (d.State == "committing" || d.State == "partial") {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
 				return e
 			}
@@ -300,7 +325,7 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 // or occupation fact is removed; unknown members remain queryable.
 func (s RuleOrchestrator) FailRollback(ctx context.Context, scope TenantScope, id, request string) error {
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.rollback.denied", ResourceID: id, RequestID: request, Reason: "current authorization/resource recheck failed; retain occupation"}, func(q *generated.Queries) error {
-		d, e := q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: scope.TenantID(), ID: id})
+		d, head, e := lockRuleDeployment(ctx, q, scope.TenantID(), id)
 		if e != nil {
 			return e
 		}
@@ -314,7 +339,7 @@ func (s RuleOrchestrator) FailRollback(ctx context.Context, scope TenantScope, i
 		if e = q.SetRuleDeploymentState(ctx, generated.SetRuleDeploymentStateParams{TenantID: scope.TenantID(), ID: id, State: "failed"}); e != nil {
 			return e
 		}
-		return reconcileRuleDeployment(ctx, q, scope, d)
+		return reconcileRuleDeployment(ctx, q, scope, d, head)
 	})
 }
 
@@ -327,16 +352,13 @@ func (s RuleOrchestrator) Rollback(ctx context.Context, scope TenantScope, id, r
 	var model RuleInput
 	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.rollback.request", ResourceID: id, RequestID: request, Reason: "deadline exceeded; retain unknown occupation"}, func(q *generated.Queries) error {
 		var e error
-		d, e = q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: scope.TenantID(), ID: id})
+		var h generated.RuleHead
+		d, h, e = lockRuleDeployment(ctx, q, scope.TenantID(), id)
 		if e != nil {
 			return e
 		}
 		if d.State == "running" || d.RollbackRevision != 0 {
 			return ErrConflict
-		}
-		h, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: d.RuleID})
-		if e != nil {
-			return e
 		}
 		if h.DesiredRevision != d.RuleRevision {
 			return ErrRuleRevisionConflict

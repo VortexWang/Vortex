@@ -48,7 +48,9 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 	if e != nil {
 		return true, e
 	}
-	d, e := q.LockRuleDeployment(ctx, generated.LockRuleDeploymentParams{TenantID: task.TenantID, ID: b.DeploymentID})
+	// Only immutable identity is needed here. Holding a deployment lock after
+	// leasing a task would invert the head -> deployment -> task receipt order.
+	d, e := q.GetRuleDeployment(ctx, generated.GetRuleDeploymentParams{TenantID: task.TenantID, ID: b.DeploymentID})
 	if e != nil {
 		return true, e
 	}

@@ -71,6 +71,9 @@ INSERT INTO rule_deployments(tenant_id,id,rule_id,rule_revision,input_digest,sta
 -- name: LockRuleDeployment :one
 SELECT * FROM rule_deployments WHERE tenant_id=$1 AND id=$2 FOR UPDATE;
 
+-- name: GetRuleDeployment :one
+SELECT * FROM rule_deployments WHERE tenant_id=$1 AND id=$2;
+
 -- name: RuleDeploymentByInput :one
 SELECT * FROM rule_deployments WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND input_digest=$4;
 

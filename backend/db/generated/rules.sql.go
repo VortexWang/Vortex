@@ -336,6 +336,32 @@ func (q *Queries) GetRuleCompileRequest(ctx context.Context, arg GetRuleCompileR
 	return i, err
 }
 
+const getRuleDeployment = `-- name: GetRuleDeployment :one
+SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE tenant_id=$1 AND id=$2
+`
+
+type GetRuleDeploymentParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) GetRuleDeployment(ctx context.Context, arg GetRuleDeploymentParams) (RuleDeployment, error) {
+	row := q.db.QueryRow(ctx, getRuleDeployment, arg.TenantID, arg.ID)
+	var i RuleDeployment
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.State,
+		&i.Deadline,
+		&i.RollbackRevision,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
 const getRuleReceipt = `-- name: GetRuleReceipt :one
 SELECT tenant_id, task_id, receipt_sha256, payload FROM rule_delivery_receipts WHERE tenant_id=$1 AND task_id=$2
 `

@@ -1,0 +1,163 @@
+=== RUN   TestNodeLifecycleDrainDeleteAndAuditRollback
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestNodeLifecycleDrainDeleteAndAuditRollback (0.04s)
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/prepare
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/query_prepared
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/partial_commit
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestApplySupersededLateObservationCannotQueueCommit (0.36s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/prepare (0.13s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/query_prepared (0.14s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/partial_commit (0.09s)
+=== RUN   TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery (0.07s)
+=== RUN   TestApplyPrepareCommitUnknownAndLateReceipt
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestApplyPrepareCommitUnknownAndLateReceipt (0.08s)
+=== RUN   TestPortAuditRollbackAndForeignAllocation
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestPortAuditRollbackAndForeignAllocation (0.03s)
+=== RUN   TestPortRestrictionAuditRollbackSameTransaction
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestPortRestrictionAuditRollbackSameTransaction (0.05s)
+=== RUN   TestCompileWorkerMissingSnapshotThenReadyRestart
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestCompileWorkerMissingSnapshotThenReadyRestart (0.06s)
+=== RUN   TestCompileWorkerAuditRollback
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestCompileWorkerAuditRollback (0.06s)
+=== RUN   TestCompileWorkerMissingSnapshotPreservesPriorAuthority
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestCompileWorkerMissingSnapshotPreservesPriorAuthority (0.05s)
+=== RUN   TestCompileWorkerConflictRetainsAuthority
+2026/11/07 17:32:04 goose: no migrations to run. current version: 5
+--- PASS: TestCompileWorkerConflictRetainsAuthority (0.06s)
+=== RUN   TestCompileWorkerConflictPreservesPriorActiveArtifact
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestCompileWorkerConflictPreservesPriorActiveArtifact (0.07s)
+=== RUN   TestRuleFixedPortRejectsUnallocatedCompilePaths
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleFixedPortRejectsUnallocatedCompilePaths (0.03s)
+=== RUN   TestRuleAutoPortConsumesDurableAllocation
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleAutoPortConsumesDurableAllocation (0.06s)
+=== RUN   TestRulePortLegacyInflightCannotBeOverwritten
+=== RUN   TestRulePortLegacyInflightCannotBeOverwritten/leased
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+=== RUN   TestRulePortLegacyInflightCannotBeOverwritten/running
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+=== RUN   TestRulePortLegacyInflightCannotBeOverwritten/unknown
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRulePortLegacyInflightCannotBeOverwritten (0.12s)
+    --- PASS: TestRulePortLegacyInflightCannotBeOverwritten/leased (0.04s)
+    --- PASS: TestRulePortLegacyInflightCannotBeOverwritten/running (0.04s)
+    --- PASS: TestRulePortLegacyInflightCannotBeOverwritten/unknown (0.04s)
+=== RUN   TestRuleAutoPortRejectsMissingOrChangedMemberAllocation
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleAutoPortRejectsMissingOrChangedMemberAllocation (0.03s)
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=true
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+2026/11/07 17:32:05 OK   00001_authority.sql (5.07ms)
+2026/11/07 17:32:05 OK   00002_tenant_policy.sql (6.54ms)
+2026/11/07 17:32:05 OK   00003_nodes_ports.sql (11.86ms)
+2026/11/07 17:32:05 OK   00004_entry_group_domains.sql (2.19ms)
+2026/11/07 17:32:05 OK   00005_rules_compile.sql (18.87ms)
+2026/11/07 17:32:05 goose: successfully migrated database to version: 5
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=false
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+2026/11/07 17:32:05 OK   00001_authority.sql (5.97ms)
+2026/11/07 17:32:05 OK   00002_tenant_policy.sql (5.41ms)
+2026/11/07 17:32:05 OK   00003_nodes_ports.sql (10.69ms)
+2026/11/07 17:32:05 OK   00004_entry_group_domains.sql (2.25ms)
+2026/11/07 17:32:05 OK   00005_rules_compile.sql (10.92ms)
+2026/11/07 17:32:05 goose: successfully migrated database to version: 5
+--- PASS: TestRulePortActualAgentSocketsUnknownAndQuery (0.47s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=true (0.29s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=false (0.18s)
+=== RUN   TestRuleRevisionSchema
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleRevisionSchema (0.01s)
+=== RUN   TestRuleImmutableRevisionConflictAndTenantScope
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleImmutableRevisionConflictAndTenantScope (0.02s)
+=== RUN   TestRuleValidationPathsTargetsAndDirections
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleValidationPathsTargetsAndDirections (0.03s)
+=== RUN   TestRuleDependencyRecompileKeepsActiveRevision
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleDependencyRecompileKeepsActiveRevision (0.02s)
+=== RUN   TestRuleAuditRollback
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleAuditRollback (0.02s)
+=== RUN   TestRuleCompileCommittedArtifactAndAuditRollback
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestRuleCompileCommittedArtifactAndAuditRollback (0.05s)
+=== RUN   TestDNSDurableServingRecomputeAndUnknownReplay
+2026/11/07 17:32:05 goose: no migrations to run. current version: 5
+--- PASS: TestDNSDurableServingRecomputeAndUnknownReplay (0.05s)
+=== RUN   TestDNSAuditRollbackAndCurrentRole
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestDNSAuditRollbackAndCurrentRole (0.02s)
+=== RUN   TestServingCurrentSnapshotAndUnknown
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestServingCurrentSnapshotAndUnknown (0.03s)
+=== RUN   TestServingAllCommittedRulesAndFailedNewRule
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestServingAllCommittedRulesAndFailedNewRule (0.04s)
+=== RUN   TestServingPlatformAggregatesAllCommittedTenantRules
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestServingPlatformAggregatesAllCommittedTenantRules (0.04s)
+=== RUN   TestTenantAuditRollbackSharedAuthority
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestTenantAuditRollbackSharedAuthority (0.01s)
+=== RUN   TestRestrictionAuditRollback
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestRestrictionAuditRollback (0.02s)
+=== RUN   TestTracerTransactionRollback
+2026/11/07 17:32:06 goose: no migrations to run. current version: 5
+--- PASS: TestTracerTransactionRollback (0.01s)
+PASS
+ok  	vortex/backend/internal/service	2.790s
+=== RUN   TestCompileArtifactImmutableSchema
+2026/11/07 17:32:03 OK   00001_authority.sql (7.66ms)
+2026/11/07 17:32:03 OK   00002_tenant_policy.sql (6.23ms)
+2026/11/07 17:32:03 OK   00003_nodes_ports.sql (13.69ms)
+2026/11/07 17:32:03 OK   00004_entry_group_domains.sql (1.74ms)
+2026/11/07 17:32:03 OK   00005_rules_compile.sql (13.73ms)
+2026/11/07 17:32:03 goose: successfully migrated database to version: 5
+--- PASS: TestCompileArtifactImmutableSchema (0.05s)
+=== RUN   TestCompileCanonicalDigestReplay
+--- PASS: TestCompileCanonicalDigestReplay (0.00s)
+=== RUN   TestCompileInvalidAuthorityNoArtifacts
+--- PASS: TestCompileInvalidAuthorityNoArtifacts (0.00s)
+=== RUN   TestCompileAutoPortBindingCanonicalReplay
+--- PASS: TestCompileAutoPortBindingCanonicalReplay (0.00s)
+=== RUN   TestCompileGrantPermitAndDirection
+--- PASS: TestCompileGrantPermitAndDirection (0.00s)
+=== RUN   TestCompileRuntimeSchemaCompatibility
+=== RUN   TestCompileRuntimeSchemaCompatibility/hops-1
+=== RUN   TestCompileRuntimeSchemaCompatibility/hops-2
+=== RUN   TestCompileRuntimeSchemaCompatibility/hops-3
+=== RUN   TestCompileRuntimeSchemaCompatibility/hops-16
+--- PASS: TestCompileRuntimeSchemaCompatibility (0.92s)
+    --- PASS: TestCompileRuntimeSchemaCompatibility/hops-1 (0.04s)
+    --- PASS: TestCompileRuntimeSchemaCompatibility/hops-2 (0.08s)
+    --- PASS: TestCompileRuntimeSchemaCompatibility/hops-3 (0.12s)
+    --- PASS: TestCompileRuntimeSchemaCompatibility/hops-16 (0.68s)
+=== RUN   TestCompileRuntimeBounds
+=== RUN   TestCompileRuntimeBounds/path-overflow
+=== RUN   TestCompileRuntimeBounds/members-256
+=== RUN   TestCompileRuntimeBounds/members-257
+--- PASS: TestCompileRuntimeBounds (0.05s)
+    --- PASS: TestCompileRuntimeBounds/path-overflow (0.00s)
+    --- PASS: TestCompileRuntimeBounds/members-256 (0.05s)
+    --- PASS: TestCompileRuntimeBounds/members-257 (0.00s)
+PASS
+ok  	vortex/backend/internal/compiler	1.261s
+?   	vortex/backend/internal/repository	[no test files]
+?   	vortex/backend/internal/worker	[no test files]
