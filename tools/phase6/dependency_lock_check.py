@@ -1,7 +1,8 @@
 """Verify the current backend compiled closure against reviewed exact bytes.
 
 The inventory includes production and test packages on both supported Linux
-architectures plus the executing host. Module-graph-only dependencies are not
+architectures, the reviewed Darwin arm64 development host, and the executing host.
+Module-graph-only dependencies are not
 represented as linked code. This is not a distributed-image license audit.
 """
 import hashlib
@@ -24,7 +25,10 @@ def command(args, **kwargs):
 
 def inventory():
     modules = {}
-    for goos, goarch in {("linux", "amd64"), ("linux", "arm64"),
+    # Keep the reviewed union stable on Linux CI as well as the Darwin producer.
+    # Darwin-only modules remain checked against their exact reviewed bytes;
+    # platform selection must never shrink the license inventory on CI.
+    for goos, goarch in {("linux", "amd64"), ("linux", "arm64"), ("darwin", "arm64"),
                            (command(["go", "env", "GOOS"]), command(["go", "env", "GOARCH"]))}:
         env = dict(os.environ, GOOS=goos, GOARCH=goarch)
         raw = command(["go", "-C", "backend", "list", "-deps", "-test", "-f",
