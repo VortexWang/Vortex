@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/port_red_test.py",
+  "exitCode": 1,
+  "output": "test_port_authority (__main__.PortAuthority) ... FAIL\n\n======================================================================\nFAIL: test_port_authority (__main__.PortAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/port_red_test.py\", line 9, in test_port_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestPortReservationProofSchema\n2026/11/07 08:28:00 goose: no migrations to run. current version: 3\n    port_test.go:14: port allocation authority table port_allocations missing\n    port_test.go:14: port allocation authority table port_reservations missing\n    port_test.go:14: port allocation authority table release_proofs missing\n--- FAIL: TestPortReservationProofSchema (0.03s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.602s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.077s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_port_authority",
+  "targetFile": "backend/internal/service/port_test.go",
+  "expected": "Port reservation and release authority tables exist",
+  "actual": "All three port authority tables absent",
+  "semanticAssessment": "Real PostgreSQL schema assertion executed with three missing planned authority tables; no discovery, fixture or compile error."
+}

@@ -1,0 +1,27 @@
+=== RUN   TestNodeGroupAuthoritySchema
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestNodeGroupAuthoritySchema (0.02s)
+=== RUN   TestNodeGroupOwnershipAndStableMembers
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestNodeGroupOwnershipAndStableMembers (0.03s)
+=== RUN   TestNodeGrantValidityHistoryAndAudit
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestNodeGrantValidityHistoryAndAudit (0.02s)
+=== RUN   TestNodeLifecycleDrainDeleteAndAuditRollback
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestNodeLifecycleDrainDeleteAndAuditRollback (0.02s)
+=== RUN   TestNodeSegmentPermitIndependentOfGrants
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestNodeSegmentPermitIndependentOfGrants (0.02s)
+=== RUN   TestTenantPlatformOwnershipGrant
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestTenantPlatformOwnershipGrant (0.01s)
+=== RUN   TestTenantAuditRollbackSharedAuthority
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestTenantAuditRollbackSharedAuthority (0.01s)
+=== RUN   TestRestrictionAuditRollback
+2026/11/07 08:26:14 goose: no migrations to run. current version: 3
+--- PASS: TestRestrictionAuditRollback (0.01s)
+PASS
+ok  	vortex/backend/internal/service	0.804s
+?   	vortex/backend/internal/repository	[no test files]
