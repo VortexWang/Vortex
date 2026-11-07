@@ -28,3 +28,13 @@ Repair benchmark result parsing when Go benchmark names and metrics are separate
 ## Remaining native qualification sequence
 
 After the live full-factorial job ends, run repeated dynamic-target 600ms renewal-response experiments for all three waterlines (256KiB block,30s horizon,8MiB floor), retaining errors/timeouts as failed availability observations. Do not increase the 200ms reservation wait. Use a separate clean 0c2ba71 worktree and preserve/restore socket settings. A provisional profile may receive formal-duration evidence before review, but remains unlocked until the full comparative matrix is audited. No native performance workloads run concurrently.
+
+## Scope reconciliation
+
+The later owner-approved `04-CLOSURE.md` governs Phase 4 acceptance. Durable
+fixture evidence supplements safety review; a production durable issuer is not
+a prerequisite for the Phase 4 parameter lock. Review must explicitly separate
+idle demand shrink and block-tail settlement from issuer grant return. The
+production Agent/Hub/PostgreSQL authority and its requalification remain Phase
+5/6 handoffs. This supersedes the earlier production-durable-bar interpretation
+in this quick plan without changing any measured result.

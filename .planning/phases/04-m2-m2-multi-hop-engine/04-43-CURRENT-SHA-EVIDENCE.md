@@ -7,14 +7,23 @@ runtime-authority workload from clean commit
 `edb1849c92b2cf81c2f6c2f9e91725f62c407090`. The host reports Linux amd64,
 12 logical CPUs, 31.3 GiB RAM, native driver placement and qualification
 interface `enp3s0f0`; the worktree was clean. The run used `GOMAXPROCS=1`, 16
-TCP streams, 100 Mbps UDP, a 60-second semantic warmup and three 300-second
+TCP streams, 100 Mbps UDP and three 300-second
 trials (`trial-1`, `trial-2`, `trial-3c`). The selected trials measured TCP
 `635.085192`, `631.061724`, and `632.175350` Mbps; UDP was `99.998336`,
 `99.998336`, and `99.997472` Mbps with zero loss. Source credit was conserved
 and settled in every trial. The independent TLS comparison measured runtime
 mixed TCP `635.085192` Mbps versus TLS mixed TCP `572.090168` Mbps, ratio
 `1.110113803059267`, with zero UDP loss. The machine-generated qualification
-gate returned `status=pass`, three trials, and 60-second warmup.
+gate returned `status=pass`, three trials, and a recorded `warmup_seconds=60`.
+
+Warmup provenance correction: the historical directory contains both `warmup`
+(60 seconds) and `warmup300` (300 seconds). Duration is part of the semantic
+manifest. Only `warmup300/report.json` matches the formal trial workload digest
+`f1fae018…`; the old gate JSON does not record input paths. Therefore its
+`warmup_seconds=60` field does not establish that the 60-second report was the
+matching gate input. The original gate file and hash below are preserved.
+The final 0c2ba71 qualification is being collected with an explicit 300-second
+warmup path and matching formal durations; its result remains pending.
 
 Summary hashes (raw event JSONL remains on the host) are:
 
