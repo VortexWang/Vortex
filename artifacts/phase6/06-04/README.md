@@ -1,4 +1,22 @@
-# 06-04 执行证据：运行验证通过，契约待批准
+# 06-04 执行证据：精确批准与本机验证通过
+
+当前最终验证源为 `9db5da0eb1d8d5f20baa7802ca37007588d6cc35`。
+用户已明确“批准 CR-006”，精确 JSON SHA256 仍为
+`60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d`。
+批准记录时间为 2026-11-07T20:45:23Z，DB/API2.1.0 已冻结；CR005 原历史保持。
+同名新目录保存批准后重新运行的 clean clone 原始证据，未覆盖下文历史 pending 结果。
+
+完整 check.sh --through-plan 06-04 --produce docker 通过：result=0、
+source_clean=true、acceptance_complete=true（仅本机 producer）。
+backend 全包普通/race service8.915s/15.177s、Agent/Engine/contracts 全包
+普通/race、真实进程、sqlc 两次独立生成、OpenAPI lint/cmp、四条冻结、
+wire/schema/map/SemVer、Linux双架构编译、真实Cloudflare CRUD均通过。
+verification/ 保存完整入口日志、批准元数据/历史/规范/catalog/changelog
+五种篡改反例及 manifest 反例；删到期测试、篡改校验和、缺 Actions 均拒绝。
+最终同提交 Actions 配对仍属于 06-11；不把交叉编译当双架构原生运行。
+
+## 以下为批准前历史证据
+
 
 最新安全修复验证源为 `a9275d8660d5041cb9d7d4b7ab4e22c3095624ec`，同名目录
 保存独立 clean clone 的完整新一轮证据。以下 d7e83d76 内容保留为前轮历史，

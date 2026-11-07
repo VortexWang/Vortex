@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Historical CR-005 prefix, exact owner-approved CR-006 hashes and metadata-only freeze, unchanged legacy wire/schema passed
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract: two clean generations, historical CR-005 prefix, exact owner-approved CR-006 freeze and unchanged legacy wire/schema passed

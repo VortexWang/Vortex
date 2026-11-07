@@ -1,3 +1,18 @@
+# CHECKPOINT RESOLVED
+
+用户已明确回复“批准 CR-006”，精确 JSON SHA256：
+`60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d`。
+2026-11-07T20:45:23Z 记录真实批准，原 proposal 不变，DB/API2.1.0
+冻结，CR005 历史条目保持。批准提交 `9db5da0e`。
+批准后 clean clone 完整 Docker producer exit0，result0、source_clean=true、
+acceptance_complete=true（本机范围）；所有必要普通/race、冻结、生成、
+Cloudflare 和门禁反例通过。证据见同名9db5目录。无待用户输入的阻塞。
+最终 Actions 配对仍归属06-11，资金/租约与HTTP仍归属后续计划。
+
+以下保留原待批准 checkpoint 作为历史，不代表当前状态。
+
+---
+
 # CHECKPOINT REACHED
 
 **Type:** human-verify

@@ -1,0 +1,22 @@
+{
+  "source_commit": "9db5da0eb1d8d5f20baa7802ca37007588d6cc35",
+  "synthetic_negative_inputs_only": true,
+  "results": {
+    "valid_runtime_host": {
+      "exit_code": 0,
+      "output": "manifest passed: 96 owners; docker producer only; pairing pending\n"
+    },
+    "missing_actions_pairing": {
+      "exit_code": 1,
+      "output": "manifest failed: actions result.json missing\n"
+    },
+    "missing_expiry_authority_test": {
+      "exit_code": 1,
+      "output": "manifest failed: docker normal/race test evidence missing TestPackageLifecycleExpiryIndependentOfNodeAuthority\n"
+    },
+    "checksum_corruption": {
+      "exit_code": 1,
+      "output": "manifest failed: docker/tracer.log checksum mismatch\n"
+    }
+  }
+}

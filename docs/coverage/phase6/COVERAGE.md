@@ -72,14 +72,14 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | RUL-016 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
 | BE-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
 | BE-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| PLN-001 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-002 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-003 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-004 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-005 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
-| PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | implemented; CR-006 owner freeze and final pairing pending |
+| PLN-001 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-002 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-003 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-004 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-005 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
+| PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
 | MTR-001 | 06-05 | pending producer in 06-05 | pending |
 | MTR-002 | 06-05 | pending producer in 06-05 | pending |
 | MTR-003 | 06-05 | pending producer in 06-05 | pending |
