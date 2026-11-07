@@ -86,6 +86,23 @@ func lockedCompileInput(ctx context.Context, q *generated.Queries, scope TenantS
 			input.Permits = append(input.Permits, compiler.Permit{From: rule.Path[i], To: rule.Path[i+1], Version: v, Allowed: true})
 		}
 	}
+	allocations, e := q.RuleCompilePortAllocations(ctx, generated.RuleCompilePortAllocationsParams{TenantID: scope.TenantID(), RuleID: rule.ID, GroupID: rule.Path[0]})
+	if e != nil {
+		return compiler.CompileInput{}, e
+	}
+	if len(allocations) > 1 || (len(allocations) == 0 && rule.Port == 0) {
+		return compiler.CompileInput{}, ErrConflict
+	}
+	if len(allocations) == 1 {
+		a := allocations[0]
+		if a.MemberSetVersion != locked.members[rule.Path[0]].MemberSetVersion {
+			return compiler.CompileInput{}, ErrConflict
+		}
+		input.PortBinding = &compiler.PortBinding{ID: a.ID, GroupID: a.GroupID, MemberSetVersion: a.MemberSetVersion, Port: a.Port, ListenAddress: a.ListenAddress, Protocols: a.Protocols}
+		if e = validateRulePortMembers(ctx, q, scope, input); e != nil {
+			return compiler.CompileInput{}, e
+		}
+	}
 	return input, nil
 }
 

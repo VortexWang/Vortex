@@ -11,6 +11,28 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const bindRulePortPrepare = `-- name: BindRulePortPrepare :exec
+UPDATE port_reservations SET prepare_task_id=$4,config_confirmed=false,state='prepared'
+WHERE tenant_id=$1 AND allocation_id=$2 AND node_id=$3 AND state<>'released'
+`
+
+type BindRulePortPrepareParams struct {
+	TenantID      string
+	AllocationID  string
+	NodeID        string
+	PrepareTaskID string
+}
+
+func (q *Queries) BindRulePortPrepare(ctx context.Context, arg BindRulePortPrepareParams) error {
+	_, err := q.db.Exec(ctx, bindRulePortPrepare,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.NodeID,
+		arg.PrepareTaskID,
+	)
+	return err
+}
+
 const clearPortRetentionClock = `-- name: ClearPortRetentionClock :exec
 UPDATE port_allocations SET first_effective_at=NULL,retained_until=NULL,version=version+1 WHERE tenant_id=$1 AND id=$2 AND state='retained'
 `
@@ -674,6 +696,52 @@ func (q *Queries) RetainPortAllocation(ctx context.Context, arg RetainPortAlloca
 	return err
 }
 
+const ruleCompilePortAllocations = `-- name: RuleCompilePortAllocations :many
+SELECT id, tenant_id, rule_id, group_id, member_set_version, port, listen_address, protocols, purpose, state, first_effective_at, retained_until, needs_revalidation, version FROM port_allocations WHERE tenant_id=$1 AND rule_id=$2 AND group_id=$3
+AND state IN ('preparing','committed') AND needs_revalidation=false ORDER BY id FOR UPDATE
+`
+
+type RuleCompilePortAllocationsParams struct {
+	TenantID string
+	RuleID   string
+	GroupID  string
+}
+
+func (q *Queries) RuleCompilePortAllocations(ctx context.Context, arg RuleCompilePortAllocationsParams) ([]PortAllocation, error) {
+	rows, err := q.db.Query(ctx, ruleCompilePortAllocations, arg.TenantID, arg.RuleID, arg.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PortAllocation{}
+	for rows.Next() {
+		var i PortAllocation
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.RuleID,
+			&i.GroupID,
+			&i.MemberSetVersion,
+			&i.Port,
+			&i.ListenAddress,
+			&i.Protocols,
+			&i.Purpose,
+			&i.State,
+			&i.FirstEffectiveAt,
+			&i.RetainedUntil,
+			&i.NeedsRevalidation,
+			&i.Version,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const ruleHasReleasedPort = `-- name: RuleHasReleasedPort :one
 SELECT EXISTS(SELECT 1 FROM port_allocations WHERE tenant_id=$1 AND rule_id=$2 AND state='released')
 `
@@ -688,6 +756,23 @@ func (q *Queries) RuleHasReleasedPort(ctx context.Context, arg RuleHasReleasedPo
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const ruleMemberPrepareTask = `-- name: RuleMemberPrepareTask :one
+SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 AND node_id=$3 AND phase='prepare'
+`
+
+type RuleMemberPrepareTaskParams struct {
+	TenantID     string
+	DeploymentID string
+	NodeID       string
+}
+
+func (q *Queries) RuleMemberPrepareTask(ctx context.Context, arg RuleMemberPrepareTaskParams) (string, error) {
+	row := q.db.QueryRow(ctx, ruleMemberPrepareTask, arg.TenantID, arg.DeploymentID, arg.NodeID)
+	var task_id string
+	err := row.Scan(&task_id)
+	return task_id, err
 }
 
 const setPortAllocationState = `-- name: SetPortAllocationState :exec
@@ -739,4 +824,21 @@ type SetReservationStateParams struct {
 func (q *Queries) SetReservationState(ctx context.Context, arg SetReservationStateParams) error {
 	_, err := q.db.Exec(ctx, setReservationState, arg.TenantID, arg.AllocationID, arg.State)
 	return err
+}
+
+const supersedeUnsentPortTask = `-- name: SupersedeUnsentPortTask :execrows
+UPDATE tasks SET state='superseded' WHERE tenant_id=$1 AND id=$2 AND task_kind='port_prepare' AND state='pending'
+`
+
+type SupersedeUnsentPortTaskParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) SupersedeUnsentPortTask(ctx context.Context, arg SupersedeUnsentPortTaskParams) (int64, error) {
+	result, err := q.db.Exec(ctx, supersedeUnsentPortTask, arg.TenantID, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

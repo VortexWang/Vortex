@@ -53,6 +53,16 @@ type BillingSnapshot struct {
 	RuleRevision    int64  `json:"rule_revision"`
 	PathGeneration  int64  `json:"path_generation"`
 }
+
+// PortBinding pins the durable allocation before Agent socket preparation.
+type PortBinding struct {
+	ID               string   `json:"id"`
+	GroupID          string   `json:"group_id"`
+	MemberSetVersion string   `json:"member_set_version"`
+	Port             int32    `json:"port"`
+	ListenAddress    string   `json:"listen_address"`
+	Protocols        []string `json:"protocols"`
+}
 type CompileInput struct {
 	TenantID          string          `json:"tenant_id"`
 	Rule              Rule            `json:"rule"`
@@ -66,6 +76,7 @@ type CompileInput struct {
 	Grants            []Grant         `json:"grants"`
 	Permits           []Permit        `json:"permits"`
 	Billing           BillingSnapshot `json:"billing"`
+	PortBinding       *PortBinding    `json:"port_binding,omitempty"`
 }
 type Segment struct {
 	Hop           int    `json:"hop"`
@@ -194,6 +205,35 @@ func Compile(ctx context.Context, in CompileInput) Result {
 			return fail(MemberMismatch)
 		}
 	}
+	runtimeRule := in.Rule
+	if in.PortBinding != nil {
+		p := *in.PortBinding
+		p.ID, e = canonID(p.ID)
+		entry := groups[in.Rule.Path[0]]
+		if e != nil || p.GroupID != entry.ID || p.MemberSetVersion != entry.MemberSetVersion || p.Port < 1 || p.Port > 65535 || (in.Rule.Port != 0 && in.Rule.Port != p.Port) || (p.ListenAddress != "*" && p.ListenAddress != "0.0.0.0" && p.ListenAddress != "::") {
+			return fail(MemberMismatch)
+		}
+		p.Protocols = append([]string(nil), p.Protocols...)
+		sort.Strings(p.Protocols)
+		want := []string{in.Rule.Protocol}
+		if in.Rule.Protocol == "tcp_udp" {
+			want = []string{"tcp", "udp"}
+		}
+		if len(want) != len(p.Protocols) {
+			return fail(MemberMismatch)
+		}
+		for i := range want {
+			if want[i] != p.Protocols[i] {
+				return fail(MemberMismatch)
+			}
+		}
+		in.PortBinding = &p
+		runtimeRule.Port = p.Port
+		versions["port_allocation"] = p.ID
+		versions["port_member_set"] = p.MemberSetVersion
+	} else if in.Rule.Port == 0 {
+		return fail(MemberMismatch)
+	}
 	grantGroups := map[string]bool{}
 	for i, g := range in.Grants {
 		g.ID, e = canonID(g.ID)
@@ -296,7 +336,7 @@ func Compile(ctx context.Context, in CompileInput) Result {
 			if ctx.Err() != nil {
 				return fail(Invalid)
 			}
-			env := Envelope{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: node.ID, BootID: node.BootID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration, BillingSnapshotID: in.Billing.ID, InputDigest: result.InputDigest, InputVersions: versions, Intent: Intent{Rule: in.Rule, Role: role, Hop: hop, AllowedUpstream: upstream, UpstreamMembers: upstreamMembers, NextMembers: next, NextScheduling: nextScheduling, Segments: segments, SessionStable: true}}
+			env := Envelope{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: node.ID, BootID: node.BootID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration, BillingSnapshotID: in.Billing.ID, InputDigest: result.InputDigest, InputVersions: versions, Intent: Intent{Rule: runtimeRule, Role: role, Hop: hop, AllowedUpstream: upstream, UpstreamMembers: upstreamMembers, NextMembers: next, NextScheduling: nextScheduling, Segments: segments, SessionStable: true}}
 			body, e := json.Marshal(env)
 			if e != nil || len(body) > 524288 {
 				return fail(Invalid)

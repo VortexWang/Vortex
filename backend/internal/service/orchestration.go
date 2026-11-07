@@ -102,6 +102,9 @@ func beginRuleDeployment(ctx context.Context, q *generated.Queries, scope Tenant
 			return generated.RuleDeployment{}, e
 		}
 	}
+	if e = bindRulePortPrepare(ctx, q, scope, result); e != nil {
+		return generated.RuleDeployment{}, e
+	}
 	return result, q.SetRuleSync(ctx, generated.SetRuleSyncParams{TenantID: scope.TenantID(), ID: rule, ActiveRevision: revision, SyncStatus: "preparing"})
 }
 
@@ -146,6 +149,11 @@ func RuleCommand(ctx context.Context, q *generated.Queries, tenant, task string)
 }
 
 func (s RuleOrchestrator) Receipt(ctx context.Context, scope TenantScope, task string, r *controlv1.RuleReceipt, request string) error {
+	return s.ReceiptWithLease(ctx, scope, task, "", r, request)
+}
+
+// ReceiptWithLease binds socket observations to the worker's durable attempt.
+func (s RuleOrchestrator) ReceiptWithLease(ctx context.Context, scope TenantScope, task, lease string, r *controlv1.RuleReceipt, request string) error {
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.receipt", ResourceID: task, RequestID: request, Reason: "correlate fixed member phase receipt"}, func(q *generated.Queries) error {
 		b, e := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: scope.TenantID(), TaskID: task})
 		if e != nil {
@@ -203,6 +211,9 @@ func (s RuleOrchestrator) Receipt(ctx context.Context, scope TenantScope, task s
 		// active/prepared state because an earlier command's response arrived late.
 		if b.MemberState == "active" && state != "active" {
 			return ErrStaleReceipt
+		}
+		if e = recordRulePortReceipt(ctx, q, scope, d, b, task, lease, state); e != nil {
+			return e
 		}
 		if e = q.InsertRuleReceipt(ctx, generated.InsertRuleReceiptParams{TenantID: scope.TenantID(), TaskID: task, ReceiptSha256: digest[:], Payload: raw}); e != nil {
 			return e

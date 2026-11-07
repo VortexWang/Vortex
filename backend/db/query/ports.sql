@@ -5,6 +5,20 @@ VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'preparing') RETURNING *;
 -- name: GetPortAllocation :one
 SELECT * FROM port_allocations WHERE tenant_id=$1 AND id=$2;
 
+-- name: RuleCompilePortAllocations :many
+SELECT * FROM port_allocations WHERE tenant_id=$1 AND rule_id=$2 AND group_id=$3
+AND state IN ('preparing','committed') AND needs_revalidation=false ORDER BY id FOR UPDATE;
+
+-- name: BindRulePortPrepare :exec
+UPDATE port_reservations SET prepare_task_id=$4,config_confirmed=false,state='prepared'
+WHERE tenant_id=$1 AND allocation_id=$2 AND node_id=$3 AND state<>'released';
+
+-- name: SupersedeUnsentPortTask :execrows
+UPDATE tasks SET state='superseded' WHERE tenant_id=$1 AND id=$2 AND task_kind='port_prepare' AND state='pending';
+
+-- name: RuleMemberPrepareTask :one
+SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 AND node_id=$3 AND phase='prepare';
+
 -- name: RuleHasReleasedPort :one
 SELECT EXISTS(SELECT 1 FROM port_allocations WHERE tenant_id=$1 AND rule_id=$2 AND state='released');
 

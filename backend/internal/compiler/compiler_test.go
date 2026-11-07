@@ -98,6 +98,51 @@ func TestCompileInvalidAuthorityNoArtifacts(t *testing.T) {
 	}
 }
 
+func TestCompileAutoPortBindingCanonicalReplay(t *testing.T) {
+	in := compileFixture()
+	in.Rule.Port = 0
+	if r := compiler.Compile(context.Background(), in); len(r.Artifacts) != 0 {
+		t.Fatal("unallocated auto port compiled")
+	}
+	in.PortBinding = &compiler.PortBinding{ID: "00000000-0000-4000-8000-000000000090", GroupID: in.Rule.Path[0], MemberSetVersion: in.Groups[0].MemberSetVersion, Port: 20001, ListenAddress: "0.0.0.0", Protocols: []string{"udp", "tcp"}}
+	before, _ := json.Marshal(in)
+	a := compiler.Compile(context.Background(), in)
+	if len(a.Diagnostics) != 0 {
+		t.Fatal(a.Diagnostics)
+	}
+	after, _ := json.Marshal(in)
+	if !bytes.Equal(before, after) {
+		t.Fatal("binding mutated caller input")
+	}
+	in.PortBinding.Protocols = []string{"tcp", "udp"}
+	b := compiler.Compile(context.Background(), in)
+	if a.InputDigest != b.InputDigest || !bytes.Equal(a.InputCanonical, b.InputCanonical) {
+		t.Fatal("protocol order changed pinned input")
+	}
+	for _, artifact := range a.Artifacts {
+		env, e := compiler.DecodeArtifact(artifact.Canonical, artifact.Digest)
+		if e != nil || env.Intent.Rule.Port != 20001 || env.InputVersions["port_allocation"] != in.PortBinding.ID {
+			t.Fatal("allocation not bound to runtime artifact", e, env)
+		}
+	}
+	var replay compiler.CompileInput
+	if e := json.Unmarshal(a.InputCanonical, &replay); e != nil || replay.Rule.Port != 0 {
+		t.Fatal("auto intent not retained", e)
+	}
+	if r := compiler.Compile(context.Background(), replay); r.InputDigest != a.InputDigest {
+		t.Fatal("binding replay drift")
+	}
+	for _, mutate := range []func(*compiler.PortBinding){func(p *compiler.PortBinding) { p.MemberSetVersion = strings.Repeat("c", 64) }, func(p *compiler.PortBinding) { p.Protocols = []string{"tcp"} }, func(p *compiler.PortBinding) { p.ListenAddress = "192.0.2.1" }, func(p *compiler.PortBinding) { p.Port = 0 }} {
+		p := *in.PortBinding
+		mutate(&p)
+		bad := in
+		bad.PortBinding = &p
+		if r := compiler.Compile(context.Background(), bad); len(r.Artifacts) != 0 {
+			t.Fatal("mismatched allocation compiled", p)
+		}
+	}
+}
+
 func TestCompileGrantPermitAndDirection(t *testing.T) {
 	in := compileFixture()
 	in.Groups[0].OwnerKind = "platform"

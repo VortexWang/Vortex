@@ -32,7 +32,7 @@ func TestRuleRevisionSchema(t *testing.T) {
 }
 
 func ruleInput(group string) service.RuleInput {
-	return service.RuleInput{ID: uuid.NewString(), Name: "规则", Protocol: "tcp", Mode: "direct", Path: []string{group}, Targets: []service.RuleTarget{{Address: "192.0.2.80:443", Weight: 1}}, Scheduling: "weighted_round_robin", ProxyProtocol: "off", Enabled: true}
+	return service.RuleInput{ID: uuid.NewString(), Name: "规则", Protocol: "tcp", Mode: "direct", Port: 20000, Path: []string{group}, Targets: []service.RuleTarget{{Address: "192.0.2.80:443", Weight: 1}}, Scheduling: "weighted_round_robin", ProxyProtocol: "off", Enabled: true}
 }
 
 func TestRuleImmutableRevisionConflictAndTenantScope(t *testing.T) {

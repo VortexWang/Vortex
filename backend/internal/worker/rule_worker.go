@@ -82,7 +82,7 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 	if e != nil {
 		return true, e
 	}
-	return true, (service.RuleOrchestrator{Pool: w.Pool}).Receipt(persist, scope, task.ID, receipt, uuid.NewString())
+	return true, (service.RuleOrchestrator{Pool: w.Pool}).ReceiptWithLease(persist, scope, task.ID, token.String, receipt, uuid.NewString())
 }
 
 // Recover closes the crash window between durable running and receipt commit.
@@ -116,7 +116,7 @@ func (w RuleWorker) Recover(ctx context.Context) error {
 			return e
 		}
 		r := &controlv1.RuleReceipt{Phase: c.Phase, TransactionId: c.TransactionId, TaskKey: c.TaskKey, TargetRevision: c.TargetRevision, IdempotencyKey: c.IdempotencyKey, ArtifactSha256: c.ArtifactSha256, FencingGeneration: c.FencingGeneration, State: "unknown", ErrorCode: "worker_restart_unknown"}
-		if e = o.Receipt(ctx, scope, task.ID, r, uuid.NewString()); e != nil && !errors.Is(e, service.ErrConflict) && !errors.Is(e, service.ErrStaleReceipt) {
+		if e = o.ReceiptWithLease(ctx, scope, task.ID, task.LeaseToken.String, r, uuid.NewString()); e != nil && !errors.Is(e, service.ErrConflict) && !errors.Is(e, service.ErrStaleReceipt) {
 			return e
 		}
 	}
