@@ -23,7 +23,7 @@ export PHASE6_EXPECTED_SHA="$expected"
 export GOTOOLCHAIN=local
 test "$(go env GOVERSION)" = go1.27.3
 # Never silently claim future implementations from the current test suite.
-case "$through" in 06-01|06-08|06-09|06-02) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
+case "$through" in 06-01|06-08|06-09|06-02|06-10) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
 evidence=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$evidence")
 case "$evidence" in "$root"|"$root"/*) echo 'evidence must be outside source checkout' >&2; exit 1;; esac
@@ -58,6 +58,20 @@ fi
 if test "$result" -eq 0; then
   PHASE6_SOURCE_ROOT="$root" PHASE6_EVIDENCE_DIR="$out" sh tools/phase6/tracer_real.sh > "$out/runner.log" 2>&1 || result=$?
 fi
+if test "$through" = 06-10 && test "$result" -eq 0; then
+  cloudflare_result=0
+  PHASE6_DATABASE_URL="postgres://vortex:phase6-local-test-only@127.0.0.1:${PHASE6_PG_PORT:-15436}/vortex?sslmode=disable" sh tools/phase6/cloudflare_integration.sh > "$out/cloudflare.log" 2>&1 || cloudflare_result=$?
+  python3 - "$out" "$expected" "$cloudflare_result" <<'PY'
+import hashlib,json,os,pathlib,sys
+out,sha,code=sys.argv[1:]
+policy=os.getenv('CLOUDFLARE_TOKEN_POLICY_FILE')
+policy_hash=hashlib.sha256(pathlib.Path(policy).read_bytes()).hexdigest() if policy and pathlib.Path(policy).is_file() else None
+pathlib.Path(out,'cloudflare.json').write_text(json.dumps(dict(commit=sha,exit_code=int(code),status='passed' if code=='0' else 'not_run' if code=='78' else 'failed',policy_sha256=policy_hash,scope_evidence='reviewed_creation_policy' if policy else 'live_policy_inspector'),indent=2)+'\n')
+PY
+  # Missing external setup is visible pending evidence. A real executed failure
+  # fails the producer; a paired acceptance gate also rejects missing setup.
+  if test "$cloudflare_result" -ne 0 && test "$cloudflare_result" -ne 78; then result=$cloudflare_result; fi
+fi
 git status --porcelain=v1 > "$out/source-status-after.txt"
 if test -s "$out/source-status-after.txt"; then result=1; fi
 if test "$(git rev-parse HEAD)" != "$expected"; then result=1; fi
@@ -74,8 +88,12 @@ if (p/'processes').is_dir():
             processes.append({role:'processes/'+stamp+'-'+role+suffix for role,suffix in [('result','.json'),('backend','.log'),('agent','.log'),('hub','.log')]})
 (p/'processes.json').write_text(json.dumps(processes,indent=2)+'\n')
 files+=['processes.json']+[name for run in processes for name in run.values()]
+external={}
+if through=='06-10':
+    files+=['cloudflare.log','cloudflare.json']
+    external['cloudflare']=json.loads((p/'cloudflare.json').read_text()) if (p/'cloudflare.json').is_file() else {'status':'not_run'}
 checksums={name:hashlib.sha256((p/name).read_bytes()).hexdigest() for name in files if (p/name).is_file()}
-(p/'result.json').write_text(json.dumps(dict(commit=sha,result=int(result),producer=host,through_plan=through,source_clean=not (p/'source-status-after.txt').read_text(),checksums=checksums,host=platform.platform(),run_id=os.getenv('GITHUB_RUN_ID'),run_url=('https://github.com/'+os.getenv('GITHUB_REPOSITORY','')+'/actions/runs/'+os.getenv('GITHUB_RUN_ID','')) if host=='actions' else None),indent=2)+'\n')
+(p/'result.json').write_text(json.dumps(dict(commit=sha,result=int(result),producer=host,through_plan=through,external_checks=external,acceptance_complete=not external or external['cloudflare']['status']=='passed',source_clean=not (p/'source-status-after.txt').read_text(),checksums=checksums,host=platform.platform(),run_id=os.getenv('GITHUB_RUN_ID'),run_url=('https://github.com/'+os.getenv('GITHUB_REPOSITORY','')+'/actions/runs/'+os.getenv('GITHUB_RUN_ID','')) if host=='actions' else None),indent=2)+'\n')
 PY
 test "$result" -eq 0 || { echo "producer failed; see $out" >&2; exit "$result"; }
 sh tools/phase6/evidence_manifest.sh --through-plan "$through" --expected-sha "$expected" --evidence-dir "$evidence" --host "$produce"

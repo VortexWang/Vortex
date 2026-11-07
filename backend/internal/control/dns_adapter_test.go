@@ -127,3 +127,29 @@ func TestDNSReconcileIdempotentOwnershipAndCleanup(t *testing.T) {
 		t.Fatal("cleanup", e)
 	}
 }
+
+func TestDNSUpdateAndMissingProxyResponseFailClosed(t *testing.T) {
+	c := NewCloudflare(nil)
+	zone := strings.Repeat("a", 32)
+	id := strings.Repeat("b", 32)
+	r := DNSRecord{ID: id, Type: "A", Name: "test.example.test", Content: "192.0.2.2", TTL: 60, Comment: "vortex:owner"}
+	c.client.Transport = dnsRoundTrip(func(req *http.Request) (*http.Response, error) {
+		var body map[string]any
+		if json.NewDecoder(req.Body).Decode(&body) != nil {
+			t.Fatal("invalid update JSON")
+		}
+		if _, present := body["id"]; present {
+			t.Fatal("record identifier sent in update body")
+		}
+		return dnsResponse(200, r), nil
+	})
+	if _, e := c.Update(context.Background(), []byte("test-token-value-only"), zone, r); e != nil {
+		t.Fatal(e)
+	}
+	c.client.Transport = dnsRoundTrip(func(*http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"success":true,"errors":[],"result":{"id":"` + id + `","type":"A","name":"test.example.test","content":"192.0.2.2","ttl":60,"comment":"vortex:owner"}}`))}, nil
+	})
+	if _, e := c.Read(context.Background(), []byte("test-token-value-only"), zone, id); e != ErrDNS {
+		t.Fatal("missing proxy confirmation accepted", e)
+	}
+}

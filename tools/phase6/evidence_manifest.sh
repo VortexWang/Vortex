@@ -23,7 +23,7 @@ through,sha,evidence,host=sys.argv[1:]
 def require(ok,message):
     if not ok: raise SystemExit('manifest failed: '+message)
 order=['06-01','06-08','06-09','06-02','06-10','06-03','06-04','06-05','06-06','06-07','06-11']
-require(through in order[:4], 'producer not implemented for '+through)
+require(through in order[:5], 'producer not implemented for '+through)
 require(host in ('','docker','actions'), 'invalid host')
 rows=re.findall(r'^\| ([A-Z][A-Z0-9-]+) \| (06-\d\d) \|',pathlib.Path('docs/coverage/phase6/COVERAGE.md').read_text(),re.M)
 require(len(rows)==96 and len(dict(rows))==96, 'full 96-item ownership register required')
@@ -36,6 +36,7 @@ for plan in order:
 require(dict(rows)==planned, 'ownership differs from plan frontmatter')
 required=['commit.txt','openapi.log','dependencies.log','tracer.log','runner.log','source-status-before.txt','source-status-after.txt','source-identity.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','build-metadata.txt','processes.json']
 tests={'06-01':['TestTracerDesiredStateReceipt','TestTracerRealProcesses'], '06-08':['TestTenantRestrictionsIndependentAndImmutable','TestTenantAuditRollbackSharedAuthority','TestMigrationUpgradeTenantAuthority'], '06-09':['TestRestrictionAllCauses','TestRestrictionAuditRollback'], '06-02':['TestNodeGroupOwnershipAndStableMembers','TestNodeGrantValidityHistoryAndAudit','TestNodeLifecycleDrainDeleteAndAuditRollback','TestNodeSegmentPermitIndependentOfGrants','TestPortAtomicFixedMembersAndServing','TestPortPlatformCrossTenantPhysicalConflict','TestPortNoCommonPortAndMemberChanges','TestPortConcurrentWildcardConflict','TestPortProofAuthenticationAndGenerationFence','TestPortRestrictionClockAndProofBackedRelease','TestPortRetentionClearReapplyAndManualHold','TestPortAuditRollbackAndForeignAllocation','TestPortRestrictionAuditRollbackSameTransaction','TestReleaseOldBootAndDisconnectRetainOccupation']}
+tests['06-10']=['TestServingRejectsDeletedMember','TestServingCurrentSnapshotAndUnknown','TestDNSDurableServingRecomputeAndUnknownReplay','TestDNSAuditRollbackAndCurrentRole','TestCredentialCryptoScopeAndRecovery','TestCredentialEncryptedScopedAuditAndRollback','TestDNSCredentialPolicyIdentityAndExactZone','TestDNSBoundedRetryRedactionAndNoBlindCreate','TestDNSReconcileIdempotentOwnershipAndCleanup']
 for producer in ([host] if host else ['docker','actions']):
     folder=pathlib.Path(evidence)/producer
     require((folder/'result.json').is_file(), producer+' result.json missing')
@@ -57,7 +58,17 @@ for producer in ([host] if host else ['docker','actions']):
         report=json.loads((folder/run['result']).read_text())
         require(report.get('commit')==sha and report.get('state')=='succeeded' and report.get('occupation_held') is True and report.get('disconnect_state')=='unknown' and report.get('hub_mode')=='blocked' and report.get('hub_signer_epoch')==0 and report.get('wrong_role_rejected') is True, 'real process assertions failed')
     require(len(set(process_files))==len(process_files), 'duplicate process evidence')
-    for name in required+process_files:
+    external_files=[]
+    if order.index(through)>=order.index('06-10'):
+        external_files=['cloudflare.log','cloudflare.json']
+        cf=json.loads((folder/'cloudflare.json').read_text())
+        require(cf.get('commit')==sha and cf==result.get('external_checks',{}).get('cloudflare'), 'Cloudflare metadata/SHA mismatch')
+        require(cf.get('status') in ('passed','not_run'), 'Cloudflare execution failed')
+        if cf.get('status')=='passed':
+            require(cf.get('exit_code')==0 and '--- PASS: TestCloudflareControlledCRUD' in (folder/'cloudflare.log').read_text(), 'real CRUD pass evidence missing')
+        else:
+            require(host and cf.get('exit_code')==78 and result.get('acceptance_complete') is False, 'paired acceptance requires real Cloudflare CRUD')
+    for name in required+process_files+external_files:
         f=folder/name
         require(f.is_file(), producer+'/'+name+' missing')
         require(result.get('checksums',{}).get(name)==hashlib.sha256(f.read_bytes()).hexdigest(), producer+'/'+name+' checksum mismatch')

@@ -272,7 +272,9 @@ func (c *Cloudflare) Update(ctx context.Context, token []byte, zone string, reco
 		return DNSRecord{}, ErrDNS
 	}
 	var result DNSRecord
-	e := c.request(ctx, token, http.MethodPut, "/zones/"+zone+"/dns_records/"+record.ID, record, &result)
+	payload := record
+	payload.ID = ""
+	e := c.request(ctx, token, http.MethodPut, "/zones/"+zone+"/dns_records/"+record.ID, payload, &result)
 	if e != nil || result.ID != record.ID || !recordMatches(result, record) {
 		return DNSRecord{}, ErrDNS
 	}
