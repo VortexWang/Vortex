@@ -150,6 +150,7 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 		return err
 	}
 	adapter.Ports = &service.PortService{Pool: pool, NodeCA: root}
+	adapter.Metering = &service.MeteringService{Pool: pool}
 	nodes, err := net.Listen("tcp", *nodeListen)
 	if err != nil {
 		return err

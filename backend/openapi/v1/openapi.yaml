@@ -1,12 +1,38 @@
 openapi: 3.1.1
 info:
   title: VORTEX Public Business API
-  version: 2.1.0
+  version: 2.2.0
   description: Public business boundary; HTTP adapters are delivered by plan 06-07.
 servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/billing-snapshots/{snapshot_id}/explanation:
+    parameters:
+      - {name: snapshot_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getBillingExplanation
+      x-vortex-implementation-plan: 06-07
+      description: Tenant scoped immutable path coefficient and each ordered group multiplier. Historical snapshots are never recalculated from current configuration. HTTP adapter pending plan 06-07.
+      responses:
+        '200':
+          description: Immutable billing explanation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/BillingExplanation'}
+  /api/v1/sources/{source_id}/ledger:
+    parameters:
+      - {name: source_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getSourceLedger
+      x-vortex-implementation-plan: 06-07
+      description: Source local PostgreSQL authority. B, F and L never net across sources. Unknown bounds are frozen occupation, distinct from measured consumption. HTTP adapter pending plan 06-07.
+      responses:
+        '200':
+          description: Rebuildable source projection
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SourceLedger'}
   /api/v1/packages/{package_id}:
     parameters:
       - {name: package_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -665,6 +691,36 @@ components:
         billing_multiplier_milli: {type: integer, minimum: 0}
         billing_version: {type: integer, minimum: 1}
         member_set_version: {type: string, pattern: '^[a-f0-9]{64}$'}
+    BillingExplanation:
+      type: object
+      additionalProperties: false
+      required: [billing_snapshot_id, path_coefficient_milli, groups, explanation]
+      properties:
+        billing_snapshot_id: {type: string, format: uuid}
+        path_coefficient_milli: {type: integer, minimum: 0}
+        explanation: {type: string}
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [group_id, version, multiplier_milli]
+            properties:
+              group_id: {type: string, format: uuid}
+              version: {type: integer, minimum: 1}
+              multiplier_milli: {type: integer, minimum: 0}
+    SourceLedger:
+      type: object
+      additionalProperties: false
+      required: [source_id, balance_bytes, outstanding_bytes, guarantee_bytes, charged_bytes, remainder_milli, sequence]
+      properties:
+        source_id: {type: string, format: uuid}
+        balance_bytes: {type: string, pattern: '^[0-9]+$'}
+        outstanding_bytes: {type: string, pattern: '^[0-9]+$'}
+        guarantee_bytes: {type: string, pattern: '^[0-9]+$'}
+        charged_bytes: {type: string, pattern: '^[0-9]+$'}
+        remainder_milli: {type: integer, minimum: 0, maximum: 999}
+        sequence: {type: string, pattern: '^[0-9]+$'}
     BusinessEvent:
       type: object
       additionalProperties: false

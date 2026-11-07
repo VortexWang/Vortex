@@ -104,10 +104,11 @@ func (a *Adapter) deliverRule(ctx context.Context, node, boot string, r ruleRequ
 // locate authenticated live streams; PostgreSQL retains every execution fact.
 type Adapter struct {
 	controlv1.UnimplementedNodeControlServer
-	mu      sync.Mutex
-	nodes   map[string]*session
-	Observe func(context.Context, string, string, []byte) error
-	Ports   *service.PortService
+	mu       sync.Mutex
+	nodes    map[string]*session
+	Observe  func(context.Context, string, string, []byte) error
+	Ports    *service.PortService
+	Metering *service.MeteringService
 }
 
 func (a *Adapter) Deliver(ctx context.Context, op generated.Operation) (service.Receipt, error) {
@@ -283,6 +284,20 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if batch := message.GetUsageBatch(); batch != nil {
+				if a.Metering == nil {
+					return errors.New("usage authority unavailable")
+				}
+				ack, e := a.Metering.IngestWireUsage(stream.Context(), id, first.BootId, message.Sequence, batch)
+				if e != nil {
+					return e
+				}
+				sequence++
+				if e = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: []string{ack.BatchID}}}}); e != nil {
+					return e
+				}
+				continue
+			}
 			if message.GetHeartbeat() != nil {
 				continue
 			}

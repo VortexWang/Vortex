@@ -630,3 +630,16 @@ CREATE TABLE billing_policy_boundaries (
  FOREIGN KEY(tenant_id,new_snapshot_id) REFERENCES billing_snapshots(tenant_id,id)
 );
 CREATE TRIGGER billing_policy_boundaries_immutable BEFORE UPDATE OR DELETE ON billing_policy_boundaries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE usage_batches (
+ tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL, boot_id text NOT NULL,
+ sequence bigint NOT NULL CHECK(sequence>0), batch_id text NOT NULL, billing_snapshot_id text NOT NULL,
+ payload_sha256 bytea NOT NULL CHECK(octet_length(payload_sha256)=32), payload bytea NOT NULL,
+ raw_cumulative numeric(40,0) NOT NULL CHECK(raw_cumulative>=0), billable_numerator numeric(40,0) NOT NULL CHECK(billable_numerator>=0),
+ final_receipt jsonb, unknown_upper_bound numeric(40,0) NOT NULL DEFAULT 0,
+ acknowledgement jsonb NOT NULL, facts jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(node_id,boot_id,sequence), UNIQUE(node_id,boot_id,batch_id),
+ FOREIGN KEY(tenant_id,billing_snapshot_id) REFERENCES billing_snapshots(tenant_id,id)
+);
+CREATE TRIGGER usage_batches_immutable BEFORE UPDATE OR DELETE ON usage_batches FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+ALTER TABLE settlements ADD COLUMN charged_delta bigint NOT NULL DEFAULT 0 CHECK(charged_delta>=0);
+ALTER TABLE settlements ADD COLUMN released_bill bigint NOT NULL DEFAULT 0 CHECK(released_bill>=0);

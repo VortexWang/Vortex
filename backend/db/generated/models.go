@@ -553,6 +553,8 @@ type Settlement struct {
 	BillableNumerator pgtype.Numeric
 	Evidence          []byte
 	CreatedAt         pgtype.Timestamptz
+	ChargedDelta      int64
+	ReleasedBill      int64
 }
 
 type SourceExpiration struct {
@@ -622,6 +624,24 @@ type UnknownLiability struct {
 	UnknownRaw        int64
 	UnknownBill       int64
 	Evidence          []byte
+	CreatedAt         pgtype.Timestamptz
+}
+
+type UsageBatch struct {
+	TenantID          string
+	NodeID            string
+	BootID            string
+	Sequence          int64
+	BatchID           string
+	BillingSnapshotID string
+	PayloadSha256     []byte
+	Payload           []byte
+	RawCumulative     pgtype.Numeric
+	BillableNumerator pgtype.Numeric
+	FinalReceipt      []byte
+	UnknownUpperBound pgtype.Numeric
+	Acknowledgement   []byte
+	Facts             []byte
 	CreatedAt         pgtype.Timestamptz
 }
 
