@@ -36,6 +36,20 @@ func TestServingRejectsDeletedMember(t *testing.T) {
 	}
 }
 
+func TestServingRejectsUnhealthyMember(t *testing.T) {
+	f := newPortFixture(t)
+	a := f.prepare(t, 20000)
+	f.commit(t, a)
+	ctx := context.Background()
+	if _, e := f.pool.Exec(ctx, "UPDATE nodes SET health='unhealthy' WHERE id=$1", f.nodes[0]); e != nil {
+		t.Fatal(e)
+	}
+	members, e := (repository.PortRepository{Pool: f.pool}).Serving(ctx, f.scope, f.group, uuid.NewString())
+	if e != nil || len(members) != 1 || members[0].ID == f.nodes[0] {
+		t.Fatal("unhealthy member retained in DNS serving set", e, len(members))
+	}
+}
+
 type servingProvider struct {
 	calls     int
 	fail      bool

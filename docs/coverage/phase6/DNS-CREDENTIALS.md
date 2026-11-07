@@ -21,6 +21,7 @@ Platform owners recompute their group from all active tenants' committed rules.
 Each member must have every committed rule's complete confirmed protocol set for
 the current boot/generation and member snapshot. An uncommitted new rule does not
 remove a member already serving other rules. Tenant read views remain scoped.
+An explicitly unhealthy node is excluded even while its lifecycle is online.
 Removing DNS never releases retained ports or grants migration of existing flows.
 
 AES-256-GCM binds tenant, access ID, zone and key version as authenticated data.

@@ -536,7 +536,7 @@ JOIN node_group_members m ON m.group_id=a.group_id AND m.node_id=p.node_id JOIN 
 WHERE (a.tenant_id=$1 OR $2::boolean) AND a.group_id=$3 AND a.member_set_version=$4 AND a.state='committed' AND a.needs_revalidation=false
 AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=a.tenant_id AND t.account_state='active')
 AND NOT EXISTS(SELECT 1 FROM current_restrictions cr WHERE cr.tenant_id=a.tenant_id AND cr.effective_at<=now() AND cr.cleared_at IS NULL)
-AND p.state='confirmed' AND p.config_confirmed AND n.lifecycle='online' AND n.deleted_at IS NULL AND n.public_address<>'' AND n.boot_id=p.boot_id AND n.generation=p.generation
+AND p.state='confirmed' AND p.config_confirmed AND n.lifecycle='online' AND n.health<>'unhealthy' AND n.deleted_at IS NULL AND n.public_address<>'' AND n.boot_id=p.boot_id AND n.generation=p.generation
 AND NOT EXISTS(SELECT 1 FROM port_reservations other WHERE other.tenant_id=a.tenant_id AND other.allocation_id=a.id AND other.node_id=n.id AND (NOT other.config_confirmed OR other.state<>'confirmed'))
 AND NOT EXISTS(SELECT 1 FROM port_allocations required
  WHERE (required.tenant_id=a.tenant_id OR $2::boolean) AND required.group_id=a.group_id AND required.state='committed'
