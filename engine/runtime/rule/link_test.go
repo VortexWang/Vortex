@@ -103,7 +103,7 @@ func TestApplyMultihopForwardAndReverseRealTLS(t *testing.T) {
 			base := artifact(t, target)
 			base.RuleID = "00000000-0000-4000-8000-000000000099"
 			base.Intent.Rule.ID = base.RuleID
-			base.Intent.Rule.Mode = "tunnel"
+			base.Intent.Rule.Mode = "multi_hop"
 			base.Intent.Rule.Path = []string{"entry", "relay", "exit"}
 			base.Intent.Segments = []Segment{{Hop: 0, Direction: direction}, {Hop: 1, Direction: "forward"}}
 			artifacts := make([]Artifact, 3)

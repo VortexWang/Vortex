@@ -109,7 +109,7 @@ func Decode(raw []byte) (Artifact, error) {
 			return a, errors.New("invalid_config: canonical identity required")
 		}
 	}
-	if m.Mode != "direct" && m.Mode != "tunnel" {
+	if m.Mode != "direct" && m.Mode != "tunnel" && m.Mode != "multi_hop" {
 		return a, errors.New("invalid_config: mode")
 	}
 	if m.Scheduling != "weighted_round_robin" && m.Scheduling != "primary_backup" {
@@ -130,7 +130,7 @@ func Decode(raw []byte) (Artifact, error) {
 	if a.Intent.Role != wantRole {
 		return a, errors.New("invalid_config: role")
 	}
-	if m.Mode == "direct" && len(m.Path) != 1 || m.Mode == "tunnel" && len(m.Path) < 2 {
+	if m.Mode == "direct" && len(m.Path) != 1 || m.Mode == "tunnel" && len(m.Path) != 2 || m.Mode == "multi_hop" && len(m.Path) < 3 {
 		return a, errors.New("invalid_config: path mode")
 	}
 	for i, segment := range a.Intent.Segments {
