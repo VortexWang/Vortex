@@ -7,6 +7,50 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/node-groups/{group_id}/serving:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+      - {name: group_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getServingMembers
+      x-vortex-implementation-plan: 06-07
+      description: Current confirmed members and ports only. Restrictions, stale snapshots, offline nodes and unknown or retained reservations exclude service. DNS removal never releases occupation.
+      responses:
+        '200':
+          description: Eligible business addresses.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ServingSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/v1/tenants/{tenant_id}/node-groups/{group_id}/dns:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+      - {name: group_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: recomputeGroupDNS
+      x-vortex-implementation-plan: 06-07
+      description: Recompute DNS from serving state using an enrolled zone access reference. TTL is fixed at 60 and DNS-only. Unknown results retain occupation and require reconciliation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DNSRecomputeRequest'}
+      responses:
+        '202':
+          description: Accepted desired DNS operation; provider success remains pending.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DNSOperationSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/port-reservations:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -178,6 +222,27 @@ components:
       type: http
       scheme: bearer
   schemas:
+    ServingSummary:
+      type: object
+      additionalProperties: false
+      required: [addresses]
+      properties:
+        addresses: {type: array, maxItems: 32, uniqueItems: true, items: {type: string}}
+    DNSRecomputeRequest:
+      type: object
+      additionalProperties: false
+      required: [access_id, name, idempotency_key]
+      properties:
+        access_id: {type: string, format: uuid}
+        name: {type: string, maxLength: 253}
+        idempotency_key: {type: string, minLength: 1, maxLength: 128}
+    DNSOperationSummary:
+      type: object
+      additionalProperties: false
+      required: [operation_id, state]
+      properties:
+        operation_id: {type: string, format: uuid}
+        state: {type: string, enum: [pending, leased, running, succeeded, failed, unknown]}
     ApiError:
       type: object
       additionalProperties: false

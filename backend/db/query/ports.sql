@@ -82,8 +82,8 @@ UPDATE tasks SET state='succeeded',lease_until=NULL WHERE tenant_id=$1 AND id=$2
 -- name: PortServingMembers :many
 SELECT DISTINCT n.id,n.public_address FROM port_allocations a JOIN port_reservations p ON p.tenant_id=a.tenant_id AND p.allocation_id=a.id
 JOIN node_group_members m ON m.group_id=a.group_id AND m.node_id=p.node_id JOIN nodes n ON n.id=m.node_id
-WHERE a.tenant_id=$1 AND a.group_id=$2 AND a.state='committed' AND a.needs_revalidation=false
-AND p.state='confirmed' AND p.config_confirmed AND n.lifecycle='online' AND n.boot_id=p.boot_id AND n.generation=p.generation
+WHERE a.tenant_id=$1 AND a.group_id=$2 AND a.member_set_version=$3 AND a.state='committed' AND a.needs_revalidation=false
+AND p.state='confirmed' AND p.config_confirmed AND n.lifecycle='online' AND n.deleted_at IS NULL AND n.public_address<>'' AND n.boot_id=p.boot_id AND n.generation=p.generation
 AND NOT EXISTS(SELECT 1 FROM port_reservations other WHERE other.tenant_id=a.tenant_id AND other.allocation_id=a.id AND other.node_id=n.id AND (NOT other.config_confirmed OR other.state<>'confirmed'))
 ORDER BY n.id;
 
