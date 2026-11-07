@@ -185,11 +185,22 @@ func TestPackageDurableSnapshotProductionCompileAndHistory(t *testing.T) {
 	if _, e = f.pool.Exec(ctx, "UPDATE billing_snapshots SET multiplier_milli=1000 WHERE id=$1", row.ID); e == nil {
 		t.Fatal("snapshot coefficient mutable")
 	}
-	if worked, e := (worker.RuleCompileWorker{Pool: f.pool}).Once(ctx); e != nil || !worked {
-		t.Fatal(worked, e)
-	}
 	var count int
-	if e = f.pool.QueryRow(ctx, "SELECT count(*) FROM rule_artifacts WHERE tenant_id=$1 AND billing_snapshot_id=$2", f.tenant, row.ID).Scan(&count); e != nil || count != len(f.nodes) {
+	// The worker consumes a shared durable queue. Older ready tasks may belong
+	// to other tenants or previous test runs; one tick is not our completion.
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		if e = f.pool.QueryRow(ctx, "SELECT count(*) FROM rule_artifacts WHERE tenant_id=$1 AND billing_snapshot_id=$2", f.tenant, row.ID).Scan(&count); e != nil {
+			t.Fatal(e)
+		}
+		if count == len(f.nodes) {
+			break
+		}
+		if worked, e := (worker.RuleCompileWorker{Pool: f.pool}).Once(ctx); e != nil || !worked {
+			t.Fatal("compile queue stopped before this snapshot completed", worked, e)
+		}
+	}
+	if count != len(f.nodes) {
 		t.Fatal(count, e)
 	}
 	forged := in.Billing

@@ -56,6 +56,12 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 	}
 	c, node, boot, e := service.RuleCommand(ctx, q, task.TenantID, task.ID)
 	if e != nil {
+		// A restriction can commit between lease selection and this current
+		// authority check. Nothing has been sent: leave the task pending instead
+		// of terminating the backend or inventing an execution failure.
+		if (errors.Is(e, service.ErrConflict) || errors.Is(e, service.ErrScope)) && (b.Phase == "prepare" || b.Phase == "commit") {
+			return true, tx.Rollback(ctx)
+		}
 		return true, e
 	}
 	if e = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: task.OperationID, State: "running"}); e != nil {
@@ -113,7 +119,7 @@ func (w RuleWorker) Recover(ctx context.Context) error {
 		if e != nil {
 			return e
 		}
-		c, _, _, e := service.RuleCommand(ctx, q, task.TenantID, task.ID)
+		c, _, _, e := service.RuleObservationCommand(ctx, q, task.TenantID, task.ID)
 		if e != nil {
 			return e
 		}

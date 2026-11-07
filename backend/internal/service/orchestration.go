@@ -142,6 +142,17 @@ func queueRulePhase(ctx context.Context, q *generated.Queries, scope TenantScope
 // Command reloads the exact committed artifact after the task has been leased.
 // The caller must authenticate the node and match BootID on the live stream.
 func RuleCommand(ctx context.Context, q *generated.Queries, tenant, task string) (*controlv1.RuleCommand, string, string, error) {
+	return ruleCommand(ctx, q, tenant, task, true)
+}
+
+// RuleObservationCommand reconstructs identity for recovery of a command which
+// may already have executed. Current restrictions cannot erase that evidence.
+// This function does not authorize sending activation commands.
+func RuleObservationCommand(ctx context.Context, q *generated.Queries, tenant, task string) (*controlv1.RuleCommand, string, string, error) {
+	return ruleCommand(ctx, q, tenant, task, false)
+}
+
+func ruleCommand(ctx context.Context, q *generated.Queries, tenant, task string, authorizeSend bool) (*controlv1.RuleCommand, string, string, error) {
 	b, e := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: tenant, TaskID: task})
 	if e != nil {
 		return nil, "", "", e
@@ -150,8 +161,18 @@ func RuleCommand(ctx context.Context, q *generated.Queries, tenant, task string)
 	if e != nil {
 		return nil, "", "", e
 	}
-	if _, e = compiler.DecodeArtifact(a.Canonical, a.Digest); e != nil {
+	artifact, e := compiler.DecodeArtifact(a.Canonical, a.Digest)
+	if e != nil {
 		return nil, "", "", e
+	}
+	if authorizeSend && artifact.Intent.Rule.Enabled && (b.Phase == "prepare" || b.Phase == "commit") {
+		scope, err := NewTenantScope(uuid.NewString(), tenant, tenant)
+		if err != nil {
+			return nil, "", "", err
+		}
+		if err = activeRule(ctx, q, scope, artifact.RuleID); err != nil {
+			return nil, "", "", err
+		}
 	}
 	id, e := uuid.Parse(b.TransactionID)
 	if e != nil {
@@ -185,7 +206,7 @@ func (s RuleOrchestrator) ReceiptWithLease(ctx context.Context, scope TenantScop
 		if e != nil {
 			return e
 		}
-		expected, _, _, e := RuleCommand(ctx, q, scope.TenantID(), task)
+		expected, _, _, e := RuleObservationCommand(ctx, q, scope.TenantID(), task)
 		if e != nil {
 			return e
 		}
@@ -279,11 +300,26 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 		anyActive = anyActive || m.State == "active"
 	}
 	obsolete := head.DesiredRevision != d.RuleRevision || d.State == "superseded"
+	// A matching receipt remains evidence after restriction, but cannot create
+	// fresh activation work. Safe query/abort continues to reconcile occupation.
+	activationBlocked := false
+	input, e := deploymentPortInput(ctx, q, scope, d)
+	if e != nil {
+		return e
+	}
+	if input.Rule.Enabled {
+		if e = activeRule(ctx, q, scope, d.RuleID); e != nil {
+			if !errors.Is(e, ErrConflict) && !errors.Is(e, ErrScope) {
+				return e
+			}
+			activationBlocked = true
+		}
+	}
 	state := d.State
 	switch {
 	case allActive:
 		state = "running"
-	case allPrepared && !obsolete && d.State != "failed":
+	case allPrepared && !obsolete && !activationBlocked && d.State != "failed":
 		state = "committing"
 		for _, m := range members {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
@@ -305,11 +341,11 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 				return e
 			}
 		}
-		if m.State == "prepared" && (obsolete || failed || d.State == "failed") {
+		if m.State == "prepared" && (obsolete || activationBlocked || failed || d.State == "failed") {
 			if e = queueRulePhase(ctx, q, scope, d, m, "abort"); e != nil {
 				return e
 			}
-		} else if m.State == "prepared" && !obsolete && (d.State == "committing" || d.State == "partial") {
+		} else if m.State == "prepared" && !obsolete && !activationBlocked && (d.State == "committing" || d.State == "partial") {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
 				return e
 			}

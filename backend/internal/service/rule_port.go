@@ -3,13 +3,18 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/compiler"
 )
 
 func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope TenantScope, in compiler.CompileInput) error {
-	if in.Rule.Enabled {
+	return validateRulePortBinding(ctx, q, scope, in, true)
+}
+
+func validateRulePortBinding(ctx context.Context, q *generated.Queries, scope TenantScope, in compiler.CompileInput, activation bool) error {
+	if activation && in.Rule.Enabled {
 		if e := activeRule(ctx, q, scope, in.Rule.ID); e != nil {
 			return e
 		}
@@ -22,7 +27,7 @@ func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope Te
 	if e != nil {
 		return e
 	}
-	if a.RuleID != in.Rule.ID || a.GroupID != p.GroupID || a.MemberSetVersion != p.MemberSetVersion || a.Port != p.Port || a.ListenAddress != p.ListenAddress || a.NeedsRevalidation || (a.State != "preparing" && a.State != "committed" && (in.Rule.Enabled || a.State != "retained")) {
+	if a.RuleID != in.Rule.ID || a.GroupID != p.GroupID || a.MemberSetVersion != p.MemberSetVersion || a.Port != p.Port || a.ListenAddress != p.ListenAddress || a.NeedsRevalidation || (a.State != "preparing" && a.State != "committed" && ((activation && in.Rule.Enabled) || a.State != "retained")) {
 		return ErrConflict
 	}
 	if len(a.Protocols) != len(p.Protocols) {
@@ -63,7 +68,7 @@ func validateRulePortMembers(ctx context.Context, q *generated.Queries, scope Te
 	}
 	for _, row := range rows {
 		n, ok := members[row.NodeID]
-		if !ok || row.BootID != n.BootID || row.Generation != n.Generation || !protocols[row.Protocol] || row.Port != p.Port || row.ListenAddress != p.ListenAddress || row.State == "released" || row.State == "releasing" || (row.State == "retained" && in.Rule.Enabled) {
+		if !ok || row.BootID != n.BootID || row.Generation != n.Generation || !protocols[row.Protocol] || row.Port != p.Port || row.ListenAddress != p.ListenAddress || row.State == "released" || row.State == "releasing" || (activation && row.State == "retained" && in.Rule.Enabled) {
 			return ErrConflict
 		}
 	}
@@ -173,7 +178,7 @@ func recordRulePortReceipt(ctx context.Context, q *generated.Queries, scope Tena
 	if e != nil || in.PortBinding == nil {
 		return e
 	}
-	if e = validateRulePortMembers(ctx, q, scope, in); e != nil {
+	if e = validateRulePortBinding(ctx, q, scope, in, false); e != nil {
 		return e
 	}
 	entryMember := false
@@ -217,6 +222,14 @@ func recordRulePortReceipt(ctx context.Context, q *generated.Queries, scope Tena
 		}
 	}
 	p := in.PortBinding.ID
+	if state == "active" && in.Rule.Enabled {
+		if e = activeRule(ctx, q, scope, in.Rule.ID); e != nil {
+			if errors.Is(e, ErrConflict) || errors.Is(e, ErrScope) {
+				return q.MarkNodePortUnknown(ctx, generated.MarkNodePortUnknownParams{TenantID: scope.TenantID(), AllocationID: p, NodeID: b.NodeID})
+			}
+			return e
+		}
+	}
 	if state == "active" && !in.Rule.Enabled {
 		// An active disabled configuration has no service socket. Keep physical
 		// occupation until the dedicated release protocol proves it is reusable.

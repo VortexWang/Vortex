@@ -13,6 +13,7 @@ import (
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/service"
 	"vortex/backend/internal/worker"
+	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 type downgradeAPI interface {
@@ -60,6 +61,10 @@ func TestRestrictionBlocksDispatchButPreservesLateObservation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	second, _, _, e := service.RuleCommand(ctx, q, f.tenant, ids[1])
+	if e != nil {
+		t.Fatal(e)
+	}
 	lease := uuid.NewString()
 	if _, e = f.pool.Exec(ctx, "UPDATE tasks SET state='running',lease_token=$3 WHERE tenant_id=$1 AND id=$2", f.tenant, ids[0], lease); e != nil {
 		t.Fatal(e)
@@ -87,6 +92,43 @@ func TestRestrictionBlocksDispatchButPreservesLateObservation(t *testing.T) {
 	if _, _, _, e = service.RuleCommand(ctx, q, f.tenant, query); e != nil {
 		t.Fatal("restriction blocked safe query", e)
 	}
+	// Late prepared observations from both members may only schedule aborts,
+	// even when the current desired revision still equals the deployment.
+	for _, c := range []*controlv1.RuleCommand{second, mustRuleCommand(t, f, query)} {
+		l := uuid.NewString()
+		if _, e = f.pool.Exec(ctx, "UPDATE tasks SET state='running',lease_token=$3 WHERE tenant_id=$1 AND id=$2", f.tenant, c.TaskKey, l); e != nil {
+			t.Fatal(e)
+		}
+		if e = o.ReceiptWithLease(ctx, f.scope, c.TaskKey, l, receipt(c, "prepared"), uuid.NewString()); e != nil {
+			t.Fatal("prepared observation lost", e)
+		}
+	}
+	var commits, aborts int
+	if e = f.pool.QueryRow(ctx, "SELECT count(*) FILTER(WHERE phase='commit'),count(*) FILTER(WHERE phase='abort') FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2", f.tenant, d.ID).Scan(&commits, &aborts); e != nil || commits != 0 || aborts != 2 {
+		t.Fatal("restriction scheduled activation or lost abort", commits, aborts, e)
+	}
+	other := ruleInput(f.group)
+	other.Port = 20001
+	reserveRulePort(t, f, other)
+	if _, e = s.Mutate(ctx, f.scope, other, 0, uuid.NewString()); e != nil {
+		t.Fatal("local restriction blocked another rule", e)
+	}
+	billing := durableBilling(t, f, other.ID, 1, 3)
+	if _, e = s.CompileRevision(ctx, f.scope, other.ID, 1, billing, 2, 3, 5, uuid.NewString()); e != nil {
+		t.Fatal("unaffected rule cannot compile", e)
+	}
+	if _, e = s.Mutate(ctx, f.scope, r, 1, uuid.NewString()); !errors.Is(e, service.ErrConflict) {
+		t.Fatal("restricted rule re-enabled", e)
+	}
+}
+
+func mustRuleCommand(t *testing.T, f *portFixture, task string) *controlv1.RuleCommand {
+	t.Helper()
+	c, _, _, e := service.RuleCommand(context.Background(), generated.New(f.pool), f.tenant, task)
+	if e != nil {
+		t.Fatal(e)
+	}
+	return c
 }
 
 func TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation(t *testing.T) {
