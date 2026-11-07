@@ -1,0 +1,26 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Exact owner-approved CR-005 hashes, frozen records and legacy wire/schema compatibility passed
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract: two clean generations, unchanged legacy schema, exact-baseline wire compatibility and recorded owner freeze passed

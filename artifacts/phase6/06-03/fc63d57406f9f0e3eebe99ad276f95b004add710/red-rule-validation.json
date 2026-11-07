@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "block": false,
+  "verdict": "RED_EVIDENCE_OK",
+  "reason": "target_test_failed",
+  "evidence": {
+    "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/rule_red_test.py",
+    "exit_code": 1,
+    "target_test": "test_immutable_revision",
+    "tests": 1,
+    "pass": 0,
+    "fail": 1,
+    "failing_tests": [
+      "test_immutable_revision"
+    ],
+    "matched_test": "test_immutable_revision",
+    "format": "unittest",
+    "report_errors": []
+  },
+  "record": {
+    "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/rule_red_test.py",
+    "exit_code": 1,
+    "failing_test": "test_immutable_revision",
+    "target_test": "test_immutable_revision",
+    "expected": "immutable rule authority tables exist",
+    "actual": "five rule tables missing at applied migration 4",
+    "verdict": "RED_EVIDENCE_OK",
+    "reason": "target_test_failed"
+  },
+  "message": "RED evidence verified: target test \"test_immutable_revision\" failed as expected (exit 1). GREEN authorized."
+}
