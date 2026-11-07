@@ -23,4 +23,4 @@ INSERT INTO billing_snapshots(id,tenant_id,package_snapshot_id,rule_id,rule_revi
 -- name: GetBillingSnapshot :one
 SELECT * FROM billing_snapshots WHERE tenant_id=$1 AND id=$2;
 -- name: FindBillingSnapshot :one
-SELECT * FROM billing_snapshots WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND path_generation=$4 AND package_snapshot_id=$5;
+SELECT * FROM billing_snapshots WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND path_generation=$4 AND package_snapshot_id=$5 AND version=1;

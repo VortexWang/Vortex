@@ -25,7 +25,7 @@ func (q *Queries) AdvancePackageCatalog(ctx context.Context, arg AdvancePackageC
 }
 
 const appendBillingSnapshot = `-- name: AppendBillingSnapshot :one
-INSERT INTO billing_snapshots(id,tenant_id,package_snapshot_id,rule_id,rule_revision,path_generation,multiplier_milli,path_versions) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at
+INSERT INTO billing_snapshots(id,tenant_id,package_snapshot_id,rule_id,rule_revision,path_generation,multiplier_milli,path_versions) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at, valid_from, valid_until, announced_at, synchronized_at
 `
 
 type AppendBillingSnapshotParams struct {
@@ -62,6 +62,10 @@ func (q *Queries) AppendBillingSnapshot(ctx context.Context, arg AppendBillingSn
 		&i.MultiplierMilli,
 		&i.PathVersions,
 		&i.CreatedAt,
+		&i.ValidFrom,
+		&i.ValidUntil,
+		&i.AnnouncedAt,
+		&i.SynchronizedAt,
 	)
 	return i, err
 }
@@ -156,7 +160,7 @@ func (q *Queries) CreatePackageCatalog(ctx context.Context, arg CreatePackageCat
 }
 
 const findBillingSnapshot = `-- name: FindBillingSnapshot :one
-SELECT id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at FROM billing_snapshots WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND path_generation=$4 AND package_snapshot_id=$5
+SELECT id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at, valid_from, valid_until, announced_at, synchronized_at FROM billing_snapshots WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND path_generation=$4 AND package_snapshot_id=$5 AND version=1
 `
 
 type FindBillingSnapshotParams struct {
@@ -187,12 +191,16 @@ func (q *Queries) FindBillingSnapshot(ctx context.Context, arg FindBillingSnapsh
 		&i.MultiplierMilli,
 		&i.PathVersions,
 		&i.CreatedAt,
+		&i.ValidFrom,
+		&i.ValidUntil,
+		&i.AnnouncedAt,
+		&i.SynchronizedAt,
 	)
 	return i, err
 }
 
 const getBillingSnapshot = `-- name: GetBillingSnapshot :one
-SELECT id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at FROM billing_snapshots WHERE tenant_id=$1 AND id=$2
+SELECT id, tenant_id, package_snapshot_id, rule_id, rule_revision, path_generation, version, multiplier_milli, path_versions, created_at, valid_from, valid_until, announced_at, synchronized_at FROM billing_snapshots WHERE tenant_id=$1 AND id=$2
 `
 
 type GetBillingSnapshotParams struct {
@@ -214,6 +222,10 @@ func (q *Queries) GetBillingSnapshot(ctx context.Context, arg GetBillingSnapshot
 		&i.MultiplierMilli,
 		&i.PathVersions,
 		&i.CreatedAt,
+		&i.ValidFrom,
+		&i.ValidUntil,
+		&i.AnnouncedAt,
+		&i.SynchronizedAt,
 	)
 	return i, err
 }

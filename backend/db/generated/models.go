@@ -21,6 +21,14 @@ type AuditEvent struct {
 	CreatedAt     pgtype.Timestamptz
 }
 
+type BillingPolicyBoundary struct {
+	TenantID      string
+	OldSnapshotID string
+	NewSnapshotID string
+	BoundaryAt    pgtype.Timestamptz
+	Evidence      []byte
+}
+
 type BillingSnapshot struct {
 	ID                string
 	TenantID          string
@@ -32,6 +40,10 @@ type BillingSnapshot struct {
 	MultiplierMilli   int64
 	PathVersions      []byte
 	CreatedAt         pgtype.Timestamptz
+	ValidFrom         pgtype.Timestamptz
+	ValidUntil        pgtype.Timestamptz
+	AnnouncedAt       pgtype.Timestamptz
+	SynchronizedAt    pgtype.Timestamptz
 }
 
 type ControlObservation struct {
@@ -68,6 +80,17 @@ type DesiredState struct {
 	Revision      int64
 	Payload       []byte
 	PayloadSha256 []byte
+}
+
+type Dispute struct {
+	ID                string
+	TenantID          string
+	GrantID           string
+	BillingSnapshotID string
+	EvidenceSha256    []byte
+	Reason            string
+	Evidence          []byte
+	CreatedAt         pgtype.Timestamptz
 }
 
 type EncryptedCredential struct {
@@ -123,6 +146,36 @@ type GrantHistory struct {
 	ValidFrom  pgtype.Timestamptz
 	ValidUntil pgtype.Timestamptz
 	RecordedAt pgtype.Timestamptz
+}
+
+type LedgerEvent struct {
+	TenantID          string
+	SourceID          string
+	Sequence          int64
+	EventKey          string
+	BillingSnapshotID pgtype.Text
+	Kind              string
+	DeltaB            int64
+	DeltaF            int64
+	DeltaL            int64
+	DeltaCharged      int64
+	DeltaRemainder    int64
+	Evidence          []byte
+	PreviousDigest    []byte
+	Digest            []byte
+	CreatedAt         pgtype.Timestamptz
+}
+
+type LedgerProjection struct {
+	TenantID       string
+	SourceID       string
+	B              int64
+	F              int64
+	L              int64
+	Charged        int64
+	RemainderMilli int64
+	Sequence       int64
+	Digest         []byte
 }
 
 type Node struct {
@@ -308,6 +361,21 @@ type ReleaseProof struct {
 	CreatedAt       pgtype.Timestamptz
 }
 
+type Reservation struct {
+	ID                string
+	TenantID          string
+	SourceID          string
+	BillingSnapshotID string
+	NodeID            string
+	BootID            string
+	RequestNonce      string
+	RawGranted        int64
+	CoefficientMilli  int64
+	ReservedBill      int64
+	ValidUntil        pgtype.Timestamptz
+	CreatedAt         pgtype.Timestamptz
+}
+
 type ResourceGrant struct {
 	ID         string
 	TenantID   string
@@ -474,6 +542,19 @@ type SegmentPermit struct {
 	Allowed     bool
 }
 
+type Settlement struct {
+	TenantID          string
+	GrantID           string
+	BillingSnapshotID string
+	Kind              string
+	ReceiptKey        string
+	RawCumulative     int64
+	ReturnedRaw       int64
+	BillableNumerator pgtype.Numeric
+	Evidence          []byte
+	CreatedAt         pgtype.Timestamptz
+}
+
 type SourceExpiration struct {
 	TenantID    string
 	SourceID    string
@@ -486,6 +567,13 @@ type SourceExtension struct {
 	SourceID   string
 	RequestKey string
 	ExpiresAt  pgtype.Timestamptz
+}
+
+type SourceLedger struct {
+	TenantID  string
+	SourceID  string
+	Origin    []byte
+	CreatedAt pgtype.Timestamptz
 }
 
 type Subscription struct {
@@ -524,6 +612,17 @@ type TrafficSource struct {
 	IssuedAt       pgtype.Timestamptz
 	ExpiresAt      pgtype.Timestamptz
 	PeriodKey      string
+}
+
+type UnknownLiability struct {
+	TenantID          string
+	GrantID           string
+	BillingSnapshotID string
+	ConfirmedRaw      int64
+	UnknownRaw        int64
+	UnknownBill       int64
+	Evidence          []byte
+	CreatedAt         pgtype.Timestamptz
 }
 
 type User struct {

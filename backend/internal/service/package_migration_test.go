@@ -69,7 +69,7 @@ func TestPackageMigrationUpgradeSeeded00005(t *testing.T) {
 		t.Fatal("00006 changed pre-existing authority or unknown observations")
 	}
 	var version int
-	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 6 {
+	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 7 {
 		t.Fatal(version, e)
 	}
 }
