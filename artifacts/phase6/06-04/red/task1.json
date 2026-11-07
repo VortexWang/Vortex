@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/package_red_test.py",
+  "exitCode": 1,
+  "output": "test_immutable_package_authority (__main__.PackageAuthority) ... FAIL\n\n======================================================================\nFAIL: test_immutable_package_authority (__main__.PackageAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/package_red_test.py\", line 9, in test_immutable_package_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestPackageSnapshotAuthoritySchema\n2026/11/07 18:19:54 OK   00001_authority.sql (28.26ms)\n2026/11/07 18:19:54 OK   00002_tenant_policy.sql (7.39ms)\n2026/11/07 18:19:54 OK   00003_nodes_ports.sql (13.96ms)\n2026/11/07 18:19:54 OK   00004_entry_group_domains.sql (1.54ms)\n2026/11/07 18:19:54 OK   00005_rules_compile.sql (12.3ms)\n2026/11/07 18:19:54 goose: successfully migrated database to version: 5\n    package_test.go:14: immutable package authority table package_catalog missing\n    package_test.go:14: immutable package authority table package_versions missing\n    package_test.go:14: immutable package authority table package_snapshots missing\n    package_test.go:14: immutable package authority table subscriptions missing\n    package_test.go:14: immutable package authority table traffic_sources missing\n    package_test.go:14: immutable package authority table billing_snapshots missing\n--- FAIL: TestPackageSnapshotAuthoritySchema (0.10s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.784s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.732s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_immutable_package_authority",
+  "targetFile": "tools/phase6/package_red_test.py",
+  "expected": "immutable package authority tables exist",
+  "actual": "six authority tables missing",
+  "semanticAssessment": "Target connected to real migrated PostgreSQL and executed assertions; missing planned tables are the only cause."
+}
