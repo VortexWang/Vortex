@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 3/11 plans executed in 11 dependency waves; 06-01, 06-08 and 06-09 complete. Source a9481584 passed clean local Docker/Linux arm64, actual Actions 42316152923/native Linux amd64 and both same-SHA paired gates, including full dependency/license/sqlc and normal/race tests. All-cause recovery, single OpenAPI ownership and 96-item ownership are verified in implemented scope. Next plan is 06-02. Final phase acceptance, real source balances, dedicated performance and remaining domains stay pending.
+**Plans**: 4/11 plans executed in 11 dependency waves; 06-01, 06-08, 06-09 and 06-02 complete. Source b71daf7d passed clean local Docker/Linux arm64 full normal/race (82 PASS lines combined), dependency/license/sqlc/OpenAPI and final migration checks. Nodes/grants and fixed-member port service/task/proof boundaries are implemented; NOD-012/PRT-004 remain pending for compiler and real Agent port consumers. New-source Actions/paired acceptance remains pending for 06-11. Next plan is 06-10. Prior 06-09 same-SHA Actions evidence remains historical; final phase acceptance, real source balances, dedicated performance and remaining domains stay pending.
 
 **Wave 1**
 
@@ -193,11 +193,11 @@
 
 - [x] 06-09-PLAN.md — 单源 OpenAPI、多原因解除与同 SHA Docker/Actions normal/race 配对通过；源码 a9481584，Actions 42316152923
 
-**Wave 4** *(ready after Wave 3; not started)*
+**Wave 4** *(complete in durable service/task/proof scope)*
 
-- [ ] 06-02-PLAN.md — 节点、节点组、grant、端口预留与释放
+- [x] 06-02-PLAN.md — 节点、节点组、grant、端口预留与释放
 
-**Wave 5** *(blocked on Wave 4 completion)*
+**Wave 5** *(ready after Wave 4)*
 
 - [ ] 06-10-PLAN.md — serving 集合、加密凭据与 Cloudflare DNS
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 3/11 | In Progress — 06-09 complete; next 06-02 | - |
+| 6. M4 Backend | 4/11 | In Progress — 06-02 complete; next 06-10 | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

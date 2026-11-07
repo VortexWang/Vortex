@@ -29,34 +29,34 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## NOD Requirements
 
-- [ ] **NOD-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (292-292; SHA-256 recorded there).
-- [ ] **NOD-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (293-293; SHA-256 recorded there).
-- [ ] **NOD-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (294-294; SHA-256 recorded there).
-- [ ] **NOD-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (295-295; SHA-256 recorded there).
-- [ ] **NOD-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (296-296; SHA-256 recorded there).
-- [ ] **NOD-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (302-302; SHA-256 recorded there).
-- [ ] **NOD-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (303-303; SHA-256 recorded there).
-- [ ] **NOD-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (304-304; SHA-256 recorded there).
-- [ ] **NOD-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (305-305; SHA-256 recorded there).
-- [ ] **NOD-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (311-311; SHA-256 recorded there).
-- [ ] **NOD-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (312-312; SHA-256 recorded there).
+- [x] **NOD-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (292-292; SHA-256 recorded there).
+- [x] **NOD-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (293-293; SHA-256 recorded there).
+- [x] **NOD-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (294-294; SHA-256 recorded there).
+- [x] **NOD-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (295-295; SHA-256 recorded there).
+- [x] **NOD-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (296-296; SHA-256 recorded there).
+- [x] **NOD-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (302-302; SHA-256 recorded there).
+- [x] **NOD-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (303-303; SHA-256 recorded there).
+- [x] **NOD-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (304-304; SHA-256 recorded there).
+- [x] **NOD-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (305-305; SHA-256 recorded there).
+- [x] **NOD-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (311-311; SHA-256 recorded there).
+- [x] **NOD-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (312-312; SHA-256 recorded there).
 - [ ] **NOD-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (313-313; SHA-256 recorded there).
-- [ ] **NOD-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (326-326; SHA-256 recorded there).
-- [ ] **NOD-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (327-327; SHA-256 recorded there).
+- [x] **NOD-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (326-326; SHA-256 recorded there).
+- [x] **NOD-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (327-327; SHA-256 recorded there).
 
 ## PRT Requirements
 
-- [ ] **PRT-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (335-335; SHA-256 recorded there).
-- [ ] **PRT-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (336-336; SHA-256 recorded there).
-- [ ] **PRT-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (337-337; SHA-256 recorded there).
+- [x] **PRT-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (335-335; SHA-256 recorded there).
+- [x] **PRT-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (336-336; SHA-256 recorded there).
+- [x] **PRT-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (337-337; SHA-256 recorded there).
 - [ ] **PRT-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (338-338; SHA-256 recorded there).
-- [ ] **PRT-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (339-339; SHA-256 recorded there).
-- [ ] **PRT-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (340-340; SHA-256 recorded there).
-- [ ] **PRT-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (341-341; SHA-256 recorded there).
-- [ ] **PRT-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (347-361; SHA-256 recorded there).
-- [ ] **PRT-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (359-359; SHA-256 recorded there).
-- [ ] **PRT-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (360-360; SHA-256 recorded there).
-- [ ] **PRT-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (361-361; SHA-256 recorded there).
+- [x] **PRT-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (339-339; SHA-256 recorded there).
+- [x] **PRT-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (340-340; SHA-256 recorded there).
+- [x] **PRT-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (341-341; SHA-256 recorded there).
+- [x] **PRT-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (347-361; SHA-256 recorded there).
+- [x] **PRT-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (359-359; SHA-256 recorded there).
+- [x] **PRT-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (360-360; SHA-256 recorded there).
+- [x] **PRT-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (361-361; SHA-256 recorded there).
 - [ ] **PRT-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (367-367; SHA-256 recorded there).
 - [ ] **PRT-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (368-368; SHA-256 recorded there).
 - [ ] **PRT-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (369-369; SHA-256 recorded there).
@@ -365,31 +365,31 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | TEN-007 | Phase 6 | Complete |
 | TEN-008 | Phase 6 | Complete |
 | TEN-009 | Phase 6 | Complete |
-| NOD-001 | Phase 6 | Pending |
-| NOD-002 | Phase 6 | Pending |
-| NOD-003 | Phase 6 | Pending |
-| NOD-004 | Phase 6 | Pending |
-| NOD-005 | Phase 6 | Pending |
-| NOD-006 | Phase 6 | Pending |
-| NOD-007 | Phase 6 | Pending |
-| NOD-008 | Phase 6 | Pending |
-| NOD-009 | Phase 6 | Pending |
-| NOD-010 | Phase 6 | Pending |
-| NOD-011 | Phase 6 | Pending |
+| NOD-001 | Phase 6 | Complete |
+| NOD-002 | Phase 6 | Complete |
+| NOD-003 | Phase 6 | Complete |
+| NOD-004 | Phase 6 | Complete |
+| NOD-005 | Phase 6 | Complete |
+| NOD-006 | Phase 6 | Complete |
+| NOD-007 | Phase 6 | Complete |
+| NOD-008 | Phase 6 | Complete |
+| NOD-009 | Phase 6 | Complete |
+| NOD-010 | Phase 6 | Complete |
+| NOD-011 | Phase 6 | Complete |
 | NOD-012 | Phase 6 | Pending |
-| NOD-013 | Phase 6 | Pending |
-| NOD-014 | Phase 6 | Pending |
-| PRT-001 | Phase 6 | Pending |
-| PRT-002 | Phase 6 | Pending |
-| PRT-003 | Phase 6 | Pending |
+| NOD-013 | Phase 6 | Complete |
+| NOD-014 | Phase 6 | Complete |
+| PRT-001 | Phase 6 | Complete |
+| PRT-002 | Phase 6 | Complete |
+| PRT-003 | Phase 6 | Complete |
 | PRT-004 | Phase 6 | Pending |
-| PRT-005 | Phase 6 | Pending |
-| PRT-006 | Phase 6 | Pending |
-| PRT-007 | Phase 6 | Pending |
-| PRT-016 | Phase 6 | Pending |
-| PRT-008 | Phase 6 | Pending |
-| PRT-009 | Phase 6 | Pending |
-| PRT-010 | Phase 6 | Pending |
+| PRT-005 | Phase 6 | Complete |
+| PRT-006 | Phase 6 | Complete |
+| PRT-007 | Phase 6 | Complete |
+| PRT-016 | Phase 6 | Complete |
+| PRT-008 | Phase 6 | Complete |
+| PRT-009 | Phase 6 | Complete |
+| PRT-010 | Phase 6 | Complete |
 | PRT-011 | Phase 6 | Pending |
 | PRT-012 | Phase 6 | Pending |
 | PRT-013 | Phase 6 | Pending |

@@ -4,18 +4,18 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 02
+current_plan: 10
 status: executing
-stopped_at: Completed 06-09-PLAN.md; next dependency plan 06-02
-last_updated: "2026-11-07T00:14:30Z"
+stopped_at: Completed 06-02-PLAN.md; next dependency plan 06-10
+last_updated: "2026-11-07T00:53:00Z"
 last_activity: 2026-11-07
-last_activity_desc: "06-09 complete: source a9481584 passes local Docker, actual Actions 42316152923 and paired gate; TEN-009 complete, next 06-02."
+last_activity_desc: "06-02 complete in service/task/proof scope: source b71daf7d passes clean Docker full normal/race and dependencies; NOD-012/PRT-004 remain pending; next 06-10."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
-  completed_plans: 45
-state_head: 843d12f6
+  completed_plans: 46
+state_head: d4869a86
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 02
+Current Plan: 10
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08 and 06-09 complete (3/11). Next dependency-ordered plan is 06-02; remaining plans and final Phase 6 acceptance are pending.
-Last activity: 2026-11-07 — source a9481584 passed clean-clone full dependency/license/sqlc and backend normal/race with real Agent/blocked-Hub processes on local Linux arm64 Docker and actual Actions 42316152923/native amd64. Both exact-source paired commands passed. Raw evidence 32698c0d and complete summary 843d12f6 are committed; two prior real CI failures remain retained. TEN-009 is complete and WINDOWS 4 fixed. Caller Phase 4/5 work is unchanged.
+Status: Executing — 06-01, 06-08, 06-09 and 06-02 complete (4/11). Next dependency-ordered plan is 06-10; final Phase 6 acceptance remains pending.
+Last activity: 2026-11-07 — source b71daf7d passed clean local Linux arm64 Docker full normal/race (82 PASS lines combined, zero skips/race warnings), dependency/license/sqlc/OpenAPI and migration checks. Evidence f25c39aa and summary d4869a86 are committed. NOD-012/PRT-004 remain pending for compiler and real Agent port consumers in 06-03/07. No new-source Actions/paired result is claimed; 06-11 must pair its final source. Caller Phase 4/5 work is unchanged.
 
-Progress: Phase 6 [███░░░░░░░░] 3/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [████░░░░░░░] 4/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -67,10 +67,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | Phase 06 P01 | 29min | 1 task | 26 files (source/tooling; 24 evidence files excluded) |
 | Phase 06 P08 | 254min wall including approval checkpoints | 2 tasks | 195 changed files including source/governance/planning and raw evidence |
 | Phase 06 P09 | at least 30min wall since first task commit, including authentication continuation | 2 tasks | 157 changed files before summary/state metadata, including raw evidence |
+| Phase 06 P02 | 32min | 2 tasks | 63 files before summary/state metadata, including raw evidence |
 
 ## Accumulated Context
 
 ### Decisions
+
+- 06-02 preserves platform ownership and uses typed domain tasks plus node-CA/boot/generation/task/lease/revision-bound proofs. NOD-012 and PRT-004 remain pending for compiler and real Agent task consumers in 06-03/07. DNS CRUD remains 06-10; final same-SHA Actions pairing remains 06-11. SDK state writes rejected historical Phase 5 passed_with_scope, so only current Phase 6 position/metrics/session were synchronized manually without changing that historical verification.
 
 - 06-09 uses one OpenAPI source and a deterministic backend copy with dependency-free Ruby lint; Phase 7 owns TypeScript generation. All 96 requirements have primary plan owners, but only implemented producers are required through 06-09. Docker producer success is separate from the mandatory paired gate. Last-cause recovery reissues only authorized persisted desired state and preserves pending/unknown occupation in the same audit/task/Outbox transaction.
 
@@ -122,8 +125,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-07T00:14:30Z
-Stopped at: Completed 06-09-PLAN.md; next dependency plan 06-02
+Last session: 2026-11-07T00:53:00Z
+Stopped at: Completed 06-02-PLAN.md; next dependency plan 06-10
 Resume file: None
 
 ### Historical qualification review (not a main-workflow gate)

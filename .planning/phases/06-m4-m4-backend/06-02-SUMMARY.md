@@ -84,6 +84,7 @@ Both task RED assertions executed against real PostgreSQL and received RED_EVIDE
 - **Rule 1:** New task metadata broke the prior-schema upgrade fixture. Explicit compatible LockTask columns and comparison of original authority fields preserve upgrade coverage; the new default is independently asserted. Fixed in `0f2ec944`; retained failure log is clearly development evidence.
 - **Rule 1:** Normalized IPv4-mapped IPv6 listener aliases before conflict checks; regression/race tests pass in `b71daf7d`.
 - **Rule 3:** Used approved Goose library migration plus real version-table status in place of the unavailable standalone CLI. Recreated only disposable Compose tmpfs test services to verify final 00003 from a fresh database.
+- **Rule 3:** SDK state handlers reject the historical Phase 5 passed_with_scope status. Preserved that verification and manually synchronized only current Phase 6 position, metric, decision and session; roadmap/requirement SDK handlers succeeded.
 
 ## Deferred Integration and Acceptance
 
