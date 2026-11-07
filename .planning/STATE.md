@@ -77,7 +77,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Pending Todos
 
-- Phase 4: clean `0c2ba71` now has separate 30% and 50% formal candidate gate passes (300s warmup, 3×300s trials, independent TLS, 100 Mbps UDP), and clean `2543fb7` has a full 81-trial D-04 matrix with independent audit pass. The user-required formal qualification and D-04 lock debts remain open; D-04 remains `locked=false`. Persisted Agent/Hub/PostgreSQL authority remains a Phase 5/6 handoff. Overall Phase 4 verification stays `gaps_found`.
+- Phase 4: clean `0c2ba71` now has separate 30% and 50% formal candidate gate passes (300s warmup, 3×300s trials, independent TLS, 100 Mbps UDP), and clean `2543fb7` has a full 81-trial D-04 matrix with independent audit pass. Q1 stage qualification is satisfied under the effective baseline; Q4 technical evidence is complete and its explicit owner lock confirmation is pending. D-04 remains `locked=false` until that confirmation. Persisted Agent/Hub/PostgreSQL authority remains a Phase 5/6 handoff. Overall Phase 4 verification stays `gaps_found`.
 
 ### Blockers/Concerns
 

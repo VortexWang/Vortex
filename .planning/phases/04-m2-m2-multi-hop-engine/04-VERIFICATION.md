@@ -8,35 +8,22 @@ behavior_unverified: 3
 
 # Phase 4 Verification — current qualification review
 
-## Current final-commit audit — 2026-11-07
+## Authoritative final audit — 2026-11-07
 
-The user-authorized Ubuntu 24.04 native run on clean commit
-`0c2ba71c0653ca1c806dc3df1db93d847544011b` completed a formal candidate
-P4-Q1 gate: 300-second warmup, three 300-second 16-stream mixed trials, independent TLS,
-100 Mbps UDP and settled source credit all passed. The earlier native mode sweep on Engine-identical `edb1849c` passed the pool/mux controlled-RTT gate (50 samples each,
-additional medians 0.991130 ms and 1.049556 ms) and observed both modes in
-auto. This records a native P4-Q1 gate evidence pass and updates the
-Engine/tracer portion of P4-Q5 to passed. Per the current phase decision,
-formal performance qualification remains an acceptance debt despite this gate
-pass. The overall status remains `gaps_found` because P4-Q1 formal acceptance,
-P4-Q4 D-04 parameters and persistent Agent/Hub/PostgreSQL authority remain
-open.
+See [04-45-FINAL-ACCEPTANCE-AUDIT.md](04-45-FINAL-ACCEPTANCE-AUDIT.md) for
+requirement-by-requirement evidence. Q1, Q2, Q3 and Q5 meet the current Phase 4
+Engine/tracer boundary. Q1 uses clean 0c2ba71, the corrected minimum-host
+baseline, explicit 300 s warmup, 3 x 300 s trials and independent TLS. Same-SHA
+local Docker and Actions regression are separately retained. The matrix passed
+81 raw audits; the center-profile formal accounting was also independently
+recomputed from rates, UDP sequences, flow identities and target/source totals.
 
-The final branch commit `0c2ba71c0653ca1c806dc3df1db93d847544011b` now has
-current-code evidence for the bounded Q2/Q3/Q4/Q5 slices in
-[04-43-CURRENT-SHA-EVIDENCE.md](04-43-CURRENT-SHA-EVIDENCE.md). Q2's 16-case
-attack matrix and eight recovery cases pass; Q3's snapshot and TCP/UDP credit
-boundaries pass; Q4's full 81 candidate trials pass the independent raw audit
-and remain `locked=false`; separate 30% and 50% formal candidate gates also pass;
-and Docker `pool`/`mux`/`auto` mode regression passes.
-
-These results close the finite implementation and current Engine/tracer
-evidence slices. P4-Q1 formal performance acceptance, P4-Q4 production D-04
-locking and persistent Agent/Hub authority remain explicitly open; later
-control-plane persistence latency is not covered by the P4-Q5 gate.
-The overall verification status therefore remains `gaps_found`: the user
-explicitly retains formal qualification and D-04 lock as acceptance debts,
-and persistent authority remains a Phase 5/6 handoff.
+Q4 technical evidence and the concrete 256 KiB / 30 s / 30% proposal are ready.
+The explicit owner lock confirmation required by 04-06-D04-REVIEW was requested
+and is pending. Therefore `gaps_found` currently identifies that remaining
+decision; it is not a permanent hold on already satisfied Q1 requirements.
+Production persistent authority belongs to Phase 5/6 and is not a Phase 4
+closure blocker. Historical notes below retain their original evidence scope.
 
 ## Current scope decision — 2026-11-06
 
