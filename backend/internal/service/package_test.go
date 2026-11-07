@@ -198,3 +198,15 @@ func TestPackageDurableSnapshotProductionCompileAndHistory(t *testing.T) {
 		t.Fatal("forged billing accepted")
 	}
 }
+
+func TestEntitlementAtomicRedemptionContract(t *testing.T){
+ f:=newPortFixture(t);pkg:=createPackage(t,f,packageTerms());s:=service.PackageService{Pool:f.pool}
+ type issuer interface {CreateEntitlement(context.Context,service.TenantScope,string,string,string,int64,int32,int64,int64,time.Time,string,string)error;RedeemEntitlement(context.Context,service.TenantScope,string,string,string)(service.PackageResult,error)}
+ api,ok:=any(s).(issuer);if !ok{t.Fatal("atomic entitlement issuance/redemption service missing")}
+ code,key:=uuid.NewString(),uuid.NewString();ctx:=context.Background()
+ if e:=api.CreateEntitlement(ctx,policyScope(t,f.tenant,auth.PlatformAdmin,policy.Grant),code,"package",pkg,1,90,10000,1,time.Now().Add(time.Hour),f.tenant,uuid.NewString());e!=nil{t.Fatal(e)}
+ first,e:=api.RedeemEntitlement(ctx,f.scope,code,key,uuid.NewString());if e!=nil||first.SubscriptionID==""||first.SourceID==""{t.Fatal(first,e)}
+ replay,e:=api.RedeemEntitlement(ctx,f.scope,code,key,uuid.NewString());if e!=nil||first!=replay{t.Fatal("redemption replay changed result",first,replay,e)}
+ if _,e=api.RedeemEntitlement(ctx,f.scope,uuid.NewString(),key,uuid.NewString());e==nil{t.Fatal("payload conflict accepted")}
+ var uses,redemptions,sources int;if e=f.pool.QueryRow(ctx,"SELECT remaining_uses,(SELECT count(*) FROM entitlement_redemptions WHERE tenant_id=$1),(SELECT count(*) FROM traffic_sources WHERE tenant_id=$1) FROM entitlement_codes WHERE applicable_tenant=$1",f.tenant).Scan(&uses,&redemptions,&sources);e!=nil||uses!=0||redemptions!=1||sources!=1{t.Fatal(uses,redemptions,sources,e)}
+}
