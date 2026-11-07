@@ -69,6 +69,27 @@ func (q *Queries) AppendRuleRevision(ctx context.Context, arg AppendRuleRevision
 	return i, err
 }
 
+const bindRuleCompileTask = `-- name: BindRuleCompileTask :exec
+INSERT INTO rule_compile_requests(tenant_id,task_id,rule_id,rule_revision) VALUES($1,$2,$3,$4)
+`
+
+type BindRuleCompileTaskParams struct {
+	TenantID     string
+	TaskID       string
+	RuleID       string
+	RuleRevision int64
+}
+
+func (q *Queries) BindRuleCompileTask(ctx context.Context, arg BindRuleCompileTaskParams) error {
+	_, err := q.db.Exec(ctx, bindRuleCompileTask,
+		arg.TenantID,
+		arg.TaskID,
+		arg.RuleID,
+		arg.RuleRevision,
+	)
+	return err
+}
+
 const commitRuleArtifact = `-- name: CommitRuleArtifact :exec
 INSERT INTO rule_artifact_commits(tenant_id,digest) VALUES($1,$2) ON CONFLICT DO NOTHING
 `
@@ -404,7 +425,7 @@ func (q *Queries) LockRuleHead(ctx context.Context, arg LockRuleHeadParams) (Rul
 }
 
 const supersedePendingRuleCompiles = `-- name: SupersedePendingRuleCompiles :exec
-UPDATE tasks t SET state='superseded' WHERE t.tenant_id=$1 AND t.task_kind='rule_compile' AND t.state='pending' AND t.operation_id IN (SELECT o.id FROM operations o WHERE o.tenant_id=$1 AND convert_from(o.payload,'UTF8')::jsonb->>'resource_id'=$2::text)
+UPDATE tasks t SET state='superseded' WHERE t.tenant_id=$1 AND t.task_kind='rule_compile' AND t.state='pending' AND EXISTS(SELECT 1 FROM rule_compile_requests r WHERE r.tenant_id=t.tenant_id AND r.task_id=t.id AND r.rule_id=$2)
 `
 
 type SupersedePendingRuleCompilesParams struct {

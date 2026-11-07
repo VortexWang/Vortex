@@ -40,6 +40,13 @@ CREATE INDEX rule_dependencies_lookup ON rule_dependencies(dependency_kind,depen
 CREATE TRIGGER rule_targets_immutable BEFORE UPDATE OR DELETE ON rule_targets FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TRIGGER rule_segments_immutable BEFORE UPDATE OR DELETE ON rule_segments FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TRIGGER rule_dependencies_immutable BEFORE UPDATE OR DELETE ON rule_dependencies FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE rule_compile_requests (
+ tenant_id text NOT NULL, task_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ PRIMARY KEY(tenant_id,task_id), FOREIGN KEY(tenant_id,task_id) REFERENCES tasks(tenant_id,id),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE INDEX rule_compile_request_rule ON rule_compile_requests(tenant_id,rule_id,rule_revision);
+CREATE TRIGGER rule_compile_request_immutable BEFORE UPDATE OR DELETE ON rule_compile_requests FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
@@ -77,4 +84,4 @@ ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release'));
-DROP TABLE rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;
+DROP TABLE rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_compile_requests,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;

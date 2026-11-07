@@ -131,6 +131,11 @@ func TestRuleDependencyRecompileKeepsActiveRevision(t *testing.T) {
 	ctx := context.Background()
 	s := service.RuleService{Pool: f.pool}
 	in := ruleInput(f.group)
+	// Unrelated control operations can carry opaque binary bytes. Rule task
+	// identity must be relational, never inferred by JSON-casting all payloads.
+	if _, e := (&service.Tracer{Pool: f.pool}).Mutate(ctx, f.scope, service.Mutation{ResourceID: uuid.NewString(), TargetKind: "node", Revision: 1, Generation: 1, IdempotencyKey: uuid.NewString(), RequestID: uuid.NewString(), Payload: []byte{255}}); e != nil {
+		t.Fatal(e)
+	}
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}

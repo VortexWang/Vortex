@@ -269,6 +269,9 @@ func (s RuleService) Mutate(ctx context.Context, scope TenantScope, in RuleInput
 		if e != nil {
 			return e
 		}
+		if e = q.BindRuleCompileTask(ctx, generated.BindRuleCompileTaskParams{TenantID: scope.TenantID(), TaskID: op.ID, RuleID: in.ID, RuleRevision: expected + 1}); e != nil {
+			return e
+		}
 		result.OperationID = op.ID
 		result.ChangeClass = class
 		return nil
@@ -290,7 +293,11 @@ func invalidateRules(ctx context.Context, q *generated.Queries, scope TenantScop
 		if e = q.SupersedePendingRuleCompiles(ctx, generated.SupersedePendingRuleCompilesParams{TenantID: scope.TenantID(), RuleID: r.ID}); e != nil {
 			return e
 		}
-		if e = domainTask(ctx, q, scope, r.ID, "rule.recompile", "rule_compile", r.DesiredRevision); e != nil {
+		op, err := newDomainTask(ctx, q, scope, r.ID, "rule.recompile", "rule_compile", r.DesiredRevision)
+		if err != nil {
+			return err
+		}
+		if e = q.BindRuleCompileTask(ctx, generated.BindRuleCompileTaskParams{TenantID: scope.TenantID(), TaskID: op.ID, RuleID: r.ID, RuleRevision: r.DesiredRevision}); e != nil {
 			return e
 		}
 	}

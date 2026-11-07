@@ -27,7 +27,10 @@ INSERT INTO rule_dependencies(tenant_id,rule_id,revision,dependency_kind,depende
 SELECT h.* FROM rule_heads h WHERE h.tenant_id=$1 AND EXISTS(SELECT 1 FROM rule_dependencies d WHERE d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.revision=h.desired_revision AND d.dependency_kind=$2 AND d.dependency_id=$3) ORDER BY h.id FOR UPDATE;
 
 -- name: SupersedePendingRuleCompiles :exec
-UPDATE tasks t SET state='superseded' WHERE t.tenant_id=sqlc.arg(tenant_id) AND t.task_kind='rule_compile' AND t.state='pending' AND t.operation_id IN (SELECT o.id FROM operations o WHERE o.tenant_id=sqlc.arg(tenant_id) AND convert_from(o.payload,'UTF8')::jsonb->>'resource_id'=sqlc.arg(rule_id)::text);
+UPDATE tasks t SET state='superseded' WHERE t.tenant_id=sqlc.arg(tenant_id) AND t.task_kind='rule_compile' AND t.state='pending' AND EXISTS(SELECT 1 FROM rule_compile_requests r WHERE r.tenant_id=t.tenant_id AND r.task_id=t.id AND r.rule_id=sqlc.arg(rule_id));
+
+-- name: BindRuleCompileTask :exec
+INSERT INTO rule_compile_requests(tenant_id,task_id,rule_id,rule_revision) VALUES($1,$2,$3,$4);
 
 -- name: InsertRuleCompileInput :exec
 INSERT INTO rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest,canonical,billing_snapshot_id,signer_epoch,path_generation,fencing_generation)

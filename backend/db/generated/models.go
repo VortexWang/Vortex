@@ -290,6 +290,13 @@ type RuleCompileInput struct {
 	FencingGeneration int64
 }
 
+type RuleCompileRequest struct {
+	TenantID     string
+	TaskID       string
+	RuleID       string
+	RuleRevision int64
+}
+
 type RuleDependency struct {
 	TenantID       string
 	RuleID         string
