@@ -512,5 +512,11 @@ CREATE TABLE source_expirations (
  PRIMARY KEY(tenant_id,source_id), FOREIGN KEY(tenant_id,source_id) REFERENCES traffic_sources(tenant_id,id)
 );
 CREATE TRIGGER source_expirations_immutable BEFORE UPDATE OR DELETE ON source_expirations FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE source_extensions (
+ tenant_id text NOT NULL, source_id text NOT NULL, request_key text NOT NULL,
+ expires_at timestamptz NOT NULL, PRIMARY KEY(tenant_id,source_id,request_key),
+ FOREIGN KEY(tenant_id,source_id) REFERENCES traffic_sources(tenant_id,id)
+);
+CREATE TRIGGER source_extensions_immutable BEFORE UPDATE OR DELETE ON source_extensions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query','package_due'));

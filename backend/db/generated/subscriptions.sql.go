@@ -55,6 +55,27 @@ func (q *Queries) AppendPackageChange(ctx context.Context, arg AppendPackageChan
 	return i, err
 }
 
+const appendSourceExtension = `-- name: AppendSourceExtension :exec
+INSERT INTO source_extensions(tenant_id,source_id,request_key,expires_at) VALUES($1,$2,$3,$4)
+`
+
+type AppendSourceExtensionParams struct {
+	TenantID   string
+	SourceID   string
+	RequestKey string
+	ExpiresAt  pgtype.Timestamptz
+}
+
+func (q *Queries) AppendSourceExtension(ctx context.Context, arg AppendSourceExtensionParams) error {
+	_, err := q.db.Exec(ctx, appendSourceExtension,
+		arg.TenantID,
+		arg.SourceID,
+		arg.RequestKey,
+		arg.ExpiresAt,
+	)
+	return err
+}
+
 const appendTrafficSource = `-- name: AppendTrafficSource :one
 INSERT INTO traffic_sources(id,tenant_id,snapshot_id,subscription_id,kind,initial_amount,issued_at,expires_at,period_key) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, tenant_id, snapshot_id, subscription_id, kind, initial_amount, issued_at, expires_at, period_key
 `
@@ -400,6 +421,22 @@ func (q *Queries) ReplaceSubscription(ctx context.Context, arg ReplaceSubscripti
 		&i.Version,
 	)
 	return i, err
+}
+
+const sourceEffectiveExpiry = `-- name: SourceEffectiveExpiry :one
+SELECT GREATEST(s.expires_at,COALESCE((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id),s.expires_at))::timestamptz FROM traffic_sources s WHERE s.tenant_id=$1 AND s.id=$2
+`
+
+type SourceEffectiveExpiryParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) SourceEffectiveExpiry(ctx context.Context, arg SourceEffectiveExpiryParams) (pgtype.Timestamptz, error) {
+	row := q.db.QueryRow(ctx, sourceEffectiveExpiry, arg.TenantID, arg.ID)
+	var column_1 pgtype.Timestamptz
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const sourceIsExpired = `-- name: SourceIsExpired :one

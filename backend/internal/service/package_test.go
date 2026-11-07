@@ -199,14 +199,228 @@ func TestPackageDurableSnapshotProductionCompileAndHistory(t *testing.T) {
 	}
 }
 
-func TestEntitlementAtomicRedemptionContract(t *testing.T){
- f:=newPortFixture(t);pkg:=createPackage(t,f,packageTerms());s:=service.PackageService{Pool:f.pool}
- type issuer interface {CreateEntitlement(context.Context,service.TenantScope,string,string,string,int64,int32,int64,int64,time.Time,string,string)error;RedeemEntitlement(context.Context,service.TenantScope,string,string,string)(service.PackageResult,error)}
- api,ok:=any(s).(issuer);if !ok{t.Fatal("atomic entitlement issuance/redemption service missing")}
- code,key:=uuid.NewString(),uuid.NewString();ctx:=context.Background()
- if e:=api.CreateEntitlement(ctx,policyScope(t,f.tenant,auth.PlatformAdmin,policy.Grant),code,"package",pkg,1,90,10000,1,time.Now().Add(time.Hour),f.tenant,uuid.NewString());e!=nil{t.Fatal(e)}
- first,e:=api.RedeemEntitlement(ctx,f.scope,code,key,uuid.NewString());if e!=nil||first.SubscriptionID==""||first.SourceID==""{t.Fatal(first,e)}
- replay,e:=api.RedeemEntitlement(ctx,f.scope,code,key,uuid.NewString());if e!=nil||first!=replay{t.Fatal("redemption replay changed result",first,replay,e)}
- if _,e=api.RedeemEntitlement(ctx,f.scope,uuid.NewString(),key,uuid.NewString());e==nil{t.Fatal("payload conflict accepted")}
- var uses,redemptions,sources int;if e=f.pool.QueryRow(ctx,"SELECT remaining_uses,(SELECT count(*) FROM entitlement_redemptions WHERE tenant_id=$1),(SELECT count(*) FROM traffic_sources WHERE tenant_id=$1) FROM entitlement_codes WHERE applicable_tenant=$1",f.tenant).Scan(&uses,&redemptions,&sources);e!=nil||uses!=0||redemptions!=1||sources!=1{t.Fatal(uses,redemptions,sources,e)}
+func TestEntitlementAtomicRedemptionContract(t *testing.T) {
+	f := newPortFixture(t)
+	pkg := createPackage(t, f, packageTerms())
+	s := service.PackageService{Pool: f.pool}
+	type issuer interface {
+		CreateEntitlement(context.Context, service.TenantScope, string, string, string, int64, int32, int64, int64, time.Time, string, string) error
+		RedeemEntitlement(context.Context, service.TenantScope, string, string, string) (service.PackageResult, error)
+	}
+	api, ok := any(s).(issuer)
+	if !ok {
+		t.Fatal("atomic entitlement issuance/redemption service missing")
+	}
+	code, key := uuid.NewString(), uuid.NewString()
+	ctx := context.Background()
+	if e := api.CreateEntitlement(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Grant), code, "package", pkg, 1, 90, 10000, 1, time.Now().Add(time.Hour), f.tenant, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	first, e := api.RedeemEntitlement(ctx, f.scope, code, key, uuid.NewString())
+	if e != nil || first.SubscriptionID == "" || first.SourceID == "" {
+		t.Fatal(first, e)
+	}
+	replay, e := api.RedeemEntitlement(ctx, f.scope, code, key, uuid.NewString())
+	if e != nil || first != replay {
+		t.Fatal("redemption replay changed result", first, replay, e)
+	}
+	if _, e = api.RedeemEntitlement(ctx, f.scope, uuid.NewString(), key, uuid.NewString()); e == nil {
+		t.Fatal("payload conflict accepted")
+	}
+	var uses, redemptions, sources int
+	if e = f.pool.QueryRow(ctx, "SELECT remaining_uses,(SELECT count(*) FROM entitlement_redemptions WHERE tenant_id=$1),(SELECT count(*) FROM traffic_sources WHERE tenant_id=$1) FROM entitlement_codes WHERE applicable_tenant=$1", f.tenant).Scan(&uses, &redemptions, &sources); e != nil || uses != 0 || redemptions != 1 || sources != 1 {
+		t.Fatal(uses, redemptions, sources, e)
+	}
+}
+
+func issueCode(t *testing.T, f *portFixture, pkg, kind string, days int32, amount, uses int64) string {
+	t.Helper()
+	code := uuid.NewString()
+	if e := (service.PackageService{Pool: f.pool}).CreateEntitlement(context.Background(), policyScope(t, f.tenant, auth.PlatformAdmin, policy.Grant), code, kind, pkg, 1, days, amount, uses, time.Now().Add(time.Hour), f.tenant, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	return code
+}
+func redeem(t *testing.T, f *portFixture, code string) service.PackageResult {
+	t.Helper()
+	r, e := (service.PackageService{Pool: f.pool}).RedeemEntitlement(context.Background(), f.scope, code, uuid.NewString(), uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	return r
+}
+func TestEntitlementRedeemConcurrentUsesAndRequestConflict(t *testing.T) {
+	f := newPortFixture(t)
+	s := service.PackageService{Pool: f.pool}
+	pkg := createPackage(t, f, packageTerms())
+	code := issueCode(t, f, pkg, "traffic", 7, 123, 1)
+	ctx := context.Background()
+	key := uuid.NewString()
+	out := make(chan service.PackageResult, 2)
+	errch := make(chan error, 2)
+	var wg sync.WaitGroup
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			r, e := s.RedeemEntitlement(ctx, f.scope, code, key, uuid.NewString())
+			out <- r
+			errch <- e
+		}()
+	}
+	wg.Wait()
+	close(out)
+	close(errch)
+	for e := range errch {
+		if e != nil {
+			t.Fatal(e)
+		}
+	}
+	var first service.PackageResult
+	for r := range out {
+		if first.SourceID != "" && r != first {
+			t.Fatal("concurrent duplicate issuance")
+		}
+		first = r
+	}
+	other := seedTenant(t, f.pool)
+	if _, e := s.RedeemEntitlement(ctx, policyScope(t, other, auth.Owner, policy.Mutate), code, key, uuid.NewString()); !errors.Is(e, service.ErrConflict) {
+		t.Fatal("cross tenant request replay", e)
+	}
+	if _, e := s.RedeemEntitlement(ctx, f.scope, code, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("exhausted accepted", e)
+	}
+	code = issueCode(t, f, pkg, "traffic", 7, 123, 1)
+	errch = make(chan error, 2)
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, e := s.RedeemEntitlement(ctx, f.scope, code, uuid.NewString(), uuid.NewString())
+			errch <- e
+		}()
+	}
+	wg.Wait()
+	close(errch)
+	success := 0
+	for e := range errch {
+		if e == nil {
+			success++
+		}
+	}
+	if success != 1 {
+		t.Fatal("code overspend", success)
+	}
+}
+func TestEntitlementAuditRollbackExpiredRevokedApplicability(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	s := service.PackageService{Pool: f.pool}
+	pkg := createPackage(t, f, packageTerms())
+	code := issueCode(t, f, pkg, "package", 90, 10000, 2)
+	tables := []string{"subscriptions", "package_snapshots", "traffic_sources", "source_extensions", "package_requests", "entitlement_redemptions", "audit_events", "tasks", "operations", "outbox"}
+	request := uuid.NewString()
+	failAudit(t, f.pool, request)
+	before := authoritySnapshot(t, f.pool, f.tenant, tables)
+	if _, e := s.RedeemEntitlement(ctx, f.scope, code, uuid.NewString(), request); e == nil {
+		t.Fatal("audit bypass")
+	}
+	if !bytes.Equal(before, authoritySnapshot(t, f.pool, f.tenant, tables)) {
+		t.Fatal("partial redeem")
+	}
+	var uses int
+	if e := f.pool.QueryRow(ctx, "SELECT remaining_uses FROM entitlement_codes WHERE applicable_tenant=$1", f.tenant).Scan(&uses); e != nil || uses != 2 {
+		t.Fatal("partial counter", uses, e)
+	}
+	other := seedTenant(t, f.pool)
+	if _, e := s.RedeemEntitlement(ctx, policyScope(t, other, auth.Owner, policy.Mutate), code, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal(e)
+	}
+	if e := s.RevokeEntitlement(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Grant), code, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := s.RedeemEntitlement(ctx, f.scope, code, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("revoked accepted", e)
+	}
+	code = issueCode(t, f, pkg, "traffic", 7, 123, 1)
+	if _, e := f.pool.Exec(ctx, "UPDATE entitlement_codes SET valid_until=now()-interval '1 second' WHERE NOT revoked AND applicable_tenant=$1", f.tenant); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := s.RedeemEntitlement(ctx, f.scope, code, uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("expired accepted", e)
+	}
+}
+func TestEntitlementRenewalMonthlyNoneDurationAndIndependentSources(t *testing.T) {
+	for _, reset := range []string{"monthly", "none"} {
+		t.Run(reset, func(t *testing.T) {
+			f := newPortFixture(t)
+			ctx := context.Background()
+			s := service.PackageService{Pool: f.pool}
+			p := packageTerms()
+			p.TrafficReset = reset
+			pkg := createPackage(t, f, p)
+			initial := subscribePackage(t, f, pkg)
+			next := redeem(t, f, issueCode(t, f, pkg, "package", 30, 77, 1))
+			if next.AnchorAt != initial.AnchorAt || !next.ExpiresAt.Equal(initial.ExpiresAt.AddDate(0, 0, 30)) {
+				t.Fatal("anchor/expiry changed", initial, next)
+			}
+			rows, e := generated.New(f.pool).ListTrafficSources(ctx, f.tenant)
+			if e != nil {
+				t.Fatal(e)
+			}
+			want := 1
+			if reset == "none" {
+				want = 2
+			}
+			if len(rows) != want {
+				t.Fatal("future monthly funds issued", len(rows))
+			}
+			duration := redeem(t, f, issueCode(t, f, pkg, "duration", 10, 999, 1))
+			if duration.AnchorAt != initial.AnchorAt {
+				t.Fatal("duration changed anchor")
+			}
+			rows, e = generated.New(f.pool).ListTrafficSources(ctx, f.tenant)
+			if e != nil || len(rows) != want {
+				t.Fatal("duration added funds", e, len(rows))
+			}
+			traffic1 := redeem(t, f, issueCode(t, f, pkg, "traffic", 9, 101, 1))
+			traffic2 := redeem(t, f, issueCode(t, f, pkg, "traffic", 3, 202, 1))
+			if traffic1.SourceID == traffic2.SourceID || traffic1.SnapshotID == traffic2.SnapshotID {
+				t.Fatal("independent sources merged")
+			}
+			available, e := s.ConsumableSources(ctx, f.scope, time.Now())
+			if e != nil || len(available) != want+2 || available[want].ID != traffic2.SourceID || available[want+1].ID != traffic1.SourceID {
+				t.Fatal("source ordering", e, available)
+			}
+		})
+	}
+}
+func TestEntitlementTrafficWithoutPrimaryAndExpiredNoResurrection(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	s := service.PackageService{Pool: f.pool}
+	pkg := createPackage(t, f, packageTerms())
+	traffic := redeem(t, f, issueCode(t, f, pkg, "traffic", 3, 500, 1))
+	if traffic.SourceID == "" {
+		t.Fatal("traffic issue missing")
+	}
+	if _, e := s.RedeemEntitlement(ctx, f.scope, issueCode(t, f, pkg, "duration", 3, 0, 1), uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("duration without primary accepted", e)
+	}
+	initial := subscribePackage(t, f, pkg)
+	old := initial.AnchorAt.AddDate(0, 0, -100)
+	if _, e := f.pool.Exec(ctx, "UPDATE subscriptions SET anchor_at=$2,expires_at=now()-interval '1 second' WHERE tenant_id=$1", f.tenant, old); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := s.RedeemEntitlement(ctx, f.scope, issueCode(t, f, pkg, "duration", 3, 0, 1), uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrEntitlementInvalid) {
+		t.Fatal("expired duration accepted", e)
+	}
+	fresh := redeem(t, f, issueCode(t, f, pkg, "package", 90, 10000, 1))
+	if fresh.SnapshotID == initial.SnapshotID || !fresh.AnchorAt.After(initial.AnchorAt) {
+		t.Fatal("expired subscription resurrected")
+	}
+	other := createPackage(t, f, packageTerms())
+	if _, e := s.RedeemEntitlement(ctx, f.scope, issueCode(t, f, other, "package", 90, 10000, 1), uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrPackageConfirmationRequired) {
+		t.Fatal("different package skipped confirmation", e)
+	}
 }

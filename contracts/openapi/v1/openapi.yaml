@@ -7,6 +7,33 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/entitlement-redemptions:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: redeemEntitlement
+      x-vortex-implementation-plan: 06-07
+      description: Redeem a code in one transaction. Idempotency-Key is globally bound to tenant and code hash; exact replay returns the stored result. Different-package codes require a confirmed downgrade preview. Codes are excluded from audit and task data. Monthly renewal extends time only; traffic codes create independent sources.
+      parameters:
+        - {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 1, maxLength: 128}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [code]
+              properties:
+                code: {type: string, minLength: 16, maxLength: 256, writeOnly: true}
+      responses:
+        '200': {description: Issued or exactly replayed result, content: {application/json: {schema: {$ref: '#/components/schemas/PackageResult'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/InvalidInput'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/subscription:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}

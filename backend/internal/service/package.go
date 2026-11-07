@@ -333,11 +333,16 @@ func (s PackageService) ConsumableSources(ctx context.Context, scope TenantScope
 	}
 	out := []generated.TrafficSource{}
 	for _, r := range rows {
+		expiry, e := q.SourceEffectiveExpiry(ctx, generated.SourceEffectiveExpiryParams{TenantID: scope.TenantID(), ID: r.ID})
+		if e != nil {
+			return nil, e
+		}
 		expired, e := q.SourceIsExpired(ctx, generated.SourceIsExpiredParams{TenantID: scope.TenantID(), SourceID: r.ID, AtTime: timestamp(at)})
 		if e != nil {
 			return nil, e
 		}
-		if !expired && !at.Before(r.IssuedAt.Time) && at.Before(r.ExpiresAt.Time) {
+		if !expired && !at.Before(r.IssuedAt.Time) && at.Before(expiry.Time) {
+			r.ExpiresAt = expiry
 			out = append(out, r)
 		}
 	}

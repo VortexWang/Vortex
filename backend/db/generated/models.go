@@ -478,6 +478,13 @@ type SourceExpiration struct {
 	Reason      string
 }
 
+type SourceExtension struct {
+	TenantID   string
+	SourceID   string
+	RequestKey string
+	ExpiresAt  pgtype.Timestamptz
+}
+
 type Subscription struct {
 	ID         string
 	TenantID   string

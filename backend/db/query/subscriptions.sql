@@ -16,6 +16,10 @@ SELECT * FROM traffic_sources WHERE tenant_id=$1 ORDER BY CASE kind WHEN 'base' 
 INSERT INTO source_expirations(tenant_id,source_id,effective_at,reason) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING;
 -- name: SourceIsExpired :one
 SELECT EXISTS(SELECT 1 FROM source_expirations WHERE tenant_id=$1 AND source_id=$2 AND effective_at<=sqlc.arg(at_time));
+-- name: AppendSourceExtension :exec
+INSERT INTO source_extensions(tenant_id,source_id,request_key,expires_at) VALUES($1,$2,$3,$4);
+-- name: SourceEffectiveExpiry :one
+SELECT GREATEST(s.expires_at,COALESCE((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id),s.expires_at))::timestamptz FROM traffic_sources s WHERE s.tenant_id=$1 AND s.id=$2;
 -- name: TenantPackageRules :many
 SELECT h.id,h.desired_revision,r.payload,r.created_at FROM rule_heads h JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision WHERE h.tenant_id=$1 ORDER BY r.created_at,h.id;
 -- name: TenantPackagePorts :many
