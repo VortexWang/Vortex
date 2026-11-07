@@ -40,9 +40,7 @@ func validateRuntimeConfig(payload []byte, nodeID string, version uint64) error 
 		return fmt.Errorf("invalid_config: payload must be UTF-8 JSON of 1..%d bytes", maxRuntimeConfigBytes)
 	}
 	runtimeSchemaOnce.Do(func() {
-		dec := json.NewDecoder(bytes.NewReader(contracts.RuntimeConfigSchema))
-		dec.UseNumber()
-		runtimeSchemaErr = dec.Decode(&runtimeSchema)
+		runtimeSchema, runtimeSchemaErr = legacyRuntimeSchema(contracts.RuntimeConfigSchema)
 	})
 	if runtimeSchemaErr != nil {
 		return fmt.Errorf("invalid_config: runtime schema unavailable: %w", runtimeSchemaErr)
@@ -75,6 +73,36 @@ func validateRuntimeConfig(payload []byte, nodeID string, version uint64) error 
 		return fmt.Errorf("stale_version: envelope and payload versions do not match")
 	}
 	return nil
+}
+
+// Legacy control updates must keep the original schema, rather than accepting
+// the separately negotiated rule artifact branch of the published contract.
+func legacyRuntimeSchema(raw []byte) (jsonSchema, error) {
+	var document struct {
+		OneOf []struct {
+			Ref string `json:"$ref"`
+		} `json:"oneOf"`
+		Definitions map[string]json.RawMessage `json:"$defs"`
+	}
+	if err := json.Unmarshal(raw, &document); err != nil {
+		return jsonSchema{}, err
+	}
+	if len(document.OneOf) != 0 {
+		if len(document.OneOf) != 2 || document.OneOf[0].Ref != "#/$defs/legacy" || document.OneOf[1].Ref != "#/$defs/rule_artifact" || len(document.Definitions["legacy"]) == 0 || len(document.Definitions["rule_artifact"]) == 0 {
+			return jsonSchema{}, fmt.Errorf("unsupported runtime schema branches")
+		}
+		raw = document.Definitions["legacy"]
+	}
+	var schema jsonSchema
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	if err := dec.Decode(&schema); err != nil {
+		return jsonSchema{}, err
+	}
+	if schema.Type != "object" {
+		return jsonSchema{}, fmt.Errorf("legacy runtime schema must be an object")
+	}
+	return schema, nil
 }
 
 func validateSchemaValue(value any, schema jsonSchema, path string) error {

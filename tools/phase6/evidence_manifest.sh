@@ -79,7 +79,7 @@ for producer in ([host] if host else ['docker','actions']):
         require('two clean generations' in (folder/'rule-contract.log').read_text(), 'generated/wire contract evidence missing')
         component_log=(folder/'rule-components.log').read_text()
         require('--- SKIP:' not in component_log and '\nFAIL' not in component_log and 'WARNING: DATA RACE' not in component_log, 'failed/skipped/racy rule component tests')
-        for target in ['TestRuleCommandPrepareCommitQueryRestartRealRuntime','TestRuleConfigScopeIndependentAndRestartHolds','TestPrepareCommitHotSessionAndAbortRealSockets','TestReleaseProvesClosedSocketsAndReapplyBindsFreshEndpoint','TestApplyMultihopForwardAndReverseRealTLS']:
+        for target in ['TestLegacyRuntimeSchemaBranchPreservesControlValidation','TestLegacyRuntimeSchemaRejectsUnsupportedBranches','TestRuleCommandPrepareCommitQueryRestartRealRuntime','TestRuleConfigScopeIndependentAndRestartHolds','TestPrepareCommitHotSessionAndAbortRealSockets','TestReleaseProvesClosedSocketsAndReapplyBindsFreshEndpoint','TestApplyMultihopForwardAndReverseRealTLS']:
             require(len(re.findall(r'--- PASS: '+target+r' \([^\n]*',component_log))>=2, 'rule component normal/race evidence missing '+target)
         builds=(folder/'rule-builds.log').read_text()
         for arch in ('amd64','arm64'):
