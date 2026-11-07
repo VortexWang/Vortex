@@ -38,3 +38,11 @@ idle demand shrink and block-tail settlement from issuer grant return. The
 production Agent/Hub/PostgreSQL authority and its requalification remain Phase
 5/6 handoffs. This supersedes the earlier production-durable-bar interpretation
 in this quick plan without changing any measured result.
+
+## Center-profile formal follow-up
+
+The initial queued shell retained its launch-time 50% profile despite the later
+on-disk edit. Its completed evidence remains 50%. Run the 30% center candidate
+separately in a new directory on clean 0c2ba71, with the same 300 s warmup,
+three 300 s trials and TLS comparison. Do not relabel, overwrite or combine
+profiles. Runner PID 252907; log /tmp/vortex-phase4-formal-center.log.

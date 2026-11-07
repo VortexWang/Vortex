@@ -18,7 +18,8 @@ complete native dynamic matrix and final formal gate are audited.
 | --- | --- | --- |
 | Durable safety matrix | Clean `2543fb745d942ddf710c02d502a3675b9b3c7fe9`; 27 cases, each TCP + UDP, all pass | Finite in-process Agent/Hub/backend fixture; target floor equals ceiling, so target seconds do not change this workload |
 | Closed SQLite audit | All 54 transport sets pass identity/payload/hash, source/delegation conservation and settlement checks | Closed fixture ledgers; no production PostgreSQL qualification |
-| Dynamic native matrix | Same clean 2543fb7, 27 combinations × 3 repeats; currently running | Fifteen seconds per load phase; not formal duration evidence |
+| Dynamic native matrix | Same clean 2543fb7, 27 combinations × 3 repeats; full raw and independent audit pass | Fifteen seconds per load phase; not formal duration evidence |
+| Formal candidate gate | Clean `0c2ba71`, 256 KiB / 30 s / 50%; 300 s warmup, 3 x 300 s trials, independent TLS; gate pass | Measured candidate profile, not an approved D-04 lock |
 | Exact-head Actions | [42308608919](https://github.com/nodeox/VORTEX/actions/runs/42308608919), clean `0c2ba71c0653ca1c806dc3df1db93d847544011b`, passed | Hosted runner regression, not dedicated native performance |
 | Same-SHA Docker | Clean 0c2ba71, 16-stream mixed accounting passed | Fifteen-second OrbStack diagnostic |
 
@@ -87,6 +88,37 @@ to the Phase 5/6 handoff.
 
 ## Decision
 
-`locked=false`. The dynamic matrix and final formal qualification are still
-running or pending. Final parameter values, comparative measurements and the
-formal gate evidence must be recorded before changing this decision.
+## Completed comparison
+
+The full matrix completed 81 trials (27 combinations, three repeats) on clean
+`2543fb7`; the independent raw-workload, accounting, target-formula and
+65-second idle-window audit returned `status=pass`. Summary SHA256 is
+`135a289cdf96d46c4b3668befa45e87c289403c669541fe7fb5b1932abc4566a` and the
+independent audit SHA256 is
+`bfe95ec5ac574c6fbf529378c6f95f35c9f8ba1dab6927ecb7d529e444c7b9b4`.
+
+The center profile (256 KiB / 30 s) had median TCP throughput 636.861 Mbps
+and 41–42 grants per trial. The 50% waterline was similar in throughput but
+used 58–59 grants per trial; 20% used 36 grants. The 10 s and 60 s horizons
+showed the expected higher and lower grant counts. All audited trials had
+source conservation, settlement, zero UDP loss, and idle target shrink to the
+8 MiB floor. The timeline audit does not prove issuer credit return.
+
+The queued 600 ms renewal-response pressure run failed all nine trials with
+transport resets and/or UDP offered-load loss. Raw failures are retained under
+`d04-delay-0c2ba71`; this is an availability boundary and does not justify
+increasing the 200 ms reservation wait.
+
+Formal candidate evidence was collected separately for 256 KiB / 30 s / 50%
+on clean `0c2ba71`: 300 s warmup, three 300 s trials and independent TLS.
+Trial TCP throughput was 637.626 / 634.512 / 630.515 Mbps; UDP offered rate
+was 99.998 Mbps with zero loss in each. TLS mixed TCP was 578.600 Mbps and
+the runtime/TLS ratio was 1.089726. The machine gate returned `pass`; gate
+SHA256 is `5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+This formal result is evidence for the 50% candidate only and does not lock
+the 30% center candidate.
+
+`locked=false` remains intentional. The user-required D-04 parameter-lock
+debt is retained: the matrix is an Engine/in-process candidate comparison,
+and the formal run is a 50% candidate profile. No production default or
+authority grant-return protocol is approved by this review.

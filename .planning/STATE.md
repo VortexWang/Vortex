@@ -77,7 +77,7 @@ Progress: Phase 5 [████████░░] 4/5 plans complete; Phase 5 r
 
 ### Pending Todos
 
-- Phase 4: current commit `edb1849c` now has native formal performance evidence (60s warmup, 3×300s trials, independent TLS, 100 Mbps UDP) with machine gate `pass`, plus native pool/mux controlled-RTT gate pass and auto mode selection evidence. D-04 remains `locked=false`; persisted Agent/Hub/PostgreSQL authority remains a Phase 5/6 handoff. Overall Phase 4 verification stays `gaps_found` until those debts are resolved.
+- Phase 4: clean `0c2ba71` now has a formal candidate gate pass (300s warmup, 3×300s trials, independent TLS, 100 Mbps UDP), and clean `2543fb7` has a full 81-trial D-04 matrix with independent audit pass. The user-required formal qualification and D-04 lock debts remain open; D-04 remains `locked=false`. Persisted Agent/Hub/PostgreSQL authority remains a Phase 5/6 handoff. Overall Phase 4 verification stays `gaps_found`.
 
 ### Blockers/Concerns
 

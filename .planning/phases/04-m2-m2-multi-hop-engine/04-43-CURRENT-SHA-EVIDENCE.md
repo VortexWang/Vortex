@@ -2,6 +2,29 @@
 
 ## Native qualification update
 
+## Final candidate qualification update — 2026-11-07
+
+The clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` host run completed a
+formal candidate profile at 256 KiB initial block, 30 s target and 50%
+waterline. It used an explicit 300 s warmup, three 300 s trials and an
+independent TLS comparison. Trial mixed TCP was 637.625870, 634.511877 and
+630.515278 Mbps; UDP offered 99.998336, 99.998048 and 99.998272 Mbps with zero
+loss. TLS mixed TCP was 578.599895 Mbps and the ratio was 1.089725876. All
+source credit conserved and settled; the machine gate returned `pass`.
+
+Gate SHA256:
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+This is formal evidence for the 50% candidate only. The user-required formal
+qualification debt remains open, and the D-04 default remains unlocked.
+
+The complete clean `2543fb7` dynamic scan independently audited all 81 trials
+(27 factor combinations, three repeats). Summary SHA256 is
+`135a289cdf96d46c4b3668befa45e87c289403c669541fe7fb5b1932abc4566a`; audit
+SHA256 is `bfe95ec5ac574c6fbf529378c6f95f35c9f8ba1dab6927ecb7d529e444c7b9b4`.
+All source/accounting/timeline/idle checks passed. The 600 ms renewal pressure
+run failed all nine trials with resets or UDP loss and is retained as a failed
+availability observation. Socket limits were restored to 212992/212992.
+
 The user-authorized Ubuntu 24.04 host `43.254.164.7` completed the formal
 runtime-authority workload from clean commit
 `edb1849c92b2cf81c2f6c2f9e91725f62c407090`. The host reports Linux amd64,
