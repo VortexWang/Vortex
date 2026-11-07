@@ -61,7 +61,7 @@ func TestRuleFixedPortRejectsUnallocatedCompilePaths(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	before := authoritySnapshot(t, f.pool, f.tenant, []string{"rule_compile_inputs", "rule_artifacts", "tasks", "operations", "outbox", "audit_events"})
 	if _, e = s.CompileRevision(ctx, f.scope, in.ID, 1, b, 2, 3, 4, uuid.NewString()); e == nil {
 		t.Fatal("legacy compile bypassed durable fixed port authority")
@@ -91,7 +91,7 @@ func TestRuleAutoPortConsumesDurableAllocation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	digest, e := s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 3, 4, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
@@ -159,7 +159,7 @@ func TestRulePortLegacyInflightCannotBeOverwritten(t *testing.T) {
 			if _, e = f.pool.Exec(ctx, `UPDATE tasks SET state=$2 WHERE tenant_id=$1 AND task_kind='port_prepare'`, f.tenant, state); e != nil {
 				t.Fatal(e)
 			}
-			b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+			b := durableBilling(t, f, in.ID, 1, 3)
 			if _, e = s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 3, 4, uuid.NewString()); e != nil {
 				t.Fatal(e)
 			}
@@ -186,7 +186,7 @@ func TestRuleAutoPortRejectsMissingOrChangedMemberAllocation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	if _, e = s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 3, 4, uuid.NewString()); e == nil {
 		t.Fatal("missing durable port allocation accepted")
 	}
@@ -307,7 +307,7 @@ func testRulePortActualLifecycle(t *testing.T, auto bool) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	// Establish real boot-local authority over mTLS through the existing issuer.
 	hs, e := store.Open(filepath.Join(dir, "hub.db"), "hub")
 	if e != nil {
@@ -500,7 +500,7 @@ func testRulePortActualLifecycle(t *testing.T, auto bool) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b = compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 2, PathGeneration: 4}
+	b = durableBilling(t, f, in.ID, 2, 4)
 	d.ID, d.SourceID, d.RuntimeSourceID, d.ShareSourceID = uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	d.RuleRevision, d.PathGeneration, d.FencingFloor, d.BillingSnapshotID = 2, 4, 5, b.ID
 	if e = hs.InstallHubDelegation(ctx, d, clock()); e != nil {

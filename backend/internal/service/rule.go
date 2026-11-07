@@ -46,6 +46,9 @@ func lockedCompileInput(ctx context.Context, q *generated.Queries, scope TenantS
 	if e := activeTenant(ctx, q, scope); e != nil {
 		return compiler.CompileInput{}, e
 	}
+	if e := validateBillingSnapshot(ctx, q, scope, id, billing); e != nil {
+		return compiler.CompileInput{}, e
+	}
 	head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: id})
 	if e != nil {
 		return compiler.CompileInput{}, e

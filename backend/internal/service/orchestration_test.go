@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"testing"
 	"vortex/backend/db/generated"
-	"vortex/backend/internal/compiler"
 	"vortex/backend/internal/service"
 	"vortex/backend/internal/worker"
 	controlv1 "vortex/contracts/protobuf/v1"
@@ -34,7 +33,7 @@ func TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery(t *testing.T) {
 	if _, e := s.Mutate(ctx, f.scope, in, 1, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
-	r, e := s.CompileRevision(ctx, f.scope, in.ID, 2, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 2, PathGeneration: 4}, 2, 4, 6, uuid.NewString())
+	r, e := s.CompileRevision(ctx, f.scope, in.ID, 2, durableBilling(t, f, in.ID, 2, 4), 2, 4, 6, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -101,7 +100,7 @@ func TestApplyPrepareCommitUnknownAndLateReceipt(t *testing.T) {
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
-	r, e := s.CompileRevision(ctx, f.scope, in.ID, 1, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}, 2, 3, 5, uuid.NewString())
+	r, e := s.CompileRevision(ctx, f.scope, in.ID, 1, durableBilling(t, f, in.ID, 1, 3), 2, 3, 5, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}

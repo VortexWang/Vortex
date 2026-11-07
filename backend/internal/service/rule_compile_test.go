@@ -44,7 +44,7 @@ func TestCompileWorkerMissingSnapshotThenReadyRestart(t *testing.T) {
 		t.Fatal("empty snapshot accepted")
 	}
 	checkPending()
-	billing := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, MultiplierMilli: 1000, RuleRevision: 1, PathGeneration: 3}
+	billing := durableBilling(t, f, in.ID, 1, 3)
 	digest, e := s.BindCompileInput(ctx, f.scope, m.OperationID, billing, 2, 3, 4, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
@@ -124,7 +124,7 @@ func TestCompileWorkerAuditRollback(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	tables := []string{"rule_compile_requests", "rule_compile_inputs", "rule_artifacts", "rule_artifact_commits", "rule_deployments", "rule_deployment_members", "rule_delivery_bindings", "rule_heads", "tasks", "operations", "outbox", "audit_events"}
 	request := uuid.NewString()
 	failAudit(t, f.pool, request)
@@ -161,7 +161,7 @@ func TestCompileWorkerMissingSnapshotPreservesPriorAuthority(t *testing.T) {
 	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
-	r, e := s.CompileRevision(ctx, f.scope, in.ID, 1, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}, 2, 3, 4, uuid.NewString())
+	r, e := s.CompileRevision(ctx, f.scope, in.ID, 1, durableBilling(t, f, in.ID, 1, 3), 2, 3, 4, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -214,7 +214,7 @@ func TestCompileWorkerConflictRetainsAuthority(t *testing.T) {
 	if _, err = f.pool.Exec(ctx, `UPDATE tasks SET state='unknown' WHERE tenant_id=$1 AND task_kind='port_prepare'`, f.tenant); err != nil {
 		t.Fatal(err)
 	}
-	b := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	b := durableBilling(t, f, in.ID, 1, 3)
 	if _, err = s.BindCompileInput(ctx, f.scope, m.OperationID, b, 2, 3, 4, uuid.NewString()); err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +282,7 @@ func TestCompileWorkerConflictPreservesPriorActiveArtifact(t *testing.T) {
 	if _, err := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); err != nil {
 		t.Fatal(err)
 	}
-	r, err := s.CompileRevision(ctx, f.scope, in.ID, 1, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}, 2, 3, 4, uuid.NewString())
+	r, err := s.CompileRevision(ctx, f.scope, in.ID, 1, durableBilling(t, f, in.ID, 1, 3), 2, 3, 4, uuid.NewString())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -303,7 +303,7 @@ func TestCompileWorkerConflictPreservesPriorActiveArtifact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.BindCompileInput(ctx, f.scope, m.OperationID, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 2, PathGeneration: 3}, 2, 3, 5, uuid.NewString()); err != nil {
+	if _, err = s.BindCompileInput(ctx, f.scope, m.OperationID, durableBilling(t, f, in.ID, 2, 3), 2, 3, 5, uuid.NewString()); err != nil {
 		t.Fatal(err)
 	}
 	tables := []string{"rule_artifacts", "rule_artifact_commits", "resource_grants", "port_allocations", "port_reservations", "rule_deployments", "rule_deployment_members", "rule_delivery_bindings"}

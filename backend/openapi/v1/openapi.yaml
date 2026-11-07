@@ -1,12 +1,26 @@
 openapi: 3.1.1
 info:
   title: VORTEX Public Business API
-  version: 2.0.0
+  version: 2.1.0
   description: Public business boundary; HTTP adapters are delivered by plan 06-07.
 servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/subscription:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    get:
+      operationId: getSubscription
+      x-vortex-implementation-plan: 06-07
+      description: Stored immutable subscription terms and original UTC monthly anchor. Catalog edits affect future issuance only. Traffic is billed as execution bytes multiplied by the immutable path coefficient.
+      responses:
+        '200': {description: Immutable primary subscription, content: {application/json: {schema: {$ref: '#/components/schemas/PackageResult'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/rules/{rule_id}:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -249,6 +263,31 @@ components:
       type: http
       scheme: bearer
   schemas:
+    PackageTerms:
+      type: object
+      additionalProperties: false
+      required: [price_minor, duration_days, traffic_reset, traffic_bytes, capabilities, rule_limit, rate_limit, connection_limit]
+      properties:
+        price_minor: {type: integer, minimum: 0}
+        duration_days: {type: integer, minimum: 1, maximum: 36500}
+        traffic_reset: {type: string, enum: [none, monthly]}
+        traffic_bytes: {type: integer, minimum: 0}
+        capabilities: {type: array, uniqueItems: true, items: {type: string, enum: [tcp, udp, direct, tunnel, multi_hop, manual_reverse]}}
+        rule_limit: {type: integer, minimum: 0}
+        rate_limit: {type: integer, minimum: 0}
+        connection_limit: {type: integer, minimum: 0}
+    PackageResult:
+      type: object
+      additionalProperties: false
+      required: [subscription_id, snapshot_id, source_id, operation_id, version, anchor_at, expires_at]
+      properties:
+        subscription_id: {type: string}
+        snapshot_id: {type: string, format: uuid}
+        source_id: {type: string}
+        operation_id: {type: string}
+        version: {type: integer, minimum: 1}
+        anchor_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
     RuleInput:
       type: object
       additionalProperties: false

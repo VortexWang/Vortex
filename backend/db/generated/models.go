@@ -21,6 +21,19 @@ type AuditEvent struct {
 	CreatedAt     pgtype.Timestamptz
 }
 
+type BillingSnapshot struct {
+	ID                string
+	TenantID          string
+	PackageSnapshotID string
+	RuleID            string
+	RuleRevision      int64
+	PathGeneration    int64
+	Version           int64
+	MultiplierMilli   int64
+	PathVersions      []byte
+	CreatedAt         pgtype.Timestamptz
+}
+
 type ControlObservation struct {
 	HubID      string
 	SessionID  string
@@ -66,6 +79,27 @@ type EncryptedCredential struct {
 	Scope      []string
 	CreatedAt  pgtype.Timestamptz
 	ZoneName   string
+}
+
+type EntitlementCode struct {
+	CodeHash         []byte
+	Kind             string
+	PackageID        string
+	PackageVersion   int64
+	DurationDays     int32
+	Amount           int64
+	RemainingUses    int64
+	ValidUntil       pgtype.Timestamptz
+	ApplicableTenant pgtype.Text
+	Revoked          bool
+}
+
+type EntitlementRedemption struct {
+	RequestKey string
+	TenantID   string
+	CodeHash   []byte
+	Result     []byte
+	RedeemedAt pgtype.Timestamptz
 }
 
 type EntryGroupDomain struct {
@@ -163,6 +197,50 @@ type Outbox struct {
 	TenantID    string
 	OperationID string
 	DeliveredAt pgtype.Timestamptz
+}
+
+type PackageCatalog struct {
+	ID             string
+	Name           string
+	CurrentVersion int64
+	Enabled        bool
+}
+
+type PackageChange struct {
+	ID              string
+	TenantID        string
+	SubscriptionID  string
+	SnapshotID      string
+	ExpectedVersion int64
+	EffectiveAt     pgtype.Timestamptz
+	Preview         []byte
+	CreatedBy       string
+	TaskID          string
+	State           string
+}
+
+type PackageRequest struct {
+	RequestKey    string
+	TenantID      string
+	PayloadSha256 []byte
+	Result        []byte
+	CreatedAt     pgtype.Timestamptz
+}
+
+type PackageSnapshot struct {
+	ID             string
+	TenantID       string
+	PackageID      string
+	PackageVersion int64
+	Terms          []byte
+	CreatedAt      pgtype.Timestamptz
+}
+
+type PackageVersion struct {
+	PackageID string
+	Version   int64
+	Terms     []byte
+	CreatedAt pgtype.Timestamptz
 }
 
 type PlatformGrant struct {
@@ -393,6 +471,22 @@ type SegmentPermit struct {
 	Allowed     bool
 }
 
+type SourceExpiration struct {
+	TenantID    string
+	SourceID    string
+	EffectiveAt pgtype.Timestamptz
+	Reason      string
+}
+
+type Subscription struct {
+	ID         string
+	TenantID   string
+	SnapshotID string
+	AnchorAt   pgtype.Timestamptz
+	ExpiresAt  pgtype.Timestamptz
+	Version    int64
+}
+
 type Task struct {
 	ID          string
 	TenantID    string
@@ -408,6 +502,18 @@ type Tenant struct {
 	ID           string
 	AccountState string
 	Version      int64
+}
+
+type TrafficSource struct {
+	ID             string
+	TenantID       string
+	SnapshotID     string
+	SubscriptionID pgtype.Text
+	Kind           string
+	InitialAmount  int64
+	IssuedAt       pgtype.Timestamptz
+	ExpiresAt      pgtype.Timestamptz
+	PeriodKey      string
 }
 
 type User struct {

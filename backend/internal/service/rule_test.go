@@ -189,7 +189,7 @@ func TestRuleCompileCommittedArtifactAndAuditRollback(t *testing.T) {
 		t.Fatal(e)
 	}
 	reserveRulePort(t, f, in)
-	billing := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	billing := durableBilling(t, f, in.ID, 1, 3)
 	request := uuid.NewString()
 	failAudit(t, f.pool, request)
 	if _, e := s.CompileRevision(ctx, f.scope, in.ID, 1, billing, 2, 3, 5, request); e == nil {

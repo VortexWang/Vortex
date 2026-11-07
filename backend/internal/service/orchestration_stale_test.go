@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"vortex/backend/db/generated"
-	"vortex/backend/internal/compiler"
 	"vortex/backend/internal/service"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
@@ -26,7 +25,7 @@ func TestApplySupersededLateObservationCannotQueueCommit(t *testing.T) {
 			if _, err := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); err != nil {
 				t.Fatal(err)
 			}
-			r, err := s.CompileRevision(ctx, f.scope, in.ID, 1, compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}, 2, 3, 5, uuid.NewString())
+			r, err := s.CompileRevision(ctx, f.scope, in.ID, 1, durableBilling(t, f, in.ID, 1, 3), 2, 3, 5, uuid.NewString())
 			if err != nil {
 				t.Fatal(err)
 			}
