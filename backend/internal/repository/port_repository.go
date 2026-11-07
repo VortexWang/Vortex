@@ -47,17 +47,17 @@ func ServingMembers(ctx context.Context, q *generated.Queries, s TenantScope, gr
 	if e != nil {
 		return nil, e
 	}
-	if tenant.AccountState != "active" {
+	if tenant.AccountState != "active" && !s.Platform() {
 		return []generated.PortServingMembersRow{}, nil
 	}
 	active, e := q.ListCurrentRestrictions(ctx, generated.ListCurrentRestrictionsParams{TenantID: s.TenantID(), AtTime: pgtype.Timestamptz{Time: time.Now(), Valid: true}})
 	if e != nil {
 		return nil, e
 	}
-	if len(active) > 0 {
+	if len(active) > 0 && !s.Platform() {
 		return []generated.PortServingMembersRow{}, nil
 	}
-	g, e := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: group, TenantID: s.TenantID(), PlatformRead: false})
+	g, e := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: group, TenantID: s.TenantID(), PlatformRead: s.Platform()})
 	if e != nil {
 		return nil, e
 	}
@@ -76,5 +76,5 @@ func ServingMembers(ctx context.Context, q *generated.Queries, s TenantScope, gr
 		return nil, e
 	}
 	sum := sha256.Sum256(raw)
-	return q.PortServingMembers(ctx, generated.PortServingMembersParams{TenantID: s.TenantID(), GroupID: group, MemberSetVersion: hex.EncodeToString(sum[:])})
+	return q.PortServingMembers(ctx, generated.PortServingMembersParams{TenantID: s.TenantID(), GroupID: group, MemberSetVersion: hex.EncodeToString(sum[:]), PlatformRead: s.Platform() && g.OwnerKind == "platform"})
 }

@@ -116,9 +116,9 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | TEN-008 | 06-08 | tracer.log | implemented scope; evidence required |
 | BE-004 | 06-08 | tracer.log | implemented scope; evidence required |
 | TEN-009 | 06-09 | tracer.log | implemented scope; evidence required |
-| PRT-011 | 06-10 | DNS-CREDENTIALS.md; serving current confirmed members/snapshots | local tests pass; final pairing pending |
-| PRT-012 | 06-10 | DNS-CREDENTIALS.md; unknown/retained exclusions and DNS cleanup preserves ports | local tests pass; final pairing pending |
-| PRT-013 | 06-10 | DNS-CREDENTIALS.md; durable DNS operation/audit/Outbox rollback | local tests pass; final pairing pending |
+| PRT-011 | 06-10 | DNS-CREDENTIALS.md; immutable one-domain-per-group binding, owner authorization, verified-zone suffix | local tests pass; final pairing pending |
+| PRT-012 | 06-10 | DNS-CREDENTIALS.md; all committed tenant rules, confirmed protocol sets, current boot/snapshot | local tests pass; final pairing pending |
+| PRT-013 | 06-10 | DNS-CREDENTIALS.md; failed/uncommitted new rule preserves existing serving members | local tests pass; final pairing pending |
 | PRT-014 | 06-10 | DNS-CREDENTIALS.md; TTL60/DNS-only owner-scoped bounded adapter | local tests pass; final pairing pending |
 | PRT-015 | 06-10 | cloudflare_integration.sh; real CRUD requires dedicated configuration | pending real Cloudflare evidence |
 | BE-006 | 06-11 | pending producer in 06-11 | pending |

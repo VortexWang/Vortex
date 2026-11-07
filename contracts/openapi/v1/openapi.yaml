@@ -33,7 +33,7 @@ paths:
     post:
       operationId: recomputeGroupDNS
       x-vortex-implementation-plan: 06-07
-      description: Recompute DNS from serving state using an enrolled zone access reference. TTL is fixed at 60 and DNS-only. Unknown results retain occupation and require reconciliation.
+      description: Recompute DNS from serving state using an enrolled zone access reference. Only the group owner can bind its one persistent domain within the verified zone; subsequent requests must match this binding. Platform groups aggregate all active tenants' committed rules. TTL is fixed at 60 and DNS-only. Unknown results retain occupation and require reconciliation.
       requestBody:
         required: true
         content:

@@ -19,8 +19,8 @@ type CredentialStore struct {
 	Provider DNSProvider
 }
 type CredentialRef struct {
-	ID, ZoneID string
-	KeyVersion int64
+	ID, ZoneID, ZoneName string
+	KeyVersion           int64
 }
 
 func (s CredentialStore) Reconcile(ctx context.Context, scope repository.TenantScope, id, zone, name string, addresses []string, owner, request string) error {
@@ -54,20 +54,21 @@ func (s CredentialStore) Store(ctx context.Context, scope repository.TenantScope
 	}
 	// Validate external scope before the short database transaction. An invalid
 	// token never reaches persistence, task payloads, audit summaries or errors.
-	if verified, e := s.Provider.VerifyZone(ctx, token, zone); e != nil || verified.ID != zone {
+	verified, e := s.Provider.VerifyZone(ctx, token, zone)
+	if e != nil || verified.ID != zone || !dnsName.MatchString(verified.Name) {
 		return CredentialRef{}, ErrCredential
 	}
 	ciphertext, nonce, version, e := s.Crypto.seal(scope.TenantID(), id, zone, token)
 	if e != nil {
 		return CredentialRef{}, e
 	}
-	ref := CredentialRef{ID: id, ZoneID: zone, KeyVersion: version}
+	ref := CredentialRef{ID: id, ZoneID: zone, ZoneName: verified.Name, KeyVersion: version}
 	summary, _ := json.Marshal(ref)
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.ManageAccess, &repository.Audit{Action: "dns.access.store", ResourceID: id, RequestID: request, Reason: "validated dedicated zone; encrypted at rest", After: summary}, func(q *generated.Queries) error {
 		if e := currentAccess(ctx, q, scope, true); e != nil {
 			return e
 		}
-		if _, e := q.InsertEncryptedCredential(ctx, generated.InsertEncryptedCredentialParams{ID: id, TenantID: scope.TenantID(), ZoneID: zone, Ciphertext: ciphertext, Nonce: nonce, KeyVersion: version, Scope: []string{"zone:" + zone + ":dns:write"}}); e != nil {
+		if _, e := q.InsertEncryptedCredential(ctx, generated.InsertEncryptedCredentialParams{ID: id, TenantID: scope.TenantID(), ZoneID: zone, Ciphertext: ciphertext, Nonce: nonce, KeyVersion: version, Scope: []string{"zone:" + zone + ":dns:write"}, ZoneName: verified.Name}); e != nil {
 			return e
 		}
 		_, e := repository.EnqueueDNS(ctx, q, scope, "access.stored/"+request, struct {

@@ -65,6 +65,17 @@ type EncryptedCredential struct {
 	KeyVersion int64
 	Scope      []string
 	CreatedAt  pgtype.Timestamptz
+	ZoneName   string
+}
+
+type EntryGroupDomain struct {
+	TenantID     string
+	GroupID      string
+	CredentialID string
+	ZoneID       string
+	Name         string
+	Version      int64
+	CreatedAt    pgtype.Timestamptz
 }
 
 type GrantHistory struct {

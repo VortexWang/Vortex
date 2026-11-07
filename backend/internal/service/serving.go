@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -22,6 +23,9 @@ type DNSCredentialAccess interface {
 }
 
 type ServingService struct{ Pool *pgxpool.Pool }
+
+var entryDomainName = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$`)
+
 type DNSDesired struct {
 	Action    string   `json:"action"`
 	GroupID   string   `json:"group_id"`
@@ -36,7 +40,7 @@ type DNSDesired struct {
 // Queueing never performs external I/O or treats DNS as a port release proof.
 func (s ServingService) RecomputeDNS(ctx context.Context, scope TenantScope, group, access, name, key, request string) (generated.Operation, error) {
 	var op generated.Operation
-	if len(key) < 1 || len(key) > 128 || len(name) > 253 || name != strings.ToLower(name) {
+	if len(key) < 1 || len(key) > 128 || len(name) > 253 || !entryDomainName.MatchString(name) || name != strings.ToLower(name) {
 		return op, ErrConflict
 	}
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "dns.recompute", ResourceID: group, RequestID: request, Reason: "confirmed current members only; TTL 60 DNS-only"}, func(q *generated.Queries) error {
@@ -46,19 +50,25 @@ func (s ServingService) RecomputeDNS(ctx context.Context, scope TenantScope, gro
 		if e := servingCurrentRole(ctx, q, scope); e != nil {
 			return e
 		}
-		g, e := q.ScopedGroup(ctx, generated.ScopedGroupParams{TenantID: scope.TenantID(), GroupID: group, PlatformRead: false})
+		g, e := q.ScopedGroup(ctx, generated.ScopedGroupParams{TenantID: scope.TenantID(), GroupID: group, PlatformRead: scope.Platform()})
 		if e != nil {
 			return e
 		}
-		if g.Purpose != "entry" || g.Scheduling != "dns" {
+		if !owns(scope, g.OwnerKind, g.OwnerTenantID) || g.Purpose != "entry" || g.Scheduling != "dns" {
 			return ErrConflict
 		}
 		credential, e := q.GetEncryptedCredential(ctx, generated.GetEncryptedCredentialParams{TenantID: scope.TenantID(), ID: access})
 		if e != nil {
 			return e
 		}
+		if credential.ZoneName == "" || (name != credential.ZoneName && !strings.HasSuffix(name, "."+credential.ZoneName)) {
+			return ErrConflict
+		}
+		if _, e = q.BindEntryGroupDomain(ctx, generated.BindEntryGroupDomainParams{TenantID: scope.TenantID(), ID: group, CredentialID: access, ZoneID: credential.ZoneID, Name: name}); e != nil {
+			return ErrConflict
+		}
 		addresses := []string{}
-		if e = activeTenant(ctx, q, scope); e == nil {
+		if e = activeTenant(ctx, q, scope); e == nil || scope.Platform() {
 			rows, e := repository.ServingMembers(ctx, q, scope, group)
 			if e != nil {
 				return e
@@ -112,6 +122,10 @@ func (s ServingService) ApplyDNS(ctx context.Context, scope TenantScope, id, req
 			return nil
 		}
 		if json.Unmarshal(op.Payload, &desired) != nil || desired.Action != "dns.reconcile" {
+			return ErrConflict
+		}
+		binding, e := q.GetEntryGroupDomain(ctx, generated.GetEntryGroupDomainParams{TenantID: scope.TenantID(), GroupID: desired.GroupID})
+		if e != nil || binding.Name != desired.Name || binding.CredentialID != desired.AccessID || binding.ZoneID != desired.ZoneID {
 			return ErrConflict
 		}
 		n, e := q.LeaseDNSOperation(ctx, generated.LeaseDNSOperationParams{TenantID: scope.TenantID(), OperationID: id, LeaseToken: pgtype.Text{String: lease, Valid: true}})

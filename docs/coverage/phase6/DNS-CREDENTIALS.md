@@ -8,6 +8,21 @@ the current serving set again before provider I/O. Provider uncertainty is
 `unknown`; no DNS result releases port occupation. HTTP wiring belongs to 06-07
 and Phase 7 consumes the asynchronous operation contract.
 
+`00004_entry_group_domains.sql` appends a persistent one-domain-per-group binding
+with a globally unique normalized DNS name and a foreign key to the enrolled
+credential. The first recompute binds it in the same audit/task/Outbox transaction;
+later requests and task application must match this immutable name, access ID and
+zone. Only the group owner may bind it; a grant does not give a tenant control of
+a platform group's DNS. The verified zone name is stored with credential metadata
+and bounds the permitted DNS suffix. Legacy credentials with no verified zone name
+fail closed and need explicit re-enrollment before binding.
+
+Platform owners recompute their group from all active tenants' committed rules.
+Each member must have every committed rule's complete confirmed protocol set for
+the current boot/generation and member snapshot. An uncommitted new rule does not
+remove a member already serving other rules. Tenant read views remain scoped.
+Removing DNS never releases retained ports or grants migration of existing flows.
+
 AES-256-GCM binds tenant, access ID, zone and key version as authenticated data.
 Only ciphertext, nonce, version and zone scope enter PostgreSQL. Deployment keys
 remain outside the database; retain old versions for ciphertext/backups. A lost

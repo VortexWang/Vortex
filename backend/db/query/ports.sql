@@ -82,9 +82,18 @@ UPDATE tasks SET state='succeeded',lease_until=NULL WHERE tenant_id=$1 AND id=$2
 -- name: PortServingMembers :many
 SELECT DISTINCT n.id,n.public_address FROM port_allocations a JOIN port_reservations p ON p.tenant_id=a.tenant_id AND p.allocation_id=a.id
 JOIN node_group_members m ON m.group_id=a.group_id AND m.node_id=p.node_id JOIN nodes n ON n.id=m.node_id
-WHERE a.tenant_id=$1 AND a.group_id=$2 AND a.member_set_version=$3 AND a.state='committed' AND a.needs_revalidation=false
+WHERE (a.tenant_id=sqlc.arg(tenant_id) OR sqlc.arg(platform_read)::boolean) AND a.group_id=sqlc.arg(group_id) AND a.member_set_version=sqlc.arg(member_set_version) AND a.state='committed' AND a.needs_revalidation=false
+AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=a.tenant_id AND t.account_state='active')
+AND NOT EXISTS(SELECT 1 FROM current_restrictions cr WHERE cr.tenant_id=a.tenant_id AND cr.effective_at<=now() AND cr.cleared_at IS NULL)
 AND p.state='confirmed' AND p.config_confirmed AND n.lifecycle='online' AND n.deleted_at IS NULL AND n.public_address<>'' AND n.boot_id=p.boot_id AND n.generation=p.generation
 AND NOT EXISTS(SELECT 1 FROM port_reservations other WHERE other.tenant_id=a.tenant_id AND other.allocation_id=a.id AND other.node_id=n.id AND (NOT other.config_confirmed OR other.state<>'confirmed'))
+AND NOT EXISTS(SELECT 1 FROM port_allocations required
+ WHERE (required.tenant_id=a.tenant_id OR sqlc.arg(platform_read)::boolean) AND required.group_id=a.group_id AND required.state='committed'
+ AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=required.tenant_id AND t.account_state='active')
+ AND NOT EXISTS(SELECT 1 FROM current_restrictions cr WHERE cr.tenant_id=required.tenant_id AND cr.effective_at<=now() AND cr.cleared_at IS NULL)
+ AND (required.needs_revalidation OR required.member_set_version<>a.member_set_version
+ OR (SELECT count(*) FROM port_reservations held WHERE held.tenant_id=required.tenant_id AND held.allocation_id=required.id AND held.node_id=n.id
+ AND held.state='confirmed' AND held.config_confirmed AND held.boot_id=n.boot_id AND held.generation=n.generation)<>cardinality(required.protocols)))
 ORDER BY n.id;
 
 -- name: CountNodePortOccupation :one

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"strings"
 	"testing"
+	"time"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/auth"
 	"vortex/backend/internal/control"
@@ -86,11 +87,11 @@ func TestDNSDurableServingRecomputeAndUnknownReplay(t *testing.T) {
 	f.commit(t, a)
 	svc := service.ServingService{Pool: f.pool}
 	key := uuid.NewString()
-	op, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.example.test", key, uuid.NewString())
+	op, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", key, uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}
-	replay, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.example.test", key, uuid.NewString())
+	replay, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", key, uuid.NewString())
 	if e != nil || replay.ID != op.ID {
 		t.Fatal("idempotent queue", e)
 	}
@@ -119,7 +120,7 @@ func TestDNSDurableServingRecomputeAndUnknownReplay(t *testing.T) {
 	if _, e = f.pool.Exec(ctx, "UPDATE port_allocations SET state='retained' WHERE tenant_id=$1 AND id=$2", f.tenant, a.ID); e != nil {
 		t.Fatal(e)
 	}
-	removal, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.example.test", uuid.NewString(), uuid.NewString())
+	removal, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", uuid.NewString(), uuid.NewString())
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -139,7 +140,7 @@ func TestDNSAuditRollbackAndCurrentRole(t *testing.T) {
 	failAudit(t, f.pool, request)
 	tables := []string{"operations", "tasks", "outbox", "audit_events"}
 	before := authoritySnapshot(t, f.pool, f.tenant, tables)
-	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.example.test", uuid.NewString(), request); e == nil {
+	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", uuid.NewString(), request); e == nil {
 		t.Fatal("audit failure committed DNS task")
 	}
 	if !bytes.Equal(before, authoritySnapshot(t, f.pool, f.tenant, tables)) {
@@ -148,8 +149,30 @@ func TestDNSAuditRollbackAndCurrentRole(t *testing.T) {
 	if _, e := f.pool.Exec(ctx, "UPDATE users SET state='suspended' WHERE tenant_id=$1 AND id=$2", f.tenant, f.scope.ActorID()); e != nil {
 		t.Fatal(e)
 	}
-	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.example.test", uuid.NewString(), uuid.NewString()); e == nil {
+	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", uuid.NewString(), uuid.NewString()); e == nil {
 		t.Fatal("stale principal queued DNS")
+	}
+}
+
+func TestDNSEntryGroupDomainBinding(t *testing.T) {
+	f, _, id, _ := dnsFixture(t)
+	ctx := context.Background()
+	svc := service.ServingService{Pool: f.pool}
+	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, "vortex.outside.test", uuid.NewString(), uuid.NewString()); e == nil {
+		t.Fatal("domain outside enrolled zone accepted")
+	}
+	if _, e := svc.RecomputeDNS(ctx, f.scope, f.group, id, f.group+".example.test", uuid.NewString(), uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	binding, e := generated.New(f.pool).GetEntryGroupDomain(ctx, generated.GetEntryGroupDomainParams{TenantID: f.tenant, GroupID: f.group})
+	if e != nil || binding.Name != f.group+".example.test" || binding.CredentialID != id {
+		t.Fatal("entry group binding not persisted", e)
+	}
+	if _, e = svc.RecomputeDNS(ctx, f.scope, f.group, id, "other.example.test", uuid.NewString(), uuid.NewString()); e == nil {
+		t.Fatal("entry group accepted second domain")
+	}
+	if _, e = f.pool.Exec(ctx, "UPDATE entry_group_domains SET name='other.example.test' WHERE group_id=$1", f.group); e == nil {
+		t.Fatal("entry group binding mutable outside audited service")
 	}
 }
 func TestServingCurrentSnapshotAndUnknown(t *testing.T) {
@@ -171,5 +194,69 @@ func TestServingCurrentSnapshotAndUnknown(t *testing.T) {
 	rows, e = repo.Serving(ctx, f.scope, f.group, uuid.NewString())
 	if e != nil || len(rows) != 0 {
 		t.Fatal("stale member snapshot entered serving", e, len(rows))
+	}
+}
+
+func TestServingAllCommittedRulesAndFailedNewRule(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	first := f.prepare(t, 20000)
+	f.commit(t, first)
+	repo := repository.PortRepository{Pool: f.pool}
+	// A failed/uncommitted new rule must not remove members serving an old rule.
+	pending := f.prepare(t, 20001)
+	rows, e := repo.Serving(ctx, f.scope, f.group, uuid.NewString())
+	if e != nil || len(rows) != 2 {
+		t.Fatal("uncommitted new rule removed existing serving member", e, len(rows))
+	}
+	f.commit(t, pending)
+	if _, e = f.pool.Exec(ctx, "UPDATE port_reservations SET state='unknown' WHERE allocation_id=$1 AND node_id=$2", pending.ID, f.nodes[0]); e != nil {
+		t.Fatal(e)
+	}
+	rows, e = repo.Serving(ctx, f.scope, f.group, uuid.NewString())
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, row := range rows {
+		if row.ID == f.nodes[0] {
+			t.Fatal("one confirmed rule hid another committed rule's unknown ports")
+		}
+	}
+	if len(rows) != 1 {
+		t.Fatal("unaffected member removed", len(rows))
+	}
+}
+
+func TestServingPlatformAggregatesAllCommittedTenantRules(t *testing.T) {
+	f := newPortFixtureKind(t, true)
+	ctx := context.Background()
+	first := f.prepare(t, 20000)
+	f.commit(t, first)
+	other := *f
+	other.tenant = seedTenant(t, f.pool)
+	other.scope = policyScope(t, other.tenant, auth.Owner, policy.Mutate)
+	admin := policyScope(t, other.tenant, auth.PlatformAdmin, policy.Grant)
+	if e := f.nodeService.SetGrant(ctx, admin, f.group, 0, "active", time.Now().Add(-time.Hour), time.Now().Add(time.Hour), uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	second := other.prepare(t, 20001)
+	other.commit(t, second)
+	if _, e := f.pool.Exec(ctx, "UPDATE port_reservations SET state='unknown' WHERE tenant_id=$1 AND allocation_id=$2 AND node_id=$3", other.tenant, second.ID, f.nodes[0]); e != nil {
+		t.Fatal(e)
+	}
+	repo := repository.PortRepository{Pool: f.pool}
+	rows, e := repo.Serving(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Read), f.group, uuid.NewString())
+	if e != nil || len(rows) != 1 || rows[0].ID == f.nodes[0] {
+		t.Fatal("platform DNS ignored another tenant's unknown committed rule", e, len(rows))
+	}
+	rows, e = repo.Serving(ctx, f.scope, f.group, uuid.NewString())
+	if e != nil || len(rows) != 2 {
+		t.Fatal("tenant scoped view changed to foreign tenant data", e, len(rows))
+	}
+	if e = generated.New(f.pool).InsertTenantUser(ctx, generated.InsertTenantUserParams{ID: f.scope.ActorID(), TenantID: f.tenant, Role: "owner", State: "active"}); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = (service.ServingService{Pool: f.pool}).RecomputeDNS(ctx, f.scope, f.group, uuid.NewString(), "tenant.example.test", uuid.NewString(), uuid.NewString()); !errors.Is(e, service.ErrConflict) {
+		t.Fatal("granted tenant changed platform group DNS")
 	}
 }

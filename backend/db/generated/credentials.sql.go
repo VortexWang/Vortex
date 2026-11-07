@@ -11,6 +11,54 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const bindEntryGroupDomain = `-- name: BindEntryGroupDomain :one
+WITH inserted AS (INSERT INTO entry_group_domains(tenant_id,group_id,credential_id,zone_id,name)
+SELECT $1,g.id,$3,$4,$5 FROM node_groups g
+WHERE g.id=$2 AND g.purpose='entry' AND g.deleted_at IS NULL
+ON CONFLICT DO NOTHING RETURNING tenant_id, group_id, credential_id, zone_id, name, version, created_at)
+SELECT tenant_id, group_id, credential_id, zone_id, name, version, created_at FROM inserted UNION ALL SELECT tenant_id, group_id, credential_id, zone_id, name, version, created_at FROM entry_group_domains
+WHERE tenant_id=$1 AND group_id=$2 AND credential_id=$3 AND zone_id=$4 AND name=$5
+`
+
+type BindEntryGroupDomainParams struct {
+	TenantID     string
+	ID           string
+	CredentialID string
+	ZoneID       string
+	Name         string
+}
+
+type BindEntryGroupDomainRow struct {
+	TenantID     string
+	GroupID      string
+	CredentialID string
+	ZoneID       string
+	Name         string
+	Version      int64
+	CreatedAt    pgtype.Timestamptz
+}
+
+func (q *Queries) BindEntryGroupDomain(ctx context.Context, arg BindEntryGroupDomainParams) (BindEntryGroupDomainRow, error) {
+	row := q.db.QueryRow(ctx, bindEntryGroupDomain,
+		arg.TenantID,
+		arg.ID,
+		arg.CredentialID,
+		arg.ZoneID,
+		arg.Name,
+	)
+	var i BindEntryGroupDomainRow
+	err := row.Scan(
+		&i.TenantID,
+		&i.GroupID,
+		&i.CredentialID,
+		&i.ZoneID,
+		&i.Name,
+		&i.Version,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteEncryptedCredential = `-- name: DeleteEncryptedCredential :execrows
 DELETE FROM encrypted_credentials WHERE tenant_id=$1 AND id=$2
 `
@@ -53,7 +101,7 @@ func (q *Queries) FinishDNSOperation(ctx context.Context, arg FinishDNSOperation
 }
 
 const getEncryptedCredential = `-- name: GetEncryptedCredential :one
-SELECT id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at FROM encrypted_credentials WHERE tenant_id=$1 AND id=$2
+SELECT id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at, zone_name FROM encrypted_credentials WHERE tenant_id=$1 AND id=$2
 `
 
 type GetEncryptedCredentialParams struct {
@@ -73,13 +121,38 @@ func (q *Queries) GetEncryptedCredential(ctx context.Context, arg GetEncryptedCr
 		&i.KeyVersion,
 		&i.Scope,
 		&i.CreatedAt,
+		&i.ZoneName,
+	)
+	return i, err
+}
+
+const getEntryGroupDomain = `-- name: GetEntryGroupDomain :one
+SELECT tenant_id, group_id, credential_id, zone_id, name, version, created_at FROM entry_group_domains WHERE tenant_id=$1 AND group_id=$2
+`
+
+type GetEntryGroupDomainParams struct {
+	TenantID string
+	GroupID  string
+}
+
+func (q *Queries) GetEntryGroupDomain(ctx context.Context, arg GetEntryGroupDomainParams) (EntryGroupDomain, error) {
+	row := q.db.QueryRow(ctx, getEntryGroupDomain, arg.TenantID, arg.GroupID)
+	var i EntryGroupDomain
+	err := row.Scan(
+		&i.TenantID,
+		&i.GroupID,
+		&i.CredentialID,
+		&i.ZoneID,
+		&i.Name,
+		&i.Version,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const insertEncryptedCredential = `-- name: InsertEncryptedCredential :one
-INSERT INTO encrypted_credentials(id,tenant_id,zone_id,ciphertext,nonce,key_version,scope)
-VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at
+INSERT INTO encrypted_credentials(id,tenant_id,zone_id,ciphertext,nonce,key_version,scope,zone_name)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at, zone_name
 `
 
 type InsertEncryptedCredentialParams struct {
@@ -90,6 +163,7 @@ type InsertEncryptedCredentialParams struct {
 	Nonce      []byte
 	KeyVersion int64
 	Scope      []string
+	ZoneName   string
 }
 
 func (q *Queries) InsertEncryptedCredential(ctx context.Context, arg InsertEncryptedCredentialParams) (EncryptedCredential, error) {
@@ -101,6 +175,7 @@ func (q *Queries) InsertEncryptedCredential(ctx context.Context, arg InsertEncry
 		arg.Nonce,
 		arg.KeyVersion,
 		arg.Scope,
+		arg.ZoneName,
 	)
 	var i EncryptedCredential
 	err := row.Scan(
@@ -112,6 +187,7 @@ func (q *Queries) InsertEncryptedCredential(ctx context.Context, arg InsertEncry
 		&i.KeyVersion,
 		&i.Scope,
 		&i.CreatedAt,
+		&i.ZoneName,
 	)
 	return i, err
 }
@@ -137,7 +213,7 @@ func (q *Queries) LeaseDNSOperation(ctx context.Context, arg LeaseDNSOperationPa
 }
 
 const lockEncryptedCredential = `-- name: LockEncryptedCredential :one
-SELECT id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at FROM encrypted_credentials WHERE tenant_id=$1 AND id=$2 FOR UPDATE
+SELECT id, tenant_id, zone_id, ciphertext, nonce, key_version, scope, created_at, zone_name FROM encrypted_credentials WHERE tenant_id=$1 AND id=$2 FOR UPDATE
 `
 
 type LockEncryptedCredentialParams struct {
@@ -157,6 +233,7 @@ func (q *Queries) LockEncryptedCredential(ctx context.Context, arg LockEncrypted
 		&i.KeyVersion,
 		&i.Scope,
 		&i.CreatedAt,
+		&i.ZoneName,
 	)
 	return i, err
 }

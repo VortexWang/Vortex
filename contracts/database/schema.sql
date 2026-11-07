@@ -206,10 +206,17 @@ CREATE TABLE node_dependencies (
  amount bigint NOT NULL CHECK (amount>0), PRIMARY KEY(tenant_id,node_id,kind,dependency_id)
 );
 CREATE TABLE encrypted_credentials (
- id text NOT NULL, tenant_id text NOT NULL REFERENCES tenants(id), zone_id text NOT NULL CHECK (zone_id<>''),
+ id text NOT NULL, tenant_id text NOT NULL REFERENCES tenants(id), zone_id text NOT NULL CHECK (zone_id<>''), zone_name text NOT NULL DEFAULT '',
  ciphertext bytea NOT NULL CHECK (octet_length(ciphertext)>16), nonce bytea NOT NULL CHECK (octet_length(nonce)=12),
  key_version bigint NOT NULL CHECK (key_version>0), scope text[] NOT NULL CHECK (cardinality(scope)>0),
  created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,zone_id)
+);
+CREATE TABLE entry_group_domains (
+ tenant_id text NOT NULL REFERENCES tenants(id), group_id text NOT NULL REFERENCES node_groups(id),
+ credential_id text NOT NULL, zone_id text NOT NULL, name text NOT NULL CHECK(length(name) BETWEEN 1 AND 253),
+ version bigint NOT NULL DEFAULT 1 CHECK(version>0), created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(group_id), UNIQUE(name),
+ FOREIGN KEY(tenant_id,credential_id) REFERENCES encrypted_credentials(tenant_id,id)
 );
 ALTER TABLE tasks ADD COLUMN task_kind text NOT NULL DEFAULT 'control' CHECK (task_kind IN ('control','resource_change','port_prepare','port_release'));
 -- Ownership and billing constraints live below every service entry point.
