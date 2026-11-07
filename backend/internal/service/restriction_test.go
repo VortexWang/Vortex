@@ -11,6 +11,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"vortex/backend/db/generated"
+	"vortex/backend/internal/auth"
+	"vortex/backend/internal/policy"
 	"vortex/backend/internal/service"
 	"vortex/backend/internal/worker"
 	controlv1 "vortex/contracts/protobuf/v1"
@@ -20,6 +22,26 @@ type downgradeAPI interface {
 	PreviewDowngrade(context.Context, service.TenantScope, string, int64, []string, time.Time) (json.RawMessage, error)
 	ConfirmDowngrade(context.Context, service.TenantScope, string, int64, []string, time.Time, string, string, string) (service.PackageResult, error)
 	ProcessDuePackageChanges(context.Context, time.Time) (bool, error)
+}
+
+func TestRestrictionAllowsStopRevisionAndCompile(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	r := ruleInput(f.group)
+	reserveRulePort(t, f, r)
+	subscribePackage(t, f, createPackage(t, f, packageTerms()))
+	s := service.RuleService{Pool: f.pool}
+	if _, e := s.Mutate(ctx, f.scope, r, 0, uuid.NewString()); e != nil { t.Fatal(e) }
+	at := time.Now().Add(-time.Minute)
+	if e := (service.TenantService{Pool: f.pool}).ChangeRestriction(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Restrict), service.Restriction{Cause: "package_expired", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: at}, uuid.NewString()); e != nil { t.Fatal(e) }
+	r.Enabled = false
+	stop, e := s.Mutate(ctx, f.scope, r, 1, uuid.NewString())
+	if e != nil { t.Fatal("restriction blocked a stop revision", e) }
+	p := service.PackageService{Pool: f.pool}
+	if _, e = p.BindPackageCompile(ctx, f.scope, stop.OperationID, 2, 3, 4, uuid.NewString()); e != nil { t.Fatal("restriction blocked stop compilation", e) }
+	if e = s.ConsumeCompile(ctx, f.scope, stop.OperationID, uuid.NewString()); e != nil { t.Fatal("restriction blocked stop deployment", e) }
+	r.Enabled = true
+	if _, e = s.Mutate(ctx, f.scope, r, 2, uuid.NewString()); e == nil { t.Fatal("restriction allowed activation") }
 }
 
 func TestRestrictionBlocksDispatchButPreservesLateObservation(t *testing.T) {
