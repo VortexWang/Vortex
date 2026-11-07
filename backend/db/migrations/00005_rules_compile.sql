@@ -42,11 +42,21 @@ CREATE TRIGGER rule_segments_immutable BEFORE UPDATE OR DELETE ON rule_segments 
 CREATE TRIGGER rule_dependencies_immutable BEFORE UPDATE OR DELETE ON rule_dependencies FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TABLE rule_compile_requests (
  tenant_id text NOT NULL, task_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ input_digest text CHECK(input_digest ~ '^[0-9a-f]{64}$'),
  PRIMARY KEY(tenant_id,task_id), FOREIGN KEY(tenant_id,task_id) REFERENCES tasks(tenant_id,id),
  FOREIGN KEY(tenant_id,rule_id,rule_revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
 );
 CREATE INDEX rule_compile_request_rule ON rule_compile_requests(tenant_id,rule_id,rule_revision);
-CREATE TRIGGER rule_compile_request_immutable BEFORE UPDATE OR DELETE ON rule_compile_requests FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- +goose StatementBegin
+CREATE FUNCTION bind_rule_compile_input_once() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF TG_OP='UPDATE' AND OLD.input_digest IS NULL AND NEW.input_digest IS NOT NULL
+    AND (to_jsonb(OLD)-'input_digest')=(to_jsonb(NEW)-'input_digest') THEN RETURN NEW; END IF;
+ RAISE EXCEPTION 'immutable rule compile request';
+END;
+$$;
+-- +goose StatementEnd
+CREATE TRIGGER rule_compile_request_immutable BEFORE UPDATE OR DELETE ON rule_compile_requests FOR EACH ROW EXECUTE FUNCTION bind_rule_compile_input_once();
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE operations DROP CONSTRAINT operations_state_check;
 ALTER TABLE operations ADD CONSTRAINT operations_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
@@ -62,6 +72,8 @@ CREATE TABLE rule_compile_inputs (
  PRIMARY KEY(tenant_id,rule_id,rule_revision,input_digest),
  FOREIGN KEY(tenant_id,rule_id,rule_revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
 );
+ALTER TABLE rule_compile_requests ADD CONSTRAINT rule_compile_input_binding
+ FOREIGN KEY(tenant_id,rule_id,rule_revision,input_digest) REFERENCES rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest);
 CREATE TABLE rule_artifacts (
  tenant_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
  node_id text NOT NULL REFERENCES nodes(id), input_digest text NOT NULL,
@@ -117,4 +129,6 @@ ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release'));
+ALTER TABLE rule_compile_requests DROP CONSTRAINT rule_compile_input_binding;
 DROP TABLE rule_delivery_receipts,rule_delivery_bindings,rule_deployment_members,rule_deployments,rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_compile_requests,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;
+DROP FUNCTION bind_rule_compile_input_once();

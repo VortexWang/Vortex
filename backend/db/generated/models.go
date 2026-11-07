@@ -295,6 +295,7 @@ type RuleCompileRequest struct {
 	TaskID       string
 	RuleID       string
 	RuleRevision int64
+	InputDigest  pgtype.Text
 }
 
 type RuleDeliveryBinding struct {

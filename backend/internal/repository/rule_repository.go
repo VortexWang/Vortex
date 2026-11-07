@@ -29,6 +29,24 @@ func (r RuleRepository) Revision(ctx context.Context, s TenantScope, id string, 
 // PersistCompilation is called only inside the service's locked authority and
 // AuditWriter transaction. Recompute rather than trusting a caller's digest.
 func PersistCompilation(ctx context.Context, q *generated.Queries, in compiler.CompileInput) (compiler.Result, error) {
+	result, e := PersistCompileInput(ctx, q, in)
+	if e != nil {
+		return compiler.Result{}, e
+	}
+	for _, a := range result.Artifacts {
+		if e = q.InsertRuleArtifact(ctx, generated.InsertRuleArtifactParams{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: a.NodeID, InputDigest: result.InputDigest, Digest: a.Digest, Canonical: a.Canonical, BillingSnapshotID: in.Billing.ID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration}); e != nil {
+			return compiler.Result{}, e
+		}
+		if e = q.CommitRuleArtifact(ctx, generated.CommitRuleArtifactParams{TenantID: in.TenantID, Digest: a.Digest}); e != nil {
+			return compiler.Result{}, e
+		}
+	}
+	return result, nil
+}
+
+// PersistCompileInput validates and pins the complete input without creating a
+// deliverable artifact. The durable task consumer commits artifacts later.
+func PersistCompileInput(ctx context.Context, q *generated.Queries, in compiler.CompileInput) (compiler.Result, error) {
 	result := compiler.Compile(ctx, in)
 	if len(result.Diagnostics) != 0 {
 		return result, result.Diagnostics[0]
@@ -47,14 +65,6 @@ func PersistCompilation(ctx context.Context, q *generated.Queries, in compiler.C
 	}
 	if e = q.InsertRuleCompileInput(ctx, generated.InsertRuleCompileInputParams{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, InputDigest: result.InputDigest, Canonical: result.InputCanonical, BillingSnapshotID: in.Billing.ID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration}); e != nil {
 		return compiler.Result{}, e
-	}
-	for _, a := range result.Artifacts {
-		if e = q.InsertRuleArtifact(ctx, generated.InsertRuleArtifactParams{TenantID: in.TenantID, RuleID: in.Rule.ID, RuleRevision: in.Revision, NodeID: a.NodeID, InputDigest: result.InputDigest, Digest: a.Digest, Canonical: a.Canonical, BillingSnapshotID: in.Billing.ID, SignerEpoch: in.SignerEpoch, PathGeneration: in.PathGeneration, FencingGeneration: in.FencingGeneration}); e != nil {
-			return compiler.Result{}, e
-		}
-		if e = q.CommitRuleArtifact(ctx, generated.CommitRuleArtifactParams{TenantID: in.TenantID, Digest: a.Digest}); e != nil {
-			return compiler.Result{}, e
-		}
 	}
 	return result, nil
 }

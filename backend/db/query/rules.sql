@@ -36,6 +36,18 @@ INSERT INTO rule_compile_requests(tenant_id,task_id,rule_id,rule_revision) VALUE
 INSERT INTO rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest,canonical,billing_snapshot_id,signer_epoch,path_generation,fencing_generation)
 VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT DO NOTHING;
 
+-- name: LockRuleCompileRequest :one
+SELECT r.*,t.state FROM rule_compile_requests r JOIN tasks t ON t.tenant_id=r.tenant_id AND t.id=r.task_id WHERE r.tenant_id=$1 AND r.task_id=$2 AND t.task_kind='rule_compile' FOR UPDATE OF t,r;
+
+-- name: GetRuleCompileRequest :one
+SELECT * FROM rule_compile_requests WHERE tenant_id=$1 AND task_id=$2;
+
+-- name: BindRuleCompileInput :execrows
+UPDATE rule_compile_requests SET input_digest=$3 WHERE tenant_id=$1 AND task_id=$2 AND input_digest IS NULL;
+
+-- name: ReadyRuleCompiles :many
+SELECT r.tenant_id,r.task_id,v.created_by FROM rule_compile_requests r JOIN tasks t ON t.tenant_id=r.tenant_id AND t.id=r.task_id JOIN rule_revisions v ON v.tenant_id=r.tenant_id AND v.rule_id=r.rule_id AND v.revision=r.rule_revision JOIN rule_heads h ON h.tenant_id=r.tenant_id AND h.id=r.rule_id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND t.task_kind='rule_compile' AND r.input_digest IS NOT NULL AND h.desired_revision=r.rule_revision AND o.delivered_at IS NULL ORDER BY o.id LIMIT 100;
+
 -- name: InsertRuleArtifact :exec
 INSERT INTO rule_artifacts(tenant_id,rule_id,rule_revision,node_id,input_digest,digest,canonical,billing_snapshot_id,signer_epoch,path_generation,fencing_generation)
 VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT DO NOTHING;

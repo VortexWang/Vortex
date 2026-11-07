@@ -42,3 +42,14 @@ bodies fail closed. Full allocation, restriction, handoff and source-ledger
 policy belongs to 06-05/06-06; the control contract is unchanged. The optional
 Valkey projection contains only the PostgreSQL authority currently implemented;
 later source balances must extend its loss/rebuild tests when introduced.
+
+`serve` also runs the PostgreSQL rule compile consumer. The internal billing
+authority producer calls `RuleService.BindCompileInput` with a validated immutable
+snapshot and explicit signer/path/fencing generations. This pins the complete
+canonical input to the task once; it does not publish artifacts. The consumer
+reloads that exact input and atomically commits artifacts, fixed-member Prepare
+tasks, Outbox confirmation and audit. Replays retain the same digest; a different
+snapshot cannot replace a task's binding. Missing or unavailable billing snapshots
+leave requests pending without artifacts or changes to prior active authority,
+grants or unknown occupation. There is no default snapshot or latest-catalog
+fallback. Formal funded snapshot production remains in 06-04/06-05.

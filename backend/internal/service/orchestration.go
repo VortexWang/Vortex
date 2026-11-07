@@ -27,77 +27,82 @@ type RuleOrchestrator struct{ Pool *pgxpool.Pool }
 func (s RuleOrchestrator) Begin(ctx context.Context, scope TenantScope, rule string, revision int64, input, request string) (generated.RuleDeployment, error) {
 	var result generated.RuleDeployment
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.prepare", ResourceID: rule, RequestID: request, Reason: "pin committed artifact member set"}, func(q *generated.Queries) error {
-		if e := activeTenant(ctx, q, scope); e != nil {
-			return e
-		}
-		head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: rule})
-		if e != nil {
-			return e
-		}
-		if head.DesiredRevision != revision {
-			return ErrRuleRevisionConflict
-		}
-		old, e := q.RuleDeploymentByInput(ctx, generated.RuleDeploymentByInputParams{TenantID: scope.TenantID(), RuleID: rule, RuleRevision: revision, InputDigest: input})
-		if e == nil {
-			result = old
-			return nil
-		}
-		if !errors.Is(e, pgx.ErrNoRows) {
-			return e
-		}
-		rows, e := q.ListCommittedRuleArtifacts(ctx, generated.ListCommittedRuleArtifactsParams{TenantID: scope.TenantID(), RuleID: rule, RuleRevision: revision, InputDigest: input})
-		if e != nil {
-			return e
-		}
-		if len(rows) == 0 {
-			return ErrConflict
-		}
-		// Revalidate current rights and incarnation, but never silently substitute a
-		// different member set or regenerate the pinned artifact during delivery.
-		rev, e := q.GetRuleRevision(ctx, generated.GetRuleRevisionParams{TenantID: scope.TenantID(), RuleID: rule, Revision: revision})
-		if e != nil {
-			return e
-		}
-		var model RuleInput
-		if e = json.Unmarshal(rev.Payload, &model); e != nil {
-			return e
-		}
-		resolved, e := resolveRule(ctx, q, scope, model)
-		if e != nil {
-			return e
-		}
-		boots := map[string]string{}
-		for _, group := range resolved.members {
-			for _, n := range group.Members {
-				boots[n.ID] = n.BootID
-			}
-		}
-		if len(boots) != len(rows) {
-			return ErrConflict
-		}
-		result, e = q.InsertRuleDeployment(ctx, generated.InsertRuleDeploymentParams{TenantID: scope.TenantID(), ID: uuid.NewString(), RuleID: rule, RuleRevision: revision, InputDigest: input, CreatedBy: scope.ActorID()})
-		if e != nil {
-			return e
-		}
-		for _, a := range rows {
-			env, e := repository.CommittedArtifact(ctx, q, scope.TenantID(), repository.ArtifactBinding{RuleID: rule, NodeID: a.NodeID, Digest: a.Digest, Revision: revision, FencingGeneration: a.FencingGeneration})
-			if e != nil {
-				return e
-			}
-			if boots[a.NodeID] != env.BootID {
-				return ErrConflict
-			}
-			m := generated.RuleDeploymentMember{TenantID: scope.TenantID(), DeploymentID: result.ID, NodeID: a.NodeID, BootID: env.BootID, TransactionID: uuid.NewString(), ArtifactDigest: a.Digest, FencingGeneration: a.FencingGeneration, State: "pending"}
-			if e = q.InsertRuleDeploymentMember(ctx, generated.InsertRuleDeploymentMemberParams{TenantID: m.TenantID, DeploymentID: m.DeploymentID, NodeID: m.NodeID, BootID: m.BootID, TransactionID: m.TransactionID, ArtifactDigest: m.ArtifactDigest, FencingGeneration: m.FencingGeneration}); e != nil {
-				return e
-			}
-			if e = queueRulePhase(ctx, q, scope, result, m, "prepare"); e != nil {
-				return e
-			}
-		}
-		return q.SetRuleSync(ctx, generated.SetRuleSyncParams{TenantID: scope.TenantID(), ID: rule, ActiveRevision: revision, SyncStatus: "preparing"})
+		var e error
+		result, e = beginRuleDeployment(ctx, q, scope, rule, revision, input)
+		return e
 	})
 	return result, err
+}
+
+func beginRuleDeployment(ctx context.Context, q *generated.Queries, scope TenantScope, rule string, revision int64, input string) (generated.RuleDeployment, error) {
+	if e := activeTenant(ctx, q, scope); e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: rule})
+	if e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	if head.DesiredRevision != revision {
+		return generated.RuleDeployment{}, ErrRuleRevisionConflict
+	}
+	old, e := q.RuleDeploymentByInput(ctx, generated.RuleDeploymentByInputParams{TenantID: scope.TenantID(), RuleID: rule, RuleRevision: revision, InputDigest: input})
+	if e == nil {
+		return old, nil
+	}
+	if !errors.Is(e, pgx.ErrNoRows) {
+		return generated.RuleDeployment{}, e
+	}
+	rows, e := q.ListCommittedRuleArtifacts(ctx, generated.ListCommittedRuleArtifactsParams{TenantID: scope.TenantID(), RuleID: rule, RuleRevision: revision, InputDigest: input})
+	if e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	if len(rows) == 0 {
+		return generated.RuleDeployment{}, ErrConflict
+	}
+	// Revalidate current rights and incarnation, but never silently substitute a
+	// different member set or regenerate the pinned artifact during delivery.
+	rev, e := q.GetRuleRevision(ctx, generated.GetRuleRevisionParams{TenantID: scope.TenantID(), RuleID: rule, Revision: revision})
+	if e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	var model RuleInput
+	if e = json.Unmarshal(rev.Payload, &model); e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	resolved, e := resolveRule(ctx, q, scope, model)
+	if e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	boots := map[string]string{}
+	for _, group := range resolved.members {
+		for _, n := range group.Members {
+			boots[n.ID] = n.BootID
+		}
+	}
+	if len(boots) != len(rows) {
+		return generated.RuleDeployment{}, ErrConflict
+	}
+	result, e := q.InsertRuleDeployment(ctx, generated.InsertRuleDeploymentParams{TenantID: scope.TenantID(), ID: uuid.NewString(), RuleID: rule, RuleRevision: revision, InputDigest: input, CreatedBy: scope.ActorID()})
+	if e != nil {
+		return generated.RuleDeployment{}, e
+	}
+	for _, a := range rows {
+		env, e := repository.CommittedArtifact(ctx, q, scope.TenantID(), repository.ArtifactBinding{RuleID: rule, NodeID: a.NodeID, Digest: a.Digest, Revision: revision, FencingGeneration: a.FencingGeneration})
+		if e != nil {
+			return generated.RuleDeployment{}, e
+		}
+		if boots[a.NodeID] != env.BootID {
+			return generated.RuleDeployment{}, ErrConflict
+		}
+		m := generated.RuleDeploymentMember{TenantID: scope.TenantID(), DeploymentID: result.ID, NodeID: a.NodeID, BootID: env.BootID, TransactionID: uuid.NewString(), ArtifactDigest: a.Digest, FencingGeneration: a.FencingGeneration, State: "pending"}
+		if e = q.InsertRuleDeploymentMember(ctx, generated.InsertRuleDeploymentMemberParams{TenantID: m.TenantID, DeploymentID: m.DeploymentID, NodeID: m.NodeID, BootID: m.BootID, TransactionID: m.TransactionID, ArtifactDigest: m.ArtifactDigest, FencingGeneration: m.FencingGeneration}); e != nil {
+			return generated.RuleDeployment{}, e
+		}
+		if e = queueRulePhase(ctx, q, scope, result, m, "prepare"); e != nil {
+			return generated.RuleDeployment{}, e
+		}
+	}
+	return result, q.SetRuleSync(ctx, generated.SetRuleSyncParams{TenantID: scope.TenantID(), ID: rule, ActiveRevision: revision, SyncStatus: "preparing"})
 }
 
 func queueRulePhase(ctx context.Context, q *generated.Queries, scope TenantScope, d generated.RuleDeployment, m generated.RuleDeploymentMember, phase string) error {

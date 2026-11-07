@@ -71,6 +71,24 @@ func (q *Queries) AppendRuleRevision(ctx context.Context, arg AppendRuleRevision
 	return i, err
 }
 
+const bindRuleCompileInput = `-- name: BindRuleCompileInput :execrows
+UPDATE rule_compile_requests SET input_digest=$3 WHERE tenant_id=$1 AND task_id=$2 AND input_digest IS NULL
+`
+
+type BindRuleCompileInputParams struct {
+	TenantID    string
+	TaskID      string
+	InputDigest pgtype.Text
+}
+
+func (q *Queries) BindRuleCompileInput(ctx context.Context, arg BindRuleCompileInputParams) (int64, error) {
+	result, err := q.db.Exec(ctx, bindRuleCompileInput, arg.TenantID, arg.TaskID, arg.InputDigest)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const bindRuleCompileTask = `-- name: BindRuleCompileTask :exec
 INSERT INTO rule_compile_requests(tenant_id,task_id,rule_id,rule_revision) VALUES($1,$2,$3,$4)
 `
@@ -292,6 +310,28 @@ func (q *Queries) GetRuleCompileInput(ctx context.Context, arg GetRuleCompileInp
 		&i.SignerEpoch,
 		&i.PathGeneration,
 		&i.FencingGeneration,
+	)
+	return i, err
+}
+
+const getRuleCompileRequest = `-- name: GetRuleCompileRequest :one
+SELECT tenant_id, task_id, rule_id, rule_revision, input_digest FROM rule_compile_requests WHERE tenant_id=$1 AND task_id=$2
+`
+
+type GetRuleCompileRequestParams struct {
+	TenantID string
+	TaskID   string
+}
+
+func (q *Queries) GetRuleCompileRequest(ctx context.Context, arg GetRuleCompileRequestParams) (RuleCompileRequest, error) {
+	row := q.db.QueryRow(ctx, getRuleCompileRequest, arg.TenantID, arg.TaskID)
+	var i RuleCompileRequest
+	err := row.Scan(
+		&i.TenantID,
+		&i.TaskID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
 	)
 	return i, err
 }
@@ -645,6 +685,38 @@ func (q *Queries) ListCommittedRuleArtifacts(ctx context.Context, arg ListCommit
 	return items, nil
 }
 
+const lockRuleCompileRequest = `-- name: LockRuleCompileRequest :one
+SELECT r.tenant_id, r.task_id, r.rule_id, r.rule_revision, r.input_digest,t.state FROM rule_compile_requests r JOIN tasks t ON t.tenant_id=r.tenant_id AND t.id=r.task_id WHERE r.tenant_id=$1 AND r.task_id=$2 AND t.task_kind='rule_compile' FOR UPDATE OF t,r
+`
+
+type LockRuleCompileRequestParams struct {
+	TenantID string
+	TaskID   string
+}
+
+type LockRuleCompileRequestRow struct {
+	TenantID     string
+	TaskID       string
+	RuleID       string
+	RuleRevision int64
+	InputDigest  pgtype.Text
+	State        string
+}
+
+func (q *Queries) LockRuleCompileRequest(ctx context.Context, arg LockRuleCompileRequestParams) (LockRuleCompileRequestRow, error) {
+	row := q.db.QueryRow(ctx, lockRuleCompileRequest, arg.TenantID, arg.TaskID)
+	var i LockRuleCompileRequestRow
+	err := row.Scan(
+		&i.TenantID,
+		&i.TaskID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.State,
+	)
+	return i, err
+}
+
 const lockRuleDeployment = `-- name: LockRuleDeployment :one
 SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE tenant_id=$1 AND id=$2 FOR UPDATE
 `
@@ -714,6 +786,36 @@ func (q *Queries) PendingRuleDelivery(ctx context.Context, arg PendingRuleDelive
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const readyRuleCompiles = `-- name: ReadyRuleCompiles :many
+SELECT r.tenant_id,r.task_id,v.created_by FROM rule_compile_requests r JOIN tasks t ON t.tenant_id=r.tenant_id AND t.id=r.task_id JOIN rule_revisions v ON v.tenant_id=r.tenant_id AND v.rule_id=r.rule_id AND v.revision=r.rule_revision JOIN rule_heads h ON h.tenant_id=r.tenant_id AND h.id=r.rule_id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND t.task_kind='rule_compile' AND r.input_digest IS NOT NULL AND h.desired_revision=r.rule_revision AND o.delivered_at IS NULL ORDER BY o.id LIMIT 100
+`
+
+type ReadyRuleCompilesRow struct {
+	TenantID  string
+	TaskID    string
+	CreatedBy string
+}
+
+func (q *Queries) ReadyRuleCompiles(ctx context.Context) ([]ReadyRuleCompilesRow, error) {
+	rows, err := q.db.Query(ctx, readyRuleCompiles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ReadyRuleCompilesRow{}
+	for rows.Next() {
+		var i ReadyRuleCompilesRow
+		if err := rows.Scan(&i.TenantID, &i.TaskID, &i.CreatedBy); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const ruleDelivery = `-- name: RuleDelivery :one
