@@ -22,6 +22,10 @@ schema = load('contracts/runtime/config.schema.json')
 assert schema['$defs']['legacy'] == json.loads(git_bytes('contracts/runtime/config.schema.json')), 'legacy schema changed'
 assert (ROOT / 'docs/governance/contract-review.yaml').read_bytes() == git_bytes('docs/governance/contract-review.yaml'), 'historical owner review changed without separate approval'
 assert {x['id']:x['version'] for x in load('contracts/versions.yaml')['contracts']} | {} == proposal['candidate_versions'], 'candidate catalog mismatch'
+assert (ROOT / 'contracts/openapi/v1/openapi.yaml').read_bytes() == (ROOT / 'backend/openapi/v1/openapi.yaml').read_bytes(), 'OpenAPI copy differs'
+for path in sorted((ROOT / 'backend/db/migrations').glob('0000[1-4]*.sql')):
+    assert path.read_bytes() == git_bytes(str(path.relative_to(ROOT))), 'applied migration rewritten: '+path.name
+subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-change', '--base', proposal['baseline_source']], cwd=ROOT, check=True)
 for row in load('contracts/versions.yaml')['contracts']:
     if row['id'] in {c['contract_id'] for c in proposal['changes']}:
         assert row['status'] == 'candidate', 'unsigned candidate marked frozen'

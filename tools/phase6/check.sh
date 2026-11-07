@@ -23,7 +23,7 @@ export PHASE6_EXPECTED_SHA="$expected"
 export GOTOOLCHAIN=local
 test "$(go env GOVERSION)" = go1.27.3
 # Never silently claim future implementations from the current test suite.
-case "$through" in 06-01|06-08|06-09|06-02|06-10) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
+case "$through" in 06-01|06-08|06-09|06-02|06-10|06-03) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
 evidence=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$evidence")
 case "$evidence" in "$root"|"$root"/*) echo 'evidence must be outside source checkout' >&2; exit 1;; esac
@@ -55,10 +55,25 @@ result=0
 if test "$result" -eq 0; then
   sh tools/phase6/dependency_lock_check.sh > "$out/dependencies.log" 2>&1 || result=$?
 fi
-if test "$result" -eq 0; then
-  PHASE6_SOURCE_ROOT="$root" PHASE6_EVIDENCE_DIR="$out" sh tools/phase6/tracer_real.sh > "$out/runner.log" 2>&1 || result=$?
+if test "$through" = 06-03 && test "$result" -eq 0; then
+  candidate=0
+  sh tools/phase6/rule_contract_check.sh > "$out/rule-contract.log" 2>&1 || candidate=$?
+  test "$candidate" -eq 0 || result=$candidate
+  # Candidate/runtime validation cannot grant owner freeze approval.
+  freeze=0
+  for contract in database public-api control.v1 runtime-config; do
+    python3 tools/phase1/contracts.py check-frozen --contract-id "vortex.$contract" > "$out/rule-freeze-$contract.log" 2>&1 || freeze=1
+  done
+  python3 - "$out" "$expected" "$freeze" "$candidate" <<'PY'
+import json,pathlib,sys
+out,sha,freeze,candidate=sys.argv[1:]
+pathlib.Path(out,'rule-contract.json').write_text(json.dumps(dict(commit=sha,candidate_validation='passed' if candidate=='0' else 'failed',freeze_status='approved' if freeze=='0' else 'pending_owner_approval'),indent=2)+'\n')
+PY
 fi
-if test "$through" = 06-10 && test "$result" -eq 0; then
+if test "$result" -eq 0; then
+  PHASE6_THROUGH_PLAN="$through" PHASE6_SOURCE_ROOT="$root" PHASE6_EVIDENCE_DIR="$out" sh tools/phase6/tracer_real.sh > "$out/runner.log" 2>&1 || result=$?
+fi
+if { test "$through" = 06-10 || test "$through" = 06-03; } && test "$result" -eq 0; then
   cloudflare_result=0
   PHASE6_DATABASE_URL="postgres://vortex:phase6-local-test-only@127.0.0.1:${PHASE6_PG_PORT:-15436}/vortex?sslmode=disable" sh tools/phase6/cloudflare_integration.sh > "$out/cloudflare.log" 2>&1 || cloudflare_result=$?
   python3 - "$out" "$expected" "$cloudflare_result" <<'PY'
@@ -89,11 +104,19 @@ if (p/'processes').is_dir():
 (p/'processes.json').write_text(json.dumps(processes,indent=2)+'\n')
 files+=['processes.json']+[name for run in processes for name in run.values()]
 external={}
-if through=='06-10':
+if through in ('06-10','06-03'):
     files+=['cloudflare.log','cloudflare.json']
     external['cloudflare']=json.loads((p/'cloudflare.json').read_text()) if (p/'cloudflare.json').is_file() else {'status':'not_run'}
+if through=='06-03':
+    files+=['rule-contract.log','rule-contract.json','rule-components.log','rule-builds.log']+['rule-freeze-'+c+'.log' for c in ('database','public-api','control.v1','runtime-config')]
+    external['rule_contract']=json.loads((p/'rule-contract.json').read_text()) if (p/'rule-contract.json').is_file() else {'freeze_status':'not_checked'}
 checksums={name:hashlib.sha256((p/name).read_bytes()).hexdigest() for name in files if (p/name).is_file()}
-(p/'result.json').write_text(json.dumps(dict(commit=sha,result=int(result),producer=host,through_plan=through,external_checks=external,acceptance_complete=not external or external['cloudflare']['status']=='passed',source_clean=not (p/'source-status-after.txt').read_text(),checksums=checksums,host=platform.platform(),run_id=os.getenv('GITHUB_RUN_ID'),run_url=('https://github.com/'+os.getenv('GITHUB_REPOSITORY','')+'/actions/runs/'+os.getenv('GITHUB_RUN_ID','')) if host=='actions' else None),indent=2)+'\n')
+accepted=(not external or external['cloudflare']['status']=='passed') and (through!='06-03' or external['rule_contract'].get('freeze_status')=='approved')
+(p/'result.json').write_text(json.dumps(dict(commit=sha,result=int(result),producer=host,through_plan=through,external_checks=external,acceptance_complete=accepted,source_clean=not (p/'source-status-after.txt').read_text(),checksums=checksums,host=platform.platform(),run_id=os.getenv('GITHUB_RUN_ID'),run_url=('https://github.com/'+os.getenv('GITHUB_REPOSITORY','')+'/actions/runs/'+os.getenv('GITHUB_RUN_ID','')) if host=='actions' else None),indent=2)+'\n')
 PY
 test "$result" -eq 0 || { echo "producer failed; see $out" >&2; exit "$result"; }
 sh tools/phase6/evidence_manifest.sh --through-plan "$through" --expected-sha "$expected" --evidence-dir "$evidence" --host "$produce"
+if test "$through" = 06-03 && test "$freeze" -ne 0; then
+  echo "candidate runtime evidence recorded; contract freeze remains pending owner approval: $out" >&2
+  exit 1
+fi

@@ -8,6 +8,18 @@
   "authorization": "Implementation continues under the already authorized 06-03 plan and the owner's request to continue; there has been no separate owner signature approving these contract bytes.",
   "changes": [
     {
+      "contract_id": "vortex.database",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "kind": "breaking"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "1.0.0",
+      "version": "2.0.0",
+      "kind": "breaking"
+    },
+    {
       "contract_id": "vortex.control.v1",
       "from": "1.3.0",
       "version": "1.4.0",
@@ -21,8 +33,8 @@
     }
   ],
   "candidate_versions": {
-    "vortex.database": "1.0.0",
-    "vortex.public-api": "1.0.0",
+    "vortex.database": "2.0.0",
+    "vortex.public-api": "2.0.0",
     "vortex.control.v1": "1.4.0",
     "vortex.runtime-config": "1.2.0",
     "vortex.vlink.v1": "1.0.0",
@@ -31,7 +43,7 @@
   "artifacts": [
     {
       "path": "contracts/versions.yaml",
-      "sha256": "93909e14600902d5d6b42d4f43a9840ba2f8dd439203851c5a1565d5d04bb3ce"
+      "sha256": "97bd1a7b865d8f0e087b319db98e7efa4c9eb543624431d7b2d32da961eb5bfc"
     },
     {
       "path": "contracts/protobuf/v1/vortex.proto",
@@ -63,7 +75,39 @@
     },
     {
       "path": "contracts/requirements-map.yaml",
-      "sha256": "65a357a8c11b8858d58a9f3f1046fd32fb8e787c59c7d6ffc859a103c06ba1ed"
+      "sha256": "5b6fe1f6ade48a1697204dee02d6008058e5818e485d223d4d6c45d692c3710c"
+    },
+    {
+      "path": "contracts/database/schema.sql",
+      "sha256": "b52405983c55312a11be9021ce81cfd0233dcde3771691d6ab71fa4f7f7985fc"
+    },
+    {
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81"
+    },
+    {
+      "path": "backend/openapi/v1/openapi.yaml",
+      "sha256": "7b6cab32fb9a385af2b442b06898960e02fc521ba25f3085f011f1724f35ab81"
+    },
+    {
+      "path": "backend/db/migrations/00001_authority.sql",
+      "sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272"
+    },
+    {
+      "path": "backend/db/migrations/00002_tenant_policy.sql",
+      "sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200"
+    },
+    {
+      "path": "backend/db/migrations/00003_nodes_ports.sql",
+      "sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6"
+    },
+    {
+      "path": "backend/db/migrations/00004_entry_group_domains.sql",
+      "sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2"
+    },
+    {
+      "path": "backend/db/migrations/00005_rules_compile.sql",
+      "sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c"
     }
   ],
   "compatibility": [
@@ -77,5 +121,10 @@
     "No invented billing snapshot, source funding or latest-catalog fallback; real snapshot producers remain 06-04/05.",
     "Cross-compilation is not native runtime/performance evidence; final Actions pairing remains 06-11."
   ],
-  "freeze_gate": "docs/governance/contract-review.yaml requires owner approval of normative changes. Historical approved hashes are unchanged; candidate generation/runtime checks confer no freeze approval."
+  "freeze_gate": "docs/governance/contract-review.yaml requires owner approval of normative changes. Historical approved hashes are unchanged; candidate generation/runtime checks confer no freeze approval.",
+  "historical_database_api_source": "7c4600af7ccb7493a1f4859ff3af013ac79a5245",
+  "migration_compatibility": {
+    "database": "Breaking relative to frozen 1.0 conceptual schema: table/column/type and constraint changes. No in-place migration from that conceptual schema is claimed. Fresh backend databases apply unchanged existing migrations 00001..00004 then additive 00005; existing Phase 6 00004 databases upgrade via 00005. Old 1.0 data needs a separately reviewed migration before use.",
+    "public_api": "Breaking relative to frozen 1.0 shared types: Restriction id/kind/active replaced by cause/source/version/effective timestamps; ApiError requires request_id; objects reject undeclared fields. Business routes/If-Match/async operations are specified; HTTP implementation remains 06-07. /api/v1 is the route namespace, distinct from contract SemVer 2.0.0."
+  }
 }

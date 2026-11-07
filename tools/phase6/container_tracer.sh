@@ -43,3 +43,21 @@ GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-backend ./cmd/vortex-b
 GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-control-peer ./cmd/vortex-control-peer
 export GORACE=halt_on_error=1
 GOTOOLCHAIN=local go test -race ./... -count=1 -v
+if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03; then
+  cd ..
+  (
+    GOTOOLCHAIN=local go test ./contracts ./agent/... ./cmd/vortex-node -p 1 -count=1 -v
+    GOTOOLCHAIN=local go -C engine test ./... -count=1 -v
+    GOTOOLCHAIN=local go test -race ./contracts ./agent/... ./cmd/vortex-node -p 1 -count=1 -v
+    GOTOOLCHAIN=local go -C engine test -race ./... -count=1 -v
+  ) > /evidence/rule-components.log 2>&1
+  (
+    for arch in amd64 arm64; do
+      GOOS=linux GOARCH="$arch" CGO_ENABLED=0 GOTOOLCHAIN=local go -C backend build -trimpath -o "/tmp/vortex-backend-$arch" ./cmd/vortex-backend
+      GOOS=linux GOARCH="$arch" CGO_ENABLED=0 GOTOOLCHAIN=local go build -trimpath -o "/tmp/vortex-agent-$arch" ./cmd/vortex-node
+      GOOS=linux GOARCH="$arch" CGO_ENABLED=0 GOTOOLCHAIN=local go -C engine build ./...
+      printf 'engine package compilation GOOS=linux GOARCH=%s CGO_ENABLED=0\n' "$arch"
+      GOTOOLCHAIN=local go version -m "/tmp/vortex-backend-$arch" "/tmp/vortex-agent-$arch"
+    done
+  ) > /evidence/rule-builds.log 2>&1
+fi

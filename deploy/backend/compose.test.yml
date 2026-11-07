@@ -34,6 +34,8 @@ services:
       PHASE6_VALKEY_ADDR: valkey:6379
       PHASE6_PROCESS_EVIDENCE_DIR: /evidence/processes
       PHASE6_EXPECTED_SHA: ${PHASE6_EXPECTED_SHA:-development}
+      PHASE6_THROUGH_PLAN: ${PHASE6_THROUGH_PLAN:-06-02}
+      VORTEX_TEST_FULL_DISK_DIR: /full-disk
     volumes:
       - ${PHASE6_SOURCE_ROOT:-../..}:/src
       - ${PHASE6_EVIDENCE_DIR:-/tmp/vortex-phase6-evidence}:/evidence
@@ -44,6 +46,8 @@ services:
         condition: service_healthy
       valkey:
         condition: service_healthy
+    tmpfs:
+      - /full-disk:rw,size=4m
     command: [sh, tools/phase6/container_tracer.sh]
 volumes:
   phase6-gomod:

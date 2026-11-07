@@ -4,6 +4,7 @@ root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
 sha=${PHASE6_EXPECTED_SHA:-$(git rev-parse HEAD)}
 export PHASE6_EXPECTED_SHA="$sha"
+export PHASE6_THROUGH_PLAN=${PHASE6_THROUGH_PLAN:-06-02}
 export PHASE6_EVIDENCE_DIR=${PHASE6_EVIDENCE_DIR:-"$root/artifacts/phase6/06-01/$sha/docker"}
 mkdir -p "$PHASE6_EVIDENCE_DIR"
 export PHASE6_SOURCE_ROOT=${PHASE6_SOURCE_ROOT:-"$root"}

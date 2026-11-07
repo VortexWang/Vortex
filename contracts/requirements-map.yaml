@@ -2634,5 +2634,16 @@
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     }
-  ]
+  ],
+  "phase6_candidate_review": {
+    "proposal": "docs/changes/CR-005-rule-two-phase.json",
+    "approval": "pending-owner",
+    "versions": {
+      "vortex.database": "2.0.0 breaking",
+      "vortex.public-api": "2.0.0 breaking",
+      "vortex.control.v1": "1.4.0 compatible",
+      "vortex.runtime-config": "1.2.0 compatible"
+    },
+    "scope": "All Phase 6 implemented database/API normative bytes through 06-03, including tenant/restriction/node/port/domain authority and immutable rules. No Phase 5 acceptance change; HTTP adapters remain 06-07. Fresh 00001..00005 migrations are executable source, not an upgrade from the historical frozen conceptual schema."
+  }
 }
