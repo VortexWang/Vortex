@@ -16,6 +16,9 @@ import (
 )
 
 func newPackageLifecycleFixture(t *testing.T) *portFixture {
+	return newPackageLifecycleFixtureKind(t, false)
+}
+func newPackageLifecycleFixtureKind(t *testing.T, platform bool) *portFixture {
 	t.Helper()
 	// Advancing the trusted worker clock must not advance other tests' tenants.
 	admin := testutil.Postgres(t)
@@ -36,7 +39,70 @@ func newPackageLifecycleFixture(t *testing.T) *portFixture {
 	query.Set("search_path", schema)
 	u.RawQuery = query.Encode()
 	t.Setenv("PHASE6_DATABASE_URL", u.String())
-	return newPortFixture(t)
+	return newPortFixtureKind(t, platform)
+}
+
+func TestPackageLifecycleExpiryIndependentOfNodeAuthority(t *testing.T) {
+	for _, fault := range []string{"offline", "revoked_grant"} {
+		t.Run(fault, func(t *testing.T) {
+			f := newPackageLifecycleFixtureKind(t, fault == "revoked_grant")
+			ctx := context.Background()
+			sub := subscribePackage(t, f, createPackage(t, f, packageTerms()))
+			r := ruleInput(f.group)
+			reserveRulePort(t, f, r)
+			if _, e := (service.RuleService{Pool: f.pool}).Mutate(ctx, f.scope, r, 0, uuid.NewString()); e != nil {
+				t.Fatal(e)
+			}
+			if _, e := f.pool.Exec(ctx, "UPDATE port_reservations SET state='unknown' WHERE tenant_id=$1", f.tenant); e != nil {
+				t.Fatal(e)
+			}
+			other := newPortFixture(t)
+			subscribePackage(t, other, createPackage(t, other, packageTerms()))
+			at := sub.ExpiresAt.Add(time.Hour)
+			if fault == "offline" {
+				if _, e := f.pool.Exec(ctx, "UPDATE nodes SET lifecycle='offline' WHERE id=$1", f.nodes[0]); e != nil {
+					t.Fatal(e)
+				}
+			} else {
+				if _, e := f.pool.Exec(ctx, "UPDATE resource_grants SET status='revoked' WHERE tenant_id=$1 AND resource_id=$2", f.tenant, f.group); e != nil {
+					t.Fatal(e)
+				}
+			}
+			s := service.PackageService{Pool: f.pool}
+			for n := 0; n < 8; n++ {
+				worked, e := s.ProcessPackageLifecycle(ctx, at)
+				if e != nil {
+					t.Errorf("unreachable node or revoked authority blocked authoritative expiry: %v", e)
+					break
+				}
+				if !worked {
+					break
+				}
+			}
+			for _, tenant := range []string{f.tenant, other.tenant} {
+				var count int
+				if e := f.pool.QueryRow(ctx, "SELECT count(*) FROM current_restrictions WHERE tenant_id=$1 AND cause='package_expired' AND cleared_at IS NULL", tenant).Scan(&count); e != nil || count != 1 {
+					t.Errorf("expiry missing for tenant %s: %d %v", tenant, count, e)
+				}
+			}
+			q := generated.New(f.pool)
+			if expired, e := q.SourceIsExpired(ctx, generated.SourceIsExpiredParams{TenantID: f.tenant, SourceID: sub.SourceID, AtTime: timestampTest(at)}); e != nil || !expired {
+				t.Errorf("source expiry absent: %v %v", expired, e)
+			}
+			ports, e := q.TenantPackagePorts(ctx, f.tenant)
+			if e != nil || len(ports) != 1 || ports[0].State != "retained" || !ports[0].FirstEffectiveAt.Valid || !ports[0].FirstEffectiveAt.Time.Equal(sub.ExpiresAt) || !ports[0].RetainedUntil.Time.Equal(sub.ExpiresAt.AddDate(0,0,7)) {
+				t.Errorf("conservative retention missing: %v %v", ports, e)
+			}
+			var unknown int
+			if e := f.pool.QueryRow(ctx, "SELECT count(*) FROM port_reservations WHERE tenant_id=$1 AND state='unknown'", f.tenant).Scan(&unknown); e != nil || unknown != 2 {
+				t.Errorf("unknown occupation changed: %d %v", unknown, e)
+			}
+			var enabled bool
+			if e := f.pool.QueryRow(ctx, "SELECT (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean FROM rule_heads h JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision WHERE h.tenant_id=$1 AND h.id=$2", f.tenant, r.ID).Scan(&enabled); e != nil || enabled {
+				t.Errorf("durable stop desire absent: %v %v", enabled, e)
+			}
+		})
+	}
 }
 
 func failAuditUntilDropped(t *testing.T, pool *pgxpool.Pool, request string) func() {
