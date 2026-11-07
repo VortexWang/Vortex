@@ -79,9 +79,38 @@ CREATE TABLE rule_artifact_commits (
 CREATE TRIGGER rule_input_immutable BEFORE UPDATE OR DELETE ON rule_compile_inputs FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TRIGGER rule_artifact_immutable BEFORE UPDATE OR DELETE ON rule_artifacts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TRIGGER rule_artifact_commit_immutable BEFORE UPDATE OR DELETE ON rule_artifact_commits FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE rule_deployments (
+ tenant_id text NOT NULL, id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ input_digest text NOT NULL, state text NOT NULL CHECK(state IN ('preparing','committing','running','partial','unknown','failed','superseded')),
+ deadline timestamptz NOT NULL, rollback_revision bigint NOT NULL DEFAULT 0, created_by text NOT NULL,
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,rule_id,rule_revision,input_digest),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision,input_digest) REFERENCES rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest)
+);
+CREATE TABLE rule_deployment_members (
+ tenant_id text NOT NULL, deployment_id text NOT NULL, node_id text NOT NULL,
+ boot_id text NOT NULL, transaction_id text NOT NULL, artifact_digest text NOT NULL,
+ fencing_generation bigint NOT NULL, state text NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','prepared','active','aborted','unknown','failed')),
+ PRIMARY KEY(tenant_id,deployment_id,node_id), UNIQUE(transaction_id),
+ FOREIGN KEY(tenant_id,deployment_id) REFERENCES rule_deployments(tenant_id,id),
+ FOREIGN KEY(tenant_id,artifact_digest) REFERENCES rule_artifacts(tenant_id,digest)
+);
+CREATE TABLE rule_delivery_bindings (
+ tenant_id text NOT NULL, task_id text NOT NULL, deployment_id text NOT NULL, node_id text NOT NULL,
+ phase text NOT NULL CHECK(phase IN ('prepare','commit','query','abort')),
+ PRIMARY KEY(tenant_id,task_id),
+ FOREIGN KEY(tenant_id,task_id) REFERENCES tasks(tenant_id,id),
+ FOREIGN KEY(tenant_id,deployment_id,node_id) REFERENCES rule_deployment_members(tenant_id,deployment_id,node_id)
+);
+CREATE TABLE rule_delivery_receipts (
+ tenant_id text NOT NULL, task_id text NOT NULL, receipt_sha256 bytea NOT NULL CHECK(octet_length(receipt_sha256)=32),
+ payload bytea NOT NULL CHECK(octet_length(payload) BETWEEN 1 AND 1048576),
+ PRIMARY KEY(tenant_id,task_id), FOREIGN KEY(tenant_id,task_id) REFERENCES rule_delivery_bindings(tenant_id,task_id)
+);
+CREATE TRIGGER rule_binding_immutable BEFORE UPDATE OR DELETE ON rule_delivery_bindings FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_delivery_receipt_immutable BEFORE UPDATE OR DELETE ON rule_delivery_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release'));
-DROP TABLE rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_compile_requests,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;
+DROP TABLE rule_delivery_receipts,rule_delivery_bindings,rule_deployment_members,rule_deployments,rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_compile_requests,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;

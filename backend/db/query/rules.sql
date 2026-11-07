@@ -49,3 +49,54 @@ WHERE a.tenant_id=$1 AND a.digest=$2 AND a.rule_id=$3 AND a.rule_revision=$4 AND
 
 -- name: GetRuleCompileInput :one
 SELECT * FROM rule_compile_inputs WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND input_digest=$4;
+
+-- name: ListCommittedRuleArtifacts :many
+SELECT a.* FROM rule_artifacts a JOIN rule_artifact_commits c ON c.tenant_id=a.tenant_id AND c.digest=a.digest WHERE a.tenant_id=$1 AND a.rule_id=$2 AND a.rule_revision=$3 AND a.input_digest=$4 ORDER BY a.node_id;
+
+-- name: InsertRuleDeployment :one
+INSERT INTO rule_deployments(tenant_id,id,rule_id,rule_revision,input_digest,state,deadline,created_by) VALUES($1,$2,$3,$4,$5,'preparing',now()+interval '120 seconds',$6) RETURNING *;
+
+-- name: LockRuleDeployment :one
+SELECT * FROM rule_deployments WHERE tenant_id=$1 AND id=$2 FOR UPDATE;
+
+-- name: RuleDeploymentByInput :one
+SELECT * FROM rule_deployments WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND input_digest=$4;
+
+-- name: InsertRuleDeploymentMember :exec
+INSERT INTO rule_deployment_members(tenant_id,deployment_id,node_id,boot_id,transaction_id,artifact_digest,fencing_generation) VALUES($1,$2,$3,$4,$5,$6,$7);
+
+-- name: RuleDeploymentMembers :many
+SELECT * FROM rule_deployment_members WHERE tenant_id=$1 AND deployment_id=$2 ORDER BY node_id FOR UPDATE;
+
+-- name: SetRuleMemberState :exec
+UPDATE rule_deployment_members SET state=$4 WHERE tenant_id=$1 AND deployment_id=$2 AND node_id=$3;
+
+-- name: SetRuleDeploymentState :exec
+UPDATE rule_deployments SET state=$3 WHERE tenant_id=$1 AND id=$2;
+
+-- name: SetRuleSync :exec
+UPDATE rule_heads SET sync_status=$4,active_revision=CASE WHEN $4::text='running' THEN $3 ELSE active_revision END WHERE tenant_id=$1 AND id=$2 AND desired_revision=$3;
+
+-- name: BindRuleDelivery :exec
+INSERT INTO rule_delivery_bindings(tenant_id,task_id,deployment_id,node_id,phase) VALUES($1,$2,$3,$4,$5);
+
+-- name: RuleDelivery :one
+SELECT b.*,d.rule_id,d.rule_revision,d.input_digest,m.boot_id,m.transaction_id,m.artifact_digest,m.fencing_generation,m.state AS member_state,o.idempotency_key FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id JOIN rule_deployment_members m ON m.tenant_id=b.tenant_id AND m.deployment_id=b.deployment_id AND m.node_id=b.node_id JOIN operations o ON o.tenant_id=b.tenant_id AND o.id=b.task_id WHERE b.tenant_id=$1 AND b.task_id=$2;
+
+-- name: LeaseRuleDelivery :one
+UPDATE tasks SET state='leased',lease_token=sqlc.arg(lease_token),lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING *;
+
+-- name: InsertRuleReceipt :exec
+INSERT INTO rule_delivery_receipts(tenant_id,task_id,receipt_sha256,payload) VALUES($1,$2,$3,$4);
+
+-- name: GetRuleReceipt :one
+SELECT * FROM rule_delivery_receipts WHERE tenant_id=$1 AND task_id=$2;
+
+-- name: PendingRuleDelivery :one
+SELECT EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=$1 AND b.deployment_id=$2 AND b.node_id=$3 AND b.phase=$4 AND t.state IN ('pending','leased','running'));
+
+-- name: ExpiredRuleDeployments :many
+SELECT * FROM rule_deployments WHERE deadline<=now() AND state IN ('preparing','committing','partial','unknown') AND rollback_revision=0 ORDER BY deadline LIMIT 100;
+
+-- name: SetRuleRollbackRevision :exec
+UPDATE rule_deployments SET rollback_revision=$3 WHERE tenant_id=$1 AND id=$2;

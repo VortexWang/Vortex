@@ -7,6 +7,8 @@ package generated
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const advanceRuleHead = `-- name: AdvanceRuleHead :execrows
@@ -90,6 +92,29 @@ func (q *Queries) BindRuleCompileTask(ctx context.Context, arg BindRuleCompileTa
 	return err
 }
 
+const bindRuleDelivery = `-- name: BindRuleDelivery :exec
+INSERT INTO rule_delivery_bindings(tenant_id,task_id,deployment_id,node_id,phase) VALUES($1,$2,$3,$4,$5)
+`
+
+type BindRuleDeliveryParams struct {
+	TenantID     string
+	TaskID       string
+	DeploymentID string
+	NodeID       string
+	Phase        string
+}
+
+func (q *Queries) BindRuleDelivery(ctx context.Context, arg BindRuleDeliveryParams) error {
+	_, err := q.db.Exec(ctx, bindRuleDelivery,
+		arg.TenantID,
+		arg.TaskID,
+		arg.DeploymentID,
+		arg.NodeID,
+		arg.Phase,
+	)
+	return err
+}
+
 const commitRuleArtifact = `-- name: CommitRuleArtifact :exec
 INSERT INTO rule_artifact_commits(tenant_id,digest) VALUES($1,$2) ON CONFLICT DO NOTHING
 `
@@ -152,6 +177,40 @@ type EnsureRuleHeadParams struct {
 func (q *Queries) EnsureRuleHead(ctx context.Context, arg EnsureRuleHeadParams) error {
 	_, err := q.db.Exec(ctx, ensureRuleHead, arg.TenantID, arg.ID)
 	return err
+}
+
+const expiredRuleDeployments = `-- name: ExpiredRuleDeployments :many
+SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE deadline<=now() AND state IN ('preparing','committing','partial','unknown') AND rollback_revision=0 ORDER BY deadline LIMIT 100
+`
+
+func (q *Queries) ExpiredRuleDeployments(ctx context.Context) ([]RuleDeployment, error) {
+	rows, err := q.db.Query(ctx, expiredRuleDeployments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RuleDeployment{}
+	for rows.Next() {
+		var i RuleDeployment
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.ID,
+			&i.RuleID,
+			&i.RuleRevision,
+			&i.InputDigest,
+			&i.State,
+			&i.Deadline,
+			&i.RollbackRevision,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getCommittedRuleArtifact = `-- name: GetCommittedRuleArtifact :one
@@ -224,6 +283,27 @@ func (q *Queries) GetRuleCompileInput(ctx context.Context, arg GetRuleCompileInp
 		&i.SignerEpoch,
 		&i.PathGeneration,
 		&i.FencingGeneration,
+	)
+	return i, err
+}
+
+const getRuleReceipt = `-- name: GetRuleReceipt :one
+SELECT tenant_id, task_id, receipt_sha256, payload FROM rule_delivery_receipts WHERE tenant_id=$1 AND task_id=$2
+`
+
+type GetRuleReceiptParams struct {
+	TenantID string
+	TaskID   string
+}
+
+func (q *Queries) GetRuleReceipt(ctx context.Context, arg GetRuleReceiptParams) (RuleDeliveryReceipt, error) {
+	row := q.db.QueryRow(ctx, getRuleReceipt, arg.TenantID, arg.TaskID)
+	var i RuleDeliveryReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.TaskID,
+		&i.ReceiptSha256,
+		&i.Payload,
 	)
 	return i, err
 }
@@ -348,6 +428,91 @@ func (q *Queries) InsertRuleDependency(ctx context.Context, arg InsertRuleDepend
 	return err
 }
 
+const insertRuleDeployment = `-- name: InsertRuleDeployment :one
+INSERT INTO rule_deployments(tenant_id,id,rule_id,rule_revision,input_digest,state,deadline,created_by) VALUES($1,$2,$3,$4,$5,'preparing',now()+interval '120 seconds',$6) RETURNING tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by
+`
+
+type InsertRuleDeploymentParams struct {
+	TenantID     string
+	ID           string
+	RuleID       string
+	RuleRevision int64
+	InputDigest  string
+	CreatedBy    string
+}
+
+func (q *Queries) InsertRuleDeployment(ctx context.Context, arg InsertRuleDeploymentParams) (RuleDeployment, error) {
+	row := q.db.QueryRow(ctx, insertRuleDeployment,
+		arg.TenantID,
+		arg.ID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.InputDigest,
+		arg.CreatedBy,
+	)
+	var i RuleDeployment
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.State,
+		&i.Deadline,
+		&i.RollbackRevision,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
+const insertRuleDeploymentMember = `-- name: InsertRuleDeploymentMember :exec
+INSERT INTO rule_deployment_members(tenant_id,deployment_id,node_id,boot_id,transaction_id,artifact_digest,fencing_generation) VALUES($1,$2,$3,$4,$5,$6,$7)
+`
+
+type InsertRuleDeploymentMemberParams struct {
+	TenantID          string
+	DeploymentID      string
+	NodeID            string
+	BootID            string
+	TransactionID     string
+	ArtifactDigest    string
+	FencingGeneration int64
+}
+
+func (q *Queries) InsertRuleDeploymentMember(ctx context.Context, arg InsertRuleDeploymentMemberParams) error {
+	_, err := q.db.Exec(ctx, insertRuleDeploymentMember,
+		arg.TenantID,
+		arg.DeploymentID,
+		arg.NodeID,
+		arg.BootID,
+		arg.TransactionID,
+		arg.ArtifactDigest,
+		arg.FencingGeneration,
+	)
+	return err
+}
+
+const insertRuleReceipt = `-- name: InsertRuleReceipt :exec
+INSERT INTO rule_delivery_receipts(tenant_id,task_id,receipt_sha256,payload) VALUES($1,$2,$3,$4)
+`
+
+type InsertRuleReceiptParams struct {
+	TenantID      string
+	TaskID        string
+	ReceiptSha256 []byte
+	Payload       []byte
+}
+
+func (q *Queries) InsertRuleReceipt(ctx context.Context, arg InsertRuleReceiptParams) error {
+	_, err := q.db.Exec(ctx, insertRuleReceipt,
+		arg.TenantID,
+		arg.TaskID,
+		arg.ReceiptSha256,
+		arg.Payload,
+	)
+	return err
+}
+
 const insertRuleSegment = `-- name: InsertRuleSegment :exec
 INSERT INTO rule_segments(tenant_id,rule_id,revision,hop,from_group_id,to_group_id,direction,permit_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
 `
@@ -402,6 +567,101 @@ func (q *Queries) InsertRuleTarget(ctx context.Context, arg InsertRuleTargetPara
 	return err
 }
 
+const leaseRuleDelivery = `-- name: LeaseRuleDelivery :one
+UPDATE tasks SET state='leased',lease_token=$1,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE id=(SELECT t.id FROM tasks t JOIN rule_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN outbox o ON o.tenant_id=t.tenant_id AND o.operation_id=t.operation_id WHERE t.state='pending' AND o.delivered_at IS NULL ORDER BY o.id FOR UPDATE OF t SKIP LOCKED LIMIT 1) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+`
+
+func (q *Queries) LeaseRuleDelivery(ctx context.Context, leaseToken pgtype.Text) (Task, error) {
+	row := q.db.QueryRow(ctx, leaseRuleDelivery, leaseToken)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.OperationID,
+		&i.State,
+		&i.LeaseToken,
+		&i.LeaseUntil,
+		&i.Attempts,
+		&i.TaskKind,
+	)
+	return i, err
+}
+
+const listCommittedRuleArtifacts = `-- name: ListCommittedRuleArtifacts :many
+SELECT a.tenant_id, a.rule_id, a.rule_revision, a.node_id, a.input_digest, a.digest, a.canonical, a.billing_snapshot_id, a.signer_epoch, a.path_generation, a.fencing_generation, a.created_at FROM rule_artifacts a JOIN rule_artifact_commits c ON c.tenant_id=a.tenant_id AND c.digest=a.digest WHERE a.tenant_id=$1 AND a.rule_id=$2 AND a.rule_revision=$3 AND a.input_digest=$4 ORDER BY a.node_id
+`
+
+type ListCommittedRuleArtifactsParams struct {
+	TenantID     string
+	RuleID       string
+	RuleRevision int64
+	InputDigest  string
+}
+
+func (q *Queries) ListCommittedRuleArtifacts(ctx context.Context, arg ListCommittedRuleArtifactsParams) ([]RuleArtifact, error) {
+	rows, err := q.db.Query(ctx, listCommittedRuleArtifacts,
+		arg.TenantID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.InputDigest,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RuleArtifact{}
+	for rows.Next() {
+		var i RuleArtifact
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.RuleID,
+			&i.RuleRevision,
+			&i.NodeID,
+			&i.InputDigest,
+			&i.Digest,
+			&i.Canonical,
+			&i.BillingSnapshotID,
+			&i.SignerEpoch,
+			&i.PathGeneration,
+			&i.FencingGeneration,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const lockRuleDeployment = `-- name: LockRuleDeployment :one
+SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE tenant_id=$1 AND id=$2 FOR UPDATE
+`
+
+type LockRuleDeploymentParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) LockRuleDeployment(ctx context.Context, arg LockRuleDeploymentParams) (RuleDeployment, error) {
+	row := q.db.QueryRow(ctx, lockRuleDeployment, arg.TenantID, arg.ID)
+	var i RuleDeployment
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.State,
+		&i.Deadline,
+		&i.RollbackRevision,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
 const lockRuleHead = `-- name: LockRuleHead :one
 SELECT tenant_id, id, desired_revision, active_revision, sync_status FROM rule_heads WHERE tenant_id=$1 AND id=$2 FOR UPDATE
 `
@@ -422,6 +682,220 @@ func (q *Queries) LockRuleHead(ctx context.Context, arg LockRuleHeadParams) (Rul
 		&i.SyncStatus,
 	)
 	return i, err
+}
+
+const pendingRuleDelivery = `-- name: PendingRuleDelivery :one
+SELECT EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=$1 AND b.deployment_id=$2 AND b.node_id=$3 AND b.phase=$4 AND t.state IN ('pending','leased','running'))
+`
+
+type PendingRuleDeliveryParams struct {
+	TenantID     string
+	DeploymentID string
+	NodeID       string
+	Phase        string
+}
+
+func (q *Queries) PendingRuleDelivery(ctx context.Context, arg PendingRuleDeliveryParams) (bool, error) {
+	row := q.db.QueryRow(ctx, pendingRuleDelivery,
+		arg.TenantID,
+		arg.DeploymentID,
+		arg.NodeID,
+		arg.Phase,
+	)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const ruleDelivery = `-- name: RuleDelivery :one
+SELECT b.tenant_id, b.task_id, b.deployment_id, b.node_id, b.phase,d.rule_id,d.rule_revision,d.input_digest,m.boot_id,m.transaction_id,m.artifact_digest,m.fencing_generation,m.state AS member_state,o.idempotency_key FROM rule_delivery_bindings b JOIN rule_deployments d ON d.tenant_id=b.tenant_id AND d.id=b.deployment_id JOIN rule_deployment_members m ON m.tenant_id=b.tenant_id AND m.deployment_id=b.deployment_id AND m.node_id=b.node_id JOIN operations o ON o.tenant_id=b.tenant_id AND o.id=b.task_id WHERE b.tenant_id=$1 AND b.task_id=$2
+`
+
+type RuleDeliveryParams struct {
+	TenantID string
+	TaskID   string
+}
+
+type RuleDeliveryRow struct {
+	TenantID          string
+	TaskID            string
+	DeploymentID      string
+	NodeID            string
+	Phase             string
+	RuleID            string
+	RuleRevision      int64
+	InputDigest       string
+	BootID            string
+	TransactionID     string
+	ArtifactDigest    string
+	FencingGeneration int64
+	MemberState       string
+	IdempotencyKey    string
+}
+
+func (q *Queries) RuleDelivery(ctx context.Context, arg RuleDeliveryParams) (RuleDeliveryRow, error) {
+	row := q.db.QueryRow(ctx, ruleDelivery, arg.TenantID, arg.TaskID)
+	var i RuleDeliveryRow
+	err := row.Scan(
+		&i.TenantID,
+		&i.TaskID,
+		&i.DeploymentID,
+		&i.NodeID,
+		&i.Phase,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.BootID,
+		&i.TransactionID,
+		&i.ArtifactDigest,
+		&i.FencingGeneration,
+		&i.MemberState,
+		&i.IdempotencyKey,
+	)
+	return i, err
+}
+
+const ruleDeploymentByInput = `-- name: RuleDeploymentByInput :one
+SELECT tenant_id, id, rule_id, rule_revision, input_digest, state, deadline, rollback_revision, created_by FROM rule_deployments WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND input_digest=$4
+`
+
+type RuleDeploymentByInputParams struct {
+	TenantID     string
+	RuleID       string
+	RuleRevision int64
+	InputDigest  string
+}
+
+func (q *Queries) RuleDeploymentByInput(ctx context.Context, arg RuleDeploymentByInputParams) (RuleDeployment, error) {
+	row := q.db.QueryRow(ctx, ruleDeploymentByInput,
+		arg.TenantID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.InputDigest,
+	)
+	var i RuleDeployment
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.State,
+		&i.Deadline,
+		&i.RollbackRevision,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
+const ruleDeploymentMembers = `-- name: RuleDeploymentMembers :many
+SELECT tenant_id, deployment_id, node_id, boot_id, transaction_id, artifact_digest, fencing_generation, state FROM rule_deployment_members WHERE tenant_id=$1 AND deployment_id=$2 ORDER BY node_id FOR UPDATE
+`
+
+type RuleDeploymentMembersParams struct {
+	TenantID     string
+	DeploymentID string
+}
+
+func (q *Queries) RuleDeploymentMembers(ctx context.Context, arg RuleDeploymentMembersParams) ([]RuleDeploymentMember, error) {
+	rows, err := q.db.Query(ctx, ruleDeploymentMembers, arg.TenantID, arg.DeploymentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RuleDeploymentMember{}
+	for rows.Next() {
+		var i RuleDeploymentMember
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.DeploymentID,
+			&i.NodeID,
+			&i.BootID,
+			&i.TransactionID,
+			&i.ArtifactDigest,
+			&i.FencingGeneration,
+			&i.State,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setRuleDeploymentState = `-- name: SetRuleDeploymentState :exec
+UPDATE rule_deployments SET state=$3 WHERE tenant_id=$1 AND id=$2
+`
+
+type SetRuleDeploymentStateParams struct {
+	TenantID string
+	ID       string
+	State    string
+}
+
+func (q *Queries) SetRuleDeploymentState(ctx context.Context, arg SetRuleDeploymentStateParams) error {
+	_, err := q.db.Exec(ctx, setRuleDeploymentState, arg.TenantID, arg.ID, arg.State)
+	return err
+}
+
+const setRuleMemberState = `-- name: SetRuleMemberState :exec
+UPDATE rule_deployment_members SET state=$4 WHERE tenant_id=$1 AND deployment_id=$2 AND node_id=$3
+`
+
+type SetRuleMemberStateParams struct {
+	TenantID     string
+	DeploymentID string
+	NodeID       string
+	State        string
+}
+
+func (q *Queries) SetRuleMemberState(ctx context.Context, arg SetRuleMemberStateParams) error {
+	_, err := q.db.Exec(ctx, setRuleMemberState,
+		arg.TenantID,
+		arg.DeploymentID,
+		arg.NodeID,
+		arg.State,
+	)
+	return err
+}
+
+const setRuleRollbackRevision = `-- name: SetRuleRollbackRevision :exec
+UPDATE rule_deployments SET rollback_revision=$3 WHERE tenant_id=$1 AND id=$2
+`
+
+type SetRuleRollbackRevisionParams struct {
+	TenantID         string
+	ID               string
+	RollbackRevision int64
+}
+
+func (q *Queries) SetRuleRollbackRevision(ctx context.Context, arg SetRuleRollbackRevisionParams) error {
+	_, err := q.db.Exec(ctx, setRuleRollbackRevision, arg.TenantID, arg.ID, arg.RollbackRevision)
+	return err
+}
+
+const setRuleSync = `-- name: SetRuleSync :exec
+UPDATE rule_heads SET sync_status=$4,active_revision=CASE WHEN $4::text='running' THEN $3 ELSE active_revision END WHERE tenant_id=$1 AND id=$2 AND desired_revision=$3
+`
+
+type SetRuleSyncParams struct {
+	TenantID       string
+	ID             string
+	ActiveRevision int64
+	SyncStatus     string
+}
+
+func (q *Queries) SetRuleSync(ctx context.Context, arg SetRuleSyncParams) error {
+	_, err := q.db.Exec(ctx, setRuleSync,
+		arg.TenantID,
+		arg.ID,
+		arg.ActiveRevision,
+		arg.SyncStatus,
+	)
+	return err
 }
 
 const supersedePendingRuleCompiles = `-- name: SupersedePendingRuleCompiles :exec

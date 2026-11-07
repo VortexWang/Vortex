@@ -48,6 +48,18 @@ func (s *Store) ObserveActivation(ctx context.Context, id string, generation uin
 		target = state
 	case "active":
 		target = "active"
+		var phased int
+		if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master WHERE type='table' AND name='rule_config_scopes'`).Scan(&phased); err != nil {
+			return err
+		}
+		if phased > 0 {
+			if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM rule_config_scopes WHERE transaction_id=?`, id).Scan(&phased); err != nil {
+				return err
+			}
+		}
+		if phased > 0 {
+			break
+		}
 		// Never regress an already applied version using a delayed observation.
 		var current string
 		readErr := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='applied_version'`).Scan(&current)

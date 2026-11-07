@@ -4,7 +4,7 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.3.0. Approval is bound by the exact governance record.
+// CONTRACT 1.4.0. Approval is bound by the exact governance record.
 // Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
 
 service NodeControl {
@@ -26,6 +26,7 @@ message NodeMessage {
     LifecycleHello lifecycle_hello = 16;
     NodeReport node_report = 17;
     RenewalRequest renewal_request = 18;
+    RuleReceipt rule_receipt = 19;
   }
 }
 
@@ -41,6 +42,7 @@ message ControlMessage {
     HubStatus hub_status = 15;
     RenewalResult renewal_result = 16;
     CredentialRevocations credential_revocations = 17;
+    RuleCommand rule_command = 18;
   }
 }
 
@@ -59,6 +61,7 @@ message ControlError {
 message Heartbeat {
   uint64 applied_config_version = 1;
   string observed_at = 2;
+  repeated string capabilities = 3; // additive 1.4: rule-two-phase-v1
 }
 
 message UsageBatch {
@@ -111,6 +114,33 @@ message RuntimeConfigUpdate {
   uint64 fencing_generation = 4;
   bytes payload_sha256 = 5;
   uint64 expected_version = 6;
+}
+
+// RuleCommand is an additive, explicitly phased control path. Older 1.3
+// readers never receive this oneof; they continue to use RuntimeConfigUpdate.
+message RuleCommand {
+  string phase = 1; // prepare, commit, query, abort
+  bytes transaction_id = 2;
+  string task_key = 3;
+  uint64 target_revision = 4;
+  string idempotency_key = 5;
+  bytes artifact_sha256 = 6;
+  uint64 fencing_generation = 7;
+  bytes payload = 8;
+  uint64 expected_version = 9;
+}
+
+message RuleReceipt {
+  string phase = 1;
+  bytes transaction_id = 2;
+  string task_key = 3;
+  uint64 target_revision = 4;
+  string idempotency_key = 5;
+  bytes artifact_sha256 = 6;
+  uint64 fencing_generation = 7;
+  string state = 8; // prepared, active, aborted, unknown
+  string error_code = 9;
+  bytes payload = 10;
 }
 
 message AuthorizationUpdate { uint64 generation = 1; bytes payload = 2; }

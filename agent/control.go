@@ -198,6 +198,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{
 			AppliedConfigVersion: appliedVersion,
 			ObservedAt:           time.Now().UTC().Format(time.RFC3339Nano),
+			Capabilities:         []string{"rule-two-phase-v1"},
 		}},
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
@@ -442,6 +443,22 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_RuleCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: rule two-phase capability requires backend direct control")
+				}
+				if c.Reconciler == nil {
+					return fmt.Errorf("agent: rule reconciler unavailable")
+				}
+				result := c.Reconciler.ApplyRuleCommand(ctx, c.Node.NodeID, body.RuleCommand)
+				sequence, err := c.Node.Store.NextControlSequence(ctx)
+				if err != nil {
+					return err
+				}
+				if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RuleReceipt{RuleReceipt: result}}); err != nil {
+					return err
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_AuthorizationUpdate:
 				issuer, ok := issuerIdentity.Load().(string)
 				if !ok || issuer == "" {
@@ -799,6 +816,13 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 		return err
 	}
 	for _, record := range prepared {
+		phased, err := c.Node.Store.IsPhasedConfig(ctx, record.TransactionID)
+		if err != nil {
+			return err
+		}
+		if phased {
+			continue
+		}
 		err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
 		if errors.Is(err, ErrActivationPending) {
 			continue

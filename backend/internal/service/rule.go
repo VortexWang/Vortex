@@ -187,6 +187,9 @@ func resolveRule(ctx context.Context, q *generated.Queries, scope TenantScope, i
 }
 
 func (s RuleService) Mutate(ctx context.Context, scope TenantScope, in RuleInput, expected int64, request string) (RuleMutation, error) {
+	return s.mutate(ctx, scope, in, expected, request, 0)
+}
+func (s RuleService) mutate(ctx context.Context, scope TenantScope, in RuleInput, expected int64, request string, rollbackOf int64) (RuleMutation, error) {
 	var result RuleMutation
 	in, e := compiler.NormalizeRule(in)
 	if e != nil {
@@ -196,6 +199,16 @@ func (s RuleService) Mutate(ctx context.Context, scope TenantScope, in RuleInput
 		return result, ErrRuleRevisionConflict
 	}
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.revise", ResourceID: in.ID, RequestID: request, Reason: "append immutable expected revision"}, func(q *generated.Queries) error {
+		var err error
+		result, err = appendRuleRevision(ctx, q, scope, in, expected, rollbackOf)
+		return err
+	})
+	return result, e
+}
+
+func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantScope, in RuleInput, expected, rollbackOf int64) (RuleMutation, error) {
+	var result RuleMutation
+	err := func() error {
 		if e := activeTenant(ctx, q, scope); e != nil {
 			return e
 		}
@@ -230,7 +243,7 @@ func (s RuleService) Mutate(ctx context.Context, scope TenantScope, in RuleInput
 			return e
 		}
 		digest := sha256.Sum256(body)
-		result.Revision, e = q.AppendRuleRevision(ctx, generated.AppendRuleRevisionParams{TenantID: scope.TenantID(), RuleID: in.ID, Revision: expected + 1, Payload: body, PayloadSha256: digest[:], CreatedBy: scope.ActorID(), ChangeClass: class})
+		result.Revision, e = q.AppendRuleRevision(ctx, generated.AppendRuleRevisionParams{TenantID: scope.TenantID(), RuleID: in.ID, Revision: expected + 1, Payload: body, PayloadSha256: digest[:], CreatedBy: scope.ActorID(), ChangeClass: class, RollbackOf: rollbackOf})
 		if e != nil {
 			return e
 		}
@@ -275,9 +288,9 @@ func (s RuleService) Mutate(ctx context.Context, scope TenantScope, in RuleInput
 		result.OperationID = op.ID
 		result.ChangeClass = class
 		return nil
-	})
-	if e != nil {
-		return RuleMutation{}, e
+	}()
+	if err != nil {
+		return RuleMutation{}, err
 	}
 	return result, nil
 }

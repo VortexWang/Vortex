@@ -37,6 +37,7 @@ type NodeMessage struct {
 	//	*NodeMessage_LifecycleHello
 	//	*NodeMessage_NodeReport
 	//	*NodeMessage_RenewalRequest
+	//	*NodeMessage_RuleReceipt
 	Body          isNodeMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -181,6 +182,15 @@ func (x *NodeMessage) GetRenewalRequest() *RenewalRequest {
 	return nil
 }
 
+func (x *NodeMessage) GetRuleReceipt() *RuleReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_RuleReceipt); ok {
+			return x.RuleReceipt
+		}
+	}
+	return nil
+}
+
 type isNodeMessage_Body interface {
 	isNodeMessage_Body()
 }
@@ -221,6 +231,10 @@ type NodeMessage_RenewalRequest struct {
 	RenewalRequest *RenewalRequest `protobuf:"bytes,18,opt,name=renewal_request,json=renewalRequest,proto3,oneof"`
 }
 
+type NodeMessage_RuleReceipt struct {
+	RuleReceipt *RuleReceipt `protobuf:"bytes,19,opt,name=rule_receipt,json=ruleReceipt,proto3,oneof"`
+}
+
 func (*NodeMessage_Heartbeat) isNodeMessage_Body() {}
 
 func (*NodeMessage_UsageBatch) isNodeMessage_Body() {}
@@ -239,6 +253,8 @@ func (*NodeMessage_NodeReport) isNodeMessage_Body() {}
 
 func (*NodeMessage_RenewalRequest) isNodeMessage_Body() {}
 
+func (*NodeMessage_RuleReceipt) isNodeMessage_Body() {}
+
 type ControlMessage struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	MessageId string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
@@ -253,6 +269,7 @@ type ControlMessage struct {
 	//	*ControlMessage_HubStatus
 	//	*ControlMessage_RenewalResult
 	//	*ControlMessage_CredentialRevocations
+	//	*ControlMessage_RuleCommand
 	Body          isControlMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -381,6 +398,15 @@ func (x *ControlMessage) GetCredentialRevocations() *CredentialRevocations {
 	return nil
 }
 
+func (x *ControlMessage) GetRuleCommand() *RuleCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_RuleCommand); ok {
+			return x.RuleCommand
+		}
+	}
+	return nil
+}
+
 type isControlMessage_Body interface {
 	isControlMessage_Body()
 }
@@ -417,6 +443,10 @@ type ControlMessage_CredentialRevocations struct {
 	CredentialRevocations *CredentialRevocations `protobuf:"bytes,17,opt,name=credential_revocations,json=credentialRevocations,proto3,oneof"`
 }
 
+type ControlMessage_RuleCommand struct {
+	RuleCommand *RuleCommand `protobuf:"bytes,18,opt,name=rule_command,json=ruleCommand,proto3,oneof"`
+}
+
 func (*ControlMessage_ConfigUpdate) isControlMessage_Body() {}
 
 func (*ControlMessage_UsageAck) isControlMessage_Body() {}
@@ -432,6 +462,8 @@ func (*ControlMessage_HubStatus) isControlMessage_Body() {}
 func (*ControlMessage_RenewalResult) isControlMessage_Body() {}
 
 func (*ControlMessage_CredentialRevocations) isControlMessage_Body() {}
+
+func (*ControlMessage_RuleCommand) isControlMessage_Body() {}
 
 type RegisterRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -557,6 +589,7 @@ type Heartbeat struct {
 	state                protoimpl.MessageState `protogen:"open.v1"`
 	AppliedConfigVersion uint64                 `protobuf:"varint,1,opt,name=applied_config_version,json=appliedConfigVersion,proto3" json:"applied_config_version,omitempty"`
 	ObservedAt           string                 `protobuf:"bytes,2,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Capabilities         []string               `protobuf:"bytes,3,rep,name=capabilities,proto3" json:"capabilities,omitempty"` // additive 1.4: rule-two-phase-v1
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -603,6 +636,13 @@ func (x *Heartbeat) GetObservedAt() string {
 		return x.ObservedAt
 	}
 	return ""
+}
+
+func (x *Heartbeat) GetCapabilities() []string {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
 }
 
 type UsageBatch struct {
@@ -1165,6 +1205,232 @@ func (x *RuntimeConfigUpdate) GetExpectedVersion() uint64 {
 	return 0
 }
 
+// RuleCommand is an additive, explicitly phased control path. Older 1.3
+// readers never receive this oneof; they continue to use RuntimeConfigUpdate.
+type RuleCommand struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // prepare, commit, query, abort
+	TransactionId     []byte                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	TaskKey           string                 `protobuf:"bytes,3,opt,name=task_key,json=taskKey,proto3" json:"task_key,omitempty"`
+	TargetRevision    uint64                 `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	IdempotencyKey    string                 `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	ArtifactSha256    []byte                 `protobuf:"bytes,6,opt,name=artifact_sha256,json=artifactSha256,proto3" json:"artifact_sha256,omitempty"`
+	FencingGeneration uint64                 `protobuf:"varint,7,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
+	Payload           []byte                 `protobuf:"bytes,8,opt,name=payload,proto3" json:"payload,omitempty"`
+	ExpectedVersion   uint64                 `protobuf:"varint,9,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RuleCommand) Reset() {
+	*x = RuleCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleCommand) ProtoMessage() {}
+
+func (x *RuleCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleCommand.ProtoReflect.Descriptor instead.
+func (*RuleCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RuleCommand) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetTransactionId() []byte {
+	if x != nil {
+		return x.TransactionId
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetTaskKey() string {
+	if x != nil {
+		return x.TaskKey
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetTargetRevision() uint64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RuleCommand) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetArtifactSha256() []byte {
+	if x != nil {
+		return x.ArtifactSha256
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetFencingGeneration() uint64 {
+	if x != nil {
+		return x.FencingGeneration
+	}
+	return 0
+}
+
+func (x *RuleCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetExpectedVersion() uint64 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+type RuleReceipt struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"`
+	TransactionId     []byte                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	TaskKey           string                 `protobuf:"bytes,3,opt,name=task_key,json=taskKey,proto3" json:"task_key,omitempty"`
+	TargetRevision    uint64                 `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	IdempotencyKey    string                 `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	ArtifactSha256    []byte                 `protobuf:"bytes,6,opt,name=artifact_sha256,json=artifactSha256,proto3" json:"artifact_sha256,omitempty"`
+	FencingGeneration uint64                 `protobuf:"varint,7,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
+	State             string                 `protobuf:"bytes,8,opt,name=state,proto3" json:"state,omitempty"` // prepared, active, aborted, unknown
+	ErrorCode         string                 `protobuf:"bytes,9,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	Payload           []byte                 `protobuf:"bytes,10,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RuleReceipt) Reset() {
+	*x = RuleReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleReceipt) ProtoMessage() {}
+
+func (x *RuleReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleReceipt.ProtoReflect.Descriptor instead.
+func (*RuleReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RuleReceipt) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetTransactionId() []byte {
+	if x != nil {
+		return x.TransactionId
+	}
+	return nil
+}
+
+func (x *RuleReceipt) GetTaskKey() string {
+	if x != nil {
+		return x.TaskKey
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetTargetRevision() uint64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RuleReceipt) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetArtifactSha256() []byte {
+	if x != nil {
+		return x.ArtifactSha256
+	}
+	return nil
+}
+
+func (x *RuleReceipt) GetFencingGeneration() uint64 {
+	if x != nil {
+		return x.FencingGeneration
+	}
+	return 0
+}
+
+func (x *RuleReceipt) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetErrorCode() string {
+	if x != nil {
+		return x.ErrorCode
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
 type AuthorizationUpdate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Generation    uint64                 `protobuf:"varint,1,opt,name=generation,proto3" json:"generation,omitempty"`
@@ -1175,7 +1441,7 @@ type AuthorizationUpdate struct {
 
 func (x *AuthorizationUpdate) Reset() {
 	*x = AuthorizationUpdate{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1187,7 +1453,7 @@ func (x *AuthorizationUpdate) String() string {
 func (*AuthorizationUpdate) ProtoMessage() {}
 
 func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1200,7 +1466,7 @@ func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizationUpdate.ProtoReflect.Descriptor instead.
 func (*AuthorizationUpdate) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{13}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AuthorizationUpdate) GetGeneration() uint64 {
@@ -1228,7 +1494,7 @@ type NodeEvent struct {
 
 func (x *NodeEvent) Reset() {
 	*x = NodeEvent{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1240,7 +1506,7 @@ func (x *NodeEvent) String() string {
 func (*NodeEvent) ProtoMessage() {}
 
 func (x *NodeEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1253,7 +1519,7 @@ func (x *NodeEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeEvent.ProtoReflect.Descriptor instead.
 func (*NodeEvent) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{14}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *NodeEvent) GetEventId() string {
@@ -1290,7 +1556,7 @@ type LifecycleHello struct {
 
 func (x *LifecycleHello) Reset() {
 	*x = LifecycleHello{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1302,7 +1568,7 @@ func (x *LifecycleHello) String() string {
 func (*LifecycleHello) ProtoMessage() {}
 
 func (x *LifecycleHello) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1315,7 +1581,7 @@ func (x *LifecycleHello) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LifecycleHello.ProtoReflect.Descriptor instead.
 func (*LifecycleHello) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LifecycleHello) GetControlVersion() string {
@@ -1360,7 +1626,7 @@ type ProbeObservation struct {
 
 func (x *ProbeObservation) Reset() {
 	*x = ProbeObservation{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1372,7 +1638,7 @@ func (x *ProbeObservation) String() string {
 func (*ProbeObservation) ProtoMessage() {}
 
 func (x *ProbeObservation) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1385,7 +1651,7 @@ func (x *ProbeObservation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProbeObservation.ProtoReflect.Descriptor instead.
 func (*ProbeObservation) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ProbeObservation) GetTargetId() string {
@@ -1445,7 +1711,7 @@ type NodeReport struct {
 
 func (x *NodeReport) Reset() {
 	*x = NodeReport{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1457,7 +1723,7 @@ func (x *NodeReport) String() string {
 func (*NodeReport) ProtoMessage() {}
 
 func (x *NodeReport) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1470,7 +1736,7 @@ func (x *NodeReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeReport.ProtoReflect.Descriptor instead.
 func (*NodeReport) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{17}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *NodeReport) GetReportId() string {
@@ -1544,7 +1810,7 @@ type HubStatus struct {
 
 func (x *HubStatus) Reset() {
 	*x = HubStatus{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1556,7 +1822,7 @@ func (x *HubStatus) String() string {
 func (*HubStatus) ProtoMessage() {}
 
 func (x *HubStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1569,7 +1835,7 @@ func (x *HubStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HubStatus.ProtoReflect.Descriptor instead.
 func (*HubStatus) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{18}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *HubStatus) GetHubId() string {
@@ -1692,7 +1958,7 @@ type RenewalRequest struct {
 
 func (x *RenewalRequest) Reset() {
 	*x = RenewalRequest{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1704,7 +1970,7 @@ func (x *RenewalRequest) String() string {
 func (*RenewalRequest) ProtoMessage() {}
 
 func (x *RenewalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1717,7 +1983,7 @@ func (x *RenewalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenewalRequest.ProtoReflect.Descriptor instead.
 func (*RenewalRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{19}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RenewalRequest) GetRequestId() string {
@@ -1831,7 +2097,7 @@ type RenewalResult struct {
 
 func (x *RenewalResult) Reset() {
 	*x = RenewalResult{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1843,7 +2109,7 @@ func (x *RenewalResult) String() string {
 func (*RenewalResult) ProtoMessage() {}
 
 func (x *RenewalResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1856,7 +2122,7 @@ func (x *RenewalResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenewalResult.ProtoReflect.Descriptor instead.
 func (*RenewalResult) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{20}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RenewalResult) GetRequestId() string {
@@ -1907,7 +2173,7 @@ type CredentialRevocations struct {
 
 func (x *CredentialRevocations) Reset() {
 	*x = CredentialRevocations{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1919,7 +2185,7 @@ func (x *CredentialRevocations) String() string {
 func (*CredentialRevocations) ProtoMessage() {}
 
 func (x *CredentialRevocations) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1932,7 +2198,7 @@ func (x *CredentialRevocations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialRevocations.ProtoReflect.Descriptor instead.
 func (*CredentialRevocations) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{21}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CredentialRevocations) GetIssuerId() string {
@@ -1987,7 +2253,7 @@ type HubMessage struct {
 
 func (x *HubMessage) Reset() {
 	*x = HubMessage{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1999,7 +2265,7 @@ func (x *HubMessage) String() string {
 func (*HubMessage) ProtoMessage() {}
 
 func (x *HubMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2012,7 +2278,7 @@ func (x *HubMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HubMessage.ProtoReflect.Descriptor instead.
 func (*HubMessage) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{22}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *HubMessage) GetHubId() string {
@@ -2105,7 +2371,7 @@ type LedgerRecord struct {
 
 func (x *LedgerRecord) Reset() {
 	*x = LedgerRecord{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2117,7 +2383,7 @@ func (x *LedgerRecord) String() string {
 func (*LedgerRecord) ProtoMessage() {}
 
 func (x *LedgerRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2130,7 +2396,7 @@ func (x *LedgerRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LedgerRecord.ProtoReflect.Descriptor instead.
 func (*LedgerRecord) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{23}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *LedgerRecord) GetRecordId() string {
@@ -2188,7 +2454,7 @@ type BackendMessage struct {
 
 func (x *BackendMessage) Reset() {
 	*x = BackendMessage{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2200,7 +2466,7 @@ func (x *BackendMessage) String() string {
 func (*BackendMessage) ProtoMessage() {}
 
 func (x *BackendMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2213,7 +2479,7 @@ func (x *BackendMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendMessage.ProtoReflect.Descriptor instead.
 func (*BackendMessage) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{24}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *BackendMessage) GetMessageId() string {
@@ -2362,7 +2628,7 @@ type BackendHeartbeat struct {
 
 func (x *BackendHeartbeat) Reset() {
 	*x = BackendHeartbeat{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2374,7 +2640,7 @@ func (x *BackendHeartbeat) String() string {
 func (*BackendHeartbeat) ProtoMessage() {}
 
 func (x *BackendHeartbeat) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2387,7 +2653,7 @@ func (x *BackendHeartbeat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendHeartbeat.ProtoReflect.Descriptor instead.
 func (*BackendHeartbeat) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{25}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *BackendHeartbeat) GetBackendId() string {
@@ -2457,7 +2723,7 @@ type BackendAllocation struct {
 
 func (x *BackendAllocation) Reset() {
 	*x = BackendAllocation{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2469,7 +2735,7 @@ func (x *BackendAllocation) String() string {
 func (*BackendAllocation) ProtoMessage() {}
 
 func (x *BackendAllocation) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2482,7 +2748,7 @@ func (x *BackendAllocation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendAllocation.ProtoReflect.Descriptor instead.
 func (*BackendAllocation) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{26}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *BackendAllocation) GetAllocationId() string {
@@ -2518,7 +2784,7 @@ type LedgerAcknowledgement struct {
 
 func (x *LedgerAcknowledgement) Reset() {
 	*x = LedgerAcknowledgement{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2530,7 +2796,7 @@ func (x *LedgerAcknowledgement) String() string {
 func (*LedgerAcknowledgement) ProtoMessage() {}
 
 func (x *LedgerAcknowledgement) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2543,7 +2809,7 @@ func (x *LedgerAcknowledgement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LedgerAcknowledgement.ProtoReflect.Descriptor instead.
 func (*LedgerAcknowledgement) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{27}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *LedgerAcknowledgement) GetRecordId() string {
@@ -2586,7 +2852,7 @@ type DelegationRestriction struct {
 
 func (x *DelegationRestriction) Reset() {
 	*x = DelegationRestriction{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2598,7 +2864,7 @@ func (x *DelegationRestriction) String() string {
 func (*DelegationRestriction) ProtoMessage() {}
 
 func (x *DelegationRestriction) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2611,7 +2877,7 @@ func (x *DelegationRestriction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DelegationRestriction.ProtoReflect.Descriptor instead.
 func (*DelegationRestriction) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{28}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *DelegationRestriction) GetDelegationId() string {
@@ -2657,7 +2923,7 @@ type AuthorityRestrictions struct {
 
 func (x *AuthorityRestrictions) Reset() {
 	*x = AuthorityRestrictions{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2669,7 +2935,7 @@ func (x *AuthorityRestrictions) String() string {
 func (*AuthorityRestrictions) ProtoMessage() {}
 
 func (x *AuthorityRestrictions) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2682,7 +2948,7 @@ func (x *AuthorityRestrictions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorityRestrictions.ProtoReflect.Descriptor instead.
 func (*AuthorityRestrictions) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{29}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *AuthorityRestrictions) GetRestrictionId() string {
@@ -2748,7 +3014,7 @@ type EpochHandoffRequest struct {
 
 func (x *EpochHandoffRequest) Reset() {
 	*x = EpochHandoffRequest{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2760,7 +3026,7 @@ func (x *EpochHandoffRequest) String() string {
 func (*EpochHandoffRequest) ProtoMessage() {}
 
 func (x *EpochHandoffRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2773,7 +3039,7 @@ func (x *EpochHandoffRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EpochHandoffRequest.ProtoReflect.Descriptor instead.
 func (*EpochHandoffRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{30}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *EpochHandoffRequest) GetHandoffId() string {
@@ -2822,7 +3088,7 @@ var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
-	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xd6\x05\n" +
+	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\x9b\x06\n" +
 	"\vNodeMessage\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x17\n" +
 	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
@@ -2838,8 +3104,9 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0flifecycle_hello\x18\x10 \x01(\v2!.vortex.control.v1.LifecycleHelloH\x00R\x0elifecycleHello\x12@\n" +
 	"\vnode_report\x18\x11 \x01(\v2\x1d.vortex.control.v1.NodeReportH\x00R\n" +
 	"nodeReport\x12L\n" +
-	"\x0frenewal_request\x18\x12 \x01(\v2!.vortex.control.v1.RenewalRequestH\x00R\x0erenewalRequestB\x06\n" +
-	"\x04body\"\xcb\x05\n" +
+	"\x0frenewal_request\x18\x12 \x01(\v2!.vortex.control.v1.RenewalRequestH\x00R\x0erenewalRequest\x12C\n" +
+	"\frule_receipt\x18\x13 \x01(\v2\x1e.vortex.control.v1.RuleReceiptH\x00R\vruleReceiptB\x06\n" +
+	"\x04body\"\x90\x06\n" +
 	"\x0eControlMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -2853,7 +3120,8 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
 	"hub_status\x18\x0f \x01(\v2\x1c.vortex.control.v1.HubStatusH\x00R\thubStatus\x12I\n" +
 	"\x0erenewal_result\x18\x10 \x01(\v2 .vortex.control.v1.RenewalResultH\x00R\rrenewalResult\x12a\n" +
-	"\x16credential_revocations\x18\x11 \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocationsB\x06\n" +
+	"\x16credential_revocations\x18\x11 \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocations\x12C\n" +
+	"\frule_command\x18\x12 \x01(\v2\x1e.vortex.control.v1.RuleCommandH\x00R\vruleCommandB\x06\n" +
 	"\x04body\"\x81\x01\n" +
 	"\x0fRegisterRequest\x12)\n" +
 	"\x10enrollment_token\x18\x01 \x01(\tR\x0fenrollmentToken\x12\x17\n" +
@@ -2863,11 +3131,12 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x02 \x01(\tR\tmessageId\x12\x1c\n" +
-	"\tretryable\x18\x03 \x01(\bR\tretryable\"b\n" +
+	"\tretryable\x18\x03 \x01(\bR\tretryable\"\x86\x01\n" +
 	"\tHeartbeat\x124\n" +
 	"\x16applied_config_version\x18\x01 \x01(\x04R\x14appliedConfigVersion\x12\x1f\n" +
 	"\vobserved_at\x18\x02 \x01(\tR\n" +
-	"observedAt\"\x8e\x01\n" +
+	"observedAt\x12\"\n" +
+	"\fcapabilities\x18\x03 \x03(\tR\fcapabilities\"\x8e\x01\n" +
 	"\n" +
 	"UsageBatch\x12\x19\n" +
 	"\bbatch_id\x18\x01 \x01(\tR\abatchId\x12.\n" +
@@ -2912,7 +3181,30 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0etransaction_id\x18\x03 \x01(\fR\rtransactionId\x12-\n" +
 	"\x12fencing_generation\x18\x04 \x01(\x04R\x11fencingGeneration\x12%\n" +
 	"\x0epayload_sha256\x18\x05 \x01(\fR\rpayloadSha256\x12)\n" +
-	"\x10expected_version\x18\x06 \x01(\x04R\x0fexpectedVersion\"O\n" +
+	"\x10expected_version\x18\x06 \x01(\x04R\x0fexpectedVersion\"\xd4\x02\n" +
+	"\vRuleCommand\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12%\n" +
+	"\x0etransaction_id\x18\x02 \x01(\fR\rtransactionId\x12\x19\n" +
+	"\btask_key\x18\x03 \x01(\tR\ataskKey\x12'\n" +
+	"\x0ftarget_revision\x18\x04 \x01(\x04R\x0etargetRevision\x12'\n" +
+	"\x0fidempotency_key\x18\x05 \x01(\tR\x0eidempotencyKey\x12'\n" +
+	"\x0fartifact_sha256\x18\x06 \x01(\fR\x0eartifactSha256\x12-\n" +
+	"\x12fencing_generation\x18\a \x01(\x04R\x11fencingGeneration\x12\x18\n" +
+	"\apayload\x18\b \x01(\fR\apayload\x12)\n" +
+	"\x10expected_version\x18\t \x01(\x04R\x0fexpectedVersion\"\xde\x02\n" +
+	"\vRuleReceipt\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12%\n" +
+	"\x0etransaction_id\x18\x02 \x01(\fR\rtransactionId\x12\x19\n" +
+	"\btask_key\x18\x03 \x01(\tR\ataskKey\x12'\n" +
+	"\x0ftarget_revision\x18\x04 \x01(\x04R\x0etargetRevision\x12'\n" +
+	"\x0fidempotency_key\x18\x05 \x01(\tR\x0eidempotencyKey\x12'\n" +
+	"\x0fartifact_sha256\x18\x06 \x01(\fR\x0eartifactSha256\x12-\n" +
+	"\x12fencing_generation\x18\a \x01(\x04R\x11fencingGeneration\x12\x14\n" +
+	"\x05state\x18\b \x01(\tR\x05state\x12\x1d\n" +
+	"\n" +
+	"error_code\x18\t \x01(\tR\terrorCode\x12\x18\n" +
+	"\apayload\x18\n" +
+	" \x01(\fR\apayload\"O\n" +
 	"\x13AuthorizationUpdate\x12\x1e\n" +
 	"\n" +
 	"generation\x18\x01 \x01(\x04R\n" +
@@ -3089,7 +3381,7 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
 	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
@@ -3104,67 +3396,71 @@ var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*ApplyResult)(nil),                 // 10: vortex.control.v1.ApplyResult
 	(*ObjectResult)(nil),                // 11: vortex.control.v1.ObjectResult
 	(*RuntimeConfigUpdate)(nil),         // 12: vortex.control.v1.RuntimeConfigUpdate
-	(*AuthorizationUpdate)(nil),         // 13: vortex.control.v1.AuthorizationUpdate
-	(*NodeEvent)(nil),                   // 14: vortex.control.v1.NodeEvent
-	(*LifecycleHello)(nil),              // 15: vortex.control.v1.LifecycleHello
-	(*ProbeObservation)(nil),            // 16: vortex.control.v1.ProbeObservation
-	(*NodeReport)(nil),                  // 17: vortex.control.v1.NodeReport
-	(*HubStatus)(nil),                   // 18: vortex.control.v1.HubStatus
-	(*RenewalRequest)(nil),              // 19: vortex.control.v1.RenewalRequest
-	(*RenewalResult)(nil),               // 20: vortex.control.v1.RenewalResult
-	(*CredentialRevocations)(nil),       // 21: vortex.control.v1.CredentialRevocations
-	(*HubMessage)(nil),                  // 22: vortex.control.v1.HubMessage
-	(*LedgerRecord)(nil),                // 23: vortex.control.v1.LedgerRecord
-	(*BackendMessage)(nil),              // 24: vortex.control.v1.BackendMessage
-	(*BackendHeartbeat)(nil),            // 25: vortex.control.v1.BackendHeartbeat
-	(*BackendAllocation)(nil),           // 26: vortex.control.v1.BackendAllocation
-	(*LedgerAcknowledgement)(nil),       // 27: vortex.control.v1.LedgerAcknowledgement
-	(*DelegationRestriction)(nil),       // 28: vortex.control.v1.DelegationRestriction
-	(*AuthorityRestrictions)(nil),       // 29: vortex.control.v1.AuthorityRestrictions
-	(*EpochHandoffRequest)(nil),         // 30: vortex.control.v1.EpochHandoffRequest
+	(*RuleCommand)(nil),                 // 13: vortex.control.v1.RuleCommand
+	(*RuleReceipt)(nil),                 // 14: vortex.control.v1.RuleReceipt
+	(*AuthorizationUpdate)(nil),         // 15: vortex.control.v1.AuthorizationUpdate
+	(*NodeEvent)(nil),                   // 16: vortex.control.v1.NodeEvent
+	(*LifecycleHello)(nil),              // 17: vortex.control.v1.LifecycleHello
+	(*ProbeObservation)(nil),            // 18: vortex.control.v1.ProbeObservation
+	(*NodeReport)(nil),                  // 19: vortex.control.v1.NodeReport
+	(*HubStatus)(nil),                   // 20: vortex.control.v1.HubStatus
+	(*RenewalRequest)(nil),              // 21: vortex.control.v1.RenewalRequest
+	(*RenewalResult)(nil),               // 22: vortex.control.v1.RenewalResult
+	(*CredentialRevocations)(nil),       // 23: vortex.control.v1.CredentialRevocations
+	(*HubMessage)(nil),                  // 24: vortex.control.v1.HubMessage
+	(*LedgerRecord)(nil),                // 25: vortex.control.v1.LedgerRecord
+	(*BackendMessage)(nil),              // 26: vortex.control.v1.BackendMessage
+	(*BackendHeartbeat)(nil),            // 27: vortex.control.v1.BackendHeartbeat
+	(*BackendAllocation)(nil),           // 28: vortex.control.v1.BackendAllocation
+	(*LedgerAcknowledgement)(nil),       // 29: vortex.control.v1.LedgerAcknowledgement
+	(*DelegationRestriction)(nil),       // 30: vortex.control.v1.DelegationRestriction
+	(*AuthorityRestrictions)(nil),       // 31: vortex.control.v1.AuthorityRestrictions
+	(*EpochHandoffRequest)(nil),         // 32: vortex.control.v1.EpochHandoffRequest
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
 	5,  // 1: vortex.control.v1.NodeMessage.usage_batch:type_name -> vortex.control.v1.UsageBatch
 	10, // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
-	14, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
+	16, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
 	2,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
 	8,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
-	15, // 6: vortex.control.v1.NodeMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
-	17, // 7: vortex.control.v1.NodeMessage.node_report:type_name -> vortex.control.v1.NodeReport
-	19, // 8: vortex.control.v1.NodeMessage.renewal_request:type_name -> vortex.control.v1.RenewalRequest
-	12, // 9: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
-	7,  // 10: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
-	13, // 11: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	3,  // 12: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
-	9,  // 13: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
-	18, // 14: vortex.control.v1.ControlMessage.hub_status:type_name -> vortex.control.v1.HubStatus
-	20, // 15: vortex.control.v1.ControlMessage.renewal_result:type_name -> vortex.control.v1.RenewalResult
-	21, // 16: vortex.control.v1.ControlMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
-	6,  // 17: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
-	11, // 18: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
-	16, // 19: vortex.control.v1.NodeReport.probes:type_name -> vortex.control.v1.ProbeObservation
-	13, // 20: vortex.control.v1.RenewalResult.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	15, // 21: vortex.control.v1.HubMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
-	18, // 22: vortex.control.v1.HubMessage.status:type_name -> vortex.control.v1.HubStatus
-	23, // 23: vortex.control.v1.HubMessage.ledger_record:type_name -> vortex.control.v1.LedgerRecord
-	25, // 24: vortex.control.v1.BackendMessage.heartbeat:type_name -> vortex.control.v1.BackendHeartbeat
-	26, // 25: vortex.control.v1.BackendMessage.allocation:type_name -> vortex.control.v1.BackendAllocation
-	21, // 26: vortex.control.v1.BackendMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
-	27, // 27: vortex.control.v1.BackendMessage.ledger_ack:type_name -> vortex.control.v1.LedgerAcknowledgement
-	3,  // 28: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
-	29, // 29: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
-	30, // 30: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
-	28, // 31: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
-	0,  // 32: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	22, // 33: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
-	1,  // 34: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	24, // 35: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
-	34, // [34:36] is the sub-list for method output_type
-	32, // [32:34] is the sub-list for method input_type
-	32, // [32:32] is the sub-list for extension type_name
-	32, // [32:32] is the sub-list for extension extendee
-	0,  // [0:32] is the sub-list for field type_name
+	17, // 6: vortex.control.v1.NodeMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	19, // 7: vortex.control.v1.NodeMessage.node_report:type_name -> vortex.control.v1.NodeReport
+	21, // 8: vortex.control.v1.NodeMessage.renewal_request:type_name -> vortex.control.v1.RenewalRequest
+	14, // 9: vortex.control.v1.NodeMessage.rule_receipt:type_name -> vortex.control.v1.RuleReceipt
+	12, // 10: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
+	7,  // 11: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
+	15, // 12: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	3,  // 13: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
+	9,  // 14: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
+	20, // 15: vortex.control.v1.ControlMessage.hub_status:type_name -> vortex.control.v1.HubStatus
+	22, // 16: vortex.control.v1.ControlMessage.renewal_result:type_name -> vortex.control.v1.RenewalResult
+	23, // 17: vortex.control.v1.ControlMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	13, // 18: vortex.control.v1.ControlMessage.rule_command:type_name -> vortex.control.v1.RuleCommand
+	6,  // 19: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
+	11, // 20: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
+	18, // 21: vortex.control.v1.NodeReport.probes:type_name -> vortex.control.v1.ProbeObservation
+	15, // 22: vortex.control.v1.RenewalResult.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	17, // 23: vortex.control.v1.HubMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	20, // 24: vortex.control.v1.HubMessage.status:type_name -> vortex.control.v1.HubStatus
+	25, // 25: vortex.control.v1.HubMessage.ledger_record:type_name -> vortex.control.v1.LedgerRecord
+	27, // 26: vortex.control.v1.BackendMessage.heartbeat:type_name -> vortex.control.v1.BackendHeartbeat
+	28, // 27: vortex.control.v1.BackendMessage.allocation:type_name -> vortex.control.v1.BackendAllocation
+	23, // 28: vortex.control.v1.BackendMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	29, // 29: vortex.control.v1.BackendMessage.ledger_ack:type_name -> vortex.control.v1.LedgerAcknowledgement
+	3,  // 30: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
+	31, // 31: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
+	32, // 32: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
+	30, // 33: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
+	0,  // 34: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	24, // 35: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
+	1,  // 36: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	26, // 37: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
+	36, // [36:38] is the sub-list for method output_type
+	34, // [34:36] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -3182,6 +3478,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*NodeMessage_LifecycleHello)(nil),
 		(*NodeMessage_NodeReport)(nil),
 		(*NodeMessage_RenewalRequest)(nil),
+		(*NodeMessage_RuleReceipt)(nil),
 	}
 	file_contracts_protobuf_v1_vortex_proto_msgTypes[1].OneofWrappers = []any{
 		(*ControlMessage_ConfigUpdate)(nil),
@@ -3192,13 +3489,14 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*ControlMessage_HubStatus)(nil),
 		(*ControlMessage_RenewalResult)(nil),
 		(*ControlMessage_CredentialRevocations)(nil),
+		(*ControlMessage_RuleCommand)(nil),
 	}
-	file_contracts_protobuf_v1_vortex_proto_msgTypes[22].OneofWrappers = []any{
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[24].OneofWrappers = []any{
 		(*HubMessage_LifecycleHello)(nil),
 		(*HubMessage_Status)(nil),
 		(*HubMessage_LedgerRecord)(nil),
 	}
-	file_contracts_protobuf_v1_vortex_proto_msgTypes[24].OneofWrappers = []any{
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[26].OneofWrappers = []any{
 		(*BackendMessage_Heartbeat)(nil),
 		(*BackendMessage_Allocation)(nil),
 		(*BackendMessage_CredentialRevocations)(nil),
@@ -3213,7 +3511,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   31,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

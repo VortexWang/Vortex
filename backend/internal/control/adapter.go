@@ -41,13 +41,49 @@ type request struct {
 	result chan outcome
 	ctx    context.Context
 }
+type ruleRequest struct {
+	command *controlv1.RuleCommand
+	boot    string
+	result  chan ruleOutcome
+	ctx     context.Context
+}
+type ruleOutcome struct {
+	receipt *controlv1.RuleReceipt
+	err     error
+}
 type outcome struct {
 	receipt service.Receipt
 	err     error
 }
 type session struct {
 	requests chan request
+	rules    chan ruleRequest
 	done     chan struct{}
+}
+
+func (a *Adapter) DeliverRule(ctx context.Context, node, boot string, c *controlv1.RuleCommand) (*controlv1.RuleReceipt, error) {
+	a.mu.Lock()
+	s := a.nodes[node]
+	a.mu.Unlock()
+	if s == nil {
+		return nil, errors.New("target disconnected")
+	}
+	r := ruleRequest{command: c, boot: boot, result: make(chan ruleOutcome, 1), ctx: ctx}
+	select {
+	case s.rules <- r:
+	case <-s.done:
+		return nil, errors.New("target disconnected")
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	select {
+	case out := <-r.result:
+		return out.receipt, out.err
+	case <-s.done:
+		return nil, errors.New("target disconnected")
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }
 
 // Adapter serves the existing NodeControl contract. Registry entries only
@@ -119,7 +155,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{requests: make(chan request), done: make(chan struct{})}
+	s := &session{requests: make(chan request), rules: make(chan ruleRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -157,22 +193,33 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	ruleCapable := false
+	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "rule-two-phase-v1" {
+			ruleCapable = true
+		}
+	}
 	var sequence uint64
 	var pending *request
+	var pendingRule *ruleRequest
 	for {
 		var pendingDone <-chan struct{}
 		if pending != nil {
 			pendingDone = pending.ctx.Done()
 		}
+		if pendingRule != nil {
+			pendingDone = pendingRule.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
+			pendingRule = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil {
+			if pending != nil || pendingRule != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -194,12 +241,46 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_ConfigUpdate{ConfigUpdate: update}}); err != nil {
 				return err
 			}
+		case r := <-s.rules:
+			if !ruleCapable {
+				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
+				continue
+			}
+			if pending != nil || pendingRule != nil {
+				r.result <- ruleOutcome{err: errors.New("target busy")}
+				continue
+			}
+			if r.boot != first.BootId {
+				r.result <- ruleOutcome{err: errors.New("node incarnation differs from pinned artifact")}
+				continue
+			}
+			if r.ctx.Err() != nil {
+				r.result <- ruleOutcome{err: r.ctx.Err()}
+				continue
+			}
+			pendingRule = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
+				return err
+			}
 		case message := <-incoming:
 			if message.NodeId != id || message.BootId != first.BootId || message.Sequence <= nodeSequence {
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
 			if message.GetHeartbeat() != nil {
+				continue
+			}
+			if receipt := message.GetRuleReceipt(); receipt != nil {
+				if pendingRule == nil {
+					continue
+				}
+				c := pendingRule.command
+				if receipt.Phase != c.Phase || receipt.TaskKey != c.TaskKey || receipt.IdempotencyKey != c.IdempotencyKey || receipt.TargetRevision != c.TargetRevision || receipt.FencingGeneration != c.FencingGeneration || !bytes.Equal(receipt.TransactionId, c.TransactionId) || !bytes.Equal(receipt.ArtifactSha256, c.ArtifactSha256) {
+					continue
+				}
+				pendingRule.result <- ruleOutcome{receipt: receipt}
+				pendingRule = nil
 				continue
 			}
 			result := message.GetApplyResult()

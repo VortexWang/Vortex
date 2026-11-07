@@ -11,8 +11,10 @@ import (
 	"sync"
 
 	"vortex/agent/store"
+	engineaccounting "vortex/engine/accounting"
 	"vortex/engine/apply"
 	"vortex/engine/runtime/config"
+	ruleruntime "vortex/engine/runtime/rule"
 )
 
 var ErrActivationPending = errors.New("agent: prepared configuration awaits boot-local authority")
@@ -22,10 +24,12 @@ var ErrActivationPending = errors.New("agent: prepared configuration awaits boot
 // supports one static destination. Unsupported changes are rejected explicitly.
 type RuntimeApplier struct {
 	EngineApplier
-	node     *Node
-	engine   *RuntimeEngine
-	mu       sync.Mutex
-	prepared map[[16]byte]bool
+	node             *Node
+	engine           *RuntimeEngine
+	mu               sync.Mutex
+	prepared         map[[16]byte]bool
+	rules            *ruleruntime.Manager
+	ruleTransactions map[[16]byte]ruleruntime.Artifact
 }
 
 func (n *Node) RuntimeApplier() (*RuntimeApplier, error) {
@@ -34,10 +38,20 @@ func (n *Node) RuntimeApplier() (*RuntimeApplier, error) {
 		return nil, fmt.Errorf("agent: runtime execution boundary unavailable")
 	}
 	e.activationRequired.Store(true)
-	return &RuntimeApplier{EngineApplier: EngineApplier{Manager: apply.NewManager()}, node: n, engine: e, prepared: map[[16]byte]bool{}}, nil
+	a := &RuntimeApplier{EngineApplier: EngineApplier{Manager: apply.NewManager()}, node: n, engine: e, prepared: map[[16]byte]bool{}, ruleTransactions: map[[16]byte]ruleruntime.Artifact{}}
+	a.rules = ruleruntime.New(func(artifact ruleruntime.Artifact) (engineaccounting.Gate, error) {
+		return &ruleAuthorityGate{node: n, scope: RuntimeScope{RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration)}, fence: uint64(artifact.FencingGeneration)}, nil
+	})
+	return a, nil
 }
 
 func (a *RuntimeApplier) Query(id [16]byte) (apply.Transaction, bool) {
+	a.mu.Lock()
+	_, phased := a.ruleTransactions[id]
+	a.mu.Unlock()
+	if phased {
+		return a.rules.Query(id)
+	}
 	result, ok := a.EngineApplier.Query(id)
 	if !ok {
 		return result, false
@@ -81,6 +95,22 @@ func (a *RuntimeApplier) Prepare(id [16]byte, generation uint64) (any, error) {
 func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	if artifact, ok := a.ruleTransactions[id]; ok {
+		low, high, trusted := a.node.TrustedTime()
+		if artifact.Intent.Rule.Enabled {
+			if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+				return nil, err
+			}
+		}
+		if unknown {
+			return nil, ErrActivationUnknown
+		}
+		if err := a.rules.Commit(id); err != nil {
+			return nil, err
+		}
+		tx, _ := a.rules.Query(id)
+		return tx, nil
+	}
 	tx, ok := a.EngineApplier.Query(id)
 	if !ok {
 		return nil, ErrConfigConflict
@@ -115,11 +145,59 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 // Stop proves shutdown using the actual runtime Done boundary, then disables
 // admission. It does not infer termination from a new boot ID or timeout.
 func (a *RuntimeApplier) Stop(ctx context.Context) error {
+	if a.rules != nil {
+		if err := a.rules.Stop(ctx); err != nil {
+			return err
+		}
+	}
 	if err := a.engine.Stop(ctx); err != nil {
 		return err
 	}
 	a.engine.activated.Store(false)
 	return nil
+}
+
+func (a *RuntimeApplier) ValidateRuleArtifact(raw []byte, node string, revision, generation uint64) error {
+	artifact, err := ruleruntime.Decode(raw)
+	if err != nil {
+		return err
+	}
+	if artifact.NodeID != node || artifact.BootID != a.node.BootID || uint64(artifact.RuleRevision) != revision || uint64(artifact.FencingGeneration) != generation {
+		return fmt.Errorf("identity_mismatch: artifact binding")
+	}
+	return nil
+}
+func (a *RuntimeApplier) PrepareRuleArtifact(id [16]byte, generation uint64, raw []byte) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	artifact, err := ruleruntime.Decode(raw)
+	if err != nil {
+		return err
+	}
+	if artifact.NodeID != a.node.NodeID || artifact.BootID != a.node.BootID || uint64(artifact.FencingGeneration) != generation {
+		return ErrConfigConflict
+	}
+	if artifact.Intent.Rule.Enabled {
+		low, high, trusted := a.node.TrustedTime()
+		if err = a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: generation, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+			return err
+		}
+	}
+	if err = a.rules.Prepare(id, artifact); err != nil {
+		return err
+	}
+	a.ruleTransactions[id] = artifact
+	return nil
+}
+func (a *RuntimeApplier) Abort(id [16]byte) (any, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if _, ok := a.ruleTransactions[id]; ok {
+		err := a.rules.Abort(id)
+		tx, _ := a.rules.Query(id)
+		return tx, err
+	}
+	return a.EngineApplier.Abort(id)
 }
 
 func (e *RuntimeEngine) matchesControlConfig(raw []byte) error {

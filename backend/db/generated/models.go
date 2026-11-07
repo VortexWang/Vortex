@@ -297,6 +297,21 @@ type RuleCompileRequest struct {
 	RuleRevision int64
 }
 
+type RuleDeliveryBinding struct {
+	TenantID     string
+	TaskID       string
+	DeploymentID string
+	NodeID       string
+	Phase        string
+}
+
+type RuleDeliveryReceipt struct {
+	TenantID      string
+	TaskID        string
+	ReceiptSha256 []byte
+	Payload       []byte
+}
+
 type RuleDependency struct {
 	TenantID       string
 	RuleID         string
@@ -304,6 +319,29 @@ type RuleDependency struct {
 	DependencyKind string
 	DependencyID   string
 	Version        string
+}
+
+type RuleDeployment struct {
+	TenantID         string
+	ID               string
+	RuleID           string
+	RuleRevision     int64
+	InputDigest      string
+	State            string
+	Deadline         pgtype.Timestamptz
+	RollbackRevision int64
+	CreatedBy        string
+}
+
+type RuleDeploymentMember struct {
+	TenantID          string
+	DeploymentID      string
+	NodeID            string
+	BootID            string
+	TransactionID     string
+	ArtifactDigest    string
+	FencingGeneration int64
+	State             string
 }
 
 type RuleHead struct {
