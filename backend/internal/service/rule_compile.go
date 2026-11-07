@@ -134,3 +134,30 @@ func (s RuleService) ConsumeCompile(ctx context.Context, scope TenantScope, task
 		return q.MarkDelivered(ctx, generated.MarkDeliveredParams{TenantID: scope.TenantID(), OperationID: task})
 	})
 }
+
+// RejectCompile records a known pre-delivery conflict. It never releases the
+// prior active artifact or resource holds and never handles uncertain execution.
+func (s RuleService) RejectCompile(ctx context.Context, scope TenantScope, task, request string) error {
+	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.compile.rejected", ResourceID: task, RequestID: request, Reason: "pinned compilation no longer matches current resources"}, func(q *generated.Queries) error {
+		b, err := lockCompileTask(ctx, q, scope, task)
+		if err != nil {
+			return err
+		}
+		if b.State == "failed" {
+			return nil
+		}
+		if b.State != "pending" || !b.InputDigest.Valid {
+			return ErrRuleRevisionConflict
+		}
+		if err = q.ReconcileTask(ctx, generated.ReconcileTaskParams{TenantID: scope.TenantID(), OperationID: task, State: "failed"}); err != nil {
+			return err
+		}
+		if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: scope.TenantID(), ID: task, State: "failed"}); err != nil {
+			return err
+		}
+		if err = q.SetRuleSync(ctx, generated.SetRuleSyncParams{TenantID: scope.TenantID(), ID: b.RuleID, ActiveRevision: b.RuleRevision, SyncStatus: "failed"}); err != nil {
+			return err
+		}
+		return q.MarkDelivered(ctx, generated.MarkDeliveredParams{TenantID: scope.TenantID(), OperationID: task})
+	})
+}

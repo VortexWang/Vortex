@@ -170,9 +170,15 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	go func() { failures <- server.Serve(nodes) }()
 	go func() { failures <- hubServer.Serve(hubs) }()
 	go func() { failures <- (&worker.Worker{Pool: pool, Adapter: adapter}).Run(ctx) }()
-	go func() { failures <- (worker.RuleWorker{Pool: pool, Adapter: adapter}).Run(ctx) }()
-	go func() { failures <- (worker.RuleCompileWorker{Pool: pool}).Run(ctx) }()
-	go func() { failures <- (worker.PortWorker{Pool: pool, Adapter: adapter}).Run(ctx) }()
+	go func() {
+		failures <- fmt.Errorf("rule delivery worker: %w", (worker.RuleWorker{Pool: pool, Adapter: adapter}).Run(ctx))
+	}()
+	go func() {
+		failures <- fmt.Errorf("rule compile worker: %w", (worker.RuleCompileWorker{Pool: pool}).Run(ctx))
+	}()
+	go func() {
+		failures <- fmt.Errorf("port release worker: %w", (worker.PortWorker{Pool: pool, Adapter: adapter}).Run(ctx))
+	}()
 	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
 	select {
 	case <-parent.Done():

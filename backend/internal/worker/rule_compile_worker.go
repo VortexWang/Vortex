@@ -24,7 +24,14 @@ func (w RuleCompileWorker) Once(ctx context.Context) (bool, error) {
 			return false, e
 		}
 		e = (service.RuleService{Pool: w.Pool}).ConsumeCompile(ctx, scope, b.TaskID, uuid.NewString())
+		if errors.Is(e, service.ErrConflict) {
+			// A stale fixed resource binding is a business task failure, not a
+			// reason to terminate every backend listener and unrelated worker.
+			e = (service.RuleService{Pool: w.Pool}).RejectCompile(ctx, scope, b.TaskID, uuid.NewString())
+		}
 		if errors.Is(e, service.ErrRuleRevisionConflict) {
+			// Another consumer or a newer desired revision may have won while
+			// the failed compilation transaction was being rolled back.
 			continue
 		}
 		return true, e
