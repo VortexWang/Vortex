@@ -1,5 +1,25 @@
 # 06-04 执行证据：运行验证通过，契约待批准
 
+最新安全修复验证源为 `a9275d8660d5041cb9d7d4b7ab4e22c3095624ec`，同名目录
+保存独立 clean clone 的完整新一轮证据。以下 d7e83d76 内容保留为前轮历史，
+不能拿来证明 a9275d86 已验证。CR-006 规范候选字节和哈希保持原值。
+
+复核发现：到期前节点 offline 或授权被撤销时，原 appendRuleRevision 的
+激活 resolve 会使整笔到期事务回滚，固定队首租户也会阻塞其他租户。
+`expiry-authority-red.json` 保留真实 PostgreSQL 两种失败及 RED 分类证据。
+修复仅允许输入严格等于已存修订且 Enabled=false 的停止修订复用已存
+segments/dependencies，仍持久化编译任务，不伪造 active、在线或停止确认。
+其他 disabled 修改仍完整校验当前权限与节点。测试同时证明到期限制、来源
+到期、七天保留、unknown occupation 和其他租户的生命周期正常推进。
+
+新源本机 backend 全包普通/race 通过（service 13.965s / 19.098s）；clean
+Linux Docker backend 全包普通/race 通过（8.998s / 15.116s）；完整
+Agent/Engine/contracts 普通/race、sqlc 两次独立生成、amd64/arm64 Linux
+编译、真实 Cloudflare CRUD（4.74s）和 host manifest 均通过。
+删除新到期测试的反例被 manifest 拒绝，pending-owner 配对仍拒绝。
+新 `result.json` 保持 result=0、source_clean=true、acceptance_complete=false。
+仍无本轮 Actions 配对，也无契约批准或 completed SUMMARY/STATE 推进。
+
 当前运行源：`d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523`。
 该源通过独立 clean clone 执行（before/after status 均为空），不是把主工作区
 未提交内容作为已验证源码。后续仅提交本证据和 checkpoint，不混称新的源码提交

@@ -6,6 +6,30 @@
 **Progress:** 3/3 implementation tasks and runtime verification finished; plan acceptance pending
 **Status:** awaiting-owner-contract-approval
 
+## Latest Safety Verification Addendum
+
+最新测试源为 `a9275d8660d5041cb9d7d4b7ab4e22c3095624ec`。下文 d7e83d76
+表格保留为前轮历史；本轮新证据位于
+`artifacts/phase6/06-04/a9275d8660d5041cb9d7d4b7ab4e22c3095624ec/`。
+
+父代理要求的实库负例已证实并修复：节点 offline / grant revoked 会使原先
+到期的 disabled revision 激活校验失败，回滚到期限制/来源到期/保留时钟，
+并阻塞其他租户。RED `e81835b8` 保存真实失败；GREEN `a9275d86` 仅允许
+严格相同既有修订的 Enabled=false 转换复用已存依赖，停止意图不再依赖
+在线或仍持有激活授权。修改其他字段仍完整 resolve，实际执行保持 pending。
+
+新增 `TestPackageLifecycleExpiryIndependentOfNodeAuthority` 验证两种失效、
+到期权威、来源到期、七天保留、unknown occupation、其他租户推进、依赖
+来源一致、无虚构 active，及 disabled 改目标不能绕过当前权限。
+本机全backend普通/race通过 13.965s/19.098s；独立 clean clone Docker
+全backend普通/race通过8.998s/15.116s；完整组件普通/race、sqlc两生成、
+Linux双架构编译、真实Cloudflare CRUD4.74s与host manifest通过。
+删新增测试的反例被门禁拒绝。源clone始终clean。
+
+CR-006 全部规范字节和精确 JSON 哈希保持不变。result=0、
+acceptance_complete=false，入口仅在待批准freeze gate最终exit1；未推进
+SUMMARY/STATE。旧失败与旧成功证据均保留，未冒充为新源结果。
+
 ## Completed Tasks
 
 | Task | Name | Commits | Key files |
