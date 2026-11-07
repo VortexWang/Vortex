@@ -4,18 +4,18 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 10
+current_plan: 03
 status: executing
-stopped_at: Completed 06-02-PLAN.md; next dependency plan 06-10
-last_updated: "2026-11-07T00:53:00Z"
+stopped_at: Completed 06-10-PLAN.md; next dependency plan 06-03
+last_updated: "2026-11-07T03:04:00Z"
 last_activity: 2026-11-07
-last_activity_desc: "06-02 complete in service/task/proof scope: source b71daf7d passes clean Docker full normal/race and dependencies; NOD-012/PRT-004 remain pending; next 06-10."
+last_activity_desc: "06-10 complete: source de6f14d6 passes clean Docker full normal/race and real Cloudflare CRUD; next 06-03. Final same-SHA Actions pairing remains pending."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
-  completed_plans: 46
-state_head: d4869a86
+  completed_plans: 47
+state_head: 6660002e
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 10
+Current Plan: 03
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08, 06-09 and 06-02 complete (4/11). Next dependency-ordered plan is 06-10; final Phase 6 acceptance remains pending.
-Last activity: 2026-11-07 — source b71daf7d passed clean local Linux arm64 Docker full normal/race (82 PASS lines combined, zero skips/race warnings), dependency/license/sqlc/OpenAPI and migration checks. Evidence f25c39aa and summary d4869a86 are committed. NOD-012/PRT-004 remain pending for compiler and real Agent port consumers in 06-03/07. No new-source Actions/paired result is claimed; 06-11 must pair its final source. Caller Phase 4/5 work is unchanged.
+Status: Executing — 06-01, 06-08, 06-09, 06-02 and 06-10 complete (5/11). Next dependency-ordered plan is 06-03; final Phase 6 acceptance remains pending.
+Last activity: 2026-11-07 — source de6f14d6 passed clean local Linux arm64 Docker full normal/race (122 PASS lines, zero skips/race warnings), dependency/license/sqlc/OpenAPI and real Cloudflare create/read/update/delete with TTL60, DNS-only, encrypted storage and exact-name cleanup. Evidence 6660002e is committed. NOD-012/PRT-004 remain pending for compiler and real Agent port consumers in 06-03/07. No new-source Actions/paired result is claimed; 06-11 must pair its final source. Caller Phase 4/5 work is unchanged.
 
-Progress: Phase 6 [████░░░░░░░] 4/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [█████░░░░░░] 5/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -68,10 +68,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | Phase 06 P08 | 254min wall including approval checkpoints | 2 tasks | 195 changed files including source/governance/planning and raw evidence |
 | Phase 06 P09 | at least 30min wall since first task commit, including authentication continuation | 2 tasks | 157 changed files before summary/state metadata, including raw evidence |
 | Phase 06 P02 | 32min | 2 tasks | 63 files before summary/state metadata, including raw evidence |
+| Phase 06 P10 | 124min multi-session | 2 tasks | 107 files before summary/state metadata, including raw evidence |
 
 ## Accumulated Context
 
 ### Decisions
+
+- 06-10 binds one immutable normalized entry domain to its owner/group and verified zone. Platform DNS aggregates every active tenant's committed rules; live per-member health is outside the configuration digest. Appended 00004 entry domains; future rules/packages/ledger/shares/events references are 00005..00009. Real Cloudflare CRUD passed on clean source de6f14d6; reviewed policy metadata remains an explicit deployment attestation, not independent live-policy introspection. No token was uploaded to GitHub; final Actions pairing remains 06-11. SDK state handler still rejects historical passed_with_scope, so Phase 6 state alone was synchronized manually.
 
 - 06-02 preserves platform ownership and uses typed domain tasks plus node-CA/boot/generation/task/lease/revision-bound proofs. NOD-012 and PRT-004 remain pending for compiler and real Agent task consumers in 06-03/07. DNS CRUD remains 06-10; final same-SHA Actions pairing remains 06-11. SDK state writes rejected historical Phase 5 passed_with_scope, so only current Phase 6 position/metrics/session were synchronized manually without changing that historical verification.
 
@@ -125,8 +128,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-07T00:53:00Z
-Stopped at: Completed 06-02-PLAN.md; next dependency plan 06-10
+Last session: 2026-11-07T03:04:00Z
+Stopped at: Completed 06-10-PLAN.md; next dependency plan 06-03
 Resume file: None
 
 ### Historical qualification review (not a main-workflow gate)

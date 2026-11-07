@@ -57,11 +57,11 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **PRT-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (359-359; SHA-256 recorded there).
 - [x] **PRT-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (360-360; SHA-256 recorded there).
 - [x] **PRT-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (361-361; SHA-256 recorded there).
-- [ ] **PRT-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (367-367; SHA-256 recorded there).
-- [ ] **PRT-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (368-368; SHA-256 recorded there).
-- [ ] **PRT-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (369-369; SHA-256 recorded there).
-- [ ] **PRT-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (370-370; SHA-256 recorded there).
-- [ ] **PRT-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (371-371; SHA-256 recorded there).
+- [x] **PRT-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (367-367; SHA-256 recorded there).
+- [x] **PRT-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (368-368; SHA-256 recorded there).
+- [x] **PRT-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (369-369; SHA-256 recorded there).
+- [x] **PRT-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (370-370; SHA-256 recorded there).
+- [x] **PRT-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (371-371; SHA-256 recorded there).
 
 ## RUL Requirements
 
@@ -390,11 +390,11 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | PRT-008 | Phase 6 | Complete |
 | PRT-009 | Phase 6 | Complete |
 | PRT-010 | Phase 6 | Complete |
-| PRT-011 | Phase 6 | Pending |
-| PRT-012 | Phase 6 | Pending |
-| PRT-013 | Phase 6 | Pending |
-| PRT-014 | Phase 6 | Pending |
-| PRT-015 | Phase 6 | Pending |
+| PRT-011 | Phase 6 | Complete |
+| PRT-012 | Phase 6 | Complete |
+| PRT-013 | Phase 6 | Complete |
+| PRT-014 | Phase 6 | Complete |
+| PRT-015 | Phase 6 | Complete |
 | RUL-001 | Phase 6 | Pending |
 | RUL-002 | Phase 6 | Pending |
 | RUL-003 | Phase 6 | Pending |
