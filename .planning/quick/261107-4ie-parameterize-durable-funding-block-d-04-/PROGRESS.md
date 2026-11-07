@@ -91,3 +91,9 @@ Extended full-factorial auditor to compare every per-flow directional amount aga
 ## Independent workload metric audit
 
 All27completed64KiB dynamic trials passed raw accounting and exact consumption formula audit. Scanner then entered256KiB factorial10. Added independent recomputation of TCP Mbps from received bytes/measured duration, UDP loss from unique sequence counts, UDP payload rate/byte counts and short-flow median from exactly50samples+5warmups. All28currently downloaded trials pass; negative tests reject altered metrics and missing samples. All37Python tests pass. Full81trial review remains pending.
+
+## Partial center-profile comparison — not a lock
+
+At45audited dynamic trials (no failures),256KiB/30s center-profile groups13..15 each have3completed repeats. Waterline20% TCPmedian622.969059Mbps,grants36/36/36;30% median636.861133Mbps,grants42/42/41;50% median638.836332Mbps,grants58/59/58. Peak held bytes span122449216..123212458,120663368..120797504,117514676..127483728 respectively. Final available issuer credit is nonzero and retained:20%143908328/286269320/212983272;30%420863464/410115560/224208392;50%362808168/376432456/461889000. These are workload-sensitive measurements, not statistical significance or proof of idle issuer return. The modest30→50throughput difference alone does not justify increased issuance calls. Full matrix and delayed response results remain required before selection; provisional formal queue can be adjusted before it starts if final review selects another profile.
+
+Final documentation audit must also update canonical04-06-D04-REVIEW.md,04-06-QUALIFICATION-MATRIX.md and04-11-EVIDENCE.md listed by04-11-PLAN.md, in addition to04-44,04-CLOSURE,04-VERIFICATION,04-43,ROADMAP,STATE and quickSUMMARY. Preserve historical SHA/results, explicitly supersede current claims and retain Phase5/6 handoff boundaries.
