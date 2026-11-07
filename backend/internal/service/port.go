@@ -130,6 +130,7 @@ func (s PortService) PreparePortReservation(ctx context.Context, scope TenantSco
 		if e != nil || ip.String() != in.ListenAddress {
 			return PortPreparation{}, ErrConflict
 		}
+		in.ListenAddress = ip.Unmap().String()
 	}
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.prepare", ResourceID: in.RuleID, RequestID: request, Reason: "reserve whole fixed member set"}, func(q *generated.Queries) error {
 		if e := activeTenant(ctx, q, scope); e != nil {

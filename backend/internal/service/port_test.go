@@ -399,6 +399,16 @@ func TestPortConcurrentWildcardConflict(t *testing.T) {
 	if succeeded != 1 {
 		t.Fatal("physical wildcard reservation not serialized", succeeded)
 	}
+	mapped := f.request(t, 20003)
+	mapped.ListenAddress = "::ffff:192.0.2.1"
+	if _, e := f.ports.PreparePortReservation(context.Background(), f.scope, mapped, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	specific := f.request(t, 20003)
+	specific.ListenAddress = "192.0.2.1"
+	if _, e := f.ports.PreparePortReservation(context.Background(), f.scope, specific, uuid.NewString()); e == nil {
+		t.Fatal("IPv4-mapped IPv6 alias bypassed conflict")
+	}
 }
 
 func TestPortProofAuthenticationAndGenerationFence(t *testing.T) {
