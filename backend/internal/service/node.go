@@ -39,7 +39,8 @@ type MemberSnapshot struct {
 	Members                   []generated.GroupMembersRow
 }
 
-func validID(s string) bool { _, err := uuid.Parse(s); return err == nil }
+func validID(s string) bool      { _, err := uuid.Parse(s); return err == nil }
+func auditJSON(value any) []byte { raw, _ := json.Marshal(value); return raw }
 func owns(scope TenantScope, kind string, tenant pgtype.Text) bool {
 	return (kind == "platform" && scope.Platform()) || (kind == "tenant" && tenant.Valid && tenant.String == scope.TenantID())
 }
@@ -56,33 +57,37 @@ func ownership(scope TenantScope, kind string) (pgtype.Text, error) {
 	return pgtype.Text{}, ErrScope
 }
 func domainTask(ctx context.Context, q *generated.Queries, scope TenantScope, resource, action, kind string, version int64) error {
+	_, err := newDomainTask(ctx, q, scope, resource, action, kind, version)
+	return err
+}
+
+// Domain events get their own desired-state identity. They must never overwrite
+// a node's RuntimeConfig or become eligible for restriction-resume delivery.
+func newDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope, resource, action, kind string, version int64) (generated.Operation, error) {
+	zero := generated.Operation{}
 	body, err := json.Marshal(struct {
 		Action   string `json:"action"`
 		Resource string `json:"resource_id"`
 		Version  int64  `json:"version"`
 	}{action, resource, version})
 	if err != nil {
-		return err
-	}
-	revision := int64(1)
-	old, err := q.GetDesiredState(ctx, generated.GetDesiredStateParams{TenantID: scope.TenantID(), ResourceID: resource})
-	if err == nil {
-		revision = old.Revision + 1
-	} else if !errors.Is(err, pgx.ErrNoRows) {
-		return err
-	}
-	digest := sha256.Sum256(body)
-	if _, err = q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: scope.TenantID(), ResourceID: resource, TargetKind: "node", Revision: revision, ExpectedRevision: revision - 1, Payload: body, PayloadSha256: digest[:]}); err != nil {
-		return err
+		return zero, err
 	}
 	id := uuid.NewString()
-	if _, err = q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: scope.TenantID(), ResourceID: resource, IdempotencyKey: id, RequestSha256: digest[:], TargetKind: "node", TargetRevision: revision, ExpectedRevision: revision - 1, Generation: version, Payload: body}); err != nil {
-		return err
+	revision := int64(1)
+	digest := sha256.Sum256(body)
+	if _, err = q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: scope.TenantID(), ResourceID: id, TargetKind: "node", Revision: revision, ExpectedRevision: revision - 1, Payload: body, PayloadSha256: digest[:]}); err != nil {
+		return zero, err
+	}
+	op, err := q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: scope.TenantID(), ResourceID: id, IdempotencyKey: id, RequestSha256: digest[:], TargetKind: "node", TargetRevision: revision, ExpectedRevision: revision - 1, Generation: version, Payload: body})
+	if err != nil {
+		return zero, err
 	}
 	if err = q.InsertDomainTask(ctx, generated.InsertDomainTaskParams{ID: id, TenantID: scope.TenantID(), OperationID: id, TaskKind: kind}); err != nil {
-		return err
+		return zero, err
 	}
-	return q.InsertOutbox(ctx, generated.InsertOutboxParams{TenantID: scope.TenantID(), OperationID: id})
+	err = q.InsertOutbox(ctx, generated.InsertOutboxParams{TenantID: scope.TenantID(), OperationID: id})
+	return op, err
 }
 
 func (s NodeService) CreateNode(ctx context.Context, scope TenantScope, in NodeInput, request string) (generated.Node, error) {
@@ -94,7 +99,7 @@ func (s NodeService) CreateNode(ctx context.Context, scope TenantScope, in NodeI
 	if !validID(in.ID) || !validID(in.HubID) {
 		return result, ErrConflict
 	}
-	event := repository.Audit{Action: "node.create", ResourceID: in.ID, RequestID: request, Reason: "create owned node"}
+	event := repository.Audit{Action: "node.create", ResourceID: in.ID, RequestID: request, Reason: "create owned node", After: auditJSON(map[string]any{"owner_kind": in.OwnerKind, "lifecycle": "pending", "version": 1})}
 	err = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &event, func(q *generated.Queries) error {
 		if err := q.CreateOwnedResource(ctx, generated.CreateOwnedResourceParams{ResourceID: in.ID, ResourceKind: "node", OwnerKind: in.OwnerKind, OwnerTenantID: tenant}); err != nil {
 			return err
@@ -171,6 +176,9 @@ func (s NodeService) SetMembers(ctx context.Context, scope TenantScope, group st
 		if err != nil {
 			return err
 		}
+		if err = q.MarkGroupPortRevalidation(ctx, group); err != nil {
+			return err
+		}
 		return domainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
 	})
 }
@@ -209,7 +217,8 @@ func (s NodeService) Snapshot(ctx context.Context, scope TenantScope, group, req
 }
 
 func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, state string, expected int64, drainSeconds int, request string) error {
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "node.lifecycle", ResourceID: node, RequestID: request, Reason: "node lifecycle transition"}, func(q *generated.Queries) error {
+	event := repository.Audit{Action: "node.lifecycle", ResourceID: node, RequestID: request, Reason: "node lifecycle transition"}
+	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &event, func(q *generated.Queries) error {
 		n, err := q.ScopedNode(ctx, generated.ScopedNodeParams{NodeID: node, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
 		if err != nil {
 			return err
@@ -220,6 +229,8 @@ func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, st
 		if n.Version != expected {
 			return ErrConflict
 		}
+		event.Before = auditJSON(map[string]any{"lifecycle": n.Lifecycle, "version": n.Version})
+		event.After = auditJSON(map[string]any{"lifecycle": state, "version": n.Version + 1})
 		valid := map[string][]string{"pending": {"online", "offline", "disabled"}, "online": {"draining", "offline"}, "offline": {"online", "draining", "disabled"}, "draining": {"offline", "disabled"}, "disabled": {"pending"}}
 		allowed := false
 		for _, v := range valid[n.Lifecycle] {
@@ -241,6 +252,13 @@ func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, st
 			deadline = timestamp(time.Now().Add(time.Duration(drainSeconds) * time.Second))
 		}
 		if state == "disabled" {
+			occupied, e := q.CountNodePortOccupation(ctx, node)
+			if e != nil {
+				return e
+			}
+			if occupied > 0 {
+				return ErrConflict
+			}
 			deps, e := q.NodeImpact(ctx, node)
 			if e != nil {
 				return e
@@ -288,6 +306,13 @@ func (s NodeService) DeleteNode(ctx context.Context, scope TenantScope, node str
 		deps, e := q.CountNodeDependencies(ctx, node)
 		if e != nil {
 			return e
+		}
+		occupied, e := q.CountNodePortOccupation(ctx, node)
+		if e != nil {
+			return e
+		}
+		if occupied > 0 {
+			return ErrConflict
 		}
 		if deps != 0 || n.Version != expected || n.Lifecycle != "disabled" {
 			return ErrConflict

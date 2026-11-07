@@ -171,6 +171,52 @@ type PlatformPrincipal struct {
 	State string
 }
 
+type PortAllocation struct {
+	ID                string
+	TenantID          string
+	RuleID            string
+	GroupID           string
+	MemberSetVersion  string
+	Port              int32
+	ListenAddress     string
+	Protocols         []string
+	Purpose           string
+	State             string
+	FirstEffectiveAt  pgtype.Timestamptz
+	RetainedUntil     pgtype.Timestamptz
+	NeedsRevalidation bool
+	Version           int64
+}
+
+type PortReservation struct {
+	TenantID        string
+	AllocationID    string
+	NodeID          string
+	Protocol        string
+	Port            int32
+	ListenAddress   string
+	BootID          string
+	Generation      int64
+	PrepareTaskID   string
+	ReleaseTaskID   pgtype.Text
+	ConfigConfirmed bool
+	State           string
+}
+
+type ReleaseProof struct {
+	TenantID        string
+	AllocationID    string
+	NodeID          string
+	TaskID          string
+	BootID          string
+	Revision        int64
+	Generation      int64
+	ProofKind       string
+	ReceiptSha256   []byte
+	PeerFingerprint []byte
+	CreatedAt       pgtype.Timestamptz
+}
+
 type ResourceGrant struct {
 	ID         string
 	TenantID   string

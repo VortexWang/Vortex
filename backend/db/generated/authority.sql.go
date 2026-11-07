@@ -418,7 +418,7 @@ func (q *Queries) LockOperation(ctx context.Context, arg LockOperationParams) (O
 }
 
 const lockTask = `-- name: LockTask :one
-SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE
+SELECT id,tenant_id,operation_id,state,lease_token,lease_until,attempts FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE
 `
 
 type LockTaskParams struct {
@@ -426,9 +426,19 @@ type LockTaskParams struct {
 	OperationID string
 }
 
-func (q *Queries) LockTask(ctx context.Context, arg LockTaskParams) (Task, error) {
+type LockTaskRow struct {
+	ID          string
+	TenantID    string
+	OperationID string
+	State       string
+	LeaseToken  pgtype.Text
+	LeaseUntil  pgtype.Timestamptz
+	Attempts    int32
+}
+
+func (q *Queries) LockTask(ctx context.Context, arg LockTaskParams) (LockTaskRow, error) {
 	row := q.db.QueryRow(ctx, lockTask, arg.TenantID, arg.OperationID)
-	var i Task
+	var i LockTaskRow
 	err := row.Scan(
 		&i.ID,
 		&i.TenantID,
@@ -437,7 +447,6 @@ func (q *Queries) LockTask(ctx context.Context, arg LockTaskParams) (Task, error
 		&i.LeaseToken,
 		&i.LeaseUntil,
 		&i.Attempts,
-		&i.TaskKind,
 	)
 	return i, err
 }

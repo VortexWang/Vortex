@@ -2,7 +2,7 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
-through=06-09
+through=06-02
 expected=${PHASE6_EXPECTED_SHA:-${GITHUB_SHA:-}}
 evidence=${PHASE6_EVIDENCE_DIR:-}
 host=
@@ -23,7 +23,7 @@ through,sha,evidence,host=sys.argv[1:]
 def require(ok,message):
     if not ok: raise SystemExit('manifest failed: '+message)
 order=['06-01','06-08','06-09','06-02','06-10','06-03','06-04','06-05','06-06','06-07','06-11']
-require(through in order[:3], 'producer not implemented for '+through)
+require(through in order[:4], 'producer not implemented for '+through)
 require(host in ('','docker','actions'), 'invalid host')
 rows=re.findall(r'^\| ([A-Z][A-Z0-9-]+) \| (06-\d\d) \|',pathlib.Path('docs/coverage/phase6/COVERAGE.md').read_text(),re.M)
 require(len(rows)==96 and len(dict(rows))==96, 'full 96-item ownership register required')
@@ -35,7 +35,7 @@ for plan in order:
         planned[req]=plan
 require(dict(rows)==planned, 'ownership differs from plan frontmatter')
 required=['commit.txt','openapi.log','dependencies.log','tracer.log','runner.log','source-status-before.txt','source-status-after.txt','source-identity.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','build-metadata.txt','processes.json']
-tests={'06-01':['TestTracerDesiredStateReceipt','TestTracerRealProcesses'], '06-08':['TestTenantRestrictionsIndependentAndImmutable','TestTenantAuditRollbackSharedAuthority','TestMigrationUpgradeTenantAuthority'], '06-09':['TestRestrictionAllCauses','TestRestrictionAuditRollback']}
+tests={'06-01':['TestTracerDesiredStateReceipt','TestTracerRealProcesses'], '06-08':['TestTenantRestrictionsIndependentAndImmutable','TestTenantAuditRollbackSharedAuthority','TestMigrationUpgradeTenantAuthority'], '06-09':['TestRestrictionAllCauses','TestRestrictionAuditRollback'], '06-02':['TestNodeGroupOwnershipAndStableMembers','TestNodeGrantValidityHistoryAndAudit','TestNodeLifecycleDrainDeleteAndAuditRollback','TestNodeSegmentPermitIndependentOfGrants','TestPortAtomicFixedMembersAndServing','TestPortPlatformCrossTenantPhysicalConflict','TestPortNoCommonPortAndMemberChanges','TestPortConcurrentWildcardConflict','TestPortProofAuthenticationAndGenerationFence','TestPortRestrictionClockAndProofBackedRelease','TestPortRetentionClearReapplyAndManualHold','TestPortAuditRollbackAndForeignAllocation','TestPortRestrictionAuditRollbackSameTransaction','TestReleaseOldBootAndDisconnectRetainOccupation']}
 for producer in ([host] if host else ['docker','actions']):
     folder=pathlib.Path(evidence)/producer
     require((folder/'result.json').is_file(), producer+' result.json missing')

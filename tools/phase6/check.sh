@@ -3,7 +3,7 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 cd "$root"
-through=06-09
+through=06-02
 expected=${GITHUB_SHA:-}
 produce=
 evidence=${PHASE6_EVIDENCE_DIR:-}
@@ -23,7 +23,7 @@ export PHASE6_EXPECTED_SHA="$expected"
 export GOTOOLCHAIN=local
 test "$(go env GOVERSION)" = go1.27.3
 # Never silently claim future implementations from the current test suite.
-case "$through" in 06-01|06-08|06-09) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
+case "$through" in 06-01|06-08|06-09|06-02) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
 evidence=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$evidence")
 case "$evidence" in "$root"|"$root"/*) echo 'evidence must be outside source checkout' >&2; exit 1;; esac

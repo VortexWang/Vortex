@@ -7,6 +7,34 @@ servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/tenants/{tenant_id}/port-reservations:
+    parameters:
+      - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
+    post:
+      operationId: preparePortReservation
+      x-vortex-implementation-plan: 06-07
+      description: Fixed member-set prepare; all matching node confirmations are required before commit. Reallocation after release warns that the entry address may change.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PortReservationRequest'}
+      responses:
+        '202':
+          description: Reserved desired allocation; node execution remains pending.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PortAllocationSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409':
+          description: Stale member set, unavailable port or no common port; safe common alternative may be returned as a field error.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/tenants/{tenant_id}/nodes/{node_id}:
     parameters:
       - {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -179,6 +207,27 @@ components:
           type: array
           items: {$ref: '#/components/schemas/Restriction'}
         next_cursor: {type: [string, 'null'], maxLength: 512}
+    PortReservationRequest:
+      type: object
+      additionalProperties: false
+      required: [rule_id, group_id, member_set_version, listen_address, protocols]
+      properties:
+        rule_id: {type: string, format: uuid}
+        group_id: {type: string, format: uuid}
+        member_set_version: {type: string, pattern: '^[a-f0-9]{64}$'}
+        listen_address: {type: string, maxLength: 45}
+        port: {type: integer, minimum: 0, maximum: 65535, default: 0}
+        protocols: {type: array, minItems: 1, maxItems: 2, uniqueItems: true, items: {type: string, enum: [tcp, udp]}}
+    PortAllocationSummary:
+      type: object
+      additionalProperties: false
+      required: [id, port, state, member_set_version, entry_address_may_change]
+      properties:
+        id: {type: string, format: uuid}
+        port: {type: integer, minimum: 1, maximum: 65535}
+        state: {type: string, enum: [preparing, committed, aborting, retained, releasing, released, aborted, unknown]}
+        member_set_version: {type: string, pattern: '^[a-f0-9]{64}$'}
+        entry_address_may_change: {type: boolean}
     NodeSummary:
       type: object
       additionalProperties: false

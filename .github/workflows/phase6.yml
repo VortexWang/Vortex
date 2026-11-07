@@ -22,7 +22,7 @@ jobs:
       - name: Produce real Linux backend evidence
         env:
           GOTOOLCHAIN: local
-        run: ./tools/phase6/check.sh --through-plan 06-09 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"
+        run: ./tools/phase6/check.sh --through-plan 06-02 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"
       - name: Retain result including failures
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

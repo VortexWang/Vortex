@@ -66,7 +66,7 @@ SELECT id,tenant_id,resource_id,target_revision,state,occupation_held FROM opera
 INSERT INTO control_observations(hub_id,session_id,payload) VALUES($1,$2,$3);
 
 -- name: LockTask :one
-SELECT * FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE;
+SELECT id,tenant_id,operation_id,state,lease_token,lease_until,attempts FROM tasks WHERE tenant_id=$1 AND operation_id=$2 FOR UPDATE;
 
 -- name: ReconcileTask :exec
 UPDATE tasks SET state=$3,lease_until=NULL WHERE tenant_id=$1 AND operation_id=$2;

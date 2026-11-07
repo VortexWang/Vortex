@@ -137,7 +137,13 @@ func (s TenantService) ChangeRestriction(ctx context.Context, scope TenantScope,
 		if count != 1 {
 			return ErrConflict
 		}
+		if kind == "applied" {
+			return restrictTenantPorts(ctx, q, scope)
+		}
 		if kind == "cleared" && tenant.AccountState == "active" {
+			if err = clearTenantPortClocks(ctx, q, scope); err != nil {
+				return err
+			}
 			return resumeAuthorizedResources(ctx, q, scope.TenantID(), id)
 		}
 		return nil

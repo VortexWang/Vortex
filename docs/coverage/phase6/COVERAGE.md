@@ -3,16 +3,16 @@
 All 96 Phase 6 requirements have an explicit primary plan owner below. Ownership
 is not acceptance: TEN-002 still requires later domain resource ownership checks.
 Through-plan order is 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04, 06-05,
-06-06, 06-07, 06-11. The implemented producer currently supports through 06-09;
+06-06, 06-07, 06-11. The implemented producer currently supports through 06-02;
 later plans extend it with actual producers before their evidence becomes required.
-Future files are neither required by 06-09 nor replaced by fixture results.
+Future files are neither required by 06-02 nor replaced by fixture results.
 
 Run from a clean exact-commit clone (outputs must be outside the source tree):
 
 ```sh
-./tools/phase6/check.sh --through-plan 06-09 --expected-sha "$SHA" --produce docker --evidence-dir "$EVIDENCE"
+./tools/phase6/check.sh --through-plan 06-02 --expected-sha "$SHA" --produce docker --evidence-dir "$EVIDENCE"
 # GitHub Actions runs the same command with --produce actions and GITHUB_SHA.
-./tools/phase6/check.sh --through-plan 06-09 --expected-sha "$SHA" --evidence-dir "$EVIDENCE"
+./tools/phase6/check.sh --through-plan 06-02 --expected-sha "$SHA" --evidence-dir "$EVIDENCE"
 ```
 
 The last command requires BOTH downloaded Actions and local Docker evidence;
@@ -29,31 +29,31 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | BE-001 | 06-01 | tracer.log | implemented scope; evidence required |
 | SUP-B2-001 | 06-01 | tracer.log | implemented scope; evidence required |
 | SUP-B5-001 | 06-01 | tracer.log | implemented scope; evidence required |
-| NOD-001 | 06-02 | pending producer in 06-02 | pending |
-| NOD-002 | 06-02 | pending producer in 06-02 | pending |
-| NOD-003 | 06-02 | pending producer in 06-02 | pending |
-| NOD-004 | 06-02 | pending producer in 06-02 | pending |
-| NOD-005 | 06-02 | pending producer in 06-02 | pending |
-| NOD-006 | 06-02 | pending producer in 06-02 | pending |
-| NOD-007 | 06-02 | pending producer in 06-02 | pending |
-| NOD-008 | 06-02 | pending producer in 06-02 | pending |
-| NOD-009 | 06-02 | pending producer in 06-02 | pending |
-| NOD-010 | 06-02 | pending producer in 06-02 | pending |
-| NOD-011 | 06-02 | pending producer in 06-02 | pending |
-| NOD-012 | 06-02 | pending producer in 06-02 | pending |
-| NOD-013 | 06-02 | pending producer in 06-02 | pending |
-| NOD-014 | 06-02 | pending producer in 06-02 | pending |
-| PRT-001 | 06-02 | pending producer in 06-02 | pending |
-| PRT-002 | 06-02 | pending producer in 06-02 | pending |
-| PRT-003 | 06-02 | pending producer in 06-02 | pending |
-| PRT-004 | 06-02 | pending producer in 06-02 | pending |
-| PRT-005 | 06-02 | pending producer in 06-02 | pending |
-| PRT-006 | 06-02 | pending producer in 06-02 | pending |
-| PRT-007 | 06-02 | pending producer in 06-02 | pending |
-| PRT-008 | 06-02 | pending producer in 06-02 | pending |
-| PRT-009 | 06-02 | pending producer in 06-02 | pending |
-| PRT-010 | 06-02 | pending producer in 06-02 | pending |
-| PRT-016 | 06-02 | pending producer in 06-02 | pending |
+| NOD-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-011 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-012 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-013 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| NOD-014 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
+| PRT-016 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
 | RUL-001 | 06-03 | pending producer in 06-03 | pending |
 | RUL-002 | 06-03 | pending producer in 06-03 | pending |
 | RUL-003 | 06-03 | pending producer in 06-03 | pending |

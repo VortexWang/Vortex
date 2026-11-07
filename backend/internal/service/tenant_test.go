@@ -336,11 +336,11 @@ func TestMigrationUpgradeTenantAuthority(t *testing.T) {
 					t.Fatal(e)
 				}
 			}
-			before := authoritySnapshot(t, pool, own.TenantID(), tables)
+			before := legacyAuthoritySnapshot(t, pool, own.TenantID(), tables)
 			if err = db.Migrate(ctx, u.String()); err != nil {
 				t.Fatal(err)
 			}
-			if !bytes.Equal(before, authoritySnapshot(t, pool, own.TenantID(), tables)) {
+			if !bytes.Equal(before, legacyAuthoritySnapshot(t, pool, own.TenantID(), tables)) {
 				t.Fatal("upgrade changed existing authoritative rows")
 			}
 			var present bool
@@ -349,6 +349,29 @@ func TestMigrationUpgradeTenantAuthority(t *testing.T) {
 			}
 		})
 	}
+}
+
+// New task routing metadata defaults to control. Compare every pre-existing
+// authority field across the upgrade, separately asserting the new default.
+func legacyAuthoritySnapshot(t *testing.T, pool *pgxpool.Pool, tenant string, tables []string) []byte {
+	t.Helper()
+	var snapshot map[string][]map[string]any
+	if e := json.Unmarshal(authoritySnapshot(t, pool, tenant, tables), &snapshot); e != nil {
+		t.Fatal(e)
+	}
+	for _, task := range snapshot["tasks"] {
+		if value, present := task["task_kind"]; present {
+			if value != "control" {
+				t.Fatal("legacy task routing changed")
+			}
+			delete(task, "task_kind")
+		}
+	}
+	result, e := json.Marshal(snapshot)
+	if e != nil {
+		t.Fatal(e)
+	}
+	return result
 }
 
 // Clearing restrictions reissues only the persisted desired state of resources
