@@ -24,15 +24,12 @@ func (s PackageService) ProduceBillingSnapshot(ctx context.Context, scope Tenant
 		return result, ErrConflict
 	}
 	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "package.billing_snapshot", ResourceID: rule, RequestID: request, Reason: "pin immutable package and ordered path policy"}, func(q *generated.Queries) error {
-		if e := activeTenant(ctx, q, scope); e != nil {
+		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
 		sub, e := q.LockSubscription(ctx, scope.TenantID())
 		if e != nil {
 			return e
-		}
-		if !time.Now().Before(sub.ExpiresAt.Time) {
-			return ErrConflict
 		}
 		snap, e := q.GetPackageSnapshot(ctx, generated.GetPackageSnapshotParams{TenantID: scope.TenantID(), ID: sub.SnapshotID})
 		if e != nil {
@@ -61,6 +58,9 @@ func (s PackageService) ProduceBillingSnapshot(ctx context.Context, scope Tenant
 			return compiler.Unauthorized
 		}
 		if in.Enabled {
+			if !time.Now().Before(sub.ExpiresAt.Time) {
+				return ErrConflict
+			}
 			if e = activeRule(ctx, q, scope, rule); e != nil {
 				return e
 			}

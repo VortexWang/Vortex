@@ -31,17 +31,29 @@ func TestRestrictionAllowsStopRevisionAndCompile(t *testing.T) {
 	reserveRulePort(t, f, r)
 	subscribePackage(t, f, createPackage(t, f, packageTerms()))
 	s := service.RuleService{Pool: f.pool}
-	if _, e := s.Mutate(ctx, f.scope, r, 0, uuid.NewString()); e != nil { t.Fatal(e) }
+	if _, e := s.Mutate(ctx, f.scope, r, 0, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
 	at := time.Now().Add(-time.Minute)
-	if e := (service.TenantService{Pool: f.pool}).ChangeRestriction(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Restrict), service.Restriction{Cause: "package_expired", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: at}, uuid.NewString()); e != nil { t.Fatal(e) }
+	if e := (service.TenantService{Pool: f.pool}).ChangeRestriction(ctx, policyScope(t, f.tenant, auth.PlatformAdmin, policy.Restrict), service.Restriction{Cause: "package_expired", SourceID: uuid.NewString(), SourceVersion: 1, EffectiveAt: at}, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
 	r.Enabled = false
 	stop, e := s.Mutate(ctx, f.scope, r, 1, uuid.NewString())
-	if e != nil { t.Fatal("restriction blocked a stop revision", e) }
+	if e != nil {
+		t.Fatal("restriction blocked a stop revision", e)
+	}
 	p := service.PackageService{Pool: f.pool}
-	if _, e = p.BindPackageCompile(ctx, f.scope, stop.OperationID, 2, 3, 4, uuid.NewString()); e != nil { t.Fatal("restriction blocked stop compilation", e) }
-	if e = s.ConsumeCompile(ctx, f.scope, stop.OperationID, uuid.NewString()); e != nil { t.Fatal("restriction blocked stop deployment", e) }
+	if _, e = p.BindPackageCompile(ctx, f.scope, stop.OperationID, 2, 3, 4, uuid.NewString()); e != nil {
+		t.Fatal("restriction blocked stop compilation", e)
+	}
+	if e = s.ConsumeCompile(ctx, f.scope, stop.OperationID, uuid.NewString()); e != nil {
+		t.Fatal("restriction blocked stop deployment", e)
+	}
 	r.Enabled = true
-	if _, e = s.Mutate(ctx, f.scope, r, 2, uuid.NewString()); e == nil { t.Fatal("restriction allowed activation") }
+	if _, e = s.Mutate(ctx, f.scope, r, 2, uuid.NewString()); e == nil {
+		t.Fatal("restriction allowed activation")
+	}
 }
 
 func TestRestrictionBlocksDispatchButPreservesLateObservation(t *testing.T) {

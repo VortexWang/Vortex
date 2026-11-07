@@ -51,9 +51,6 @@ func (s RuleOrchestrator) Begin(ctx context.Context, scope TenantScope, rule str
 }
 
 func beginRuleDeployment(ctx context.Context, q *generated.Queries, scope TenantScope, rule string, revision int64, input string) (generated.RuleDeployment, error) {
-	if e := activeTenant(ctx, q, scope); e != nil {
-		return generated.RuleDeployment{}, e
-	}
 	head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: rule})
 	if e != nil {
 		return generated.RuleDeployment{}, e

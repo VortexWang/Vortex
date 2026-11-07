@@ -94,6 +94,25 @@ func (s PackageService) ProcessPackageLifecycle(ctx context.Context, at time.Tim
 			if e == nil && current.SourceVersion == sub.Version && !current.ClearedAt.Valid {
 				return nil
 			}
+			// A notification alone cannot stop already running forwarding. Append
+			// real disabled revisions and their durable compiler work atomically.
+			rules, e := q.TenantPackageRules(ctx, tenant)
+			if e != nil {
+				return e
+			}
+			for _, row := range rules {
+				var rule RuleInput
+				if e = json.Unmarshal(row.Payload, &rule); e != nil {
+					return e
+				}
+				if !rule.Enabled {
+					continue
+				}
+				rule.Enabled = false
+				if _, e = appendRuleRevision(ctx, q, scope, rule, row.DesiredRevision, 0); e != nil {
+					return e
+				}
+			}
 			id := uuid.NewString()
 			if _, e = q.AppendRestrictionEvent(ctx, generated.AppendRestrictionEventParams{ID: id, TenantID: tenant, Cause: "package_expired", SourceID: sub.ID, SourceVersion: sub.Version, EventKind: "applied", EffectiveAt: sub.ExpiresAt}); e != nil {
 				return e

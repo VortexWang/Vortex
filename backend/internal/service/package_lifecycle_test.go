@@ -128,7 +128,16 @@ func TestPackageLifecycleAuditRollbackAndUnknownRetention(t *testing.T) {
 	f := newPackageLifecycleFixture(t)
 	ctx := context.Background()
 	sub := subscribePackage(t, f, createPackage(t, f, packageTerms()))
-	allocation := f.prepare(t, 20000)
+	r := ruleInput(f.group)
+	reserveRulePort(t, f, r)
+	allocations, e := generated.New(f.pool).RuleCompilePortAllocations(ctx, generated.RuleCompilePortAllocationsParams{TenantID: f.tenant, RuleID: r.ID, GroupID: f.group})
+	if e != nil || len(allocations) != 1 {
+		t.Fatal(allocations, e)
+	}
+	allocation := allocations[0]
+	if _, e := (service.RuleService{Pool: f.pool}).Mutate(ctx, f.scope, r, 0, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
 	if _, e := f.pool.Exec(ctx, "UPDATE port_reservations SET state='unknown' WHERE tenant_id=$1 AND allocation_id=$2", f.tenant, allocation.ID); e != nil {
 		t.Fatal(e)
 	}
@@ -163,6 +172,10 @@ func TestPackageLifecycleAuditRollbackAndUnknownRetention(t *testing.T) {
 	}
 	drop()
 	lifecycle(t, f, sub.ExpiresAt)
+	var enabled bool
+	if e := f.pool.QueryRow(ctx, "SELECT (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean FROM rule_heads h JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision WHERE h.tenant_id=$1 AND h.id=$2", f.tenant, r.ID).Scan(&enabled); e != nil || enabled {
+		t.Fatal("expiry did not append stop revision", enabled, e)
+	}
 	if e := f.pool.QueryRow(ctx, "SELECT count(*) FROM port_reservations WHERE tenant_id=$1 AND allocation_id=$2 AND state='unknown'", f.tenant, allocation.ID).Scan(&events); e != nil || events != len(f.nodes)*len(allocation.Protocols) {
 		t.Fatal("unknown released or relabelled", events, e)
 	}

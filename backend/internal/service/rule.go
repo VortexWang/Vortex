@@ -43,9 +43,6 @@ func (s RuleService) CompileRevision(ctx context.Context, scope TenantScope, id 
 }
 
 func lockedCompileInput(ctx context.Context, q *generated.Queries, scope TenantScope, id string, revision int64, billing compiler.BillingSnapshot, signerEpoch, pathGeneration, fencingGeneration int64) (compiler.CompileInput, error) {
-	if e := activeTenant(ctx, q, scope); e != nil {
-		return compiler.CompileInput{}, e
-	}
 	if e := validateBillingSnapshot(ctx, q, scope, id, billing); e != nil {
 		return compiler.CompileInput{}, e
 	}
@@ -126,9 +123,6 @@ type ruleInputs struct {
 // authority, and retains every member. It never silently skips an empty hop.
 func resolveRule(ctx context.Context, q *generated.Queries, scope TenantScope, in RuleInput) (ruleInputs, error) {
 	r := ruleInputs{groups: map[string]generated.ScopedGroupRow{}, members: map[string]MemberSnapshot{}, grants: map[string]generated.ResourceGrant{}}
-	if e := activeTenant(ctx, q, scope); e != nil {
-		return r, e
-	}
 	if in.Enabled {
 		if e := activeRule(ctx, q, scope, in.ID); e != nil {
 			return r, e
@@ -248,8 +242,10 @@ func appendRuleRevision(ctx context.Context, q *generated.Queries, scope TenantS
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
-		if e := activeTenant(ctx, q, scope); e != nil {
-			return e
+		if in.Enabled {
+			if e := activeTenant(ctx, q, scope); e != nil {
+				return e
+			}
 		}
 		if e := q.EnsureRuleHead(ctx, generated.EnsureRuleHeadParams{TenantID: scope.TenantID(), ID: in.ID}); e != nil {
 			return e
