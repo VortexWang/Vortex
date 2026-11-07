@@ -44,9 +44,37 @@ ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query'));
+CREATE TABLE rule_compile_inputs (
+ tenant_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ input_digest text NOT NULL CHECK(input_digest ~ '^[0-9a-f]{64}$'),
+ canonical bytea NOT NULL CHECK(octet_length(canonical) BETWEEN 1 AND 524288),
+ billing_snapshot_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ path_generation bigint NOT NULL CHECK(path_generation>0), fencing_generation bigint NOT NULL CHECK(fencing_generation>0),
+ PRIMARY KEY(tenant_id,rule_id,rule_revision,input_digest),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE TABLE rule_artifacts (
+ tenant_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ node_id text NOT NULL REFERENCES nodes(id), input_digest text NOT NULL,
+ digest text NOT NULL CHECK(digest ~ '^[0-9a-f]{64}$'),
+ canonical bytea NOT NULL CHECK(octet_length(canonical) BETWEEN 1 AND 524288),
+ billing_snapshot_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ path_generation bigint NOT NULL CHECK(path_generation>0), fencing_generation bigint NOT NULL CHECK(fencing_generation>0),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_id,rule_id,rule_revision,node_id,input_digest),
+ UNIQUE(tenant_id,digest),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision,input_digest) REFERENCES rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest)
+);
+CREATE TABLE rule_artifact_commits (
+ tenant_id text NOT NULL, digest text NOT NULL, committed_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_id,digest), FOREIGN KEY(tenant_id,digest) REFERENCES rule_artifacts(tenant_id,digest)
+);
+CREATE TRIGGER rule_input_immutable BEFORE UPDATE OR DELETE ON rule_compile_inputs FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_artifact_immutable BEFORE UPDATE OR DELETE ON rule_artifacts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_artifact_commit_immutable BEFORE UPDATE OR DELETE ON rule_artifact_commits FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown'));
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release'));
-DROP TABLE rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;
+DROP TABLE rule_artifact_commits,rule_artifacts,rule_compile_inputs,rule_dependencies,rule_segments,rule_targets,rule_revisions,rule_heads;

@@ -12,16 +12,29 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
 	"vortex/backend/db/generated"
+	"vortex/backend/internal/compiler"
+	"vortex/backend/internal/repository"
 	"vortex/backend/internal/service"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 const MaxMessage = 1 << 20
+
+// LoadCommittedArtifact is the mandatory artifact gate before rule transport.
+// A digest alone, an uncommitted row or a different revision/node/generation
+// cannot authorize control delivery.
+func LoadCommittedArtifact(ctx context.Context, pool *pgxpool.Pool, tenant string, b repository.ArtifactBinding) (compiler.Envelope, error) {
+	if pool == nil {
+		return compiler.Envelope{}, errors.New("artifact authority unavailable")
+	}
+	return repository.CommittedArtifact(ctx, generated.New(pool), tenant, b)
+}
 
 type request struct {
 	op     generated.Operation

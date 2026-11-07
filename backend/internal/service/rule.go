@@ -22,6 +22,65 @@ type RuleTarget = compiler.Target
 var ErrRuleRevisionConflict = compiler.RevisionConflict
 
 type RuleService struct{ Pool *pgxpool.Pool }
+
+// CompileRevision is an internal producer boundary. Billing is supplied by the
+// immutable billing-snapshot authority, never by public rule payloads. All node,
+// grant and segment versions are loaded under this transaction's locks.
+func (s RuleService) CompileRevision(ctx context.Context, scope TenantScope, id string, revision int64, billing compiler.BillingSnapshot, signerEpoch, pathGeneration, fencingGeneration int64, request string) (compiler.Result, error) {
+	var result compiler.Result
+	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "rule.compile", ResourceID: id, RequestID: request, Reason: "commit pinned compiler inputs and immutable per-node artifacts"}, func(q *generated.Queries) error {
+		if e := activeTenant(ctx, q, scope); e != nil {
+			return e
+		}
+		head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: id})
+		if e != nil {
+			return e
+		}
+		if head.DesiredRevision != revision {
+			return ErrRuleRevisionConflict
+		}
+		rev, e := q.GetRuleRevision(ctx, generated.GetRuleRevisionParams{TenantID: scope.TenantID(), RuleID: id, Revision: revision})
+		if e != nil {
+			return e
+		}
+		var rule RuleInput
+		if e = json.Unmarshal(rev.Payload, &rule); e != nil {
+			return e
+		}
+		locked, e := resolveRule(ctx, q, scope, rule)
+		if e != nil {
+			return e
+		}
+		input := compiler.CompileInput{TenantID: scope.TenantID(), Rule: rule, Revision: revision, Billing: billing, SignerEpoch: signerEpoch, PathGeneration: pathGeneration, FencingGeneration: fencingGeneration, ValidAt: rev.CreatedAt.Time.UTC(), Groups: []compiler.Group{}, Grants: []compiler.Grant{}, Permits: []compiler.Permit{}}
+		for _, id := range rule.Path {
+			g := locked.groups[id]
+			snap := locked.members[id]
+			group := compiler.Group{ID: id, OwnerKind: g.OwnerKind, Version: g.Version, MemberSetVersion: snap.MemberSetVersion, Scheduling: g.Scheduling, Members: []compiler.Member{}}
+			for _, n := range snap.Members {
+				group.Members = append(group.Members, compiler.Member{ID: n.ID, BootID: n.BootID, PublicAddress: n.PublicAddress, Version: n.Version, Generation: n.Generation, LinkPort: n.LinkPort, Weight: n.Weight, Priority: n.Priority, Online: n.Lifecycle == "online"})
+			}
+			input.Groups = append(input.Groups, group)
+			if grant, ok := locked.grants[id]; ok {
+				if grant.ValidFrom.Time.After(input.ValidAt) {
+					input.ValidAt = grant.ValidFrom.Time.UTC()
+				}
+				input.Grants = append(input.Grants, compiler.Grant{ID: grant.ID, GroupID: id, Version: grant.Version, Active: grant.Status == "active", ValidFrom: grant.ValidFrom.Time, ValidUntil: grant.ValidUntil.Time})
+			}
+		}
+		for i, v := range locked.permits {
+			if v > 0 {
+				input.Permits = append(input.Permits, compiler.Permit{From: rule.Path[i], To: rule.Path[i+1], Version: v, Allowed: true})
+			}
+		}
+		result, e = repository.PersistCompilation(ctx, q, input)
+		return e
+	})
+	if err != nil {
+		return compiler.Result{}, err
+	}
+	return result, nil
+}
+
 type RuleMutation struct {
 	Revision    generated.RuleRevision
 	OperationID string

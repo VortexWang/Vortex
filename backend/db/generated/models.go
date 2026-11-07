@@ -257,6 +257,39 @@ type RestrictionEvent struct {
 	ClearedAt     pgtype.Timestamptz
 }
 
+type RuleArtifact struct {
+	TenantID          string
+	RuleID            string
+	RuleRevision      int64
+	NodeID            string
+	InputDigest       string
+	Digest            string
+	Canonical         []byte
+	BillingSnapshotID string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+	CreatedAt         pgtype.Timestamptz
+}
+
+type RuleArtifactCommit struct {
+	TenantID    string
+	Digest      string
+	CommittedAt pgtype.Timestamptz
+}
+
+type RuleCompileInput struct {
+	TenantID          string
+	RuleID            string
+	RuleRevision      int64
+	InputDigest       string
+	Canonical         []byte
+	BillingSnapshotID string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+}
+
 type RuleDependency struct {
 	TenantID       string
 	RuleID         string

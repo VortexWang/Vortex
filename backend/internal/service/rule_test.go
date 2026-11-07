@@ -3,12 +3,15 @@ package service_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"testing"
+	"vortex/backend/db/generated"
 	"vortex/backend/internal/auth"
 	"vortex/backend/internal/compiler"
+	"vortex/backend/internal/control"
 	"vortex/backend/internal/policy"
 	"vortex/backend/internal/repository"
 	"vortex/backend/internal/service"
@@ -169,5 +172,70 @@ func TestRuleAuditRollback(t *testing.T) {
 	}
 	if !bytes.Equal(before, authoritySnapshot(t, f.pool, f.tenant, tables)) {
 		t.Fatal("partial rule/revision/task/outbox commit")
+	}
+}
+
+func TestRuleCompileCommittedArtifactAndAuditRollback(t *testing.T) {
+	f := newPortFixture(t)
+	ctx := context.Background()
+	s := service.RuleService{Pool: f.pool}
+	in := ruleInput(f.group)
+	if _, e := s.Mutate(ctx, f.scope, in, 0, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	billing := compiler.BillingSnapshot{ID: uuid.NewString(), Version: 1, RuleRevision: 1, PathGeneration: 3}
+	request := uuid.NewString()
+	failAudit(t, f.pool, request)
+	if _, e := s.CompileRevision(ctx, f.scope, in.ID, 1, billing, 2, 3, 5, request); e == nil {
+		t.Fatal("compiler artifact escaped failed audit")
+	}
+	var count int
+	if e := f.pool.QueryRow(ctx, "SELECT count(*) FROM rule_artifacts WHERE tenant_id=$1", f.tenant).Scan(&count); e != nil || count != 0 {
+		t.Fatal("partial compiler commit", e, count)
+	}
+	result, e := s.CompileRevision(ctx, f.scope, in.ID, 1, billing, 2, 3, 5, uuid.NewString())
+	if e != nil || len(result.Artifacts) != 2 {
+		t.Fatal(e, result.Diagnostics)
+	}
+	replayed, e := s.CompileRevision(ctx, f.scope, in.ID, 1, billing, 2, 3, 5, uuid.NewString())
+	if e != nil || replayed.InputDigest != result.InputDigest || replayed.Artifacts[0].Digest != result.Artifacts[0].Digest {
+		t.Fatal("database replay changed fixed-input digest", e)
+	}
+	binding := repository.ArtifactBinding{RuleID: in.ID, NodeID: result.Artifacts[0].NodeID, Digest: result.Artifacts[0].Digest, Revision: 1, FencingGeneration: 5}
+	if _, e = control.LoadCommittedArtifact(ctx, f.pool, f.tenant, binding); e != nil {
+		t.Fatal(e)
+	}
+	for _, alter := range []func(*repository.ArtifactBinding){func(b *repository.ArtifactBinding) { b.Revision++ }, func(b *repository.ArtifactBinding) { b.FencingGeneration++ }, func(b *repository.ArtifactBinding) { b.NodeID = uuid.NewString() }, func(b *repository.ArtifactBinding) { b.Digest = "bad" }} {
+		bad := binding
+		alter(&bad)
+		if _, e = control.LoadCommittedArtifact(ctx, f.pool, f.tenant, bad); e == nil {
+			t.Fatal("mismatched artifact passed runtime gate")
+		}
+	}
+	if _, e = control.LoadCommittedArtifact(ctx, f.pool, seedTenant(t, f.pool), binding); e == nil {
+		t.Fatal("foreign artifact passed runtime gate")
+	}
+	// Inject a valid but unpublished artifact through SQL: the transport gate
+	// must require the separate committed marker, not just canonical digest.
+	var pinned compiler.CompileInput
+	if e = json.Unmarshal(result.InputCanonical, &pinned); e != nil {
+		t.Fatal(e)
+	}
+	pinned.SignerEpoch++
+	uncommitted := compiler.Compile(ctx, pinned)
+	a := uncommitted.Artifacts[0]
+	q := generated.New(f.pool)
+	if e = q.InsertRuleCompileInput(ctx, generated.InsertRuleCompileInputParams{TenantID: f.tenant, RuleID: in.ID, RuleRevision: 1, InputDigest: uncommitted.InputDigest, Canonical: uncommitted.InputCanonical, BillingSnapshotID: billing.ID, SignerEpoch: pinned.SignerEpoch, PathGeneration: 3, FencingGeneration: 5}); e != nil {
+		t.Fatal(e)
+	}
+	if e = q.InsertRuleArtifact(ctx, generated.InsertRuleArtifactParams{TenantID: f.tenant, RuleID: in.ID, RuleRevision: 1, NodeID: a.NodeID, InputDigest: uncommitted.InputDigest, Digest: a.Digest, Canonical: a.Canonical, BillingSnapshotID: billing.ID, SignerEpoch: pinned.SignerEpoch, PathGeneration: 3, FencingGeneration: 5}); e != nil {
+		t.Fatal(e)
+	}
+	binding.Digest = a.Digest
+	if _, e = control.LoadCommittedArtifact(ctx, f.pool, f.tenant, binding); e == nil {
+		t.Fatal("uncommitted artifact passed runtime gate")
+	}
+	if _, e = f.pool.Exec(ctx, "UPDATE rule_artifacts SET canonical=canonical WHERE tenant_id=$1", f.tenant); e == nil {
+		t.Fatal("artifact mutable")
 	}
 }

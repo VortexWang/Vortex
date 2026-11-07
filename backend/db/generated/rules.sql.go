@@ -69,6 +69,20 @@ func (q *Queries) AppendRuleRevision(ctx context.Context, arg AppendRuleRevision
 	return i, err
 }
 
+const commitRuleArtifact = `-- name: CommitRuleArtifact :exec
+INSERT INTO rule_artifact_commits(tenant_id,digest) VALUES($1,$2) ON CONFLICT DO NOTHING
+`
+
+type CommitRuleArtifactParams struct {
+	TenantID string
+	Digest   string
+}
+
+func (q *Queries) CommitRuleArtifact(ctx context.Context, arg CommitRuleArtifactParams) error {
+	_, err := q.db.Exec(ctx, commitRuleArtifact, arg.TenantID, arg.Digest)
+	return err
+}
+
 const dependentRuleHeads = `-- name: DependentRuleHeads :many
 SELECT h.tenant_id, h.id, h.desired_revision, h.active_revision, h.sync_status FROM rule_heads h WHERE h.tenant_id=$1 AND EXISTS(SELECT 1 FROM rule_dependencies d WHERE d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.revision=h.desired_revision AND d.dependency_kind=$2 AND d.dependency_id=$3) ORDER BY h.id FOR UPDATE
 `
@@ -119,6 +133,80 @@ func (q *Queries) EnsureRuleHead(ctx context.Context, arg EnsureRuleHeadParams) 
 	return err
 }
 
+const getCommittedRuleArtifact = `-- name: GetCommittedRuleArtifact :one
+SELECT a.tenant_id, a.rule_id, a.rule_revision, a.node_id, a.input_digest, a.digest, a.canonical, a.billing_snapshot_id, a.signer_epoch, a.path_generation, a.fencing_generation, a.created_at FROM rule_artifacts a JOIN rule_artifact_commits c ON c.tenant_id=a.tenant_id AND c.digest=a.digest
+WHERE a.tenant_id=$1 AND a.digest=$2 AND a.rule_id=$3 AND a.rule_revision=$4 AND a.node_id=$5 AND a.fencing_generation=$6
+`
+
+type GetCommittedRuleArtifactParams struct {
+	TenantID          string
+	Digest            string
+	RuleID            string
+	RuleRevision      int64
+	NodeID            string
+	FencingGeneration int64
+}
+
+func (q *Queries) GetCommittedRuleArtifact(ctx context.Context, arg GetCommittedRuleArtifactParams) (RuleArtifact, error) {
+	row := q.db.QueryRow(ctx, getCommittedRuleArtifact,
+		arg.TenantID,
+		arg.Digest,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.NodeID,
+		arg.FencingGeneration,
+	)
+	var i RuleArtifact
+	err := row.Scan(
+		&i.TenantID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.NodeID,
+		&i.InputDigest,
+		&i.Digest,
+		&i.Canonical,
+		&i.BillingSnapshotID,
+		&i.SignerEpoch,
+		&i.PathGeneration,
+		&i.FencingGeneration,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getRuleCompileInput = `-- name: GetRuleCompileInput :one
+SELECT tenant_id, rule_id, rule_revision, input_digest, canonical, billing_snapshot_id, signer_epoch, path_generation, fencing_generation FROM rule_compile_inputs WHERE tenant_id=$1 AND rule_id=$2 AND rule_revision=$3 AND input_digest=$4
+`
+
+type GetRuleCompileInputParams struct {
+	TenantID     string
+	RuleID       string
+	RuleRevision int64
+	InputDigest  string
+}
+
+func (q *Queries) GetRuleCompileInput(ctx context.Context, arg GetRuleCompileInputParams) (RuleCompileInput, error) {
+	row := q.db.QueryRow(ctx, getRuleCompileInput,
+		arg.TenantID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.InputDigest,
+	)
+	var i RuleCompileInput
+	err := row.Scan(
+		&i.TenantID,
+		&i.RuleID,
+		&i.RuleRevision,
+		&i.InputDigest,
+		&i.Canonical,
+		&i.BillingSnapshotID,
+		&i.SignerEpoch,
+		&i.PathGeneration,
+		&i.FencingGeneration,
+	)
+	return i, err
+}
+
 const getRuleRevision = `-- name: GetRuleRevision :one
 SELECT tenant_id, rule_id, revision, payload, payload_sha256, created_by, created_at, change_class, rollback_of FROM rule_revisions WHERE tenant_id=$1 AND rule_id=$2 AND revision=$3
 `
@@ -144,6 +232,74 @@ func (q *Queries) GetRuleRevision(ctx context.Context, arg GetRuleRevisionParams
 		&i.RollbackOf,
 	)
 	return i, err
+}
+
+const insertRuleArtifact = `-- name: InsertRuleArtifact :exec
+INSERT INTO rule_artifacts(tenant_id,rule_id,rule_revision,node_id,input_digest,digest,canonical,billing_snapshot_id,signer_epoch,path_generation,fencing_generation)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT DO NOTHING
+`
+
+type InsertRuleArtifactParams struct {
+	TenantID          string
+	RuleID            string
+	RuleRevision      int64
+	NodeID            string
+	InputDigest       string
+	Digest            string
+	Canonical         []byte
+	BillingSnapshotID string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+}
+
+func (q *Queries) InsertRuleArtifact(ctx context.Context, arg InsertRuleArtifactParams) error {
+	_, err := q.db.Exec(ctx, insertRuleArtifact,
+		arg.TenantID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.NodeID,
+		arg.InputDigest,
+		arg.Digest,
+		arg.Canonical,
+		arg.BillingSnapshotID,
+		arg.SignerEpoch,
+		arg.PathGeneration,
+		arg.FencingGeneration,
+	)
+	return err
+}
+
+const insertRuleCompileInput = `-- name: InsertRuleCompileInput :exec
+INSERT INTO rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest,canonical,billing_snapshot_id,signer_epoch,path_generation,fencing_generation)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT DO NOTHING
+`
+
+type InsertRuleCompileInputParams struct {
+	TenantID          string
+	RuleID            string
+	RuleRevision      int64
+	InputDigest       string
+	Canonical         []byte
+	BillingSnapshotID string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+}
+
+func (q *Queries) InsertRuleCompileInput(ctx context.Context, arg InsertRuleCompileInputParams) error {
+	_, err := q.db.Exec(ctx, insertRuleCompileInput,
+		arg.TenantID,
+		arg.RuleID,
+		arg.RuleRevision,
+		arg.InputDigest,
+		arg.Canonical,
+		arg.BillingSnapshotID,
+		arg.SignerEpoch,
+		arg.PathGeneration,
+		arg.FencingGeneration,
+	)
+	return err
 }
 
 const insertRuleDependency = `-- name: InsertRuleDependency :exec

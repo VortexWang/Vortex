@@ -1,4 +1,4 @@
--- Phase 6 implemented PostgreSQL schema through migration 00003.
+-- Phase 6 implemented PostgreSQL schema through migration 00005_rules_compile.
 -- Canonical executable source: backend/db/migrations/*.sql.
 
 CREATE TABLE desired_state (
@@ -206,17 +206,10 @@ CREATE TABLE node_dependencies (
  amount bigint NOT NULL CHECK (amount>0), PRIMARY KEY(tenant_id,node_id,kind,dependency_id)
 );
 CREATE TABLE encrypted_credentials (
- id text NOT NULL, tenant_id text NOT NULL REFERENCES tenants(id), zone_id text NOT NULL CHECK (zone_id<>''), zone_name text NOT NULL DEFAULT '',
+ id text NOT NULL, tenant_id text NOT NULL REFERENCES tenants(id), zone_id text NOT NULL CHECK (zone_id<>''),
  ciphertext bytea NOT NULL CHECK (octet_length(ciphertext)>16), nonce bytea NOT NULL CHECK (octet_length(nonce)=12),
  key_version bigint NOT NULL CHECK (key_version>0), scope text[] NOT NULL CHECK (cardinality(scope)>0),
  created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,zone_id)
-);
-CREATE TABLE entry_group_domains (
- tenant_id text NOT NULL REFERENCES tenants(id), group_id text NOT NULL REFERENCES node_groups(id),
- credential_id text NOT NULL, zone_id text NOT NULL, name text NOT NULL CHECK(length(name) BETWEEN 1 AND 253),
- version bigint NOT NULL DEFAULT 1 CHECK(version>0), created_at timestamptz NOT NULL DEFAULT now(),
- PRIMARY KEY(group_id), UNIQUE(name),
- FOREIGN KEY(tenant_id,credential_id) REFERENCES encrypted_credentials(tenant_id,id)
 );
 ALTER TABLE tasks ADD COLUMN task_kind text NOT NULL DEFAULT 'control' CHECK (task_kind IN ('control','resource_change','port_prepare','port_release'));
 -- Ownership and billing constraints live below every service entry point.
@@ -298,3 +291,93 @@ BEGIN
 END;
 $$;
 CREATE TRIGGER port_conflict BEFORE INSERT OR UPDATE ON port_reservations FOR EACH ROW EXECUTE FUNCTION guard_physical_port();
+
+ALTER TABLE encrypted_credentials ADD COLUMN zone_name text NOT NULL DEFAULT '';
+CREATE TABLE entry_group_domains (
+ tenant_id text NOT NULL REFERENCES tenants(id),
+ group_id text NOT NULL REFERENCES node_groups(id),
+ credential_id text NOT NULL,
+ zone_id text NOT NULL,
+ name text NOT NULL CHECK(length(name) BETWEEN 1 AND 253),
+ version bigint NOT NULL DEFAULT 1 CHECK(version>0),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(group_id),
+ UNIQUE(name),
+ FOREIGN KEY(tenant_id,credential_id) REFERENCES encrypted_credentials(tenant_id,id)
+);
+CREATE TRIGGER entry_group_domains_immutable BEFORE UPDATE OR DELETE ON entry_group_domains FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+
+
+CREATE TABLE rule_heads (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL,
+ desired_revision bigint NOT NULL DEFAULT 0 CHECK(desired_revision>=0),
+ active_revision bigint NOT NULL DEFAULT 0 CHECK(active_revision>=0),
+ sync_status text NOT NULL DEFAULT 'pending' CHECK(sync_status IN ('pending','preparing','committing','running','partial','unknown','failed')),
+ PRIMARY KEY(tenant_id,id), CHECK(active_revision<=desired_revision)
+);
+CREATE TABLE rule_revisions (
+ tenant_id text NOT NULL, rule_id text NOT NULL, revision bigint NOT NULL CHECK(revision>0),
+ payload bytea NOT NULL CHECK(octet_length(payload) BETWEEN 1 AND 524288),
+ payload_sha256 bytea NOT NULL CHECK(octet_length(payload_sha256)=32),
+ created_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
+ change_class text NOT NULL CHECK(change_class IN ('hot','rebuild','stop')),
+ rollback_of bigint NOT NULL DEFAULT 0 CHECK(rollback_of>=0),
+ PRIMARY KEY(tenant_id,rule_id,revision), FOREIGN KEY(tenant_id,rule_id) REFERENCES rule_heads(tenant_id,id)
+);
+CREATE TRIGGER rule_revision_immutable BEFORE UPDATE OR DELETE ON rule_revisions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE rule_targets (
+ tenant_id text NOT NULL, rule_id text NOT NULL, revision bigint NOT NULL,
+ address text NOT NULL, weight integer NOT NULL CHECK(weight BETWEEN 1 AND 10000), priority integer NOT NULL CHECK(priority>=0),
+ PRIMARY KEY(tenant_id,rule_id,revision,address),
+ FOREIGN KEY(tenant_id,rule_id,revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE TABLE rule_segments (
+ tenant_id text NOT NULL, rule_id text NOT NULL, revision bigint NOT NULL, hop integer NOT NULL CHECK(hop>=0),
+ from_group_id text NOT NULL REFERENCES node_groups(id), to_group_id text NOT NULL REFERENCES node_groups(id),
+ direction text NOT NULL CHECK(direction IN ('forward','reverse')), permit_version bigint NOT NULL CHECK(permit_version>=0),
+ PRIMARY KEY(tenant_id,rule_id,revision,hop), CHECK(from_group_id<>to_group_id),
+ FOREIGN KEY(tenant_id,rule_id,revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE TABLE rule_dependencies (
+ tenant_id text NOT NULL, rule_id text NOT NULL, revision bigint NOT NULL,
+ dependency_kind text NOT NULL CHECK(dependency_kind IN ('group','grant','permit','billing')),
+ dependency_id text NOT NULL, version text NOT NULL,
+ PRIMARY KEY(tenant_id,rule_id,revision,dependency_kind,dependency_id),
+ FOREIGN KEY(tenant_id,rule_id,revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE INDEX rule_dependencies_lookup ON rule_dependencies(dependency_kind,dependency_id,tenant_id);
+CREATE TRIGGER rule_targets_immutable BEFORE UPDATE OR DELETE ON rule_targets FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_segments_immutable BEFORE UPDATE OR DELETE ON rule_segments FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_dependencies_immutable BEFORE UPDATE OR DELETE ON rule_dependencies FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+ALTER TABLE tasks DROP CONSTRAINT tasks_state_check;
+ALTER TABLE tasks ADD CONSTRAINT tasks_state_check CHECK(state IN ('pending','leased','running','succeeded','failed','unknown','superseded'));
+ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
+ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query'));
+CREATE TABLE rule_compile_inputs (
+ tenant_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ input_digest text NOT NULL CHECK(input_digest ~ '^[0-9a-f]{64}$'),
+ canonical bytea NOT NULL CHECK(octet_length(canonical) BETWEEN 1 AND 524288),
+ billing_snapshot_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ path_generation bigint NOT NULL CHECK(path_generation>0), fencing_generation bigint NOT NULL CHECK(fencing_generation>0),
+ PRIMARY KEY(tenant_id,rule_id,rule_revision,input_digest),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision) REFERENCES rule_revisions(tenant_id,rule_id,revision)
+);
+CREATE TABLE rule_artifacts (
+ tenant_id text NOT NULL, rule_id text NOT NULL, rule_revision bigint NOT NULL,
+ node_id text NOT NULL REFERENCES nodes(id), input_digest text NOT NULL,
+ digest text NOT NULL CHECK(digest ~ '^[0-9a-f]{64}$'),
+ canonical bytea NOT NULL CHECK(octet_length(canonical) BETWEEN 1 AND 524288),
+ billing_snapshot_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ path_generation bigint NOT NULL CHECK(path_generation>0), fencing_generation bigint NOT NULL CHECK(fencing_generation>0),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_id,rule_id,rule_revision,node_id,input_digest),
+ UNIQUE(tenant_id,digest),
+ FOREIGN KEY(tenant_id,rule_id,rule_revision,input_digest) REFERENCES rule_compile_inputs(tenant_id,rule_id,rule_revision,input_digest)
+);
+CREATE TABLE rule_artifact_commits (
+ tenant_id text NOT NULL, digest text NOT NULL, committed_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_id,digest), FOREIGN KEY(tenant_id,digest) REFERENCES rule_artifacts(tenant_id,digest)
+);
+CREATE TRIGGER rule_input_immutable BEFORE UPDATE OR DELETE ON rule_compile_inputs FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_artifact_immutable BEFORE UPDATE OR DELETE ON rule_artifacts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TRIGGER rule_artifact_commit_immutable BEFORE UPDATE OR DELETE ON rule_artifact_commits FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
