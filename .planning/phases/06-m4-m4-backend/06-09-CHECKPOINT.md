@@ -1,19 +1,31 @@
 ---
 phase: 06-m4-m4-backend
 plan: 09
-status: awaiting-authentication
+status: resolved
 source_commit: c1e6b7663a02e65ec9b6b9965c00554ca35fad99
 evidence_commit: bbbac76d
-completed_tasks: [2]
-pending_tasks: [1]
+completed_tasks: [1, 2]
+pending_tasks: []
+resolved_source_commit: a948158446255e2eb2e2a975c435ddbb2f357ecf
+resolved_actions_run: 42316152923
+resolved_evidence_commit: 32698c0d
+resolved_summary_commit: 843d12f6
 ---
 
 # 06-09 authentication checkpoint
 
-Implementation is committed. Task 2 is verified. Task 1's complete paired gate
-remains unpassed because the authenticated GitHub account cannot write the target
-repository. No complete SUMMARY exists; Phase 6 remains 2/11 complete and TEN-009
-is not prematurely checked off in REQUIREMENTS.md.
+Resolved after user browser authentication restored VortexWang write permission.
+Both tasks and TEN-009 are complete. Final source a9481584 passed local Docker,
+actual Actions 42316152923 and both unchanged same-SHA paired acceptance commands.
+Complete SUMMARY is committed in 843d12f6; Phase 6 is 3/11, next 06-02.
+
+Two actual CI failures were preserved and fixed: c1e6b766 omitted already-reviewed
+Darwin-only dependencies on Linux; 3c877d4d then hit container Git ownership during
+VCS stamping. The final source fixes the reviewed union and scopes container trust
+to its source directory, retaining expected SHA and VCS stamping. Raw failures and
+successful paired evidence are under `artifacts/phase6/06-09/`.
+
+The original checkpoint record below preserves what was known before resolution.
 
 ## Built and verified
 
@@ -118,4 +130,5 @@ and Phase 4/8 qualification boundaries are preserved.
 
 All named source/evidence/checkpoint files exist; all seven implementation,
 TDD and evidence commits are ancestors of HEAD. Final source identity and local
-producer checksums were verified from the clean clone. Actions remains unrun.
+producer checksums were verified from the clean clone. At the original checkpoint
+Actions remained unrun; the resolution above records actual final success.

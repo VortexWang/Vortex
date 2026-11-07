@@ -25,7 +25,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **TEN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (276-276; SHA-256 recorded there).
 - [x] **TEN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (282-282; SHA-256 recorded there).
 - [x] **TEN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (283-283; SHA-256 recorded there).
-- [ ] **TEN-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (284-284; SHA-256 recorded there).
+- [x] **TEN-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (284-284; SHA-256 recorded there).
 
 ## NOD Requirements
 
@@ -364,7 +364,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | TEN-006 | Phase 6 | Complete |
 | TEN-007 | Phase 6 | Complete |
 | TEN-008 | Phase 6 | Complete |
-| TEN-009 | Phase 6 | Pending |
+| TEN-009 | Phase 6 | Complete |
 | NOD-001 | Phase 6 | Pending |
 | NOD-002 | Phase 6 | Pending |
 | NOD-003 | Phase 6 | Pending |

@@ -36,11 +36,11 @@ created: "2026-11-07"
 
 | Task ID | Wave | Behavior / artifact | Verification | File Exists | Status |
 |---------|------|---------------------|--------------|-------------|--------|
-| 06-01-01 | 1 | desired state 到 Agent/Hub receipt 的端到端 tracer | 自动化；执行 06-01-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-08-01 | 2 | tenant scope, roles and transaction-scoped audit | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-08-02 | 2 | sqlc/toolchain reproducibility and Valkey loss gate | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | c1e6b766 clean Docker producer 通过；paired 实测因缺 Actions 失败，认证 checkpoint | ✅ 已实现 | ⬜ pending Actions/pair |
-| 06-09-02 | 3 | all restriction causes must clear | c1e6b766 真实 PG normal/race、全 Docker 与 audit rollback 通过 | ✅ 已实现 | ✅ passed implemented scope |
+| 06-01-01 | 1 | desired state 到 Agent/Hub receipt 的端到端 tracer | a9481584 本机 Docker/Actions 42316152923 同 SHA normal/race 真实进程通过 | ✅ 已实现 | ✅ passed implemented scope |
+| 06-08-01 | 2 | tenant scope, roles and transaction-scoped audit | a9481584 真实 PostgreSQL 固定角色、隔离与审计 normal/race；两端通过 | ✅ 已实现 | ✅ passed implemented scope |
+| 06-08-02 | 2 | sqlc/toolchain reproducibility and Valkey loss gate | a9481584 双次 sqlc、精确许可闭包、已实施权威 Valkey 丢失重建；两端通过；来源余额待 06-05/11 | ✅ 已实现 | ✅ passed implemented scope |
+| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | a9481584 Docker/真实 Actions 42316152923 通过，check/manifest 同 SHA 配对均返回 0 | ✅ 已实现 | ✅ passed implemented scope |
+| 06-09-02 | 3 | all restriction causes must clear | a9481584 两端真实 PG normal/race，多原因恢复、账号限制与 audit rollback 通过 | ✅ 已实现 | ✅ passed implemented scope |
 | 06-02-01 | 4 | 节点组、成员、grant 与生命周期服务 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-02-02 | 4 | 端口预留、限制保留和释放确认 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-10-01 | 5 | serving eligibility and encrypted DNS credential boundary | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
@@ -81,8 +81,8 @@ created: "2026-11-07"
 - [ ] 06-01：backend 模块、精确工具链、pgx/sqlc/Goose、最小权威 schema/query/generated、测试数据库配置。
 - [ ] 06-01：真实 Phase 5 Agent/Hub mTLS tracer、进程证据和数据库故障断言。
 - [ ] 06-08：租户策略、统一 AuditWriter、Valkey 可丢失重建、依赖与 sqlc reproducibility。
-- [ ] 06-09：单一 OpenAPI source、确定性 copy、Ruby structural/security lint；Phase 6 不安装 OpenAPI generator，TypeScript 生成由 Phase 7 负责。
-- [ ] 06-09：分阶段 check.sh/evidence_manifest.sh 与 Actions 入口，明确 expected-SHA producer；06-11 扩展最终完整门禁。
+- [x] 06-09：单一 OpenAPI source、确定性 copy、Ruby structural/security lint；Phase 6 不安装 OpenAPI generator，TypeScript 生成由 Phase 7 负责。
+- [x] 06-09：分阶段 check.sh/evidence_manifest.sh 与 Actions 入口，明确 expected-SHA producer；a9481584 同 SHA 配对通过，06-11 仍须扩展最终完整门禁。
 - [ ] 后续计划每次新增 SQL 都生成并消费 backend/db/generated；所有 fault shell/test 引用具有本计划或前置 producer。
 
 ## Deferred Manual Verification
