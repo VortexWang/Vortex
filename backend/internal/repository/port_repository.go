@@ -68,13 +68,27 @@ func ServingMembers(ctx context.Context, q *generated.Queries, s TenantScope, gr
 	if e != nil {
 		return nil, e
 	}
-	raw, e := json.Marshal(struct {
-		Version int64
-		Members []generated.GroupMembersRow
-	}{g.MemberVersion, members})
+	digest, e := MemberSetDigest(g.MemberVersion, members)
 	if e != nil {
 		return nil, e
 	}
+	return q.PortServingMembers(ctx, generated.PortServingMembersParams{TenantID: s.TenantID(), GroupID: group, MemberSetVersion: digest, PlatformRead: s.Platform() && g.OwnerKind == "platform"})
+}
+
+// Health is a live per-member eligibility signal, not a configuration input.
+// Its change must not invalidate other members' confirmed port snapshots.
+func MemberSetDigest(version int64, members []generated.GroupMembersRow) (string, error) {
+	configured := append([]generated.GroupMembersRow(nil), members...)
+	for i := range configured {
+		configured[i].Health = ""
+	}
+	raw, e := json.Marshal(struct {
+		Version int64
+		Members []generated.GroupMembersRow
+	}{version, configured})
+	if e != nil {
+		return "", e
+	}
 	sum := sha256.Sum256(raw)
-	return q.PortServingMembers(ctx, generated.PortServingMembersParams{TenantID: s.TenantID(), GroupID: group, MemberSetVersion: hex.EncodeToString(sum[:]), PlatformRead: s.Platform() && g.OwnerKind == "platform"})
+	return hex.EncodeToString(sum[:]), nil
 }

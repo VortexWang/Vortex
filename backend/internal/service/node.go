@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -193,15 +192,11 @@ func snapshot(ctx context.Context, q *generated.Queries, scope TenantScope, grou
 	}
 	// Include member incarnation/version/ranges as well as ordered identity. A
 	// reboot or capability change cannot reuse a stale reservation snapshot.
-	raw, err := json.Marshal(struct {
-		Version int64
-		Members []generated.GroupMembersRow
-	}{g.MemberVersion, members})
+	digest, err := repository.MemberSetDigest(g.MemberVersion, members)
 	if err != nil {
 		return MemberSnapshot{}, err
 	}
-	sum := sha256.Sum256(raw)
-	return MemberSnapshot{GroupID: group, GroupVersion: g.MemberVersion, MemberSetVersion: hex.EncodeToString(sum[:]), Members: members}, nil
+	return MemberSnapshot{GroupID: group, GroupVersion: g.MemberVersion, MemberSetVersion: digest, Members: members}, nil
 }
 func (s NodeService) Snapshot(ctx context.Context, scope TenantScope, group, request string) (MemberSnapshot, error) {
 	var result MemberSnapshot

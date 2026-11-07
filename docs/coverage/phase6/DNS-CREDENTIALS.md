@@ -22,6 +22,8 @@ Each member must have every committed rule's complete confirmed protocol set for
 the current boot/generation and member snapshot. An uncommitted new rule does not
 remove a member already serving other rules. Tenant read views remain scoped.
 An explicitly unhealthy node is excluded even while its lifecycle is online.
+Health is evaluated per member and excluded from the shared configuration digest;
+changing one member's health does not invalidate confirmed ports on the others.
 Removing DNS never releases retained ports or grants migration of existing flows.
 
 AES-256-GCM binds tenant, access ID, zone and key version as authenticated data.
