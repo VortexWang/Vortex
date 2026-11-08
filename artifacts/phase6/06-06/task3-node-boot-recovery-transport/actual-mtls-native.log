@@ -1,0 +1,15 @@
+2026/11/08 18:21:01 goose: no migrations to run. current version: 8
+2026/11/08 18:21:01 OK   00001_authority.sql (29.64ms)
+2026/11/08 18:21:01 OK   00002_tenant_policy.sql (9.45ms)
+2026/11/08 18:21:01 OK   00003_nodes_ports.sql (20.67ms)
+2026/11/08 18:21:01 OK   00004_entry_group_domains.sql (2.67ms)
+2026/11/08 18:21:01 OK   00005_rules_compile.sql (22.58ms)
+2026/11/08 18:21:01 OK   00006_packages_entitlements.sql (20.7ms)
+2026/11/08 18:21:01 OK   00007_metering_ledger.sql (26.91ms)
+2026/11/08 18:21:02 OK   00008_limits_shares.sql (45.83ms)
+2026/11/08 18:21:02 goose: successfully migrated database to version: 8
+--- FAIL: TestNodeBootRecoveryActualMTLSCapabilityLostFULLReceiptReplay (1.22s)
+    node_boot_recovery_transport_test.go:93: agent: configuration-only control requires pinned direct backend
+FAIL
+FAIL	vortex/backend/internal/service	1.887s
+FAIL

@@ -186,6 +186,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 		failures <- (worker.CreditCloseWorker{Service: *adapter.Shares, BackendID: *backendID, Adapter: adapter}).Run(ctx)
 	}()
 	go func() {
+		failures <- (worker.NodeBootRecoveryWorker{Service: *adapter.Shares, BackendID: *backendID, Adapter: adapter}).Run(ctx)
+	}()
+	go func() {
 		failures <- (worker.HubCreditSettlementWorker{Service: *adapter.Shares}).Run(ctx)
 	}()
 	go func() { failures <- server.Serve(nodes) }()

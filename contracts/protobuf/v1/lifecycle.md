@@ -484,3 +484,29 @@ expiry or a later CAS never rewinds the chain. This backend service prerequisite
 still needs independently negotiated pinned direct-backend NodeControl delivery
 and its production worker; it is not yet complete production Node boot recovery.
 The candidate remains unapproved under CR-008.
+
+Candidate NodeControl delivery now has independent `node-boot-recovery-v1`
+negotiation. Additive NodeMessage23 and ControlMessage22 carry canonical
+payload/SHA envelopes; all existing tags remain unchanged. Only a direct Agent
+client configured with an explicit canonical backend UUID advertises this
+capability. Regional Hub streams cannot send it; source/share/credit-close or
+unknown future capability names do not imply recovery authority. The TLS server
+identity must match the configured backend UUID before stream startup, and the
+command independently pins that identity and the Node's actual current boot.
+
+The production worker delivers only existing immutable platform-approved
+commands. No worker automatically approves a recovery, changes its expiry or
+infers success from sending bytes. The stream handler checks Node identity,
+boot, sequence, pending command and receipt digest before the PostgreSQL service
+validates the complete canonical FULL receipt and commits it with audit/tasks/
+Outbox. Lost Node FULL receipts reconnect and replay the original bytes while
+PG keeps the original boot and capacity occupation until acceptance.
+
+A first local retirement uses bounded trusted time; an untrusted boot clock may
+observe the command under the existing continuity rules and bootstrap from the independently authenticated command's issued time within the
+existing300s boot freshness rule. The command creates no Hub heartbeat. Exact
+already-FULL replay is checked before clock bootstrap, so command/clock expiry
+cannot force a different command or rewind later generations. A stale first
+installation still fails. These additive candidate tags and semantics remain
+unapproved CR-008 work, separate from original-rule execution convergence,
+same-store signer S/R transfer, HTTP entry and complete Phase6 acceptance.

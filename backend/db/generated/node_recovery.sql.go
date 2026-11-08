@@ -429,6 +429,45 @@ func (q *Queries) NodeRecoveryShares(ctx context.Context, arg NodeRecoveryShares
 	return items, nil
 }
 
+const pendingNodeBootRecoveries = `-- name: PendingNodeBootRecoveries :many
+SELECT c.tenant_id, c.id, c.node_id, c.from_boot_id, c.to_boot_id, c.backend_id, c.operation_id, c.created_by, c.proof, c.proof_digest, c.payload, c.payload_digest FROM node_boot_recoveries c JOIN nodes n ON n.id=c.node_id AND n.boot_id=c.to_boot_id
+WHERE NOT EXISTS(SELECT 1 FROM node_boot_recovery_receipts r WHERE r.tenant_id=c.tenant_id AND r.recovery_id=c.id)
+ORDER BY c.tenant_id,c.id LIMIT 100
+`
+
+func (q *Queries) PendingNodeBootRecoveries(ctx context.Context) ([]NodeBootRecovery, error) {
+	rows, err := q.db.Query(ctx, pendingNodeBootRecoveries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []NodeBootRecovery{}
+	for rows.Next() {
+		var i NodeBootRecovery
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.ID,
+			&i.NodeID,
+			&i.FromBootID,
+			&i.ToBootID,
+			&i.BackendID,
+			&i.OperationID,
+			&i.CreatedBy,
+			&i.Proof,
+			&i.ProofDigest,
+			&i.Payload,
+			&i.PayloadDigest,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const retireNodeShareChain = `-- name: RetireNodeShareChain :execrows
 UPDATE share_chains SET boot_id=$4,active_generation=0,retired_generation=head_generation
 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND boot_id=$5 AND head_generation=$6 AND active_generation=head_generation AND pending_generation=0 AND retired_generation=0

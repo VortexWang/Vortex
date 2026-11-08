@@ -29,3 +29,7 @@ UPDATE node_fencing SET renewal_closed=true,closure_proof=$4 WHERE tenant_id=$1 
 SELECT pg_advisory_xact_lock_shared(hashtextextended('node-authority/' || sqlc.arg(node_id)::text, 0));
 -- name: LockNodeAuthorityWrite :exec
 SELECT pg_advisory_xact_lock(hashtextextended('node-authority/' || sqlc.arg(node_id)::text, 0));
+-- name: PendingNodeBootRecoveries :many
+SELECT c.* FROM node_boot_recoveries c JOIN nodes n ON n.id=c.node_id AND n.boot_id=c.to_boot_id
+WHERE NOT EXISTS(SELECT 1 FROM node_boot_recovery_receipts r WHERE r.tenant_id=c.tenant_id AND r.recovery_id=c.id)
+ORDER BY c.tenant_id,c.id LIMIT 100;

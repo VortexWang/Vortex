@@ -76,12 +76,13 @@ type sourceRequest struct {
 	ctx     context.Context
 }
 type session struct {
-	creditCloses chan creditCloseRequest
-	sources      chan sourceRequest
-	requests     chan request
-	shares       chan shareRequest
-	rules        chan ruleRequest
-	done         chan struct{}
+	bootRecoveries chan nodeBootRecoveryRequest
+	creditCloses   chan creditCloseRequest
+	sources        chan sourceRequest
+	requests       chan request
+	shares         chan shareRequest
+	rules          chan ruleRequest
+	done           chan struct{}
 }
 
 // DeliverShare returns success only after the authenticated stream handler
@@ -220,7 +221,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{creditCloses: make(chan creditCloseRequest), sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
+	s := &session{bootRecoveries: make(chan nodeBootRecoveryRequest), creditCloses: make(chan creditCloseRequest), sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -258,11 +259,15 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	bootRecoveryCapable := false
 	creditCloseCapable := false
 	sourceCapable := false
 	shareCapable := false
 	ruleCapable := false
 	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "node-boot-recovery-v1" {
+			bootRecoveryCapable = true
+		}
 		if capability == "credit-close-v1" {
 			creditCloseCapable = true
 		}
@@ -282,6 +287,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	var pendingShare *shareRequest
 	var pendingSource *sourceRequest
 	var pendingCreditClose *creditCloseRequest
+	var pendingBootRecovery *nodeBootRecoveryRequest
 	for {
 		var pendingDone <-chan struct{}
 		if pending != nil {
@@ -299,6 +305,9 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		if pendingCreditClose != nil {
 			pendingDone = pendingCreditClose.ctx.Done()
 		}
+		if pendingBootRecovery != nil {
+			pendingDone = pendingBootRecovery.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
@@ -306,12 +315,13 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			pendingShare = nil
 			pendingSource = nil
 			pendingCreditClose = nil
+			pendingBootRecovery = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -338,7 +348,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
 				r.result <- ruleOutcome{err: errors.New("target busy")}
 				continue
 			}
@@ -355,12 +365,30 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
 				return err
 			}
+		case r := <-s.bootRecoveries:
+			if !bootRecoveryCapable || a.Shares == nil {
+				r.result <- errors.New("target lacks node-boot-recovery-v1")
+				continue
+			}
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+				r.result <- errors.New("target busy")
+				continue
+			}
+			if r.boot != first.BootId || r.ctx.Err() != nil {
+				r.result <- errors.New("boot recovery target/request expired")
+				continue
+			}
+			pendingBootRecovery = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_NodeBootRecoveryCommand{NodeBootRecoveryCommand: r.command}}); err != nil {
+				return err
+			}
 		case r := <-s.creditCloses:
 			if !creditCloseCapable || a.Shares == nil {
 				r.result <- errors.New("target lacks credit-close-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -378,7 +406,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks source-provision-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -396,7 +424,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks share-cas-v1 authority")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -414,6 +442,23 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if receipt := message.GetNodeBootRecoveryReceipt(); receipt != nil {
+				if pendingBootRecovery == nil {
+					continue
+				}
+				if len(receipt.Payload) > 64<<10 || len(receipt.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(sha256Bytes(receipt.Payload), receipt.PayloadSha256) {
+					return errors.New("invalid boot recovery receipt envelope")
+				}
+				var r contracts.NodeBootRecoveryReceipt
+				c, e := contracts.DecodeNodeBootRecovery(pendingBootRecovery.command.Payload)
+				if e != nil || json.Unmarshal(receipt.Payload, &r) != nil || r.ID != c.ID || r.NodeID != id || r.BootID != first.BootId || r.CommandSHA256 != fmt.Sprintf("%x", pendingBootRecovery.command.PayloadSha256) {
+					return errors.New("boot recovery receipt target/command mismatch")
+				}
+				e = a.Shares.RecordNodeBootRecovery(stream.Context(), pendingBootRecovery.scope, receipt.Payload, uuid.NewString())
+				pendingBootRecovery.result <- e
+				pendingBootRecovery = nil
+				continue
+			}
 			if receipt := message.GetCreditCloseReceipt(); receipt != nil {
 				if pendingCreditClose == nil {
 					continue
