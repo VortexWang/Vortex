@@ -1,0 +1,30 @@
+{
+  "base_sha": "e9920c151a47d16d512f7e3b62644b6ef227df6b",
+  "scope": "06-07 global group dependency revalidation;not complete plan",
+  "passed": [
+    "focused-native-corrected-race.log",
+    "final-focused-native-race.log",
+    "final-full-native-race.log",
+    "final-full-linux-race.log",
+    "generation-builds.json"
+  ],
+  "failed_retained": {
+    "missing-consumer-red.log": "missing durable consumer runtime interface",
+    "focused-native-race.log": "helper extraction compile failure, not semantic RED",
+    "missing-other-tenant-semantic-red.log": "Go overlay omits another tenant and evades its actual audit fault",
+    "missing-tenant-lock-semantic-red.log": "Go overlay omits tenant-first lock and holds rule head while blocked"
+  },
+  "evidence_sha256": {
+    "source-hashes.json": "6d8b54ab2283bb2f763e7463c959234bd564e439eb36d4a3024e468d30c7e524",
+    "missing-consumer-red.log": "d4feb3b6f62320fb8f8ec9d90d9bf1e2509ccb0dbcce32e6ce67fa2feaed49d7",
+    "generation-builds.json": "f219240f8a0fed38411f7f25386d31521d1c98deaacb1b6b923dcdbe82eacd76",
+    "README.md": "5ac0ad5485952ca9223be11447678e9dfe4d22a90f808b07e770838d652397a4",
+    "final-focused-native-race.log": "9a8f1aca01d2324b10e98fc948861e4059e8cad02e63689fe237002f95774c9e",
+    "missing-tenant-lock-semantic-red.log": "7cf68998331f8ab50a29505241b11167511352ee2a2dca4bd2b4fbd0cf7f93f4",
+    "focused-native-race.log": "ccb51ab93c371f915a2cdeee6007341d4b6ac0a86ae61312e1b2e8c440112ac9",
+    "final-full-linux-race.log": "cc06f1b3f951784f4570a6d4921aea6cb4bd65885274c8ffe478333de4e4a735",
+    "missing-other-tenant-semantic-red.log": "8bb9848e80874acb2aa1e38c68c66b5abcf9de6b4fe0a110e585e759d1b668a5",
+    "final-full-native-race.log": "f9f0ee7cd4f387a47a06b8f90ae667bfbccebe71e58d37ae5264a81c20815a4f",
+    "focused-native-corrected-race.log": "1bf813e811f70eb6f54cf1b834d1118cd8809a55822de0f914f4352b422bb868"
+  }
+}

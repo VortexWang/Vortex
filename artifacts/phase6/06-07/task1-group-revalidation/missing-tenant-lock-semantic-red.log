@@ -1,0 +1,17 @@
+2026/11/09 07:20:45 goose: no migrations to run. current version: 9
+2026/11/09 07:20:45 OK   00001_authority.sql (15.4ms)
+2026/11/09 07:20:45 OK   00002_tenant_policy.sql (9.33ms)
+2026/11/09 07:20:45 OK   00003_nodes_ports.sql (19.44ms)
+2026/11/09 07:20:45 OK   00004_entry_group_domains.sql (3.9ms)
+2026/11/09 07:20:45 OK   00005_rules_compile.sql (26.19ms)
+2026/11/09 07:20:45 OK   00006_packages_entitlements.sql (20.76ms)
+2026/11/09 07:20:45 OK   00007_metering_ledger.sql (31.63ms)
+2026/11/09 07:20:45 OK   00008_limits_shares.sql (61.55ms)
+2026/11/09 07:20:45 OK   00009_domain_events.sql (20.23ms)
+2026/11/09 07:20:45 goose: successfully migrated database to version: 9
+--- FAIL: TestGroupAndCompileWaitForTenantBeforeBusinessRows (0.55s)
+    --- FAIL: TestGroupAndCompileWaitForTenantBeforeBusinessRows/bind (0.03s)
+        group_lock_order_test.go:81: producer acquired business row before tenant ERROR: could not obtain lock on row in relation "rule_heads" (SQLSTATE 55P03)
+FAIL
+FAIL	vortex/backend/internal/service	1.256s
+FAIL

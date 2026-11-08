@@ -62,6 +62,9 @@ func (s RuleService) BindCompileInput(ctx context.Context, scope TenantScope, ta
 }
 
 func lockCompileTask(ctx context.Context, q *generated.Queries, scope TenantScope, task string) (generated.LockRuleCompileRequestRow, error) {
+	if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
+		return generated.LockRuleCompileRequestRow{}, e
+	}
 	b, e := q.GetRuleCompileRequest(ctx, generated.GetRuleCompileRequestParams{TenantID: scope.TenantID(), TaskID: task})
 	if e != nil {
 		return generated.LockRuleCompileRequestRow{}, e

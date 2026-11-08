@@ -218,6 +218,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	go func() {
 		failures <- fmt.Errorf("port release worker: %w", (worker.PortWorker{Pool: pool, Adapter: adapter}).Run(ctx))
 	}()
+	go func() {
+		failures <- fmt.Errorf("group revalidation worker: %w", (worker.GroupRevalidationWorker{Pool: pool}).Run(ctx))
+	}()
 	go func() { failures <- fmt.Errorf("package due worker: %w", (worker.PackageWorker{Pool: pool}).Run(ctx)) }()
 	go func() {
 		failures <- fmt.Errorf("usage reconciliation worker: %w", (worker.UsageReconciliationWorker{Pool: pool}).Run(ctx))
@@ -293,11 +296,13 @@ func serveHTTP(ctx context.Context, pool *pgxpool.Pool, args []string) error {
 	fmt.Printf("backend public API ready https=%s\n", listener.Addr())
 	runtime, cancel := context.WithCancel(ctx)
 	defer cancel()
-	failures := make(chan error, 2)
+	failures := make(chan error, 3)
 	go func() { failures <- httpapi.Serve(runtime, listener, server) }()
 	go func() { failures <- (worker.EventRetentionWorker{Pool: pool}).Run(runtime) }()
+	go func() { failures <- (worker.GroupRevalidationWorker{Pool: pool}).Run(runtime) }()
 	first := <-failures
 	cancel()
+	<-failures
 	<-failures
 	if ctx.Err() != nil {
 		return nil

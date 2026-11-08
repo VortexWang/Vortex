@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 group member HTTP verified; durable global group revalidation gap next"
-last_updated: "2026-11-08T22:47:50.705542+00:00"
+stopped_at: "06-07 global group revalidation full race verified; port operation/public adapters next"
+last_updated: "2026-11-08T23:27:45.741872+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-07 authorized stable lists and schema8 ordering backfill pass full native/Linux race, double sqlc and four builds;9/11."
+last_activity_desc: "06-07 package/group REST and durable global group revalidation; final full native/Linux backend race, double29 sqlc/four builds pass;9/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: fb520695
+state_head: e9920c15
 ---
 
 # Project State

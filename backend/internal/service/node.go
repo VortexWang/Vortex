@@ -72,10 +72,15 @@ func newDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope,
 	if err != nil {
 		return zero, err
 	}
+	return appendDomainTask(ctx, q, scope, kind, version, body)
+}
+
+func appendDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope, kind string, version int64, body []byte) (generated.Operation, error) {
+	zero := generated.Operation{}
 	id := uuid.NewString()
 	revision := int64(1)
 	digest := sha256.Sum256(body)
-	if _, err = q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: scope.TenantID(), ResourceID: id, TargetKind: "node", Revision: revision, ExpectedRevision: revision - 1, Payload: body, PayloadSha256: digest[:]}); err != nil {
+	if _, err := q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: scope.TenantID(), ResourceID: id, TargetKind: "node", Revision: revision, ExpectedRevision: revision - 1, Payload: body, PayloadSha256: digest[:]}); err != nil {
 		return zero, err
 	}
 	op, err := q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: scope.TenantID(), ResourceID: id, IdempotencyKey: id, RequestSha256: digest[:], TargetKind: "node", TargetRevision: revision, ExpectedRevision: revision - 1, Generation: version, Payload: body})
@@ -162,6 +167,11 @@ func (s NodeService) SetMembersWithOperation(ctx context.Context, scope TenantSc
 		}
 	}
 	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "group.members", ResourceID: group, RequestID: request, Reason: "replace fixed member set"}, func(q *generated.Queries) error {
+		// Rule producers take the tenant before group/head locks. Do not hold
+		// the group while waiting for a tenant locked by an editor.
+		if _, err := q.LockTenant(ctx, scope.TenantID()); err != nil {
+			return err
+		}
 		g, err := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: group, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
 		if err != nil {
 			return err
@@ -206,10 +216,17 @@ func (s NodeService) SetMembersWithOperation(ctx context.Context, scope TenantSc
 		if err = q.MarkGroupPortRevalidation(ctx, group); err != nil {
 			return err
 		}
-		if err = invalidateRules(ctx, q, scope, "group", group); err != nil {
-			return err
+		var op generated.Operation
+		if g.OwnerKind == "platform" {
+			// Cross-tenant invalidation runs only after releasing the group,
+			// with its own sorted tenant locks and per-tenant audit transaction.
+			op, err = newGroupRevalidationTask(ctx, q, scope, group, next.Version)
+		} else {
+			if err = invalidateRules(ctx, q, scope, "group", group); err != nil {
+				return err
+			}
+			op, err = newDomainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
 		}
-		op, err := newDomainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
 		if err != nil {
 			return err
 		}

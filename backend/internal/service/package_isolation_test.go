@@ -31,6 +31,7 @@ func isolatePackageAuthority(t *testing.T) {
 	}
 	query := u.Query()
 	query.Set("search_path", schema)
+	query.Set("application_name", schema)
 	u.RawQuery = query.Encode()
 	t.Setenv("PHASE6_DATABASE_URL", u.String())
 }

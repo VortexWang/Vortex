@@ -1,0 +1,16 @@
+2026/11/09 07:20:37 goose: no migrations to run. current version: 9
+2026/11/09 07:20:38 OK   00001_authority.sql (63.68ms)
+2026/11/09 07:20:38 OK   00002_tenant_policy.sql (17.28ms)
+2026/11/09 07:20:38 OK   00003_nodes_ports.sql (38.32ms)
+2026/11/09 07:20:38 OK   00004_entry_group_domains.sql (6.46ms)
+2026/11/09 07:20:38 OK   00005_rules_compile.sql (29.15ms)
+2026/11/09 07:20:38 OK   00006_packages_entitlements.sql (24.99ms)
+2026/11/09 07:20:38 OK   00007_metering_ledger.sql (42.58ms)
+2026/11/09 07:20:38 OK   00008_limits_shares.sql (67.21ms)
+2026/11/09 07:20:38 OK   00009_domain_events.sql (26.75ms)
+2026/11/09 07:20:38 goose: successfully migrated database to version: 9
+--- FAIL: TestGroupRevalidationAllTenantsAtomicReplayAndOriginalAuthority (0.80s)
+    group_revalidation_test.go:72: global audit failure escaped true <nil>
+FAIL
+FAIL	vortex/backend/internal/service	1.656s
+FAIL

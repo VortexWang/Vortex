@@ -44,6 +44,9 @@ func (s RuleService) CompileRevision(ctx context.Context, scope TenantScope, id 
 }
 
 func lockedCompileInput(ctx context.Context, q *generated.Queries, scope TenantScope, id string, revision int64, billing compiler.BillingSnapshot, signerEpoch, pathGeneration, fencingGeneration int64) (compiler.CompileInput, error) {
+	if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
+		return compiler.CompileInput{}, e
+	}
 	if e := validateBillingSnapshot(ctx, q, scope, id, billing); e != nil {
 		return compiler.CompileInput{}, e
 	}
