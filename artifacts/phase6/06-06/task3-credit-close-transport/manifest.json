@@ -1,0 +1,24 @@
+{
+  "base_commit": "819d7b53080f4f9a518f9e8f3308649d3ccd0117",
+  "scope": "candidate authenticated Node credit-close consumer; no PG receipt consumer/release or full06-06 acceptance",
+  "source": {
+    "agent/control.go": "3947475e8ba82e3335c85b46b396cd029c4d01a73a95d5965e80546d455f0ded",
+    "agent/credit_close_control.go": "5dcd2a6c53ed6c8007e76556421a3ea4281b894c613bfa19931e0705d6b86a40",
+    "agent/credit_close_control_test.go": "9c49a99405ea22a62fc20d56193c5c0b3316b6f30815fd887e953f8fdbefd4c4",
+    "contracts/credit_close.go": "d2dcf224b4bdfe4bb3c5bde1f7de61708d41300afc4883aa7fb148b4bce942ed",
+    "contracts/credit_close_test.go": "6ce066498280a8fd91a3fe3f7f9b0b770b3c14c466d8b1d9e737bd35ecdd692a",
+    "contracts/protobuf/v1/vortex.proto": "f9b3f68fe7ffb87ea4a8d974b145714c0332c7a01f7d25acb98a19f3610659b2",
+    "contracts/protobuf/v1/vortex.pb.go": "acf19feeaaebe74d56252c5e6fb377e73669ecaae402c5fd7c44341d3a67f4e3",
+    "contracts/protobuf/v1/vortex_grpc.pb.go": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+    "contracts/protobuf/v1/lifecycle.md": "ecdced35c1925a7522d2c8470e4759a9cf3325ce5a3283206e7be99536dc2217"
+  },
+  "evidence": {
+    "README.md": "64f06edcfa7dcb14333c18b33bf741379ff29ef0e3c3e75e5521570580f2e49f",
+    "backend-native-race.log": "e2cc1e659155675d67ebbc96cd55dcd6b7d69fb9eacdf1992ab0e6f905551265",
+    "focused-native.log": "0c9a1eabe02d258703fd454d088045b9dbc850be4f97d661a5b0b834d9c3cfbb",
+    "focused-scope-native.log": "5c190b67283706c3ff31ba308c4cb9f2c7a1bbefa1972cb0b8294c32f120ef66",
+    "full-native-race.log": "1d7b447a833099b859b7bb2a6484247e32daef0021787b1dc34acf1023145a27",
+    "generation.json": "bc605a9f9abd93bb4f84f2f65da2b753c6b274dd5e1e28f8ff14451e80500869",
+    "linux-race-build.log": "1389e8c798ad05357c302c73daf2fa0948f5704ffcdab8190858a2453b7d320d"
+  }
+}

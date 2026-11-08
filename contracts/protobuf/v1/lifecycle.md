@@ -297,3 +297,39 @@ it cannot finalize or recover that parent while bypassing the complete issued
 child/Node closure proof. This applies both to unresolved and risk-budget-settled
 parents. Ordinary nondelegated exact/risk reconciliation keeps its own existing
 semantics; issued delegated funds remain frozen pending dedicated closure.
+
+## Direct Node credit closure (1.6.0 candidate)
+
+Independent `credit-close-v1` is advertised only by a direct Node client with
+an explicit canonical backend UUID pinned to the verified TLS role identity.
+Regional Hub and legacy unpinned streams cannot execute these commands. Existing
+tags/behaviors remain unchanged; `NodeMessage.credit_close_receipt=22` and
+`ControlMessage.credit_close_command=21` carry canonical JSON plus its SHA256.
+`contracts/credit_close.go` defines strict bounded command/result envelopes.
+
+The command binds its immutable UUID, backend/Hub/Node/boot/grant identities,
+path generation and original funded1.2 Hub issue bytes. The Node validates the
+original against its current boot and Hub reference issuers without applying
+it, refreshing time or creating leases/roots. Installed grants require matching
+original lineage/amount/times (excluding the locally observed ShareRevision).
+Uninstalled grants require a FULL permanent identity tombstone before any
+zero-use witness; delayed matching installs remain revoked and changed scope
+is rejected. A new boot cannot manufacture absence evidence for a prior boot.
+
+Stop permanently denies further pre-write tickets. It never resolves existing
+tickets or closes sockets by assertion. Pending/unknown outcomes produce only
+`unsettled` without final evidence; expiry/ACK cannot replace a known outcome.
+Known terminal tickets, original payload digests and source conservation are
+verified in one transaction before an immutable local final snapshot is returned.
+The final JSON is the candidate `agent/store.CreditGrantFinal` record, including
+the complete `AuthorizationRecord`, Used/Unused, BatchCount/UsageSHA256 and optional
+NeverInstalled witness. The outer result binds the command SHA256 and exact
+target identities. Lost transport receipts replay durable evidence without
+reopening credit. This snapshot is evidence for a future dedicated PostgreSQL
+consumer, never financial acceptance or release authority by itself.
+
+Node consumption and actual TLS1.3 positive/negative/replay tests exist. Backend
+durable close task production, receipt acceptance and independent complete
+issuer/usage inventory verification are still pending; no end-to-end parent
+closure or sustained funding is implied. CR-008 is unprepared/unapproved and
+earlier approved contracts are unchanged.

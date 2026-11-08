@@ -1,0 +1,7 @@
+{
+  "independent_generations": 2,
+  "matched_outputs": {
+    "contracts/protobuf/v1/vortex.pb.go": "acf19feeaaebe74d56252c5e6fb377e73669ecaae402c5fd7c44341d3a67f4e3",
+    "contracts/protobuf/v1/vortex_grpc.pb.go": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+  }
+}
