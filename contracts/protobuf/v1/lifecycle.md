@@ -925,3 +925,24 @@ FULL CAS proof releases the proven capacity difference. Original issued/unknown
 credit remains held. Repeated PG recovery producers and a later cold recovery of
 an already transferred generation remain separate pending work. CR-008 remains
 unapproved and Phase6 remains8/11.
+
+
+## Repeated PostgreSQL same-store recovery producers (candidate)
+
+A later adjacent recovery derives its FromEpoch roots through every committed
+prior admission and exact Node FULL fence/root witness. The original allocation,
+delegation digest, source, generation, limits, raw parent and deadlines stay
+unchanged. Original installation receipts remain pinned to their original Hub
+boot. The initial Node provision is checked independently against original roots;
+the new inventory fence uses the proven effective FromEpoch root. Each next root
+revision requires its own authenticated FULL fence and receipt before admission.
+
+Complete prefix verification accepts exact registered historical issue bytes only
+at their own proven epoch/boot/sequence, and requires every registered issue from
+all epochs of each original linked allocation. Missing intermediate admission,
+unknown source history, missing earlier issue or a different cold parent denies.
+Current-state admission validates the effective share issuer while preserving the
+original closed row and original generation. It appends a new immutable admission
+and binds only the explicit next boot; local finite FULL ACK remains separate.
+Repeated service/store cycles do not by themselves complete platform orchestration,
+later cold recovery or production RuntimeServer convergence. CR-008 is unapproved.

@@ -615,7 +615,9 @@ func (q *Queries) HubSameStoreRecoveryByTargetBoot(ctx context.Context, arg HubS
 }
 
 const missingHubSameStoreIssues = `-- name: MissingHubSameStoreIssues :one
-SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND i.hub_boot_id=$2
+SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND (i.hub_boot_id=$2 OR EXISTS(
+ SELECT 1 FROM hub_same_store_recoveries r WHERE r.id=$3 AND EXISTS(
+ SELECT 1 FROM jsonb_array_elements(convert_from(r.payload,'UTF8')::jsonb->'allocations') link WHERE link->>'allocation_id'=i.allocation_id)))
  AND NOT EXISTS(SELECT 1 FROM hub_same_store_journal j WHERE j.recovery_id=$3 AND j.sequence=i.ledger_sequence AND j.sequence<=$4 AND j.kind='issue' AND j.record_id=i.issue_id AND j.payload=i.payload AND j.payload_digest=i.payload_digest))
 `
 

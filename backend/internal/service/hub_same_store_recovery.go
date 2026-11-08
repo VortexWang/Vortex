@@ -129,9 +129,6 @@ func (s ShareService) PrepareHubSameStoreRecovery(ctx context.Context, scope Ten
 			}
 			// A separate cold/older boot's unknown financial parent cannot be
 			// silently adopted as unissued R by this same-store command.
-			if record.HubBootID != in.FromBootID {
-				return ErrShareUnknown
-			}
 			installed, e := q.GetHubAllocationReceipt(ctx, generated.GetHubAllocationReceiptParams{TenantID: record.TenantID, AllocationID: record.AllocationID})
 			if e != nil {
 				if errors.Is(e, pgx.ErrNoRows) {
@@ -140,10 +137,14 @@ func (s ShareService) PrepareHubSameStoreRecovery(ctx context.Context, scope Ten
 				return e
 			}
 			wireHash := sha256.Sum256(record.Payload)
-			if !bytes.Equal(wireHash[:], record.PayloadDigest) || installed.HubID != in.HubID || installed.HubBootID != in.FromBootID || !bytes.Equal(installed.PayloadDigest, record.PayloadDigest) {
+			if !bytes.Equal(wireHash[:], record.PayloadDigest) || installed.HubID != in.HubID || installed.HubBootID != record.HubBootID || !bytes.Equal(installed.PayloadDigest, record.PayloadDigest) {
 				return ErrShareConflict
 			}
-			a, e := hub.DecodeAllocation(record.Payload)
+			originalAllocation, e := hub.DecodeAllocation(record.Payload)
+			if e != nil {
+				return e
+			}
+			a, _, e := effectiveHubAllocationTx(ctx, q, record, uint64(in.FromEpoch), in.FromBootID, lo)
 			if e != nil {
 				return e
 			}
@@ -164,7 +165,7 @@ func (s ShareService) PrepareHubSameStoreRecovery(ctx context.Context, scope Ten
 			if !ok || !hi.Before(a.ExpiresAt) || !hi.Before(a.HardDeadline) || !hi.Before(a.AutonomyDeadline) || !hi.Before(approval.AutonomyUntil.Time) {
 				return ErrLeaseBoundary
 			}
-			original, e := json.Marshal(a.Delegation())
+			original, e := json.Marshal(originalAllocation.Delegation())
 			if e != nil {
 				return e
 			}

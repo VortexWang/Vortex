@@ -1,0 +1,37 @@
+2026/11/08 23:51:42 goose: no migrations to run. current version: 8
+2026/11/08 23:51:42 OK   00001_authority.sql (23.76ms)
+2026/11/08 23:51:42 OK   00002_tenant_policy.sql (15.49ms)
+2026/11/08 23:51:42 OK   00003_nodes_ports.sql (46.84ms)
+2026/11/08 23:51:42 OK   00004_entry_group_domains.sql (4.04ms)
+2026/11/08 23:51:42 OK   00005_rules_compile.sql (37.39ms)
+2026/11/08 23:51:42 OK   00006_packages_entitlements.sql (17.16ms)
+2026/11/08 23:51:42 OK   00007_metering_ledger.sql (22.36ms)
+2026/11/08 23:51:42 OK   00008_limits_shares.sql (49.06ms)
+2026/11/08 23:51:42 goose: successfully migrated database to version: 8
+2026/11/08 23:51:44 goose: no migrations to run. current version: 8
+2026/11/08 23:51:44 OK   00001_authority.sql (8.71ms)
+2026/11/08 23:51:44 OK   00002_tenant_policy.sql (18.24ms)
+2026/11/08 23:51:44 OK   00003_nodes_ports.sql (41.95ms)
+2026/11/08 23:51:44 OK   00004_entry_group_domains.sql (5.66ms)
+2026/11/08 23:51:44 OK   00005_rules_compile.sql (18ms)
+2026/11/08 23:51:44 OK   00006_packages_entitlements.sql (16.67ms)
+2026/11/08 23:51:44 OK   00007_metering_ledger.sql (22.49ms)
+2026/11/08 23:51:44 OK   00008_limits_shares.sql (48.48ms)
+2026/11/08 23:51:44 goose: successfully migrated database to version: 8
+--- FAIL: TestHubRepeatedPrefixRequiresIssuesFromEveryOriginalEpoch (1.29s)
+    hub_repeated_recovery_test.go:265: ERROR: column "tenant_id" does not exist (SQLSTATE 42703)
+2026/11/08 23:51:46 goose: no migrations to run. current version: 8
+2026/11/08 23:51:46 OK   00001_authority.sql (8.36ms)
+2026/11/08 23:51:46 OK   00002_tenant_policy.sql (7.22ms)
+2026/11/08 23:51:46 OK   00003_nodes_ports.sql (16.47ms)
+2026/11/08 23:51:46 OK   00004_entry_group_domains.sql (2.05ms)
+2026/11/08 23:51:46 OK   00005_rules_compile.sql (16.48ms)
+2026/11/08 23:51:46 OK   00006_packages_entitlements.sql (15.56ms)
+2026/11/08 23:51:46 OK   00007_metering_ledger.sql (21.21ms)
+2026/11/08 23:51:46 OK   00008_limits_shares.sql (48.9ms)
+2026/11/08 23:51:46 goose: successfully migrated database to version: 8
+--- FAIL: TestHubRepeatedApprovalCannotSkipPriorAdmission (1.13s)
+    hub_repeated_recovery_test.go:283: ERROR: column "tenant_id" does not exist (SQLSTATE 42703)
+FAIL
+FAIL	vortex/backend/internal/service	5.251s
+FAIL

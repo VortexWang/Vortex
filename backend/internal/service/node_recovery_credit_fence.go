@@ -90,7 +90,7 @@ func (s ShareService) PrepareNodeRecoveryCreditFence(ctx context.Context, scope 
 			return e
 		}
 		h := sha256.Sum256(a.Payload)
-		if hex.EncodeToString(h[:]) != c.Allocations[index].PayloadSHA256 || !bytes.Equal(h[:], a.PayloadDigest) || a.HubID != c.HubID || a.HubBootID != c.FromBootID {
+		if hex.EncodeToString(h[:]) != c.Allocations[index].PayloadSHA256 || !bytes.Equal(h[:], a.PayloadDigest) || a.HubID != c.HubID {
 			return ErrShareConflict
 		}
 		decoded, e := hub.DecodeAllocation(a.Payload)
@@ -117,6 +117,10 @@ func (s ShareService) PrepareNodeRecoveryCreditFence(ctx context.Context, scope 
 		ph := sha256.Sum256(provision.Payload)
 		if e != nil || !bytes.Equal(ph[:], provision.PayloadDigest) || source.BackendID != c.BackendID || provision.BackendID != c.BackendID || source.NodeID != a.NodeID || source.BootID != a.BootID || !jsonEqual(source.Roots, decoded.ShareReferences) {
 			return ErrShareConflict
+		}
+		decoded, _, e = effectiveHubAllocationTx(ctx, q, a, c.Handoff.FromEpoch, c.FromBootID, time.Time{})
+		if e != nil {
+			return e
 		}
 		lo, hi, e := s.bounds()
 		if e != nil {

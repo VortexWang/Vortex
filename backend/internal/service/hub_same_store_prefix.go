@@ -227,8 +227,11 @@ func verifySameStoreFinancialIssue(ctx context.Context, q *generated.Queries, hu
 		}
 		return e
 	}
-	if prior.AllocationID != a.AllocationID || prior.HubID != hubID || prior.HubBootID != a.HubBootID || prior.LedgerSequence != r.Sequence || !bytes.Equal(prior.Payload, r.Payload) || !bytes.Equal(prior.PayloadDigest, r.PayloadDigest) {
+	if prior.AllocationID != a.AllocationID || prior.HubID != hubID || prior.LedgerSequence != r.Sequence || !bytes.Equal(prior.Payload, r.Payload) || !bytes.Equal(prior.PayloadDigest, r.PayloadDigest) {
 		return ErrShareConflict
+	}
+	if _, _, e = effectiveHubAllocationTx(ctx, q, a, p.SignerEpoch, prior.HubBootID, p.IssuedAt); e != nil {
+		return e
 	}
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -132,10 +133,10 @@ func (s ShareService) PrepareNodeRecoverySources(ctx context.Context, scope Tena
 			return e
 		}
 		h := sha256.Sum256(a.Payload)
-		if !bytes.Equal(h[:], a.PayloadDigest) || hex.EncodeToString(h[:]) != c.Allocations[index].PayloadSHA256 || a.HubID != c.HubID || a.HubBootID != c.FromBootID || a.NodeID != f.NodeID || a.BootID != f.BootID || a.DelegationID != f.ParentID {
+		if !bytes.Equal(h[:], a.PayloadDigest) || hex.EncodeToString(h[:]) != c.Allocations[index].PayloadSHA256 || a.HubID != c.HubID || a.NodeID != f.NodeID || a.BootID != f.BootID || a.DelegationID != f.ParentID {
 			return ErrShareConflict
 		}
-		decoded, e := hub.DecodeAllocation(a.Payload)
+		decoded, _, e := effectiveHubAllocationTx(ctx, q, a, c.Handoff.FromEpoch, c.FromBootID, time.Time{})
 		if e != nil {
 			return e
 		}

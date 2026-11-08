@@ -1,0 +1,30 @@
+[
+  {
+    "component": "backend",
+    "arch": "amd64",
+    "exit_code": 0,
+    "sha256": "a36b497d2b9d8cd598f5af9f2976f82bc2ec973d362ab393f42daf8e79a3ebe7",
+    "output": ""
+  },
+  {
+    "component": "hub",
+    "arch": "amd64",
+    "exit_code": 0,
+    "sha256": "2be9b7bbcb675df4b8c625f82bbbc2d94cd0b65ec87dc6c322286906eacd648d",
+    "output": ""
+  },
+  {
+    "component": "backend",
+    "arch": "arm64",
+    "exit_code": 0,
+    "sha256": "2298cb0033396bacccafebc51a4f154c0f5cf2037ac8739bcdcae90c72f25287",
+    "output": ""
+  },
+  {
+    "component": "hub",
+    "arch": "arm64",
+    "exit_code": 0,
+    "sha256": "327f94231fa08569b821a810098fab858bba0c06decb04211f55a084abecf761",
+    "output": ""
+  }
+]

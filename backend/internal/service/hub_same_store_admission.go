@@ -156,11 +156,11 @@ func (s ShareService) AdmitHubSameStore(ctx context.Context, scope TenantScope, 
 				return e
 			}
 			index, ok := links[a.AllocationID]
-			if !ok || a.HubBootID != c.FromBootID {
+			if !ok {
 				return ErrShareUnknown
 			}
 			unsealed++
-			decoded, e := hub.DecodeAllocation(a.Payload)
+			decoded, _, e := effectiveHubAllocationTx(ctx, q, a, c.Handoff.FromEpoch, c.FromBootID, lo)
 			if e != nil {
 				return e
 			}
@@ -225,7 +225,7 @@ func (s ShareService) AdmitHubSameStore(ctx context.Context, scope TenantScope, 
 				if e != nil {
 					return e
 				}
-				if g.SignerID != c.HubID || g.SignerEpoch != int64(c.Handoff.FromEpoch) || g.BootID != a.BootID || g.FencingGeneration > int64(decoded.FencingFloor) || !hi.Before(g.OwnershipUntil.Time) || !hi.Before(g.PolicyUntil.Time) || !hi.Before(g.AutonomyUntil.Time) {
+				if g.SignerID != c.HubID || g.BootID != a.BootID || g.FencingGeneration > int64(decoded.FencingFloor) || !hi.Before(g.OwnershipUntil.Time) || !hi.Before(g.PolicyUntil.Time) || !hi.Before(g.AutonomyUntil.Time) {
 					return ErrShareUnknown
 				}
 				if chain.HeldAmount < g.Amount || (b.Kind == "rate" && uint64(g.Amount) < decoded.RateBPS) || (b.Kind == "connections" && uint64(g.Amount) < decoded.Connections) {
@@ -239,7 +239,11 @@ func (s ShareService) AdmitHubSameStore(ctx context.Context, scope TenantScope, 
 				if e != nil {
 					return e
 				}
-				if barrier || authority.ClosedAt.Valid || authority.SignerEpoch != int64(c.Handoff.FromEpoch) {
+				issuer, e := effectiveShareIssuerTx(ctx, q, g, authority)
+				if e != nil {
+					return e
+				}
+				if barrier || (!issuer.Recovered && authority.ClosedAt.Valid) || issuer.Epoch != int64(c.Handoff.FromEpoch) {
 					return ErrShareUnknown
 				}
 				covered[fmt.Sprintf("%s/%s/%s/%d", a.TenantID, b.NodeID, b.Kind, b.Generation)] = true
