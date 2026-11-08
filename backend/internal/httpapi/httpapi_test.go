@@ -338,6 +338,10 @@ func TestHTTPRuleMutationExplicitIfMatchAcceptedOperationAndStaleConflict(t *tes
 	if w = call(`"1"`); w.Code != 412 {
 		t.Fatal("stale revision", w.Code, w.Body)
 	}
+	read := f.request(t, "GET", path, f.pair.AccessToken, "")
+	if read.Code != 200 || !strings.Contains(read.Body.String(), `"desired_revision": 2`) || !strings.Contains(read.Body.String(), `"active_revision": 0`) || !strings.Contains(read.Body.String(), `"sync_status": "pending"`) {
+		t.Fatal("accepted desired state confused with applied", read.Code, read.Body)
+	}
 	var revisions, work int
 	if e = f.pool.QueryRow(ctx, `SELECT count(*) FROM rule_revisions WHERE tenant_id=$1 AND rule_id=$2`, f.tenant, rule.ID).Scan(&revisions); e != nil {
 		t.Fatal(e)

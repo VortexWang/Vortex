@@ -1,0 +1,26 @@
+{
+  "base_sha": "9f1efedc3a5a5cc83990f01e554f59681a8ba365",
+  "scope": "06-07 bounded detail reads;not complete plan",
+  "passed": [
+    "final-native-race.log",
+    "final-linux-race.log",
+    "generation-builds.json"
+  ],
+  "failed_retained": {
+    "routes-red.log": "missing routes plus independent bad fixture scope",
+    "initial-native-race.log": "Subscribe fixture wrong action",
+    "corrected-native-race.log": "JSON whitespace assertion",
+    "reads-native-race.log": "same whitespace assertion"
+  },
+  "evidence_sha256": {
+    "README.md": "d6c2396598dabe4423d949ce21b4433956074047c98047bec3c48a91cde9d2b0",
+    "corrected-native-race.log": "a4fc4b452e85b74f879fa69febdea0510282d0faa5bd4d6cdd732679735f9a39",
+    "final-linux-race.log": "d02accab04ba3eb5d83e54cfab61d00a22d14b3dacd5f5d6b12cb0808e0a3b3b",
+    "final-native-race.log": "0ba91ea30aa041bfd4d13fd7fd2692dd33aafe0a224166f80b901b3e2d4866af",
+    "generation-builds.json": "810c62cd39945b18620dba4ffa0e23e3af203571c515c627f27c401e86982625",
+    "initial-native-race.log": "cb9b96f67f12119de1a36cdf658afec41c2c785a64b42214877a080b513fa052",
+    "reads-native-race.log": "acfac569278e2fd245b71ae9f7ff43d9d694e1135345084b1a0afea0fc36f2c8",
+    "routes-red.log": "a233d9936ba9732a79edb330176437f0618116f32a6536b0c51480190e93978e",
+    "source-hashes.json": "1d21f50bd6f8d22dfefd5726e86592366703b1977b6d40b4f35bda263cd0ecdc"
+  }
+}

@@ -61,6 +61,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	r.POST("/api/v1/auth/refresh", a.refresh)
 	secured := r.Group("/api/v1", a.authenticate)
 	secured.POST("/auth/logout", a.logout)
+	a.registerResourceReads(secured)
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)
