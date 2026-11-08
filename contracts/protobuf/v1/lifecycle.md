@@ -165,3 +165,44 @@ production runtime NodeControl, explicit boot/epoch recovery and complete parent
 closure/remainder return. A delayed first installation outside its original fresh
 heartbeat window fails closed; no timeout frees its parent hold. These limits are
 not a completed Phase 6 acceptance claim. No protobuf field number changes here.
+
+
+## Direct Node source provisioning (1.6.0 candidate)
+
+NodeMessage tag 21 is SourceProvisionReceipt; ControlMessage tag 20 is
+SourceProvisionCommand. Both contain bounded canonical UTF-8 JSON payload and
+SHA-256. All old tags and runtime/authorization semantics remain unchanged.
+The Node Heartbeat advertises `source-provision-v1` only on a direct control
+client explicitly configured with a canonical source backend UUID (node CLI
+`--source-backend-id`). Regional Hub control cannot enable this capability or
+send this command. The verified server CN/sole DNS SAN must equal that configured
+backend UUID; deployment supplies the dedicated backend CA for this direct client.
+The backend sends no source message to legacy or unknown-version capabilities.
+
+The source_provision payload binds version 1, provision_id=allocation_id,
+backend_id, node_id, current boot_id, issued_at and exactly three finite roots
+from an immutable PG-funded allocation. Every root is parentless, belongs to the
+same Node/Hub/epoch/rule/revision/path, and has a distinct source/share ID. Roots
+are limits on future authorization validation, not credit grants or runtime
+leases. PG validates current Node incarnation and original allocation expiry,
+persists exact bytes, operation/task/Outbox and shared audit before transport.
+
+The authenticated Agent validates its local boot and explicit backend identity,
+checks trusted conservative time for first installation, and commits all roots,
+provision bytes and the deterministic receipt in one FULL SQLite transaction.
+Any disk failure rolls the whole bundle back. Same provision ID plus changed bytes
+rejects. An exact durable replay can return its original receipt even after time
+trust is lost: it creates no new root, balance, lease or listener. A new boot can
+never replay the old boot's receipt. The JSON receipt contains version, provision,
+backend, Node, boot and original payload SHA-256; its outer protobuf digest covers
+those receipt bytes.
+
+Only the currently authenticated Node stream can commit the matching receipt to
+PG. Shared audit, immutable receipt, original operation/task completion and Outbox
+delivery commit together. They prove root installation only, never runtime
+activation or permission to return funds. Transport failure leaves the original
+delivery pending and original funding held; reconnect retries exact bytes. The
+production backend worker reads committed PG candidates and handles independent
+candidate errors without aborting the rest of the current bounded page. Complete
+boot recovery, stale candidate maintenance and runtime lease delivery remain
+separate work; no timeout drops unknown financial occupation.

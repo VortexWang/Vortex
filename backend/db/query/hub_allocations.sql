@@ -41,3 +41,13 @@ SELECT * FROM hub_allocation_receipts WHERE tenant_id=$1 AND allocation_id=$2;
 INSERT INTO hub_allocation_receipts(tenant_id,allocation_id,hub_id,hub_boot_id,payload_digest) VALUES($1,$2,$3,$4,$5);
 -- name: HubBootHasInstalledAllocation :one
 SELECT EXISTS(SELECT 1 FROM hub_allocation_receipts WHERE hub_id=$1 AND hub_boot_id=$2);
+-- name: NodeSourceCandidates :many
+SELECT a.* FROM hub_funded_allocations a WHERE NOT EXISTS(SELECT 1 FROM node_source_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 100;
+-- name: GetNodeSourceProvision :one
+SELECT * FROM node_source_provisions WHERE tenant_id=$1 AND allocation_id=$2;
+-- name: AppendNodeSourceProvision :exec
+INSERT INTO node_source_provisions(tenant_id,allocation_id,node_id,boot_id,backend_id,operation_id,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8);
+-- name: GetNodeSourceReceipt :one
+SELECT * FROM node_source_receipts WHERE tenant_id=$1 AND allocation_id=$2;
+-- name: AppendNodeSourceReceipt :exec
+INSERT INTO node_source_receipts(tenant_id,allocation_id,payload,payload_digest) VALUES($1,$2,$3,$4);

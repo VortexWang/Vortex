@@ -1,0 +1,19 @@
+{
+  "scope": "06-06 Task3 Node source anchor provisioning, development source",
+  "base_commit": "02ff815117457ff22a92a4d0d4c3421cd2bd5ed0",
+  "source_clean": false,
+  "validation": [
+    "real TLS 1.3 source delivery: FULL success with lost receipt, exact reconnect replay and PG completion",
+    "explicit backend identity and opt-in capability isolation",
+    "source prepare and receipt audit rollback; original source funds remain held",
+    "complete local backend service/control/worker race and Agent/store/Hub/contracts race passed",
+    "focused Docker Linux arm64 race passed",
+    "two independent clean protobuf and sqlc generations match repository",
+    "local go vet passed"
+  ],
+  "limits": [
+    "not clean-source Docker or Actions acceptance",
+    "06-06 Task3 incomplete; no CR-008 approval",
+    "production runtime delivery, scheduling, boot recovery and complete funded-parent closure pending"
+  ]
+}

@@ -125,6 +125,56 @@ func (q *Queries) AppendHubIssue(ctx context.Context, arg AppendHubIssueParams) 
 	return err
 }
 
+const appendNodeSourceProvision = `-- name: AppendNodeSourceProvision :exec
+INSERT INTO node_source_provisions(tenant_id,allocation_id,node_id,boot_id,backend_id,operation_id,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+`
+
+type AppendNodeSourceProvisionParams struct {
+	TenantID      string
+	AllocationID  string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendNodeSourceProvision(ctx context.Context, arg AppendNodeSourceProvisionParams) error {
+	_, err := q.db.Exec(ctx, appendNodeSourceProvision,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.NodeID,
+		arg.BootID,
+		arg.BackendID,
+		arg.OperationID,
+		arg.Payload,
+		arg.PayloadDigest,
+	)
+	return err
+}
+
+const appendNodeSourceReceipt = `-- name: AppendNodeSourceReceipt :exec
+INSERT INTO node_source_receipts(tenant_id,allocation_id,payload,payload_digest) VALUES($1,$2,$3,$4)
+`
+
+type AppendNodeSourceReceiptParams struct {
+	TenantID      string
+	AllocationID  string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendNodeSourceReceipt(ctx context.Context, arg AppendNodeSourceReceiptParams) error {
+	_, err := q.db.Exec(ctx, appendNodeSourceReceipt,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.Payload,
+		arg.PayloadDigest,
+	)
+	return err
+}
+
 const bindHubIncarnation = `-- name: BindHubIncarnation :exec
 INSERT INTO hub_signer_incarnations(hub_id,signer_epoch,boot_id) VALUES($1,$2,$3)
 `
@@ -290,6 +340,52 @@ func (q *Queries) GetHubIssue(ctx context.Context, arg GetHubIssueParams) (HubIs
 	return i, err
 }
 
+const getNodeSourceProvision = `-- name: GetNodeSourceProvision :one
+SELECT tenant_id, allocation_id, node_id, boot_id, backend_id, operation_id, payload, payload_digest FROM node_source_provisions WHERE tenant_id=$1 AND allocation_id=$2
+`
+
+type GetNodeSourceProvisionParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) GetNodeSourceProvision(ctx context.Context, arg GetNodeSourceProvisionParams) (NodeSourceProvision, error) {
+	row := q.db.QueryRow(ctx, getNodeSourceProvision, arg.TenantID, arg.AllocationID)
+	var i NodeSourceProvision
+	err := row.Scan(
+		&i.TenantID,
+		&i.AllocationID,
+		&i.NodeID,
+		&i.BootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
+const getNodeSourceReceipt = `-- name: GetNodeSourceReceipt :one
+SELECT tenant_id, allocation_id, payload, payload_digest FROM node_source_receipts WHERE tenant_id=$1 AND allocation_id=$2
+`
+
+type GetNodeSourceReceiptParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) GetNodeSourceReceipt(ctx context.Context, arg GetNodeSourceReceiptParams) (NodeSourceReceipt, error) {
+	row := q.db.QueryRow(ctx, getNodeSourceReceipt, arg.TenantID, arg.AllocationID)
+	var i NodeSourceReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.AllocationID,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
 const hubAllocationByDelegation = `-- name: HubAllocationByDelegation :one
 SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, hub_boot_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE delegation_id=$1
 `
@@ -426,6 +522,45 @@ func (q *Queries) LatestHubIncarnation(ctx context.Context, hubID string) (HubSi
 	var i HubSignerIncarnation
 	err := row.Scan(&i.HubID, &i.SignerEpoch, &i.BootID)
 	return i, err
+}
+
+const nodeSourceCandidates = `-- name: NodeSourceCandidates :many
+SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a WHERE NOT EXISTS(SELECT 1 FROM node_source_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 100
+`
+
+func (q *Queries) NodeSourceCandidates(ctx context.Context) ([]HubFundedAllocation, error) {
+	rows, err := q.db.Query(ctx, nodeSourceCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubFundedAllocation{}
+	for rows.Next() {
+		var i HubFundedAllocation
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.AllocationID,
+			&i.DelegationID,
+			&i.ReservationID,
+			&i.HubID,
+			&i.HubBootID,
+			&i.NodeID,
+			&i.BootID,
+			&i.RequestKey,
+			&i.RequestDigest,
+			&i.Payload,
+			&i.PayloadDigest,
+			&i.OperationID,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const pendingHubAllocations = `-- name: PendingHubAllocations :many

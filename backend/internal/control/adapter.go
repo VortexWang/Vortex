@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
+	"vortex/agent/store"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/compiler"
 	"vortex/backend/internal/repository"
@@ -67,7 +68,15 @@ type shareRequest struct {
 	result            chan error
 	ctx               context.Context
 }
+type sourceRequest struct {
+	command *controlv1.SourceProvisionCommand
+	boot    string
+	scope   service.TenantScope
+	result  chan error
+	ctx     context.Context
+}
 type session struct {
+	sources  chan sourceRequest
 	requests chan request
 	shares   chan shareRequest
 	rules    chan ruleRequest
@@ -210,7 +219,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
+	s := &session{sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -248,9 +257,13 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	sourceCapable := false
 	shareCapable := false
 	ruleCapable := false
 	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "source-provision-v1" {
+			sourceCapable = true
+		}
 		if capability == "share-cas-v1" {
 			shareCapable = true
 		}
@@ -262,6 +275,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	var pending *request
 	var pendingRule *ruleRequest
 	var pendingShare *shareRequest
+	var pendingSource *sourceRequest
 	for {
 		var pendingDone <-chan struct{}
 		if pending != nil {
@@ -273,17 +287,21 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		if pendingShare != nil {
 			pendingDone = pendingShare.ctx.Done()
 		}
+		if pendingSource != nil {
+			pendingDone = pendingSource.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
 			pendingRule = nil
 			pendingShare = nil
+			pendingSource = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil || pendingRule != nil || pendingShare != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -310,7 +328,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
 				r.result <- ruleOutcome{err: errors.New("target busy")}
 				continue
 			}
@@ -327,12 +345,30 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
 				return err
 			}
+		case r := <-s.sources:
+			if !sourceCapable || a.Shares == nil {
+				r.result <- errors.New("target lacks source-provision-v1")
+				continue
+			}
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
+				r.result <- errors.New("target busy")
+				continue
+			}
+			if r.boot != first.BootId || r.ctx.Err() != nil {
+				r.result <- errors.New("source target boot/request expired")
+				continue
+			}
+			pendingSource = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_SourceProvisionCommand{SourceProvisionCommand: r.command}}); err != nil {
+				return err
+			}
 		case r := <-s.shares:
 			if !shareCapable || a.Shares == nil {
 				r.result <- errors.New("target lacks share-cas-v1 authority")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -350,6 +386,35 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if receipt := message.GetSourceProvisionReceipt(); receipt != nil {
+				if pendingSource == nil {
+					continue
+				}
+				if len(receipt.Payload) > 16384 || len(receipt.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(sha256Bytes(receipt.Payload), receipt.PayloadSha256) {
+					return errors.New("invalid source receipt envelope")
+				}
+				var observation store.SourceProvisionReceipt
+				d := json.NewDecoder(bytes.NewReader(receipt.Payload))
+				d.DisallowUnknownFields()
+				if e := d.Decode(&observation); e != nil {
+					return e
+				}
+				var extra any
+				if d.Decode(&extra) != io.EOF {
+					return errors.New("source receipt trailing payload")
+				}
+				pinned, e := store.DecodeSourceProvision(pendingSource.command.Payload)
+				if e != nil {
+					return e
+				}
+				if observation.ID != pinned.ID || observation.Digest != fmt.Sprintf("%x", pendingSource.command.PayloadSha256) || observation.NodeID != id || observation.BootID != first.BootId {
+					return errors.New("source receipt target mismatch")
+				}
+				e = a.Shares.RecordNodeSources(stream.Context(), pendingSource.scope, observation, uuid.NewString())
+				pendingSource.result <- e
+				pendingSource = nil
+				continue
+			}
 			if receipt := message.GetShareReceipt(); receipt != nil {
 				if pendingShare == nil {
 					continue

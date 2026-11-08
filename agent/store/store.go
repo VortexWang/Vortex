@@ -517,7 +517,10 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if err := s.migratePolicyTransitions(); err != nil {
 		return err
 	}
-	return s.migrateUsageOrigin()
+	if err := s.migrateUsageOrigin(); err != nil {
+		return err
+	}
+	return s.migrateSourceProvisions()
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative

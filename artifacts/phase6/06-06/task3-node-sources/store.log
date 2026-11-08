@@ -1,0 +1,5 @@
+--- FAIL: TestSourceProvisionFULLRollbackReplayAndNoRuntimeAuthority (0.15s)
+    source_provision_test.go:58: roots created executable or financial rights authorizations 0 SQL logic error: no such table: authorizations (1)
+FAIL
+FAIL	vortex/agent/store	0.830s
+FAIL

@@ -28,6 +28,7 @@ message NodeMessage {
     RenewalRequest renewal_request = 18;
     RuleReceipt rule_receipt = 19;
     ShareReceipt share_receipt = 20;
+    SourceProvisionReceipt source_provision_receipt = 21;
   }
 }
 
@@ -45,6 +46,7 @@ message ControlMessage {
     CredentialRevocations credential_revocations = 17;
     RuleCommand rule_command = 18;
     ShareCommand share_command = 19;
+    SourceProvisionCommand source_provision_command = 20;
   }
 }
 
@@ -314,3 +316,8 @@ message ShareReceipt {
   bytes payload = 1;
   bytes payload_sha256 = 2;
 }
+
+// Direct backend-only source roots. Negotiated source-provision-v1; no runtime
+// lease, credit or Node activation can be inferred from this receipt.
+message SourceProvisionCommand { bytes payload = 1; bytes payload_sha256 = 2; }
+message SourceProvisionReceipt { bytes payload = 1; bytes payload_sha256 = 2; }

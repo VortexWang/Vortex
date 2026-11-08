@@ -44,3 +44,34 @@ func TestShareHandoffLegacyCapabilityNeverReceivesCAS(t *testing.T) {
 		<-done
 	}
 }
+
+func TestSourceProvisionLegacyCapabilityNeverReceivesRoots(t *testing.T) {
+	const node = "00000000-0000-4000-8000-000000000001"
+	const boot = "00000000-0000-4000-8000-000000000002"
+	for _, caps := range [][]string{nil, {"source-provision-v2"}, {"share-cas-v1"}} {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		cert := &x509.Certificate{DNSNames: []string{node}, Subject: pkix.Name{CommonName: node}}
+		ctx = peer.NewContext(ctx, &peer.Peer{AuthInfo: credentials.TLSInfo{State: tls.ConnectionState{Version: tls.VersionTLS13, PeerCertificates: []*x509.Certificate{cert}, VerifiedChains: [][]*x509.Certificate{{cert}}}}})
+		s := &ruleStream{ctx: ctx, in: make(chan *controlv1.NodeMessage, 1), out: make(chan *controlv1.ControlMessage, 1)}
+		ready := make(chan struct{})
+		a := &Adapter{Shares: &service.ShareService{}, Observe: func(context.Context, string, string, []byte) error { close(ready); return nil }}
+		s.in <- &controlv1.NodeMessage{NodeId: node, BootId: boot, Sequence: 1, Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{Capabilities: caps}}}
+		done := make(chan error, 1)
+		go func() { done <- a.Connect(s) }()
+		select {
+		case <-ready:
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		}
+		if e := a.DeliverSources(ctx, service.TenantScope{}, node, boot, &controlv1.SourceProvisionCommand{}); e == nil {
+			t.Fatal("legacy received sources")
+		}
+		select {
+		case <-s.out:
+			t.Fatal("sources sent without capability")
+		default:
+		}
+		cancel()
+		<-done
+	}
+}

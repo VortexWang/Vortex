@@ -38,6 +38,7 @@ type ControlClient struct {
 	currentStatus             *controlv1.HubStatus
 	reportMu                  sync.Mutex
 	reports                   chan *controlv1.NodeReport
+	SourceBackendID           string // explicit direct backend identity; never inferred from Hub metadata
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
@@ -97,6 +98,9 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 }
 
 func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) error {
+	if c != nil && c.SourceBackendID != "" && (!canonicalUUID(c.SourceBackendID) || regional != nil) {
+		return fmt.Errorf("agent: source provisioning backend requires direct control and canonical UUID")
+	}
 	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
@@ -192,6 +196,10 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	} else if !errors.Is(stateErr, sql.ErrNoRows) {
 		return stateErr
 	}
+	capabilities := []string{"rule-two-phase-v1", "share-cas-v1"}
+	if regional == nil && canonicalUUID(c.SourceBackendID) {
+		capabilities = append(capabilities, "source-provision-v1")
+	}
 	if err := stream.Send(&controlv1.NodeMessage{
 		NodeId:   c.Node.NodeID,
 		BootId:   c.Node.BootID,
@@ -199,7 +207,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{
 			AppliedConfigVersion: appliedVersion,
 			ObservedAt:           time.Now().UTC().Format(time.RFC3339Nano),
-			Capabilities:         []string{"rule-two-phase-v1", "share-cas-v1"},
+			Capabilities:         capabilities,
 		}},
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
@@ -444,6 +452,45 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_SourceProvisionCommand:
+				if regional != nil || !canonicalUUID(c.SourceBackendID) {
+					return fmt.Errorf("agent: source provisioning requires configured direct backend")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if issuer != c.SourceBackendID {
+					return fmt.Errorf("agent: wrong source provisioning backend identity")
+				}
+				command := body.SourceProvisionCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return store.ErrSourceProvision
+				}
+				provision, e := store.DecodeSourceProvision(command.Payload)
+				if e != nil || provision.NodeID != c.Node.NodeID || provision.BootID != c.Node.BootID || provision.BackendID != issuer {
+					return store.ErrSourceProvision
+				}
+				if c.Node.clock == nil {
+					return fmt.Errorf("agent: missing trusted boot clock")
+				}
+				if e = c.Node.clock.observe(provision.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
+					return e
+				}
+				low, high, trusted := c.Node.TrustedTime()
+				receipt, e := c.Node.Store.ApplySourceProvision(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Payload, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted})
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(receipt)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_SourceProvisionReceipt{SourceProvisionReceipt: &controlv1.SourceProvisionReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_ShareCommand:
 				if regional != nil {
 					return fmt.Errorf("agent: share CAS requires direct authenticated backend")

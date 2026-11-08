@@ -42,6 +42,7 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	dbPath := flags.String("db", "agent.db", "Agent SQLite path")
 	region := flags.String("region", "default", "configured control region")
 	controlConfig := flags.String("control-config", "", "approved runtime envelope containing lifecycle region/endpoints")
+	sourceBackendID := flags.String("source-backend-id", "", "explicit direct backend UUID allowed to provision finite source roots")
 	hubID := flags.String("hub-id", "", "configured Hub UUID for single --hub compatibility")
 	dialTimeout := flags.Duration("control-dial-timeout", 5*time.Second, "TLS and lifecycle readiness timeout")
 	watchdog := flags.Duration("control-watchdog", 15*time.Second, "current Hub status timeout")
@@ -315,7 +316,7 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 		reconciler.Apply = runtimeApply
 	}
 
-	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler}
+	client := &agent.ControlClient{SourceBackendID: *sourceBackendID, Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler}
 	n.SetHubModeObserver(func() string {
 		status := client.CurrentHubStatus()
 		if status == nil {

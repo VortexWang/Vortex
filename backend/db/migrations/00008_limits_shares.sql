@@ -173,6 +173,23 @@ CREATE TABLE hub_allocation_receipts (
  PRIMARY KEY(tenant_id,allocation_id), FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_allocation_receipt_immutable BEFORE UPDATE OR DELETE ON hub_allocation_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Direct backend root provisioning precedes usable Hub authorization at a Node.
+CREATE TABLE node_source_provisions (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, node_id text NOT NULL, boot_id text NOT NULL,
+ backend_id text NOT NULL, operation_id text NOT NULL, payload bytea NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER node_source_provision_immutable BEFORE UPDATE OR DELETE ON node_source_provisions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_source_receipts (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, payload bytea NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES node_source_provisions(tenant_id,allocation_id)
+);
+CREATE TRIGGER node_source_receipt_immutable BEFORE UPDATE OR DELETE ON node_source_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

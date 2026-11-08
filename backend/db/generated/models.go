@@ -316,6 +316,24 @@ type NodeGroupMember struct {
 	Priority int32
 }
 
+type NodeSourceProvision struct {
+	TenantID      string
+	AllocationID  string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+type NodeSourceReceipt struct {
+	TenantID      string
+	AllocationID  string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
 type Operation struct {
 	ID               string
 	TenantID         string
