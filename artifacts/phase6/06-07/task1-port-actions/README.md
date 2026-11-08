@@ -1,0 +1,13 @@
+# 06-07 versioned port commit/release/abort
+
+Development evidence based on a22917c0, not complete06-07 or clean same-SHA Docker/Actions acceptance.
+
+POST scoped port-allocations/{allocation_id}/{commit,release,abort} accepts a strict empty JSON object and positive strong If-Match. Version CAS happens under the allocation lock. Return202 uses the exact same-transaction operation, safe allocation fields, ETag and Location. Stale412 differs from valid-state409. No public control/proof/incarnation inputs.
+
+Commit additionally checks immutable authenticated prepare proofs for each original Node/task/incarnation/revision, rather than mutable flags alone. The commit operation succeeds inside the audited PG transaction: it confirms only the persisted port allocation stage, not Engine rule activation. It remains occupation_held=true. Release/abort persist per-Node tasks plus original frozen inventory binding; operation remains pending/unknown until every authenticated release proof is present. Historical unknown allocations without a binding cannot invent a smaller original inventory. Legacy service wrappers retain their idempotent state behavior, with strengthened commit proof verification.
+
+Candidate migration9 extends immutable port bindings to commit/release/abort, and the passive projection distinguishes release stages. It never mutates financial or port authority. Both fresh native/Linux port_actions DBs migrated; version9 port_operations DBs are old schema for this unit. Migration8/frozen contracts unchanged. Two independent30-file sqlc runs match checked-in outputs; four Backend/Hub amd64/arm64 builds pass.
+
+Evidence: broad related Port/Rule/Group/Serving/DNS/Restriction service race native16.519s and Linux11.112s; strict complete native API/auth/repository/policy/CLI race10.733s; Linux strict HTTP7.630s/CLI1.098s passed inside a command that later failed on a new fixture, so the combined final-strict-linux-race.log remains failed. Actual TLS-proof-to-HTTP test initially failed because the service fixture lacked a persisted users row, correctly rejected by token issuance. Only the fixture was corrected. Final intent suite, including actual role-mTLS-stored-proof→Bearer HTTP commit, audit completion rollback and replay, passes native2.675s/Linux1.710s. Earlier complete Linux API7.188s and related service11.112s also pass. No actual production Agent-wire/Engine activation claim.
+
+missing-proof-guard-red.log uses a Go overlay to omit the new immutable proof guard; mutable-confirmation attack assertion fails. Working source unchanged. Initial fixture failures are retained separately from semantic RED and final passing evidence.

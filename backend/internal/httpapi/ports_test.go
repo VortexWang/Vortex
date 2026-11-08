@@ -199,3 +199,98 @@ func TestHTTPPortPrepareRejectsChangedIncarnationAndAuditor(t *testing.T) {
 		t.Fatal(count, e)
 	}
 }
+
+func (f *apiFixture) mutatePortHTTP(t *testing.T, id, action, tag, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	r := httptest.NewRequest("POST", "/api/v1/tenants/"+f.tenant+"/port-allocations/"+id+"/"+action, strings.NewReader(body))
+	r.Header.Set("Authorization", "Bearer "+f.pair.AccessToken)
+	r.Header.Set("Content-Type", "application/json")
+	if tag != "" {
+		r.Header.Set("If-Match", tag)
+	}
+	w := httptest.NewRecorder()
+	f.handler.ServeHTTP(w, r)
+	return w
+}
+func TestHTTPPortActionsCASPendingReleaseAndNoPublicProof(t *testing.T) {
+	f := newAPI(t)
+	in := f.portInput(t)
+	w := f.preparePortHTTP(t, in)
+	var a struct {
+		ID string `json:"id"`
+	}
+	if e := json.Unmarshal(w.Body.Bytes(), &a); e != nil || w.Code != 202 {
+		t.Fatal(w.Code, w.Body, e)
+	}
+	if w := f.mutatePortHTTP(t, a.ID, "commit", `"1"`, `{}`); w.Code != 409 {
+		t.Fatal("commit accepted absent proofs", w.Code, w.Body)
+	}
+	for _, tag := range []string{"", `W/"1"`, `1`, `"0"`} {
+		w := f.mutatePortHTTP(t, a.ID, "release", tag, `{}`)
+		if w.Code != 400 && w.Code != 428 {
+			t.Fatal(w.Code, w.Body)
+		}
+	}
+	if w := f.mutatePortHTTP(t, a.ID, "release", `"1"`, `{"proof":"released"}`); w.Code != 400 {
+		t.Fatal(w.Code, w.Body)
+	}
+	if w := f.mutatePortHTTP(t, a.ID, "release", `"1"`, `null`); w.Code != 400 {
+		t.Fatal(w.Code, w.Body)
+	}
+	results := make(chan *httptest.ResponseRecorder, 8)
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func() { defer wg.Done(); results <- f.mutatePortHTTP(t, a.ID, "release", `"1"`, `{}`) }()
+	}
+	wg.Wait()
+	close(results)
+	accepted, stale := 0, 0
+	for w := range results {
+		if w.Code == 412 {
+			stale++
+			continue
+		}
+		if w.Code != 202 {
+			t.Fatal(w.Code, w.Body)
+		}
+		accepted++
+		var b struct {
+			Operation string `json:"operation_id"`
+			State     string `json:"state"`
+			Version   int64  `json:"version"`
+			Status    string `json:"sync_status"`
+		}
+		if e := json.Unmarshal(w.Body.Bytes(), &b); e != nil || b.State != "releasing" || b.Operation == "" || b.Version != 2 || b.Status != "pending" {
+			t.Fatal(b, e)
+		}
+		if w.Header().Get("ETag") != `"2"` {
+			t.Fatal(w.Header())
+		}
+		op := f.request(t, "GET", w.Header().Get("Location"), f.pair.AccessToken, "")
+		if op.Code != 200 || !strings.Contains(op.Body.String(), a.ID) || !strings.Contains(op.Body.String(), `"occupation_held":true`) {
+			t.Fatal(op.Code, op.Body)
+		}
+	}
+	if accepted != 1 || stale != 7 {
+		t.Fatal(accepted, stale)
+	}
+	var held int
+	if e := f.pool.QueryRow(context.Background(), `SELECT count(*) FROM port_reservations WHERE tenant_id=$1 AND allocation_id=$2 AND state<>'released'`, f.tenant, a.ID).Scan(&held); e != nil || held != 4 {
+		t.Fatal("HTTP freed occupancy", held, e)
+	}
+	other := newAPI(t)
+	if w := other.mutatePortHTTP(t, a.ID, "release", `"2"`, `{}`); w.Code != 404 {
+		t.Fatal(w.Code, w.Body)
+	}
+	// A separate uncommitted allocation can be aborted, still awaiting releases.
+	in["rule_id"] = uuid.NewString()
+	in["port"] = 20001
+	w = f.preparePortHTTP(t, in)
+	if e := json.Unmarshal(w.Body.Bytes(), &a); e != nil || w.Code != 202 {
+		t.Fatal(w.Code, w.Body, e)
+	}
+	if w := f.mutatePortHTTP(t, a.ID, "abort", `"1"`, `{}`); w.Code != 202 || !strings.Contains(w.Body.String(), `"state":"aborting"`) {
+		t.Fatal(w.Code, w.Body)
+	}
+}

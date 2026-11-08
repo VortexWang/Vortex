@@ -6,7 +6,7 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 safe public digest and port prepare/read verified; versioned commit/release adapters next"
+stopped_at: "06-07 versioned proof-bound port commit/release/abort verified; DNS/recovery adapters next"
 last_updated: "2026-11-08T23:36:40.178261+00:00"
 last_activity: 2026-11-08
 last_activity_desc: "06-07 package/group REST and durable global group revalidation; final full native/Linux backend race, double29 sqlc/four builds pass;9/11."
@@ -15,7 +15,7 @@ progress:
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: 012dd0d3
+state_head: a22917c0
 ---
 
 # Project State
@@ -218,3 +218,5 @@ Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 fro
 06-07 platform-admin catalog PUT now returns its exact transaction-bound operation; global empty-head advisory serialization covers cross-tenant concurrent creation, stale412 stays ErrConflict-compatible, audit failure returns zero result. Chinese names honor128-character boundary. Native/Linux complete HTTP/auth/repository/policy and Package/Entitlement service races plus four final builds pass; no SQL/schema/dependency/frozen contract change. Evidence: artifacts/phase6/06-07/task1-package-catalog/. Remaining confirmation/code/group/port/DNS/recovery adapters and concreteCR-009/unified checks;9/11.
 
 06-07 public opaque group digest and safe port prepare/read pass concurrent single-allocation, exact operation, audit rollback, changed-incarnation/auditor and cross-tenant negatives. Native API7.921s/service8.802s and Linux API7.059s/service7.324s race plus four cross-builds pass. No SQL/schema/dependency/frozen contract change;30-file generation inherited012dd0d3. Remaining commit/release/abort, DNS/recovery, exactCR-009 and unified checks;9/11,no SUMMARY.
+
+06-07 versioned port commit/release/abort now return exact stage operations with positive strongCAS. Commit requires original immutable prepare proofs; release/abort aggregate pending/unknown until full authenticated release. Native broad related service16.519s, strict API10.733s; Linux related service11.112s/strict HTTP7.630s; final actual-proof HTTP+intent suites native2.675s/Linux1.710s pass. Failed fixture logs retained; two30-file sqlc/four builds pass. Candidate9 extended; fresh port_actions native/Linux DBs migrated. No migration8/frozen change. Remaining DNS/recovery/exactCR-009/unified evidence;9/11,no SUMMARY.

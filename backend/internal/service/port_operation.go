@@ -41,7 +41,7 @@ func (s PortService) ReconcilePortOperation(ctx context.Context, tenant, operati
 		if e != nil {
 			return e
 		}
-		if task.TaskKind != "resource_change" || b.Action != "prepare" {
+		if task.TaskKind != "resource_change" || (b.Action != "prepare" && b.Action != "commit" && b.Action != "release" && b.Action != "abort") {
 			return ErrConflict
 		}
 		op, e := q.GetOperation(ctx, generated.GetOperationParams{TenantID: tenant, ID: operation})
@@ -54,7 +54,7 @@ func (s PortService) ReconcilePortOperation(ctx context.Context, tenant, operati
 			Version  int64  `json:"version"`
 		}
 		digest := sha256.Sum256(op.Payload)
-		if json.Unmarshal(op.Payload, &envelope) != nil || envelope.Action != "port.prepare.requested" || envelope.Resource != b.AllocationID || envelope.Version != b.AllocationVersion || op.Generation != b.AllocationVersion || !bytes.Equal(digest[:], op.RequestSha256) {
+		if json.Unmarshal(op.Payload, &envelope) != nil || envelope.Action != "port."+b.Action+".requested" || envelope.Resource != b.AllocationID || envelope.Version != b.AllocationVersion || op.Generation != b.AllocationVersion || !bytes.Equal(digest[:], op.RequestSha256) {
 			return ErrConflict
 		}
 		projection, e := q.GetPortOperationProjection(ctx, generated.GetPortOperationProjectionParams{TenantID: tenant, OperationID: operation})

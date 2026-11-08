@@ -18,3 +18,6 @@ UPDATE operations SET state=$3,occupation_held=$4 WHERE tenant_id=$1 AND id=$2;
 
 -- name: LockPortOperationTask :one
 SELECT * FROM tasks WHERE tenant_id=$1 AND operation_id=$2 AND task_kind='resource_change' FOR UPDATE;
+
+-- name: PortOriginalInventory :one
+SELECT expected_reservations FROM port_operation_bindings WHERE tenant_id=$1 AND allocation_id=$2 AND action='prepare' ORDER BY allocation_version LIMIT 1;

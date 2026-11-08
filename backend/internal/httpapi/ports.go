@@ -112,3 +112,52 @@ func (a *API) port(c *gin.Context) {
 	c.Header("ETag", `"`+strconv.FormatInt(result.Version, 10)+`"`)
 	c.JSON(200, publicPort(result))
 }
+
+func (a *API) mutatePort(action string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		s, ok := scope(c, policy.Mutate)
+		if !ok {
+			return
+		}
+		id := c.Param("allocation_id")
+		if !canonicalResource(id) || c.Request.URL.RawQuery != "" {
+			fail(c, 400, "invalid_request", "Invalid port allocation request", nil)
+			return
+		}
+		expected, ok := expectedRevision(c)
+		if !ok {
+			return
+		}
+		if expected < 1 {
+			fail(c, 400, "invalid_request", "Positive allocation revision required", nil)
+			return
+		}
+		var body *struct{}
+		if !decodeBody(c, &body) {
+			return
+		}
+		if body == nil {
+			fail(c, 400, "invalid_request", "Empty JSON object required", nil)
+			return
+		}
+		ports := service.PortService{Pool: a.config.Pool}
+		var result service.PortMutationResult
+		var e error
+		if action == "commit" {
+			result, e = ports.CommitPortWithOperation(c.Request.Context(), s, id, expected, requestID(c))
+		} else {
+			result, e = ports.ReleasePortWithOperation(c.Request.Context(), s, id, action, expected, requestID(c))
+		}
+		if e != nil {
+			portError(c, e)
+			return
+		}
+		c.Header("ETag", `"`+strconv.FormatInt(result.Version, 10)+`"`)
+		c.Header("Location", "/api/v1/tenants/"+s.TenantID()+"/operations/"+result.OperationID)
+		c.JSON(202, struct {
+			portSummary
+			OperationID string `json:"operation_id"`
+			SyncStatus  string `json:"sync_status"`
+		}{publicPort(result.PortAllocation), result.OperationID, result.OperationState})
+	}
+}

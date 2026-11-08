@@ -184,7 +184,7 @@ CREATE TRIGGER current_restrictions_public_order BEFORE INSERT OR UPDATE ON curr
 -- frozen reservation count; they never substitute for authenticated receipts.
 CREATE TABLE port_operation_bindings (
  tenant_id text NOT NULL, allocation_id text NOT NULL, operation_id text NOT NULL,
- action text NOT NULL CHECK(action='prepare'), allocation_version bigint NOT NULL CHECK(allocation_version>0),
+ action text NOT NULL CHECK(action IN ('prepare','commit','release','abort')), allocation_version bigint NOT NULL CHECK(allocation_version>0),
  actor_id text NOT NULL, expected_reservations integer NOT NULL CHECK(expected_reservations BETWEEN 1 AND 2048),
  PRIMARY KEY(tenant_id,operation_id), UNIQUE(tenant_id,allocation_id,action,allocation_version),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES port_allocations(tenant_id,id),
@@ -197,7 +197,7 @@ WITH evidence AS (
  SELECT b.*,a.state AS allocation_state,a.needs_revalidation,o.state AS actual_state,o.occupation_held AS actual_held,
  count(p.node_id) AS actual_reservations,
  COALESCE(bool_and(p.config_confirmed AND p.state='confirmed' AND pp.task_id IS NOT NULL),false) AS all_prepared,
- COALESCE(bool_or(p.state='unknown' OR pt.state='unknown'),false) AS has_unknown,
+ COALESCE(bool_or(p.state='unknown' OR pt.state='unknown' OR rt.state='unknown'),false) AS has_unknown,
  COALESCE(bool_and(p.state='released' AND rp.task_id IS NOT NULL),false) AS all_released
  FROM port_operation_bindings b
  JOIN port_allocations a ON a.tenant_id=b.tenant_id AND a.id=b.allocation_id
@@ -218,6 +218,11 @@ WITH evidence AS (
 )
 SELECT *,CASE
  WHEN actual_state IN ('succeeded','failed') THEN actual_state
+ WHEN action IN ('release','abort') THEN CASE
+  WHEN actual_reservations<>expected_reservations THEN 'unknown'
+  WHEN all_released AND allocation_state IN ('released','aborted') THEN 'succeeded'
+  WHEN has_unknown THEN 'unknown' ELSE 'pending' END
+ WHEN action='commit' THEN 'unknown'
  WHEN needs_revalidation OR allocation_state IN ('aborting','releasing','released','aborted') THEN 'failed'
  WHEN actual_reservations<>expected_reservations OR has_unknown THEN 'unknown'
  WHEN all_prepared THEN 'succeeded' ELSE 'pending' END::text AS desired_state,

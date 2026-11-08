@@ -116,6 +116,22 @@ func (q *Queries) LockPortOperationTask(ctx context.Context, arg LockPortOperati
 	return i, err
 }
 
+const portOriginalInventory = `-- name: PortOriginalInventory :one
+SELECT expected_reservations FROM port_operation_bindings WHERE tenant_id=$1 AND allocation_id=$2 AND action='prepare' ORDER BY allocation_version LIMIT 1
+`
+
+type PortOriginalInventoryParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) PortOriginalInventory(ctx context.Context, arg PortOriginalInventoryParams) (int32, error) {
+	row := q.db.QueryRow(ctx, portOriginalInventory, arg.TenantID, arg.AllocationID)
+	var expected_reservations int32
+	err := row.Scan(&expected_reservations)
+	return expected_reservations, err
+}
+
 const readyPortOperationProjections = `-- name: ReadyPortOperationProjections :many
 SELECT p.tenant_id,p.operation_id FROM port_operation_projection p JOIN operations o ON o.tenant_id=p.tenant_id AND o.id=p.operation_id
 WHERE p.actual_state<>p.desired_state OR p.actual_held<>p.desired_held

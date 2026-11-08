@@ -258,12 +258,30 @@ func lockAllocation(ctx context.Context, q *generated.Queries, scope TenantScope
 	return q.LockPortAllocation(ctx, generated.LockPortAllocationParams{TenantID: scope.TenantID(), ID: id})
 }
 func (s PortService) CommitPortReservation(ctx context.Context, scope TenantScope, id, request string) error {
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.commit", ResourceID: id, RequestID: request, Reason: "all fixed members confirmed"}, func(q *generated.Queries) error {
+	_, e := s.commitPort(ctx, scope, id, nil, request)
+	return e
+}
+
+func (s PortService) CommitPortWithOperation(ctx context.Context, scope TenantScope, id string, expected int64, request string) (PortMutationResult, error) {
+	if expected < 1 {
+		return PortMutationResult{}, ErrPrecondition
+	}
+	return s.commitPort(ctx, scope, id, &expected, request)
+}
+func (s PortService) commitPort(ctx context.Context, scope TenantScope, id string, expected *int64, request string) (PortMutationResult, error) {
+	var result PortMutationResult
+	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.commit", ResourceID: id, RequestID: request, Reason: "all fixed members confirmed"}, func(q *generated.Queries) error {
 		a, e := lockAllocation(ctx, q, scope, id)
 		if e != nil {
 			return e
 		}
+		if expected != nil && a.Version != *expected {
+			return ErrPrecondition
+		}
 		if a.State == "committed" {
+			if expected != nil {
+				return ErrConflict
+			}
 			return nil
 		}
 		if a.State != "preparing" || a.NeedsRevalidation {
@@ -294,9 +312,32 @@ func (s PortService) CommitPortReservation(ctx context.Context, scope TenantScop
 				return ErrConflict
 			}
 		}
-		_, e = q.CommitPortAllocation(ctx, generated.CommitPortAllocationParams{TenantID: scope.TenantID(), ID: id})
-		return e
+		// Mutable confirmation flags are not a substitute for the immutable
+		// authenticated receipt tied to each original Node/task incarnation.
+		if e = confirmedPortProofs(ctx, q, scope, a, rows); e != nil {
+			return e
+		}
+		next, e := q.CommitPortAllocation(ctx, generated.CommitPortAllocationParams{TenantID: scope.TenantID(), ID: id})
+		if e != nil {
+			return e
+		}
+		if expected != nil {
+			count, e := portIntentInventory(ctx, q, scope, a, rows)
+			if e != nil {
+				return e
+			}
+			op, e := appendPortIntent(ctx, q, scope, next, "commit", count, true)
+			if e != nil {
+				return e
+			}
+			result = PortMutationResult{PortAllocation: next, OperationID: op, OperationState: "succeeded"}
+		}
+		return nil
 	})
+	if err != nil {
+		return PortMutationResult{}, err
+	}
+	return result, nil
 }
 func (s PortService) AbortPortReservation(ctx context.Context, scope TenantScope, id, request string) error {
 	return s.release(ctx, scope, id, "abort", request)
@@ -308,12 +349,36 @@ func (s PortService) RequestRelease(ctx context.Context, scope TenantScope, id, 
 	return s.release(ctx, scope, id, reason, request)
 }
 func (s PortService) release(ctx context.Context, scope TenantScope, id, reason, request string) error {
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.release_requested", ResourceID: id, RequestID: request, Reason: "proof required: " + reason}, func(q *generated.Queries) error {
+	_, e := s.releasePort(ctx, scope, id, reason, nil, request)
+	return e
+}
+func (s PortService) ReleasePortWithOperation(ctx context.Context, scope TenantScope, id, action string, expected int64, request string) (PortMutationResult, error) {
+	if expected < 1 {
+		return PortMutationResult{}, ErrPrecondition
+	}
+	if action != "release" && action != "abort" {
+		return PortMutationResult{}, ErrConflict
+	}
+	reason := "explicit"
+	if action == "abort" {
+		reason = "abort"
+	}
+	return s.releasePort(ctx, scope, id, reason, &expected, request)
+}
+func (s PortService) releasePort(ctx context.Context, scope TenantScope, id, reason string, expected *int64, request string) (PortMutationResult, error) {
+	var result PortMutationResult
+	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "port.release_requested", ResourceID: id, RequestID: request, Reason: "proof required: " + reason}, func(q *generated.Queries) error {
 		a, e := lockAllocation(ctx, q, scope, id)
 		if e != nil {
 			return e
 		}
+		if expected != nil && a.Version != *expected {
+			return ErrPrecondition
+		}
 		if a.State == "released" || a.State == "aborted" || a.State == "releasing" || a.State == "aborting" {
+			if expected != nil {
+				return ErrConflict
+			}
 			return nil
 		}
 		if reason == "abort" && a.State != "preparing" && a.State != "unknown" {
@@ -365,8 +430,31 @@ func (s PortService) release(ctx context.Context, scope TenantScope, id, reason,
 				return e
 			}
 		}
+		if expected != nil {
+			count, e := portIntentInventory(ctx, q, scope, a, rows)
+			if e != nil {
+				return e
+			}
+			next, e := q.GetPortAllocation(ctx, generated.GetPortAllocationParams{TenantID: scope.TenantID(), ID: id})
+			if e != nil {
+				return e
+			}
+			action := "release"
+			if reason == "abort" {
+				action = "abort"
+			}
+			op, e := appendPortIntent(ctx, q, scope, next, action, count, false)
+			if e != nil {
+				return e
+			}
+			result = PortMutationResult{PortAllocation: next, OperationID: op, OperationState: "pending"}
+		}
 		return nil
 	})
+	if err != nil {
+		return PortMutationResult{}, err
+	}
+	return result, nil
 }
 
 func (s PortService) MarkRestricted(ctx context.Context, scope TenantScope, id, request string) error {
