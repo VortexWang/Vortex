@@ -156,6 +156,14 @@ type HubAllocationReceipt struct {
 	PayloadDigest []byte
 }
 
+type HubAllocationShareBinding struct {
+	TenantID     string
+	AllocationID string
+	NodeID       string
+	Kind         string
+	Generation   int64
+}
+
 type HubCreditGrant struct {
 	TenantID     string
 	GrantID      string

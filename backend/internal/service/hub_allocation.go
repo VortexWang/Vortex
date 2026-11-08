@@ -157,7 +157,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			return ErrShareConflict
 		}
 		rate, connections := int64(0), int64(0)
-		generation := int64(1)
+		generations := make(map[string]int64, 2)
 		for _, kind := range []string{"rate", "connections"} {
 			c, e := q.LockShareChain(ctx, generated.LockShareChainParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: kind})
 			if e != nil {
@@ -192,7 +192,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			} else {
 				connections = min(g.Amount, limits.ConnectionLimit)
 			}
-			generation = max(generation, g.Generation)
+			generations[kind] = g.Generation
 		}
 		if ruleRate > 0 {
 			rate = min(rate, ruleRate)
@@ -219,7 +219,9 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		}
 		out = hub.Allocation{AllocationID: uuid.NewString(), DelegationID: uuid.NewString(), HubID: in.HubID, Region: in.Region, NodeID: in.NodeID, BootID: in.BootID, SourceID: r.ID, RuntimeSourceID: uuid.NewString(), ShareSourceID: uuid.NewString(), SnapshotID: b.ID, RuleID: b.RuleID, RuleRevision: uint64(b.RuleRevision), PathGeneration: uint64(in.PathGeneration), FencingFloor: uint64(in.FencingFloor), SignerEpoch: uint64(in.SignerEpoch), RawBytes: uint64(in.RawBytes), RateBPS: uint64(rate), Connections: uint64(connections), ValidFrom: hi, ExpiresAt: in.ExpiresAt.UTC(), HardDeadline: in.ExpiresAt.UTC(), BackendHeartbeat: lo, AutonomyDeadline: signer.AutonomyUntil.Time.UTC(), ShareReferences: []store.ShareReference{}, PolicyTransitions: []store.PolicyTransition{}}
 		for _, source := range []string{out.SourceID, out.RuntimeSourceID, out.ShareSourceID} {
-			out.ShareReferences = append(out.ShareReferences, store.ShareReference{ID: uuid.NewString(), SourceID: source, IssuerID: out.HubID, NodeID: out.NodeID, SignerEpoch: out.SignerEpoch, Generation: uint64(generation), Revision: 1, RuleID: out.RuleID, RuleRevision: out.RuleRevision, PathGeneration: out.PathGeneration, RateBPS: out.RateBPS, Connections: out.Connections, NotBefore: out.ValidFrom, ExpiresAt: out.ExpiresAt, HardDeadline: out.HardDeadline})
+			// Every root belongs to a fresh source UUID and starts its own lineage.
+			// Its generation cannot stand for either independent Node share kind.
+			out.ShareReferences = append(out.ShareReferences, store.ShareReference{ID: uuid.NewString(), SourceID: source, IssuerID: out.HubID, NodeID: out.NodeID, SignerEpoch: out.SignerEpoch, Generation: 1, Revision: 1, RuleID: out.RuleID, RuleRevision: out.RuleRevision, PathGeneration: out.PathGeneration, RateBPS: out.RateBPS, Connections: out.Connections, NotBefore: out.ValidFrom, ExpiresAt: out.ExpiresAt, HardDeadline: out.HardDeadline})
 		}
 		if e = out.Validate(); e != nil {
 			return e
@@ -233,7 +235,15 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		if e != nil {
 			return e
 		}
-		return q.AppendHubAllocation(ctx, generated.AppendHubAllocationParams{TenantID: scope.TenantID(), AllocationID: out.AllocationID, DelegationID: out.DelegationID, ReservationID: r.ID, HubID: in.HubID, HubBootID: in.HubBootID, NodeID: in.NodeID, BootID: in.BootID, RequestKey: in.Nonce, RequestDigest: digest[:], Payload: payload, PayloadDigest: sum[:], OperationID: op.ID, CreatedBy: scope.ActorID()})
+		if e = q.AppendHubAllocation(ctx, generated.AppendHubAllocationParams{TenantID: scope.TenantID(), AllocationID: out.AllocationID, DelegationID: out.DelegationID, ReservationID: r.ID, HubID: in.HubID, HubBootID: in.HubBootID, NodeID: in.NodeID, BootID: in.BootID, RequestKey: in.Nonce, RequestDigest: digest[:], Payload: payload, PayloadDigest: sum[:], OperationID: op.ID, CreatedBy: scope.ActorID()}); e != nil {
+			return e
+		}
+		for _, kind := range []string{"rate", "connections"} {
+			if e = q.AppendHubAllocationShareBinding(ctx, generated.AppendHubAllocationShareBindingParams{TenantID: scope.TenantID(), AllocationID: out.AllocationID, NodeID: in.NodeID, Kind: kind, Generation: generations[kind]}); e != nil {
+				return e
+			}
+		}
+		return nil
 	})
 	if e != nil {
 		return hub.Allocation{}, e

@@ -1,0 +1,38 @@
+=== RUN   TestHubFundingIndependentKindsAndExactHistoricalClosure
+2026/11/08 14:37:51 goose: no migrations to run. current version: 8
+2026/11/08 14:37:51 OK   00001_authority.sql (15.11ms)
+2026/11/08 14:37:51 OK   00002_tenant_policy.sql (11.21ms)
+2026/11/08 14:37:51 OK   00003_nodes_ports.sql (27.25ms)
+2026/11/08 14:37:51 OK   00004_entry_group_domains.sql (5.38ms)
+2026/11/08 14:37:51 OK   00005_rules_compile.sql (22.84ms)
+2026/11/08 14:37:51 OK   00006_packages_entitlements.sql (28.89ms)
+2026/11/08 14:37:51 OK   00007_metering_ledger.sql (43.82ms)
+2026/11/08 14:37:51 OK   00008_limits_shares.sql (69.22ms)
+2026/11/08 14:37:51 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingIndependentKindsAndExactHistoricalClosure (1.44s)
+=== RUN   TestHubFundingMissingKindBindingCannotProveClosure
+2026/11/08 14:37:52 goose: no migrations to run. current version: 8
+2026/11/08 14:37:52 OK   00001_authority.sql (13.54ms)
+2026/11/08 14:37:52 OK   00002_tenant_policy.sql (11.65ms)
+2026/11/08 14:37:52 OK   00003_nodes_ports.sql (23.79ms)
+2026/11/08 14:37:52 OK   00004_entry_group_domains.sql (5.42ms)
+2026/11/08 14:37:52 OK   00005_rules_compile.sql (28.09ms)
+2026/11/08 14:37:52 OK   00006_packages_entitlements.sql (25.41ms)
+2026/11/08 14:37:52 OK   00007_metering_ledger.sql (43.06ms)
+2026/11/08 14:37:52 OK   00008_limits_shares.sql (32.95ms)
+2026/11/08 14:37:52 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingMissingKindBindingCannotProveClosure (0.97s)
+=== RUN   TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease
+2026/11/08 14:37:53 goose: no migrations to run. current version: 8
+2026/11/08 14:37:53 OK   00001_authority.sql (8.04ms)
+2026/11/08 14:37:53 OK   00002_tenant_policy.sql (7.55ms)
+2026/11/08 14:37:53 OK   00003_nodes_ports.sql (22.6ms)
+2026/11/08 14:37:53 OK   00004_entry_group_domains.sql (2.58ms)
+2026/11/08 14:37:53 OK   00005_rules_compile.sql (20.99ms)
+2026/11/08 14:37:53 OK   00006_packages_entitlements.sql (18.28ms)
+2026/11/08 14:37:53 OK   00007_metering_ledger.sql (39.18ms)
+2026/11/08 14:37:53 OK   00008_limits_shares.sql (41.77ms)
+2026/11/08 14:37:53 goose: successfully migrated database to version: 8
+--- PASS: TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease (2.71s)
+PASS
+ok  	vortex/backend/internal/service	6.620s

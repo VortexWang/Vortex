@@ -75,6 +75,29 @@ func (q *Queries) AppendHubAllocationReceipt(ctx context.Context, arg AppendHubA
 	return err
 }
 
+const appendHubAllocationShareBinding = `-- name: AppendHubAllocationShareBinding :exec
+INSERT INTO hub_allocation_share_bindings(tenant_id,allocation_id,node_id,kind,generation) VALUES($1,$2,$3,$4,$5)
+`
+
+type AppendHubAllocationShareBindingParams struct {
+	TenantID     string
+	AllocationID string
+	NodeID       string
+	Kind         string
+	Generation   int64
+}
+
+func (q *Queries) AppendHubAllocationShareBinding(ctx context.Context, arg AppendHubAllocationShareBindingParams) error {
+	_, err := q.db.Exec(ctx, appendHubAllocationShareBinding,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.NodeID,
+		arg.Kind,
+		arg.Generation,
+	)
+	return err
+}
+
 const appendHubCreditGrant = `-- name: AppendHubCreditGrant :exec
 INSERT INTO hub_credit_grants(tenant_id,grant_id,allocation_id,issue_id,raw_granted) VALUES($1,$2,$3,$4,$5)
 `
@@ -518,6 +541,41 @@ func (q *Queries) HubAllocationIssued(ctx context.Context, arg HubAllocationIssu
 	var issued int64
 	err := row.Scan(&issued)
 	return issued, err
+}
+
+const hubAllocationShareBindings = `-- name: HubAllocationShareBindings :many
+SELECT tenant_id, allocation_id, node_id, kind, generation FROM hub_allocation_share_bindings WHERE tenant_id=$1 AND allocation_id=$2 ORDER BY kind
+`
+
+type HubAllocationShareBindingsParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) HubAllocationShareBindings(ctx context.Context, arg HubAllocationShareBindingsParams) ([]HubAllocationShareBinding, error) {
+	rows, err := q.db.Query(ctx, hubAllocationShareBindings, arg.TenantID, arg.AllocationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubAllocationShareBinding{}
+	for rows.Next() {
+		var i HubAllocationShareBinding
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.AllocationID,
+			&i.NodeID,
+			&i.Kind,
+			&i.Generation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const hubBootHasInstalledAllocation = `-- name: HubBootHasInstalledAllocation :one

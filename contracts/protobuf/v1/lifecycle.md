@@ -270,3 +270,16 @@ usage; this cannot be inferred from expiry alone. Exact lost ACK replay returns
 nothing twice. After sealing, only previously recorded issue IDs may replay;
 new child mapping is rejected. Child final accounting, safe sustained automatic
 refill and explicit boot recovery remain separate work; CR-008 remains candidate.
+
+## Candidate allocation aggregate dependencies
+
+Funding persists immutable `hub_allocation_share_bindings` for both Node aggregate
+kinds under the same tenant lock and audit/task/Outbox transaction as its parent
+reservation and allocation. Rate and connections retain independent generations;
+source-reference generation starts at1 for each fresh source UUID and cannot
+stand for either Node aggregate generation. Closure snapshots join the exact
+kind, predecessor generation, signer epoch and Hub/Node boots, including issued
+and not-yet-installed allocations. A missing or inconsistent dependency stays
+unknown and cannot become an empty closure proof. Existing source-reference wire
+semantics and historical approvals are unchanged; these DB artifacts are candidate
+CR-008, not an approval or an inferred Node-stop receipt.

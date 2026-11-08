@@ -6,6 +6,10 @@ SELECT * FROM hub_funded_allocations WHERE tenant_id=$1 AND allocation_id=$2;
 SELECT * FROM hub_funded_allocations WHERE delegation_id=$1;
 -- name: AppendHubAllocation :exec
 INSERT INTO hub_funded_allocations(tenant_id,allocation_id,delegation_id,reservation_id,hub_id,hub_boot_id,node_id,boot_id,request_key,request_digest,payload,payload_digest,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);
+-- name: AppendHubAllocationShareBinding :exec
+INSERT INTO hub_allocation_share_bindings(tenant_id,allocation_id,node_id,kind,generation) VALUES($1,$2,$3,$4,$5);
+-- name: HubAllocationShareBindings :many
+SELECT * FROM hub_allocation_share_bindings WHERE tenant_id=$1 AND allocation_id=$2 ORDER BY kind;
 -- name: GetHubIssue :one
 SELECT * FROM hub_issue_receipts WHERE tenant_id=$1 AND issue_id=$2;
 -- name: AppendHubIssue :exec

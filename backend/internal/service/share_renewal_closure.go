@@ -78,7 +78,14 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 			if e != nil {
 				return e
 			}
-			ids, e := q.ShareClosureDelegations(ctx, generated.ShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID})
+			unbound, e := q.UnboundShareClosureDelegations(ctx, generated.UnboundShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID})
+			if e != nil {
+				return e
+			}
+			if unbound != 0 {
+				return ErrShareUnknown
+			}
+			ids, e := q.ShareClosureDelegations(ctx, generated.ShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID, Kind: g.Kind, Generation: g.Predecessor, SignerEpoch: a.SignerEpoch})
 			if e != nil {
 				return e
 			}

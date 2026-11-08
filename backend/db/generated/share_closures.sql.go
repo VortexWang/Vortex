@@ -304,15 +304,21 @@ func (q *Queries) ShareClosureCommands(ctx context.Context, arg ShareClosureComm
 }
 
 const shareClosureDelegations = `-- name: ShareClosureDelegations :many
-SELECT delegation_id FROM hub_funded_allocations WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3 AND hub_id=$4 AND hub_boot_id=$5 ORDER BY delegation_id
+SELECT a.delegation_id FROM hub_funded_allocations a
+JOIN hub_allocation_share_bindings b ON b.tenant_id=a.tenant_id AND b.allocation_id=a.allocation_id AND b.node_id=a.node_id
+JOIN share_generations g ON g.tenant_id=b.tenant_id AND g.node_id=b.node_id AND g.kind=b.kind AND g.generation=b.generation AND g.boot_id=a.boot_id AND g.signer_id=a.hub_id
+WHERE a.tenant_id=$1 AND a.node_id=$2 AND a.boot_id=$3 AND a.hub_id=$4 AND a.hub_boot_id=$5 AND b.kind=$6 AND b.generation=$7 AND g.signer_epoch=$8 ORDER BY a.delegation_id
 `
 
 type ShareClosureDelegationsParams struct {
-	TenantID  string
-	NodeID    string
-	BootID    string
-	HubID     string
-	HubBootID string
+	TenantID    string
+	NodeID      string
+	BootID      string
+	HubID       string
+	HubBootID   string
+	Kind        string
+	Generation  int64
+	SignerEpoch int64
 }
 
 func (q *Queries) ShareClosureDelegations(ctx context.Context, arg ShareClosureDelegationsParams) ([]string, error) {
@@ -322,6 +328,9 @@ func (q *Queries) ShareClosureDelegations(ctx context.Context, arg ShareClosureD
 		arg.BootID,
 		arg.HubID,
 		arg.HubBootID,
+		arg.Kind,
+		arg.Generation,
+		arg.SignerEpoch,
 	)
 	if err != nil {
 		return nil, err
@@ -339,4 +348,33 @@ func (q *Queries) ShareClosureDelegations(ctx context.Context, arg ShareClosureD
 		return nil, err
 	}
 	return items, nil
+}
+
+const unboundShareClosureDelegations = `-- name: UnboundShareClosureDelegations :one
+SELECT count(*) FROM hub_funded_allocations a
+WHERE a.tenant_id=$1 AND a.node_id=$2 AND a.boot_id=$3 AND a.hub_id=$4 AND a.hub_boot_id=$5
+AND (SELECT count(*) FROM hub_allocation_share_bindings b
+JOIN share_generations g ON g.tenant_id=b.tenant_id AND g.node_id=b.node_id AND g.kind=b.kind AND g.generation=b.generation AND g.boot_id=a.boot_id AND g.signer_id=a.hub_id
+WHERE b.tenant_id=a.tenant_id AND b.allocation_id=a.allocation_id AND b.node_id=a.node_id)<>2
+`
+
+type UnboundShareClosureDelegationsParams struct {
+	TenantID  string
+	NodeID    string
+	BootID    string
+	HubID     string
+	HubBootID string
+}
+
+func (q *Queries) UnboundShareClosureDelegations(ctx context.Context, arg UnboundShareClosureDelegationsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, unboundShareClosureDelegations,
+		arg.TenantID,
+		arg.NodeID,
+		arg.BootID,
+		arg.HubID,
+		arg.HubBootID,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }

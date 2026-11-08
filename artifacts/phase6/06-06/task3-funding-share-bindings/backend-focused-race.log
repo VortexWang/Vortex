@@ -1,0 +1,26 @@
+=== RUN   TestHubFundingIndependentKindsAndExactHistoricalClosure
+2026/11/08 14:36:06 goose: no migrations to run. current version: 8
+2026/11/08 14:36:06 OK   00001_authority.sql (12.7ms)
+2026/11/08 14:36:06 OK   00002_tenant_policy.sql (9.92ms)
+2026/11/08 14:36:06 OK   00003_nodes_ports.sql (23.73ms)
+2026/11/08 14:36:06 OK   00004_entry_group_domains.sql (2.77ms)
+2026/11/08 14:36:06 OK   00005_rules_compile.sql (26.26ms)
+2026/11/08 14:36:06 OK   00006_packages_entitlements.sql (23ms)
+2026/11/08 14:36:06 OK   00007_metering_ledger.sql (25.39ms)
+2026/11/08 14:36:06 OK   00008_limits_shares.sql (36.9ms)
+2026/11/08 14:36:06 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingIndependentKindsAndExactHistoricalClosure (1.16s)
+=== RUN   TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease
+2026/11/08 14:36:07 goose: no migrations to run. current version: 8
+2026/11/08 14:36:07 OK   00001_authority.sql (10.63ms)
+2026/11/08 14:36:07 OK   00002_tenant_policy.sql (13.59ms)
+2026/11/08 14:36:07 OK   00003_nodes_ports.sql (24ms)
+2026/11/08 14:36:07 OK   00004_entry_group_domains.sql (3.14ms)
+2026/11/08 14:36:07 OK   00005_rules_compile.sql (24.15ms)
+2026/11/08 14:36:07 OK   00006_packages_entitlements.sql (16.24ms)
+2026/11/08 14:36:07 OK   00007_metering_ledger.sql (33.98ms)
+2026/11/08 14:36:07 OK   00008_limits_shares.sql (52.88ms)
+2026/11/08 14:36:07 goose: successfully migrated database to version: 8
+--- PASS: TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease (2.11s)
+PASS
+ok  	vortex/backend/internal/service	5.115s

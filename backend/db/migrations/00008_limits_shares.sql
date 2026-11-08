@@ -147,6 +147,17 @@ CREATE TABLE hub_funded_allocations (
  FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
 );
 CREATE TRIGGER hub_allocation_immutable BEFORE UPDATE OR DELETE ON hub_funded_allocations FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Source-root generations are not Node aggregate generations. Retain both
+-- independent aggregate dependencies for exact renewal-closure snapshots.
+CREATE TABLE hub_allocation_share_bindings (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, node_id text NOT NULL,
+ kind text NOT NULL CHECK(kind IN ('rate','connections')), generation bigint NOT NULL CHECK(generation>0),
+ PRIMARY KEY(tenant_id,allocation_id,kind),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,node_id,kind,generation) REFERENCES share_generations(tenant_id,node_id,kind,generation)
+);
+CREATE INDEX hub_allocation_share_generation ON hub_allocation_share_bindings(tenant_id,node_id,kind,generation);
+CREATE TRIGGER hub_allocation_share_binding_immutable BEFORE UPDATE OR DELETE ON hub_allocation_share_bindings FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TABLE hub_issue_receipts (
  tenant_id text NOT NULL, issue_id text NOT NULL, allocation_id text NOT NULL,
  hub_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),

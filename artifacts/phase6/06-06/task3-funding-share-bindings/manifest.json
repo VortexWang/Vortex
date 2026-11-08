@@ -1,0 +1,26 @@
+{
+  "base_commit": "061d3d8a110706c01f932d1ba6ffb4bab8d8be26",
+  "scope": "development independent aggregate funding dependency unit; not full06-06 acceptance",
+  "source": {
+    "backend/db/generated/hub_allocations.sql.go": "cc54c32d0e56f49e9adf295902ee475bf7e3175952d9ca6561ab018804a7afa6",
+    "backend/db/generated/models.go": "5a0ff808cf3c01755e43dddc29fbeede794a49356207e34fa166837f6978c206",
+    "backend/db/generated/share_closures.sql.go": "49ad2459c9751391a660c0a617f13aa40765698def665cf8f769ea3f31f9ed1a",
+    "backend/db/migrations/00008_limits_shares.sql": "f7b4d71356d8f60a7a41e778ee6b834f36cc3661279cd17dc178edcf44b3895b",
+    "backend/db/query/hub_allocations.sql": "c5ccb84c3719f82e8c5976a38192fccfde9b1e02a382a64255c0216964443409",
+    "backend/db/query/share_closures.sql": "8d0d6521d77e13060c865697240f97569c0c950be6032d801f2ac636cd5fef06",
+    "backend/internal/service/hub_allocation.go": "3c33d7939b89d3bbac302f24297950e46b087f5a4ab58b2e5a76799d0727465d",
+    "backend/internal/service/share_renewal_closure.go": "18fdf84a73b4202a0c117ba1f342fb5a8619ef7de0bb7a9347e831abcbe26d81",
+    "backend/internal/service/hub_allocation_shares_test.go": "ccc22fb4676804c7d4f7170cf2e6eea225d0f1362d0269ec1918ace4b70ba855",
+    "contracts/database/schema.sql": "9a589b3c655cb6f76394d8a5b5ba7f66f529be9cd24cb8e8b74c31025f0ba8fd",
+    "contracts/protobuf/v1/lifecycle.md": "7b5f9797095c8cd353e84cbc711f2c9c458278a804e655fd4c249984aaa19c9f"
+  },
+  "evidence": {
+    "README.md": "c4e46c60ca97d5a1b9d0a09b4b8d8558c84b11930ee8532a2b832595b03923a0",
+    "backend-all-race.log": "0cf2ac9d1083235d636e51f418e5e8108b4f8ed4d6c897e93c6690c537c8f9ad",
+    "backend-final-focused-race.log": "174eb176aa09fbf1ced524c0c824da0c303f4dd12698730bdb61d278957685b6",
+    "backend-focused-race.log": "cfcc57b2f95d345213e055aea8cd145ecc8252cfc1189cf125465bfe6fa82630",
+    "generators.json": "2379d40cd5f2c810fe7a3822e51a9f772d66a47fa99dcf0ad717aaaad218130d",
+    "linux-race-build.log": "353316680c27ae36a2a7ea1317e6bf1aa7416cba273ef76bfa91fc4fe0a24613",
+    "migrate-native.log": "244ae734fdcdb67e36f146995ced6781a4ca7cbc12bf42ac6e10cce86e2bb63b"
+  }
+}
