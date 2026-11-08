@@ -17,7 +17,9 @@
 
 Node新boot和Hub恢复均需显式、当前有效的platform授权与各自停止/安全截止证明；Hub同库恢复还需完整保留prefix、原资金/份额manifest、Node实际安装inventory fence、独立新根及FULL回执和全租户admission。PG admitted本身不是Hub本地ACK或online许可，不能通过手动改blocked状态进入运行。恢复保留原source/limits/deadline；允许花费的只是已证明未签发的有限R。
 
-06-06覆盖与验证入口见 [LIMITS.md](../coverage/phase6/LIMITS.md)。当前完整本机后端和精确提交Docker统一检查仍在执行，完成后补充具体证据引用，未运行/失败不记通过。最终同SHA Actions配对归06-11。
+06-06覆盖与验证入口见 [LIMITS.md](../coverage/phase6/LIMITS.md)。完整本机后端 race 已通过（service334.663秒）。提交 `cf92b7e24b6c557a5d14a18b0549a67eac349eb4` 的干净克隆在 Linux Docker arm64 通过完整 backend normal/race（service211.753/359.668秒）、Agent/Store/Hub/contracts/Engine normal/race、有界磁盘满、ledger/share fault suites 和 Node/Backend/Hub Linux双架构构建。源码前后干净，关键用例和摘要校验通过。原始证据及校验结果位于 `artifacts/phase6/06-06/task3-unified-acceptance/`。最终同SHA Actions配对仍归06-11。
+
+保留的已知观察：更早的开发 Linux 用例曾出现3次连接而非预期2次，原因尚未确定；严格断言未放宽，加入退出诊断后独立3次、完整受影响回归及上述干净克隆的普通/race/fault检查均通过。该失败日志仍保留，不宣称已定位或证明不存在间歇重试。
 
 实际pending Commit恢复案例仅选定成员运行真实Engine；其他固定成员使用prepared fixture和真实容量预留，不声称全成员转发/滚动升级/重启验收。有限性质算例、SIGKILL、FULL回滚不等于完整模型或物理断电。交叉编译不等于native amd64运行。HTTP适配器、跨域全验收、性能和物理恢复保持其后续计划范围。
 

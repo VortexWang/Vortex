@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: CR-008 candidate validated; exact clean-source Docker acceptance pending"
-last_updated: "2026-11-08T19:18:40.429296+00:00"
+stopped_at: "06-06: implementation and clean Docker verified; awaiting exact CR-008 owner approval"
+last_updated: "2026-11-08T19:44:21.756171+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: CR-008 exact candidate and generation checks pass; native full backend race334.663s;8/11."
+last_activity_desc: "06-06 unified candidate validation complete; CR-008 awaiting owner;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 35561d16
+state_head: cf92b7e2
 ---
 
 # Project State
@@ -196,3 +196,5 @@ Explicit pending Engine Commit now participates in bounded renewal observation o
 Restrictive older-path pure revocation now stops only authenticated matching issuer/Node boot/path IDs after a newer path/fence, without floor promotion/regression, heartbeat or financial release. Unknown IDs use immutable scoped tombstones. FULL rollback/concurrent replay/reopen, foreign/mixed-right negatives and actual issuer/Node mTLS pass. Complete native/Linux root race, final affected backend race(native67.318/Linux67.277) and six builds pass. One earlier Linux renewal-loss test observed an extra reconnect; cause unproven, failure retained, isolated3x/final suite pass with strict assertion and added server-exit diagnostics. Evidence: artifacts/phase6/06-06/task3-older-path-revocation/. Remaining: unified06-06 full/fault/clean-source acceptance and concreteCR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
 CR-008 exact review candidate now binds database/API2.3.0 and control1.6.0, protected historicalCR-007 and all normative companions/codecs/migration8. Candidate digest4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd; no approval/freeze. Historical exact checker, two independent protobuf generations/legacy wire, current inventory/map/SemVer, two sqlc generations/dependency licenses and OpenAPI copy/lint pass. Complete native backend race passes(service334.663s). Candidate Docker entry now covers06-06 root/Engine and ledger/share/recovery fault suites plus Hub dual builds; exact committed-source run pending. CoverageLIMITS.md records bounded Engine fixture and unrun nativeamd64/Actions/physical recovery limits. Phase6 stays8/11; no06-06 SUMMARY.
+
+06-06 implementation and unified candidate checks complete; awaiting explicit ownerCR-008 approval. Candidate4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd remains pending and historical approvals unchanged. Exact clean cf92b7e2 Docker passes backend normal211.753/race359.668, Agent/Store/Hub/contracts/Engine normal/race including full-disk, ledger fault2.820, share/recovery fault139.984 and all six Node/Backend/Hub Linux dual builds. Source before/after clean; semantic SHA/key-case checker passes and five malformed evidence cases reject. Native full backend race334.663 and generation/license/OpenAPI/legacy wire evidence retained. Earlier intermittent extra reconnect remains unexplained with failure retained; final strict suites pass. Checkpoint06-06-CHECKPOINT.md is concrete and reviewable. No owner approval/freeze/SUMMARY; Phase6 stays8/11. After exact approval, freeze/protect the candidate, complete06-06, then execute06-07; sameSHA Actions pairing remains06-11.
