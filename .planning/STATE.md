@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: sealed recovery delivery verified; renewal and Engine convergence pending"
-last_updated: "2026-11-08T17:56:08.271157+00:00"
+stopped_at: "06-06 Task3: effective renewal trigger verified; Engine scheduling/delivery pending"
+last_updated: "2026-11-08T18:07:28.024548+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: stopped-credit fenced recovery passes native/Linux race and mTLS;8/11."
+last_activity_desc: "06-06 Task3: effective funded renewal candidate/journal passes native/Linux race;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: f1cc01c0
+state_head: 9f396b7a
 ---
 
 # Project State
@@ -79,6 +79,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 Direct credit stop before recovery delivery now retains only exact independently fenced handoff history in a no-grant/no-policy FULL transaction. Original credit remains revoked; pending tickets/debt and later source-spending checks remain unchanged. Missing/changed fence, new grant/policy, legacy revoked-root, FULL rollback,8 concurrent replays,reopen and unresolved-final refusal pass. Actual production Node/Hub/backend role-mTLS receives recovery after direct stop, keeps original37-byte debt and completes inherited financial final/refill. Final complete native backend race(service361.732), Linux arm64 backend race(service386.522), native/Linux root components race and six Node/Backend/Hub builds pass. Genuine store and mTLS RED evidence is retained. Evidence: artifacts/phase6/06-06/task3-stopped-credit-recovery/. SQL/protobuf/dependencies/approved snapshots unchanged; development evidence only. Remaining: seal-before-first-delivery and older-path revocation-only ordering, transferred-credit automatic renewal, Engine/pending deployment convergence and complete06-06 producer/fault/clean-source checks before concreteCR-008. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
 Seal-before-first-runtime-recovery delivery now passes actual production Node/Hub/backend mTLS in both materialize-before-seal and materialize-after-seal orderings. Both permanently stop original credit before delivery, reconnect twice without hidden retry, retain original37-byte debt and exact outbox bytes, then complete inherited financial final/refill gates. Focused native/Linux arm64 race passes; no production code changed, so prior f1cc01c0 full race/build evidence is inherited without rerun. Evidence: artifacts/phase6/06-06/task3-sealed-recovery-delivery/. Remaining: older-path revocation-only ordering, transferred-credit automatic renewal, Engine/pending deployment convergence and complete06-06 verification before concreteCR-008. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
+
+Effective funded renewal observation now follows retained adjacent source handoffs and exact independently anchored flat-root revisions, retaining original scope/limits/deadlines and current path/fence. Both selected grant and original source owner must remain active. The FULL trigger journal rechecks current source/epoch/root/path/fence after observation; stop/root/epoch changes deny new intent, while exact replay remains stable. Genuine low-water-after-S/R RED now passes; FULL rollback,8 concurrent replays,reopen,unchanged200-byte pending hold and existing journal/refusal tests pass. Actual production recovery mTLS/PG usage ACK yields one epoch8 candidate and durable intent; stopped sources yield none, then inherited complete final/refill assertions pass. Final native backend race(service377.894), Linux arm64 backend race(service392.441), native/Linux root race and six builds pass. Evidence: artifacts/phase6/06-06/task3-transferred-renewal-trigger/. SQL/protobuf/generator/dependency/approval bytes unchanged; development evidence only. This is observer/journal evidence, not complete Engine scheduler or actual renewal delivery convergence. Next: dynamically committed Engine rules in automatic renewal scheduling, actual transferred renewal delivery/pending deployment, older-path revocation-only ordering and complete06-06 verification before concreteCR-008. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.
 
 ## Performance Metrics
 

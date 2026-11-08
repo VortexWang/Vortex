@@ -1,0 +1,39 @@
+{
+  "base_sha": "9f396b7ab7bebc7ef27495ad3664ada6bd434478",
+  "scope": "Conservative effective-epoch candidate observation and revalidated FULL trigger journal after funded handoff;no grant/financial mutation",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "native_backend": "backend-native-race.log;service377.894s",
+    "linux_arm64_backend": "backend-linux-race.log;service392.441s",
+    "native_root": "root-native-race.log",
+    "linux_arm64_root": "root-linux-race.log",
+    "focused_store": "green-complete-store.log",
+    "actual_mtls": "actual-mtls-native.log;candidate/journal after real recovery delivery and PG usage ACK,stopped source negatives",
+    "builds": "cross-builds.json;six linux builds"
+  },
+  "failed_retained": [
+    "red-store.log"
+  ],
+  "not_claimed": [
+    "Complete multi-rule Engine renewal scheduler/delivery or pending deployment convergence",
+    "Clean-source same-SHA Docker/Actions pairing",
+    "Native amd64 execution",
+    "06-06 completion or CR-008 approval"
+  ],
+  "generator_rerun": "No SQL/protobuf/generator/dependency inputs changed",
+  "evidence_sha256": {
+    "README.md": "b0b61c5e0680ba028cf11bb9b2bb3b30021fda53b4f4d4060bc87c289ac7328c",
+    "actual-mtls-native.log": "60f0968426a3b91b236748cd8434f9542e766a6fb9077eb866556199c0e0d077",
+    "approved-snapshot-protection.json": "eeb3095026a3e28ea6f946018d2f85763cfe862c160b1b971dda8f20f5754aaf",
+    "backend-linux-race.log": "7af144329ac9215bb29861364d500d9e10ca8d3846a16c912fc7af012ed1ab20",
+    "backend-native-race.log": "16d54ee0045126c5d686f38a30bfef019a470fff46b40d6a0f04f315ef3a727e",
+    "cross-builds.json": "133986ed3aee312438553a272cdb4d9cdfcfaaa7b9b5e3575e3ebd246291abfa",
+    "environment.json": "ac1399f6edb9751001bf6aeb5356240b91e62d96b77c0f79928ad5cd09d07988",
+    "green-complete-store.log": "566c1f861622f2d8b32de35a18bc231e082f726b687b3e3487db9bae1cb7dfdf",
+    "green-store.log": "471fccb36a028ab32eab85a810cd94f20bfcaa7b781298d57dfd2146196ac652",
+    "red-store.log": "e9f9588415d70eb182895efa7ee573558736d12502c828ed7226e93123582d41",
+    "root-linux-race.log": "24ef498415aec1d9903afdf2f0c7115f5fe0646088a9fc6aa495a94cacb28db6",
+    "root-native-race.log": "233286acebe52fd07228a4313a987909e221e3635d26a33a5bd2fed76a9a08d5",
+    "source-hashes.json": "29982b96a427ad6dcc1ec00f0b3dfcc244788317bd9934150a9e68d22e698ff3"
+  }
+}

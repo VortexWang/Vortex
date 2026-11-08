@@ -1095,3 +1095,23 @@ network delivery, with materialization both before and after that seal. The
 already persisted outbox remains byte-identical, stopped credit stays revoked,
 and the financial final/refill gates still apply. No producer behavior changes
 were needed for these orderings.
+
+## Automatic renewal observation after funded handoff (candidate)
+
+A low-water/TTL trigger may observe a live original credit family after adjacent
+funded S/R without changing the immutable grant's signer epoch or share revision.
+Its request uses the independently proven effective current epoch. Every source
+handoff and every flat source-root revision must be continuous and retain the
+original source, limits, generation, Node/boot, policy and time bounds; the latest
+root must still match the independent backend anchor and current share head.
+The original owner and selected grant must both remain active. Other share forms
+retain current-revision admission checks. Current path and fencing floors still
+apply, and the trigger alone cannot admit a new session on an old share revision.
+
+The FULL trigger journal rechecks the source/epoch/root/path/fence after candidate
+observation. A stop, root replacement or epoch advance between those steps denies
+the new intent; exact existing journal replay remains unchanged. It neither
+spends transferred R, clears pending writes, finalizes money nor creates credit.
+Hub issuance and Node installation retain their independent original validators.
+This unit does not establish complete multi-rule Engine scheduler/renewal delivery
+or pending deployment convergence.

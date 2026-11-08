@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
@@ -16,6 +17,7 @@ import (
 	"vortex/agent/store"
 	"vortex/backend/internal/control"
 	"vortex/backend/internal/service"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 	"vortex/hub"
 )
@@ -167,6 +169,30 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 			case <-done:
 			case <-ctx.Done():
 				t.Fatal("runtime recovery did not join")
+			}
+		}
+		// Recovery must make a live transferred family observable to the
+		// scheduler without making its old share revision a new-session right.
+		due, err := ns.DueRenewals(ctx, store.AuthorizationUse{NodeID: a.NodeID, BootID: a.BootID, RuleID: a.RuleID, RuleRevision: a.RuleRevision, PathGeneration: a.PathGeneration, FencingGeneration: a.FencingFloor, Earliest: clock().Earliest, Latest: clock().Latest, TrustedTime: true}, a.HubID, 30)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if stopped {
+			if len(due) != 0 {
+				t.Fatal("stopped source produced automatic renewal", due)
+			}
+		} else {
+			if len(due) != 1 || due[0].Request.SignerEpoch != 8 {
+				t.Fatal("actual recovery lost effective renewal trigger", due)
+			}
+			request := due[0].Request
+			request.RequestId = uuid.NewString()
+			request.RequestSha256, err = contracts.RenewalDigest(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = ns.PersistTriggeredRenewal(ctx, a.HubID, request, due[0].GrantID); err != nil {
+				t.Fatal(err)
 			}
 		}
 		if stopped {
