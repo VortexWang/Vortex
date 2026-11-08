@@ -44,7 +44,12 @@ func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdat
 		return e
 	}
 	var rootID string
-	if e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, u.NodeID, h.SourceID).Scan(&rootID); e != nil {
+	e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, u.NodeID, h.SourceID).Scan(&rootID)
+	if errors.Is(e, sql.ErrNoRows) && h.Remaining == 0 {
+		// Nonfinancial sources still require an original locally known family.
+		e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_records WHERE node_id=? AND source_id=? AND parent_authorization_id=? AND issuer_id=? AND boot_id=? AND kind IN ('runtime_lease','share_lease') AND state='active' ORDER BY length(signer_epoch),signer_epoch,rowid LIMIT 1`, u.NodeID, h.SourceID, h.ParentID, u.IssuerID, u.BootID).Scan(&rootID)
+	}
+	if e != nil {
 		return ErrAuthorityHandoffRequired
 	}
 	root, state, e := readAuthorizationTx(ctx, tx, u.NodeID, rootID)
@@ -180,8 +185,23 @@ func attachEpochHandoffTx(ctx context.Context, tx *sql.Tx, d HubDelegation, resu
 	if err = json.Unmarshal(result.Payload, &payload); err != nil {
 		return err
 	}
-	payload["schema_version"] = "1.1.0"
-	payload["epoch_handoffs"] = []EpochHandoff{h}
+	proofs := delegationEpochProofs(d, h)
+	if d.ShareReferences == nil {
+		payload["schema_version"] = "1.1.0"
+	}
+	payload["epoch_handoffs"] = proofs
 	result.Payload, err = json.Marshal(payload)
 	return err
+}
+
+func delegationEpochProofs(d HubDelegation, h EpochHandoff) []EpochHandoff {
+	proofs := []EpochHandoff{h}
+	if d.ShareReferences != nil {
+		for _, source := range []string{d.RuntimeSourceID, d.ShareSourceID} {
+			r := h
+			r.SourceID, r.Remaining = source, 0
+			proofs = append(proofs, r)
+		}
+	}
+	return proofs
 }

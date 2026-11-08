@@ -510,3 +510,52 @@ cannot force a different command or rewind later generations. A stale first
 installation still fails. These additive candidate tags and semantics remain
 unapproved CR-008 work, separate from original-rule execution convergence,
 same-store signer S/R transfer, HTTP entry and complete Phase6 acceptance.
+
+### Candidate funded same-store S/R primitive (not yet a production protocol)
+
+The local Hub HandoffRequest may carry BackendID and FundedSuccessors. Every
+open funded delegation not explicitly revoked must have exactly one successor
+binding containing the SHA256 of its original SQLite HubDelegation payload and
+exactly three flat source roots. This local payload digest is distinct from the
+original backend Allocation wire digest; a PostgreSQL consumer must independently
+link them. A root advances signer_epoch and revision by exactly one. Source,
+share generation, rule/path, rate/connection limits and all time bounds stay
+identical. The BackendID must own the existing source anchors. Original
+delegation payloads, balances, issued partitions and unknown debt remain intact.
+The bindings, roots, revocations, epoch closure, R transfer and handoff journal
+commit together under SQLite FULL. Missing/extra bindings, stale roots or any
+write failure roll back the entire transition. A historical generic handoff
+cannot silently move a funded delegation without those explicit bindings.
+
+FundedInventory commits the complete retained journal prefix through S. Its
+PrefixSHA256 hashes newline-delimited canonical JSON objects with fields
+Sequence, Kind, ID, SHA256 in that order, ascending from sequence1 through S.
+Each digest is checked against retained payload bytes, including already ACKed
+records. Every transferred delegation also commits its original payload digest,
+total raw bytes, issued total, R, issue count and the existing sorted PartitionDigest.
+All original issue rows must be present in that journal; issued+R must equal the
+original raw amount. Handoff/transfer witnesses and handoff journal bytes are
+immutable; only journal confirmation may advance.
+
+Effective funded authority is derived from the retained attested chain instead
+of rewriting original allocation bytes. New credit and runtime/share refresh
+wait for CompleteRecovery's finite contiguous ACK barrier, including the handoff
+record. Closing issuance and retaining debt need no fabricated ACK. Historical
+issues replay their original bytes. Subsequent seals include child partitions
+from every earlier signer epoch under the original delegation, with no new
+parent reservation or source conversion.
+
+Funded successor envelopes retain authorization1.2, all share references and
+policy restrictions. Epoch handoffs include the credit source's R and two
+nonfinancial runtime/share source proofs with zero bytes. Node FULL persistence
+requires each source's original local family; backend anchors for the new roots
+must arrive independently. Existing grants may drain under their immutable old
+roots, while current admission uses the new roots. A fresh/lost Hub store is not
+evidence of same-store S/R; cold recovery remains a separate boundary.
+
+This increment has local FULL/fault evidence and actual Hub/Node TLS transport
+with explicit provisioning/ACK fixtures. It does not add backend approval,
+complete PG prefix/partition verification, recovery preflight capability,
+automatic direct-Node reprovisioning or a production S/R consumer. Those remain
+required before enabling the path. No new wire tag/capability is implicitly
+negotiated here and CR-008 remains unapproved.

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 )
 
@@ -47,8 +46,12 @@ func (s *Store) refreshHubRuntime(ctx context.Context, hub, node, boot, delegati
 	}
 	sum := sha256.Sum256(raw)
 	var d HubDelegation
-	if !bytes.Equal(sum[:], digest) || json.Unmarshal(raw, &d) != nil || d.ID != delegation || d.HubID != hub || d.NodeID != node || d.BootID != boot || state != "open" || epoch != strconv.FormatUint(d.SignerEpoch, 10) || len(d.ShareReferences) != 3 {
+	if !bytes.Equal(sum[:], digest) || json.Unmarshal(raw, &d) != nil || d.ID != delegation || d.HubID != hub || d.NodeID != node || d.BootID != boot || state != "open" || len(d.ShareReferences) != 3 {
 		return zero, ErrAuthorizationDenied
+	}
+	d, e = effectiveHubDelegationTx(ctx, tx, d, digest, epoch, true)
+	if e != nil {
+		return zero, e
 	}
 	var signerEpoch, signerState string
 	if e = tx.QueryRowContext(ctx, `SELECT signer_epoch,state FROM issuer_epochs WHERE hub_id=?`, hub).Scan(&signerEpoch, &signerState); e != nil {
@@ -135,6 +138,11 @@ func (s *Store) refreshHubRuntime(ctx context.Context, hub, node, boot, delegati
 	if e != nil {
 		return zero, e
 	}
+	update := IssuedAuthorization{Payload: payload}
+	if e = attachEpochHandoffTx(ctx, tx, d, &update); e != nil {
+		return zero, e
+	}
+	payload = update.Payload
 	sum = sha256.Sum256(payload)
 	if _, e = tx.ExecContext(ctx, `INSERT INTO `+table+`(delegation_id,revision,issue_id,issued_at,payload,payload_sha256) VALUES(?,?,?,?,?,?)`, delegation, revision+1, requestID, now.Latest.UTC().Format(time.RFC3339Nano), payload, sum[:]); e != nil {
 		return zero, e

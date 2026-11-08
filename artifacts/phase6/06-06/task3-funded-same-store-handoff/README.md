@@ -1,0 +1,24 @@
+# Funded same-store Hub S/R — development evidence
+
+Base source: 474af9dd. This unit extends the existing local S/R primitive; it does not enable a backend recovery protocol. No PostgreSQL migration/query, protobuf tag, negotiated capability, generated file or approved snapshot changes. CR-008 remains unprepared/unapproved and Phase6 stays8/11.
+
+Every transferred open funded delegation requires an authenticated-backend successor binding to its original SQLite HubDelegation payload hash and exact next three flat root revisions. The backend wire Allocation digest is distinct and must be linked independently by the future PG consumer. Source, limits, share generation, Node boot, rule/path, policy and all original time bounds stay unchanged. Missing/extra bindings or wrong backend/stale roots deny atomically. Explicit revocations happen before R moves; revoked funds remain frozen. Old allocation payloads are not rewritten. Derived effective authority follows retained, hash-checked handoff records. Funded issuance/lease refresh waits for the full finite ACK barrier, including the handoff itself.
+
+The FULL handoff journal includes every retained prefix identity/hash through S and each delegation's complete original child partition digest, total issued and R. Prefix holes/corruption and mismatch between amount columns and immutable credit payloads deny transfer. Issued+R must equal the original raw budget. SQL triggers prohibit mutation/deletion of handoff/transfer witnesses and handoff journal bytes, while confirmation may advance. Subsequent seals include issues from all earlier epochs; no financial parent/source/balance is created or released. Funded successor and recovery envelopes retain authorization1.2 restrictions and all roots; credit R and two zero-byte nonfinancial source proofs persist at Node under FULL.
+
+Evidence:
+
+- `red-missing-roots.log`: genuine RED; previous generic handoff moved a funded delegation without successor roots.
+- `initial-green.log`: first generic refusal and legacy handoff/recovery regression PASS.
+- `focused-store.log` / `focused-store-corrected.log`: retained fixture failures (historical issue replay still requires trusted time; lease cadence is measured from the latest issue). Neither guard was relaxed.
+- `focused-store-final.log`, `focused-store-complete.log`, `focused-store-faults.log`: progressively expanded passing coverage of roots, FULL journal rollback, finite prefix holes, reopen/exact replay, two epochs, eight concurrent callers, independent SQLite connections, complete delegation coverage/revocation and SIGKILL before/after commit.
+- `actual-node-mtls.log`: retained initial test fixture failure: setting TestServer.HubID requires a lifecycle handshake, while the fixture used the direct Connect helper. Corrected the fixture; no production guard changed.
+- `actual-node-mtls-corrected.log`: real Hub/Node TLS1.3 with actual Agent control decoder and FULL store. Independent backend root provisioning and ledger ACKs are explicit fixtures, not PostgreSQL approval or production RuntimeServer recovery. Separate generation7/revision3/path4/fence8 remain distinct; new roots are revision4/epoch2; a64-byte old unknown debt stays frozen and replay does not refill R. This verifies persisted rights, not an Engine stop or a full runtime session drain.
+- `root-native-race.log`: complete native Agent74.012s/Store95.470s/Hub11.398s/contracts2.815s/NodeCLI4.512s PASS before the final additional credit-payload/amount binding guard.
+- `backend-native-race.log`: complete native backend race PASS(service212.135s); no backend S/R consumer exists yet.
+- `linux-race.log`: Linux arm64 root component race and backend service/control/worker/timeauthority race; final status recorded in manifest. The root run compiled before the final additional credit-payload/amount guard.
+- `final-payload-bound-native.log`: final guard and negative balanced amount/R-column tamper, all funded S/R/fault tests and actual Node TLS regression PASS(Store12.144s/Agent2.660s).
+- `final-payload-bound-linux.log`: final Linux guard/fault/Node TLS coverage, final status recorded in manifest.
+- `final-cross-builds.log`: final Node/Hub/backend linux amd64+arm64 build identities/checksums; cross-builds do not prove native amd64 execution.
+
+These are development checkout results. Complete same-store PG authority approval, original allocation linking, contiguous replay/partition verification, independently negotiated preflight, direct Node reprovisioning and new-epoch issue/lease/seal consumers are still required. Fresh/lost Hub state remains cold recovery only. Original pending-rule convergence, full06-06 clean-source producer and exact CR-008 proposal remain pending; final same-SHA Actions belongs to06-11. No06-06 SUMMARY or full-phase acceptance is claimed.

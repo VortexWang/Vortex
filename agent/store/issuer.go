@@ -344,9 +344,9 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 	if epoch != ownerEpoch || epochState != "open" {
 		return result, ErrSignerEpochClosed
 	}
-	d.SignerEpoch, err = strconv.ParseUint(ownerEpoch, 10, 64)
-	if err != nil || d.SignerEpoch == 0 {
-		return result, ErrAuthorizationDenied
+	d, err = effectiveHubDelegationTx(ctx, tx, d, digest, ownerEpoch, true)
+	if err != nil {
+		return result, err
 	}
 	// Provisioning may have advanced a source root since this delegation was
 	// installed. Recheck it in the spending transaction; historical grants may

@@ -1,0 +1,100 @@
+{
+  "scope": "development/local funded same-store S/R primitive; no PG approval or production recovery protocol",
+  "base_sha": "474af9ddf45de096612e4cf530bb59fb8a4e4525",
+  "created_at": "2026-11-08T10:59:40.391441+00:00",
+  "phase_status": "8/11, 06-06 Task3 incomplete; CR-008 unprepared/unapproved",
+  "source_sha256": {
+    "agent/store/funded_handoff.go": "464421f3f7c055feaedc40ee9c64d042a27d4bf3cd2cca50a507fba537e2f9eb",
+    "agent/store/funded_handoff_inventory.go": "8eacd585ea53ad0745e5b69f19a2c58c64556caf2f944e97125b70c7f56eff23",
+    "agent/store/funded_handoff_test.go": "1425e95ca916c09d4b2bcbaab5b5464a9793169a158912ef08e80b5b2da5c0f2",
+    "agent/store/funded_handoff_fault_test.go": "fb61144aca6ea0b62025bffaca6fa33fad14f2f139e3ecb8b41a9d3860a23f45",
+    "agent/funded_epoch_handoff_test.go": "054b5fea1ad6c33caa2bd48a2f880b140f4cd75323e0036b44d70e26043f1155",
+    "agent/store/handoff.go": "1253f5e4e232287d067eadd27f248b2e1cf178a75ee1fb52e95f0269202bb95d",
+    "agent/store/epoch_handoff.go": "d2fd36b89165f794c3510debfdfde3ac6d3324a1a7de08c56a343e2be7442147",
+    "agent/store/issuer.go": "8d24db1ee706b8c345fbeec476a0123edc237b328cf583281449c67eb31fc1e1",
+    "agent/store/issuer_lease_refresh.go": "d2780953750f07a5efba7aa6dc2df8676905ec3a9bd61370077d554b578dd98c",
+    "agent/store/delegation_seal.go": "af18929b048a643690748364011511c3284786c289b26a03997ccca6b3e7e72b",
+    "agent/store/recovery_authorization.go": "0a753097f06e9000b87278e0e86489740447a18d74ff4e14ebc40093510b8c2a",
+    "agent/store/store.go": "15823637a8da6007cb6fc1f8be25f920c21f8fd2720ea7e0275b8a2f0131a316",
+    "contracts/protobuf/v1/lifecycle.md": "c7809b34336f292fdb8bb1e79d88ef2217ccaf180595f41953d8f5cfedbc85a6"
+  },
+  "evidence": {
+    "red-missing-roots.log": {
+      "result": "expected_fail",
+      "sha256": "692b1c604281c6660dc842cd2c7b3a589ff7a54518d3614e65ba050d0656d7ee"
+    },
+    "initial-green.log": {
+      "result": "pass",
+      "sha256": "0a23c0509cc48b01ae632b208209e12f33f2c8c93812711bc38c51efb980ed55"
+    },
+    "focused-store.log": {
+      "result": "fixture_fail",
+      "sha256": "471246aba7fc0fcc390a85f8d9d500e934ad2a2ea6ccaec961aef0598d0828ea"
+    },
+    "focused-store-corrected.log": {
+      "result": "fixture_fail",
+      "sha256": "e0a7e9a3582bfe59b90cb2b908f4c3f1c55ee7e57bb926d856a5575c61a78b93"
+    },
+    "focused-store-final.log": {
+      "result": "pass",
+      "sha256": "ab284564ce141f09b50f38ee5996e130735947d805b9ba0ac79d05f7364957c8"
+    },
+    "focused-store-complete.log": {
+      "result": "pass",
+      "sha256": "52aad0a79b8c8f024fab94e77ecf10b08bf7279b56d3560e92884d9d3e120c19"
+    },
+    "focused-store-faults.log": {
+      "result": "pass",
+      "sha256": "ad7cb623e720368a521545b7847f8f9568db56de0db48021696706d80619ada8"
+    },
+    "actual-node-mtls.log": {
+      "result": "fixture_fail",
+      "sha256": "ab19affcda3e38e9994bb3ac1278b508312f06241b4fefd291996896754f9c12"
+    },
+    "actual-node-mtls-corrected.log": {
+      "result": "pass",
+      "sha256": "e90b7d68a79b02f5ba1fdbfc8754a0d45281bc84e1da3eb960f22533704120fa"
+    },
+    "root-native-race.log": {
+      "result": "pass_before_final_payload_binding",
+      "sha256": "935f4b058b589b64364e030843d2c04cd04bad5f257c22f639c4fe4b2fbacb59"
+    },
+    "backend-native-race.log": {
+      "result": "pass_no_backend_sr_consumer",
+      "sha256": "6c5e94fd1167ec0f2be98e4a1377a667086b551f1b6399da3702fd944e29bf68"
+    },
+    "linux-race.log": {
+      "result": "pass_root_before_final_payload_binding",
+      "sha256": "39c9d37c4335808af52564da9311d1c4843156d45104ea63360787282549c7e0"
+    },
+    "final-focused-native.log": {
+      "result": "pass_before_final_payload_binding",
+      "sha256": "04c9d87603b53cce1e252cd8a18c282e49fef512d9990fed7427987e95ca5bc6"
+    },
+    "final-payload-bound-native.log": {
+      "result": "pass_final",
+      "sha256": "d370e5153b2053ed77371bba9c14bbcddcf183e9e9cf866dcb1d3a2daa773b47"
+    },
+    "final-payload-bound-linux.log": {
+      "result": "pass_final",
+      "sha256": "f0f5c02983e310afc43cd9edfd639a4a7438bc234f19ed9f5f72f1cd51ff569b"
+    },
+    "cross-builds.log": {
+      "result": "pass_before_final_payload_binding",
+      "sha256": "e9e33a0a8852b049ba55a160154c4c3d76a6b4e51e7c4ab52ce9dbcae09f80dd"
+    },
+    "final-cross-builds.log": {
+      "result": "pass_final",
+      "sha256": "aabeaab3a351666b8153588fa392941605f864bf6c3502270bdd5af8df58f56a"
+    }
+  },
+  "generated_changes": false,
+  "sqlc_or_protobuf_regeneration": "not needed: no SQL/protobuf/generated changes in this unit; prior two-output reproducibility belongs to474af9dd",
+  "clean_source_actions_pairing": false,
+  "next": [
+    "explicit platform PG authority/command and complete original allocation linking",
+    "boot-bound recovery preflight and complete prefix/partition verification",
+    "independent direct Node root provisioning and effective issue/lease/seal consumers",
+    "original pending-rule convergence, full06-06 producer and exact CR-008 proposal"
+  ]
+}

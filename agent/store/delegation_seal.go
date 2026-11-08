@@ -49,8 +49,12 @@ func (s *Store) SealHubDelegation(ctx context.Context, hub, boot, id string) (co
 	}
 	sum := sha256.Sum256(raw)
 	var d HubDelegation
-	if !bytes.Equal(sum[:], digest) || json.Unmarshal(raw, &d) != nil || d.HubID != hub || d.ID != id || d.SignerEpoch > math.MaxInt64 || epoch != strconv.FormatUint(d.SignerEpoch, 10) {
+	if !bytes.Equal(sum[:], digest) || json.Unmarshal(raw, &d) != nil || d.HubID != hub || d.ID != id || d.SignerEpoch > math.MaxInt64 {
 		return zero, ErrAuthorizationDenied
+	}
+	d, e = effectiveHubDelegationTx(ctx, tx, d, digest, epoch, false)
+	if e != nil {
+		return zero, e
 	}
 	left, e := strconv.ParseInt(remaining, 10, 64)
 	if e != nil || left < 0 || uint64(left) > d.RawBytes {

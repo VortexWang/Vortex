@@ -60,19 +60,21 @@ func (s *Store) RecoveryAuthorization(ctx context.Context, handoff, node, boot s
 	if deadline.IsZero() || now.Earliest.Before(request.Heartbeat) || !now.Latest.Before(deadline) {
 		return out, ErrAuthorityExpired
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT d.payload,d.state,COALESCE(t.remaining_bytes,'') FROM issuer_delegations d LEFT JOIN hub_transfers t ON t.delegation_id=d.delegation_id AND t.handoff_id=? WHERE d.hub_id=? ORDER BY d.delegation_id`, handoff, request.HubID)
+	rows, err := tx.QueryContext(ctx, `SELECT d.payload,d.state,COALESCE(t.remaining_bytes,''),d.payload_sha256,d.signer_epoch FROM issuer_delegations d LEFT JOIN hub_transfers t ON t.delegation_id=d.delegation_id AND t.handoff_id=? WHERE d.hub_id=? ORDER BY d.delegation_id`, handoff, request.HubID)
 	if err != nil {
 		return out, err
 	}
 	type entry struct {
 		d                HubDelegation
 		state, remaining string
+		digest           []byte
+		owner            string
 	}
 	var entries []entry
 	for rows.Next() {
 		var raw []byte
 		var e entry
-		if err = rows.Scan(&raw, &e.state, &e.remaining); err != nil {
+		if err = rows.Scan(&raw, &e.state, &e.remaining, &e.digest, &e.owner); err != nil {
 			rows.Close()
 			return out, err
 		}
@@ -81,6 +83,11 @@ func (s *Store) RecoveryAuthorization(ctx context.Context, handoff, node, boot s
 			return out, err
 		}
 		if e.d.NodeID == node && e.d.BootID == boot && e.d.PathGeneration == generation {
+			sum := sha256.Sum256(raw)
+			if !bytes.Equal(sum[:], e.digest) {
+				rows.Close()
+				return out, ErrAuthorizationDenied
+			}
 			entries = append(entries, e)
 		}
 	}
@@ -91,6 +98,7 @@ func (s *Store) RecoveryAuthorization(ctx context.Context, handoff, node, boot s
 	}
 	revoked := []string{}
 	proofs := []EpochHandoff{}
+	refs := []ShareReference{}
 	floor := uint64(0)
 	for _, e := range entries {
 		if e.d.FencingFloor > floor {
@@ -130,14 +138,23 @@ func (s *Store) RecoveryAuthorization(ctx context.Context, handoff, node, boot s
 			if err != nil {
 				return out, err
 			}
-			proofs = append(proofs, EpochHandoff{TransferID: handoff, ParentID: e.d.ID, SourceID: e.d.SourceID, From: request.FromEpoch, To: request.ToEpoch, Remaining: amount, SealedSequence: sealed, RecordSHA256: hex.EncodeToString(recordHash)})
+			d, err := effectiveHubDelegationTx(ctx, tx, e.d, e.digest, e.owner, false)
+			if err != nil {
+				return out, err
+			}
+			refs = append(refs, d.ShareReferences...)
+			proofs = append(proofs, delegationEpochProofs(d, EpochHandoff{TransferID: handoff, ParentID: d.ID, SourceID: d.SourceID, From: request.FromEpoch, To: request.ToEpoch, Remaining: amount, SealedSequence: sealed, RecordSHA256: hex.EncodeToString(recordHash)})...)
 		}
 	}
-	if floor == 0 || len(revoked) > 4096 || len(proofs) > 4096 || len(revoked)+len(proofs) == 0 {
+	if floor == 0 || len(revoked) > 4096 || len(proofs) > 4096 || len(refs) > 4096 || len(revoked)+len(proofs) == 0 {
 		return out, ErrAuthorizationDenied
 	}
 	// No grants are minted here; future unique issues consume the transferred R.
-	out.Payload, err = json.Marshal(map[string]any{"schema_version": "1.1.0", "update_id": handoff, "node_id": node, "boot_id": boot, "signer_epoch": request.ToEpoch, "path_generation": generation, "fencing_generation_floor": floor, "issued_at": now.Latest, "backend_heartbeat_at": request.Heartbeat, "autonomy_deadline": deadline, "authorizations": []any{}, "revocations": revoked, "epoch_handoffs": proofs, "restrictions": map[string]bool{"existing_rules_only": true, "existing_shares_only": true, "existing_delegated_balances_only": true, "new_rules": false, "new_ports": false, "dns_changes": false, "registrations": false, "cross_node_rebalance": false}})
+	payload := map[string]any{"schema_version": "1.1.0", "update_id": handoff, "node_id": node, "boot_id": boot, "signer_epoch": request.ToEpoch, "path_generation": generation, "fencing_generation_floor": floor, "issued_at": now.Latest, "backend_heartbeat_at": request.Heartbeat, "autonomy_deadline": deadline, "authorizations": []any{}, "revocations": revoked, "epoch_handoffs": proofs, "restrictions": map[string]bool{"existing_rules_only": true, "existing_shares_only": true, "existing_delegated_balances_only": true, "new_rules": false, "new_ports": false, "dns_changes": false, "registrations": false, "cross_node_rebalance": false}}
+	if len(refs) > 0 {
+		payload["schema_version"], payload["share_references"], payload["policy_transitions"] = "1.2.0", refs, []any{}
+	}
+	out.Payload, err = json.Marshal(payload)
 	if err != nil {
 		return out, err
 	}

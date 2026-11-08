@@ -21,10 +21,13 @@ type HandoffRequest struct {
 	FromEpoch, ToEpoch uint64
 	Heartbeat          time.Time
 	RevokeDelegations  []string
+	BackendID          string                   `json:",omitempty"`
+	FundedSuccessors   []FundedHandoffSuccessor `json:",omitempty"`
 }
 type HandoffResult struct {
-	SealedSequence int64
-	Remaining      map[string]uint64
+	SealedSequence  int64
+	Remaining       map[string]uint64
+	FundedInventory *FundedHandoffInventory `json:",omitempty"`
 }
 
 func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime) (HandoffResult, error) {
@@ -32,11 +35,11 @@ func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime
 	if s.owner != "hub" || !validIssuerUUID(r.ID) || !validIssuerUUID(r.HubID) || r.FromEpoch == 0 || r.FromEpoch == math.MaxUint64 || r.ToEpoch != r.FromEpoch+1 {
 		return result, ErrAuthorizationDenied
 	}
-	if err := checkIssuerTime(now); err != nil {
-		return result, err
-	}
 	raw, err := json.Marshal(r)
-	if err != nil {
+	if err != nil || len(raw) > 1<<20 {
+		if err == nil {
+			err = ErrAuthorizationDenied
+		}
 		return result, err
 	}
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -72,9 +75,42 @@ func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime
 		if err != nil {
 			return result, err
 		}
+		if len(r.FundedSuccessors) > 0 {
+			var journal, digest []byte
+			if err = tx.QueryRowContext(ctx, `SELECT payload,payload_sha256 FROM hub_ledger WHERE kind='handoff' AND record_id=?`, r.ID).Scan(&journal, &digest); err != nil {
+				return result, err
+			}
+			sum := sha256.Sum256(journal)
+			var record struct {
+				Request HandoffRequest
+				Result  HandoffResult
+			}
+			if !bytes.Equal(sum[:], digest) || json.Unmarshal(journal, &record) != nil || record.Result.FundedInventory == nil {
+				return result, ErrAuthorizationDenied
+			}
+			request, _ := json.Marshal(record.Request)
+			if !bytes.Equal(request, raw) || record.Result.SealedSequence != result.SealedSequence || len(record.Result.Remaining) != len(result.Remaining) {
+				return result, ErrAuthorizationUpdateConflict
+			}
+			for id, n := range result.Remaining {
+				if other, ok := record.Result.Remaining[id]; !ok || other != n {
+					return result, ErrAuthorizationUpdateConflict
+				}
+			}
+			result = record.Result
+		}
 		return result, tx.Commit()
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
+		return result, err
+	}
+	if err = checkIssuerTime(now); err != nil {
+		return result, err
+	}
+	if len(r.FundedSuccessors) > 0 && now.Latest.Sub(now.Earliest) > 10*time.Second {
+		return result, ErrAuthorityTimeUncertain
+	}
+	if err = s.installFundedHandoffTx(ctx, tx, r); err != nil {
 		return result, err
 	}
 	var epoch string
@@ -142,6 +178,12 @@ func (s *Store) HandoffHub(ctx context.Context, r HandoffRequest, now IssuerTime
 	}
 	for id, n := range result.Remaining {
 		if _, err = tx.ExecContext(ctx, `INSERT INTO hub_transfers(handoff_id,delegation_id,remaining_bytes) VALUES(?,?,?)`, r.ID, id, strconv.FormatUint(n, 10)); err != nil {
+			return result, err
+		}
+	}
+	if len(r.FundedSuccessors) > 0 {
+		result.FundedInventory, err = fundedHandoffInventoryTx(ctx, tx, r, result)
+		if err != nil {
 			return result, err
 		}
 	}
