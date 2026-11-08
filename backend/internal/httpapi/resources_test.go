@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/google/uuid"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -150,18 +151,25 @@ func TestHTTPSubscriptionLedgerAndHeldLimitsUseAuthoritativeSnapshots(t *testing
 		}
 	}
 	for collection, id := range map[string]string{"packages": pkg, "subscriptions": sub.SubscriptionID, "sources": sub.SourceID} {
-		page := f.businessPage(t, base+"/"+collection, f.pair.AccessToken)
+		path := base + "/" + collection + "?limit=100"
 		found := false
-		for _, item := range page.Items {
-			if item["id"] == id {
-				found = true
-				if collection == "sources" && item["balance_bytes"] != "10000" {
-					t.Fatal(item)
+		for {
+			page := f.businessPage(t, path, f.pair.AccessToken)
+			for _, item := range page.Items {
+				if item["id"] == id {
+					found = true
+					if collection == "sources" && item["balance_bytes"] != "10000" {
+						t.Fatal(item)
+					}
 				}
 			}
+			if found || page.Next == "" {
+				break
+			}
+			path = base + "/" + collection + "?limit=100&cursor=" + url.QueryEscape(page.Next)
 		}
 		if !found {
-			t.Fatal("missing public business list record", collection, id, page)
+			t.Fatal("missing public business list record", collection, id)
 		}
 	}
 	terms.RateLimit = 99999

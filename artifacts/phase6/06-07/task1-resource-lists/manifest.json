@@ -7,22 +7,34 @@
     "final-http-native-race.log",
     "full-backend-native-race.log",
     "full-backend-linux-race.log",
-    "generation-builds.json"
+    "generation-builds.json",
+    "final-pagination-fixture-native-race.log",
+    "final-pagination-fixture-linux-race.log",
+    "normalized-sql-generation-builds.json"
   ],
   "failed_retained": {
-    "routes-red.log": "actual missing GET collection route404"
+    "routes-red.log": "actual missing GET collection route404",
+    "normalized-sql-native-race.log": "shared global catalog >50; fixture searched only first page",
+    "normalized-sql-linux-race.log": "same first-page fixture assumption"
   },
   "compile_only": "compile.log is not behavior evidence",
   "evidence_sha256": {
-    "README.md": "f8979ed65f27a7adec7a9029de2aeaa79847a3237b204154a9c5dc14bc908b62",
+    "README.md": "d83413b1a431db9151617c505c452440af23b4102c2f524eb0778469017153e2",
     "affected-native-race.log": "9beec6af11a4c67c5ed86bfd1d45dfb8842609cf94a499e3daa9fd4d416877d1",
     "compile.log": "440dbab0eded85db691860a6e2683ce74b9892946d02ee51bcfbbe3ffeac4f94",
     "final-http-native-race.log": "7c573d283d32b7eac00e798d8cf07f95dc84889cf2f3028466ecc803a72a5a29",
+    "final-pagination-fixture-linux-race.log": "709b5dd51d9681c929ee275790acd3eb7ba6820ec93bca004f0845df0b6a7517",
+    "final-pagination-fixture-native-race.log": "c94bc7be6b350ab2cd0bacd8835c1a66b08cf6c915b7eeb497497db2ef9e507a",
     "full-backend-linux-race.log": "c952a326a6b9c96b2df94d590585cc4b0fd6a49de004e79a06fa4f60b86ad320",
     "full-backend-native-race.log": "325f92ee318a74c43a5c2ce6ffe56c75e999e3349a31ea8a10834b9c1964e4c3",
     "generation-builds.json": "4c55bcdae1191d18acec864488c9486aa22830c36955180a0b4bd48d4a569ae3",
     "initial-native.log": "97101427b25d68308f5fb629a0856d18f5b04fa335a3f1639dc332b1f2376a37",
+    "normalized-source-hashes.json": "43c3dd4f98e72519765df8d9fd174c699ded256b132c005413e82a9de3f1762a",
+    "normalized-sql-generation-builds.json": "d2a64e4a58beeb1ff05187cd9b96686143f2162a1a04533a2fd4eb007dabd247",
+    "normalized-sql-linux-race.log": "cc8aec19330b3eeda36c07953e1d39bc4717c61eaec2a6b089709856ff2c5d28",
+    "normalized-sql-native-race.log": "b17cb4288c21864220e3aa48ebc1fb2e65e88fd7d0f0bc0f41c60f4e132736bf",
     "routes-red.log": "7f8630694c914202c543f747c33a09555dc75a0d39d097a706b603b77ef98f7e",
     "source-hashes.json": "f97d2a74f449476105c6fb45245f986ee763ae6fb295c2c57a9edd5fdf35875b"
-  }
+  },
+  "normalization_base_sha": "dc3252bc"
 }

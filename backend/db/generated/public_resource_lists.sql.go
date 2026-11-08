@@ -15,7 +15,7 @@ const listPublicResources = `-- name: ListPublicResources :many
 WITH resources AS (
 SELECT o.created_at,o.sort_id,t.id::text AS target_tenant_id,(jsonb_build_object('id',t.id,'account_state',t.account_state,'version',t.version)) || jsonb_build_object('created_at',o.created_at) AS body
  FROM tenants t JOIN public_resource_order o ON o.collection='tenants' AND o.tenant_key=t.id AND o.resource_key=t.id
- 
+
  WHERE $5::text='tenants' AND ($6::boolean OR t.id=$7::text)
 UNION ALL
 SELECT o.created_at,o.sort_id,$7::text::text AS target_tenant_id,(jsonb_build_object('id',n.id,'name',n.name,'region',n.region,'capabilities',n.capabilities,'health',n.health,'lifecycle',n.lifecycle,'version',n.version)) || jsonb_build_object('created_at',o.created_at) AS body
@@ -45,17 +45,17 @@ SELECT o.created_at,o.sort_id,s.tenant_id::text AS target_tenant_id,(jsonb_build
 UNION ALL
 SELECT o.created_at,o.sort_id,p.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',p.id,'rule_id',p.rule_id,'group_id',p.group_id,'port',p.port,'protocols',p.protocols,'purpose',p.purpose,'state',p.state,'first_effective_at',p.first_effective_at,'retained_until',p.retained_until,'needs_revalidation',p.needs_revalidation,'version',p.version)) || jsonb_build_object('created_at',o.created_at) AS body
  FROM port_allocations p JOIN public_resource_order o ON o.collection='port-allocations' AND o.tenant_key=p.tenant_id AND o.resource_key=p.id
- 
+
  WHERE $5::text='port-allocations' AND p.tenant_id=$7::text
 UNION ALL
 SELECT o.created_at,o.sort_id,p.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',p.source_id,'source_id',p.source_id,'balance_bytes',p.b::text,'outstanding_bytes',p.f::text,'guarantee_bytes',p.l::text,'charged_bytes',p.charged::text,'remainder_milli',p.remainder_milli,'sequence',p.sequence::text)) || jsonb_build_object('created_at',o.created_at) AS body
  FROM ledger_projections p JOIN public_resource_order o ON o.collection='sources' AND o.tenant_key=p.tenant_id AND o.resource_key=p.source_id
- 
+
  WHERE $5::text='sources' AND p.tenant_id=$7::text
 UNION ALL
 SELECT o.created_at,o.sort_id,r.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',o.sort_id,'cause',r.cause,'source_id',r.source_id,'source_version',r.source_version,'effective_at',r.effective_at,'cleared_at',r.cleared_at)) || jsonb_build_object('created_at',o.created_at) AS body
  FROM current_restrictions r JOIN public_resource_order o ON o.collection='restrictions' AND o.tenant_key=r.tenant_id AND o.resource_key=jsonb_build_array(r.cause,r.source_id)::text
- 
+
  WHERE $5::text='restrictions' AND r.tenant_id=$7::text)
 SELECT created_at,sort_id,target_tenant_id,body::jsonb AS body FROM resources
 WHERE NOT $1::boolean OR (created_at,sort_id)>($2::timestamptz,$3::text)
