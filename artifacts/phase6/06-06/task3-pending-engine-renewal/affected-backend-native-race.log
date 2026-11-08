@@ -1,0 +1,255 @@
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=true
+2026/11/09 02:49:59 goose: no migrations to run. current version: 8
+2026/11/09 02:49:59 OK   00001_authority.sql (12.94ms)
+2026/11/09 02:49:59 OK   00002_tenant_policy.sql (10.35ms)
+2026/11/09 02:49:59 OK   00003_nodes_ports.sql (29.34ms)
+2026/11/09 02:49:59 OK   00004_entry_group_domains.sql (3.49ms)
+2026/11/09 02:49:59 OK   00005_rules_compile.sql (44.7ms)
+2026/11/09 02:49:59 OK   00006_packages_entitlements.sql (36.3ms)
+2026/11/09 02:49:59 OK   00007_metering_ledger.sql (30.66ms)
+2026/11/09 02:49:59 OK   00008_limits_shares.sql (64.07ms)
+2026/11/09 02:49:59 goose: successfully migrated database to version: 8
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=false
+2026/11/09 02:50:00 goose: no migrations to run. current version: 8
+2026/11/09 02:50:00 OK   00001_authority.sql (24.91ms)
+2026/11/09 02:50:00 OK   00002_tenant_policy.sql (38.68ms)
+2026/11/09 02:50:01 OK   00003_nodes_ports.sql (87.42ms)
+2026/11/09 02:50:01 OK   00004_entry_group_domains.sql (5.18ms)
+2026/11/09 02:50:01 OK   00005_rules_compile.sql (30.33ms)
+2026/11/09 02:50:01 OK   00006_packages_entitlements.sql (23.46ms)
+2026/11/09 02:50:01 OK   00007_metering_ledger.sql (53.19ms)
+2026/11/09 02:50:01 OK   00008_limits_shares.sql (102.35ms)
+2026/11/09 02:50:01 goose: successfully migrated database to version: 8
+--- PASS: TestRulePortActualAgentSocketsUnknownAndQuery (3.32s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=true (1.77s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=false (1.56s)
+=== RUN   TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare
+2026/11/09 02:50:02 goose: no migrations to run. current version: 8
+2026/11/09 02:50:02 OK   00001_authority.sql (14.74ms)
+2026/11/09 02:50:02 OK   00002_tenant_policy.sql (10.89ms)
+2026/11/09 02:50:02 OK   00003_nodes_ports.sql (21.33ms)
+2026/11/09 02:50:02 OK   00004_entry_group_domains.sql (4.71ms)
+2026/11/09 02:50:02 OK   00005_rules_compile.sql (25.66ms)
+2026/11/09 02:50:02 OK   00006_packages_entitlements.sql (18.96ms)
+2026/11/09 02:50:02 OK   00007_metering_ledger.sql (24.23ms)
+2026/11/09 02:50:02 OK   00008_limits_shares.sql (55.02ms)
+2026/11/09 02:50:02 goose: successfully migrated database to version: 8
+--- PASS: TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare (1.96s)
+=== RUN   TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare
+2026/11/09 02:50:04 goose: no migrations to run. current version: 8
+2026/11/09 02:50:04 OK   00001_authority.sql (11.3ms)
+2026/11/09 02:50:04 OK   00002_tenant_policy.sql (8.45ms)
+2026/11/09 02:50:04 OK   00003_nodes_ports.sql (35.83ms)
+2026/11/09 02:50:04 OK   00004_entry_group_domains.sql (5.82ms)
+2026/11/09 02:50:04 OK   00005_rules_compile.sql (23.51ms)
+2026/11/09 02:50:04 OK   00006_packages_entitlements.sql (21.02ms)
+2026/11/09 02:50:04 OK   00007_metering_ledger.sql (24.2ms)
+2026/11/09 02:50:04 OK   00008_limits_shares.sql (65.79ms)
+2026/11/09 02:50:04 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_hub_same_store_admissions
+=== RUN   TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_hub_same_store_manifests
+=== RUN   TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_node_recovery_source_receipts
+--- PASS: TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare (2.54s)
+    --- PASS: TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_hub_same_store_admissions (0.02s)
+    --- PASS: TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_hub_same_store_manifests (0.02s)
+    --- PASS: TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/unadmitted
+2026/11/09 02:50:06 goose: no migrations to run. current version: 8
+2026/11/09 02:50:06 OK   00001_authority.sql (12.89ms)
+2026/11/09 02:50:06 OK   00002_tenant_policy.sql (11.61ms)
+2026/11/09 02:50:06 OK   00003_nodes_ports.sql (30.31ms)
+2026/11/09 02:50:06 OK   00004_entry_group_domains.sql (2.98ms)
+2026/11/09 02:50:07 OK   00005_rules_compile.sql (26.82ms)
+2026/11/09 02:50:07 OK   00006_packages_entitlements.sql (32.8ms)
+2026/11/09 02:50:07 OK   00007_metering_ledger.sql (35.88ms)
+2026/11/09 02:50:07 OK   00008_limits_shares.sql (61.26ms)
+2026/11/09 02:50:07 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/missing_binding
+2026/11/09 02:50:08 goose: no migrations to run. current version: 8
+2026/11/09 02:50:08 OK   00001_authority.sql (10.18ms)
+2026/11/09 02:50:08 OK   00002_tenant_policy.sql (10.63ms)
+2026/11/09 02:50:08 OK   00003_nodes_ports.sql (24.4ms)
+2026/11/09 02:50:08 OK   00004_entry_group_domains.sql (3.65ms)
+2026/11/09 02:50:08 OK   00005_rules_compile.sql (29.36ms)
+2026/11/09 02:50:08 OK   00006_packages_entitlements.sql (26.05ms)
+2026/11/09 02:50:08 OK   00007_metering_ledger.sql (33.36ms)
+2026/11/09 02:50:08 OK   00008_limits_shares.sql (68.81ms)
+2026/11/09 02:50:08 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/future_epoch
+2026/11/09 02:50:09 goose: no migrations to run. current version: 8
+2026/11/09 02:50:09 OK   00001_authority.sql (12.66ms)
+2026/11/09 02:50:09 OK   00002_tenant_policy.sql (9.77ms)
+2026/11/09 02:50:09 OK   00003_nodes_ports.sql (20.74ms)
+2026/11/09 02:50:09 OK   00004_entry_group_domains.sql (3.08ms)
+2026/11/09 02:50:10 OK   00005_rules_compile.sql (23.77ms)
+2026/11/09 02:50:10 OK   00006_packages_entitlements.sql (25.23ms)
+2026/11/09 02:50:10 OK   00007_metering_ledger.sql (36.09ms)
+2026/11/09 02:50:10 OK   00008_limits_shares.sql (61.88ms)
+2026/11/09 02:50:10 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/wrong_boot
+2026/11/09 02:50:11 goose: no migrations to run. current version: 8
+2026/11/09 02:50:11 OK   00001_authority.sql (11.05ms)
+2026/11/09 02:50:11 OK   00002_tenant_policy.sql (10.72ms)
+2026/11/09 02:50:11 OK   00003_nodes_ports.sql (26.69ms)
+2026/11/09 02:50:11 OK   00004_entry_group_domains.sql (3.28ms)
+2026/11/09 02:50:11 OK   00005_rules_compile.sql (29.16ms)
+2026/11/09 02:50:11 OK   00006_packages_entitlements.sql (28.49ms)
+2026/11/09 02:50:11 OK   00007_metering_ledger.sql (33.99ms)
+2026/11/09 02:50:11 OK   00008_limits_shares.sql (66.89ms)
+2026/11/09 02:50:11 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/closure_barrier
+2026/11/09 02:50:13 goose: no migrations to run. current version: 8
+2026/11/09 02:50:13 OK   00001_authority.sql (14.7ms)
+2026/11/09 02:50:13 OK   00002_tenant_policy.sql (10.33ms)
+2026/11/09 02:50:13 OK   00003_nodes_ports.sql (31.09ms)
+2026/11/09 02:50:13 OK   00004_entry_group_domains.sql (4.73ms)
+2026/11/09 02:50:13 OK   00005_rules_compile.sql (33.08ms)
+2026/11/09 02:50:13 OK   00006_packages_entitlements.sql (25.19ms)
+2026/11/09 02:50:13 OK   00007_metering_ledger.sql (37.29ms)
+2026/11/09 02:50:13 OK   00008_limits_shares.sql (60.04ms)
+2026/11/09 02:50:13 goose: successfully migrated database to version: 8
+=== RUN   TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/audit
+2026/11/09 02:50:14 goose: no migrations to run. current version: 8
+2026/11/09 02:50:14 OK   00001_authority.sql (15.13ms)
+2026/11/09 02:50:14 OK   00002_tenant_policy.sql (10.07ms)
+2026/11/09 02:50:14 OK   00003_nodes_ports.sql (28.58ms)
+2026/11/09 02:50:14 OK   00004_entry_group_domains.sql (3.08ms)
+2026/11/09 02:50:14 OK   00005_rules_compile.sql (23.24ms)
+2026/11/09 02:50:14 OK   00006_packages_entitlements.sql (23.85ms)
+2026/11/09 02:50:14 OK   00007_metering_ledger.sql (33.6ms)
+2026/11/09 02:50:14 OK   00008_limits_shares.sql (66.98ms)
+2026/11/09 02:50:14 goose: successfully migrated database to version: 8
+--- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards (9.34s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/unadmitted (1.46s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/missing_binding (1.57s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/future_epoch (1.50s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/wrong_boot (1.64s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/closure_barrier (1.60s)
+    --- PASS: TestEffectiveRuntimeFundingRefusesMissingTransferAndCurrentClosureGuards/audit (1.58s)
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/09 02:50:16 goose: no migrations to run. current version: 8
+2026/11/09 02:50:16 OK   00001_authority.sql (11.54ms)
+2026/11/09 02:50:16 OK   00002_tenant_policy.sql (9.4ms)
+2026/11/09 02:50:16 OK   00003_nodes_ports.sql (23.09ms)
+2026/11/09 02:50:16 OK   00004_entry_group_domains.sql (2.53ms)
+2026/11/09 02:50:16 OK   00005_rules_compile.sql (22.9ms)
+2026/11/09 02:50:16 OK   00006_packages_entitlements.sql (29.31ms)
+2026/11/09 02:50:16 OK   00007_metering_ledger.sql (33.22ms)
+2026/11/09 02:50:16 OK   00008_limits_shares.sql (88.69ms)
+2026/11/09 02:50:16 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:277: actual role mTLS: child expiry before parent, automatic seal, missing-inventory hold, authenticated child final, original-source settlement, funded successor, direct source provisioning and Agent runtime ready; short child TTL fixture
+--- PASS: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (7.59s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 02:50:23 goose: no migrations to run. current version: 8
+2026/11/09 02:50:23 OK   00001_authority.sql (11.46ms)
+2026/11/09 02:50:23 OK   00002_tenant_policy.sql (9.87ms)
+2026/11/09 02:50:23 OK   00003_nodes_ports.sql (21.8ms)
+2026/11/09 02:50:23 OK   00004_entry_group_domains.sql (4.31ms)
+2026/11/09 02:50:23 OK   00005_rules_compile.sql (20.87ms)
+2026/11/09 02:50:23 OK   00006_packages_entitlements.sql (27.13ms)
+2026/11/09 02:50:24 OK   00007_metering_ledger.sql (30.5ms)
+2026/11/09 02:50:24 OK   00008_limits_shares.sql (60.78ms)
+2026/11/09 02:50:24 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.69s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt
+2026/11/09 02:50:30 goose: no migrations to run. current version: 8
+2026/11/09 02:50:30 OK   00001_authority.sql (12.41ms)
+2026/11/09 02:50:30 OK   00002_tenant_policy.sql (11.34ms)
+2026/11/09 02:50:30 OK   00003_nodes_ports.sql (25.17ms)
+2026/11/09 02:50:30 OK   00004_entry_group_domains.sql (3.54ms)
+2026/11/09 02:50:30 OK   00005_rules_compile.sql (26.75ms)
+2026/11/09 02:50:30 OK   00006_packages_entitlements.sql (21.39ms)
+2026/11/09 02:50:30 OK   00007_metering_ledger.sql (38.97ms)
+2026/11/09 02:50:30 OK   00008_limits_shares.sql (60.42ms)
+2026/11/09 02:50:30 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt (6.89s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization
+2026/11/09 02:50:37 goose: no migrations to run. current version: 8
+2026/11/09 02:50:37 OK   00001_authority.sql (14.7ms)
+2026/11/09 02:50:37 OK   00002_tenant_policy.sql (12.49ms)
+2026/11/09 02:50:37 OK   00003_nodes_ports.sql (26.02ms)
+2026/11/09 02:50:37 OK   00004_entry_group_domains.sql (2.41ms)
+2026/11/09 02:50:37 OK   00005_rules_compile.sql (33.09ms)
+2026/11/09 02:50:37 OK   00006_packages_entitlements.sql (40.5ms)
+2026/11/09 02:50:37 OK   00007_metering_ledger.sql (33.27ms)
+2026/11/09 02:50:37 OK   00008_limits_shares.sql (73.49ms)
+2026/11/09 02:50:37 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_node_recovery_source_receipts
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization
+2026/11/09 02:50:44 goose: no migrations to run. current version: 8
+2026/11/09 02:50:44 OK   00001_authority.sql (13.99ms)
+2026/11/09 02:50:44 OK   00002_tenant_policy.sql (12.22ms)
+2026/11/09 02:50:44 OK   00003_nodes_ports.sql (31.07ms)
+2026/11/09 02:50:44 OK   00004_entry_group_domains.sql (2.88ms)
+2026/11/09 02:50:44 OK   00005_rules_compile.sql (35.34ms)
+2026/11/09 02:50:44 OK   00006_packages_entitlements.sql (26.41ms)
+2026/11/09 02:50:44 OK   00007_metering_ledger.sql (40.79ms)
+2026/11/09 02:50:44 OK   00008_limits_shares.sql (102.5ms)
+2026/11/09 02:50:44 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt (13.59s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization (6.73s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_admissions (0.01s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_manifests (0.02s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_node_recovery_source_receipts (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization (6.86s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_admissions (0.02s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_manifests (0.02s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 02:50:50 goose: no migrations to run. current version: 8
+2026/11/09 02:50:51 OK   00001_authority.sql (11.19ms)
+2026/11/09 02:50:51 OK   00002_tenant_policy.sql (10.96ms)
+2026/11/09 02:50:51 OK   00003_nodes_ports.sql (27.3ms)
+2026/11/09 02:50:51 OK   00004_entry_group_domains.sql (3.24ms)
+2026/11/09 02:50:51 OK   00005_rules_compile.sql (28.81ms)
+2026/11/09 02:50:51 OK   00006_packages_entitlements.sql (22ms)
+2026/11/09 02:50:51 OK   00007_metering_ledger.sql (33.1ms)
+2026/11/09 02:50:51 OK   00008_limits_shares.sql (49.12ms)
+2026/11/09 02:50:51 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (9.03s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 02:51:00 goose: no migrations to run. current version: 8
+2026/11/09 02:51:00 OK   00001_authority.sql (11.63ms)
+2026/11/09 02:51:00 OK   00002_tenant_policy.sql (10.31ms)
+2026/11/09 02:51:00 OK   00003_nodes_ports.sql (28.54ms)
+2026/11/09 02:51:00 OK   00004_entry_group_domains.sql (4.74ms)
+2026/11/09 02:51:00 OK   00005_rules_compile.sql (27.55ms)
+2026/11/09 02:51:00 OK   00006_packages_entitlements.sql (25.92ms)
+2026/11/09 02:51:00 OK   00007_metering_ledger.sql (33.13ms)
+2026/11/09 02:51:00 OK   00008_limits_shares.sql (59.15ms)
+2026/11/09 02:51:00 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (9.13s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	71.592s

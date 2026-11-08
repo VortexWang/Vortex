@@ -1,0 +1,20 @@
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 02:49:19 goose: no migrations to run. current version: 8
+2026/11/09 02:49:19 OK   00001_authority.sql (8.56ms)
+2026/11/09 02:49:19 OK   00002_tenant_policy.sql (7.18ms)
+2026/11/09 02:49:19 OK   00003_nodes_ports.sql (16.82ms)
+2026/11/09 02:49:19 OK   00004_entry_group_domains.sql (2.19ms)
+2026/11/09 02:49:19 OK   00005_rules_compile.sql (16.44ms)
+2026/11/09 02:49:19 OK   00006_packages_entitlements.sql (14.98ms)
+2026/11/09 02:49:19 OK   00007_metering_ledger.sql (20.87ms)
+2026/11/09 02:49:19 OK   00008_limits_shares.sql (46.67ms)
+2026/11/09 02:49:19 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.74s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.02s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.02s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.02s)
+PASS
+ok  	vortex/backend/internal/service	10.509s

@@ -1,0 +1,14 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/runtime_effective_funding_test.go:163:9: no new variables on left side of :=
+internal/service/runtime_effective_funding_test.go:163:12: cannot use authoritySnapshot(t, x.f.pool, x.f.tenant, financial) (value of type []byte) as func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node) value in assignment
+internal/service/runtime_effective_funding_test.go:167:18: cannot use before (variable of type func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node)) as []byte value in argument to bytes.Equal
+internal/service/runtime_effective_funding_test.go:192:12: cannot use authoritySnapshot(t, x.f.pool, x.f.tenant, financial) (value of type []byte) as func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node) value in assignment
+internal/service/runtime_effective_funding_test.go:196:19: cannot use before (variable of type func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node)) as []byte value in argument to bytes.Equal
+internal/service/runtime_effective_funding_test.go:203:12: cannot use authoritySnapshot(t, x.f.pool, x.f.tenant, financial) (value of type []byte) as func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node) value in assignment
+internal/service/runtime_effective_funding_test.go:207:19: cannot use before (variable of type func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node)) as []byte value in argument to bytes.Equal
+internal/service/runtime_effective_funding_test.go:249:12: cannot use authoritySnapshot(t, x.f.pool, x.f.tenant, append(append([]string{}, financial...), "settlements", "tasks", "operations", "outbox", "audit_events")) (value of type []byte) as func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node) value in assignment
+internal/service/runtime_effective_funding_test.go:253:19: cannot use before (variable of type func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node)) as []byte value in argument to bytes.Equal
+internal/service/runtime_effective_funding_test.go:279:11: cannot use authoritySnapshot(t, x.f.pool, x.f.tenant, atomic) (value of type []byte) as func(*shareFixture, *"vortex/agent/store".Store, hub.Allocation, *agent.Node) value in assignment
+internal/service/runtime_effective_funding_test.go:279:11: too many errors
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

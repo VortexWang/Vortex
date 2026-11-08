@@ -42,11 +42,21 @@ func TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR(t *tes
 	testRuntimeRecoveryUpdateActualMTLS(t, "renewal-loss")
 }
 
+func TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR(t *testing.T) {
+	testRuntimeRecoveryUpdateActualMTLS(t, "engine-pending-renewal-loss")
+}
 func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
-	stopped := ordering != "open" && ordering != "renewal-loss"
-	testEffectiveRuntimeFundingWithHook(t, true, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) func() {
+	var pending *pendingRecoveryRule
+	var before func(*shareFixture, *store.Store, hub.Allocation, *agent.Node)
+	if ordering == "engine-pending-renewal-loss" {
+		before = func(x *shareFixture, ns *store.Store, a hub.Allocation, n *agent.Node) {
+			pending = preparePendingRecoveryRule(t, x, ns, a, n)
+		}
+	}
+	stopped := ordering != "open" && ordering != "renewal-loss" && before == nil
+	testEffectiveRuntimeFundingWithHooks(t, true, before, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) func() {
 		timeout := 15 * time.Second
-		if ordering == "renewal-loss" {
+		if ordering == "renewal-loss" || before != nil {
 			timeout = 25 * time.Second
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -118,6 +128,12 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 		defer backendServer.Stop()
 		controlv1.RegisterHubControlServer(backendServer, &control.HubAdapter{BackendID: shareBackendID, HubID: a.HubID, Region: a.Region, Shares: &x.s, Metering: &service.MeteringService{Pool: x.f.pool}, Observe: func(context.Context, string, string, []byte) error { return nil }})
 		go backendServer.Serve(backendListener)
+
+		if pending != nil {
+			directServerTLS := &tls.Config{Certificates: []tls.Certificate{portCertificate(t, backendCA, backendKey, shareBackendID, x509.ExtKeyUsageServerAuth)}, ClientCAs: nodeRoots, ClientAuth: tls.RequireAndVerifyClientCert, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}
+			directClientTLS := &tls.Config{Certificates: clientTLS.Certificates, RootCAs: backendRoots, ServerName: shareBackendID, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}
+			defer pending.startControl(t, ctx, directServerTLS, directClientTLS)()
+		}
 		usageBackend := hub.BackendUsageClient{Config: &hub.BackendClient{HubID: a.HubID, BootID: r.ToBootID, BackendID: shareBackendID, Region: a.Region, Address: backendListener.Addr().String(), Store: hs, Clock: clock, TLS: &tls.Config{Certificates: []tls.Certificate{portCertificate(t, x.s.SignerCA, x.f.caKey, a.HubID, x509.ExtKeyUsageClientAuth)}, RootCAs: backendRoots, ServerName: shareBackendID, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}}}
 		runtime := &hub.RuntimeServer{HubID: a.HubID, Region: a.Region, Issuer: &hub.Issuer{Store: hs, HubID: a.HubID, Clock: clock}, Usage: &hub.UsageRelay{Store: hs, Clock: clock, Backend: usageBackend}}
 		controlv1.RegisterNodeControlServer(server, runtime)
@@ -199,13 +215,15 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 				t.Fatal("actual recovery lost effective renewal trigger", due)
 			}
 			request := due[0].Request
-			request.RequestId = uuid.NewString()
-			request.RequestSha256, err = contracts.RenewalDigest(request)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err = ns.PersistTriggeredRenewal(ctx, a.HubID, request, due[0].GrantID); err != nil {
-				t.Fatal(err)
+			if pending == nil {
+				request.RequestId = uuid.NewString()
+				request.RequestSha256, err = contracts.RenewalDigest(request)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = ns.PersistTriggeredRenewal(ctx, a.HubID, request, due[0].GrantID); err != nil {
+					t.Fatal(err)
+				}
 			}
 		}
 		if stopped {
@@ -226,8 +244,11 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 		if e != nil || len(replay.Updates) != 1 || string(replay.Updates[0].Payload) != string(page.Updates[0].Payload) {
 			t.Fatal("reconnect retimed runtime recovery", replay, e)
 		}
-		if ordering == "renewal-loss" {
-			return exerciseTransferredRenewalAfterFULLLoss(t, ctx, x, hs, ns, a, r, node, runtime, serverTLS, clientTLS, due[0])
+		if ordering == "renewal-loss" || pending != nil {
+			if pending != nil {
+				pending.assertPending(t, ctx, x)
+			}
+			return exerciseTransferredRenewalAfterFULLLoss(t, ctx, x, hs, ns, a, r, node, runtime, serverTLS, clientTLS, due[0], pending)
 		}
 		return nil
 	})
@@ -237,8 +258,9 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 // The real RuntimeServer and its authenticated stream remain otherwise intact.
 type runtimeRenewalDropServer struct {
 	controlv1.UnimplementedNodeControlServer
-	runtime *hub.RuntimeServer
-	dropped atomic.Bool
+	runtime   *hub.RuntimeServer
+	dropped   atomic.Bool
+	requestID atomic.Value
 }
 
 func (s *runtimeRenewalDropServer) Connect(stream controlv1.NodeControl_ConnectServer) error {
@@ -252,12 +274,13 @@ type runtimeRenewalDropStream struct {
 
 func (s *runtimeRenewalDropStream) Send(m *controlv1.ControlMessage) error {
 	if result := m.GetRenewalResult(); result != nil && result.Code == "ok" && s.owner.dropped.CompareAndSwap(false, true) {
+		s.owner.requestID.Store(result.RequestId)
 		return status.Error(codes.Unavailable, "injected response loss after Hub FULL renewal")
 	}
 	return s.NodeControl_ConnectServer.Send(m)
 }
 
-func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node, runtime *hub.RuntimeServer, serverTLS, clientTLS *tls.Config, candidate store.RenewalCandidate) func() {
+func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node, runtime *hub.RuntimeServer, serverTLS, clientTLS *tls.Config, candidate store.RenewalCandidate, pending *pendingRecoveryRule) func() {
 	t.Helper()
 	request := candidate.Request
 	before, err := ns.AuditAuthorizationBalance(ctx, a.NodeID, candidate.GrantID)
@@ -301,6 +324,19 @@ func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, 
 	tick := time.NewTicker(10 * time.Millisecond)
 	defer tick.Stop()
 	for {
+		if request.RequestId == "" {
+			if id := faults.requestID.Load(); id != nil {
+				request.RequestId = id.(string)
+			} else {
+				select {
+				case <-ctx.Done():
+					local, localErr := ns.PendingRenewalIntents(context.Background(), a.HubID, a.NodeID, a.BootID, "")
+					t.Fatal("pending Engine Commit could not schedule transferred renewal", ctx.Err(), client.RegionalCounters(), client.CurrentHubStatus(), local, localErr)
+				case <-tick.C:
+					continue
+				}
+			}
+		}
 		intent, err = ns.RenewalIntent(ctx, request.RequestId)
 		if err != nil {
 			t.Fatal(err)
@@ -361,6 +397,9 @@ func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, 
 	issued, err := q.HubAllocationIssued(ctx, generated.HubAllocationIssuedParams{TenantID: x.f.tenant, AllocationID: a.AllocationID})
 	if err != nil || issued != 102 {
 		t.Fatal("PG issue inventory duplicated or omitted recovered child", issued, err)
+	}
+	if pending != nil {
+		pending.commit(t, ctx, x)
 	}
 	extra := &creditCloseFixture{x: x, in: service.HubFundingInput{HubID: a.HubID, NodeID: a.NodeID, BootID: a.BootID}, a: a, hs: hs, st: ns, node: node, issued: store.IssuedAuthorization{Payload: receipt.Payload, Generation: a.PathGeneration}, grant: grant}
 	// This callback runs only after the inherited complete seal is accepted.

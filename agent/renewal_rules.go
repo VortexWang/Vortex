@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"context"
+	"encoding/hex"
 	"sort"
 	"vortex/engine/apply"
 	ruleruntime "vortex/engine/runtime/rule"
@@ -11,17 +13,29 @@ type runtimeRenewalScope struct {
 	Fence uint64
 }
 
-// activeRenewalScopes observes the live process-local Engine, never a durable
-// active receipt from an earlier process. Prepare is not execution evidence.
+// liveRenewalScopes observes the live process-local Engine. Prepared work is
+// eligible only after an exact explicit Commit bound to this same executor.
 // The cursor limits one scheduler pass to32 rules and carries no authority.
-func (a *RuntimeApplier) activeRenewalScopes(after string) ([]runtimeRenewalScope, string) {
+func (a *RuntimeApplier) liveRenewalScopes(ctx context.Context, after string) ([]runtimeRenewalScope, string, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	latest := map[string]ruleruntime.Artifact{}
 	for id, artifact := range a.ruleTransactions {
 		tx, found := a.rules.Query(id)
-		if !found || tx.State != apply.Active {
+		if !found {
 			continue
+		}
+		if tx.State != apply.Active {
+			if tx.State != apply.Prepared {
+				continue
+			}
+			pending, err := a.node.Store.PendingRuleCommit(ctx, hex.EncodeToString(id[:]), a.ExecutionID())
+			if err != nil {
+				return nil, "", err
+			}
+			if !pending {
+				continue
+			}
 		}
 		old, found := latest[artifact.RuleID]
 		if !found || artifact.FencingGeneration > old.FencingGeneration {
@@ -41,5 +55,5 @@ func (a *RuntimeApplier) activeRenewalScopes(after string) ([]runtimeRenewalScop
 		scopes = scopes[:32]
 		next = scopes[len(scopes)-1].RuleID
 	}
-	return scopes, next
+	return scopes, next, nil
 }

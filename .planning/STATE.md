@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: transferred renewal loss/replay and finalization verified; Engine/pending convergence remains"
-last_updated: "2026-11-08T18:36:34.810263+00:00"
+stopped_at: "06-06 Task3: actual pending Engine Commit after S/R verified; remaining ordering/full acceptance"
+last_updated: "2026-11-08T18:55:30.080927+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: actual post-S/R renewal loss/replay and original-source settlement verified;8/11."
+last_activity_desc: "06-06 Task3: explicit pending Commit automatic renewal and actual direct mTLS Engine activation verified;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: ec473632
+state_head: f114fa64
 ---
 
 # Project State
@@ -189,3 +189,6 @@ Phase4 D-04 remains candidate; see04-VERIFICATION.md. Earlier credit6a1faf2 was 
 
 
 Transferred renewal delivery now uses the actual production Agent/RuntimeServer and funded Hub/backend role-mTLS stream after epoch7->8 recovery. One success is dropped after Hub FULL; exactly one reconnect installs the same immutable issue and PG inventory records102 issued from the original103 parent, leaving1 R. Original51 child/37 known bytes and parent reservations remain unchanged. The recovered zero-use child final cannot finalize the still-unfinalized original child or mutate financial/task/audit rows; complete seal, both child finals and parent final precede one fresh successor under8 concurrent funding calls. All recovery orderings and effective funding tests pass final native race46.831s/Linux arm64 race47.642s. Production/build evidence inherits ec473632 and full backend suites936edcab; only tests and candidate docs changed, no redundant build/root/generator rerun or clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-transferred-renewal-delivery/. This explicitly journals a candidate after real recovery; Engine is absent in this fixture. Actual post-S/R Engine/pending deployment convergence, older-path revocation-only ordering and complete06-06 verification remain before concreteCR-008. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.
+
+
+Explicit pending Engine Commit now participates in bounded renewal observation only when the same live executor proves Prepared and its FULL journal has the exact explicit Commit digest/revision/fence/correlation. Prepare/query/malformed/different-executor/committing/unknown work cannot bootstrap. A stale share revision at the pre-Commit readiness check is classified as pending; the same executor must independently prove Prepared and all current authority checks still gate the later Commit. Genuine RED could not schedule after S/R; final actual direct backend/Node mTLS replays Prepare, leaves the first explicit Commit Prepared, then production automatic epoch8 renewal survives lost FULL response and only a second explicit Commit activates the original immutable artifact. Original103/51/37/new51/R1 and complete child/parent final/fresh funding gates pass. The other fixed member has genuinely reserved capacity plus its original prepared fixture receipt, not real Engine execution in this test. Native complete root race(Agent61.251/Store80.779), Linux arm64 complete root race(Agent111.577/Store171.388), final native/Linux affected backend integrations71.592s/68.963s and six builds pass. Final store negative enhancement passes separately after native full root; Linux full root includes it. Full backend suites inherit936edcab; no full backend/generator rerun or same-SHA clean-source/Actions claim. Failed fixture/RED/intermediate classification logs remain FAIL. Evidence: artifacts/phase6/06-06/task3-pending-engine-renewal/. SQL/protobuf/Engine module/dependencies/approved snapshots unchanged. Next: older-path revocation-only ordering and complete06-06 producer/fault/clean-source acceptance before concreteCR-008 review. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.

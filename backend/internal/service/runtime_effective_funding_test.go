@@ -31,6 +31,9 @@ func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
 	testEffectiveRuntimeFundingWithHook(t, installed, nil)
 }
 func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func(*shareFixture, *store.Store, *store.Store, hub.Allocation, service.HubSameStoreRecoveryInput, *agent.Node) func()) {
+	testEffectiveRuntimeFundingWithHooks(t, installed, nil, hook)
+}
+func testEffectiveRuntimeFundingWithHooks(t *testing.T, installed bool, beforeRecovery func(*shareFixture, *store.Store, hub.Allocation, *agent.Node), hook func(*shareFixture, *store.Store, *store.Store, hub.Allocation, service.HubSameStoreRecoveryInput, *agent.Node) func()) {
 	t.Helper()
 	ctx := context.Background()
 	x, in, hs := fundedHubFixture(t)
@@ -104,6 +107,9 @@ func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func
 			t.Fatal(err)
 		}
 		oldUsage = oldCredit.commitLocalUsage(t, 37)
+		if beforeRecovery != nil {
+			beforeRecovery(x, ns, original, node)
+		}
 	}
 	x.now = x.now.Add(5 * time.Second)
 	if _, e = x.s.AuthorizeSigner(ctx, admin, in.HubID, 8, x.now.Add(-time.Second), x.now.Add(time.Hour), make([]byte, 32), uuid.NewString()); e != nil {

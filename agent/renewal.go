@@ -26,7 +26,11 @@ func (c *ControlClient) queueDueRenewals(ctx context.Context, issuer string, con
 	var scopes []runtimeRenewalScope
 	next := ""
 	if applier := e.renewalApplier.Load(); applier != nil {
-		scopes, next = applier.activeRenewalScopes(c.renewalAfter)
+		var err error
+		scopes, next, err = applier.liveRenewalScopes(ctx, c.renewalAfter)
+		if err != nil {
+			return err
+		}
 	}
 	if !e.activationRequired.Load() || e.activated.Load() {
 		scopes = append(scopes, runtimeRenewalScope{RuntimeScope: e.scope, Fence: e.activeFence.Load()})

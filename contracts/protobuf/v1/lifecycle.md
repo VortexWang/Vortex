@@ -1152,3 +1152,31 @@ child lacks its dedicated final. Complete seal, both child finals and the
 independently validated parent final precede the single fresh successor. This
 covers production request delivery and replay from a durable candidate, with
 Engine/pending deployment convergence remaining a separate check.
+
+
+## Explicit pending Commit renewal observation (candidate)
+
+An enabled prepared rule may join the bounded live Engine renewal scan only
+when its exact current process-local executor still proves Prepared and the
+immutable FULL command journal contains an explicit Commit matching transaction,
+artifact digest, rule revision and fencing generation. Prepare/query-only work,
+invalid correlation, unknown/released transactions or a different executor do
+not qualify. This observation alone never activates the Engine or grants money.
+Every candidate and durable renewal still passes the existing current-boot,
+trusted-time, source handoff/root, path/fence, finite R and deduplication checks.
+
+A stale authorization share revision encountered before any Engine Commit may
+leave that same transaction Prepared while it waits for current independent
+rights. The exact executor must prove Prepared before the reconciler retains
+that result. Lower path/fence and unproven ownership remain denied. Later funded
+new-epoch rights still require a separate explicit backend Commit and complete
+current authority/share-hold validation before Engine activation.
+
+The actual S/R fault case retains the original immutable epoch7 artifact,
+replays Prepare and delivers both Commit attempts over direct backend/Node mTLS.
+The first remains Prepared; production automatic renewal spends original epoch8
+R and survives a lost FULL response, then the second explicit Commit activates
+that same Engine transaction. Only the selected member has real Engine execution
+in this fixture; the fixed deployment's other member has reserved capacity and
+its earlier prepared fixture receipt. It is not a complete multi-member data
+forwarding or restart/rolling-upgrade acceptance result.

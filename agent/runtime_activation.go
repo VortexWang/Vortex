@@ -130,7 +130,10 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 		low, high, trusted := a.node.TrustedTime()
 		if artifact.Intent.Rule.Enabled {
 			if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
-				if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) || errors.Is(err, store.ErrAuthorityExpired) {
+				// Exact current roots may arrive after a funded epoch handoff.
+				// No Engine Commit has run at this point; preserve the prepared
+				// transaction while independently validated current rights are absent.
+				if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) || errors.Is(err, store.ErrAuthorityExpired) || errors.Is(err, store.ErrAuthorizationGenerationStale) {
 					return nil, fmt.Errorf("%w: %w", ErrActivationPending, err)
 				}
 				return nil, err
