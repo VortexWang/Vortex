@@ -243,6 +243,28 @@ type HubRuntimeLeaseReceipt struct {
 	PeerFingerprint []byte
 }
 
+type HubSameStoreJournal struct {
+	TenantID        string
+	RecoveryID      string
+	Sequence        int64
+	Kind            string
+	RecordID        string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+	OperationID     string
+}
+
+type HubSameStoreManifest struct {
+	TenantID        string
+	RecoveryID      string
+	SealedSequence  int64
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+	OperationID     string
+}
+
 type HubSameStoreRecovery struct {
 	TenantID      string
 	ID            string

@@ -94,3 +94,45 @@ func (c SameStoreRecoveryCommand) Validate() error {
 	}
 	return nil
 }
+
+// SameStoreRecoveryManifest is the exact immutable local FULL journal witness.
+// Decoding checks command identity and conservation; PostgreSQL independently
+// reconstructs every prefix hash and financial issue partition before accepting it.
+type SameStoreRecoveryManifest struct {
+	Request store.HandoffRequest
+	Result  store.HandoffResult
+}
+
+func DecodeSameStoreManifest(raw []byte, c SameStoreRecoveryCommand) (SameStoreRecoveryManifest, error) {
+	var m SameStoreRecoveryManifest
+	if len(raw) == 0 || len(raw) > 1<<20 || c.Validate() != nil {
+		return m, ErrSameStoreRecovery
+	}
+	d := json.NewDecoder(bytes.NewReader(raw))
+	d.DisallowUnknownFields()
+	if d.Decode(&m) != nil {
+		return SameStoreRecoveryManifest{}, ErrSameStoreRecovery
+	}
+	canonical, e := json.Marshal(m)
+	a, _ := json.Marshal(m.Request)
+	b, _ := json.Marshal(c.Handoff)
+	inv := m.Result.FundedInventory
+	if e != nil || !bytes.Equal(raw, canonical) || !bytes.Equal(a, b) || m.Result.SealedSequence < 0 || m.Result.SealedSequence >= math.MaxInt64 || inv == nil || inv.PrefixCount != m.Result.SealedSequence || len(inv.Delegations) != len(c.Allocations) || len(m.Result.Remaining) != len(c.Allocations) {
+		return SameStoreRecoveryManifest{}, ErrSameStoreRecovery
+	}
+	validHash := func(s string) bool {
+		b, e := hex.DecodeString(s)
+		return e == nil && len(b) == 32 && hex.EncodeToString(b) == s
+	}
+	if !validHash(inv.PrefixSHA256) {
+		return SameStoreRecoveryManifest{}, ErrSameStoreRecovery
+	}
+	for i, p := range inv.Delegations {
+		a := c.Allocations[i]
+		r, ok := m.Result.Remaining[a.DelegationID]
+		if !ok || p.DelegationID != a.DelegationID || p.AllocationSHA256 != a.DelegationSHA256 || p.Raw < 1 || p.Issued < 0 || p.Issued > p.Raw || p.Remaining != p.Raw-p.Issued || uint64(p.Remaining) != r || p.IssueCount < 0 || p.IssueCount > p.Issued || !validHash(p.IssueSHA256) {
+			return SameStoreRecoveryManifest{}, ErrSameStoreRecovery
+		}
+	}
+	return m, nil
+}

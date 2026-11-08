@@ -321,6 +321,30 @@ CREATE TABLE hub_same_store_recoveries (
  FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
 );
 CREATE TRIGGER hub_same_store_recovery_immutable BEFORE UPDATE OR DELETE ON hub_same_store_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Recovery retention is distinct from usage settlement and online admission.
+CREATE TABLE hub_same_store_journal (
+ tenant_id text NOT NULL, recovery_id text NOT NULL,
+ sequence bigint NOT NULL CHECK(sequence>0), kind text NOT NULL,
+ record_id text NOT NULL, payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ operation_id text NOT NULL,
+ PRIMARY KEY(recovery_id,sequence), UNIQUE(recovery_id,kind,record_id),
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_recoveries(id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_journal_immutable BEFORE UPDATE OR DELETE ON hub_same_store_journal FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE hub_same_store_manifests (
+ tenant_id text NOT NULL, recovery_id text NOT NULL PRIMARY KEY,
+ sealed_sequence bigint NOT NULL CHECK(sealed_sequence>=0),
+ payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ operation_id text NOT NULL,
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_recoveries(id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_manifest_immutable BEFORE UPDATE OR DELETE ON hub_same_store_manifests FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

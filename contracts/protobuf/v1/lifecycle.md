@@ -591,3 +591,40 @@ authenticated boot-bound preflight, complete PG journal/partition verification,
 new-root Node provisioning and effective issue/lease/seal consumers are still
 required. No recovery wire handler or approved snapshot is added by this unit;
 CR-008 remains unapproved.
+
+
+### Candidate retained prefix and independent PG partition witness
+
+LedgerPrefix reads every retained local row through a fixed boundary, including
+already confirmed rows, in continuous sequence order. It rejects missing rows
+and payload hash mismatch. Pages have count and byte bounds; reading never
+changes confirmations or usage settlement.
+
+RetainHubSameStoreRecord accepts only the authenticated approved target Hub boot
+and exact original record identity/digest. Each immutable PG journal row,
+pending obligation task, Outbox and audit commit together. Out-of-order retention
+is permitted; it proves no contiguous completion. Replaying retained bytes does
+not retime a command. A verified manifest forbids adding new prefix records.
+
+VerifyHubSameStorePrefix independently hashes every sequence1..S and requires
+the exact local handoff record atS+1. It checks the original approved command,
+complete prefix digest and each transferred delegation's complete independent
+PG financial issue inventory. Each prefix issue must already have its canonical
+PG financial receipt with the original allocation, boot, sequence and bytes;
+every PG issue from the old boot must occur in the prefix. A shorter but
+self-consistent forged prefix cannot omit an independently registered child.
+The original raw amount, issued count/total/digest and R must all agree. A
+transferred allocation sealed meanwhile is refused. All prior tenant locks are
+acquired in sorted order under the Hub incarnation lock, preventing issue
+registration from changing the inventory during verification. Changed authority
+inventory, replaced boot, advanced epoch, command expiry and uncertain time deny
+first verification. The verified witness/task/Outbox/audit are atomic.
+
+Retention and this immutable witness are neither a local journal ACK nor a Node
+usage settlement. Known/unknown usage remains a pending obligation; it is not
+silently charged, finalized or removed. Financial debt/capacity and original Hub
+binding stay unchanged. Exact witness replay remains available after clock
+expiry. It cannot establish fresh readiness: admission must revalidate current
+authority, complete partitions and original seals/closures, independently
+provision Node roots and consume the original FULL handoff. No recovery transport,
+new capability, online binding or approved snapshot is introduced by this unit.

@@ -9,6 +9,64 @@ import (
 	"context"
 )
 
+const appendHubSameStoreJournal = `-- name: AppendHubSameStoreJournal :exec
+INSERT INTO hub_same_store_journal(tenant_id,recovery_id,sequence,kind,record_id,payload,payload_digest,peer_fingerprint,operation_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+`
+
+type AppendHubSameStoreJournalParams struct {
+	TenantID        string
+	RecoveryID      string
+	Sequence        int64
+	Kind            string
+	RecordID        string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+	OperationID     string
+}
+
+func (q *Queries) AppendHubSameStoreJournal(ctx context.Context, arg AppendHubSameStoreJournalParams) error {
+	_, err := q.db.Exec(ctx, appendHubSameStoreJournal,
+		arg.TenantID,
+		arg.RecoveryID,
+		arg.Sequence,
+		arg.Kind,
+		arg.RecordID,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.PeerFingerprint,
+		arg.OperationID,
+	)
+	return err
+}
+
+const appendHubSameStoreManifest = `-- name: AppendHubSameStoreManifest :exec
+INSERT INTO hub_same_store_manifests(tenant_id,recovery_id,sealed_sequence,payload,payload_digest,peer_fingerprint,operation_id) VALUES($1,$2,$3,$4,$5,$6,$7)
+`
+
+type AppendHubSameStoreManifestParams struct {
+	TenantID        string
+	RecoveryID      string
+	SealedSequence  int64
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+	OperationID     string
+}
+
+func (q *Queries) AppendHubSameStoreManifest(ctx context.Context, arg AppendHubSameStoreManifestParams) error {
+	_, err := q.db.Exec(ctx, appendHubSameStoreManifest,
+		arg.TenantID,
+		arg.RecoveryID,
+		arg.SealedSequence,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.PeerFingerprint,
+		arg.OperationID,
+	)
+	return err
+}
+
 const appendHubSameStoreRecovery = `-- name: AppendHubSameStoreRecovery :exec
 INSERT INTO hub_same_store_recoveries(tenant_id,id,hub_id,from_epoch,to_epoch,from_boot_id,to_boot_id,backend_id,operation_id,created_by,payload,payload_digest,proof,proof_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 `
@@ -50,6 +108,51 @@ func (q *Queries) AppendHubSameStoreRecovery(ctx context.Context, arg AppendHubS
 	return err
 }
 
+const getHubSameStoreJournal = `-- name: GetHubSameStoreJournal :one
+SELECT tenant_id, recovery_id, sequence, kind, record_id, payload, payload_digest, peer_fingerprint, operation_id FROM hub_same_store_journal WHERE recovery_id=$1 AND sequence=$2
+`
+
+type GetHubSameStoreJournalParams struct {
+	RecoveryID string
+	Sequence   int64
+}
+
+func (q *Queries) GetHubSameStoreJournal(ctx context.Context, arg GetHubSameStoreJournalParams) (HubSameStoreJournal, error) {
+	row := q.db.QueryRow(ctx, getHubSameStoreJournal, arg.RecoveryID, arg.Sequence)
+	var i HubSameStoreJournal
+	err := row.Scan(
+		&i.TenantID,
+		&i.RecoveryID,
+		&i.Sequence,
+		&i.Kind,
+		&i.RecordID,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.PeerFingerprint,
+		&i.OperationID,
+	)
+	return i, err
+}
+
+const getHubSameStoreManifest = `-- name: GetHubSameStoreManifest :one
+SELECT tenant_id, recovery_id, sealed_sequence, payload, payload_digest, peer_fingerprint, operation_id FROM hub_same_store_manifests WHERE recovery_id=$1
+`
+
+func (q *Queries) GetHubSameStoreManifest(ctx context.Context, recoveryID string) (HubSameStoreManifest, error) {
+	row := q.db.QueryRow(ctx, getHubSameStoreManifest, recoveryID)
+	var i HubSameStoreManifest
+	err := row.Scan(
+		&i.TenantID,
+		&i.RecoveryID,
+		&i.SealedSequence,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.PeerFingerprint,
+		&i.OperationID,
+	)
+	return i, err
+}
+
 const getHubSameStoreRecovery = `-- name: GetHubSameStoreRecovery :one
 SELECT tenant_id, id, hub_id, from_epoch, to_epoch, from_boot_id, to_boot_id, backend_id, operation_id, created_by, payload, payload_digest, proof, proof_digest FROM hub_same_store_recoveries WHERE hub_id=$1 AND to_epoch=$2
 `
@@ -79,4 +182,93 @@ func (q *Queries) GetHubSameStoreRecovery(ctx context.Context, arg GetHubSameSto
 		&i.ProofDigest,
 	)
 	return i, err
+}
+
+const hubSameStoreRecoveryByID = `-- name: HubSameStoreRecoveryByID :one
+SELECT tenant_id, id, hub_id, from_epoch, to_epoch, from_boot_id, to_boot_id, backend_id, operation_id, created_by, payload, payload_digest, proof, proof_digest FROM hub_same_store_recoveries WHERE id=$1
+`
+
+func (q *Queries) HubSameStoreRecoveryByID(ctx context.Context, id string) (HubSameStoreRecovery, error) {
+	row := q.db.QueryRow(ctx, hubSameStoreRecoveryByID, id)
+	var i HubSameStoreRecovery
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.HubID,
+		&i.FromEpoch,
+		&i.ToEpoch,
+		&i.FromBootID,
+		&i.ToBootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.Proof,
+		&i.ProofDigest,
+	)
+	return i, err
+}
+
+const missingHubSameStoreIssues = `-- name: MissingHubSameStoreIssues :one
+SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND i.hub_boot_id=$2
+ AND NOT EXISTS(SELECT 1 FROM hub_same_store_journal j WHERE j.recovery_id=$3 AND j.sequence=i.ledger_sequence AND j.sequence<=$4 AND j.kind='issue' AND j.record_id=i.issue_id AND j.payload=i.payload AND j.payload_digest=i.payload_digest))
+`
+
+type MissingHubSameStoreIssuesParams struct {
+	HubID          string
+	HubBootID      string
+	RecoveryID     string
+	SealedSequence int64
+}
+
+func (q *Queries) MissingHubSameStoreIssues(ctx context.Context, arg MissingHubSameStoreIssuesParams) (bool, error) {
+	row := q.db.QueryRow(ctx, missingHubSameStoreIssues,
+		arg.HubID,
+		arg.HubBootID,
+		arg.RecoveryID,
+		arg.SealedSequence,
+	)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const pageHubSameStoreJournal = `-- name: PageHubSameStoreJournal :many
+SELECT tenant_id, recovery_id, sequence, kind, record_id, payload, payload_digest, peer_fingerprint, operation_id FROM hub_same_store_journal WHERE recovery_id=$1 AND sequence>$2 ORDER BY sequence LIMIT 32
+`
+
+type PageHubSameStoreJournalParams struct {
+	RecoveryID    string
+	AfterSequence int64
+}
+
+func (q *Queries) PageHubSameStoreJournal(ctx context.Context, arg PageHubSameStoreJournalParams) ([]HubSameStoreJournal, error) {
+	rows, err := q.db.Query(ctx, pageHubSameStoreJournal, arg.RecoveryID, arg.AfterSequence)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubSameStoreJournal{}
+	for rows.Next() {
+		var i HubSameStoreJournal
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.RecoveryID,
+			&i.Sequence,
+			&i.Kind,
+			&i.RecordID,
+			&i.Payload,
+			&i.PayloadDigest,
+			&i.PeerFingerprint,
+			&i.OperationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
