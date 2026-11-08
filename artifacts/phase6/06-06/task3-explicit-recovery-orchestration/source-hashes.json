@@ -1,0 +1,6 @@
+{
+  "backend/internal/repository/tenant_scope.go": "ef8cb792133b99c6bce536d0edcf61fe7d2c9765de69513d5750ccd55e80bbc1",
+  "backend/internal/repository/tenant_scope_test.go": "507958c0c4e894142acb98f26e5488abb6aee86f7a6b1c8f9dee73f6ef99b520",
+  "backend/internal/service/hub_recovery_orchestration.go": "49d5fcf3a5a7d264cc9538c275fcf2a40004dde1acffb46adfb43ee867955f7f",
+  "backend/internal/service/hub_recovery_orchestration_test.go": "7c9e9d4cc1f646ea93767f12bf73be1829a9536544c35fffc69bef87422ba6e1"
+}

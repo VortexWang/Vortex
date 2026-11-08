@@ -1,0 +1,9 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/hub_recovery_orchestration_test.go:31:20: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+internal/service/hub_recovery_orchestration_test.go:38:18: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+internal/service/hub_recovery_orchestration_test.go:42:17: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+internal/service/hub_recovery_orchestration_test.go:54:17: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+internal/service/hub_recovery_orchestration_test.go:63:21: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+internal/service/hub_recovery_orchestration_test.go:113:21: x.s.AdvanceHubSameStoreRecovery undefined (type service.ShareService has no field or method AdvanceHubSameStoreRecovery)
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

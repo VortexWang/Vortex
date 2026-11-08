@@ -967,3 +967,25 @@ This closes the service-level cold path for transferred generations. Automatic
 platform recovery orchestration, effective funding/refill and RuntimeServer
 convergence remain separate unfinished work. No wire field, migration or approved
 snapshot changes in this unit. CR-008 remains unapproved.
+
+## Explicit request-scoped recovery orchestration (candidate)
+
+`AdvanceHubSameStoreRecovery` consumes an existing explicit platform approval
+under the current authenticated platform Grant scope. It never derives a role
+from approval/task CreatedBy. Target-tenant scopes preserve the same authenticated
+principal and independently authorize the same action; an existing read/mutation
+scope cannot become Grant.
+
+The coordinator audits its approval/finite-manifest inventory read, then creates
+at most32 missing commands per call. Each command retains the existing independent
+audit/task/Outbox transaction. Existing workers deliver committed Node fences and
+roots. Missing manifest, fence receipt or root receipt yields its corresponding
+waiting stage. All original admission guards run again before PG admission.
+A later call resumes from immutable PG evidence; concurrent calls cannot duplicate
+commands or manufacture receipts. `admitted` describes PG evidence only, including
+historical replay; local Hub FULL admission and finite ACK remain independent.
+
+This is a resumable explicitly authorized service action for the06-07 HTTP
+adapter. It is not a background worker grant and does not automatically approve
+signer authority, cold recovery or new platform actions. No public HTTP endpoint,
+wire field, migration or approved snapshot is introduced here. CR-008 is unapproved.

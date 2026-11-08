@@ -62,6 +62,8 @@ Repeated PG same-store recovery producers now derive effective FromEpoch through
 
 Transferred-generation cold closure now consumes the existing explicit platform complete immutable deadline proof independently from the live S/R chain. Canonical bytes/hash, exact request and both incarnation bindings, original share/deadlines and trusted lower bound are rechecked. The original first-admission closure row is never rewritten; unacknowledged live closure work is retired as failed without fabricated receipts. Cold proof enables no renewal, funding or money release. Real PG/Hub admitted7->8, explicit cold8->9 and actual Node FULL CAS retain all financial occupation and release only600000->300000 capacity. Audit rollback,8 concurrent calls, scope/inventory/hash/time negatives, exact replay and expected RED/normal GREEN pass. Final complete native backend race(service287.287), Linux arm64 backend race(service303.517) and four Backend/Hub cross-builds pass. SQL/protobuf/root source unchanged; no generation/root rerun or clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-transferred-cold-closure/. Remaining: explicit platform orchestration, effective funding/refill, RuntimeServer/pending-rule convergence and complete06-06 producer/fault/clean-source checks before concrete CR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
+Explicit request-scoped recovery coordinator now consumes an existing approval under the current authenticated platform Grant scope, preserves that principal when authorizing target tenants, and never promotes CreatedBy into a role. Audited inventory/current pending boundary checks, at most32 missing commands per call and existing independent fence/root task+Outbox transactions progress only through actual committed FULL receipts before existing all-tenant admission checks. Waiting stages are resumable; PG admitted status grants no local Hub ACK/readiness. Actual PG/Hub/Node SQLite stage flow,8 concurrent producers/admissions, audit rollback, actual actor attribution,33-allocation32+1 progression without starvation, scope/action escalation and expiry/clock/boot/account/epoch/tenant/admission-audit negatives pass. Original capacity and financial rows remain unchanged; local Hub remains blocked until its own FULL admission. Complete native backend race(service300.164), Linux arm64 backend race(service314.733) and four Backend/Hub cross-builds pass. SQL/protobuf/root source unchanged; no root/generation rerun or clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-explicit-recovery-orchestration/. This is the resumable service action for06-07 HTTP, not a background platform delegation or endpoint. Remaining06-06: effective funding/refill, RuntimeServer/pending-rule convergence and complete producer/fault/clean-source checks before concrete CR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
+
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
@@ -161,8 +163,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T16:12:28.051803+00:00
-Stopped at: 06-06 Task3: transferred cold closure complete; explicit orchestration and production convergence pending
+Last session: 2026-11-08T16:25:56.995227+00:00
+Stopped at: 06-06 Task3: explicit recovery service coordinator complete; effective funding and runtime convergence pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

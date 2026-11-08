@@ -30,6 +30,17 @@ func (s TenantScope) Allows(a policy.Action) bool {
 	return s.Valid() && (a == policy.Read || s.action == a) && policy.Authorize(s.principal, s.tenant, a) == nil
 }
 
+// ForTenant preserves the authenticated principal and its existing action. It
+// cannot promote a stored actor ID or widen a read/mutation scope into a grant.
+// The new tenant is independently authorized; platform reads/writes still use
+// the target operation's AuditWriter transaction.
+func (s TenantScope) ForTenant(tenant string, action policy.Action) (TenantScope, error) {
+	if !s.Allows(action) {
+		return TenantScope{}, policy.ErrForbidden
+	}
+	return NewTenantScope(s.principal, tenant, action)
+}
+
 type Audit struct {
 	Action, ResourceID, RequestID, Reason string
 	Before, After                         []byte
