@@ -1,0 +1,19 @@
+{
+  "status": "passed_partial_task3_development",
+  "base_commit": "c0d3559aa4e370b2355aa4241f63bfbfde091b1e",
+  "checks": [
+    "every first-platform-group node needs both real reserved share kinds before Commit is queued or sent",
+    "last bootstrap reservation and Commit tasks rollback together on failed audit",
+    "reservation permits configuration Commit but active_generation remains zero until Node receipt",
+    "full service/control/worker/timeauthority race suite",
+    "fresh PostgreSQL schema migration 00001 through 00008; Docker race regression",
+    "Linux arm64 backend compilation",
+    "sqlc v1.31.1 two clean output directories and repository identical: 16 files"
+  ],
+  "clock_scope": "Linux kernel synchronization flags and finite error bounds, one-second total including margin; discontinuity disables new rights in this process. Simulated clock tests do not establish deployment NTP accuracy. Non-Linux denies trusted bounds.",
+  "evidence_scope": "dirty development checkout; not clean committed-source producer or same-SHA Actions pair",
+  "failures_preserved": [
+    "existing Docker database had an older candidate 00008; new database passed without changing migration history",
+    "seeded upgrade test expected old latest version 7; updated to current candidate 8"
+  ]
+}

@@ -942,6 +942,47 @@ func (q *Queries) PendingShareDelivery(ctx context.Context, arg PendingShareDeli
 	return exists, err
 }
 
+const preparedNodeDeployments = `-- name: PreparedNodeDeployments :many
+SELECT DISTINCT d.tenant_id, d.id, d.rule_id, d.rule_revision, d.input_digest, d.state, d.deadline, d.rollback_revision, d.created_by FROM rule_deployments d JOIN rule_deployment_members m ON m.tenant_id=d.tenant_id AND m.deployment_id=d.id
+JOIN rule_heads h ON h.tenant_id=d.tenant_id AND h.id=d.rule_id AND h.desired_revision=d.rule_revision
+WHERE d.tenant_id=$1 AND m.node_id=$2 AND m.state='prepared' AND d.state='preparing' ORDER BY d.rule_id,d.id
+`
+
+type PreparedNodeDeploymentsParams struct {
+	TenantID string
+	NodeID   string
+}
+
+func (q *Queries) PreparedNodeDeployments(ctx context.Context, arg PreparedNodeDeploymentsParams) ([]RuleDeployment, error) {
+	rows, err := q.db.Query(ctx, preparedNodeDeployments, arg.TenantID, arg.NodeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RuleDeployment{}
+	for rows.Next() {
+		var i RuleDeployment
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.ID,
+			&i.RuleID,
+			&i.RuleRevision,
+			&i.InputDigest,
+			&i.State,
+			&i.Deadline,
+			&i.RollbackRevision,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const preparedShareArtifacts = `-- name: PreparedShareArtifacts :many
 SELECT a.tenant_id, a.rule_id, a.rule_revision, a.node_id, a.input_digest, a.digest, a.canonical, a.billing_snapshot_id, a.signer_epoch, a.path_generation, a.fencing_generation, a.created_at,m.boot_id,m.transaction_id,d.id AS deployment_id,r.created_by
 FROM rule_artifacts a
@@ -1130,6 +1171,27 @@ func (q *Queries) SetShareAllocationQueue(ctx context.Context, arg SetShareAlloc
 		arg.State,
 	)
 	return err
+}
+
+const shareBootstrapReserved = `-- name: ShareBootstrapReserved :one
+SELECT count(DISTINCT c.kind)::integer=2 AS reserved
+FROM share_chains c JOIN share_generations g ON g.tenant_id=c.tenant_id AND g.node_id=c.node_id AND g.kind=c.kind AND g.generation=CASE WHEN c.pending_generation>0 THEN c.pending_generation ELSE c.active_generation END
+WHERE c.tenant_id=$1 AND c.node_id=$2 AND c.boot_id=$3 AND g.boot_id=c.boot_id AND c.held_amount>0 AND g.amount>0
+AND g.ownership_until>now() AND g.policy_until>now() AND g.autonomy_until>now()
+AND (c.kind='connections' OR g.burst_bytes>0)
+`
+
+type ShareBootstrapReservedParams struct {
+	TenantID string
+	NodeID   string
+	BootID   string
+}
+
+func (q *Queries) ShareBootstrapReserved(ctx context.Context, arg ShareBootstrapReservedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, shareBootstrapReserved, arg.TenantID, arg.NodeID, arg.BootID)
+	var reserved bool
+	err := row.Scan(&reserved)
+	return reserved, err
 }
 
 const shareClosureEvidence = `-- name: ShareClosureEvidence :many

@@ -59,7 +59,7 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 		// A restriction can commit between lease selection and this current
 		// authority check. Nothing has been sent: leave the task pending instead
 		// of terminating the backend or inventing an execution failure.
-		if (errors.Is(e, service.ErrConflict) || errors.Is(e, service.ErrScope)) && (b.Phase == "prepare" || b.Phase == "commit") {
+		if (errors.Is(e, service.ErrConflict) || errors.Is(e, service.ErrScope) || errors.Is(e, service.ErrShareUnknown)) && (b.Phase == "prepare" || b.Phase == "commit") {
 			return true, tx.Rollback(ctx)
 		}
 		return true, e

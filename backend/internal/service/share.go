@@ -240,7 +240,7 @@ func (s ShareService) PrepareShare(ctx context.Context, scope TenantScope, in Pr
 			return e
 		}
 		out = PreparedShare{generation, op.ID, h.State}
-		return nil
+		return resumePreparedNodeDeployments(ctx, q, scope, in.NodeID)
 	})
 	if e != nil {
 		return PreparedShare{}, e

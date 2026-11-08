@@ -111,3 +111,14 @@ INSERT INTO share_demand_samples(tenant_id,node_id,boot_id,sample_id,window_at,p
 
 -- name: ResetShareAllocationQueues :exec
 UPDATE share_allocation_queue SET state='ineligible',target=0,window_at=$2 WHERE tenant_id=$1;
+
+-- name: ShareBootstrapReserved :one
+SELECT count(DISTINCT c.kind)::integer=2 AS reserved
+FROM share_chains c JOIN share_generations g ON g.tenant_id=c.tenant_id AND g.node_id=c.node_id AND g.kind=c.kind AND g.generation=CASE WHEN c.pending_generation>0 THEN c.pending_generation ELSE c.active_generation END
+WHERE c.tenant_id=$1 AND c.node_id=$2 AND c.boot_id=$3 AND g.boot_id=c.boot_id AND c.held_amount>0 AND g.amount>0
+AND g.ownership_until>now() AND g.policy_until>now() AND g.autonomy_until>now()
+AND (c.kind='connections' OR g.burst_bytes>0);
+-- name: PreparedNodeDeployments :many
+SELECT DISTINCT d.* FROM rule_deployments d JOIN rule_deployment_members m ON m.tenant_id=d.tenant_id AND m.deployment_id=d.id
+JOIN rule_heads h ON h.tenant_id=d.tenant_id AND h.id=d.rule_id AND h.desired_revision=d.rule_revision
+WHERE d.tenant_id=$1 AND m.node_id=$2 AND m.state='prepared' AND d.state='preparing' ORDER BY d.rule_id,d.id;

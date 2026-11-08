@@ -11,3 +11,5 @@ Task 3 exceeds the original estimate; split implementation into the following de
 4. Full required race/fault checks, generation/compatibility and clean Docker producer; construct exact CR-008 candidate and immutable prior-approval protection. CR-007 approval does not approve CR-008. Final same-source Actions remains 06-11.
 
 Phase 6 remains 8/11. No 06-06 SUMMARY until all units and its exact contract approval gate pass.
+
+Bootstrap unit: first-platform-group Commit now requires positive reserved rate and connection shares for every node/boot; a final reservation and resumed Commit tasks share one audit transaction. Node activation still needs its separate durable receipt. Linux kernel clock bounds fail closed on unsynchronized/excess error/clock discontinuity. Full backend service/control/timeauthority race and clean-database Docker regression plus Linux arm64 compile passed. Raw development evidence: `artifacts/phase6/06-06/task3-bootstrap/`. Production allocation scheduling, funding/Hub transport and boot recovery remain incomplete.

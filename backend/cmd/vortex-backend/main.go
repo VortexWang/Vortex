@@ -21,6 +21,7 @@ import (
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/control"
 	"vortex/backend/internal/service"
+	"vortex/backend/internal/timeauthority"
 	"vortex/backend/internal/worker"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
@@ -151,7 +152,16 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	}
 	adapter.Ports = &service.PortService{Pool: pool, NodeCA: root}
 	adapter.Metering = &service.MeteringService{Pool: pool}
-	adapter.Shares = &service.ShareService{Pool: pool, NodeCA: root}
+	hubRootBlock, hubRootRest := pem.Decode(hubRoot)
+	if hubRootBlock == nil || hubRootBlock.Type != "CERTIFICATE" || len(hubRootRest) != 0 {
+		return errors.New("one Hub CA certificate required")
+	}
+	signerRoot, err := x509.ParseCertificate(hubRootBlock.Bytes)
+	if err != nil {
+		return err
+	}
+	authorityClock := timeauthority.New()
+	adapter.Shares = &service.ShareService{Pool: pool, NodeCA: root, SignerCA: signerRoot, Clock: authorityClock.Bounds}
 	nodes, err := net.Listen("tcp", *nodeListen)
 	if err != nil {
 		return err

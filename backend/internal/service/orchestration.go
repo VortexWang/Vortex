@@ -171,6 +171,23 @@ func ruleCommand(ctx context.Context, q *generated.Queries, tenant, task string,
 			return nil, "", "", err
 		}
 	}
+	if authorizeSend && b.Phase == "commit" && artifact.Intent.Rule.Enabled {
+		p, e := q.GetRuleCompileInput(ctx, generated.GetRuleCompileInputParams{TenantID: tenant, RuleID: b.RuleID, RuleRevision: b.RuleRevision, InputDigest: b.InputDigest})
+		if e != nil {
+			return nil, "", "", e
+		}
+		var input compiler.CompileInput
+		if e = json.Unmarshal(p.Canonical, &input); e != nil {
+			return nil, "", "", e
+		}
+		reserved, e := platformBootstrapReserved(ctx, q, tenant, input)
+		if e != nil {
+			return nil, "", "", e
+		}
+		if !reserved {
+			return nil, "", "", ErrShareUnknown
+		}
+	}
 	id, e := uuid.Parse(b.TransactionID)
 	if e != nil {
 		return nil, "", "", e
@@ -312,11 +329,15 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 			activationBlocked = true
 		}
 	}
+	bootstrapReserved, e := platformBootstrapReserved(ctx, q, scope.TenantID(), input)
+	if e != nil {
+		return e
+	}
 	state := d.State
 	switch {
 	case allActive:
 		state = "running"
-	case allPrepared && !obsolete && !activationBlocked && d.State != "failed":
+	case allPrepared && bootstrapReserved && !obsolete && !activationBlocked && d.State != "failed":
 		state = "committing"
 		for _, m := range members {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
@@ -342,7 +363,7 @@ func reconcileRuleDeployment(ctx context.Context, q *generated.Queries, scope Te
 			if e = queueRulePhase(ctx, q, scope, d, m, "abort"); e != nil {
 				return e
 			}
-		} else if m.State == "prepared" && !obsolete && !activationBlocked && (d.State == "committing" || d.State == "partial") {
+		} else if m.State == "prepared" && bootstrapReserved && !obsolete && !activationBlocked && (d.State == "committing" || d.State == "partial") {
 			if e = queueRulePhase(ctx, q, scope, d, m, "commit"); e != nil {
 				return e
 			}

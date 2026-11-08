@@ -66,10 +66,10 @@ func TestPackageMigrationUpgradeSeeded00005(t *testing.T) {
 		t.Fatal(e)
 	}
 	if !bytes.Equal(before, authoritySnapshot(t, pool, own.TenantID(), tables)) {
-		t.Fatal("00006 changed pre-existing authority or unknown observations")
+		t.Fatal("upgrade through 00008 changed pre-existing authority or unknown observations")
 	}
 	var version int
-	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 7 {
+	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 8 {
 		t.Fatal(version, e)
 	}
 }
