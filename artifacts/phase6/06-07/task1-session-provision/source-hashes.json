@@ -1,0 +1,7 @@
+{
+  "backend/cmd/vortex-backend/main.go": "12e9c3da016a3caab9ce427a583e8781ee6be651d677af9a37d5997c836cba49",
+  "backend/cmd/vortex-backend/session.go": "d732616e78efe510dcbd041de325639a8c7823b7ba3cea65e3fa6a9aa6133c47",
+  "backend/cmd/vortex-backend/session_test.go": "8490fc8314956c9b4157cee24a98a8eb637e6ebf77fe8f010e1d6a2fee06a1bc",
+  "backend/internal/repository/token_repository.go": "2b1c6dfe40c951d830629765afd6cdb9c8d8fa090122b904daf962001bbc3413",
+  "docs/api/phase7-recovery-dependencies.md": "08d830af8f9b3978fad8af697403bb4584a9b068bd81f7462e49b932ad43d2b0"
+}

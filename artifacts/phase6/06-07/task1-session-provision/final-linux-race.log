@@ -1,0 +1,51 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-10a3bcfe109e Creating 
+ Container vortex-phase6-tracer-backend-test-run-10a3bcfe109e Created 
+=== RUN   TestLocalSessionUsesPersistedPrincipalAndSeparateCredentialNamespace
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestLocalSessionUsesPersistedPrincipalAndSeparateCredentialNamespace (0.03s)
+=== RUN   TestLocalPlatformSessionPersistsIssueAudit
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestLocalPlatformSessionPersistsIssueAudit (0.06s)
+=== RUN   TestLocalSessionAuditFailureOutputsNoCredential
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestLocalSessionAuditFailureOutputsNoCredential (0.03s)
+PASS
+ok  	vortex/backend/cmd/vortex-backend	1.140s
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.04s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.06s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.04s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.03s)
+=== RUN   TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole (0.02s)
+=== RUN   TestAuthTokenIssueAuditFailureAndConfigurationBounds
+2026/11/08 21:52:21 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenIssueAuditFailureAndConfigurationBounds (0.02s)
+PASS
+ok  	vortex/backend/internal/auth	1.227s
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant
+--- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant (0.00s)
+PASS
+ok  	vortex/backend/internal/repository	1.012s

@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 transactional SSE core verified; REST lists/mutations/public contract next"
-last_updated: "2026-11-08T21:48:39.285971+00:00"
+stopped_at: "06-07 trusted local issuance verified; REST lists/mutations/public contract next"
+last_updated: "2026-11-08T21:58:00.664390+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-07 transactional domain events, stable scope-bound replay, retention/resync and audited SSE verified;9/11."
+last_activity_desc: "06-07 trusted local initial session issuance passes native/Linux race, actual processes and dual builds;9/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: 2ebbf055
+state_head: e41cf7d1
 ---
 
 # Project State

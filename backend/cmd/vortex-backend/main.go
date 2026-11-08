@@ -41,7 +41,7 @@ func main() {
 }
 func run(ctx context.Context, args []string) error {
 	if len(args) == 0 {
-		return errors.New("command required: migrate, serve, serve-http, mutate, operation")
+		return errors.New("command required: migrate, serve, serve-http, issue-session, mutate, operation")
 	}
 	url := os.Getenv("PHASE6_DATABASE_URL")
 	if url == "" {
@@ -65,6 +65,8 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	switch args[0] {
+	case "issue-session":
+		return issueSession(ctx, pool, args[1:], os.Stdout)
 	case "serve-http":
 		return serveHTTP(ctx, pool, args[1:])
 	case "serve":

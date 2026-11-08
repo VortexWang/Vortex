@@ -26,6 +26,17 @@ func tokenPrincipal(ctx context.Context, q *generated.Queries, actor, tenant str
 	}
 	return p, nil
 }
+
+// LocalSessionPrincipal is for a trusted operator/authentication adapter only.
+// A public HTTP handler must validate an independent credential before Issue;
+// it must never expose this principal-ID lookup as a login endpoint.
+func (r TokenRepository) LocalSessionPrincipal(ctx context.Context, actor, tenant string) (auth.Principal, error) {
+	if r.Pool == nil {
+		return auth.Principal{}, auth.ErrToken
+	}
+	return tokenPrincipal(ctx, generated.New(r.Pool), actor, tenant)
+}
+
 func tokenScope(p auth.Principal) (TenantScope, error) {
 	tenant := p.TenantID()
 	if tenant == "" {
