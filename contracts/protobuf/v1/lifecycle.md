@@ -559,3 +559,35 @@ complete PG prefix/partition verification, recovery preflight capability,
 automatic direct-Node reprovisioning or a production S/R consumer. Those remain
 required before enabling the path. No new wire tag/capability is implicitly
 negotiated here and CR-008 remains unapproved.
+
+
+### Candidate PG same-store recovery approval (preflight still required)
+
+PrepareHubSameStoreRecovery requires an explicit platform Grant decision, the
+exact currently bound Hub boot/epoch, a preapproved adjacent next epoch, fixed
+target boot and the backend that owns every existing source provision. All
+previously authorized tenants must approve the next epoch. Every original,
+unsealed Hub allocation must have its authenticated installation receipt and
+persisted Node source provision. A sealed allocation is not transferred. Older
+unsealed boots/epochs cannot be silently adopted into R. This first PG approval
+producer supports allocations from the immediately preceding original epoch;
+repeated PG transitions require a separately verified effective-authority chain.
+
+The immutable command links both original backend Allocation wire SHA256 and
+original local HubDelegation payload SHA256. Its three successor roots change
+only signer epoch and root revision, each by one. Source, share generation,
+limits, Node boot, rule/path, policy and all original deadlines stay fixed. No
+arbitrary R amount is accepted from an operator. Exact replay returns the same
+command/proof and operation even after clock expiry; it does not retime authority.
+
+The command, all-tenant approval inventory, original allocation links, task,
+Outbox and audit event commit together in PostgreSQL. A global Hub incarnation
+lock serializes competing targets; tenant financial state is not changed.
+Preparation does not bind the target incarnation, acknowledge a ledger record,
+close old renewal, complete an operation, release capacity/money or make a Hub
+online. The local FULL command can produce the complete S/R manifest while
+remaining behind its finite ACK barrier. Independent capability negotiation,
+authenticated boot-bound preflight, complete PG journal/partition verification,
+new-root Node provisioning and effective issue/lease/seal consumers are still
+required. No recovery wire handler or approved snapshot is added by this unit;
+CR-008 remains unapproved.

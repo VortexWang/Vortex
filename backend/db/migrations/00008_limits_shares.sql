@@ -304,6 +304,23 @@ CREATE TABLE node_boot_recovery_receipts (
  FOREIGN KEY(tenant_id,recovery_id) REFERENCES node_boot_recoveries(tenant_id,id)
 );
 CREATE TRIGGER node_boot_recovery_receipt_immutable BEFORE UPDATE OR DELETE ON node_boot_recovery_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Explicit same-store recovery approval contains no execution or settlement
+-- witness. Complete prefix/partition verification is required before binding
+-- the target incarnation; all original authority and money remain held.
+CREATE TABLE hub_same_store_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL UNIQUE,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch=from_epoch+1),
+ from_boot_id text NOT NULL, to_boot_id text NOT NULL, backend_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ proof bytea NOT NULL, proof_digest bytea NOT NULL CHECK(octet_length(proof_digest)=32),
+ PRIMARY KEY(hub_id,to_epoch), UNIQUE(hub_id,from_epoch),
+ FOREIGN KEY(hub_id,from_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_recovery_immutable BEFORE UPDATE OR DELETE ON hub_same_store_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin
