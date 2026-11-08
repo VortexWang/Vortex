@@ -1,0 +1,30 @@
+{
+  "base_source": "bf88ff31",
+  "scope": "development Node PG cold-recovery proof and authenticated FULL consumer; no transport/Actions/full phase acceptance",
+  "native_backend_race": "passed",
+  "linux_arm64_backend_race": "passed",
+  "cross_builds": [
+    "backend linux/amd64",
+    "backend linux/arm64",
+    "Hub linux/amd64",
+    "Hub linux/arm64"
+  ],
+  "sqlc_outputs": 22,
+  "attempts_preserved": true,
+  "files": {
+    "README.md": "3933a85cd96782498bc63faff2534b2e95ae96d5338ff4b7e61deb3cdede350f",
+    "backend-linux-race-build-corrected.log": "20bad2e7b7737ae4d261f4af3e5c48d89239677cbc1b6d6c8c9030f4e306419b",
+    "backend-linux-race-build.log": "9983212cf86e666440666c1dcb4fdcb70cebbe37d81fcf5fe53145286298e1ac",
+    "backend-native-race-corrected.log": "4bc414edfad5e398312c715abd93658fb609fffb8d702f42621606b51eb3fdcb",
+    "backend-native-race.log": "3f409d399a4273f23de364d7d4366f5723d6323cad3d3ad0564731f6d1d2a42f",
+    "compile.log": "2e79d88e82bb9f1a062069cb23c9f3f302805bb4cbda0a679a0798278e1245d7",
+    "focused-advisory-corrected.log": "ff316e31f000042a7db8a986e309c92512e4237b71601b4f777877611a4eb70a",
+    "focused-complete-native.log": "c5bab3b1dc07f24427ac99249b70654ead5da4641b59bd8a1c3e942f465814b1",
+    "focused-final-native.log": "2118feec6f736f6171ff9f165a148f6392ec359b0f1cd04620bebe94f97fd5bf",
+    "focused-late-usage-final.log": "ed825a425f1724b1037a244b01769409e3aff4a754157049ea8aaf1738794a3d",
+    "focused-native-corrected.log": "cb51c1ea797814f4a666805c249023605814b1a1264425caafb51348012d92f5",
+    "focused-native.log": "8bde728373aa42a7c39f976b5cb70b4c31cf154e435a352b8b343b563047514a",
+    "initial-wrong-module.log": "21616970c43ab65257012f5cac338fc7378e5a94e779f26e95ea6fc450c84ede",
+    "sqlc-reproducibility.json": "afc5caf8a1ac68a7240738d6fd167b07ef0594747574f58458b2b37a29ece13f"
+  }
+}

@@ -12,7 +12,7 @@ import (
 )
 
 const activateDrainingShare = `-- name: ActivateDrainingShare :execrows
-UPDATE share_chains SET active_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$5)
+UPDATE share_chains SET active_generation=$4,retired_generation=0 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND (active_generation IN ($4,$5) OR (active_generation=0 AND retired_generation=$5))
 `
 
 type ActivateDrainingShareParams struct {
@@ -339,7 +339,7 @@ func (q *Queries) CloseShareRenewalAuthority(ctx context.Context, arg CloseShare
 }
 
 const confirmShareChain = `-- name: ConfirmShareChain :execrows
-UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$6)
+UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5,retired_generation=0 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND (active_generation IN ($4,$6) OR (active_generation=0 AND retired_generation=$6))
 `
 
 type ConfirmShareChainParams struct {
@@ -861,7 +861,7 @@ func (q *Queries) LockNodeFencing(ctx context.Context, arg LockNodeFencingParams
 }
 
 const lockShareChain = `-- name: LockShareChain :one
-SELECT tenant_id, node_id, kind, boot_id, head_generation, active_generation, pending_generation, held_amount FROM share_chains WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 FOR UPDATE
+SELECT tenant_id, node_id, kind, boot_id, head_generation, active_generation, pending_generation, held_amount, retired_generation FROM share_chains WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 FOR UPDATE
 `
 
 type LockShareChainParams struct {
@@ -882,6 +882,7 @@ func (q *Queries) LockShareChain(ctx context.Context, arg LockShareChainParams) 
 		&i.ActiveGeneration,
 		&i.PendingGeneration,
 		&i.HeldAmount,
+		&i.RetiredGeneration,
 	)
 	return i, err
 }
@@ -1078,7 +1079,7 @@ func (q *Queries) RaiseNodeFencing(ctx context.Context, arg RaiseNodeFencingPara
 }
 
 const readShareChain = `-- name: ReadShareChain :one
-SELECT tenant_id, node_id, kind, boot_id, head_generation, active_generation, pending_generation, held_amount FROM share_chains WHERE tenant_id=$1 AND node_id=$2 AND kind=$3
+SELECT tenant_id, node_id, kind, boot_id, head_generation, active_generation, pending_generation, held_amount, retired_generation FROM share_chains WHERE tenant_id=$1 AND node_id=$2 AND kind=$3
 `
 
 type ReadShareChainParams struct {
@@ -1099,6 +1100,7 @@ func (q *Queries) ReadShareChain(ctx context.Context, arg ReadShareChainParams) 
 		&i.ActiveGeneration,
 		&i.PendingGeneration,
 		&i.HeldAmount,
+		&i.RetiredGeneration,
 	)
 	return i, err
 }

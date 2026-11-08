@@ -1,0 +1,35 @@
+2026/11/08 18:03:18 OK   00001_authority.sql (13.55ms)
+2026/11/08 18:03:18 OK   00002_tenant_policy.sql (12.39ms)
+2026/11/08 18:03:18 OK   00003_nodes_ports.sql (19.62ms)
+2026/11/08 18:03:18 OK   00004_entry_group_domains.sql (3.13ms)
+2026/11/08 18:03:18 OK   00005_rules_compile.sql (21.14ms)
+2026/11/08 18:03:18 OK   00006_packages_entitlements.sql (18.91ms)
+2026/11/08 18:03:18 OK   00007_metering_ledger.sql (25.42ms)
+2026/11/08 18:03:18 OK   00008_limits_shares.sql (44.61ms)
+2026/11/08 18:03:18 goose: successfully migrated database to version: 8
+2026/11/08 18:03:18 OK   00001_authority.sql (9.07ms)
+2026/11/08 18:03:18 OK   00002_tenant_policy.sql (7.85ms)
+2026/11/08 18:03:18 OK   00003_nodes_ports.sql (20.11ms)
+2026/11/08 18:03:18 OK   00004_entry_group_domains.sql (8.99ms)
+2026/11/08 18:03:18 OK   00005_rules_compile.sql (33.76ms)
+2026/11/08 18:03:18 OK   00006_packages_entitlements.sql (19.99ms)
+2026/11/08 18:03:18 OK   00007_metering_ledger.sql (26.28ms)
+2026/11/08 18:03:18 OK   00008_limits_shares.sql (51.15ms)
+2026/11/08 18:03:18 goose: successfully migrated database to version: 8
+--- FAIL: TestNodeBootRecoveryProofFullReceiptPreservesFloorsAndDebtUntilRealCAS (1.46s)
+    node_boot_recovery_test.go:76: no rows in result set
+2026/11/08 18:03:19 goose: no migrations to run. current version: 8
+2026/11/08 18:03:19 OK   00001_authority.sql (9.86ms)
+2026/11/08 18:03:19 OK   00002_tenant_policy.sql (9.44ms)
+2026/11/08 18:03:19 OK   00003_nodes_ports.sql (26.26ms)
+2026/11/08 18:03:19 OK   00004_entry_group_domains.sql (2.72ms)
+2026/11/08 18:03:19 OK   00005_rules_compile.sql (22.26ms)
+2026/11/08 18:03:19 OK   00006_packages_entitlements.sql (20.1ms)
+2026/11/08 18:03:19 OK   00007_metering_ledger.sql (27.51ms)
+2026/11/08 18:03:19 OK   00008_limits_shares.sql (47.56ms)
+2026/11/08 18:03:19 goose: successfully migrated database to version: 8
+--- FAIL: TestNodeBootRecoveryConcurrentDecisionsAndCurrentBootPin (1.25s)
+    node_boot_recovery_test.go:239: no rows in result set
+FAIL
+FAIL	vortex/backend/internal/service	3.504s
+FAIL

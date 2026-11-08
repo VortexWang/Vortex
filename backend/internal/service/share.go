@@ -147,6 +147,9 @@ func (s ShareService) PrepareShare(ctx context.Context, scope TenantScope, in Pr
 		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+in.SignerID); e != nil {
 			return e
 		}
+		if e := q.LockNodeAuthorityRead(ctx, in.NodeID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -165,6 +168,13 @@ func (s ShareService) PrepareShare(ctx context.Context, scope TenantScope, in Pr
 		_, now, e = s.bounds()
 		if e != nil {
 			return e
+		}
+		current, e := q.GetNodeIncarnation(ctx, in.NodeID)
+		if e != nil {
+			return e
+		}
+		if current.BootID != in.BootID {
+			return ErrShareUnknown
 		}
 		limits, b, e := shareEligibility(ctx, q, scope, in, now)
 		if e != nil {
@@ -377,8 +387,18 @@ func (s ShareService) RecordNodeFencing(ctx context.Context, scope TenantScope, 
 		return ErrShareConflict
 	}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.fence", ResourceID: node, RequestID: request, Reason: "monotonic durable same-boot fencing floor"}, func(q *generated.Queries) error {
+		if e := q.LockNodeAuthorityRead(ctx, node); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
+		}
+		current, e := q.GetNodeIncarnation(ctx, node)
+		if e != nil {
+			return e
+		}
+		if current.BootID != boot {
+			return ErrShareConflict
 		}
 		other, e := q.NodeOtherBootHeld(ctx, generated.NodeOtherBootHeldParams{TenantID: scope.TenantID(), NodeID: node, BootID: boot})
 		if e != nil {

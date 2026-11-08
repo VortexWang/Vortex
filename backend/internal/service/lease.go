@@ -50,6 +50,9 @@ func (s ShareService) RenewShare(ctx context.Context, scope TenantScope, in Leas
 	}
 	digest := sha256.Sum256(raw)
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.renew", ResourceID: in.NodeID, RequestID: request, Reason: "renew enforced same-boot share without changing independent authority boundaries"}, func(q *generated.Queries) error {
+		if e := q.LockNodeAuthorityRead(ctx, in.NodeID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}

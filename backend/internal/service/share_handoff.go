@@ -40,7 +40,7 @@ func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, r
 		if e != nil {
 			return e
 		}
-		if chain.PendingGeneration != g.Generation || chain.ActiveGeneration != g.Predecessor {
+		if chain.PendingGeneration != g.Generation || (chain.ActiveGeneration != g.Predecessor && !(chain.ActiveGeneration == 0 && chain.RetiredGeneration == g.Predecessor)) {
 			return ErrShareConflict
 		}
 		_, now, e := s.bounds()

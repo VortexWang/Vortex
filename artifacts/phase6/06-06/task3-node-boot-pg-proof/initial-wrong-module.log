@@ -1,0 +1,4 @@
+# ./internal/service
+stat /Users/peng/Documents/123/VORTEX/internal/service: directory not found
+FAIL	./internal/service [setup failed]
+FAIL

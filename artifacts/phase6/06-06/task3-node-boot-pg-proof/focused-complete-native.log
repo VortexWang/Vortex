@@ -1,0 +1,36 @@
+2026/11/08 18:06:25 goose: no migrations to run. current version: 8
+2026/11/08 18:06:26 OK   00001_authority.sql (19.73ms)
+2026/11/08 18:06:26 OK   00002_tenant_policy.sql (11.76ms)
+2026/11/08 18:06:26 OK   00003_nodes_ports.sql (26.6ms)
+2026/11/08 18:06:26 OK   00004_entry_group_domains.sql (3.26ms)
+2026/11/08 18:06:26 OK   00005_rules_compile.sql (24.7ms)
+2026/11/08 18:06:26 OK   00006_packages_entitlements.sql (24.89ms)
+2026/11/08 18:06:26 OK   00007_metering_ledger.sql (31.13ms)
+2026/11/08 18:06:26 OK   00008_limits_shares.sql (52.22ms)
+2026/11/08 18:06:26 goose: successfully migrated database to version: 8
+2026/11/08 18:06:27 goose: no migrations to run. current version: 8
+2026/11/08 18:06:27 OK   00001_authority.sql (8.53ms)
+2026/11/08 18:06:27 OK   00002_tenant_policy.sql (7.48ms)
+2026/11/08 18:06:27 OK   00003_nodes_ports.sql (17.49ms)
+2026/11/08 18:06:27 OK   00004_entry_group_domains.sql (2.41ms)
+2026/11/08 18:06:27 OK   00005_rules_compile.sql (17.75ms)
+2026/11/08 18:06:27 OK   00006_packages_entitlements.sql (16.81ms)
+2026/11/08 18:06:27 OK   00007_metering_ledger.sql (22.28ms)
+2026/11/08 18:06:27 OK   00008_limits_shares.sql (38.26ms)
+2026/11/08 18:06:27 goose: successfully migrated database to version: 8
+2026/11/08 18:06:28 goose: no migrations to run. current version: 8
+2026/11/08 18:06:28 OK   00001_authority.sql (10.36ms)
+2026/11/08 18:06:28 OK   00002_tenant_policy.sql (8.44ms)
+2026/11/08 18:06:28 OK   00003_nodes_ports.sql (19.76ms)
+2026/11/08 18:06:28 OK   00004_entry_group_domains.sql (2.71ms)
+2026/11/08 18:06:28 OK   00005_rules_compile.sql (20.92ms)
+2026/11/08 18:06:28 OK   00006_packages_entitlements.sql (19.15ms)
+2026/11/08 18:06:28 OK   00007_metering_ledger.sql (25.63ms)
+2026/11/08 18:06:28 OK   00008_limits_shares.sql (42.96ms)
+2026/11/08 18:06:28 goose: successfully migrated database to version: 8
+2026/11/08 18:06:29 goose: no migrations to run. current version: 8
+--- FAIL: TestNodeBootRecoveryIncludesOtherTenantOriginalHardBoundary (1.24s)
+    node_boot_recovery_test.go:332: other tenant original share lease_boundary_invalid
+FAIL
+FAIL	vortex/backend/internal/service	4.617s
+FAIL

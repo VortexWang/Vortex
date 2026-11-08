@@ -48,6 +48,9 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+in.HubID); e != nil {
 			return e
 		}
+		if e := q.LockNodeAuthorityRead(ctx, in.NodeID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}

@@ -1,6 +1,6 @@
 -- +goose Up
 -- One serialized capacity account per tenant is the existing tenants row.
--- A chain never changes boot_id. A new boot requires a separate proved close,
+-- A chain changes boot_id only after a separate authenticated FULL retirement,
 -- not a CAS on an old incarnation; generations and liabilities remain history.
 CREATE TABLE share_chains (
  tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id),
@@ -9,7 +9,8 @@ CREATE TABLE share_chains (
  active_generation bigint NOT NULL DEFAULT 0 CHECK(active_generation>=0),
  pending_generation bigint NOT NULL DEFAULT 0 CHECK(pending_generation>=0),
  held_amount bigint NOT NULL DEFAULT 0 CHECK(held_amount>=0),
- PRIMARY KEY(tenant_id,node_id,kind), CHECK(active_generation<=head_generation), CHECK(pending_generation<=head_generation)
+ retired_generation bigint NOT NULL DEFAULT 0 CHECK(retired_generation>=0),
+ PRIMARY KEY(tenant_id,node_id,kind), CHECK(active_generation<=head_generation), CHECK(pending_generation<=head_generation), CHECK(retired_generation=0 OR (retired_generation=head_generation OR retired_generation=head_generation-1) AND active_generation=0)
 );
 CREATE TABLE node_fencing (
  tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id),
@@ -280,6 +281,29 @@ CREATE TABLE hub_cold_recoveries (
  FOREIGN KEY(hub_id,to_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch)
 );
 CREATE TRIGGER hub_cold_recovery_immutable BEFORE UPDATE OR DELETE ON hub_cold_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Cold Node recovery is an explicit immutable platform decision. Its FULL
+-- receipt migrates only aggregate generation floors; financial occupation and
+-- configuration execution remain independent.
+CREATE TABLE node_boot_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL,
+ node_id text NOT NULL REFERENCES nodes(id), from_boot_id text NOT NULL,
+ to_boot_id text NOT NULL, backend_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ proof bytea NOT NULL, proof_digest bytea NOT NULL CHECK(octet_length(proof_digest)=32),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,node_id,from_boot_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id),
+ CHECK(from_boot_id<>to_boot_id)
+);
+CREATE TRIGGER node_boot_recovery_immutable BEFORE UPDATE OR DELETE ON node_boot_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_boot_recovery_receipts (
+ tenant_id text NOT NULL, recovery_id text NOT NULL,
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,recovery_id),
+ FOREIGN KEY(tenant_id,recovery_id) REFERENCES node_boot_recoveries(tenant_id,id)
+);
+CREATE TRIGGER node_boot_recovery_receipt_immutable BEFORE UPDATE OR DELETE ON node_boot_recovery_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

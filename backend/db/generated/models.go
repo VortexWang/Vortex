@@ -324,6 +324,29 @@ type Node struct {
 	Version        int64
 }
 
+type NodeBootRecovery struct {
+	TenantID      string
+	ID            string
+	NodeID        string
+	FromBootID    string
+	ToBootID      string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Proof         []byte
+	ProofDigest   []byte
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+type NodeBootRecoveryReceipt struct {
+	TenantID        string
+	RecoveryID      string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type NodeCreditCloseCommand struct {
 	TenantID      string
 	GrantID       string
@@ -782,6 +805,7 @@ type ShareChain struct {
 	ActiveGeneration  int64
 	PendingGeneration int64
 	HeldAmount        int64
+	RetiredGeneration int64
 }
 
 type ShareDeliveryBinding struct {

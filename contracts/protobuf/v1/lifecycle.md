@@ -453,3 +453,34 @@ only: it is not yet connected to NodeControl, and complete PostgreSQL proof,
 explicit approval, independent capability negotiation and authenticated receipt
 consumption are required before production use. It does not complete Node boot
 recovery or authorize manual blocked-to-active state changes.
+
+The candidate PostgreSQL Node cold-recovery producer now requires an explicit
+platform Grant decision for one already authenticated new boot. Under an
+exclusive transaction-level Node authority lock it records all tenants' original old-boot aggregate
+generations, funded allocation payload digests and original autonomy bounds,
+lease expectations, and configuration member/deadline inventory. The trusted
+lower time bound must pass every included boundary. New share, lease and funded
+allocation producers take the corresponding shared lock before their current-incarnation check;
+a concurrent old transaction cannot disappear behind the snapshot. A late
+original issue remains bounded by its already inventoried immutable roots.
+Configuration deadlines do not attest Engine stop or release configuration
+holds. A later hard deadline known only to Node SQLite still denies retirement.
+
+This first producer supports a pair of fully acknowledged aggregate heads;
+missing, pending or unknown CAS remains held. The original two complete commands
+are checked against every immutable generation field. Approval, canonical
+command, task, Outbox and audit commit together. Retries return the original
+bytes, including the original expiry; no retry silently creates fresh authority.
+
+The authenticated canonical FULL receipt consumer migrates only that tenant's
+aggregate boot ownership and records each independent `retired_generation`.
+Active generation becomes zero; head generations and held capacity stay intact.
+Old-boot renewal/fencing close under the same audit transaction. A new-boot share
+must advance each retired kind by exactly one and pass current eligibility and
+all existing CAS checks. Only its real subsequent Node CAS receipt clears the
+retired marker and can release the exact capacity difference. Every financial,
+old execution and configuration fact remains independent. Receipt replay after
+expiry or a later CAS never rewinds the chain. This backend service prerequisite
+still needs independently negotiated pinned direct-backend NodeControl delivery
+and its production worker; it is not yet complete production Node boot recovery.
+The candidate remains unapproved under CR-008.

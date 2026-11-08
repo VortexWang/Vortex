@@ -84,6 +84,9 @@ func (s PortService) RegisterNodeSession(ctx context.Context, scope TenantScope,
 		return ErrConflict
 	}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "node.incarnation", ResourceID: node, RequestID: request, Reason: "authenticated node boot and generation"}, func(q *generated.Queries) error {
+		if e := q.LockNodeAuthorityWrite(ctx, node); e != nil {
+			return e
+		}
 		if _, e := q.ScopedNode(ctx, generated.ScopedNodeParams{NodeID: node, TenantID: scope.TenantID(), PlatformRead: scope.Platform()}); e != nil {
 			return e
 		}

@@ -74,12 +74,12 @@ SELECT * FROM share_handoff_receipts WHERE tenant_id=$1 AND receipt_id=$2;
 -- name: AppendShareReceipt :exec
 INSERT INTO share_handoff_receipts(tenant_id,handoff_id,receipt_id,command_digest,receipt_digest,peer_fingerprint,payload) VALUES($1,$2,$3,$4,$5,$6,$7);
 -- name: ConfirmShareChain :execrows
-UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$6);
+UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5,retired_generation=0 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND (active_generation IN ($4,$6) OR (active_generation=0 AND retired_generation=$6));
 -- name: ConfirmShareHandoff :exec
 UPDATE share_handoffs SET state='enforced',execution_state='enforced',receipt_digest=$3 WHERE tenant_id=$1 AND id=$2;
 
 -- name: ActivateDrainingShare :execrows
-UPDATE share_chains SET active_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$5);
+UPDATE share_chains SET active_generation=$4,retired_generation=0 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND (active_generation IN ($4,$5) OR (active_generation=0 AND retired_generation=$5));
 
 -- name: PreparedShareArtifacts :many
 SELECT a.*,m.boot_id,m.transaction_id,d.id AS deployment_id,r.created_by
