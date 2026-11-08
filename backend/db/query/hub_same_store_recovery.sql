@@ -34,3 +34,6 @@ INSERT INTO node_recovery_credit_fence_receipts(tenant_id,fence_id,payload,paylo
 -- name: MissingHubSameStoreIssues :one
 SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND i.hub_boot_id=$2
  AND NOT EXISTS(SELECT 1 FROM hub_same_store_journal j WHERE j.recovery_id=$3 AND j.sequence=i.ledger_sequence AND j.sequence<=sqlc.arg(sealed_sequence) AND j.kind='issue' AND j.record_id=i.issue_id AND j.payload=i.payload AND j.payload_digest=i.payload_digest));
+
+-- name: HubSameStoreRecoveryByTargetBoot :one
+SELECT * FROM hub_same_store_recoveries WHERE hub_id=$1 AND to_boot_id=$2 ORDER BY to_epoch DESC LIMIT 1;

@@ -22,6 +22,7 @@ type BackendClient struct {
 	TLS                                       *tls.Config // must use a backend-role root, never the node root
 	Store                                     *store.Store
 	Clock                                     func() store.IssuerTime
+	RecoveryPreflight                         bool // independent candidate handshake before the funded stream
 }
 
 func (c *BackendClient) Run(ctx context.Context) error {
@@ -64,6 +65,22 @@ func (c *BackendClient) Run(ctx context.Context) error {
 	stream, err := controlv1.NewHubControlClient(conn).Connect(ctx)
 	if err != nil {
 		return err
+	}
+	if c.RecoveryPreflight {
+		available, e := c.runRecoveryPreflight(ctx, stream)
+		if e != nil {
+			return e
+		}
+		if !available {
+			return ErrRecoveryEvidenceRetained
+		}
+		if e = stream.CloseSend(); e != nil {
+			return e
+		}
+		stream, e = controlv1.NewHubControlClient(conn).Connect(ctx)
+		if e != nil {
+			return e
+		}
 	}
 	if c.Clock != nil {
 		return c.runFunded(ctx, stream)

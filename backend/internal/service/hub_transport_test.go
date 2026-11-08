@@ -89,7 +89,7 @@ func TestHubFundedActualMTLSLostReceiptsReconnectAndNewBootDenied(t *testing.T) 
 		t.Fatal(e)
 	}
 	defer hs.Close()
-	cfg := &hub.BackendClient{HubID: in.HubID, BootID: in.HubBootID, BackendID: backendID, Region: in.Region, Address: listener.Addr().String(), TLS: clientTLS, Store: hs, Clock: clock}
+	cfg := &hub.BackendClient{RecoveryPreflight: true, HubID: in.HubID, BootID: in.HubBootID, BackendID: backendID, Region: in.Region, Address: listener.Addr().String(), TLS: clientTLS, Store: hs, Clock: clock}
 	if e = cfg.Run(ctx); e == nil {
 		t.Fatal("lost allocation receipt unexpectedly succeeded")
 	}

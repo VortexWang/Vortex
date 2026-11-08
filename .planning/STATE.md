@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: direct Node inventory fence delivered; independent Hub preflight/admission pending"
-last_updated: "2026-11-08T13:30:23Z"
+stopped_at: "06-06 Task 3: independent Hub recovery preflight retained; current-state admission/Node roots pending"
+last_updated: "2026-11-08T13:54:13.790401+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: immutable PG credit fence command and authenticated FULL receipt now have independent direct-backend capability and production worker; original funds/Hub admission unchanged;8/11."
+last_activity_desc: "06-06 Task3: independent Hub preflight delivers explicit FULL S/R and paged immutable evidence over role-mTLS; no ACK/admission;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: faf9fa55
+state_head: f1e8ebc3
 ---
 
 # Project State
@@ -45,6 +45,8 @@ Node local recovery fence now checks the complete actually installed original-so
 
 
 Direct Node inventory fence transport now has immutable PG command/receipt, exact manifest/allocation/root/child binding, independently negotiated UUID-pinned mTLS capability and production worker. Command/receipt audit rollback,8 concurrent replay, actual installed37-byte old child, lost FULL receipt/reconnect, legacy capability and Agent identity/clock negatives pass. Full native backend/root and Linux root/backend race pass before final allocation expiry tightening; final native/Linux focused race and six cross-builds cover the last edit. Two isolated23sqlc+2protobuf generations match. One test-only inspection-record type error is retained with corrected passing evidence. Target Hub stays unbound; no funds/share/ACK/admission changes. Evidence: artifacts/phase6/06-06/task3-node-credit-fence-transport/. Independent Hub recovery preflight/current-state admission, successor roots/effective epoch consumers and full06-06 convergence remain.
+
+Independent Hub S/R preflight now carries explicit actual-boot approval and local FULL command over an isolated role-mTLS capability. Complete42-record prefix/manifest retention survives lost row/final receipts and exact replay without local ACK, online, PG boot binding or financial change. Empty-state and forged Node-role certificate deny. Native complete backend/root race, serial Linux complete root/backend race, final role-separated focused race, six cross-builds and two isolated23sqlc+2protobuf outputs pass; full suites preceded only the final test-role refinement. Evidence: artifacts/phase6/06-06/task3-hub-recovery-preflight/. Current-state all-tenant admission, independent direct Node successor roots, effective epoch consumers and full06-06 convergence remain.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -146,7 +148,7 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 ## Session Continuity
 
 Last session: 2026-11-08T13:30:23Z
-Stopped at: 06-06 Task 3: direct Node inventory fence delivered; independent Hub preflight/admission pending
+Stopped at: 06-06 Task 3: independent Hub recovery preflight retained; current-state admission/Node roots pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

@@ -381,6 +381,37 @@ func (q *Queries) HubSameStoreRecoveryByID(ctx context.Context, id string) (HubS
 	return i, err
 }
 
+const hubSameStoreRecoveryByTargetBoot = `-- name: HubSameStoreRecoveryByTargetBoot :one
+SELECT tenant_id, id, hub_id, from_epoch, to_epoch, from_boot_id, to_boot_id, backend_id, operation_id, created_by, payload, payload_digest, proof, proof_digest FROM hub_same_store_recoveries WHERE hub_id=$1 AND to_boot_id=$2 ORDER BY to_epoch DESC LIMIT 1
+`
+
+type HubSameStoreRecoveryByTargetBootParams struct {
+	HubID    string
+	ToBootID string
+}
+
+func (q *Queries) HubSameStoreRecoveryByTargetBoot(ctx context.Context, arg HubSameStoreRecoveryByTargetBootParams) (HubSameStoreRecovery, error) {
+	row := q.db.QueryRow(ctx, hubSameStoreRecoveryByTargetBoot, arg.HubID, arg.ToBootID)
+	var i HubSameStoreRecovery
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.HubID,
+		&i.FromEpoch,
+		&i.ToEpoch,
+		&i.FromBootID,
+		&i.ToBootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.Proof,
+		&i.ProofDigest,
+	)
+	return i, err
+}
+
 const missingHubSameStoreIssues = `-- name: MissingHubSameStoreIssues :one
 SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND i.hub_boot_id=$2
  AND NOT EXISTS(SELECT 1 FROM hub_same_store_journal j WHERE j.recovery_id=$3 AND j.sequence=i.ledger_sequence AND j.sequence<=$4 AND j.kind='issue' AND j.record_id=i.issue_id AND j.payload=i.payload AND j.payload_digest=i.payload_digest))

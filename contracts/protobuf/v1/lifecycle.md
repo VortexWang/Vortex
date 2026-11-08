@@ -715,3 +715,43 @@ unacknowledged command remains pending. No financial/usage/share authority row,
 Hub incarnation, prefix ACK or online readiness changes here. Complete current
 state admission, independent successor root delivery and effective new-epoch
 issue/lease/seal consumers remain required before production S/R can resume.
+
+
+## Independent Hub S/R preflight stream (candidate)
+
+Production Hub performs a separate `hub-sr-preflight-v1` hello before attempting
+the ordinary funded stream. The hello uses1.6.0 with exactly this one capability,
+actual Hub boot, region and a fresh session UUID. It cannot be combined with
+ordinary funded, lease or usage capabilities. Legacy clients retain their
+existing paths. A normal available boot receives an advisory
+`funded_session_available`; the client then opens a fresh stream and still runs
+all ordinary BindHubSession/funded checks. This advisory creates no authority.
+An unapproved replacement boot fails closed; the CLI prints its actual boot for
+a subsequent explicit platform approval, without accepting a supplied boot ID.
+
+A matching explicit immutable PG recovery approval is returned in typed
+BackendMessage.recovery_command(tag18), binding backend/Hub/actual boot/session/
+region and exact command SHA. The Hub validates both outer and payload bindings,
+uses existing original-root funded FULL S/R, and replays the exact local result
+before checking a clock. First installation needs trusted bounded time within
+the command window and all existing HandoffHub boundary checks. No command can
+invent R, extend original allocation bounds or substitute fresh roots.
+
+HubMessage.recovery_record(tag13) sends exact retained local rows in bounded
+32-row pages through S+1, including already-confirmed original rows. Each PG row
+commits via the independent immutable forensic-retention audit transaction.
+HubMessage.recovery_manifest(tag14) then requests full PG prefix/partition
+verification. Typed BackendMessage.recovery_retention(tag19) pins every scope,
+record identity/kind/sequence and SHA; `manifest` is a separate final retention
+kind. The client checks each receipt before advancing its in-memory upload
+cursor. Lost row or manifest receipts reconnect from the original finite prefix,
+reusing the same immutable FULL result and PG rows.
+
+These typed retention receipts never invoke ConfirmLedger, CompleteRecovery,
+RecordBackendHeartbeat, BindHubSession or financial settlement. Even after the
+complete PG witness is retained, the local confirmed prefix remains unchanged,
+the Hub stays recovering and original PG boot stays bound. The client reports
+`ErrRecoveryEvidenceRetained` and waits for independent admission. This candidate
+delivers the prerequisite evidence; production admission, Node successor roots
+and effective new-epoch issue/lease/seal consumers are still required. Prior
+approved snapshots remain unchanged and CR-008 is not approved.

@@ -1768,6 +1768,178 @@
           "maximum": 9223372036854775807
         }
       }
+    },
+    "hub_recovery_preflight_hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_version",
+        "capabilities",
+        "session_id",
+        "region_id"
+      ],
+      "properties": {
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "const": [
+            "hub-sr-preflight-v1"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "hub_recovery_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_id",
+        "hub_id",
+        "boot_id",
+        "session_id",
+        "region_id",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "hub_recovery_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recovery_id",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "recovery_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "hub_recovery_retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_id",
+        "hub_id",
+        "boot_id",
+        "session_id",
+        "region_id",
+        "recovery_id",
+        "record_id",
+        "kind",
+        "ledger_sequence",
+        "payload_sha256"
+      ],
+      "properties": {
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "recovery_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "kind": {
+          "enum": [
+            "issue",
+            "runtime-lease",
+            "delegation-seal",
+            "known",
+            "unknown",
+            "handoff",
+            "manifest"
+          ]
+        },
+        "ledger_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775806
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
     }
   }
 }

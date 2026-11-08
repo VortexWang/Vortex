@@ -1,0 +1,44 @@
+[
+  {
+    "target": "backend",
+    "GOOS": "linux",
+    "GOARCH": "amd64",
+    "result": "build-pass",
+    "sha256": "827f48404bda36097c9bd39d9cdd26f9e78facadcd50c612b98c692187b2d8e3"
+  },
+  {
+    "target": "hub",
+    "GOOS": "linux",
+    "GOARCH": "amd64",
+    "result": "build-pass",
+    "sha256": "dc2b7061ee781bd17a5be19fce799eb6ea2d496d24e940a74631f36a189c1f4b"
+  },
+  {
+    "target": "node",
+    "GOOS": "linux",
+    "GOARCH": "amd64",
+    "result": "build-pass",
+    "sha256": "bf68da4c9e97e6fa031bd97316930ae4c081cb6e5025866f7de51235fd970822"
+  },
+  {
+    "target": "backend",
+    "GOOS": "linux",
+    "GOARCH": "arm64",
+    "result": "build-pass",
+    "sha256": "7b9d17e55bc77de9116301b4f11cf3a55fd5d4dcdfdc3aee30e55bcf5eab3dd0"
+  },
+  {
+    "target": "hub",
+    "GOOS": "linux",
+    "GOARCH": "arm64",
+    "result": "build-pass",
+    "sha256": "118d23c0e0abb72c6fbd1a91ad9010a54cdc4f1b00264c0368bf741537d5f7bb"
+  },
+  {
+    "target": "node",
+    "GOOS": "linux",
+    "GOARCH": "arm64",
+    "result": "build-pass",
+    "sha256": "3a3c9b97eee955dc930f7d2b621bea642625eed9d7e302a4ff1c8108f2ae9910"
+  }
+]

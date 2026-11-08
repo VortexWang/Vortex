@@ -120,7 +120,7 @@ func run(parent context.Context, args []string) error {
 		lo, hi, trusted := clock.Bounds()
 		return store.IssuerTime{Earliest: lo, Latest: hi, Trusted: trusted}
 	}
-	client := &hub.BackendClient{HubID: *id, BootID: uuid.NewString(), BackendID: *backend, Region: *region, Address: *address, Store: s, Clock: bounds, TLS: &tls.Config{Certificates: []tls.Certificate{pair}, RootCAs: backends, ServerName: *backend, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}}
+	client := &hub.BackendClient{RecoveryPreflight: true, HubID: *id, BootID: uuid.NewString(), BackendID: *backend, Region: *region, Address: *address, Store: s, Clock: bounds, TLS: &tls.Config{Certificates: []tls.Certificate{pair}, RootCAs: backends, ServerName: *backend, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}}
 	relay := &hub.UsageRelay{Store: s, Clock: bounds, Backend: hub.BackendUsageClient{Config: client}}
 	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{pair}, ClientCAs: nodes, ClientAuth: tls.RequireAndVerifyClientCert, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13})), grpc.MaxRecvMsgSize(1<<20), grpc.MaxSendMsgSize(1<<20))
 	controlv1.RegisterNodeControlServer(server, &hub.RuntimeServer{HubID: *id, Region: *region, Issuer: &hub.Issuer{Store: s, HubID: *id, Clock: bounds}, Usage: relay})

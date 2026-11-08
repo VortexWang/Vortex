@@ -243,6 +243,8 @@ message HubMessage {
     LifecycleHello lifecycle_hello = 10;
     HubStatus status = 11;
     LedgerRecord ledger_record = 12;
+    HubRecoveryRecord recovery_record = 13;
+    HubRecoveryManifest recovery_manifest = 14;
   }
 }
 message LedgerRecord {
@@ -264,6 +266,8 @@ message BackendMessage {
     AuthorityRestrictions authority_restrictions = 15;
     EpochHandoffRequest epoch_handoff_request = 16;
     ShareRenewalClosureCommand share_renewal_closure = 17;
+    HubRecoveryCommand recovery_command = 18;
+    HubRecoveryRetention recovery_retention = 19;
   }
 }
 message BackendHeartbeat {
@@ -349,3 +353,29 @@ message NodeBootRecoveryReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
 // Candidate direct-backend Node inventory fence; never negotiated over a Hub link.
 message RecoveryCreditFenceCommand { bytes payload = 1; bytes payload_sha256 = 2; }
 message RecoveryCreditFenceReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Independent hub-sr-preflight-v1 stream. Retention is forensic persistence;
+// it must never be applied as a local ledger ACK or an online admission.
+message HubRecoveryCommand {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  bytes payload = 6;
+  bytes payload_sha256 = 7;
+}
+message HubRecoveryRecord { string recovery_id = 1; LedgerRecord record = 2; }
+message HubRecoveryManifest { string recovery_id = 1; bytes payload = 2; bytes payload_sha256 = 3; }
+message HubRecoveryRetention {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  string recovery_id = 6;
+  string record_id = 7;
+  string kind = 8;
+  uint64 ledger_sequence = 9;
+  bytes payload_sha256 = 10;
+}
