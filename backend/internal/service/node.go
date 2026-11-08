@@ -215,8 +215,21 @@ func (s NodeService) Snapshot(ctx context.Context, scope TenantScope, group, req
 }
 
 func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, state string, expected int64, drainSeconds int, request string) error {
+	_, err := s.TransitionWithOperation(ctx, scope, node, state, expected, drainSeconds, request)
+	return err
+}
+
+// NodeTransitionResult binds the response to the operation committed with the
+// desired lifecycle. It never asserts physical stop, capacity release or apply.
+type NodeTransitionResult struct {
+	NodeID, OperationID, DesiredLifecycle string
+	Version                               int64
+}
+
+func (s NodeService) TransitionWithOperation(ctx context.Context, scope TenantScope, node, state string, expected int64, drainSeconds int, request string) (NodeTransitionResult, error) {
+	var result NodeTransitionResult
 	event := repository.Audit{Action: "node.lifecycle", ResourceID: node, RequestID: request, Reason: "node lifecycle transition"}
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &event, func(q *generated.Queries) error {
+	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &event, func(q *generated.Queries) error {
 		n, err := q.ScopedNode(ctx, generated.ScopedNodeParams{NodeID: node, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
 		if err != nil {
 			return err
@@ -225,7 +238,7 @@ func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, st
 			return ErrScope
 		}
 		if n.Version != expected {
-			return ErrConflict
+			return ErrPrecondition
 		}
 		event.Before = auditJSON(map[string]any{"lifecycle": n.Lifecycle, "version": n.Version})
 		event.After = auditJSON(map[string]any{"lifecycle": state, "version": n.Version + 1})
@@ -271,8 +284,17 @@ func (s NodeService) Transition(ctx context.Context, scope TenantScope, node, st
 		if err != nil {
 			return err
 		}
-		return domainTask(ctx, q, scope, node, "node."+state, "resource_change", next.Version)
+		op, err := newDomainTask(ctx, q, scope, node, "node."+state, "resource_change", next.Version)
+		if err != nil {
+			return err
+		}
+		result = NodeTransitionResult{NodeID: node, OperationID: op.ID, DesiredLifecycle: next.Lifecycle, Version: next.Version}
+		return nil
 	})
+	if err != nil {
+		return NodeTransitionResult{}, err
+	}
+	return result, nil
 }
 func (s NodeService) Impact(ctx context.Context, scope TenantScope, node, request string) ([]generated.NodeDependency, error) {
 	var result []generated.NodeDependency

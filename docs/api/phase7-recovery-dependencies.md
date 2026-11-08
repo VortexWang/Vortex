@@ -22,6 +22,10 @@
 
 202 只说明期望状态和 operation 已提交。前端保留 operation_id 与业务资源的关联，查询 operation，同时重取业务详情。desired_revision、active_revision、sync_status 和 occupation_held 是不同事实：pending、unknown 或超时都不证明业务已经停止或资源已经释放。
 
+节点 PATCH 同样要求强 If-Match。body 包含 lifecycle；仅 draining 可带1..86400秒的 drain_seconds，省略使用300秒。返回 node_id、desired_lifecycle、version、operation_id、sync_status=pending，以及新 ETag/operation Location。合法版本下不允许的生命周期跳转返回409，过时版本返回412。普通租户不能管理仅经 grant 可见的平台节点，auditor 不能修改。持久化 lifecycle 是管理期望；不能据202推断节点实际停止或容量已释放。
+
+公开 operation 的 resource_id 和 target_revision 映射到原业务资源与版本；领域任务用于隔离运行配置的内部身份不用于此关联。先读取 operation 再刷新对应资源；SSE 摘要仅提示重取，不能用其任务上下文覆盖业务状态。
+
 套餐目录变化不改写既有订阅快照。套餐预览、确认、权益码和恢复操作的 HTTP 适配仍在本计划待完成范围内；前端不得用目录当前值替换订阅历史值，也不得在无确认或无最终回执时自行补发额度、清除限制或标记已恢复。
 
 ## SSE 与 REST 收敛

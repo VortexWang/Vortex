@@ -18,8 +18,11 @@ import (
 )
 
 var (
-	ErrScope        = policy.ErrForbidden
-	ErrConflict     = errors.New("desired revision or idempotency conflict")
+	ErrScope    = policy.ErrForbidden
+	ErrConflict = errors.New("desired revision or idempotency conflict")
+	// ErrPrecondition remains an ErrConflict for internal compatibility, while
+	// HTTP can distinguish a stale If-Match from a valid-version state conflict.
+	ErrPrecondition = fmt.Errorf("%w: resource version changed", ErrConflict)
 	ErrStaleReceipt = errors.New("receipt does not match current target")
 )
 

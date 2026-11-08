@@ -6,7 +6,7 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 authorized stable lists verified; REST mutations/public contract next"
+stopped_at: "06-07 Node mutation and business operation links verified; remaining adapters/contract next"
 last_updated: "2026-11-08T21:58:00.664390+00:00"
 last_activity: 2026-11-08
 last_activity_desc: "06-07 authorized stable lists and schema8 ordering backfill pass full native/Linux race, double sqlc and four builds;9/11."
@@ -15,7 +15,7 @@ progress:
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: 62fd55dc
+state_head: 5f77d744
 ---
 
 # Project State
@@ -212,3 +212,5 @@ Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 fro
 06-07 transactional SSE core now has deferred sorted-tenant commit sequencing, immutable safe summaries, stable HMAC event positions, one-snapshot replay, retention floor/delete atomicity and production retention worker. Access expiry/revocation/current scope, crossprincipal/tenant/future cursor, audit failure, activeTLS shutdown and actual REST convergence tests pass. Native full backend race passes(service364.554); second Linux full command retains one pre-isolation bounded-batch fixture failure despite service384.285 passing; final affected Linux component validation is separate. Two27-output sqlc generations/dependency review and four Backend/Hub cross-builds pass. Initial old-schema/tracer fixtures corrected without relaxing production constraints; failed/semantic RED logs retained. Phase7 recovery file remains draft. Remaining lists/mutations/initial token provisioning/OpenAPI approval/unified checks;9/11, no06-07 SUMMARY.
 
 06-07 stable business lists and /me now pass ordinary ownership/grants, per-tenant platform audit/fail-closed, principal/collection cursors, mutable-state pagination, non-empty business projections, composite restriction identity and schema8 unchanged-authority backfill/transaction rollback. Complete native backend race(service363.733s) and Linux arm64 backend race(service371.556s) pass, with two28-output sqlc runs and four Backend/Hub cross-builds. No dependencies/frozen contracts changed; migration9 remains candidate. Evidence: artifacts/phase6/06-07/task1-resource-lists/. Remaining mutations and exact OpenAPI candidate/approval/unified checks;9/11, no SUMMARY.
+
+06-07 Node PATCH now returns its exact transaction-bound operation and strong version ETag; stale412 differs from valid-state409. Concurrent CAS/audit rollback/foreign/auditor negatives and native/Linux complete HTTP plus affected Node/Grant/Scope service races pass. Domain operation list/detail maps synthetic config identities to original business resources/versions, with genuine RED evidence. Two28-file sqlc and four cross-builds pass; no migration/dependency/frozen contract change. Remaining adapters and concreteCR-009;9/11, no SUMMARY.

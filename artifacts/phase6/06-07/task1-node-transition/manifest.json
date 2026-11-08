@@ -1,0 +1,30 @@
+{
+  "base_sha": "5f77d744a1870519467f841fc1d19d5a3209eb54",
+  "scope": "06-07 Node lifecycle and business operation projections;not complete plan",
+  "passed": [
+    "focused-native-race.log",
+    "affected-native-race.log",
+    "affected-linux-race.log",
+    "final-api-native-race.log",
+    "final-operation-link-native-race.log",
+    "final-operation-link-linux-race.log",
+    "generation-builds.json"
+  ],
+  "failed_retained": {
+    "routes-red.log": "missing PATCH404",
+    "business-identity-red.log": "synthetic domain operation resource/version exposed"
+  },
+  "evidence_sha256": {
+    "README.md": "7361a43e9585d6fc3cabc423efc35ca00d4ca244ba90db4f535244164f0d7ef0",
+    "affected-linux-race.log": "0cb33258270c9d86bafd26daad0c63f5bd52073af4f1d6df82305c9bce7a3aa0",
+    "affected-native-race.log": "86780ec9720816a58a57e7c1db880f67465b859e79f8f337ba7619b7568fcbb0",
+    "business-identity-red.log": "b83ba4e8423d816ce92ab8c21d0e0864dc1f94399f85c5a06c0076f3f83aec1e",
+    "final-api-native-race.log": "6a5da7fcbb5fb120fb8c15c4beaaa01e97436eecd89fa41dc99c64f9b0013e6e",
+    "final-operation-link-linux-race.log": "f318e50b2089332fc26b34947337d5db3aaf99bb4fa0515564311250fb2ad6e8",
+    "final-operation-link-native-race.log": "87fca8300aaf1427f378b21e4185dc6b5f9b84153b9802e9e200cfb434f060c9",
+    "focused-native-race.log": "ac23aefd487c5e9b310b2e5a801a39cabece34780435f9dcd136f783473abfca",
+    "generation-builds.json": "d045a4a25c0709e9588386ea6d218facaf46c8b1e6fa8ba23af631ee6e8a3e5f",
+    "routes-red.log": "f09dc6c5bd1da48560bc16d503f1361799724d476e5fc5a726145eef6ea3a3f9",
+    "source-hashes.json": "887401c4065a33d60be6cf97a7cd02492f7065ba95de39e725d8fb3315f6f4c6"
+  }
+}

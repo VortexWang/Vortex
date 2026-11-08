@@ -12,8 +12,12 @@ import (
 )
 
 const getPublicOperation = `-- name: GetPublicOperation :one
-SELECT id,resource_id,target_revision,state,occupation_held,public_created_at AS created_at
-FROM operations WHERE tenant_id=$1 AND id=$2
+SELECT o.id,
+CASE WHEN t.task_kind='resource_change' THEN convert_from(o.payload,'UTF8')::jsonb->>'resource_id' ELSE o.resource_id END::text AS resource_id,
+CASE WHEN t.task_kind='resource_change' THEN o.generation ELSE o.target_revision END::bigint AS target_revision,
+o.state,o.occupation_held,o.public_created_at AS created_at
+FROM operations o LEFT JOIN tasks t ON t.tenant_id=o.tenant_id AND t.operation_id=o.id
+WHERE o.tenant_id=$1 AND o.id=$2
 `
 
 type GetPublicOperationParams struct {
@@ -45,10 +49,14 @@ func (q *Queries) GetPublicOperation(ctx context.Context, arg GetPublicOperation
 }
 
 const listPublicOperations = `-- name: ListPublicOperations :many
-SELECT id,resource_id,target_revision,state,occupation_held,public_created_at AS created_at
-FROM operations WHERE tenant_id=$1
-AND (NOT $2::boolean OR (public_created_at,id)>($3::timestamptz,$4::text))
-ORDER BY public_created_at,id LIMIT $5::integer
+SELECT o.id,
+CASE WHEN t.task_kind='resource_change' THEN convert_from(o.payload,'UTF8')::jsonb->>'resource_id' ELSE o.resource_id END::text AS resource_id,
+CASE WHEN t.task_kind='resource_change' THEN o.generation ELSE o.target_revision END::bigint AS target_revision,
+o.state,o.occupation_held,o.public_created_at AS created_at
+FROM operations o LEFT JOIN tasks t ON t.tenant_id=o.tenant_id AND t.operation_id=o.id
+WHERE o.tenant_id=$1
+AND (NOT $2::boolean OR (o.public_created_at,o.id)>($3::timestamptz,$4::text))
+ORDER BY o.public_created_at,o.id LIMIT $5::integer
 `
 
 type ListPublicOperationsParams struct {
@@ -68,6 +76,9 @@ type ListPublicOperationsRow struct {
 	CreatedAt      pgtype.Timestamptz
 }
 
+// Domain tasks deliberately use a separate desired-state identity, so public
+// operation DTOs select the original business resource/version from the typed
+// resource_change envelope. No raw payload or internal config identity escapes.
 func (q *Queries) ListPublicOperations(ctx context.Context, arg ListPublicOperationsParams) ([]ListPublicOperationsRow, error) {
 	rows, err := q.db.Query(ctx, listPublicOperations,
 		arg.TenantID,

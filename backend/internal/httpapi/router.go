@@ -68,6 +68,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	a.registerResourceLists(secured)
 	secured.GET("/tenants/:tenant_id/events", a.streamEvents)
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
+	secured.PATCH("/tenants/:tenant_id/nodes/:node_id", a.transitionNode)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)
 	return r, nil
@@ -222,24 +223,8 @@ func (a *API) reviseRule(c *gin.Context) {
 	if !ok {
 		return
 	}
-	headers := c.Request.Header.Values("If-Match")
-	if len(headers) == 0 {
-		fail(c, 428, "precondition_required", "If-Match required", nil)
-		return
-	}
-	if len(headers) != 1 {
-		fail(c, 400, "invalid_request", "Invalid If-Match", nil)
-		return
-	}
-	tag := headers[0]
-	if len(tag) < 3 || !strings.HasPrefix(tag, "\"") || !strings.HasSuffix(tag, "\"") {
-		fail(c, 400, "invalid_request", "Invalid If-Match", nil)
-		return
-	}
-	digits := tag[1 : len(tag)-1]
-	expected, e := strconv.ParseInt(digits, 10, 64)
-	if e != nil || expected < 0 || strconv.FormatInt(expected, 10) != digits {
-		fail(c, 400, "invalid_request", "Invalid If-Match", nil)
+	expected, ok := expectedRevision(c)
+	if !ok {
 		return
 	}
 	var body service.RuleInput
