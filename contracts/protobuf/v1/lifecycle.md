@@ -432,3 +432,24 @@ FULL-issue from fresh Hub SQLite with local ledger sequence1, and accept both
 new-boot sequence1 and the exact old-boot sequence1 replay. This does not claim
 that a prior prepared/unknown rule has converged or that Node boot recovery is
 complete; those original configuration/port holds remain protected.
+
+A separate candidate local Node cold-boot consumer retires both original Node
+aggregate heads under SQLite FULL. The canonical backend command pins tenant,
+Node, backend, old/new boot, exact original rate and connection commands, their
+independent generation floors, a strictly greater fencing floor, trusted
+safe-after/issue/expiry bounds and the immutable authority-proof digest. Any
+later old-boot hard deadline already stored on the Node independently prevents
+early retirement. No credit, old execution receipt, activation release or
+financial final is created. Unknown original evidence and balances remain.
+
+Fresh disk installs only zero-capacity retired heads at the original per-kind
+floors. Retained disk must match both exact original heads; a higher/different
+head denies the whole transaction. Neither head may activate until a subsequent
+new-boot linear CAS advances that kind. Same-command FULL replay after restart,
+expiry or later CAS returns its original canonical receipt and never lowers a
+head. Conflicting commands and corrupt stored receipts fail closed. Concurrent
+new boots cannot split the two kinds across owners. This is a local primitive
+only: it is not yet connected to NodeControl, and complete PostgreSQL proof,
+explicit approval, independent capability negotiation and authenticated receipt
+consumption are required before production use. It does not complete Node boot
+recovery or authorize manual blocked-to-active state changes.
