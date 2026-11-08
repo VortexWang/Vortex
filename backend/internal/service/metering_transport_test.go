@@ -184,6 +184,17 @@ func TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence(t *testing
 	if e != nil || restarted.BootID == oldBoot {
 		t.Fatal("Agent boot recovery", e)
 	}
+	firstReportBoot := restarted.BootID
+	backend.mu.Lock()
+	backend.Drop = true
+	backend.mu.Unlock()
+	if e = (&agent.ControlClient{Node: restarted, TLS: nodeTLS}).Connect(ctx, nodeListener.Addr().String()); e == nil {
+		t.Fatal("unknown usage acknowledged before dropped backend receipt")
+	}
+	restarted, e = agent.New(node.NodeID, agentStore, nil)
+	if e != nil || restarted.BootID == firstReportBoot {
+		t.Fatal("second Agent boot recovery", e)
+	}
 	connectCtx, stopConnect = context.WithCancel(ctx)
 	defer stopConnect()
 	go func() {
@@ -210,7 +221,7 @@ func TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence(t *testing
 		t.Fatal("boot restart did not freeze original source", e, u)
 	}
 	reportBoot, reportSequence, e := hs.UsageOrigin(ctx, node.NodeID, unknownID)
-	if e != nil || reportBoot != restarted.BootID || reportSequence == 0 {
+	if e != nil || reportBoot != firstReportBoot || reportSequence == 0 {
 		t.Fatal("unknown report provenance", e)
 	}
 	unknownTuple, e := generated.New(f.pool).GetUsageTuple(ctx, generated.GetUsageTupleParams{NodeID: node.NodeID, BootID: reportBoot, Sequence: int64(reportSequence)})
