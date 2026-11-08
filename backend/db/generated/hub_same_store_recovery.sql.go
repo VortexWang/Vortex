@@ -754,13 +754,68 @@ func (q *Queries) PendingNodeRecoverySources(ctx context.Context) ([]NodeRecover
 	return items, nil
 }
 
+const shareBoundHubAllocations = `-- name: ShareBoundHubAllocations :many
+SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a
+JOIN hub_allocation_share_bindings b ON b.tenant_id=a.tenant_id AND b.allocation_id=a.allocation_id
+WHERE b.tenant_id=$1 AND b.node_id=$2 AND b.kind=$3 AND b.generation=$4 AND a.hub_id=$5
+ORDER BY a.delegation_id
+`
+
+type ShareBoundHubAllocationsParams struct {
+	TenantID   string
+	NodeID     string
+	Kind       string
+	Generation int64
+	HubID      string
+}
+
+func (q *Queries) ShareBoundHubAllocations(ctx context.Context, arg ShareBoundHubAllocationsParams) ([]HubFundedAllocation, error) {
+	rows, err := q.db.Query(ctx, shareBoundHubAllocations,
+		arg.TenantID,
+		arg.NodeID,
+		arg.Kind,
+		arg.Generation,
+		arg.HubID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubFundedAllocation{}
+	for rows.Next() {
+		var i HubFundedAllocation
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.AllocationID,
+			&i.DelegationID,
+			&i.ReservationID,
+			&i.HubID,
+			&i.HubBootID,
+			&i.NodeID,
+			&i.BootID,
+			&i.RequestKey,
+			&i.RequestDigest,
+			&i.Payload,
+			&i.PayloadDigest,
+			&i.OperationID,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const shareHasAdmittedRecovery = `-- name: ShareHasAdmittedRecovery :one
-SELECT EXISTS(SELECT 1 FROM hub_allocation_share_bindings b
-JOIN hub_funded_allocations a ON a.tenant_id=b.tenant_id AND a.allocation_id=b.allocation_id
-JOIN hub_same_store_recoveries r ON r.hub_id=a.hub_id
-JOIN hub_same_store_admissions s ON s.recovery_id=r.id
-WHERE b.tenant_id=$1 AND b.node_id=$2 AND b.kind=$3 AND b.generation=$4
-AND EXISTS(SELECT 1 FROM jsonb_array_elements(convert_from(r.payload,'UTF8')::jsonb->'allocations') link WHERE link->>'allocation_id'=a.allocation_id))
+SELECT EXISTS(SELECT 1 FROM hub_same_store_admissions s
+JOIN share_generations g ON g.signer_id=s.hub_id
+WHERE g.tenant_id=$1 AND g.node_id=$2 AND g.kind=$3 AND g.generation=$4
+AND EXISTS(SELECT 1 FROM jsonb_array_elements(convert_from(s.payload,'UTF8')::jsonb->'Shares') item
+WHERE item->>'TenantID'=g.tenant_id AND item->>'NodeID'=g.node_id AND item->>'Kind'=g.kind AND item->>'Generation'=g.generation::text))
 `
 
 type ShareHasAdmittedRecoveryParams struct {

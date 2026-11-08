@@ -1,0 +1,8 @@
+--- FAIL: TestRecoveredShareClosureFollowsTwoEpochsFULLRollbackConcurrentReplay (0.45s)
+    share_recovery_closure_test.go:86: original issue replay changed store: trusted time is required for authorization
+--- FAIL: TestRecoveredShareClosureRejectsUnprovenEpochAndCorruptOriginal (1.75s)
+    --- FAIL: TestRecoveredShareClosureRejectsUnprovenEpochAndCorruptOriginal/missing_handoff (0.36s)
+        share_recovery_closure_test.go:127: constraint failed: FOREIGN KEY constraint failed (787)
+FAIL
+FAIL	vortex/agent/store	3.439s
+FAIL

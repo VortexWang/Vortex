@@ -1,0 +1,25 @@
+2026/11/08 23:27:56 goose: no migrations to run. current version: 8
+2026/11/08 23:27:56 OK   00001_authority.sql (26.88ms)
+2026/11/08 23:27:56 OK   00002_tenant_policy.sql (19.45ms)
+2026/11/08 23:27:56 OK   00003_nodes_ports.sql (36.66ms)
+2026/11/08 23:27:56 OK   00004_entry_group_domains.sql (4ms)
+2026/11/08 23:27:56 OK   00005_rules_compile.sql (51.91ms)
+2026/11/08 23:27:56 OK   00006_packages_entitlements.sql (40.71ms)
+2026/11/08 23:27:56 OK   00007_metering_ledger.sql (22.45ms)
+2026/11/08 23:27:56 OK   00008_limits_shares.sql (48.62ms)
+2026/11/08 23:27:56 goose: successfully migrated database to version: 8
+2026/11/08 23:27:58 goose: no migrations to run. current version: 8
+2026/11/08 23:27:58 OK   00001_authority.sql (8.59ms)
+2026/11/08 23:27:58 OK   00002_tenant_policy.sql (7.34ms)
+2026/11/08 23:27:58 OK   00003_nodes_ports.sql (19.91ms)
+2026/11/08 23:27:58 OK   00004_entry_group_domains.sql (2.39ms)
+2026/11/08 23:27:58 OK   00005_rules_compile.sql (18.25ms)
+2026/11/08 23:27:58 OK   00006_packages_entitlements.sql (16.49ms)
+2026/11/08 23:27:58 OK   00007_metering_ledger.sql (22.26ms)
+2026/11/08 23:27:58 OK   00008_limits_shares.sql (48.44ms)
+2026/11/08 23:27:58 goose: successfully migrated database to version: 8
+--- FAIL: TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay (1.22s)
+    share_effective_transport_test.go:69: FULL closed recovered delegation issued
+FAIL
+FAIL	vortex/backend/internal/service	3.844s
+FAIL

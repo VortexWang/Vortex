@@ -3,6 +3,7 @@ package store
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -43,12 +44,21 @@ func (s *Store) ApplyShareRenewalClosure(ctx context.Context, hub, boot, backend
 		return zero, e
 	}
 	for _, id := range c.DelegationIDs {
-		var installed []byte
+		var installed, digest []byte
 		var epoch string
-		e = tx.QueryRowContext(ctx, `SELECT payload,signer_epoch FROM issuer_delegations WHERE delegation_id=?`, id).Scan(&installed, &epoch)
+		e = tx.QueryRowContext(ctx, `SELECT payload,payload_sha256,signer_epoch FROM issuer_delegations WHERE delegation_id=?`, id).Scan(&installed, &digest, &epoch)
 		if e == nil {
 			var d HubDelegation
-			if json.Unmarshal(installed, &d) != nil || d.ID != id || d.HubID != c.HubID || d.NodeID != c.NodeID || d.BootID != c.BootID || d.SignerEpoch != uint64(c.SignerEpoch) || epoch != strconv.FormatInt(c.SignerEpoch, 10) {
+			sum := sha256.Sum256(installed)
+			if !bytes.Equal(sum[:], digest) || json.Unmarshal(installed, &d) != nil || d.ID != id || d.HubID != c.HubID || d.NodeID != c.NodeID || d.BootID != c.BootID || epoch != strconv.FormatInt(c.SignerEpoch, 10) {
+				return zero, ErrAuthorizationDenied
+			}
+			// Closure may stop a retained delegation while recovery is pending,
+			// but an epoch column alone cannot confer its successor ownership.
+			// Follow the same immutable root handoffs used for seal validation;
+			// closing never bypasses the FULL ACK gate for later spending.
+			d, e = effectiveHubDelegationTx(ctx, tx, d, digest, epoch, false)
+			if e != nil || d.SignerEpoch != uint64(c.SignerEpoch) {
 				return zero, ErrAuthorizationDenied
 			}
 		} else if !errors.Is(e, sql.ErrNoRows) {

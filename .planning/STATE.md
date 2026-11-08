@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: independent admission/FULL ACK complete; effective generation closure and repeated recovery pending"
-last_updated: "2026-11-08T15:18:23.365825+00:00"
+stopped_at: "06-06 Task3: effective share epoch renewal/closure complete; repeated recovery and production convergence pending"
+last_updated: "2026-11-08T15:44:55.407182+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: separate admission and finite FULL ACK pass native/Linux race; generation closure remains guarded;8/11."
+last_activity_desc: "06-06 Task3: effective generation renewal/closure and actual CAS preserve original funds; native/Linux race pass;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: acf26002
+state_head: 52f66c56
 ---
 
 # Project State
@@ -55,6 +55,8 @@ PG current-state Hub S/R admission now reruns complete prefix/financial verifica
 Admitted effective-epoch consumers now derive every adjacent immutable approval/manifest/admission and exact Node FULL fence/root witness from the original allocation; only root revision/epoch advance. Global Hub->tenant locking rejects fresh old-boot work and exact latest three handoff proofs bind original credit R plus zero nonfinancial R. Historical exact receipts retain original boot/sequence and stable ErrScope on relabeling. Actual37 old+10 new bytes share one103 parent; complete seal returns only56 and retains47 issued/unknown. Audit rollback,8 concurrent issue/seal replay, cap/proof/root/source/deadline negatives and real independent-role-mTLS issue/lease/seal loss/reconnect pass. Expected RED with the handoff gate disconnected and restored GREEN pass without editing working source. Final complete native backend race(service239.915) and Linux backend race(service249.745), native/Linux Agent/Hub/contracts/NodeCLI race, six final cross-builds and two isolated23-output sqlc generations pass. Initial test-import/fixed-clock failures and the corrected stable error-code regression remain classified. Evidence: artifacts/phase6/06-06/task3-hub-effective-epoch/. This does not implement production admission/ACK, generation-level new-epoch renewal/closure, repeated PG recovery producers or full06-06 convergence. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
 Independent recovery admission transport now delivers only an already committed explicit all-tenant admission over a separate role-mTLS capability. The local FULL transaction validates the complete retained prefix including confirmed rows, confirms only the finite barrier, completes recovery and records immutable admission without financial changes; later tail remains pending. Exact replay never retimes liveness. Lost response before FULL and lost funded status after FULL converge with original37+10 bytes against one103 parent. Empty/admitted boot bypasses and forged Node role deny. Current authority/Node state/assignment/expiry/audit negatives, rollback/concurrent connections, SIGKILL and prefix-hash RED/GREEN pass. Old epoch closure cannot stand in for recovered generation closure: CAS temporarily fails closed with unchanged capacity/tasks. Final complete native backend race(service263.908), Linux backend race(service270.720), native root race and serial Linux root race, six final cross-builds and two isolated23sqlc+2protobuf outputs pass. Original Linux parallel regional timeout and test fixture failures remain failed and separately classified. Evidence: artifacts/phase6/06-06/task3-hub-admission-ack/. Next: effective generation renewal/closure, repeated PG recovery, explicit orchestration, production RuntimeServer/pending-rule convergence and full06-06 verification. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
+
+Effective share generation renewal/closure now derives adjacent immutable admitted epochs, exact original generations, complete allocation bindings/manifests and Node FULL witnesses without reopening original closed rows. New-epoch renewal retains original capacity/deadlines, rejects stale authority/boot/floor/eligibility, and exact nonce replay retains old bytes. Closure freezes sorted effective-boot pages; production Hub FULL consumer follows funded chains and keeps original issued/remaining debt. Complete authenticated pages, receipts and exact original delegation set now gate CAS; actual Node FULL CAS releases only600000->300000 proven rate difference. Lost FULL closure and PG ACK over real independent-role-mTLS, eight concurrent producers/receipts, audit rollback, local two-epoch closure/reopen/corruption and missing dependency negatives pass. Missing bindings cannot erase transferred status because detection uses immutable admission share inventory. Original closed proof/funds remain unchanged. Expected RED replacing effective closure with original old proof and restored GREEN pass with identical source SHA. Final complete native backend race(service280.487), Linux backend race(service290.487), native root(Store84.777), Linux serial root(Store190.650), six final builds and two independent23-output sqlc generations pass. Initial stale fixture/SQL delivery/JSON-key failures remain classified. Evidence: artifacts/phase6/06-06/task3-effective-share-closure/. Next: repeated PG recovery producers, explicit orchestration, later cold recovery for transferred generations, effective funding/refill, RuntimeServer/pending-rule convergence and complete06-06 verification. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -155,8 +157,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T15:18:23.365825+00:00
-Stopped at: 06-06 Task3: admission/FULL ACK complete; effective generation renewal/closure pending
+Last session: 2026-11-08T15:44:55.407182+00:00
+Stopped at: 06-06 Task3: effective share closure complete; repeated recovery pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

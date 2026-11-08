@@ -50,6 +50,9 @@ func (s ShareService) RenewShare(ctx context.Context, scope TenantScope, in Leas
 	}
 	digest := sha256.Sum256(raw)
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.renew", ResourceID: in.NodeID, RequestID: request, Reason: "renew enforced same-boot share without changing independent authority boundaries"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+in.SignerID); e != nil {
+			return e
+		}
 		if e := q.LockNodeAuthorityRead(ctx, in.NodeID); e != nil {
 			return e
 		}
@@ -98,7 +101,7 @@ func (s ShareService) RenewShare(ctx context.Context, scope TenantScope, in Leas
 		if e != nil {
 			return e
 		}
-		if fence.RenewalClosed || in.FencingGeneration < fence.FencingGeneration || g.FencingGeneration != in.FencingGeneration || g.PathGeneration != in.PathGeneration || g.SignerEpoch != in.SignerEpoch || g.SignerID != in.SignerID {
+		if fence.RenewalClosed || in.FencingGeneration < fence.FencingGeneration || g.FencingGeneration != in.FencingGeneration || g.PathGeneration != in.PathGeneration || g.SignerID != in.SignerID {
 			return ErrShareConflict
 		}
 		a, e := q.ShareRenewalAuthority(ctx, generated.ShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID})
@@ -112,8 +115,28 @@ func (s ShareService) RenewShare(ctx context.Context, scope TenantScope, in Leas
 		if barrier {
 			return ErrShareConflict
 		}
-		if a.ClosedAt.Valid || a.SignerEpoch != in.SignerEpoch {
+		issuer, e := effectiveShareIssuerTx(ctx, q, g, a)
+		if e != nil {
+			return e
+		}
+		if (!issuer.Recovered && a.ClosedAt.Valid) || issuer.Epoch != in.SignerEpoch {
 			return ErrShareConflict
+		}
+		if issuer.Recovered {
+			latest, e := q.LatestSignerEpoch(ctx, generated.LatestSignerEpochParams{TenantID: scope.TenantID(), SignerID: in.SignerID})
+			if e != nil {
+				return e
+			}
+			if latest != issuer.Epoch {
+				return ErrShareConflict
+			}
+			authority, e := q.GetSignerAuthority(ctx, generated.GetSignerAuthorityParams{TenantID: scope.TenantID(), SignerID: in.SignerID, SignerEpoch: issuer.Epoch})
+			if e != nil {
+				return e
+			}
+			if !now.Before(authority.AutonomyUntil.Time) {
+				return ErrLeaseBoundary
+			}
 		}
 		if !now.Before(g.OwnershipUntil.Time) || !now.Before(g.PolicyUntil.Time) || !now.Before(g.AutonomyUntil.Time) {
 			return ErrLeaseBoundary

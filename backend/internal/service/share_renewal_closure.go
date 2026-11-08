@@ -24,7 +24,19 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 	if !validID(backend) {
 		return ErrShareConflict
 	}
+	lookup := generated.New(s.Pool)
+	target, e := lookup.GetShareHandoff(ctx, generated.GetShareHandoffParams{TenantID: scope.TenantID(), ID: handoff})
+	if e != nil {
+		return e
+	}
+	generation, e := lookup.GetShareGeneration(ctx, generated.GetShareGenerationParams{TenantID: scope.TenantID(), NodeID: target.NodeID, Kind: target.Kind, Generation: target.Generation})
+	if e != nil {
+		return e
+	}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.prepare_renewal_closure", ResourceID: handoff, RequestID: request, Reason: "freeze predecessor issuance using authenticated FULL closure or immutable cold deadline proof; retain occupation"}, func(q *generated.Queries) error {
+		if e := lockShareIssuersTx(ctx, q, generation); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -60,11 +72,22 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 		if len(authorities) == 0 {
 			return ErrShareUnknown
 		}
+		prior, e := q.GetShareGeneration(ctx, generated.GetShareGenerationParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
+		if e != nil {
+			return e
+		}
 		for _, a := range authorities {
-			if a.ClosedAt.Valid {
+			issuer, e := effectiveShareIssuerTx(ctx, q, prior, a)
+			if e != nil {
+				return e
+			}
+			if a.ClosedAt.Valid && !issuer.Recovered {
 				continue
 			}
-			closed, e := s.closeColdHubRenewalTx(ctx, q, scope, g, a)
+			closed := false
+			if !issuer.Recovered {
+				closed, e = s.closeColdHubRenewalTx(ctx, q, scope, g, a)
+			}
 			if e != nil {
 				return e
 			}
@@ -78,23 +101,28 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 			if len(existing) != 0 {
 				continue
 			}
-			incarnation, e := q.GetHubIncarnation(ctx, generated.GetHubIncarnationParams{HubID: a.SignerID, SignerEpoch: a.SignerEpoch})
+			incarnation, e := q.GetHubIncarnation(ctx, generated.GetHubIncarnationParams{HubID: a.SignerID, SignerEpoch: issuer.Epoch})
 			if errors.Is(e, pgx.ErrNoRows) {
 				return ErrShareUnknown
 			}
 			if e != nil {
 				return e
 			}
-			unbound, e := q.UnboundShareClosureDelegations(ctx, generated.UnboundShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID})
-			if e != nil {
-				return e
-			}
-			if unbound != 0 {
-				return ErrShareUnknown
-			}
-			ids, e := q.ShareClosureDelegations(ctx, generated.ShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID, Kind: g.Kind, Generation: g.Predecessor, SignerEpoch: a.SignerEpoch})
-			if e != nil {
-				return e
+			var ids []string
+			if issuer.Recovered {
+				ids = issuer.Delegations
+			} else {
+				unbound, e := q.UnboundShareClosureDelegations(ctx, generated.UnboundShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID})
+				if e != nil {
+					return e
+				}
+				if unbound != 0 {
+					return ErrShareUnknown
+				}
+				ids, e = q.ShareClosureDelegations(ctx, generated.ShareClosureDelegationsParams{TenantID: scope.TenantID(), NodeID: g.NodeID, BootID: g.BootID, HubID: a.SignerID, HubBootID: incarnation.BootID, Kind: g.Kind, Generation: g.Predecessor, SignerEpoch: a.SignerEpoch})
+				if e != nil {
+					return e
+				}
 			}
 			parts := max(1, (len(ids)+63)/64)
 			if parts > math.MaxInt32 {
@@ -102,7 +130,7 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 			}
 			for part := 0; part < parts; part++ {
 				page := append([]string{}, ids[min(part*64, len(ids)):min((part+1)*64, len(ids))]...)
-				c := contracts.ShareRenewalClosure{Version: 1, ID: uuid.NewString(), BackendID: backend, TenantID: scope.TenantID(), HandoffID: h.ID, HubID: a.SignerID, HubBootID: incarnation.BootID, NodeID: g.NodeID, BootID: g.BootID, Kind: g.Kind, Generation: g.Predecessor, SuccessorGeneration: g.Generation, SignerEpoch: a.SignerEpoch, Part: int32(part + 1), Parts: int32(parts), DelegationIDs: page}
+				c := contracts.ShareRenewalClosure{Version: 1, ID: uuid.NewString(), BackendID: backend, TenantID: scope.TenantID(), HandoffID: h.ID, HubID: a.SignerID, HubBootID: incarnation.BootID, NodeID: g.NodeID, BootID: g.BootID, Kind: g.Kind, Generation: g.Predecessor, SuccessorGeneration: g.Generation, SignerEpoch: issuer.Epoch, Part: int32(part + 1), Parts: int32(parts), DelegationIDs: page}
 				if e = c.Validate(); e != nil {
 					return e
 				}
@@ -115,7 +143,7 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 				if e != nil {
 					return e
 				}
-				if e = q.AppendShareClosureCommand(ctx, generated.AppendShareClosureCommandParams{TenantID: scope.TenantID(), ID: c.ID, HandoffID: h.ID, NodeID: g.NodeID, BootID: g.BootID, Kind: g.Kind, Generation: g.Predecessor, SignerID: a.SignerID, SignerEpoch: a.SignerEpoch, HubBootID: incarnation.BootID, Part: c.Part, Parts: c.Parts, OperationID: op.ID, Payload: raw, PayloadDigest: sum[:]}); e != nil {
+				if e = q.AppendShareClosureCommand(ctx, generated.AppendShareClosureCommandParams{TenantID: scope.TenantID(), ID: c.ID, HandoffID: h.ID, NodeID: g.NodeID, BootID: g.BootID, Kind: g.Kind, Generation: g.Predecessor, SignerID: a.SignerID, SignerEpoch: issuer.Epoch, HubBootID: incarnation.BootID, Part: c.Part, Parts: c.Parts, OperationID: op.ID, Payload: raw, PayloadDigest: sum[:]}); e != nil {
 					return e
 				}
 			}
@@ -160,6 +188,9 @@ func (s ShareService) RecordRenewalClosureReceipt(ctx context.Context, hub, boot
 	}
 	sum := sha256.Sum256(raw)
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.renewal_closed_receipt", ResourceID: c.ID, RequestID: request, Reason: "authenticated FULL old-issuer page; close only when every immutable page is confirmed"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+hub); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -191,6 +222,31 @@ func (s ShareService) RecordRenewalClosureReceipt(ctx context.Context, hub, boot
 		}
 		if remaining != 0 {
 			return nil
+		}
+		g, e := q.GetShareGeneration(ctx, generated.GetShareGenerationParams{TenantID: scope.TenantID(), NodeID: c.NodeID, Kind: c.Kind, Generation: c.Generation})
+		if e != nil {
+			return e
+		}
+		a, e := q.ShareRenewalAuthority(ctx, generated.ShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: c.NodeID, Kind: c.Kind, Generation: c.Generation, SignerID: hub})
+		if e != nil {
+			return e
+		}
+		issuer, e := effectiveShareIssuerTx(ctx, q, g, a)
+		if e != nil {
+			return e
+		}
+		if issuer.Recovered {
+			chain, e := q.LockShareChain(ctx, generated.LockShareChainParams{TenantID: scope.TenantID(), NodeID: c.NodeID, Kind: c.Kind})
+			if e != nil {
+				return e
+			}
+			if chain.BootID != c.BootID || chain.ActiveGeneration != c.Generation || chain.PendingGeneration != c.SuccessorGeneration {
+				return ErrShareConflict
+			}
+			if _, e = effectiveShareClosureTx(ctx, q, g, c.HandoffID, a); e != nil {
+				return e
+			}
+			return domainTask(ctx, q, scope, c.NodeID, "share.close_renewal", "share_handoff", c.SuccessorGeneration)
 		}
 		in := RenewalClosure{NodeID: c.NodeID, BootID: c.BootID, Kind: c.Kind, SignerID: c.HubID, Generation: c.Generation, SuccessorGeneration: c.SuccessorGeneration, SignerEpoch: c.SignerEpoch}
 		closure, e := json.Marshal(in)

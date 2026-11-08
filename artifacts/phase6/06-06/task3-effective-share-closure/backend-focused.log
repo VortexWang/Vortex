@@ -1,0 +1,65 @@
+2026/11/08 23:25:01 goose: no migrations to run. current version: 8
+2026/11/08 23:25:01 OK   00001_authority.sql (59.85ms)
+2026/11/08 23:25:01 OK   00002_tenant_policy.sql (25.15ms)
+2026/11/08 23:25:01 OK   00003_nodes_ports.sql (19.96ms)
+2026/11/08 23:25:01 OK   00004_entry_group_domains.sql (2.35ms)
+2026/11/08 23:25:01 OK   00005_rules_compile.sql (19.08ms)
+2026/11/08 23:25:01 OK   00006_packages_entitlements.sql (18.23ms)
+2026/11/08 23:25:01 OK   00007_metering_ledger.sql (24.26ms)
+2026/11/08 23:25:01 OK   00008_limits_shares.sql (56.03ms)
+2026/11/08 23:25:01 goose: successfully migrated database to version: 8
+2026/11/08 23:25:02 goose: no migrations to run. current version: 8
+2026/11/08 23:25:02 OK   00001_authority.sql (8.06ms)
+2026/11/08 23:25:02 OK   00002_tenant_policy.sql (7.66ms)
+2026/11/08 23:25:02 OK   00003_nodes_ports.sql (17.51ms)
+2026/11/08 23:25:02 OK   00004_entry_group_domains.sql (2.07ms)
+2026/11/08 23:25:02 OK   00005_rules_compile.sql (17.18ms)
+2026/11/08 23:25:02 OK   00006_packages_entitlements.sql (15.87ms)
+2026/11/08 23:25:02 OK   00007_metering_ledger.sql (21.68ms)
+2026/11/08 23:25:02 OK   00008_limits_shares.sql (48.94ms)
+2026/11/08 23:25:02 goose: successfully migrated database to version: 8
+2026/11/08 23:25:03 goose: no migrations to run. current version: 8
+2026/11/08 23:25:03 OK   00001_authority.sql (8.42ms)
+2026/11/08 23:25:03 OK   00002_tenant_policy.sql (7.53ms)
+2026/11/08 23:25:03 OK   00003_nodes_ports.sql (17.94ms)
+2026/11/08 23:25:03 OK   00004_entry_group_domains.sql (2.23ms)
+2026/11/08 23:25:03 OK   00005_rules_compile.sql (17.76ms)
+2026/11/08 23:25:03 OK   00006_packages_entitlements.sql (16.9ms)
+2026/11/08 23:25:03 OK   00007_metering_ledger.sql (22.72ms)
+2026/11/08 23:25:03 OK   00008_limits_shares.sql (51.14ms)
+2026/11/08 23:25:03 goose: successfully migrated database to version: 8
+--- FAIL: TestRecoveredShareIssuerRenewalClosureOriginalProofAndCAS (1.36s)
+    share_effective_issuer_test.go:83: closed old row suppressed successor delivery [] <nil>
+2026/11/08 23:25:04 goose: no migrations to run. current version: 8
+2026/11/08 23:25:05 OK   00001_authority.sql (8.68ms)
+2026/11/08 23:25:05 OK   00002_tenant_policy.sql (7.44ms)
+2026/11/08 23:25:05 OK   00003_nodes_ports.sql (17.55ms)
+2026/11/08 23:25:05 OK   00004_entry_group_domains.sql (2.17ms)
+2026/11/08 23:25:05 OK   00005_rules_compile.sql (17.99ms)
+2026/11/08 23:25:05 OK   00006_packages_entitlements.sql (16.95ms)
+2026/11/08 23:25:05 OK   00007_metering_ledger.sql (21.69ms)
+2026/11/08 23:25:05 OK   00008_limits_shares.sql (50.24ms)
+2026/11/08 23:25:05 goose: successfully migrated database to version: 8
+2026/11/08 23:25:06 goose: no migrations to run. current version: 8
+2026/11/08 23:25:06 OK   00001_authority.sql (8.04ms)
+2026/11/08 23:25:06 OK   00002_tenant_policy.sql (7.42ms)
+2026/11/08 23:25:07 OK   00003_nodes_ports.sql (16.38ms)
+2026/11/08 23:25:07 OK   00004_entry_group_domains.sql (2.29ms)
+2026/11/08 23:25:07 OK   00005_rules_compile.sql (17.28ms)
+2026/11/08 23:25:07 OK   00006_packages_entitlements.sql (17.22ms)
+2026/11/08 23:25:07 OK   00007_metering_ledger.sql (22.87ms)
+2026/11/08 23:25:07 OK   00008_limits_shares.sql (50.33ms)
+2026/11/08 23:25:07 goose: successfully migrated database to version: 8
+2026/11/08 23:25:07 goose: no migrations to run. current version: 8
+2026/11/08 23:25:07 OK   00001_authority.sql (8.13ms)
+2026/11/08 23:25:07 OK   00002_tenant_policy.sql (7.23ms)
+2026/11/08 23:25:07 OK   00003_nodes_ports.sql (17ms)
+2026/11/08 23:25:07 OK   00004_entry_group_domains.sql (1.99ms)
+2026/11/08 23:25:07 OK   00005_rules_compile.sql (17.16ms)
+2026/11/08 23:25:07 OK   00006_packages_entitlements.sql (16.12ms)
+2026/11/08 23:25:07 OK   00007_metering_ledger.sql (22.02ms)
+2026/11/08 23:25:08 OK   00008_limits_shares.sql (47.4ms)
+2026/11/08 23:25:08 goose: successfully migrated database to version: 8
+FAIL
+FAIL	vortex/backend/internal/service	7.812s
+FAIL

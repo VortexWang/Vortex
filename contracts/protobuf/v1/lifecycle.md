@@ -898,8 +898,30 @@ transport consumes only explicitly persisted approval and admission records. Sha
 generation renewal/closure across epochs and repeated PG recovery producers remain
 pending. CR-008 is unapproved, and prior approved snapshots/tags remain unchanged.
 
-Until generation-level effective-epoch closure is implemented, QueueHandoff
-refuses any predecessor with an admitted S/R allocation. The original epoch's
-closed renewal row cannot authorize CAS or capacity release after a successor
-epoch was admitted; a prepared successor remains held/pending. This is an explicit
-conservative pending boundary, not a completed renewal/closure lifecycle.
+## Effective generation renewal and closure after admission (candidate)
+
+An original generation and its original closed renewal authority remain immutable
+across S/R. Backend renewal derives an effective signer from adjacent immutable
+admissions containing that exact generation, all original allocation bindings,
+complete manifest and authenticated Node fence/root witnesses. Current Node boot,
+fencing, eligibility, signer approval and original deadlines still apply. A new
+nonce at an old epoch denies; exact historical nonce replay returns original bytes.
+No original row is reopened and no capacity or money is added.
+
+Before a generation successor can be delivered, the backend freezes a sorted,
+paged delegation inventory for the effective Hub boot/epoch. Pending delivery
+includes new-epoch commands even though the original epoch's row is closed. Each
+Hub FULL consumer validates original payload hashes and follows retained adjacent
+funded handoffs before writing permanent denial tombstones. Closing can stop
+issuance during recovery but does not bypass finite ACK requirements for spending.
+It changes no original financial partition and preserves exact receipt replay.
+
+Every immutable page must have an authenticated, digest-matching FULL receipt;
+the complete delegation list, page sequence/count, effective epoch/boot and
+original generation must match before QueueHandoff can create a CAS command.
+An old admission closure, missing binding/page/receipt, epoch column or unknown
+response remains insufficient. CAS enqueue retains occupation; only actual Node
+FULL CAS proof releases the proven capacity difference. Original issued/unknown
+credit remains held. Repeated PG recovery producers and a later cold recovery of
+an already transferred generation remain separate pending work. CR-008 remains
+unapproved and Phase6 remains8/11.

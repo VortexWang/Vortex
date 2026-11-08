@@ -1,0 +1,18 @@
+{
+  "base_sha": "52f66c56316214c91c14656bd55fb78efde470dd",
+  "sha256": {
+    "agent/store/share_renewal_closure.go": "da1a674b488fac9edaff4297d32d8bce9d5c4324559fdac7b5149fd095fdb3ec",
+    "agent/store/share_recovery_closure_test.go": "e2f2eb199f20427d294e73bcbfbe6e328c08c51c4553a5b1196afbfb3d248e4b",
+    "backend/internal/service/lease.go": "7e466c953dc10f098fbb22a7115f9718ff10bb4d8a4c216af87928e7e405c9e8",
+    "backend/internal/service/share_handoff.go": "b68d244f7a8a1763d2f9029ae1acacfe2edaa31a6bdf5e6793df06005a587aa1",
+    "backend/internal/service/share_renewal_closure.go": "bef3e6af1f06600e8ffe49dcbdabd60f9616c322c145188a77fba7d91cb6b464",
+    "backend/internal/service/share_effective_issuer.go": "08c543873bd3fb6fb7ecbeb28525de5dd34fdcbfbf2edf2afb8d8049e63ec94e",
+    "backend/internal/service/share_effective_issuer_test.go": "fd37c3b6531f006e8e263990947026142a628d0aedc2db5d724076c55c558920",
+    "backend/internal/service/share_effective_transport_test.go": "e4544eb950a9ea9f48757c9fbdd12127690d2895905b795eb93a7106c3684455",
+    "backend/db/query/hub_same_store_recovery.sql": "c84b58f22c27ad8baf803d3b04eb9cb974c0f9548efb5973d174f160cf8c51d0",
+    "backend/db/query/share_closures.sql": "f35c1284e4f766fff1cb7e8842b3420046d39bf23a58ada0771197dd90034b11",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "80ece0830811aaf167a79aac0caeea1cf9eefdbc174f5857b945c0440e464ac8",
+    "backend/db/generated/share_closures.sql.go": "7cdf766a7287041fc614548e2cb7e52de2db2fed73c2fec3ee4939ca59882f29",
+    "contracts/protobuf/v1/lifecycle.md": "fd09c6f3389f6a2b409532451d4af16cceb6c05e505f6efb62b8e321d6401bea"
+  }
+}

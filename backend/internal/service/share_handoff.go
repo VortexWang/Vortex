@@ -21,7 +21,19 @@ import (
 // signer has durably closed renewal. All capacity stays reserved while delivery
 // or activation is unknown. A prepared share is never execution proof.
 func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, request string) error {
+	lookup := generated.New(s.Pool)
+	target, e := lookup.GetShareHandoff(ctx, generated.GetShareHandoffParams{TenantID: scope.TenantID(), ID: id})
+	if e != nil {
+		return e
+	}
+	generation, e := lookup.GetShareGeneration(ctx, generated.GetShareGenerationParams{TenantID: scope.TenantID(), NodeID: target.NodeID, Kind: target.Kind, Generation: target.Generation})
+	if e != nil {
+		return e
+	}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.queue_cas", ResourceID: id, RequestID: request, Reason: "close all predecessor issuers before durable CAS task and outbox"}, func(q *generated.Queries) error {
+		if e := lockShareIssuersTx(ctx, q, generation); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -56,16 +68,6 @@ func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, r
 		}
 		closure := ""
 		if g.Predecessor > 0 {
-			// S/R admission closes only the old epoch's issuance, not the
-			// generation's newly admitted issuer. Until its separate epoch-aware
-			// closure consumer exists, retain capacity and refuse a CAS shortcut.
-			recovered, e := q.ShareHasAdmittedRecovery(ctx, generated.ShareHasAdmittedRecoveryParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
-			if e != nil {
-				return e
-			}
-			if recovered {
-				return ErrShareUnknown
-			}
 			proofs, e := q.ShareClosureEvidence(ctx, generated.ShareClosureEvidenceParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
 			if e != nil {
 				return e
@@ -73,12 +75,19 @@ func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, r
 			if len(proofs) == 0 {
 				return ErrShareUnknown
 			}
-			for _, p := range proofs {
-				if !p.ClosedAt.Valid || len(p.ClosureProof) != 32 {
-					return ErrShareUnknown
-				}
+			prior, e := q.GetShareGeneration(ctx, generated.GetShareGenerationParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
+			if e != nil {
+				return e
 			}
-			raw, e := json.Marshal(proofs)
+			closureProofs := [][]byte{}
+			for _, p := range proofs {
+				proof, e := effectiveShareClosureTx(ctx, q, prior, h.ID, p)
+				if e != nil {
+					return e
+				}
+				closureProofs = append(closureProofs, proof)
+			}
+			raw, e := json.Marshal(closureProofs)
 			if e != nil {
 				return e
 			}

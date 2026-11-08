@@ -1,0 +1,44 @@
+[
+  {
+    "component": "backend",
+    "arch": "amd64",
+    "exit_code": 0,
+    "sha256": "e942f66c40aa3b2182f7d40cf1316b49a192b3f3edc3dbb62e5959f891a7ebe1",
+    "output": ""
+  },
+  {
+    "component": "hub",
+    "arch": "amd64",
+    "exit_code": 0,
+    "sha256": "1223fa1a46c5dc7778c9048d6d8a92d40764c279f54712f14553fc4e4ea6cf64",
+    "output": ""
+  },
+  {
+    "component": "node",
+    "arch": "amd64",
+    "exit_code": 0,
+    "sha256": "642edf00f7cfccb135adeb3734a7d565b3ec5c96bc39449bb1ff066b2e68a2fb",
+    "output": ""
+  },
+  {
+    "component": "backend",
+    "arch": "arm64",
+    "exit_code": 0,
+    "sha256": "649b7146b6e7d2c3a16df5d910d6c7dad9c808bfe98c9621730986fb090b763f",
+    "output": ""
+  },
+  {
+    "component": "hub",
+    "arch": "arm64",
+    "exit_code": 0,
+    "sha256": "3ea7ee947bb026e8920ea1b9f6cf9d02aa7797a9e391a0dee83ff549f63a2f46",
+    "output": ""
+  },
+  {
+    "component": "node",
+    "arch": "arm64",
+    "exit_code": 0,
+    "sha256": "bcd3bacbfceffdf217b5ec0499d27bff27ca323e9fcbe7b18237724976505075",
+    "output": ""
+  }
+]

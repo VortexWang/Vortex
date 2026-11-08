@@ -125,7 +125,7 @@ func (q *Queries) GetShareClosureReceipt(ctx context.Context, arg GetShareClosur
 }
 
 const pendingShareClosures = `-- name: PendingShareClosures :many
-SELECT c.tenant_id, c.id, c.handoff_id, c.node_id, c.boot_id, c.kind, c.generation, c.signer_id, c.signer_epoch, c.hub_boot_id, c.part, c.parts, c.operation_id, c.payload, c.payload_digest FROM share_renewal_closure_commands c WHERE c.signer_id=$1 AND c.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_receipts r WHERE r.tenant_id=c.tenant_id AND r.command_id=c.id) AND EXISTS(SELECT 1 FROM share_renewal_authorities a WHERE a.tenant_id=c.tenant_id AND a.node_id=c.node_id AND a.kind=c.kind AND a.generation=c.generation AND a.signer_id=c.signer_id AND a.closed_at IS NULL) ORDER BY c.tenant_id,c.handoff_id,c.part LIMIT 1
+SELECT c.tenant_id, c.id, c.handoff_id, c.node_id, c.boot_id, c.kind, c.generation, c.signer_id, c.signer_epoch, c.hub_boot_id, c.part, c.parts, c.operation_id, c.payload, c.payload_digest FROM share_renewal_closure_commands c WHERE c.signer_id=$1 AND c.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_receipts r WHERE r.tenant_id=c.tenant_id AND r.command_id=c.id) AND EXISTS(SELECT 1 FROM share_renewal_authorities a WHERE a.tenant_id=c.tenant_id AND a.node_id=c.node_id AND a.kind=c.kind AND a.generation=c.generation AND a.signer_id=c.signer_id AND (a.closed_at IS NULL OR c.signer_epoch>a.signer_epoch)) ORDER BY c.tenant_id,c.handoff_id,c.part LIMIT 1
 `
 
 type PendingShareClosuresParams struct {
@@ -217,7 +217,7 @@ const shareClosureCandidates = `-- name: ShareClosureCandidates :many
 SELECT DISTINCT h.tenant_id, h.id, h.node_id, h.kind, h.generation, h.operation_id, h.created_by, h.command, h.command_digest, h.state, h.receipt_digest, h.execution_state, h.next_attempt, h.attempts FROM share_handoffs h
 JOIN share_generations g ON g.tenant_id=h.tenant_id AND g.node_id=h.node_id AND g.kind=h.kind AND g.generation=h.generation
 JOIN share_renewal_authorities a ON a.tenant_id=g.tenant_id AND a.node_id=g.node_id AND a.kind=g.kind AND a.generation=g.predecessor
-WHERE h.command IS NULL AND h.state='prepared' AND a.closed_at IS NULL
+WHERE h.command IS NULL AND h.state='prepared' AND (a.closed_at IS NULL OR EXISTS(SELECT 1 FROM hub_same_store_admissions r WHERE r.hub_id=a.signer_id AND r.from_epoch=a.signer_epoch AND r.payload_digest=a.closure_proof))
 AND (NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=h.tenant_id AND c.handoff_id=h.id AND c.signer_id=a.signer_id)
 OR EXISTS(SELECT 1 FROM hub_cold_recoveries r WHERE r.hub_id=a.signer_id AND r.to_epoch>a.signer_epoch))
 ORDER BY h.tenant_id,h.id LIMIT 100
