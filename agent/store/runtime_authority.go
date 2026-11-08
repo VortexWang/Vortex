@@ -155,6 +155,13 @@ func (s *Store) CheckRuntimeReady(ctx context.Context, scope AuthorizationUse) e
 	if _, err = selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil); err != nil {
 		return err
 	}
+	// A platform-bound rule must also have both independently durable Node
+	// aggregate kinds. Child leases alone cannot activate before bootstrap CAS.
+	for _, kind := range []string{"rate", "connections"} {
+		if _, _, err = nodeShareTx(ctx, tx, scope, kind); err != nil {
+			return err
+		}
+	}
 	return tx.Commit()
 }
 

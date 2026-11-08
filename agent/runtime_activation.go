@@ -129,6 +129,15 @@ func (a *RuntimeApplier) Commit(id [16]byte, unknown bool) (any, error) {
 		low, high, trusted := a.node.TrustedTime()
 		if artifact.Intent.Rule.Enabled {
 			if err := a.node.Store.CheckRuntimeReady(context.Background(), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
+				if errors.Is(err, store.ErrAuthorizationDenied) || errors.Is(err, store.ErrAuthorityTimeUncertain) || errors.Is(err, store.ErrAuthorityExpired) {
+					return nil, fmt.Errorf("%w: %w", ErrActivationPending, err)
+				}
+				return nil, err
+			}
+			// Prepare may precede source provisioning and child authorization.
+			// Bind their immutable revisions before the first Engine Commit;
+			// failed or unknown activation retains these durable holds.
+			if err := a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: uint64(artifact.FencingGeneration), BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
 				return nil, err
 			}
 		}
@@ -207,12 +216,10 @@ func (a *RuntimeApplier) PrepareRuleArtifact(id [16]byte, generation uint64, raw
 	if artifact.NodeID != a.node.NodeID || artifact.BootID != a.node.BootID || uint64(artifact.FencingGeneration) != generation {
 		return ErrConfigConflict
 	}
-	if artifact.Intent.Rule.Enabled {
-		low, high, trusted := a.node.TrustedTime()
-		if err = a.node.Store.HoldRuntimeShares(context.Background(), hex.EncodeToString(id[:]), store.AuthorizationUse{NodeID: a.node.NodeID, BootID: a.node.BootID, RuleID: artifact.RuleID, RuleRevision: uint64(artifact.RuleRevision), PathGeneration: uint64(artifact.PathGeneration), FencingGeneration: generation, BillingSnapshotID: artifact.BillingSnapshotID, Earliest: low, Latest: high, TrustedTime: trusted}); err != nil {
-			return err
-		}
-	}
+	// Engine Prepare owns sockets only and starts no reader or forwarding loop.
+	// The backend uses its durable receipt to allocate bootstrap rights; requiring
+	// those rights here would create a circular dependency. Commit checks and
+	// durably holds the matching boot-local authority before activating readers.
 	if err = a.rules.Prepare(id, artifact); err != nil {
 		return err
 	}

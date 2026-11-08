@@ -20,7 +20,21 @@ import (
 func TestEnabledRulePreparesWithoutAuthorityAndCommitWaitsForLease(t *testing.T) {
 	ctx := context.Background()
 	node, applier, _, a := newRuleRuntimeFixture(t)
-	target, e := net.Listen("tcp", "127.0.0.1:0")
+	addresses, e := net.InterfaceAddrs()
+	if e != nil {
+		t.Fatal(e)
+	}
+	local := ""
+	for _, address := range addresses {
+		if ip, ok := address.(*net.IPNet); ok && ip.IP.To4() != nil && !ip.IP.IsLoopback() && !ip.IP.IsLinkLocalUnicast() {
+			local = ip.IP.String()
+			break
+		}
+	}
+	if local == "" {
+		t.Fatal("real non-loopback target interface required")
+	}
+	target, e := net.Listen("tcp", net.JoinHostPort(local, "0"))
 	if e != nil {
 		t.Fatal(e)
 	}

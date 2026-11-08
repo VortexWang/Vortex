@@ -175,6 +175,17 @@ func (r *Reconciler) ApplyRuleCommand(ctx context.Context, node string, c *contr
 				return out
 			}
 			if _, e = r.Apply.Commit(id, false); e != nil {
+				// This exact executor can prove that missing lease authority left
+				// the transaction prepared. Preserve it for a later explicit Commit;
+				// never infer the same from a missing/replaced executor.
+				if errors.Is(e, ErrActivationPending) {
+					if current, present := executor.Query(id); present && current.State == apply.Prepared {
+						if persist := r.Store.ObserveActivation(ctx, idText, c.FencingGeneration, "prepared"); persist == nil {
+							out.State, out.ErrorCode = "unknown", "activation_unknown"
+							return out
+						}
+					}
+				}
 				_ = r.Store.SaveConfigResult(ctx, idText, c.TargetRevision, "activation-unknown", e.Error())
 				out.State = "unknown"
 				out.ErrorCode = "activation_unknown"
