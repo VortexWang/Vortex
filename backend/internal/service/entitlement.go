@@ -118,7 +118,19 @@ func (s PackageService) ConfirmEntitlement(ctx context.Context, scope TenantScop
 	if len(code) < 16 || len(code) > 256 {
 		return PackageResult{}, ErrEntitlementInvalid
 	}
-	return s.confirmPackageChange(ctx, scope, "", 0, code, keep, at, digest, key, request)
+	return s.confirmPackageChange(ctx, scope, "", 0, code, keep, at, digest, key, request, nil)
+}
+
+// ConfirmEntitlementAtVersion checks the subscription precondition before code
+// consumption. Exact idempotent replay still precedes the current-version read.
+func (s PackageService) ConfirmEntitlementAtVersion(ctx context.Context, scope TenantScope, code string, expected int64, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
+	if expected < 1 {
+		return PackageResult{}, ErrPrecondition
+	}
+	if len(code) < 16 || len(code) > 256 {
+		return PackageResult{}, ErrEntitlementInvalid
+	}
+	return s.confirmPackageChange(ctx, scope, "", 0, code, keep, at, digest, key, request, &expected)
 }
 
 // Code duration and amount are immutable grant terms; catalog capability and

@@ -1,0 +1,43 @@
+{
+  "base_sha": "cc7c3e556862f8750850552ac619ac15f1c2997b",
+  "scope": "06-07 transactional confirmation version foundation;not complete plan",
+  "passed": [
+    "final-all-isolated-service-native-corrected-race.log",
+    "corrected-native-race.log",
+    "final-all-isolated-service-linux-race.log",
+    "final-isolated-service-linux-race.log",
+    "final-linux-race.log",
+    "focused-native-race.log",
+    "final-api-native-race.log",
+    "final-builds.json"
+  ],
+  "failed_retained": {
+    "final-service-native-race.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "missing-adapter-red.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "missing-guard-semantic-red.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "pending-conflict-red.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "audit-fixture-red.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "final-all-isolated-service-native-race.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)",
+    "final-isolated-service-native-race.log": "retained failure; see README (missing adapter, deliberate missing guard, named constraint or shared due backlog fixture)"
+  },
+  "evidence_sha256": {
+    "final-service-native-race.log": "23eb5cb3b96c8ce85b855eb63a0bc9688bda63265dc33844ddbd3db6cb05a872",
+    "source-hashes.json": "b1d4e9cf1837d8e57a0d3e23a4640947e7d91deae660b10b2b14a3180b757385",
+    "final-all-isolated-service-native-corrected-race.log": "c12ae05ffe3dd395f8339afc1dbf8485b826b269960e9a2dbbee3e1e5d145fb3",
+    "corrected-native-race.log": "38be1c8e476f3578815c86ea18151ed23d50696efe510791d44598ae983582ba",
+    "missing-adapter-red.log": "e572edd50a11683f9c609b448437c7131a028f83ad07f106bead6c3733f993de",
+    "missing-guard-semantic-red.log": "8464f6ca7f7bc5d66f7db314332305776a7c9eef74b8b0367dde7d847884840c",
+    "pending-conflict-red.log": "289010e4a22001f9a9a3ddf535795eaf384820a5b941c5ee801d6c724be28922",
+    "final-all-isolated-service-linux-race.log": "de86b7b86152e6ec98e3a249c292ba202352a84db13aac689ed51f39fe3c882c",
+    "audit-fixture-red.log": "fcedfedc907bee34e19d60f466df3706dc5309268cc3abf8f6378e3f57bf05b1",
+    "README.md": "de34db7ca095b694baa988cbbbc1879a11ec2c196122e47fdbcb577b876715a7",
+    "final-all-isolated-service-native-race.log": "b5e5c7fe7e1e6a2f0dbdc2719a3de003f00086c5f52109c6aecc3cece25c28c5",
+    "final-isolated-service-linux-race.log": "216f6b9b09e598115ba8e04f1412a437b2fdd9ddc5efd39fec6498c1f7df2be6",
+    "final-linux-race.log": "0c27cdffbef37166f827635645e4214c36eb55439b43c79d142e017bc79dbcab",
+    "final-isolated-service-native-race.log": "731e1a288aae2d7443789ab633063d37ef85814605c28b62a5a0893c2a0a4aab",
+    "focused-native-race.log": "d1768a1e24f2dac3636896e2b913e75d7ca73e9785ff6549991607c88533f223",
+    "final-api-native-race.log": "7370970bc42d39be1f385ab1bd2a202183411a34e1d4ac9895db8fcdcbcbfd4d",
+    "builds.json": "b3e1b51d4260bbb7be209d7b5cc647d594236d86de6fd2614b66ecf1503e24a0",
+    "final-builds.json": "d55b6bf7369e7e40897d0e6bd342f57fcbe8ee7659a884a049807fe5e4b6b60f"
+  }
+}

@@ -1,0 +1,16 @@
+2026/11/09 06:37:56 goose: no migrations to run. current version: 9
+2026/11/09 06:37:56 OK   00001_authority.sql (16.39ms)
+2026/11/09 06:37:56 OK   00002_tenant_policy.sql (10.11ms)
+2026/11/09 06:37:57 OK   00003_nodes_ports.sql (19.9ms)
+2026/11/09 06:37:57 OK   00004_entry_group_domains.sql (2.6ms)
+2026/11/09 06:37:57 OK   00005_rules_compile.sql (16.75ms)
+2026/11/09 06:37:57 OK   00006_packages_entitlements.sql (15.22ms)
+2026/11/09 06:37:57 OK   00007_metering_ledger.sql (18.72ms)
+2026/11/09 06:37:57 OK   00008_limits_shares.sql (43.06ms)
+2026/11/09 06:37:57 OK   00009_domain_events.sql (14.37ms)
+2026/11/09 06:37:57 goose: successfully migrated database to version: 9
+--- FAIL: TestPackageConfirmationVersionCASIsTransactionalAndReplayKeepsOriginalIdentity (0.31s)
+    package_confirmation_version_test.go:60: another pending change is a state conflict ERROR: duplicate key value violates unique constraint "one_pending_package_change" (SQLSTATE 23505)
+FAIL
+FAIL	vortex/backend/internal/service	1.009s
+FAIL

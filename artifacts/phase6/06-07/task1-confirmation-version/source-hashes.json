@@ -1,0 +1,8 @@
+{
+  "backend/internal/service/restriction.go": "11b7abe0e7d53012aa9b1239ce4d33fdcb600bbb2c2ea80293bad96c986f866e",
+  "backend/internal/service/entitlement.go": "cae6a925e33dae3c51231fbd108b7b951dbf370217f0409e190d479e468ae901",
+  "backend/internal/service/restriction_test.go": "fbc380eb4c187b26f10ad074fd65d6a3672a553fd95dce69749bd0b18190f35c",
+  "backend/internal/service/entitlement_confirmation_test.go": "33b5fd4be5ab98bee47a80c04d8247d4456edc5f6914eee6045272e2a5f1b23a",
+  "backend/internal/service/package_confirmation_version_test.go": "e16956ee3420e63340edbb323e7a2871be8f277e7d79baba566af9f391dc2a55",
+  "backend/internal/service/package_isolation_test.go": "2acc071d39ea19dd5e1924ad8e0fdb6d3404f04e599c4e500197c9fb48678144"
+}

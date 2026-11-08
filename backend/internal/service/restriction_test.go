@@ -166,6 +166,7 @@ func mustRuleCommand(t *testing.T, f *portFixture, task string) *controlv1.RuleC
 }
 
 func TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation(t *testing.T) {
+	isolatePackageAuthority(t)
 	f := newPortFixture(t)
 	ctx := context.Background()
 	if _, e := f.pool.Exec(ctx, "INSERT INTO users(id,tenant_id,role,state) VALUES($1,$2,'owner','active')", f.scope.ActorID(), f.tenant); e != nil {
@@ -252,6 +253,7 @@ func TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation(t *testing.T) {
 }
 
 func TestDowngradePreviewConfirmDueAuthority(t *testing.T) {
+	isolatePackageAuthority(t)
 	f := newPortFixture(t)
 	ctx := context.Background()
 	if _, e := f.pool.Exec(ctx, "INSERT INTO users(id,tenant_id,role,state) VALUES($1,$2,'owner','active')", f.scope.ActorID(), f.tenant); e != nil {

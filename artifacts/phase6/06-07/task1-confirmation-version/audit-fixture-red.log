@@ -1,0 +1,6 @@
+2026/11/09 06:34:41 goose: no migrations to run. current version: 9
+--- FAIL: TestPackageConfirmationVersionCASIsTransactionalAndReplayKeepsOriginalIdentity (0.06s)
+    package_confirmation_version_test.go:85: code audit failure accepted {    0 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC} ERROR: duplicate key value violates unique constraint "one_pending_package_change" (SQLSTATE 23505)
+FAIL
+FAIL	vortex/backend/internal/service	0.710s
+FAIL

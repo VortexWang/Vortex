@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/auth"
@@ -311,24 +312,34 @@ func previewDowngrade(ctx context.Context, q *generated.Queries, scope TenantSco
 }
 
 func (s PackageService) ConfirmDowngrade(ctx context.Context, scope TenantScope, pkg string, version int64, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
-	return s.confirmPackageChange(ctx, scope, pkg, version, "", keep, at, digest, key, request)
+	return s.confirmPackageChange(ctx, scope, pkg, version, "", keep, at, digest, key, request, nil)
 }
 
-func (s PackageService) confirmPackageChange(ctx context.Context, scope TenantScope, pkg string, version int64, code string, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
+// ConfirmDowngradeAtVersion binds public If-Match inside the same transaction
+// as immutable preview validation and accepted task/audit persistence.
+func (s PackageService) ConfirmDowngradeAtVersion(ctx context.Context, scope TenantScope, pkg string, version, expected int64, keep []string, at time.Time, digest, key, request string) (PackageResult, error) {
+	if expected < 1 {
+		return PackageResult{}, ErrPrecondition
+	}
+	return s.confirmPackageChange(ctx, scope, pkg, version, "", keep, at, digest, key, request, &expected)
+}
+
+func (s PackageService) confirmPackageChange(ctx context.Context, scope TenantScope, pkg string, version int64, code string, keep []string, at time.Time, digest, key, request string, expected *int64) (PackageResult, error) {
 	var result PackageResult
 	if !scope.Allows(policy.Mutate) || scope.Platform() {
 		return result, ErrScope
 	}
 	at = at.UTC().Truncate(time.Microsecond)
 	payload := struct {
-		Kind, Package string
-		Actor         string
-		CodeHash      string
-		Version       int64
-		Keep          []string
-		At            time.Time
-		Digest        string
-	}{Kind: "package_change", Package: pkg, Actor: scope.ActorID(), Version: version, Keep: append([]string{}, keep...), At: at, Digest: digest}
+		Kind, Package   string
+		Actor           string
+		CodeHash        string
+		Version         int64
+		Keep            []string
+		At              time.Time
+		Digest          string
+		ExpectedVersion *int64 `json:"ExpectedVersion,omitempty"`
+	}{Kind: "package_change", Package: pkg, Actor: scope.ActorID(), Version: version, Keep: append([]string{}, keep...), At: at, Digest: digest, ExpectedVersion: expected}
 	if code != "" {
 		hash := sha256.Sum256([]byte(code))
 		payload.Kind, payload.CodeHash = "entitlement_change", hex.EncodeToString(hash[:])
@@ -350,6 +361,9 @@ func (s PackageService) confirmPackageChange(ctx context.Context, scope TenantSc
 		sub, e := q.LockSubscription(ctx, scope.TenantID())
 		if e != nil {
 			return e
+		}
+		if expected != nil && sub.Version != *expected {
+			return ErrPrecondition
 		}
 		var c generated.EntitlementCode
 		if code != "" {
@@ -388,6 +402,10 @@ func (s PackageService) confirmPackageChange(ctx context.Context, scope TenantSc
 			return e
 		}
 		if _, e = q.AppendPackageChange(ctx, generated.AppendPackageChangeParams{ID: id, TenantID: scope.TenantID(), SubscriptionID: sub.ID, SnapshotID: snap.ID, ExpectedVersion: sub.Version, EffectiveAt: timestamp(at), Preview: auditJSON(preview), CreatedBy: scope.ActorID(), TaskID: op.ID}); e != nil {
+			var conflict *pgconn.PgError
+			if errors.As(e, &conflict) && conflict.Code == "23505" && conflict.ConstraintName == "one_pending_package_change" {
+				return ErrConflict
+			}
 			return e
 		}
 		result = PackageResult{SubscriptionID: sub.ID, SnapshotID: snap.ID, OperationID: op.ID, Version: sub.Version + 1, AnchorAt: at, ExpiresAt: at.AddDate(0, 0, int(p.DurationDays))}

@@ -19,6 +19,7 @@ type entitlementConfirmationAPI interface {
 }
 
 func TestEntitlementDifferentPackageConfirmationAtomic(t *testing.T) {
+	isolatePackageAuthority(t)
 	f := newPortFixture(t)
 	ctx := context.Background()
 	if _, e := f.pool.Exec(ctx, "INSERT INTO users(id,tenant_id,role,state) VALUES($1,$2,'owner','active')", f.scope.ActorID(), f.tenant); e != nil {
