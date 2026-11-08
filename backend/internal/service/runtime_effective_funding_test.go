@@ -30,7 +30,7 @@ func TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare(t
 func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
 	testEffectiveRuntimeFundingWithHook(t, installed, nil)
 }
-func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func(*shareFixture, *store.Store, *store.Store, hub.Allocation, service.HubSameStoreRecoveryInput, *agent.Node)) {
+func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func(*shareFixture, *store.Store, *store.Store, hub.Allocation, service.HubSameStoreRecoveryInput, *agent.Node) func()) {
 	t.Helper()
 	ctx := context.Background()
 	x, in, hs := fundedHubFixture(t)
@@ -148,8 +148,9 @@ func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func
 	if _, e = hs.ApplyHubRecoveryAdmission(ctx, shareBackendID, in.HubID, r.ToBootID, admission, store.IssuerTime{Earliest: x.now, Latest: x.now, Trusted: true}); e != nil {
 		t.Fatal(e)
 	}
+	var afterSeal func()
 	if hook != nil {
-		hook(x, hs, ns, original, r, oldCredit.node)
+		afterSeal = hook(x, hs, ns, original, r, oldCredit.node)
 	}
 	retained := authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"share_chains", "share_generations", "share_renewal_authorities", "rule_artifacts", "rule_compile_inputs"})
 	financial := []string{"hub_funded_allocations", "reservations", "ledger_projections", "ledger_events"}
@@ -177,6 +178,9 @@ func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func
 	}
 	if e = x.s.RecordDelegationSeal(x.f.contexts[in.HubID], in.HubID, r.ToBootID, sequence, sealRaw, uuid.NewString()); e != nil {
 		t.Fatal(e)
+	}
+	if afterSeal != nil {
+		afterSeal()
 	}
 	if installed {
 		before = authoritySnapshot(t, x.f.pool, x.f.tenant, financial)

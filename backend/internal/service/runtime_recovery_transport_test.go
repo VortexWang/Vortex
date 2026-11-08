@@ -1,20 +1,25 @@
 package service_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"vortex/agent"
 	"vortex/agent/store"
+	"vortex/backend/db/generated"
 	"vortex/backend/internal/control"
 	"vortex/backend/internal/service"
 	"vortex/contracts"
@@ -33,10 +38,18 @@ func TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt(t *testing.T
 		t.Run(ordering, func(t *testing.T) { testRuntimeRecoveryUpdateActualMTLS(t, ordering) })
 	}
 }
+func TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR(t *testing.T) {
+	testRuntimeRecoveryUpdateActualMTLS(t, "renewal-loss")
+}
+
 func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
-	stopped := ordering != "open"
-	testEffectiveRuntimeFundingWithHook(t, true, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	stopped := ordering != "open" && ordering != "renewal-loss"
+	testEffectiveRuntimeFundingWithHook(t, true, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) func() {
+		timeout := 15 * time.Second
+		if ordering == "renewal-loss" {
+			timeout = 25 * time.Second
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		var frozenRecovery []byte
 		if ordering == "sealed-after-materialization" {
@@ -213,5 +226,155 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
 		if e != nil || len(replay.Updates) != 1 || string(replay.Updates[0].Payload) != string(page.Updates[0].Payload) {
 			t.Fatal("reconnect retimed runtime recovery", replay, e)
 		}
+		if ordering == "renewal-loss" {
+			return exerciseTransferredRenewalAfterFULLLoss(t, ctx, x, hs, ns, a, r, node, runtime, serverTLS, clientTLS, due[0])
+		}
+		return nil
 	})
+}
+
+// Drop exactly one success after the production issuer has committed FULL.
+// The real RuntimeServer and its authenticated stream remain otherwise intact.
+type runtimeRenewalDropServer struct {
+	controlv1.UnimplementedNodeControlServer
+	runtime *hub.RuntimeServer
+	dropped atomic.Bool
+}
+
+func (s *runtimeRenewalDropServer) Connect(stream controlv1.NodeControl_ConnectServer) error {
+	return s.runtime.Connect(&runtimeRenewalDropStream{NodeControl_ConnectServer: stream, owner: s})
+}
+
+type runtimeRenewalDropStream struct {
+	controlv1.NodeControl_ConnectServer
+	owner *runtimeRenewalDropServer
+}
+
+func (s *runtimeRenewalDropStream) Send(m *controlv1.ControlMessage) error {
+	if result := m.GetRenewalResult(); result != nil && result.Code == "ok" && s.owner.dropped.CompareAndSwap(false, true) {
+		return status.Error(codes.Unavailable, "injected response loss after Hub FULL renewal")
+	}
+	return s.NodeControl_ConnectServer.Send(m)
+}
+
+func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node, runtime *hub.RuntimeServer, serverTLS, clientTLS *tls.Config, candidate store.RenewalCandidate) func() {
+	t.Helper()
+	request := candidate.Request
+	before, err := ns.AuditAuthorizationBalance(ctx, a.NodeID, candidate.GrantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	financial := authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"reservations", "ledger_projections", "ledger_events"})
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	faults := &runtimeRenewalDropServer{runtime: runtime}
+	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(serverTLS)))
+	defer server.Stop()
+	controlv1.RegisterNodeControlServer(server, faults)
+	go server.Serve(listener)
+	run, stop := context.WithCancel(ctx)
+	defer stop()
+	nodeDone, backendDone := make(chan error, 1), make(chan error, 1)
+	usage := runtime.Usage.Backend.(hub.BackendUsageClient)
+	backend := *usage.Config
+	go func() { defer close(backendDone); backendDone <- backend.Run(run) }()
+	client := &agent.ControlClient{Node: node, TLS: clientTLS}
+	go func() {
+		defer close(nodeDone)
+		nodeDone <- client.RunRegion(run, agent.RegionalConfig{Region: a.Region, Watchdog: 3 * time.Second, LeaseRefresh: true, Renewal: &agent.RenewalConfig{Percent: 30, Retry: time.Second}, Endpoints: []agent.HubEndpoint{{Region: a.Region, HubID: a.HubID, ServerName: a.HubID, Address: listener.Addr().String()}}})
+	}()
+	defer func() {
+		stop()
+		for _, ch := range []<-chan error{nodeDone, backendDone} {
+			select {
+			case <-ch:
+			case <-time.After(3 * time.Second):
+				t.Error("transferred renewal stream did not join")
+			}
+		}
+	}()
+	var intent store.RenewalIntent
+	var receipt generated.HubIssueReceipt
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		intent, err = ns.RenewalIntent(ctx, request.RequestId)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var receiptErr error
+		receipt, receiptErr = generated.New(x.f.pool).GetHubIssue(ctx, generated.GetHubIssueParams{TenantID: x.f.tenant, IssueID: request.RequestId})
+		if intent.State == "installed" && receiptErr == nil {
+			break
+		}
+		select {
+		case e := <-nodeDone:
+			t.Fatal("transferred Node stream stopped", e)
+		case e := <-backendDone:
+			t.Fatal("transferred Hub backend stream stopped", e)
+		case <-ctx.Done():
+			t.Fatal("transferred renewal did not converge", ctx.Err())
+		case <-tick.C:
+		}
+	}
+	if !faults.dropped.Load() || client.RegionalCounters().Attempts != 2 || client.RegionalCounters().WatchdogTimeouts != 0 {
+		t.Fatal("expected one lost FULL response and one replay", client.RegionalCounters())
+	}
+	if intent.Result == nil || intent.Result.Code != "ok" || !bytes.Equal(receipt.Payload, intent.Result.AuthorizationUpdate.Payload) || receipt.HubBootID != r.ToBootID {
+		t.Fatal("PG did not accept original recovered issue", intent, receipt)
+	}
+	facts, err := agent.InspectAuthorizationUpdate(receipt.Payload, a.NodeID, a.BootID, a.PathGeneration)
+	if err != nil || facts.SignerEpoch != 8 {
+		t.Fatal(facts, err)
+	}
+	grant := ""
+	for _, v := range facts.Records {
+		if v.Kind == "credit_grant" {
+			grant = v.AuthorizationID
+			if v.SourceID != a.SourceID || v.AmountBytes == nil || *v.AmountBytes != 51 {
+				t.Fatal("renewal changed funded source/amount", v)
+			}
+		}
+	}
+	if grant == "" {
+		t.Fatal("renewal missing funded credit")
+	}
+	child, err := ns.AuditAuthorizationBalance(ctx, a.NodeID, grant)
+	if err != nil || child.Initial != 51 || child.Remaining != 51 {
+		t.Fatal(child, err)
+	}
+	after, err := ns.AuditAuthorizationBalance(ctx, a.NodeID, candidate.GrantID)
+	if err != nil || after != before {
+		t.Fatal("renewal rewrote old known debt", before, after, err)
+	}
+	partition, err := hs.AuditHubDelegation(ctx, a.DelegationID)
+	if err != nil || partition.Initial != 103 || partition.Issued != 102 || partition.Remaining != 1 {
+		t.Fatal("FULL replay consumed R twice", partition, err)
+	}
+	if !bytes.Equal(financial, authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"reservations", "ledger_projections", "ledger_events"})) {
+		t.Fatal("renewal reserved parent funds again")
+	}
+	q := generated.New(x.f.pool)
+	issued, err := q.HubAllocationIssued(ctx, generated.HubAllocationIssuedParams{TenantID: x.f.tenant, AllocationID: a.AllocationID})
+	if err != nil || issued != 102 {
+		t.Fatal("PG issue inventory duplicated or omitted recovered child", issued, err)
+	}
+	extra := &creditCloseFixture{x: x, in: service.HubFundingInput{HubID: a.HubID, NodeID: a.NodeID, BootID: a.BootID}, a: a, hs: hs, st: ns, node: node, issued: store.IssuedAuthorization{Payload: receipt.Payload, Generation: a.PathGeneration}, grant: grant}
+	// This callback runs only after the inherited complete seal is accepted.
+	// Its zero-use child final cannot release the still-unfinalized original.
+	return func() {
+		acceptCreditFinal(t, extra)
+		finalCtx := context.Background()
+		tables := []string{"settlements", "reservations", "ledger_events", "ledger_projections", "tasks", "operations", "outbox", "audit_events"}
+		unchanged := authoritySnapshot(t, x.f.pool, x.f.tenant, tables)
+		if err := x.s.FinalizeHubAllocation(finalCtx, x.f.scope, a.AllocationID, uuid.NewString()); err == nil {
+			t.Fatal("recovered child final released original unfinalized child")
+		}
+		if !bytes.Equal(unchanged, authoritySnapshot(t, x.f.pool, x.f.tenant, tables)) {
+			t.Fatal("incomplete transferred-child final changed money/task state")
+		}
+	}
 }

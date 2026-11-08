@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: live Engine rule renewal verified; post-recovery Engine/pending convergence remains"
-last_updated: "2026-11-08T18:26:37.971066+00:00"
+stopped_at: "06-06 Task3: transferred renewal loss/replay and finalization verified; Engine/pending convergence remains"
+last_updated: "2026-11-08T18:36:34.810263+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: live Engine rule scheduler and33-rule mTLS install/reconnect verified;8/11."
+last_activity_desc: "06-06 Task3: actual post-S/R renewal loss/replay and original-source settlement verified;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 936edcab
+state_head: ec473632
 ---
 
 # Project State
@@ -186,3 +186,6 @@ Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 ### Historical qualification boundaries
 
 Phase4 D-04 remains candidate; see04-VERIFICATION.md. Earlier credit6a1faf2 was TCP-only; clean d2f21f8 later verified static-snapshot TCP/UDP with bounded grant-result injection and same-SHA Actions41856742608. These increments do not complete hot routes, persistent issuer or formal performance/24h qualification. Phase4 and Phase5 historical verdicts are unchanged.
+
+
+Transferred renewal delivery now uses the actual production Agent/RuntimeServer and funded Hub/backend role-mTLS stream after epoch7->8 recovery. One success is dropped after Hub FULL; exactly one reconnect installs the same immutable issue and PG inventory records102 issued from the original103 parent, leaving1 R. Original51 child/37 known bytes and parent reservations remain unchanged. The recovered zero-use child final cannot finalize the still-unfinalized original child or mutate financial/task/audit rows; complete seal, both child finals and parent final precede one fresh successor under8 concurrent funding calls. All recovery orderings and effective funding tests pass final native race46.831s/Linux arm64 race47.642s. Production/build evidence inherits ec473632 and full backend suites936edcab; only tests and candidate docs changed, no redundant build/root/generator rerun or clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-transferred-renewal-delivery/. This explicitly journals a candidate after real recovery; Engine is absent in this fixture. Actual post-S/R Engine/pending deployment convergence, older-path revocation-only ordering and complete06-06 verification remain before concreteCR-008. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.

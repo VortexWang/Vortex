@@ -1134,3 +1134,21 @@ bootstrap intentionally issues its complete initial partition and retains its
 separate final/fresh-parent funding gates. Neither test topology creates default
 production budgets. Complete post-S/R Engine/pending deployment convergence
 remains separate from these scheduling and same-epoch delivery checks.
+
+
+## Transferred credit renewal delivery and finalization (candidate)
+
+After admitted S/R, a durable renewal request may spend only the original
+partition's transferred R in the independently proven effective epoch. A lost
+success response after Hub FULL must replay the original immutable issue; Node
+installation and authenticated funded-journal delivery to PostgreSQL retain the
+same request ID, payload, original source and parent. They cannot reserve another
+parent, rewrite known old usage or consume R a second time.
+
+Actual role-mTLS fault evidence covers epoch7->8 with a103-byte parent,51-byte
+original child and37 known used bytes: a51-byte recovered child leaves1 byte R.
+The new zero-use child final still cannot finalize the parent while the original
+child lacks its dedicated final. Complete seal, both child finals and the
+independently validated parent final precede the single fresh successor. This
+covers production request delivery and replay from a durable candidate, with
+Engine/pending deployment convergence remaining a separate check.

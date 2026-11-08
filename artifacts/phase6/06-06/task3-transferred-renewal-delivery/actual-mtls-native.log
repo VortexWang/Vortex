@@ -1,0 +1,20 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 02:31:17 goose: no migrations to run. current version: 8
+2026/11/09 02:31:17 OK   00001_authority.sql (26.7ms)
+2026/11/09 02:31:17 OK   00002_tenant_policy.sql (17.02ms)
+2026/11/09 02:31:17 OK   00003_nodes_ports.sql (30.55ms)
+2026/11/09 02:31:17 OK   00004_entry_group_domains.sql (3.58ms)
+2026/11/09 02:31:17 OK   00005_rules_compile.sql (33.82ms)
+2026/11/09 02:31:17 OK   00006_packages_entitlements.sql (30.48ms)
+2026/11/09 02:31:17 OK   00007_metering_ledger.sql (41.76ms)
+2026/11/09 02:31:17 OK   00008_limits_shares.sql (95.71ms)
+2026/11/09 02:31:17 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.86s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	10.673s
