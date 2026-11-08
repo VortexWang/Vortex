@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt
+2026/11/09 01:42:23 goose: no migrations to run. current version: 8
+2026/11/09 01:42:23 OK   00001_authority.sql (46.32ms)
+2026/11/09 01:42:23 OK   00002_tenant_policy.sql (12.82ms)
+2026/11/09 01:42:23 OK   00003_nodes_ports.sql (28.5ms)
+2026/11/09 01:42:23 OK   00004_entry_group_domains.sql (3.37ms)
+2026/11/09 01:42:23 OK   00005_rules_compile.sql (27.32ms)
+2026/11/09 01:42:23 OK   00006_packages_entitlements.sql (24.73ms)
+2026/11/09 01:42:23 OK   00007_metering_ledger.sql (37.46ms)
+2026/11/09 01:42:23 OK   00008_limits_shares.sql (74.51ms)
+2026/11/09 01:42:23 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:126: context deadline exceeded
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt (16.47s)
+FAIL
+FAIL	vortex/backend/internal/service	17.220s
+FAIL

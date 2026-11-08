@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
+	"google.golang.org/protobuf/proto"
 	"net"
 	"testing"
 	"time"
@@ -19,9 +21,30 @@ import (
 )
 
 func TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill(t *testing.T) {
+	testRuntimeRecoveryUpdateActualMTLS(t, false)
+}
+func TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt(t *testing.T) {
+	testRuntimeRecoveryUpdateActualMTLS(t, true)
+}
+func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, stopped bool) {
 	testEffectiveRuntimeFundingWithHook(t, true, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
+		var stoppedGrant string
+		if stopped {
+			pending, err := ns.PendingUsageOutbox(ctx, a.NodeID)
+			if err != nil || len(pending) != 1 {
+				t.Fatal(pending, err)
+			}
+			batch := new(controlv1.UsageBatch)
+			if err = proto.Unmarshal(pending[0].Payload, batch); err != nil {
+				t.Fatal(err)
+			}
+			stoppedGrant = batch.Deltas[0].GrantId
+			if err = ns.StopCreditGrant(ctx, a.NodeID, a.BootID, a.HubID, stoppedGrant); err != nil {
+				t.Fatal(err)
+			}
+		}
 		// The helper advances its deterministic recovery clock by five seconds.
 		// Regional advertisements use wall time, so wait for that instant rather
 		// than accepting a future backend heartbeat or creating a new Node boot.
@@ -122,6 +145,16 @@ func TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill(t *tes
 			case <-done:
 			case <-ctx.Done():
 				t.Fatal("runtime recovery did not join")
+			}
+		}
+		if stopped {
+			_, err := ns.CheckStoredAuthorization(ctx, store.AuthorizationUse{NodeID: a.NodeID, BootID: a.BootID, AuthorizationID: stoppedGrant, Kind: "credit_grant", RuleID: a.RuleID, RuleRevision: a.RuleRevision, PathGeneration: a.PathGeneration, BillingSnapshotID: a.SnapshotID, Earliest: clock().Earliest, Latest: clock().Latest, TrustedTime: true, ExistingSession: true})
+			if !errors.Is(err, store.ErrAuthorizationDenied) {
+				t.Fatal("recovery revived stopped credit", err)
+			}
+			b, err := ns.AuditAuthorizationBalance(ctx, a.NodeID, stoppedGrant)
+			if err != nil || b.Committed != 37 {
+				t.Fatal("recovery changed original known debt", b, err)
 			}
 		}
 		after, e := hs.AuditHubDelegation(ctx, a.DelegationID)

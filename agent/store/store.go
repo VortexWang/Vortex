@@ -812,7 +812,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		}
 	}
 	for _, h := range update.Handoffs {
-		if err := persistEpochHandoffTx(ctx, tx, update, h); err != nil {
+		if err := persistEpochHandoffTx(ctx, tx, update, h, len(records) == 0 && len(update.PolicyTransitions) == 0); err != nil {
 			return err
 		}
 	}

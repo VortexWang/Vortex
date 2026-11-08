@@ -1072,3 +1072,20 @@ fence and successor roots, PG admission and local finite ACK. It checks epoch8
 installation and a reconnect without hidden retries or changed credit partition.
 This is runtime control delivery evidence; actual Engine and pending deployment
 convergence and complete06-06 acceptance remain separate work.
+
+## Direct credit stop preceding recovery delivery (candidate)
+
+The direct backend channel may permanently stop an old issued child before the
+Hub recovery envelope arrives. A no-grant, no-policy-transition envelope can
+retain that source's adjacent handoff history only when its original local root
+is revoked by an exact permanent credit stop and an independently installed
+backend recovery fence exists. The complete fence tuple—manifest hash, parent,
+Node/boot/Hub, epochs, remaining partition and sealed sequence—must still match.
+Missing fences, ordinary revocations and changed manifests retain the old denial.
+
+The root remains revoked. This path does not restore credit or change balances,
+settle pending writes, finalize child/parent accounting or permit later issuance
+against the stopped original root. Existing source-spending checks still require
+that original root to be active. FULL rollback, replay/reopen and pending-ticket
+checks exercise these invariants; actual production Node/Hub/backend mTLS also
+checks the original37-byte known debt and subsequent financial final/refill.

@@ -23,7 +23,7 @@ type EpochHandoff struct {
 	RecordSHA256   string `json:"record_sha256"`
 }
 
-func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate, h EpochHandoff) error {
+func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate, h EpochHandoff, settlementOnly bool) error {
 	hash, e := hex.DecodeString(h.RecordSHA256)
 	if u.IssuerID == "" || !validIssuerUUID(h.TransferID) || h.ParentID == "" || h.SourceID == "" || h.From == 0 || h.From == math.MaxUint64 || h.To != h.From+1 || h.To != u.SignerEpoch || h.Remaining > math.MaxInt64 || h.SealedSequence < 0 || e != nil || len(hash) != 32 {
 		return ErrAuthorityHandoffRequired
@@ -59,8 +59,26 @@ func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdat
 	if e != nil {
 		return e
 	}
-	if state != "active" || root.ParentAuthorizationID != h.ParentID || root.IssuerID != u.IssuerID || root.BootID != u.BootID || root.PathGeneration != u.PathGeneration {
+	if root.ParentAuthorizationID != h.ParentID || root.IssuerID != u.IssuerID || root.BootID != u.BootID || root.PathGeneration != u.PathGeneration {
 		return ErrAuthorityHandoffRequired
+	}
+	if state != "active" {
+		// The independent backend channel may stop an issued child before its
+		// Hub recovery envelope arrives. Retain only the exact fenced history;
+		// never reactivate the root or permit a grant in this transaction.
+		if !settlementOnly || state != "revoked" || root.Kind != "credit_grant" {
+			return ErrAuthorityHandoffRequired
+		}
+		var proven bool
+		if e = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM credit_grant_stops WHERE node_id=? AND authorization_id=? AND boot_id=? AND issuer_id=?) AND EXISTS(SELECT 1 FROM recovery_credit_fences WHERE node_id=? AND source_id=? AND to_epoch=?)`, u.NodeID, root.AuthorizationID, u.BootID, u.IssuerID, u.NodeID, h.SourceID, strconv.FormatUint(h.To, 10)).Scan(&proven); e != nil {
+			return e
+		}
+		// checkRecoveryHandoffFenceTx already compared the complete immutable
+		// manifest/parent/epoch/R/seal tuple. Absence must not authorize this
+		// special case. Source spending still requires an active original root.
+		if !proven {
+			return ErrAuthorityHandoffRequired
+		}
 	}
 	latest, e := sourceEpochTx(ctx, tx, u.NodeID, h.SourceID, root.SignerEpoch)
 	if e != nil {
