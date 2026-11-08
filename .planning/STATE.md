@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: 06-06 Tasks 1 and 2 complete; Task 3 limits/runtime integration in progress
-last_updated: "2026-11-08T03:01:34Z"
+stopped_at: "06-06 Task 3: runtime transport and automatic finite bootstrap scheduling committed; closure, sustained funding and boot recovery pending"
+last_updated: "2026-11-08T05:54:41Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-05 complete after CR-007 approval; approved clean source84821a04 Docker passed, evidence4403ac52, SUMMARY5b71afe6. Phase6 8/11; next06-06."
+last_activity_desc: "06-06 Task3: direct backend TLS pin94561be1; automatic share windows and finite funded bootstrap704c213c. Full native/Linux race and actual mTLS passed; clean704c213c Docker passed. Phase6 stays8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 6c4c1a1d
+state_head: 704c213c
 ---
 
 # Project State
@@ -33,7 +33,7 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 06
 Total Plans in Phase: 11
 Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete (8/11). 06-06 Tasks 1 and 2 complete; Task 3 allocation/runtime authority remains. Final Phase6 acceptance pending.
-Last activity: 2026-11-08 — CR-007 exact approval recorded. Clean source84821a04 full Docker normal/race, fault, freezes, generation/compatibility, dual-architecture compilation and real Cloudflare passed. Evidence4403ac52, SUMMARY5b71afe6. Next06-06; final Actions06-11.
+Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer closure, sustained funding and boot recovery remain; final Actions06-11.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -134,9 +134,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T03:01:34Z
-Stopped at: 06-06 Tasks 1 and 2 complete; Task 3 limits/runtime integration in progress
-Resume file: .planning/phases/06-m4-m4-backend/06-06-PLAN.md
+Last session: 2026-11-08T05:50:18Z
+Stopped at: 06-06 Task 3: runtime transport and automatic finite bootstrap scheduling committed; closure, sustained funding and boot recovery pending
+Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries
 
