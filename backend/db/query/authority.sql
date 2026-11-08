@@ -54,7 +54,7 @@ INSERT INTO control_receipts(tenant_id,operation_id,target_revision,generation,r
 
 -- name: ExpireLeases :many
 UPDATE tasks SET state='unknown',lease_until=NULL WHERE id IN
-(SELECT id FROM tasks WHERE state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING *;
+(SELECT id FROM tasks WHERE task_kind='control' AND state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING *;
 
 -- name: LockOperation :one
 SELECT * FROM operations WHERE tenant_id=$1 AND id=$2 FOR UPDATE;

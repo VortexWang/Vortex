@@ -4,7 +4,7 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.4.0 candidate. Owner freeze approval is pending in governance.
+// CONTRACT 1.6.0 candidate. New owner freeze approval is required in governance.
 // Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
 
 service NodeControl {
@@ -27,6 +27,7 @@ message NodeMessage {
     NodeReport node_report = 17;
     RenewalRequest renewal_request = 18;
     RuleReceipt rule_receipt = 19;
+    ShareReceipt share_receipt = 20;
   }
 }
 
@@ -43,6 +44,7 @@ message ControlMessage {
     RenewalResult renewal_result = 16;
     CredentialRevocations credential_revocations = 17;
     RuleCommand rule_command = 18;
+    ShareCommand share_command = 19;
   }
 }
 
@@ -299,4 +301,16 @@ message EpochHandoffRequest {
   uint64 to_epoch = 4;
   string backend_heartbeat_at = 5;
   uint64 required_restriction_revision = 6;
+}
+
+// Negotiated share-cas-v1 only. The immutable JSON decision is documented in
+// share-handoff.schema.json; query uses the same payload and digest as CAS.
+message ShareCommand {
+  string phase = 1; // cas, query
+  bytes payload = 2;
+  bytes payload_sha256 = 3;
+}
+message ShareReceipt {
+  bytes payload = 1;
+  bytes payload_sha256 = 2;
 }

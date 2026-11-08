@@ -625,6 +625,13 @@ type ShareChain struct {
 	HeldAmount        int64
 }
 
+type ShareDeliveryBinding struct {
+	TenantID  string
+	TaskID    string
+	HandoffID string
+	Phase     string
+}
+
 type ShareGeneration struct {
 	TenantID          string
 	NodeID            string
@@ -657,11 +664,24 @@ type ShareHandoff struct {
 	Kind           string
 	Generation     int64
 	OperationID    string
+	CreatedBy      string
+	Command        []byte
+	CommandDigest  []byte
 	State          string
 	ReceiptDigest  []byte
 	ExecutionState string
 	NextAttempt    pgtype.Timestamptz
 	Attempts       int32
+}
+
+type ShareHandoffReceipt struct {
+	TenantID        string
+	HandoffID       string
+	ReceiptID       string
+	CommandDigest   []byte
+	ReceiptDigest   []byte
+	PeerFingerprint []byte
+	Payload         []byte
 }
 
 type ShareRenewalAuthority struct {

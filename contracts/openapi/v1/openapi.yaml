@@ -1,12 +1,28 @@
 openapi: 3.1.1
 info:
   title: VORTEX Public Business API
-  version: 2.2.0
+  version: 2.3.0
   description: Public business boundary; HTTP adapters are delivered by plan 06-07.
 servers: []
 security:
   - bearerAuth: []
 paths:
+  /api/v1/limits:
+    get:
+      operationId: getTenantLimits
+      x-vortex-implementation-plan: 06-07
+      description: Tenant scoped limits and conservative reserved totals. Submitted or enforcing work is never reported as enforced; unknown execution retains allocation. HTTP adapter pending plan 06-07.
+      responses:
+        '200':
+          description: Current immutable package limits and execution summary
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LimitStatus'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/billing-snapshots/{snapshot_id}/explanation:
     parameters:
       - {name: snapshot_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -731,6 +747,17 @@ components:
         charged_bytes: {type: string, pattern: '^[0-9]+$'}
         remainder_milli: {type: integer, minimum: 0, maximum: 999}
         sequence: {type: string, pattern: '^[0-9]+$'}
+    LimitStatus:
+      type: object
+      additionalProperties: false
+      required: [rate_limit_bps, connection_limit, reserved_rate_bps, reserved_connections, execution_state, operation_ids]
+      properties:
+        rate_limit_bps: {type: string, pattern: '^[0-9]+$'}
+        connection_limit: {type: string, pattern: '^[0-9]+$'}
+        reserved_rate_bps: {type: string, pattern: '^[0-9]+$'}
+        reserved_connections: {type: string, pattern: '^[0-9]+$'}
+        execution_state: {type: string, enum: [submitted, enforcing, enforced, failed]}
+        operation_ids: {type: array, maxItems: 1000, items: {type: string, format: uuid}}
     BusinessEvent:
       type: object
       additionalProperties: false

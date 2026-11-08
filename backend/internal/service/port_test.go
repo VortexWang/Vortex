@@ -121,6 +121,7 @@ func portNodeContext(t *testing.T, ca *x509.Certificate, key ed25519.PrivateKey,
 }
 
 type portFixture struct {
+	caKey         ed25519.PrivateKey
 	pool          *pgxpool.Pool
 	tenant, group string
 	scope         repository.TenantScope
@@ -139,7 +140,7 @@ func newPortFixtureKind(t *testing.T, platform bool) *portFixture {
 	tenant := seedTenant(t, pool)
 	scope := policyScope(t, tenant, auth.Owner, policy.Mutate)
 	ca, key := portCA(t)
-	f := &portFixture{pool: pool, tenant: tenant, scope: scope, contexts: map[string]context.Context{}, ports: service.PortService{Pool: pool, NodeCA: ca}, nodeService: service.NodeService{Pool: pool}}
+	f := &portFixture{caKey: key, pool: pool, tenant: tenant, scope: scope, contexts: map[string]context.Context{}, ports: service.PortService{Pool: pool, NodeCA: ca}, nodeService: service.NodeService{Pool: pool}}
 	creator := scope
 	if platform {
 		creator = policyScope(t, tenant, auth.PlatformAdmin, policy.Mutate)

@@ -1,0 +1,24 @@
+{
+  "status": "passed_development_scope",
+  "recorded_at": "2026-11-08T03:41:04.472951+00:00",
+  "base_commit": "33b177d31324d548ae105774c13d33ba96461344",
+  "source_state": "dirty development checkout; no clean committed source or Actions pairing claimed",
+  "task": "06-06 Task 2",
+  "verification": {
+    "backend_handoff_activation_receipt_unknown_audit_race": "pass",
+    "agent_store_full_race": "pass",
+    "control_share_and_rule_capability": "pass",
+    "actual_mtls_agent_sqlite_postgres": "pass",
+    "sqlite_full_commit_then_sigkill_recovery": "pass",
+    "fault_injection_compose": "pass after explicitly restoring /usr/local/go/bin to login shell PATH",
+    "sqlc_double_generation": "16 files byte identical and repo identical",
+    "protobuf_double_generation": "2 files byte identical and repo identical",
+    "openapi_lint_copy": "pass 19 authenticated business operations"
+  },
+  "boundaries": [
+    "Task 3 production signer/runtime lease and allocation are incomplete",
+    "new boot remains conservatively blocked pending proved safe rebind",
+    "candidate contracts are not approved or frozen; CR-008 pending",
+    "06-06 not complete; final same-SHA Docker/Actions remains 06-11"
+  ]
+}

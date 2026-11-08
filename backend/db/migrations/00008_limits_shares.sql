@@ -55,7 +55,8 @@ CREATE TABLE share_renewal_authorities (
 );
 CREATE TABLE share_handoffs (
  tenant_id text NOT NULL, id text NOT NULL, node_id text NOT NULL, kind text NOT NULL, generation bigint NOT NULL,
- operation_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ command bytea, command_digest bytea CHECK(command_digest IS NULL OR octet_length(command_digest)=32),
  state text NOT NULL DEFAULT 'prepared' CHECK(state IN ('prepared','closing','cas_pending','activation-unknown','enforced','failed')),
  receipt_digest bytea CHECK(receipt_digest IS NULL OR octet_length(receipt_digest)=32),
  execution_state text NOT NULL DEFAULT 'submitted' CHECK(execution_state IN ('submitted','enforcing','enforced','failed')),
@@ -64,6 +65,22 @@ CREATE TABLE share_handoffs (
  FOREIGN KEY(tenant_id,node_id,kind,generation) REFERENCES share_generations(tenant_id,node_id,kind,generation),
  FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
 );
+CREATE TABLE share_delivery_bindings (
+ tenant_id text NOT NULL, task_id text NOT NULL, handoff_id text NOT NULL,
+ phase text NOT NULL CHECK(phase IN ('cas','query')),
+ PRIMARY KEY(tenant_id,task_id),
+ FOREIGN KEY(tenant_id,task_id) REFERENCES operations(tenant_id,id),
+ FOREIGN KEY(tenant_id,handoff_id) REFERENCES share_handoffs(tenant_id,id)
+);
+CREATE TABLE share_handoff_receipts (
+ tenant_id text NOT NULL, handoff_id text NOT NULL, receipt_id text NOT NULL,
+ command_digest bytea NOT NULL CHECK(octet_length(command_digest)=32),
+ receipt_digest bytea NOT NULL CHECK(octet_length(receipt_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32), payload bytea NOT NULL,
+ PRIMARY KEY(tenant_id,receipt_id),
+ FOREIGN KEY(tenant_id,handoff_id) REFERENCES share_handoffs(tenant_id,id)
+);
+CREATE TRIGGER share_receipt_immutable BEFORE UPDATE OR DELETE ON share_handoff_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TABLE lease_expectations (
  tenant_id text NOT NULL, id text NOT NULL, node_id text NOT NULL, kind text NOT NULL CHECK(kind IN ('runtime','rate','connections')),
  share_kind text NOT NULL CHECK(share_kind IN ('rate','connections')), generation bigint NOT NULL,

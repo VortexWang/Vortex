@@ -161,6 +161,25 @@ func (s *Store) configure() error {
 		}
 	}
 	_, err := s.db.Exec(`
+CREATE TABLE IF NOT EXISTS node_share_heads (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,kind TEXT NOT NULL,boot_id TEXT NOT NULL,
+ generation INTEGER NOT NULL,fencing_generation INTEGER NOT NULL,
+ amount INTEGER NOT NULL,burst_bytes INTEGER NOT NULL,payload BLOB NOT NULL,
+ PRIMARY KEY(tenant_id,node_id,kind)
+);
+CREATE TABLE IF NOT EXISTS node_share_commands (
+ handoff_id TEXT PRIMARY KEY NOT NULL,backend_id TEXT NOT NULL,payload BLOB NOT NULL,
+ payload_sha256 TEXT NOT NULL,receipt BLOB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS node_share_bindings (
+ node_id TEXT NOT NULL,rule_id TEXT NOT NULL,tenant_id TEXT NOT NULL,
+ PRIMARY KEY(node_id,rule_id)
+);
+CREATE TABLE IF NOT EXISTS node_share_buckets (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,boot_id TEXT NOT NULL,
+ tokens INTEGER NOT NULL,last_tick INTEGER NOT NULL,
+ PRIMARY KEY(tenant_id,node_id)
+);
 CREATE TABLE IF NOT EXISTS schema_meta (
   key TEXT PRIMARY KEY NOT NULL,
   value TEXT NOT NULL

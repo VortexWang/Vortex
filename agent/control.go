@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -198,7 +199,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{
 			AppliedConfigVersion: appliedVersion,
 			ObservedAt:           time.Now().UTC().Format(time.RFC3339Nano),
-			Capabilities:         []string{"rule-two-phase-v1"},
+			Capabilities:         []string{"rule-two-phase-v1", "share-cas-v1"},
 		}},
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
@@ -443,6 +444,44 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_ShareCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: share CAS requires direct authenticated backend")
+				}
+				command := body.ShareCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return fmt.Errorf("agent: invalid share command digest")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				decision, e := contracts.DecodeShareHandoff(command.Payload)
+				if e != nil || decision.NodeID != c.Node.NodeID || decision.BootID != c.Node.BootID {
+					return contracts.ErrShareHandoff
+				}
+				if command.Phase == "cas" {
+					if c.Node.clock == nil {
+						return fmt.Errorf("agent: missing boot clock")
+					}
+					if e = c.Node.clock.observe(decision.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
+						return e
+					}
+				}
+				low, high, trusted := c.Node.TrustedTime()
+				observation, e := c.Node.Store.ApplyShareHandoff(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Phase, command.Payload, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted})
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(observation)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ShareReceipt{ShareReceipt: &controlv1.ShareReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_RuleCommand:
 				if regional != nil {
 					return fmt.Errorf("agent: rule two-phase capability requires backend direct control")
@@ -845,3 +884,5 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 	}
 	return nil
 }
+
+func sha256BytesControl(b []byte) []byte { s := sha256.Sum256(b); return s[:] }

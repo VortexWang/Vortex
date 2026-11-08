@@ -33,6 +33,9 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 	if err != nil {
 		return result, err
 	}
+	if err := checkNodeShareOpenTx(ctx, tx, scope); err != nil {
+		return result, err
+	}
 	grant, runtime, share := chosen.grant, chosen.runtime, chosen.share
 	// All held slots on this source count, including unproven previous boots.
 	var count uint64
@@ -74,6 +77,9 @@ func (e *RateLimited) Error() string { return "store: share rate exhausted" }
 // One durable token bucket per share source, common to both directions and all
 // sessions. Reboot cannot refill it; uncertain time earns no additional tokens.
 func consumeRuntimeRate(ctx context.Context, tx *sql.Tx, use AuthorizationUse, n uint64) error {
+	if err := consumeNodeShareRateTx(ctx, tx, use, n); err != nil {
+		return err
+	}
 	shareUse := use
 	shareUse.Kind = "share_lease"
 	shareUse.AuthorizationID = use.ShareLeaseID

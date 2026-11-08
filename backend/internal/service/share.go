@@ -235,7 +235,7 @@ func (s ShareService) PrepareShare(ctx context.Context, scope TenantScope, in Pr
 		if e != nil {
 			return e
 		}
-		h, e := q.CreateShareHandoff(ctx, generated.CreateShareHandoffParams{TenantID: scope.TenantID(), ID: generation.ID, NodeID: in.NodeID, Kind: in.Kind, Generation: generation.Generation, OperationID: op.ID})
+		h, e := q.CreateShareHandoff(ctx, generated.CreateShareHandoffParams{TenantID: scope.TenantID(), ID: generation.ID, NodeID: in.NodeID, Kind: in.Kind, Generation: generation.Generation, OperationID: op.ID, CreatedBy: scope.ActorID()})
 		if e != nil {
 			return e
 		}

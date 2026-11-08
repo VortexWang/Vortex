@@ -21,7 +21,7 @@ UPDATE share_renewal_authorities SET closed_at=$6,closure_proof=$7 WHERE tenant_
 -- name: OpenShareRenewalCount :one
 SELECT count(*) FROM share_renewal_authorities WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4 AND closed_at IS NULL;
 -- name: CreateShareHandoff :one
-INSERT INTO share_handoffs(tenant_id,id,node_id,kind,generation,operation_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *;
+INSERT INTO share_handoffs(tenant_id,id,node_id,kind,generation,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *;
 -- name: GetShareHandoff :one
 SELECT * FROM share_handoffs WHERE tenant_id=$1 AND id=$2;
 -- name: ShareHandoffByGeneration :one
@@ -46,3 +46,37 @@ SELECT COALESCE(max(signer_epoch),0)::bigint FROM signer_authorities WHERE tenan
 SELECT * FROM share_chains WHERE tenant_id=$1 AND node_id=$2 AND kind=$3;
 -- name: GetNodeIncarnation :one
 SELECT boot_id,generation FROM nodes WHERE id=$1;
+
+-- name: ShareClosureEvidence :many
+SELECT * FROM share_renewal_authorities WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4 ORDER BY signer_id;
+-- name: BindShareCommand :execrows
+UPDATE share_handoffs SET command=$3,command_digest=$4,state='cas_pending',execution_state='enforcing' WHERE tenant_id=$1 AND id=$2 AND command IS NULL AND state='prepared';
+-- name: BindShareDelivery :exec
+INSERT INTO share_delivery_bindings(tenant_id,task_id,handoff_id,phase) VALUES($1,$2,$3,$4);
+-- name: GetShareDelivery :one
+SELECT b.*,h.node_id,h.kind,h.generation,h.command,h.command_digest,h.created_by,g.boot_id FROM share_delivery_bindings b JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id JOIN share_generations g ON g.tenant_id=h.tenant_id AND g.node_id=h.node_id AND g.kind=h.kind AND g.generation=h.generation WHERE b.tenant_id=$1 AND b.task_id=$2;
+-- name: PendingShareDelivery :one
+SELECT EXISTS(SELECT 1 FROM share_delivery_bindings b JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=$1 AND b.handoff_id=$2 AND t.state IN ('pending','leased','running'));
+-- name: ShareDeliveryCandidates :many
+SELECT t.*,h.created_by FROM tasks t JOIN share_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id WHERE t.state='pending' AND h.next_attempt<=now() ORDER BY t.id LIMIT 100;
+-- name: ExpiredShareDeliveries :many
+SELECT t.*,h.created_by FROM tasks t JOIN share_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id WHERE t.state IN ('leased','running') AND t.lease_until<=now() ORDER BY t.id LIMIT 100;
+-- name: LeaseShareDelivery :one
+UPDATE tasks SET state='running',lease_token=$3,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE tenant_id=$1 AND id=$2 AND state='pending' RETURNING *;
+-- name: ShareTaskByLease :one
+SELECT * FROM tasks WHERE tenant_id=$1 AND id=$2 AND lease_token=$3 FOR UPDATE;
+-- name: FinishShareTask :exec
+UPDATE tasks SET state=$3,lease_until=NULL WHERE tenant_id=$1 AND id=$2;
+-- name: ShareExecutionUnknown :exec
+UPDATE share_handoffs SET state='activation-unknown',execution_state='enforcing',attempts=attempts+1,next_attempt=now()+interval '1 second' WHERE tenant_id=$1 AND id=$2 AND state<>'enforced';
+-- name: GetShareReceipt :one
+SELECT * FROM share_handoff_receipts WHERE tenant_id=$1 AND receipt_id=$2;
+-- name: AppendShareReceipt :exec
+INSERT INTO share_handoff_receipts(tenant_id,handoff_id,receipt_id,command_digest,receipt_digest,peer_fingerprint,payload) VALUES($1,$2,$3,$4,$5,$6,$7);
+-- name: ConfirmShareChain :execrows
+UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$6);
+-- name: ConfirmShareHandoff :exec
+UPDATE share_handoffs SET state='enforced',execution_state='enforced',receipt_digest=$3 WHERE tenant_id=$1 AND id=$2;
+
+-- name: ActivateDrainingShare :execrows
+UPDATE share_chains SET active_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$5);

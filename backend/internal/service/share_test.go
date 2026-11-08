@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"errors"
 	"github.com/google/uuid"
+	"net/url"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -39,6 +41,24 @@ type shareFixture struct {
 
 func newShareFixture(t *testing.T) *shareFixture {
 	t.Helper()
+	admin := testutil.Postgres(t)
+	schema := "share_case_" + uuid.NewString()[:8]
+	if _, e := admin.Exec(context.Background(), "CREATE SCHEMA "+schema); e != nil {
+		t.Fatal(e)
+	}
+	t.Cleanup(func() {
+		if _, e := admin.Exec(context.Background(), "DROP SCHEMA "+schema+" CASCADE"); e != nil {
+			t.Error(e)
+		}
+	})
+	u, e := url.Parse(os.Getenv("PHASE6_DATABASE_URL"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	values := u.Query()
+	values.Set("search_path", schema)
+	u.RawQuery = values.Encode()
+	t.Setenv("PHASE6_DATABASE_URL", u.String())
 	f, _, snapshot := ledgerFixture(t)
 	now := time.Now().UTC().Truncate(time.Microsecond)
 	x := &shareFixture{f: f, now: now}

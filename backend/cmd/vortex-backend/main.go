@@ -151,6 +151,7 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	}
 	adapter.Ports = &service.PortService{Pool: pool, NodeCA: root}
 	adapter.Metering = &service.MeteringService{Pool: pool}
+	adapter.Shares = &service.ShareService{Pool: pool, NodeCA: root}
 	nodes, err := net.Listen("tcp", *nodeListen)
 	if err != nil {
 		return err
@@ -167,7 +168,7 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	defer hubServer.Stop()
 	controlv1.RegisterNodeControlServer(server, adapter)
 	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe, Metering: adapter.Metering})
-	failures := make(chan error, 8)
+	failures := make(chan error, 12)
 	go func() { failures <- server.Serve(nodes) }()
 	go func() { failures <- hubServer.Serve(hubs) }()
 	go func() { failures <- (&worker.Worker{Pool: pool, Adapter: adapter}).Run(ctx) }()
@@ -183,6 +184,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	go func() { failures <- fmt.Errorf("package due worker: %w", (worker.PackageWorker{Pool: pool}).Run(ctx)) }()
 	go func() {
 		failures <- fmt.Errorf("usage reconciliation worker: %w", (worker.UsageReconciliationWorker{Pool: pool}).Run(ctx))
+	}()
+	go func() {
+		failures <- fmt.Errorf("share reconciliation worker: %w", (worker.ShareReconciliationWorker{Service: *adapter.Shares, Adapter: adapter}).Run(ctx))
 	}()
 	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
 	select {

@@ -23,6 +23,7 @@ import (
 	"vortex/backend/internal/compiler"
 	"vortex/backend/internal/repository"
 	"vortex/backend/internal/service"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 	"vortex/hub"
 )
@@ -60,10 +61,45 @@ type outcome struct {
 	receipt service.Receipt
 	err     error
 }
+type shareRequest struct {
+	command           *controlv1.ShareCommand
+	boot, task, token string
+	scope             service.TenantScope
+	result            chan error
+	ctx               context.Context
+}
 type session struct {
 	requests chan request
+	shares   chan shareRequest
 	rules    chan ruleRequest
 	done     chan struct{}
+}
+
+// DeliverShare returns success only after the authenticated stream handler
+// committed the Node receipt through ShareService's audit transaction.
+func (a *Adapter) DeliverShare(ctx context.Context, scope service.TenantScope, task, token, node, boot string, c *controlv1.ShareCommand) error {
+	a.mu.Lock()
+	s := a.nodes[node]
+	a.mu.Unlock()
+	if s == nil {
+		return errors.New("target disconnected")
+	}
+	r := shareRequest{c, boot, task, token, scope, make(chan error, 1), ctx}
+	select {
+	case s.shares <- r:
+	case <-s.done:
+		return errors.New("target disconnected")
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	select {
+	case e := <-r.result:
+		return e
+	case <-s.done:
+		return errors.New("target disconnected")
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 func (a *Adapter) DeliverRule(ctx context.Context, node, boot string, c *controlv1.RuleCommand) (*controlv1.RuleReceipt, error) {
@@ -111,6 +147,7 @@ type Adapter struct {
 	nodes    map[string]*session
 	Observe  func(context.Context, string, string, []byte) error
 	Ports    *service.PortService
+	Shares   *service.ShareService
 	Metering *service.MeteringService
 }
 
@@ -174,7 +211,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{requests: make(chan request), rules: make(chan ruleRequest), done: make(chan struct{})}
+	s := &session{requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -212,8 +249,12 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	shareCapable := false
 	ruleCapable := false
 	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "share-cas-v1" {
+			shareCapable = true
+		}
 		if capability == "rule-two-phase-v1" {
 			ruleCapable = true
 		}
@@ -221,6 +262,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	var sequence uint64
 	var pending *request
 	var pendingRule *ruleRequest
+	var pendingShare *shareRequest
 	for {
 		var pendingDone <-chan struct{}
 		if pending != nil {
@@ -229,16 +271,20 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		if pendingRule != nil {
 			pendingDone = pendingRule.ctx.Done()
 		}
+		if pendingShare != nil {
+			pendingDone = pendingShare.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
 			pendingRule = nil
+			pendingShare = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil || pendingRule != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -265,7 +311,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
 				continue
 			}
-			if pending != nil || pendingRule != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil {
 				r.result <- ruleOutcome{err: errors.New("target busy")}
 				continue
 			}
@@ -282,11 +328,54 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
 				return err
 			}
+		case r := <-s.shares:
+			if !shareCapable || a.Shares == nil {
+				r.result <- errors.New("target lacks share-cas-v1 authority")
+				continue
+			}
+			if pending != nil || pendingRule != nil || pendingShare != nil {
+				r.result <- errors.New("target busy")
+				continue
+			}
+			if r.boot != first.BootId || r.ctx.Err() != nil {
+				r.result <- errors.New("target boot or request expired")
+				continue
+			}
+			pendingShare = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_ShareCommand{ShareCommand: r.command}}); err != nil {
+				return err
+			}
 		case message := <-incoming:
 			if message.NodeId != id || message.BootId != first.BootId || message.Sequence <= nodeSequence {
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if receipt := message.GetShareReceipt(); receipt != nil {
+				if pendingShare == nil {
+					continue
+				}
+				if !bytes.Equal(sha256Bytes(receipt.Payload), receipt.PayloadSha256) || len(receipt.Payload) > 16384 || len(receipt.ProtoReflect().GetUnknown()) != 0 {
+					return errors.New("share receipt digest invalid")
+				}
+				var observation contracts.ShareObservation
+				d := json.NewDecoder(bytes.NewReader(receipt.Payload))
+				d.DisallowUnknownFields()
+				if e := d.Decode(&observation); e != nil {
+					return e
+				}
+				var extra any
+				if d.Decode(&extra) != io.EOF {
+					return errors.New("share receipt trailing payload")
+				}
+				if observation.NodeID != id || observation.BootID != first.BootId {
+					return errors.New("share receipt identity invalid")
+				}
+				e := a.Shares.RecordShareReceipt(stream.Context(), pendingShare.scope, pendingShare.task, pendingShare.token, observation, uuid.NewString())
+				pendingShare.result <- e
+				pendingShare = nil
+				continue
+			}
 			if batch := message.GetUnknownUsageBatch(); batch != nil {
 				if a.Metering == nil {
 					return errors.New("usage authority unavailable")

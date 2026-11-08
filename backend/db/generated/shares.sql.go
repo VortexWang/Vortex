@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const activateDrainingShare = `-- name: ActivateDrainingShare :execrows
+UPDATE share_chains SET active_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$5)
+`
+
+type ActivateDrainingShareParams struct {
+	TenantID           string
+	NodeID             string
+	Kind               string
+	ActiveGeneration   int64
+	ActiveGeneration_2 int64
+}
+
+func (q *Queries) ActivateDrainingShare(ctx context.Context, arg ActivateDrainingShareParams) (int64, error) {
+	result, err := q.db.Exec(ctx, activateDrainingShare,
+		arg.TenantID,
+		arg.NodeID,
+		arg.Kind,
+		arg.ActiveGeneration,
+		arg.ActiveGeneration_2,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const appendShareGeneration = `-- name: AppendShareGeneration :one
 INSERT INTO share_generations(tenant_id,node_id,kind,generation,predecessor,id,boot_id,signer_id,signer_epoch,path_generation,fencing_generation,amount,burst_bytes,billing_snapshot_id,rule_id,rule_revision,created_at,ownership_until,policy_until,autonomy_until,request_key,request_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22) RETURNING tenant_id, node_id, kind, generation, predecessor, id, boot_id, signer_id, signer_epoch, path_generation, fencing_generation, amount, burst_bytes, billing_snapshot_id, rule_id, rule_revision, created_at, ownership_until, policy_until, autonomy_until, request_key, request_digest
 `
@@ -93,6 +119,33 @@ func (q *Queries) AppendShareGeneration(ctx context.Context, arg AppendShareGene
 	return i, err
 }
 
+const appendShareReceipt = `-- name: AppendShareReceipt :exec
+INSERT INTO share_handoff_receipts(tenant_id,handoff_id,receipt_id,command_digest,receipt_digest,peer_fingerprint,payload) VALUES($1,$2,$3,$4,$5,$6,$7)
+`
+
+type AppendShareReceiptParams struct {
+	TenantID        string
+	HandoffID       string
+	ReceiptID       string
+	CommandDigest   []byte
+	ReceiptDigest   []byte
+	PeerFingerprint []byte
+	Payload         []byte
+}
+
+func (q *Queries) AppendShareReceipt(ctx context.Context, arg AppendShareReceiptParams) error {
+	_, err := q.db.Exec(ctx, appendShareReceipt,
+		arg.TenantID,
+		arg.HandoffID,
+		arg.ReceiptID,
+		arg.CommandDigest,
+		arg.ReceiptDigest,
+		arg.PeerFingerprint,
+		arg.Payload,
+	)
+	return err
+}
+
 const appendShareRenewalAuthority = `-- name: AppendShareRenewalAuthority :exec
 INSERT INTO share_renewal_authorities(tenant_id,node_id,kind,generation,signer_id,signer_epoch) VALUES($1,$2,$3,$4,$5,$6)
 `
@@ -152,6 +205,51 @@ func (q *Queries) AppendSignerAuthority(ctx context.Context, arg AppendSignerAut
 	return i, err
 }
 
+const bindShareCommand = `-- name: BindShareCommand :execrows
+UPDATE share_handoffs SET command=$3,command_digest=$4,state='cas_pending',execution_state='enforcing' WHERE tenant_id=$1 AND id=$2 AND command IS NULL AND state='prepared'
+`
+
+type BindShareCommandParams struct {
+	TenantID      string
+	ID            string
+	Command       []byte
+	CommandDigest []byte
+}
+
+func (q *Queries) BindShareCommand(ctx context.Context, arg BindShareCommandParams) (int64, error) {
+	result, err := q.db.Exec(ctx, bindShareCommand,
+		arg.TenantID,
+		arg.ID,
+		arg.Command,
+		arg.CommandDigest,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const bindShareDelivery = `-- name: BindShareDelivery :exec
+INSERT INTO share_delivery_bindings(tenant_id,task_id,handoff_id,phase) VALUES($1,$2,$3,$4)
+`
+
+type BindShareDeliveryParams struct {
+	TenantID  string
+	TaskID    string
+	HandoffID string
+	Phase     string
+}
+
+func (q *Queries) BindShareDelivery(ctx context.Context, arg BindShareDeliveryParams) error {
+	_, err := q.db.Exec(ctx, bindShareDelivery,
+		arg.TenantID,
+		arg.TaskID,
+		arg.HandoffID,
+		arg.Phase,
+	)
+	return err
+}
+
 const closeShareRenewalAuthority = `-- name: CloseShareRenewalAuthority :execrows
 UPDATE share_renewal_authorities SET closed_at=$6,closure_proof=$7 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4 AND signer_id=$5 AND closed_at IS NULL
 `
@@ -182,8 +280,51 @@ func (q *Queries) CloseShareRenewalAuthority(ctx context.Context, arg CloseShare
 	return result.RowsAffected(), nil
 }
 
+const confirmShareChain = `-- name: ConfirmShareChain :execrows
+UPDATE share_chains SET active_generation=$4,pending_generation=0,held_amount=$5 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$6)
+`
+
+type ConfirmShareChainParams struct {
+	TenantID           string
+	NodeID             string
+	Kind               string
+	ActiveGeneration   int64
+	HeldAmount         int64
+	ActiveGeneration_2 int64
+}
+
+func (q *Queries) ConfirmShareChain(ctx context.Context, arg ConfirmShareChainParams) (int64, error) {
+	result, err := q.db.Exec(ctx, confirmShareChain,
+		arg.TenantID,
+		arg.NodeID,
+		arg.Kind,
+		arg.ActiveGeneration,
+		arg.HeldAmount,
+		arg.ActiveGeneration_2,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const confirmShareHandoff = `-- name: ConfirmShareHandoff :exec
+UPDATE share_handoffs SET state='enforced',execution_state='enforced',receipt_digest=$3 WHERE tenant_id=$1 AND id=$2
+`
+
+type ConfirmShareHandoffParams struct {
+	TenantID      string
+	ID            string
+	ReceiptDigest []byte
+}
+
+func (q *Queries) ConfirmShareHandoff(ctx context.Context, arg ConfirmShareHandoffParams) error {
+	_, err := q.db.Exec(ctx, confirmShareHandoff, arg.TenantID, arg.ID, arg.ReceiptDigest)
+	return err
+}
+
 const createShareHandoff = `-- name: CreateShareHandoff :one
-INSERT INTO share_handoffs(tenant_id,id,node_id,kind,generation,operation_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING tenant_id, id, node_id, kind, generation, operation_id, state, receipt_digest, execution_state, next_attempt, attempts
+INSERT INTO share_handoffs(tenant_id,id,node_id,kind,generation,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING tenant_id, id, node_id, kind, generation, operation_id, created_by, command, command_digest, state, receipt_digest, execution_state, next_attempt, attempts
 `
 
 type CreateShareHandoffParams struct {
@@ -193,6 +334,7 @@ type CreateShareHandoffParams struct {
 	Kind        string
 	Generation  int64
 	OperationID string
+	CreatedBy   string
 }
 
 func (q *Queries) CreateShareHandoff(ctx context.Context, arg CreateShareHandoffParams) (ShareHandoff, error) {
@@ -203,6 +345,7 @@ func (q *Queries) CreateShareHandoff(ctx context.Context, arg CreateShareHandoff
 		arg.Kind,
 		arg.Generation,
 		arg.OperationID,
+		arg.CreatedBy,
 	)
 	var i ShareHandoff
 	err := row.Scan(
@@ -212,6 +355,9 @@ func (q *Queries) CreateShareHandoff(ctx context.Context, arg CreateShareHandoff
 		&i.Kind,
 		&i.Generation,
 		&i.OperationID,
+		&i.CreatedBy,
+		&i.Command,
+		&i.CommandDigest,
 		&i.State,
 		&i.ReceiptDigest,
 		&i.ExecutionState,
@@ -263,6 +409,67 @@ func (q *Queries) EnsureShareChain(ctx context.Context, arg EnsureShareChainPara
 	return err
 }
 
+const expiredShareDeliveries = `-- name: ExpiredShareDeliveries :many
+SELECT t.id, t.tenant_id, t.operation_id, t.state, t.lease_token, t.lease_until, t.attempts, t.task_kind,h.created_by FROM tasks t JOIN share_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id WHERE t.state IN ('leased','running') AND t.lease_until<=now() ORDER BY t.id LIMIT 100
+`
+
+type ExpiredShareDeliveriesRow struct {
+	ID          string
+	TenantID    string
+	OperationID string
+	State       string
+	LeaseToken  pgtype.Text
+	LeaseUntil  pgtype.Timestamptz
+	Attempts    int32
+	TaskKind    string
+	CreatedBy   string
+}
+
+func (q *Queries) ExpiredShareDeliveries(ctx context.Context) ([]ExpiredShareDeliveriesRow, error) {
+	rows, err := q.db.Query(ctx, expiredShareDeliveries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ExpiredShareDeliveriesRow{}
+	for rows.Next() {
+		var i ExpiredShareDeliveriesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.OperationID,
+			&i.State,
+			&i.LeaseToken,
+			&i.LeaseUntil,
+			&i.Attempts,
+			&i.TaskKind,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const finishShareTask = `-- name: FinishShareTask :exec
+UPDATE tasks SET state=$3,lease_until=NULL WHERE tenant_id=$1 AND id=$2
+`
+
+type FinishShareTaskParams struct {
+	TenantID string
+	ID       string
+	State    string
+}
+
+func (q *Queries) FinishShareTask(ctx context.Context, arg FinishShareTaskParams) error {
+	_, err := q.db.Exec(ctx, finishShareTask, arg.TenantID, arg.ID, arg.State)
+	return err
+}
+
 const getNodeIncarnation = `-- name: GetNodeIncarnation :one
 SELECT boot_id,generation FROM nodes WHERE id=$1
 `
@@ -276,6 +483,48 @@ func (q *Queries) GetNodeIncarnation(ctx context.Context, id string) (GetNodeInc
 	row := q.db.QueryRow(ctx, getNodeIncarnation, id)
 	var i GetNodeIncarnationRow
 	err := row.Scan(&i.BootID, &i.Generation)
+	return i, err
+}
+
+const getShareDelivery = `-- name: GetShareDelivery :one
+SELECT b.tenant_id, b.task_id, b.handoff_id, b.phase,h.node_id,h.kind,h.generation,h.command,h.command_digest,h.created_by,g.boot_id FROM share_delivery_bindings b JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id JOIN share_generations g ON g.tenant_id=h.tenant_id AND g.node_id=h.node_id AND g.kind=h.kind AND g.generation=h.generation WHERE b.tenant_id=$1 AND b.task_id=$2
+`
+
+type GetShareDeliveryParams struct {
+	TenantID string
+	TaskID   string
+}
+
+type GetShareDeliveryRow struct {
+	TenantID      string
+	TaskID        string
+	HandoffID     string
+	Phase         string
+	NodeID        string
+	Kind          string
+	Generation    int64
+	Command       []byte
+	CommandDigest []byte
+	CreatedBy     string
+	BootID        string
+}
+
+func (q *Queries) GetShareDelivery(ctx context.Context, arg GetShareDeliveryParams) (GetShareDeliveryRow, error) {
+	row := q.db.QueryRow(ctx, getShareDelivery, arg.TenantID, arg.TaskID)
+	var i GetShareDeliveryRow
+	err := row.Scan(
+		&i.TenantID,
+		&i.TaskID,
+		&i.HandoffID,
+		&i.Phase,
+		&i.NodeID,
+		&i.Kind,
+		&i.Generation,
+		&i.Command,
+		&i.CommandDigest,
+		&i.CreatedBy,
+		&i.BootID,
+	)
 	return i, err
 }
 
@@ -326,7 +575,7 @@ func (q *Queries) GetShareGeneration(ctx context.Context, arg GetShareGeneration
 }
 
 const getShareHandoff = `-- name: GetShareHandoff :one
-SELECT tenant_id, id, node_id, kind, generation, operation_id, state, receipt_digest, execution_state, next_attempt, attempts FROM share_handoffs WHERE tenant_id=$1 AND id=$2
+SELECT tenant_id, id, node_id, kind, generation, operation_id, created_by, command, command_digest, state, receipt_digest, execution_state, next_attempt, attempts FROM share_handoffs WHERE tenant_id=$1 AND id=$2
 `
 
 type GetShareHandoffParams struct {
@@ -344,11 +593,38 @@ func (q *Queries) GetShareHandoff(ctx context.Context, arg GetShareHandoffParams
 		&i.Kind,
 		&i.Generation,
 		&i.OperationID,
+		&i.CreatedBy,
+		&i.Command,
+		&i.CommandDigest,
 		&i.State,
 		&i.ReceiptDigest,
 		&i.ExecutionState,
 		&i.NextAttempt,
 		&i.Attempts,
+	)
+	return i, err
+}
+
+const getShareReceipt = `-- name: GetShareReceipt :one
+SELECT tenant_id, handoff_id, receipt_id, command_digest, receipt_digest, peer_fingerprint, payload FROM share_handoff_receipts WHERE tenant_id=$1 AND receipt_id=$2
+`
+
+type GetShareReceiptParams struct {
+	TenantID  string
+	ReceiptID string
+}
+
+func (q *Queries) GetShareReceipt(ctx context.Context, arg GetShareReceiptParams) (ShareHandoffReceipt, error) {
+	row := q.db.QueryRow(ctx, getShareReceipt, arg.TenantID, arg.ReceiptID)
+	var i ShareHandoffReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.HandoffID,
+		&i.ReceiptID,
+		&i.CommandDigest,
+		&i.ReceiptDigest,
+		&i.PeerFingerprint,
+		&i.Payload,
 	)
 	return i, err
 }
@@ -391,6 +667,32 @@ func (q *Queries) LatestSignerEpoch(ctx context.Context, arg LatestSignerEpochPa
 	var column_1 int64
 	err := row.Scan(&column_1)
 	return column_1, err
+}
+
+const leaseShareDelivery = `-- name: LeaseShareDelivery :one
+UPDATE tasks SET state='running',lease_token=$3,lease_until=now()+interval '10 seconds',attempts=attempts+1 WHERE tenant_id=$1 AND id=$2 AND state='pending' RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+`
+
+type LeaseShareDeliveryParams struct {
+	TenantID   string
+	ID         string
+	LeaseToken pgtype.Text
+}
+
+func (q *Queries) LeaseShareDelivery(ctx context.Context, arg LeaseShareDeliveryParams) (Task, error) {
+	row := q.db.QueryRow(ctx, leaseShareDelivery, arg.TenantID, arg.ID, arg.LeaseToken)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.OperationID,
+		&i.State,
+		&i.LeaseToken,
+		&i.LeaseUntil,
+		&i.Attempts,
+		&i.TaskKind,
+	)
+	return i, err
 }
 
 const lockNodeFencing = `-- name: LockNodeFencing :one
@@ -483,6 +785,22 @@ func (q *Queries) OpenShareRenewalCount(ctx context.Context, arg OpenShareRenewa
 	return count, err
 }
 
+const pendingShareDelivery = `-- name: PendingShareDelivery :one
+SELECT EXISTS(SELECT 1 FROM share_delivery_bindings b JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=$1 AND b.handoff_id=$2 AND t.state IN ('pending','leased','running'))
+`
+
+type PendingShareDeliveryParams struct {
+	TenantID  string
+	HandoffID string
+}
+
+func (q *Queries) PendingShareDelivery(ctx context.Context, arg PendingShareDeliveryParams) (bool, error) {
+	row := q.db.QueryRow(ctx, pendingShareDelivery, arg.TenantID, arg.HandoffID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const raiseNodeFencing = `-- name: RaiseNodeFencing :execrows
 UPDATE node_fencing SET fencing_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3 AND fencing_generation<=$4 AND NOT renewal_closed
 `
@@ -561,6 +879,111 @@ func (q *Queries) ReserveShareSuccessor(ctx context.Context, arg ReserveShareSuc
 	return result.RowsAffected(), nil
 }
 
+const shareClosureEvidence = `-- name: ShareClosureEvidence :many
+SELECT tenant_id, node_id, kind, generation, signer_id, signer_epoch, closed_at, closure_proof FROM share_renewal_authorities WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4 ORDER BY signer_id
+`
+
+type ShareClosureEvidenceParams struct {
+	TenantID   string
+	NodeID     string
+	Kind       string
+	Generation int64
+}
+
+func (q *Queries) ShareClosureEvidence(ctx context.Context, arg ShareClosureEvidenceParams) ([]ShareRenewalAuthority, error) {
+	rows, err := q.db.Query(ctx, shareClosureEvidence,
+		arg.TenantID,
+		arg.NodeID,
+		arg.Kind,
+		arg.Generation,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ShareRenewalAuthority{}
+	for rows.Next() {
+		var i ShareRenewalAuthority
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.NodeID,
+			&i.Kind,
+			&i.Generation,
+			&i.SignerID,
+			&i.SignerEpoch,
+			&i.ClosedAt,
+			&i.ClosureProof,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const shareDeliveryCandidates = `-- name: ShareDeliveryCandidates :many
+SELECT t.id, t.tenant_id, t.operation_id, t.state, t.lease_token, t.lease_until, t.attempts, t.task_kind,h.created_by FROM tasks t JOIN share_delivery_bindings b ON b.tenant_id=t.tenant_id AND b.task_id=t.id JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id WHERE t.state='pending' AND h.next_attempt<=now() ORDER BY t.id LIMIT 100
+`
+
+type ShareDeliveryCandidatesRow struct {
+	ID          string
+	TenantID    string
+	OperationID string
+	State       string
+	LeaseToken  pgtype.Text
+	LeaseUntil  pgtype.Timestamptz
+	Attempts    int32
+	TaskKind    string
+	CreatedBy   string
+}
+
+func (q *Queries) ShareDeliveryCandidates(ctx context.Context) ([]ShareDeliveryCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, shareDeliveryCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ShareDeliveryCandidatesRow{}
+	for rows.Next() {
+		var i ShareDeliveryCandidatesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.OperationID,
+			&i.State,
+			&i.LeaseToken,
+			&i.LeaseUntil,
+			&i.Attempts,
+			&i.TaskKind,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const shareExecutionUnknown = `-- name: ShareExecutionUnknown :exec
+UPDATE share_handoffs SET state='activation-unknown',execution_state='enforcing',attempts=attempts+1,next_attempt=now()+interval '1 second' WHERE tenant_id=$1 AND id=$2 AND state<>'enforced'
+`
+
+type ShareExecutionUnknownParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) ShareExecutionUnknown(ctx context.Context, arg ShareExecutionUnknownParams) error {
+	_, err := q.db.Exec(ctx, shareExecutionUnknown, arg.TenantID, arg.ID)
+	return err
+}
+
 const shareGenerationByRequest = `-- name: ShareGenerationByRequest :one
 SELECT tenant_id, node_id, kind, generation, predecessor, id, boot_id, signer_id, signer_epoch, path_generation, fencing_generation, amount, burst_bytes, billing_snapshot_id, rule_id, rule_revision, created_at, ownership_until, policy_until, autonomy_until, request_key, request_digest FROM share_generations WHERE tenant_id=$1 AND request_key=$2
 `
@@ -601,7 +1024,7 @@ func (q *Queries) ShareGenerationByRequest(ctx context.Context, arg ShareGenerat
 }
 
 const shareHandoffByGeneration = `-- name: ShareHandoffByGeneration :one
-SELECT tenant_id, id, node_id, kind, generation, operation_id, state, receipt_digest, execution_state, next_attempt, attempts FROM share_handoffs WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4
+SELECT tenant_id, id, node_id, kind, generation, operation_id, created_by, command, command_digest, state, receipt_digest, execution_state, next_attempt, attempts FROM share_handoffs WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND generation=$4
 `
 
 type ShareHandoffByGenerationParams struct {
@@ -626,6 +1049,9 @@ func (q *Queries) ShareHandoffByGeneration(ctx context.Context, arg ShareHandoff
 		&i.Kind,
 		&i.Generation,
 		&i.OperationID,
+		&i.CreatedBy,
+		&i.Command,
+		&i.CommandDigest,
 		&i.State,
 		&i.ReceiptDigest,
 		&i.ExecutionState,
@@ -665,6 +1091,32 @@ func (q *Queries) ShareRenewalAuthority(ctx context.Context, arg ShareRenewalAut
 		&i.SignerEpoch,
 		&i.ClosedAt,
 		&i.ClosureProof,
+	)
+	return i, err
+}
+
+const shareTaskByLease = `-- name: ShareTaskByLease :one
+SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind FROM tasks WHERE tenant_id=$1 AND id=$2 AND lease_token=$3 FOR UPDATE
+`
+
+type ShareTaskByLeaseParams struct {
+	TenantID   string
+	ID         string
+	LeaseToken pgtype.Text
+}
+
+func (q *Queries) ShareTaskByLease(ctx context.Context, arg ShareTaskByLeaseParams) (Task, error) {
+	row := q.db.QueryRow(ctx, shareTaskByLease, arg.TenantID, arg.ID, arg.LeaseToken)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.OperationID,
+		&i.State,
+		&i.LeaseToken,
+		&i.LeaseUntil,
+		&i.Attempts,
+		&i.TaskKind,
 	)
 	return i, err
 }

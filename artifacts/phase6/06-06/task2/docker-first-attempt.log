@@ -1,0 +1,10 @@
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-9a72d6074c7d Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-9a72d6074c7d Created 
+./tools/phase6/share_fault_injection.sh: 5: go: not found
+

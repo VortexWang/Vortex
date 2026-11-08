@@ -13,7 +13,7 @@ import (
 
 const expireLeases = `-- name: ExpireLeases :many
 UPDATE tasks SET state='unknown',lease_until=NULL WHERE id IN
-(SELECT id FROM tasks WHERE state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
+(SELECT id FROM tasks WHERE task_kind='control' AND state IN ('leased','running') AND lease_until<now() ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT 100) RETURNING id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind
 `
 
 func (q *Queries) ExpireLeases(ctx context.Context) ([]Task, error) {
