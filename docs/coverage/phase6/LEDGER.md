@@ -26,6 +26,8 @@ reconciliation job，退避有界，72h落持久争议与告警。没有资金�
 Hub 增加独立 usage_origin_envelopes 元数据，保留原 node/report boot/sequence 与
 payload digest。既有 SQLite 用量 payload 原字节保持；历史无 envelope 的记录
 由生产 BackendUsageClient 返回 ErrUsageOriginMissing，继续保留待对账。
+已保存身份的未知用量在回执丢失、Agent 再次重启后复用首个报告身份，既不覆盖
+原 boot/sequence，也不重复消费；store 反例和双段 mTLS 重启测试共同验证。
 生产 AccountingServer/UsageRelay 与 BackendUsageClient 只转交计量事实，不能
 签发运行或资金权利。活跃 signer 的完整后端握手仍由06-06接管。
 

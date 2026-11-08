@@ -40,9 +40,12 @@ func (s *Store) RecordUsageOrigin(ctx context.Context, node, batch, boot string,
 	var oldDigest []byte
 	e = tx.QueryRowContext(ctx, `SELECT report_boot_id,payload_sha256 FROM usage_origin_envelopes WHERE node_id=? AND batch_id=?`, node, batch).Scan(&oldBoot, &oldDigest)
 	if e == nil {
-		if oldBoot != boot || !bytes.Equal(oldDigest, digest[:]) {
+		if oldBoot == "" || !bytes.Equal(oldDigest, digest[:]) {
 			return ErrUsageBatchConflict
 		}
+		// An unknown report can survive another Agent reboot after its receipt
+		// was lost. Reuse the first captured identity for identical payloads;
+		// the retry's current boot and sequence never overwrite that provenance.
 		return tx.Commit()
 	}
 	if !errors.Is(e, sql.ErrNoRows) {

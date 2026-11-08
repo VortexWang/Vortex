@@ -88,6 +88,7 @@ for producer in ([host] if host else ['docker','actions']):
             require(builds.count('GOARCH='+arch)>=2 and builds.count('GOOS=linux')>=4, 'Linux target compilation missing '+arch)
     if order.index(through)>=order.index('06-05'):
         external_files+=['ledger-fault.log']
+        require(len(re.findall(r'--- PASS: TestUsageOriginReplayAfterReportBootChangePreservesOriginal \([^\n]*',component_log))>=2, 'original usage identity reboot replay normal/race evidence missing')
         fault=(folder/'ledger-fault.log').read_text()
         require('--- SKIP:' not in fault and '\nFAIL' not in fault and 'WARNING: DATA RACE' not in fault,'ledger fault suite failed/skipped/racy')
         for target in ['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback']:
