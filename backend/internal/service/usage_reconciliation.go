@@ -213,7 +213,7 @@ func ProtectionState(lo, hi, boundary, started, hardDeadline time.Time, preautho
 		return "close"
 	}
 	if !hi.Before(boundary) && lo.Before(boundary) {
-		if !preauthorized || started.IsZero() || hi.Sub(started) > 12*time.Second {
+		if !preauthorized || started.IsZero() || started.After(hi) || hi.Sub(started) > 12*time.Second {
 			return "close"
 		}
 		return "pause"

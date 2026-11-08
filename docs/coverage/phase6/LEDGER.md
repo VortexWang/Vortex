@@ -17,6 +17,7 @@
 
 `TestUsageWireRejectsMalformedAndUnfundedSelfHosted` 拒绝空用量条目及收费快照
 伪装自托管的上报，失败不改变来源权威；自托管必须绑定零系数快照且不携带计费授权。
+`TestUnknownProtectionRejectsFutureStart` 拒绝未来保护带起点，防止以无效时间绕过12秒上限。
 
 生产 UsageReconciliationWorker 实际消费已过期的预留、来源签发事实及 PostgreSQL
 reconciliation job，退避有界，72h落持久争议与告警。没有资金、最终证明或原始
