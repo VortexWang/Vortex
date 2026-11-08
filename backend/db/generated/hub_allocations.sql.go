@@ -623,6 +623,40 @@ func (q *Queries) ReservationHasHubAllocation(ctx context.Context, arg Reservati
 	return exists, err
 }
 
+const runtimeAllocationExists = `-- name: RuntimeAllocationExists :one
+SELECT EXISTS(SELECT 1 FROM hub_funded_allocations
+WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3
+AND convert_from(payload,'UTF8')::jsonb->>'billing_snapshot_id'=$4::text
+AND convert_from(payload,'UTF8')::jsonb->>'signer_epoch'=$5::text
+AND convert_from(payload,'UTF8')::jsonb->>'path_generation'=$6::text
+AND convert_from(payload,'UTF8')::jsonb->>'fencing_generation_floor'=$7::text)
+`
+
+type RuntimeAllocationExistsParams struct {
+	TenantID       string
+	NodeID         string
+	BootID         string
+	SnapshotID     string
+	SignerEpoch    string
+	PathGeneration string
+	FencingFloor   string
+}
+
+func (q *Queries) RuntimeAllocationExists(ctx context.Context, arg RuntimeAllocationExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, runtimeAllocationExists,
+		arg.TenantID,
+		arg.NodeID,
+		arg.BootID,
+		arg.SnapshotID,
+		arg.SignerEpoch,
+		arg.PathGeneration,
+		arg.FencingFloor,
+	)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const setHubCreditUsage = `-- name: SetHubCreditUsage :exec
 INSERT INTO hub_credit_usage(tenant_id,grant_id,raw_cumulative) VALUES($1,$2,$3) ON CONFLICT(tenant_id,grant_id) DO UPDATE SET raw_cumulative=excluded.raw_cumulative
 `

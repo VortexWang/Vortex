@@ -201,6 +201,12 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	go func() {
 		failures <- fmt.Errorf("share reconciliation worker: %w", (worker.ShareReconciliationWorker{Service: *adapter.Shares, Adapter: adapter}).Run(ctx))
 	}()
+	go func() {
+		failures <- fmt.Errorf("share scheduling worker: %w", (worker.ShareSchedulingWorker{Service: *adapter.Shares}).Run(ctx))
+	}()
+	go func() {
+		failures <- fmt.Errorf("runtime funding worker: %w", (worker.RuntimeFundingWorker{Service: *adapter.Shares, Region: "phase6"}).Run(ctx))
+	}()
 	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
 	select {
 	case <-parent.Done():

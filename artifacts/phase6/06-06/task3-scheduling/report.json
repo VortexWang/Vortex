@@ -1,0 +1,31 @@
+{
+  "scope": "development automatic share windows and finite initial funded delegation scheduling",
+  "source_base": "94561be1",
+  "source_clean": false,
+  "actions": "not_run",
+  "checks": {
+    "backend_native_full_race": 0,
+    "linux_backend_service_control_worker_clock_full_race": 0,
+    "linux_agent_cli_focused_race": 0,
+    "linux_amd64_arm64_backend_compilation": 0,
+    "actual_mtls_runtime_from_automatic_funding": 0,
+    "two_independent_sqlc_generations_match": true,
+    "linux_actual_mtls_runtime_from_automatic_funding": 0
+  },
+  "retained_failure": "initial missing-Hub-authority path returned pgx no rows instead of stable share_execution_unknown; corrected before full passing rerun",
+  "pending": [
+    "explicit signer renewal closure transport",
+    "sustained source-funded topups with parent/children closure",
+    "new boot recovery",
+    "06-06 complete producer and CR-008 exact approval",
+    "06-11 same-SHA Actions"
+  ],
+  "checksums": {
+    "docker-full-race-and-build.log": "5eda93b747ed3c1379d66ffba07e1713592fd88fb6f5972d35edc318a66e87a0",
+    "native-runtime-race.log": "bc9111b17a5967f6fcc7683b5c27d7aa0f18075d9bdfbf2385c922ebdc7c8eaa",
+    "native-initial-missing-authority-code-failed.log": "7420edd08f7bd07bc28b2ed808aaf7ebc08a6d1da4198b6d332cfdaa3c75bf2d",
+    "backend-native-full-race.log": "e1cdcb54e3116e7ba56e7e60f2f9a12a8ac72b53a1dc5970bd834b09fc3698db",
+    "generation.json": "717d1cbee04ec8b73f99130cdeb5bd14d34a64dddbad4eb8e1346a05126809cc",
+    "docker-runtime-race.log": "7e43cc99d30782729ce3f17fe9ce8eeefaad97f338383338cc7422dbb0c04eac"
+  }
+}

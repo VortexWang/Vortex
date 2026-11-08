@@ -122,3 +122,12 @@ AND (c.kind='connections' OR g.burst_bytes>0);
 SELECT DISTINCT d.* FROM rule_deployments d JOIN rule_deployment_members m ON m.tenant_id=d.tenant_id AND m.deployment_id=d.id
 JOIN rule_heads h ON h.tenant_id=d.tenant_id AND h.id=d.rule_id AND h.desired_revision=d.rule_revision
 WHERE d.tenant_id=$1 AND m.node_id=$2 AND m.state='prepared' AND d.state='preparing' ORDER BY d.rule_id,d.id;
+
+-- name: ShareSchedulingTenants :many
+SELECT DISTINCT ON (h.tenant_id) h.tenant_id,r.created_by
+FROM rule_heads h
+JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision
+JOIN rule_deployments d ON d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.rule_revision=h.desired_revision
+WHERE d.state NOT IN ('failed','superseded')
+AND (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean
+ORDER BY h.tenant_id,h.id,d.id;

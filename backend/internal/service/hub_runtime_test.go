@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"net"
 	"testing"
 	"time"
@@ -15,17 +16,51 @@ import (
 	"vortex/agent"
 	"vortex/agent/store"
 	"vortex/backend/db/generated"
+	"vortex/backend/internal/service"
+	"vortex/backend/internal/worker"
 	controlv1 "vortex/contracts/protobuf/v1"
 	"vortex/hub"
 )
 
 func TestProductionHubRuntimeActualMTLSFundedBootstrapReconnectAndBootIsolation(t *testing.T) {
+	productionHubRuntime(t, false)
+}
+
+func TestProductionHubRuntimeAutomaticFundingActualMTLS(t *testing.T) {
+	productionHubRuntime(t, true)
+}
+
+func productionHubRuntime(t *testing.T, automatic bool) {
 	x, in, hs := fundedHubFixture(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	a, e := x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
-	if e != nil {
-		t.Fatal(e)
+	var a hub.Allocation
+	var e error
+	if automatic {
+		if _, e = (worker.RuntimeFundingWorker{Service: x.s, Region: in.Region}).Once(ctx); !errors.Is(e, service.ErrShareUnknown) {
+			t.Fatal("second Node remains unconfirmed", e)
+		}
+		rows, err := generated.New(x.f.pool).NodeSourceCandidates(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, row := range rows {
+			if row.NodeID == in.NodeID {
+				a, e = hub.DecodeAllocation(row.Payload)
+				if e != nil {
+					t.Fatal(e)
+				}
+			}
+		}
+		if a.AllocationID == "" {
+			t.Fatal("automatic producer did not create committed funded allocation")
+		}
+		in.RawBytes = int64(a.RawBytes)
+	} else {
+		a, e = x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
+		if e != nil {
+			t.Fatal(e)
+		}
 	}
 	installAllocationFixture(t, hs, a, x.now.Add(time.Second))
 	clock := func() store.IssuerTime {

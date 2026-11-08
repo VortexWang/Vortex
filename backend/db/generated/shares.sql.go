@@ -1450,6 +1450,41 @@ func (q *Queries) ShareRenewalAuthority(ctx context.Context, arg ShareRenewalAut
 	return i, err
 }
 
+const shareSchedulingTenants = `-- name: ShareSchedulingTenants :many
+SELECT DISTINCT ON (h.tenant_id) h.tenant_id,r.created_by
+FROM rule_heads h
+JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision
+JOIN rule_deployments d ON d.tenant_id=h.tenant_id AND d.rule_id=h.id AND d.rule_revision=h.desired_revision
+WHERE d.state NOT IN ('failed','superseded')
+AND (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean
+ORDER BY h.tenant_id,h.id,d.id
+`
+
+type ShareSchedulingTenantsRow struct {
+	TenantID  string
+	CreatedBy string
+}
+
+func (q *Queries) ShareSchedulingTenants(ctx context.Context) ([]ShareSchedulingTenantsRow, error) {
+	rows, err := q.db.Query(ctx, shareSchedulingTenants)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ShareSchedulingTenantsRow{}
+	for rows.Next() {
+		var i ShareSchedulingTenantsRow
+		if err := rows.Scan(&i.TenantID, &i.CreatedBy); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const shareTaskByLease = `-- name: ShareTaskByLease :one
 SELECT id, tenant_id, operation_id, state, lease_token, lease_until, attempts, task_kind FROM tasks WHERE tenant_id=$1 AND id=$2 AND lease_token=$3 FOR UPDATE
 `
