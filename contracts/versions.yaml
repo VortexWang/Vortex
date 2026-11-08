@@ -5,10 +5,10 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "2.1.0",
-      "status": "frozen",
+      "version": "2.2.0",
+      "status": "candidate",
       "sources": [
-        "V1.11 \u00a70.2",
+        "V1.11 §0.2",
         "BE-001..006",
         "TEN-001..009",
         "NOD-001..014",
@@ -21,8 +21,8 @@
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "2.1.0",
-      "status": "frozen",
+      "version": "2.2.0",
+      "status": "candidate",
       "sources": [
         "GEN-007",
         "BE-005",
@@ -32,12 +32,12 @@
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.4.0",
-      "status": "frozen",
+      "version": "1.5.0",
+      "status": "candidate",
       "sources": [
-        "\u00a73.4",
-        "\u00a77",
-        "\u00a79",
+        "§3.4",
+        "§7",
+        "§9",
         "AGT-001..012",
         "HUB-001..018"
       ],

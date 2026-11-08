@@ -21,7 +21,8 @@
               "identity-v1",
               "recovery-v1",
               "share-policy-v1",
-              "backend-ledger-v1"
+              "backend-ledger-v1",
+              "usage-ledger-v1"
             ]
           },
           "uniqueItems": true
@@ -1141,6 +1142,64 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9223372036854775807
+        }
+      }
+    },
+    "usage_envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "node_id",
+        "origin_boot_id",
+        "report_boot_id",
+        "sequence",
+        "batch_id",
+        "kind",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "origin_boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "report_boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "batch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "kind": {
+          "enum": [
+            "known",
+            "unknown"
+          ]
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
         }
       }
     }

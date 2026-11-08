@@ -23,7 +23,7 @@ through,sha,evidence,host=sys.argv[1:]
 def require(ok,message):
     if not ok: raise SystemExit('manifest failed: '+message)
 order=['06-01','06-08','06-09','06-02','06-10','06-03','06-04','06-05','06-06','06-07','06-11']
-require(through in order[:7], 'producer not implemented for '+through)
+require(through in order[:8], 'producer not implemented for '+through)
 require(host in ('','docker','actions'), 'invalid host')
 rows=re.findall(r'^\| ([A-Z][A-Z0-9-]+) \| (06-\d\d) \|',pathlib.Path('docs/coverage/phase6/COVERAGE.md').read_text(),re.M)
 require(len(rows)==96 and len(dict(rows))==96, 'full 96-item ownership register required')
@@ -39,6 +39,7 @@ tests={'06-01':['TestTracerDesiredStateReceipt','TestTracerRealProcesses'], '06-
 tests['06-10']=['TestServingRejectsDeletedMember','TestServingRejectsUnhealthyMember','TestServingCurrentSnapshotAndUnknown','TestServingAllCommittedRulesAndFailedNewRule','TestServingPlatformAggregatesAllCommittedTenantRules','TestDNSEntryGroupDomainBinding','TestDNSDurableServingRecomputeAndUnknownReplay','TestDNSAuditRollbackAndCurrentRole','TestCredentialCryptoScopeAndRecovery','TestCredentialEncryptedScopedAuditAndRollback','TestDNSCredentialPolicyIdentityAndExactZone','TestDNSBoundedRetryRedactionAndNoBlindCreate','TestDNSReconcileIdempotentOwnershipAndCleanup']
 tests['06-03']=['TestApplySupersededLateObservationCannotQueueCommit','TestRuleRevisionSchema','TestRuleImmutableRevisionConflictAndTenantScope','TestRuleValidationPathsTargetsAndDirections','TestRuleDependencyRecompileKeepsActiveRevision','TestRuleAuditRollback','TestRuleCompileCommittedArtifactAndAuditRollback','TestCompileArtifactImmutableSchema','TestCompileCanonicalDigestReplay','TestCompileInvalidAuthorityNoArtifacts','TestCompileAutoPortBindingCanonicalReplay','TestCompileGrantPermitAndDirection','TestCompileRuntimeSchemaCompatibility','TestCompileRuntimeBounds','TestApplyPrepareCommitUnknownAndLateReceipt','TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery','TestCompileWorkerMissingSnapshotThenReadyRestart','TestCompileWorkerAuditRollback','TestCompileWorkerMissingSnapshotPreservesPriorAuthority','TestCompileWorkerConflictRetainsAuthority','TestCompileWorkerConflictPreservesPriorActiveArtifact','TestRuleFixedPortRejectsUnallocatedCompilePaths','TestRuleAutoPortConsumesDurableAllocation','TestRulePortLegacyInflightCannotBeOverwritten','TestRuleAutoPortRejectsMissingOrChangedMemberAllocation','TestRulePortActualAgentSocketsUnknownAndQuery','TestRuleCapabilityLegacyAndReceiptIsolation']
 tests['06-04']=['TestPackageLifecycleExpiryIndependentOfNodeAuthority','TestPackageSnapshotAuthoritySchema','TestPackageCatalogSnapshotAndSubscriptionImmutable','TestPackageMonthlyAnchorAndCapabilityIntersection','TestPackageSubscriptionConcurrentPrimaryAndAuditRollback','TestPackageDurableSnapshotProductionCompileAndHistory','TestPackageMigrationUpgradeSeeded00005','TestEntitlementAtomicRedemptionContract','TestEntitlementRedeemConcurrentUsesAndRequestConflict','TestEntitlementAuditRollbackExpiredRevokedApplicability','TestEntitlementRenewalMonthlyNoneDurationAndIndependentSources','TestEntitlementTrafficWithoutPrimaryAndExpiredNoResurrection','TestEntitlementDifferentPackageConfirmationAtomic','TestPackageLifecycleMonthlyExpiryAndReplay','TestPackageLifecycleAuditRollbackAndUnknownRetention','TestRestrictionAllowsStopRevisionAndCompile','TestRestrictionBlocksDispatchButPreservesLateObservation','TestDowngradePreviewConfirmDueAuthority','TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation']
+tests['06-05']=['TestLedgerSourceAuthoritySchema','TestLedgerConservationRebuildSourceIsolationAndAuditRollback','TestRateVersionSnapshotLeadAndBillingExplanation','TestUsageBatchIdempotencyAuthoritySchema','TestUsageIdempotentTupleDigestDisputeAndFinal','TestReserveConcurrentNonceDualVersionAndReturnUnused','TestUsageAuditRollback','TestUnknownRiskBudgetAuthoritySchema','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback','TestUnknownExactFinalReconciliationAndProtectionBand','TestUsageReconciliationWorkerExpiredReceiptFreeze','TestSourceLocalUnknownDoesNotNetOrFreezeNewSource','TestUsageSourceFixedPointRemainderAcrossGrants','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUsageFaultPowerLossAuditTransactionRollback','TestUsageRelayAndSelfHostedNoCharge','TestUsageWireRejectsMalformedAndUnfundedSelfHosted']
 for producer in ([host] if host else ['docker','actions']):
     folder=pathlib.Path(evidence)/producer
     require((folder/'result.json').is_file(), producer+' result.json missing')
@@ -85,6 +86,12 @@ for producer in ([host] if host else ['docker','actions']):
         builds=(folder/'rule-builds.log').read_text()
         for arch in ('amd64','arm64'):
             require(builds.count('GOARCH='+arch)>=2 and builds.count('GOOS=linux')>=4, 'Linux target compilation missing '+arch)
+    if order.index(through)>=order.index('06-05'):
+        external_files+=['ledger-fault.log']
+        fault=(folder/'ledger-fault.log').read_text()
+        require('--- SKIP:' not in fault and '\nFAIL' not in fault and 'WARNING: DATA RACE' not in fault,'ledger fault suite failed/skipped/racy')
+        for target in ['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback']:
+            require('--- PASS: '+target in fault,'fault proof missing '+target)
     for name in required+process_files+external_files:
         f=folder/name
         require(f.is_file(), producer+'/'+name+' missing')

@@ -3,7 +3,7 @@
 All 96 Phase 6 requirements have an explicit primary plan owner below. Ownership
 is not acceptance: TEN-002 still requires later domain resource ownership checks.
 Through-plan order is 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04, 06-05,
-06-06, 06-07, 06-11. The implemented producer currently supports through 06-04;
+06-06, 06-07, 06-11. The implemented producer currently supports through 06-05;
 later plans extend it with actual producers before their evidence becomes required.
 Future files are neither required by 06-02 nor replaced by fixture results.
 
@@ -80,21 +80,21 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
 | PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
 | PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| MTR-001 | 06-05 | pending producer in 06-05 | pending |
-| MTR-002 | 06-05 | pending producer in 06-05 | pending |
-| MTR-003 | 06-05 | pending producer in 06-05 | pending |
-| MTR-004 | 06-05 | pending producer in 06-05 | pending |
-| MTR-005 | 06-05 | pending producer in 06-05 | pending |
-| MTR-006 | 06-05 | pending producer in 06-05 | pending |
-| MTR-007 | 06-05 | pending producer in 06-05 | pending |
-| MTR-008 | 06-05 | pending producer in 06-05 | pending |
-| MTR-009 | 06-05 | pending producer in 06-05 | pending |
-| MTR-010 | 06-05 | pending producer in 06-05 | pending |
-| MTR-011 | 06-05 | pending producer in 06-05 | pending |
-| MTR-013 | 06-05 | pending producer in 06-05 | pending |
-| MTR-014 | 06-05 | pending producer in 06-05 | pending |
-| MTR-015 | 06-05 | pending producer in 06-05 | pending |
-| MTR-016 | 06-05 | pending producer in 06-05 | pending |
+| MTR-001 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log; ledger-fault.log | implemented accounting scope; CR-007 freeze and later authority producers pending |
+| MTR-002 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | implemented source fixed-point accounting; freeze pending |
+| MTR-003 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | 24h policy candidate and preauthorization; signer activation06-06 |
+| MTR-004 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | source-local B/F/L and projection rebuild; freeze pending |
+| MTR-005 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | source ledger API contract; HTTP06-07, UI Phase7 |
+| MTR-006 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log; ledger-fault.log | real Agent/Hub/PG tuple idempotency; freeze pending |
+| MTR-007 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | old boot frozen; new signed lease producer06-06 |
+| MTR-008 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | immutable reserve/actual/return/final; runtime authority06-06 |
+| MTR-009 | 06-05 | [LEDGER.md](LEDGER.md); ledger-fault.log | 72h funded conservative close or persistent frozen dispute |
+| MTR-010 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | immutable each-group coefficient explanation; HTTP06-07/UI Phase7 |
+| MTR-011 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | zero-coefficient self-hosted accounting exemption; mandatory runtime rights still required |
+| MTR-013 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | old-source L and independent new sources; freeze pending |
+| MTR-014 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | max12s UTC protection, no new holds inside band; full signer handover06-06 |
+| MTR-015 | 06-05 | [LEDGER.md](LEDGER.md); ledger-fault.log | immutable unknown, risk-funded compensation, idempotent late exact; freeze pending |
+| MTR-016 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | snapshot/source/grant binding, immutable history; freeze pending |
 | LIM-001 | 06-06 | pending producer in 06-06 | pending |
 | LIM-002 | 06-06 | pending producer in 06-06 | pending |
 | LIM-003 | 06-06 | pending producer in 06-06 | pending |

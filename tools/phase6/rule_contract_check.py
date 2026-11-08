@@ -1,4 +1,4 @@
-"""Verify historical CR-005 exactly, unchanged wire, and current CR-006 candidate."""
+"""Verify exact historical approvals, unchanged wire and the CR-007 candidate."""
 import hashlib
 import json
 from pathlib import Path
@@ -19,6 +19,11 @@ def protoc(source, kind, text=None, data=None):
 proposal = load('docs/changes/CR-005-rule-two-phase.json')
 approval = load('docs/changes/CR-005-APPROVAL.json')
 approved_source = 'fc63d57406f9f0e3eebe99ad276f95b004add710'
+history6_source='9749c7af71b5b6d430f58b67ef5398c0adc90ce2'
+def history6(path):
+    return subprocess.check_output(['git','show',history6_source+':'+path],cwd=ROOT)
+for path in ('docs/changes/CR-006-packages-entitlements.json','docs/changes/CR-006-APPROVAL.json','docs/governance/contract-review.yaml'):
+    assert (ROOT/path).read_bytes()==history6(path), 'historical CR-006 approval rewritten: '+path
 for path in ('docs/changes/CR-005-rule-two-phase.json', 'docs/changes/CR-005-APPROVAL.json'):
     assert (ROOT/path).read_bytes() == approved_bytes(path), 'historical approval rewritten: '+path
 proposal_hash = hashlib.sha256((ROOT / 'docs/changes/CR-005-rule-two-phase.json').read_bytes()).hexdigest()
@@ -53,7 +58,7 @@ for row in approval['changes']:
     assert row['decision'] == 'approved' and row['proposal_sha256'] == proposal_hash
     assert row['from'] == change['from'] and row['version'] == change['version']
     assert row['reviewer'] == approval['reviewer'] and row['approved_at'] == approval['recorded_at']
-    if row['contract_id'] in ('vortex.control.v1','vortex.runtime-config'):
+    if row['contract_id']=='vortex.runtime-config':
         subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-frozen', '--contract-id', row['contract_id']], cwd=ROOT, check=True)
 
 candidate = load('docs/changes/CR-006-packages-entitlements.json')
@@ -72,7 +77,7 @@ for row in approved6['changes']:
     assert row['approved_at']==approved6['recorded_at'] and row['approval_record']=='docs/changes/CR-006-APPROVAL.json'
     contract=next(c for c in expected_review['contracts'] if c['id']==row['contract_id'])
     contract['version'],contract['sha256']='2.1.0',row['contract_sha256']
-    assert hashlib.sha256((ROOT/contract['path']).read_bytes()).hexdigest()==row['contract_sha256']
+    assert hashlib.sha256(history6(contract['path'])).hexdigest()==row['contract_sha256']
 expected_review['change_approvals']+=approved6['changes']
 assert review==expected_review, 'unapproved governance metadata mutation'
 assert candidate['id']=='CR-006' and candidate['plan']=='06-04' and candidate['status']=='pending-owner-approval'
@@ -80,12 +85,12 @@ assert candidate['baseline_source']==approved_source
 assert candidate['prior_approval']['sha256']==hashlib.sha256(approved_bytes('docs/changes/CR-005-APPROVAL.json')).hexdigest()
 assert candidate['prior_approval']['proposal_sha256']==proposal_hash
 assert candidate['changes']==[{'contract_id':c,'from':'2.0.0','version':'2.1.0','kind':'compatible'} for c in ('vortex.database','vortex.public-api')]
-assert {x['id']:x['version'] for x in catalog['contracts']} == candidate['candidate_versions'], 'candidate catalog version mismatch'
+assert {x['id']:x['version'] for x in json.loads(history6('contracts/versions.yaml'))['contracts']} == candidate['candidate_versions'], 'historical candidate catalog version mismatch'
 assert len(candidate['artifacts'])==len({x['path'] for x in candidate['artifacts']}), 'duplicate candidate artifact'
 required={x['path'] for x in proposal['artifacts']}|{'backend/db/migrations/00006_packages_entitlements.sql','contracts/CHANGELOG.md'}
 assert {x['path'] for x in candidate['artifacts']}==required, 'candidate artifact inventory incomplete'
 for row in candidate['artifacts']:
-    raw=(ROOT/row['path']).read_bytes()
+    raw=history6(row['path'])
     candidate_raw=subprocess.check_output(['git','show',approved6['candidate_source']+':'+row['path']],cwd=ROOT)
     assert hashlib.sha256(candidate_raw).hexdigest()==row['sha256'], 'signed candidate source changed: '+row['path']
     if row['path']=='contracts/versions.yaml':
@@ -104,7 +109,7 @@ for row in candidate['artifacts']:
         assert raw==candidate_raw, 'approved normative artifact changed: '+row['path']
     if row['baseline_sha256'] is not None:
         assert hashlib.sha256(approved_bytes(row['path'])).hexdigest()==row['baseline_sha256'], 'candidate baseline changed'
-mutable={'contracts/versions.yaml','contracts/database/schema.sql','contracts/openapi/v1/openapi.yaml','backend/openapi/v1/openapi.yaml','contracts/requirements-map.yaml'}
+mutable={'contracts/versions.yaml','contracts/database/schema.sql','contracts/openapi/v1/openapi.yaml','backend/openapi/v1/openapi.yaml','contracts/requirements-map.yaml','contracts/protobuf/v1/lifecycle.schema.json','contracts/protobuf/v1/lifecycle.md'}
 for row in proposal['artifacts']:
     if row['path'] not in mutable:
         assert (ROOT/row['path']).read_bytes()==approved_bytes(row['path']), 'unchanged approved wire/migration modified: '+row['path']
@@ -112,6 +117,9 @@ old_map=json.loads(approved_bytes('contracts/requirements-map.yaml'))
 current_map=load('contracts/requirements-map.yaml')
 assert len(old_map['requirements'])==len(current_map['requirements']), 'requirement inventory changed'
 for old,current in zip(old_map['requirements'],current_map['requirements']):
+    if old['id'].startswith('MTR-'):
+        assert current['implementation_plan']=='06-05' and current['contract_candidate']=='CR-007' and current['verification']
+        current={k:v for k,v in current.items() if k not in ('implementation_plan','contract_candidate','verification','http_adapter_plan')}
     if old['id'].startswith('PLN-'):
         assert current['implementation_plan']=='06-04' and current['contract_candidate']=='CR-006' and current['verification']
         current={k:v for k,v in current.items() if k not in ('implementation_plan','contract_candidate','verification','http_adapter_plan')}
@@ -119,9 +127,27 @@ for old,current in zip(old_map['requirements'],current_map['requirements']):
 expected_schema='\n'.join([f'-- Phase 6 implemented PostgreSQL schema through migration {sorted((ROOT/"backend/db/migrations").glob("*.sql"))[-1].stem}.\n-- Canonical executable source: backend/db/migrations/*.sql.\n']+['\n'.join(line for line in p.read_text().split('-- +goose Down',1)[0].splitlines() if not line.startswith('-- +goose'))+'\n' for p in sorted((ROOT/'backend/db/migrations').glob('*.sql'))])
 assert (ROOT/'contracts/database/schema.sql').read_text()==expected_schema, 'database review schema differs from executable migrations'
 assert (ROOT / 'contracts/openapi/v1/openapi.yaml').read_bytes() == (ROOT / 'backend/openapi/v1/openapi.yaml').read_bytes(), 'OpenAPI copy differs'
-for path in sorted((ROOT / 'backend/db/migrations').glob('0000[1-5]*.sql')):
-    assert path.read_bytes() == approved_bytes(str(path.relative_to(ROOT))), 'applied migration rewritten: '+path.name
-subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-change', '--base', approved_source], cwd=ROOT, check=True)
+for path in sorted((ROOT / 'backend/db/migrations').glob('0000[1-6]*.sql')):
+    assert path.read_bytes() == history6(str(path.relative_to(ROOT))), 'applied migration rewritten: '+path.name
+proposal7=load('docs/changes/CR-007-metering-ledger.json')
+assert proposal7['id']=='CR-007' and proposal7['plan']=='06-05' and proposal7['status']=='pending-owner-approval'
+assert proposal7['baseline_source']==history6_source
+assert proposal7['prior_approval']['sha256']==hashlib.sha256(history6('docs/changes/CR-006-APPROVAL.json')).hexdigest()
+assert proposal7['prior_approval']['proposal_sha256']==candidate_hash
+expected_changes=[{'contract_id':key,'from':before,'version':after,'kind':'compatible'} for key,before,after in [('vortex.database','2.1.0','2.2.0'),('vortex.public-api','2.1.0','2.2.0'),('vortex.control.v1','1.4.0','1.5.0')]]
+assert proposal7['changes']==expected_changes
+assert proposal7['candidate_versions']=={c['id']:c['version'] for c in catalog['contracts']}
+for entry in catalog['contracts']:
+    if entry['id'] in {r['contract_id'] for r in expected_changes}: assert entry['status']=='candidate'
+    else: assert entry==next(c for c in json.loads(history6('contracts/versions.yaml'))['contracts'] if c['id']==entry['id'])
+required7={r['path'] for r in candidate['artifacts']}|{'backend/db/migrations/00007_metering_ledger.sql'}
+assert len(proposal7['artifacts'])==len(required7) and {r['path'] for r in proposal7['artifacts']}==required7
+for artifact in proposal7['artifacts']:
+    assert hashlib.sha256((ROOT/artifact['path']).read_bytes()).hexdigest()==artifact['sha256'], 'CR-007 candidate bytes changed: '+artifact['path']
+    if artifact['baseline_sha256'] is not None: assert hashlib.sha256(history6(artifact['path'])).hexdigest()==artifact['baseline_sha256']
+assert proposal7['acceptance']['owner_approval'] is False
+assert not (ROOT/'docs/changes/CR-007-APPROVAL.json').exists(), 'unreviewed approval record'
+subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-change', '--base', history6_source], cwd=ROOT, check=True)
 work=Path(sys.argv[1]); old=work/'baseline.proto'
 old.write_bytes(git_bytes('contracts/protobuf/v1/vortex.proto'))
 current=ROOT/'contracts/protobuf/v1/vortex.proto'
@@ -136,4 +162,4 @@ for kind,text in [
 new=protoc(current,'ControlMessage',text='sequence:4 rule_command{phase:"prepare" task_key:"key" target_revision:2}')
 decoded=protoc(old,'ControlMessage',data=new).decode()
 assert 'config_update' not in decoded and '18 {' in decoded, 'new rule body aliases legacy auto-apply body'
-print('Historical CR-005 prefix, exact owner-approved CR-006 hashes and metadata-only freeze, unchanged legacy wire/schema passed')
+print('Historical CR-005/CR-006 exact approvals, CR-007 candidate hashes, unchanged legacy wire/schema passed; owner freeze pending')

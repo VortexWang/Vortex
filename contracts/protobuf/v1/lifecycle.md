@@ -79,3 +79,21 @@ BackendMessage.authority_restrictions is distinct from certificate revocation. O
 BackendMessage.epoch_handoff_request is the typed input to existing Hub Recover/HandoffHub. Require matching authenticated Hub, from_epoch=current open epoch, to_epoch=from_epoch+1 without overflow, current backend heartbeat bound and required_restriction_revision already durably applied. Missing or delayed restriction revision holds the request; never default it to empty revocations. Same handoff ID and identical request replays original S/R result, changed request rejects. Compute S and original unissued R locally in one FULL transaction, close old signer, transfer R once and capture recovery barrier. Backend request contains no arbitrary R amount to mint. Handoff and status revisions are independently persisted; certificate-revocation revision must not substitute for authority restriction revision.
 
 Ledger payload is a replayed immutable observation, not a new allocation request. The phase-5 backend fixture commits the exact Hub/sequence/kind/record ID/bytes/hash before echoing ACK, preserving uniqueness and requiring contiguous confirmation. It does not derive funds, signer authority or financial settlement from arbitrary ledger payload. `issue` payload is the original authorization envelope; `known` is the existing deterministic UsageBatch protobuf and `unknown` is UnknownUsageBatch protobuf; `handoff` is the existing {Request,Result} record from agent/store/handoff.go at the recorded baseline. No payload is reinterpreted as BackendAllocation or EpochHandoffRequest. Any new semantic interpretation/record encoding requires another reviewed schema/version rather than extending an opaque NodeEvent.
+# Control 1.5 candidate: provenance-preserving usage ledger
+
+The additive `usage-ledger-v1` capability is negotiated independently of signer
+authority. It permits only `LedgerRecord.kind=usage-v1` carrying a UTF-8 JSON
+`usage_envelope` from lifecycle.schema.json. Outer Hub mTLS identity must match
+the configured Hub and the persisted node-to-Hub assignment. The inner node,
+origin/report boot, original NodeMessage sequence and original payload SHA-256
+are retained before any acknowledgement. Known usage requires origin boot equal
+to report boot. Unknown reports may describe an old origin grant boot while
+their tuple belongs to the new report boot. Both bindings must be validated.
+
+Backend LedgerAcknowledgement is sent only after PostgreSQL commits usage,
+source ledger, task/outbox and shared audit. Duplicate batch bytes return the
+stored acknowledgement; conflicting tuple or digest remains disputed and does
+not overwrite history. Sequence-less historic SQLite records remain pending.
+This extension does not authorize a signer, allocation, runtime lease or share.
+All existing Protobuf field numbers, old messages and legacy wire behavior remain.
+CR-007 is pending owner approval; this candidate is not a frozen release claim.

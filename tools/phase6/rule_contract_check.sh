@@ -19,4 +19,4 @@ for name in vortex.pb.go vortex_grpc.pb.go; do
 done
 python3 tools/phase6/rule_contract_check.py "$work"
 python3 tools/phase1/contracts.py check-map
-echo 'Rule contract: two clean generations, historical CR-005 prefix, exact owner-approved CR-006 freeze and unchanged legacy wire/schema passed'
+echo 'Rule contract: two clean generations, historical CR-005/CR-006 exact approvals, CR-007 candidate hashes and unchanged legacy wire/schema passed; owner freeze pending'

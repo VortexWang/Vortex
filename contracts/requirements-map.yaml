@@ -1697,7 +1697,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-002",
@@ -1705,7 +1712,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-003",
@@ -1713,7 +1727,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-004",
@@ -1721,7 +1742,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-005",
@@ -1729,7 +1757,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-006",
@@ -1737,7 +1772,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-007",
@@ -1745,7 +1787,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-008",
@@ -1753,7 +1802,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-009",
@@ -1761,7 +1817,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-010",
@@ -1769,7 +1832,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-011",
@@ -1777,7 +1847,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-013",
@@ -1785,7 +1862,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-014",
@@ -1793,7 +1877,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-015",
@@ -1801,7 +1892,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-016",
@@ -1809,7 +1907,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-001",

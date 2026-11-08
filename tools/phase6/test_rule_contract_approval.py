@@ -15,7 +15,7 @@ class ApprovalIntegrity(unittest.TestCase):
             clone = Path(folder)/'source'
             subprocess.run(['git','clone','--quiet','--no-hardlinks',str(ROOT),str(clone)],check=True)
             # Also support the pre-commit validation run without changing source.
-            owned = ['tools/phase6/rule_contract_check.py','contracts/versions.yaml','contracts/CHANGELOG.md','docs/governance/contract-review.yaml','docs/changes/CR-006-APPROVAL.json']
+            owned = ['tools/phase6/rule_contract_check.py','docs/governance/contract-review.yaml','docs/changes/CR-006-APPROVAL.json','docs/changes/CR-007-metering-ledger.json']+[r['path'] for r in json.loads((ROOT/'docs/changes/CR-007-metering-ledger.json').read_text())['artifacts']]
             for name in owned:
                 shutil.copyfile(ROOT/name,clone/name)
             work = Path(folder)/'work'
