@@ -148,6 +148,28 @@ type GrantHistory struct {
 	RecordedAt pgtype.Timestamptz
 }
 
+type LeaseExpectation struct {
+	TenantID         string
+	ID               string
+	NodeID           string
+	Kind             string
+	ShareKind        string
+	Generation       int64
+	BootID           string
+	Revision         int64
+	Nonce            string
+	ConnectionID     string
+	RequestDigest    []byte
+	RequestedAt      pgtype.Timestamptz
+	IssuedAt         pgtype.Timestamptz
+	TtlSeconds       int32
+	RenewalSeconds   int32
+	RelativeDeadline pgtype.Timestamptz
+	OwnershipUntil   pgtype.Timestamptz
+	PolicyUntil      pgtype.Timestamptz
+	AutonomyUntil    pgtype.Timestamptz
+}
+
 type LedgerEvent struct {
 	TenantID          string
 	SourceID          string
@@ -207,6 +229,15 @@ type NodeDependency struct {
 	DependencyID string
 	Kind         string
 	Amount       int64
+}
+
+type NodeFencing struct {
+	TenantID          string
+	NodeID            string
+	BootID            string
+	FencingGeneration int64
+	RenewalClosed     bool
+	ClosureProof      []byte
 }
 
 type NodeGroup struct {
@@ -581,6 +612,76 @@ type Settlement struct {
 	CreatedAt         pgtype.Timestamptz
 	ChargedDelta      int64
 	ReleasedBill      int64
+}
+
+type ShareChain struct {
+	TenantID          string
+	NodeID            string
+	Kind              string
+	BootID            string
+	HeadGeneration    int64
+	ActiveGeneration  int64
+	PendingGeneration int64
+	HeldAmount        int64
+}
+
+type ShareGeneration struct {
+	TenantID          string
+	NodeID            string
+	Kind              string
+	Generation        int64
+	Predecessor       int64
+	ID                string
+	BootID            string
+	SignerID          string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+	Amount            int64
+	BurstBytes        int64
+	BillingSnapshotID string
+	RuleID            string
+	RuleRevision      int64
+	CreatedAt         pgtype.Timestamptz
+	OwnershipUntil    pgtype.Timestamptz
+	PolicyUntil       pgtype.Timestamptz
+	AutonomyUntil     pgtype.Timestamptz
+	RequestKey        string
+	RequestDigest     []byte
+}
+
+type ShareHandoff struct {
+	TenantID       string
+	ID             string
+	NodeID         string
+	Kind           string
+	Generation     int64
+	OperationID    string
+	State          string
+	ReceiptDigest  []byte
+	ExecutionState string
+	NextAttempt    pgtype.Timestamptz
+	Attempts       int32
+}
+
+type ShareRenewalAuthority struct {
+	TenantID     string
+	NodeID       string
+	Kind         string
+	Generation   int64
+	SignerID     string
+	SignerEpoch  int64
+	ClosedAt     pgtype.Timestamptz
+	ClosureProof []byte
+}
+
+type SignerAuthority struct {
+	TenantID         string
+	SignerID         string
+	SignerEpoch      int64
+	HeartbeatAt      pgtype.Timestamptz
+	AutonomyUntil    pgtype.Timestamptz
+	ApprovalEvidence []byte
 }
 
 type SourceExpiration struct {
