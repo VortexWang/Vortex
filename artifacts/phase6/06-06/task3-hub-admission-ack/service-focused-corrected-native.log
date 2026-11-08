@@ -1,0 +1,148 @@
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/valid
+2026/11/08 22:59:45 goose: no migrations to run. current version: 8
+2026/11/08 22:59:45 OK   00001_authority.sql (35.36ms)
+2026/11/08 22:59:45 OK   00002_tenant_policy.sql (12.97ms)
+2026/11/08 22:59:46 OK   00003_nodes_ports.sql (39.97ms)
+2026/11/08 22:59:46 OK   00004_entry_group_domains.sql (3.89ms)
+2026/11/08 22:59:46 OK   00005_rules_compile.sql (41.95ms)
+2026/11/08 22:59:46 OK   00006_packages_entitlements.sql (19.38ms)
+2026/11/08 22:59:46 OK   00007_metering_ledger.sql (24.35ms)
+2026/11/08 22:59:46 OK   00008_limits_shares.sql (56.37ms)
+2026/11/08 22:59:46 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/no_admission
+2026/11/08 22:59:47 goose: no migrations to run. current version: 8
+2026/11/08 22:59:47 OK   00001_authority.sql (8.47ms)
+2026/11/08 22:59:47 OK   00002_tenant_policy.sql (7.82ms)
+2026/11/08 22:59:47 OK   00003_nodes_ports.sql (17.3ms)
+2026/11/08 22:59:47 OK   00004_entry_group_domains.sql (2.45ms)
+2026/11/08 22:59:47 OK   00005_rules_compile.sql (18.1ms)
+2026/11/08 22:59:47 OK   00006_packages_entitlements.sql (17.68ms)
+2026/11/08 22:59:47 OK   00007_metering_ledger.sql (24.75ms)
+2026/11/08 22:59:47 OK   00008_limits_shares.sql (51.33ms)
+2026/11/08 22:59:47 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/unsigned
+2026/11/08 22:59:48 goose: no migrations to run. current version: 8
+2026/11/08 22:59:48 OK   00001_authority.sql (8.15ms)
+2026/11/08 22:59:48 OK   00002_tenant_policy.sql (6.93ms)
+2026/11/08 22:59:48 OK   00003_nodes_ports.sql (16.83ms)
+2026/11/08 22:59:48 OK   00004_entry_group_domains.sql (2.11ms)
+2026/11/08 22:59:48 OK   00005_rules_compile.sql (17.42ms)
+2026/11/08 22:59:48 OK   00006_packages_entitlements.sql (16.43ms)
+2026/11/08 22:59:48 OK   00007_metering_ledger.sql (22ms)
+2026/11/08 22:59:48 OK   00008_limits_shares.sql (47.97ms)
+2026/11/08 22:59:48 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/boot
+2026/11/08 22:59:49 goose: no migrations to run. current version: 8
+2026/11/08 22:59:49 OK   00001_authority.sql (8.17ms)
+2026/11/08 22:59:49 OK   00002_tenant_policy.sql (7ms)
+2026/11/08 22:59:49 OK   00003_nodes_ports.sql (17.04ms)
+2026/11/08 22:59:49 OK   00004_entry_group_domains.sql (2ms)
+2026/11/08 22:59:49 OK   00005_rules_compile.sql (16.77ms)
+2026/11/08 22:59:49 OK   00006_packages_entitlements.sql (16.4ms)
+2026/11/08 22:59:49 OK   00007_metering_ledger.sql (21.88ms)
+2026/11/08 22:59:49 OK   00008_limits_shares.sql (50.01ms)
+2026/11/08 22:59:49 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/backend
+2026/11/08 22:59:50 goose: no migrations to run. current version: 8
+2026/11/08 22:59:50 OK   00001_authority.sql (8.31ms)
+2026/11/08 22:59:50 OK   00002_tenant_policy.sql (7.12ms)
+2026/11/08 22:59:50 OK   00003_nodes_ports.sql (17ms)
+2026/11/08 22:59:50 OK   00004_entry_group_domains.sql (2.19ms)
+2026/11/08 22:59:50 OK   00005_rules_compile.sql (17.23ms)
+2026/11/08 22:59:50 OK   00006_packages_entitlements.sql (16.29ms)
+2026/11/08 22:59:50 OK   00007_metering_ledger.sql (21.7ms)
+2026/11/08 22:59:50 OK   00008_limits_shares.sql (48.22ms)
+2026/11/08 22:59:50 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/expiry
+2026/11/08 22:59:51 goose: no migrations to run. current version: 8
+2026/11/08 22:59:51 OK   00001_authority.sql (8.29ms)
+2026/11/08 22:59:51 OK   00002_tenant_policy.sql (7.75ms)
+2026/11/08 22:59:51 OK   00003_nodes_ports.sql (17.9ms)
+2026/11/08 22:59:51 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/08 22:59:51 OK   00005_rules_compile.sql (17.64ms)
+2026/11/08 22:59:51 OK   00006_packages_entitlements.sql (16.76ms)
+2026/11/08 22:59:51 OK   00007_metering_ledger.sql (22.65ms)
+2026/11/08 22:59:52 OK   00008_limits_shares.sql (48.48ms)
+2026/11/08 22:59:52 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/new_authority
+2026/11/08 22:59:53 goose: no migrations to run. current version: 8
+2026/11/08 22:59:53 OK   00001_authority.sql (8.18ms)
+2026/11/08 22:59:53 OK   00002_tenant_policy.sql (7.4ms)
+2026/11/08 22:59:53 OK   00003_nodes_ports.sql (17.51ms)
+2026/11/08 22:59:53 OK   00004_entry_group_domains.sql (2.37ms)
+2026/11/08 22:59:53 OK   00005_rules_compile.sql (18.56ms)
+2026/11/08 22:59:53 OK   00006_packages_entitlements.sql (17.83ms)
+2026/11/08 22:59:53 OK   00007_metering_ledger.sql (23.62ms)
+2026/11/08 22:59:53 OK   00008_limits_shares.sql (60.2ms)
+2026/11/08 22:59:53 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/node_boot
+2026/11/08 22:59:54 goose: no migrations to run. current version: 8
+2026/11/08 22:59:54 OK   00001_authority.sql (11.37ms)
+2026/11/08 22:59:54 OK   00002_tenant_policy.sql (7.18ms)
+2026/11/08 22:59:54 OK   00003_nodes_ports.sql (21.91ms)
+2026/11/08 22:59:54 OK   00004_entry_group_domains.sql (3.07ms)
+2026/11/08 22:59:54 OK   00005_rules_compile.sql (25.55ms)
+2026/11/08 22:59:54 OK   00006_packages_entitlements.sql (16.34ms)
+2026/11/08 22:59:54 OK   00007_metering_ledger.sql (21.24ms)
+2026/11/08 22:59:54 OK   00008_limits_shares.sql (47.8ms)
+2026/11/08 22:59:54 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/fencing
+2026/11/08 22:59:55 goose: no migrations to run. current version: 8
+2026/11/08 22:59:55 OK   00001_authority.sql (8.16ms)
+2026/11/08 22:59:55 OK   00002_tenant_policy.sql (7.51ms)
+2026/11/08 22:59:55 OK   00003_nodes_ports.sql (16.77ms)
+2026/11/08 22:59:55 OK   00004_entry_group_domains.sql (2.04ms)
+2026/11/08 22:59:55 OK   00005_rules_compile.sql (17.2ms)
+2026/11/08 22:59:55 OK   00006_packages_entitlements.sql (16.54ms)
+2026/11/08 22:59:55 OK   00007_metering_ledger.sql (22.43ms)
+2026/11/08 22:59:55 OK   00008_limits_shares.sql (49.74ms)
+2026/11/08 22:59:55 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/restriction
+2026/11/08 22:59:56 goose: no migrations to run. current version: 8
+2026/11/08 22:59:56 OK   00001_authority.sql (8.07ms)
+2026/11/08 22:59:56 OK   00002_tenant_policy.sql (7.2ms)
+2026/11/08 22:59:56 OK   00003_nodes_ports.sql (16.7ms)
+2026/11/08 22:59:56 OK   00004_entry_group_domains.sql (2.04ms)
+2026/11/08 22:59:56 OK   00005_rules_compile.sql (17ms)
+2026/11/08 22:59:56 OK   00006_packages_entitlements.sql (15.88ms)
+2026/11/08 22:59:56 OK   00007_metering_ledger.sql (21.3ms)
+2026/11/08 22:59:56 OK   00008_limits_shares.sql (48.98ms)
+2026/11/08 22:59:56 goose: successfully migrated database to version: 8
+=== RUN   TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/audit
+2026/11/08 22:59:57 goose: no migrations to run. current version: 8
+2026/11/08 22:59:57 OK   00001_authority.sql (8.25ms)
+2026/11/08 22:59:57 OK   00002_tenant_policy.sql (7.67ms)
+2026/11/08 22:59:57 OK   00003_nodes_ports.sql (16.97ms)
+2026/11/08 22:59:57 OK   00004_entry_group_domains.sql (2.06ms)
+2026/11/08 22:59:57 OK   00005_rules_compile.sql (16.9ms)
+2026/11/08 22:59:57 OK   00006_packages_entitlements.sql (16.05ms)
+2026/11/08 22:59:57 OK   00007_metering_ledger.sql (21.77ms)
+2026/11/08 22:59:57 OK   00008_limits_shares.sql (47.83ms)
+2026/11/08 22:59:57 goose: successfully migrated database to version: 8
+--- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope (12.99s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/valid (1.37s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/no_admission (1.12s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/unsigned (1.16s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/boot (1.17s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/backend (1.18s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/expiry (1.17s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/new_authority (1.20s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/node_boot (1.18s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/fencing (1.15s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/restriction (1.14s)
+    --- PASS: TestHubRecoveryAdmissionRequiresCommittedProofAndCurrentScope/audit (1.13s)
+=== RUN   TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue
+2026/11/08 22:59:58 goose: no migrations to run. current version: 8
+2026/11/08 22:59:58 OK   00001_authority.sql (8.32ms)
+2026/11/08 22:59:58 OK   00002_tenant_policy.sql (7.61ms)
+2026/11/08 22:59:58 OK   00003_nodes_ports.sql (17.4ms)
+2026/11/08 22:59:58 OK   00004_entry_group_domains.sql (2.15ms)
+2026/11/08 22:59:58 OK   00005_rules_compile.sql (17.2ms)
+2026/11/08 22:59:58 OK   00006_packages_entitlements.sql (16.8ms)
+2026/11/08 22:59:58 OK   00007_metering_ledger.sql (22.54ms)
+2026/11/08 22:59:59 OK   00008_limits_shares.sql (49.18ms)
+2026/11/08 22:59:59 goose: successfully migrated database to version: 8
+--- PASS: TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue (3.15s)
+PASS
+ok  	vortex/backend/internal/service	17.939s

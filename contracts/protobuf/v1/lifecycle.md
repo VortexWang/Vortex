@@ -855,3 +855,51 @@ explicitly completes the finite local ACK barrier. They do not implement product
 admission/ACK transport, new-epoch generation renewal or repeated PG recovery
 producers; those remain pending. No approved snapshot or protobuf tag changes here.
 CR-008 remains unapproved; Phase6 remains8/11 and06-06 incomplete.
+
+## Independent authenticated admission and finite FULL prefix ACK (candidate)
+
+The ordinary preflight capability remains forensic-only. A separate exact
+`hub-sr-admission-v1` hello and typed `BackendMessage.recovery_admission` at tag20
+can deliver an already committed platform admission. The envelope pins backend,
+Hub, actual boot, session and region; the canonical payload pins recovery,
+adjacent epochs, PG admission hash, complete manifest/prefix hashes, sealed
+sequence and a fresh bounded observed time. The backend does not create a
+platform approval from a Hub request. It checks the current bound epoch/boot,
+complete original all-tenant approvals, original deadlines, current Node
+boot/assignment/fence, eligibility and active share bindings without replacement.
+Delivery audit is transactional and failed audit emits no capability.
+
+The Hub replays a prior FULL admission before clock observation; replay returns
+the original payload without retiming liveness. First installation requires
+trusted local conservative time within5seconds of the authenticated timestamp,
+recovering mode, the exact active handoff and open target epoch, and every original
+autonomy deadline still unexpired. This explicit immutable-admission path may
+refresh recovering liveness after the ordinary30second heartbeat gap. It cannot
+revive offline, expired, closed or a different recovery, and ordinary heartbeat
+checks remain unchanged. The original hard deadline is clamped, never extended.
+
+One SQLite FULL transaction revalidates the immutable handoff and every local row
+including confirmed rows; it reconstructs the complete prefix hash and verifies
+the exact sealed_sequence+1 handoff row. It confirms only that finite prefix,
+updates its checkpoint, stores an immutable admission receipt, fresh heartbeat
+and recovering->online transition, and marks recovery complete atomically. A tail
+beyond the barrier is not implicitly confirmed. Local or PG admission never settles
+usage or releases issued/unknown debt, changes R or rewrites allocation/source/share.
+
+Lost response before local FULL leaves the prefix unconfirmed; SIGKILL before/after,
+FULL failure, concurrent connections and reopen preserve atomicity and exact replay.
+After local FULL, a lost funded status reconnects through separately gated ordinary
+funded authority. The production Hub enables independent preflight plus admission;
+legacy callers remain opt-in. The server treats an admitted boot as issuer evidence,
+so an empty DB cannot use blocked/fresh funded bootstrap to adopt that epoch.
+
+Platform orchestration of approval/fences/roots/admission is still separate; the
+transport consumes only explicitly persisted approval and admission records. Share
+generation renewal/closure across epochs and repeated PG recovery producers remain
+pending. CR-008 is unapproved, and prior approved snapshots/tags remain unchanged.
+
+Until generation-level effective-epoch closure is implemented, QueueHandoff
+refuses any predecessor with an admitted S/R allocation. The original epoch's
+closed renewal row cannot authorize CAS or capacity release after a successor
+epoch was admitted; a prepared successor remains held/pending. This is an explicit
+conservative pending boundary, not a completed renewal/closure lifecycle.

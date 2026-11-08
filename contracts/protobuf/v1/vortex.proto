@@ -268,6 +268,7 @@ message BackendMessage {
     ShareRenewalClosureCommand share_renewal_closure = 17;
     HubRecoveryCommand recovery_command = 18;
     HubRecoveryRetention recovery_retention = 19;
+    HubRecoveryAdmission recovery_admission = 20;
   }
 }
 message BackendHeartbeat {
@@ -378,4 +379,16 @@ message HubRecoveryRetention {
   string kind = 8;
   uint64 ledger_sequence = 9;
   bytes payload_sha256 = 10;
+}
+
+// Separate hub-sr-admission-v1 stream; this body cannot be consumed as retention
+// or an ordinary funded LedgerAcknowledgement.
+message HubRecoveryAdmission {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  bytes payload = 6;
+  bytes payload_sha256 = 7;
 }

@@ -1,0 +1,54 @@
+=== RUN   TestRecoveryAdmissionFULLAtomicFinitePrefixConcurrentReopenNoFunds
+--- PASS: TestRecoveryAdmissionFULLAtomicFinitePrefixConcurrentReopenNoFunds (0.48s)
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/backend
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/boot
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/manifest
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/prefix
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/sequence
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/epoch
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/clock
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/stale
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/expiry
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/closed
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/hole
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/ordinary-heartbeat
+--- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives (5.29s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/backend (0.43s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/boot (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/manifest (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/prefix (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/sequence (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/epoch (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/clock (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/stale (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/expiry (0.42s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/closed (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/hole (0.42s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/ordinary-heartbeat (0.40s)
+PASS
+ok  	vortex/agent/store	7.949s
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/backend
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/hub
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/boot
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/session
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/region
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/digest
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/payload_backend
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/payload_boot
+=== RUN   TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/unknown_proto
+--- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL (1.54s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/backend (0.18s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/hub (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/boot (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/session (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/region (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/digest (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/payload_backend (0.17s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/payload_boot (0.19s)
+    --- PASS: TestRecoveryPreflightCommandBindsActualSessionBeforeFULL/unknown_proto (0.17s)
+PASS
+ok  	vortex/hub	3.234s

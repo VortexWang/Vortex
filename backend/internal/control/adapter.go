@@ -708,6 +708,9 @@ func (h *HubAdapter) Connect(stream grpc.BidiStreamingServer[controlv1.HubMessag
 	if body != nil && body.ControlVersion == "1.6.0" && len(body.Capabilities) == 1 && body.Capabilities[0] == "hub-sr-preflight-v1" {
 		return h.connectRecoveryPreflight(stream, id, hello)
 	}
+	if body != nil && body.ControlVersion == "1.6.0" && len(body.Capabilities) == 1 && body.Capabilities[0] == "hub-sr-admission-v1" {
+		return h.connectRecoveryAdmission(stream, id, hello)
+	}
 	if body != nil && body.ControlVersion == "1.6.0" {
 		return h.connectFunded(stream, id, hello)
 	}

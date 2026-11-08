@@ -1,0 +1,62 @@
+{
+  "base_sha": "acf26002c0f8f8294913c200fe470b626c610020",
+  "scope": "Independent explicit admitted recovery transport and atomic finite-prefix SQLite FULL ACK; no financial settlement or generation closure completion",
+  "phase_progress": "8/11; 06-06 Task3 incomplete; CR-008 unprepared/unapproved",
+  "environment": "development checkout; Darwin arm64 native and Linux arm64 Docker; cross-builds only for amd64",
+  "passed": {
+    "backend_native": "backend-complete-final-native.log; service263.908s",
+    "backend_linux_arm64": "backend-complete-final-linux.log; service270.720s",
+    "root_native": "root-native-race.log",
+    "root_linux_arm64_serial": "root-linux-serial-race.log",
+    "focused": "service-authorities-final-native.log; generation-closure-guard-final-native.log; green-prefix-crash-final.log",
+    "generators": "generators-repro-final.json; two isolated23sqlc+2protobuf outputs",
+    "cross_builds": "cross-builds-complete-final.json; six builds"
+  },
+  "retained_failures": [
+    "local-focused-native.log: fixture journal ID assertion",
+    "service-focused-native.log: unused test import",
+    "root-linux-race.log: existing bounded regional timeout under parallel race load",
+    "generation-closure-guard-native.log: invalid test burst fixture",
+    "generation-closure-guard-corrected-native.log: invalid test burst fixture"
+  ],
+  "expected_red": "red-without-prefix-hash.log; overlay bypass of prefix hash; source hashes unchanged",
+  "scope_limits": [
+    "No clean-source Docker/Actions same-SHA pairing",
+    "No native amd64 execution",
+    "No repeated PG recovery producers",
+    "No effective generation renewal/closure completion",
+    "No platform recovery orchestration or full06-06 completion"
+  ],
+  "evidence_sha256": {
+    "README.md": "97f71d92da6c1cb7265d8950a61bd5703b3ca64d603d71709ed5204da4dbfb6c",
+    "approved-snapshot-protection.json": "1c500cf229d466803153ef89877c6ce0acf486a8015e54db57077ed3fcf35037",
+    "backend-complete-final-linux.log": "3f931c01fbcd15539d72f1c9ce123d5de8ca6cb39d6bde3e04239e850b188784",
+    "backend-complete-final-native.log": "0cc5c420266dc461e686b1fd51f046f96f4c60ef96ecfe1ad21a58cb7c367241",
+    "backend-linux-final-race.log": "b58ff0e49457655f030df8ada399a256e7b735357d86b78068afec02038e53e7",
+    "backend-native-final-race.log": "45bfe8af65815f0c2d23a8ec863b928235d7f5c8afebdec251dd304767406e59",
+    "backend-native-race.log": "68b611fa59f0df434f7f3f2afbe840cd0aea036bfab5a93c2a8c13d81a41973d",
+    "cross-builds-complete-final.json": "e37709b48bdddff2ea5565787405937a12ab0c8db8448bddd96b05ae9b9806c7",
+    "cross-builds-final.json": "a293b6c797d6c8e97647cd60965a9130570b5491fc3f531343256a5048fa7cb3",
+    "cross-builds.json": "1f5c0e7a257a729af7ef4ba6b498f3794ce5a0bc0b109e5a5bb5ba706626e502",
+    "environment.json": "31538f08219d6b17bb8d0bfc21a7ebaee7a72ee757c8671cf0e6e498efb370ba",
+    "generation-closure-guard-corrected-native.log": "29396ab35d3c435946a45c9e89e65be27dbcef19d6578f122315d54e04b6e875",
+    "generation-closure-guard-final-native.log": "aff09ac1297b28f35694f5c36c51cc562cedfe7de79191825bfcf0c74f3f9955",
+    "generation-closure-guard-native.log": "336a35cd595b0c488b159626589fa586de050a327897d3d12633c80ce3665d95",
+    "generators-repro-final.json": "faa77dc9c636b5f8d3e4300f0e65dce95c476edb9d3d7eecb03711fa8ca66cc7",
+    "generators-repro.json": "75d256897aff809ca5b22ffa87b360e4b2cb04b0bfb936e3a0670e283d1b41a1",
+    "green-prefix-crash-final.log": "e56dfd91d5e0ce07d42fd0cc7dbb97c91c7d6407abbe706e5202434db44387b4",
+    "local-focused-corrected-native.log": "a7e799a2652705e0167948c06e70b1473804414b29ff898071cf0d9ae4707ce3",
+    "local-focused-final-native.log": "2ba28b7fbcd5fd8ab6a556fd8509e0b2c5a4f870dce9c7303a174894794c2548",
+    "local-focused-native.log": "08df641eccb7cac9adaa6ff94824b14819be3eb46d6b583cbb497461a917cf13",
+    "red-overlay.json": "39c6efd73944dbd8c8e43073eabd13d1a0f41e3fca2d0fc41cde9278b0e909d7",
+    "red-without-prefix-hash.log": "a16626515184d9163cad4c40b385b8b08ffa316f1eae9077264c88eacb117e83",
+    "root-linux-race.log": "be2e03d36603fe9795773349094bed9472f7ba57fa11270cda0ccd8927d437fd",
+    "root-linux-serial-race.log": "1eda3923a752e63fa219dde8298911fa7fa4fedb3abd0557cc4882b51c191530",
+    "root-native-race.log": "9b963f84572b7934095715348753729400cef816adfd10ddb3aab2857b7635bb",
+    "service-authorities-final-native.log": "2f14592fc3a8210502b1914828ba74d608d5cf5a36298e41c1aa337635b70b1b",
+    "service-focused-corrected-native.log": "ca2b2fb6378b8e6c8815862243f5526fc7cbc16e73dc845b859d8c49598e868d",
+    "service-focused-final-native.log": "9d14796a6a932a6899ee9fd45348b5da6e1b4da46d13c136acb4b6595558bae2",
+    "service-focused-native.log": "c42dada976809860ea741e0b95d7bf59d33009f51b069053e337222c177ba3ae",
+    "source-hashes.json": "21b7e9baed41e28ca84d550357113ba10e7aa68a81b622ae4a80a33a8f1b504e"
+  }
+}

@@ -1,0 +1,34 @@
+=== RUN   TestRecoveryAdmissionFULLAtomicFinitePrefixConcurrentReopenNoFunds
+    recovery_admission_test.go:85: admission ACKed later usage tail [{43 known 550e8400-e29b-41d4-a716-446655440105/later-tail [117 110 99 111 110 102 105 114 109 101 100 32 108 97 116 101 114 32 117 115 97 103 101 32 116 97 105 108] [44 60 38 93 100 139 45 27 110 79 25 61 237 228 187 179 251 125 169 71 165 132 66 85 243 81 51 252 255 184 145 190]}] <nil>
+--- FAIL: TestRecoveryAdmissionFULLAtomicFinitePrefixConcurrentReopenNoFunds (0.47s)
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/backend
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/boot
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/manifest
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/prefix
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/sequence
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/epoch
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/clock
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/stale
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/expiry
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/closed
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/hole
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/ordinary-heartbeat
+--- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives (5.23s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/backend (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/boot (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/manifest (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/prefix (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/sequence (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/epoch (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/clock (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/stale (0.39s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/expiry (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/closed (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/hole (0.40s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row (0.41s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/ordinary-heartbeat (0.40s)
+FAIL
+FAIL	vortex/agent/store	6.412s
+FAIL

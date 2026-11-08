@@ -56,6 +56,16 @@ func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, r
 		}
 		closure := ""
 		if g.Predecessor > 0 {
+			// S/R admission closes only the old epoch's issuance, not the
+			// generation's newly admitted issuer. Until its separate epoch-aware
+			// closure consumer exists, retain capacity and refuse a CAS shortcut.
+			recovered, e := q.ShareHasAdmittedRecovery(ctx, generated.ShareHasAdmittedRecoveryParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
+			if e != nil {
+				return e
+			}
+			if recovered {
+				return ErrShareUnknown
+			}
 			proofs, e := q.ShareClosureEvidence(ctx, generated.ShareClosureEvidenceParams{TenantID: scope.TenantID(), NodeID: g.NodeID, Kind: g.Kind, Generation: g.Predecessor})
 			if e != nil {
 				return e

@@ -2642,6 +2642,7 @@ type BackendMessage struct {
 	//	*BackendMessage_ShareRenewalClosure
 	//	*BackendMessage_RecoveryCommand
 	//	*BackendMessage_RecoveryRetention
+	//	*BackendMessage_RecoveryAdmission
 	Body          isBackendMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2788,6 +2789,15 @@ func (x *BackendMessage) GetRecoveryRetention() *HubRecoveryRetention {
 	return nil
 }
 
+func (x *BackendMessage) GetRecoveryAdmission() *HubRecoveryAdmission {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_RecoveryAdmission); ok {
+			return x.RecoveryAdmission
+		}
+	}
+	return nil
+}
+
 type isBackendMessage_Body interface {
 	isBackendMessage_Body()
 }
@@ -2832,6 +2842,10 @@ type BackendMessage_RecoveryRetention struct {
 	RecoveryRetention *HubRecoveryRetention `protobuf:"bytes,19,opt,name=recovery_retention,json=recoveryRetention,proto3,oneof"`
 }
 
+type BackendMessage_RecoveryAdmission struct {
+	RecoveryAdmission *HubRecoveryAdmission `protobuf:"bytes,20,opt,name=recovery_admission,json=recoveryAdmission,proto3,oneof"`
+}
+
 func (*BackendMessage_Heartbeat) isBackendMessage_Body() {}
 
 func (*BackendMessage_Allocation) isBackendMessage_Body() {}
@@ -2851,6 +2865,8 @@ func (*BackendMessage_ShareRenewalClosure) isBackendMessage_Body() {}
 func (*BackendMessage_RecoveryCommand) isBackendMessage_Body() {}
 
 func (*BackendMessage_RecoveryRetention) isBackendMessage_Body() {}
+
+func (*BackendMessage_RecoveryAdmission) isBackendMessage_Body() {}
 
 type BackendHeartbeat struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
@@ -4244,6 +4260,100 @@ func (x *HubRecoveryRetention) GetPayloadSha256() []byte {
 	return nil
 }
 
+// Separate hub-sr-admission-v1 stream; this body cannot be consumed as retention
+// or an ordinary funded LedgerAcknowledgement.
+type HubRecoveryAdmission struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackendId     string                 `protobuf:"bytes,1,opt,name=backend_id,json=backendId,proto3" json:"backend_id,omitempty"`
+	HubId         string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	BootId        string                 `protobuf:"bytes,3,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId      string                 `protobuf:"bytes,5,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,6,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,7,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubRecoveryAdmission) Reset() {
+	*x = HubRecoveryAdmission{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryAdmission) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryAdmission) ProtoMessage() {}
+
+func (x *HubRecoveryAdmission) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryAdmission.ProtoReflect.Descriptor instead.
+func (*HubRecoveryAdmission) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *HubRecoveryAdmission) GetBackendId() string {
+	if x != nil {
+		return x.BackendId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *HubRecoveryAdmission) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
 var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
@@ -4475,7 +4585,7 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0fledger_sequence\x18\x02 \x01(\x04R\x0eledgerSequence\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload\x12%\n" +
 	"\x0epayload_sha256\x18\x04 \x01(\fR\rpayloadSha256\x12\x12\n" +
-	"\x04kind\x18\x05 \x01(\tR\x04kind\"\x9b\a\n" +
+	"\x04kind\x18\x05 \x01(\tR\x04kind\"\xf5\a\n" +
 	"\x0eBackendMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -4493,7 +4603,8 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequest\x12c\n" +
 	"\x15share_renewal_closure\x18\x11 \x01(\v2-.vortex.control.v1.ShareRenewalClosureCommandH\x00R\x13shareRenewalClosure\x12R\n" +
 	"\x10recovery_command\x18\x12 \x01(\v2%.vortex.control.v1.HubRecoveryCommandH\x00R\x0frecoveryCommand\x12X\n" +
-	"\x12recovery_retention\x18\x13 \x01(\v2'.vortex.control.v1.HubRecoveryRetentionH\x00R\x11recoveryRetentionB\x06\n" +
+	"\x12recovery_retention\x18\x13 \x01(\v2'.vortex.control.v1.HubRecoveryRetentionH\x00R\x11recoveryRetention\x12X\n" +
+	"\x12recovery_admission\x18\x14 \x01(\v2'.vortex.control.v1.HubRecoveryAdmissionH\x00R\x11recoveryAdmissionB\x06\n" +
 	"\x04body\"\xb6\x02\n" +
 	"\x10BackendHeartbeat\x12\x1d\n" +
 	"\n" +
@@ -4608,7 +4719,17 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x04kind\x18\b \x01(\tR\x04kind\x12'\n" +
 	"\x0fledger_sequence\x18\t \x01(\x04R\x0eledgerSequence\x12%\n" +
 	"\x0epayload_sha256\x18\n" +
-	" \x01(\fR\rpayloadSha2562_\n" +
+	" \x01(\fR\rpayloadSha256\"\xe2\x01\n" +
+	"\x14HubRecoveryAdmission\x12\x1d\n" +
+	"\n" +
+	"backend_id\x18\x01 \x01(\tR\tbackendId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x17\n" +
+	"\aboot_id\x18\x03 \x01(\tR\x06bootId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x05 \x01(\tR\bregionId\x12\x18\n" +
+	"\apayload\x18\x06 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\a \x01(\fR\rpayloadSha2562_\n" +
 	"\vNodeControl\x12P\n" +
 	"\aConnect\x12\x1e.vortex.control.v1.NodeMessage\x1a!.vortex.control.v1.ControlMessage(\x010\x012]\n" +
 	"\n" +
@@ -4627,7 +4748,7 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 48)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
 	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
@@ -4677,6 +4798,7 @@ var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*HubRecoveryRecord)(nil),           // 45: vortex.control.v1.HubRecoveryRecord
 	(*HubRecoveryManifest)(nil),         // 46: vortex.control.v1.HubRecoveryManifest
 	(*HubRecoveryRetention)(nil),        // 47: vortex.control.v1.HubRecoveryRetention
+	(*HubRecoveryAdmission)(nil),        // 48: vortex.control.v1.HubRecoveryAdmission
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
@@ -4727,17 +4849,18 @@ var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	39, // 45: vortex.control.v1.BackendMessage.share_renewal_closure:type_name -> vortex.control.v1.ShareRenewalClosureCommand
 	44, // 46: vortex.control.v1.BackendMessage.recovery_command:type_name -> vortex.control.v1.HubRecoveryCommand
 	47, // 47: vortex.control.v1.BackendMessage.recovery_retention:type_name -> vortex.control.v1.HubRecoveryRetention
-	30, // 48: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
-	25, // 49: vortex.control.v1.HubRecoveryRecord.record:type_name -> vortex.control.v1.LedgerRecord
-	0,  // 50: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	24, // 51: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
-	1,  // 52: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	26, // 53: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
-	52, // [52:54] is the sub-list for method output_type
-	50, // [50:52] is the sub-list for method input_type
-	50, // [50:50] is the sub-list for extension type_name
-	50, // [50:50] is the sub-list for extension extendee
-	0,  // [0:50] is the sub-list for field type_name
+	48, // 48: vortex.control.v1.BackendMessage.recovery_admission:type_name -> vortex.control.v1.HubRecoveryAdmission
+	30, // 49: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
+	25, // 50: vortex.control.v1.HubRecoveryRecord.record:type_name -> vortex.control.v1.LedgerRecord
+	0,  // 51: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	24, // 52: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
+	1,  // 53: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	26, // 54: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
+	53, // [53:55] is the sub-list for method output_type
+	51, // [51:53] is the sub-list for method input_type
+	51, // [51:51] is the sub-list for extension type_name
+	51, // [51:51] is the sub-list for extension extendee
+	0,  // [0:51] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -4796,6 +4919,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*BackendMessage_ShareRenewalClosure)(nil),
 		(*BackendMessage_RecoveryCommand)(nil),
 		(*BackendMessage_RecoveryRetention)(nil),
+		(*BackendMessage_RecoveryAdmission)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -4803,7 +4927,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   48,
+			NumMessages:   49,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

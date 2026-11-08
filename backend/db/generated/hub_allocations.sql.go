@@ -584,7 +584,8 @@ func (q *Queries) HubAllocationShareBindings(ctx context.Context, arg HubAllocat
 const hubBootHasIssuerEvidence = `-- name: HubBootHasIssuerEvidence :one
 SELECT (EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.hub_id=$1 AND r.hub_boot_id=$2)
  OR EXISTS(SELECT 1 FROM hub_delegation_seals s WHERE s.hub_id=$1 AND s.hub_boot_id=$2)
- OR EXISTS(SELECT 1 FROM hub_issue_receipts i JOIN hub_funded_allocations a ON a.tenant_id=i.tenant_id AND a.allocation_id=i.allocation_id WHERE a.hub_id=$1 AND a.hub_boot_id=$2))::boolean AS has_issuer_evidence
+ OR EXISTS(SELECT 1 FROM hub_issue_receipts i JOIN hub_funded_allocations a ON a.tenant_id=i.tenant_id AND a.allocation_id=i.allocation_id WHERE a.hub_id=$1 AND a.hub_boot_id=$2)
+ OR EXISTS(SELECT 1 FROM hub_same_store_admissions s WHERE s.hub_id=$1 AND s.to_boot_id=$2))::boolean AS has_issuer_evidence
 `
 
 type HubBootHasIssuerEvidenceParams struct {

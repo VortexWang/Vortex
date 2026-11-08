@@ -46,7 +46,8 @@ INSERT INTO hub_allocation_receipts(tenant_id,allocation_id,hub_id,hub_boot_id,p
 -- name: HubBootHasIssuerEvidence :one
 SELECT (EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.hub_id=$1 AND r.hub_boot_id=$2)
  OR EXISTS(SELECT 1 FROM hub_delegation_seals s WHERE s.hub_id=$1 AND s.hub_boot_id=$2)
- OR EXISTS(SELECT 1 FROM hub_issue_receipts i JOIN hub_funded_allocations a ON a.tenant_id=i.tenant_id AND a.allocation_id=i.allocation_id WHERE a.hub_id=$1 AND a.hub_boot_id=$2))::boolean AS has_issuer_evidence;
+ OR EXISTS(SELECT 1 FROM hub_issue_receipts i JOIN hub_funded_allocations a ON a.tenant_id=i.tenant_id AND a.allocation_id=i.allocation_id WHERE a.hub_id=$1 AND a.hub_boot_id=$2)
+ OR EXISTS(SELECT 1 FROM hub_same_store_admissions s WHERE s.hub_id=$1 AND s.to_boot_id=$2))::boolean AS has_issuer_evidence;
 -- name: RuntimeAllocationExists :one
 SELECT EXISTS(SELECT 1 FROM hub_funded_allocations
 WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3

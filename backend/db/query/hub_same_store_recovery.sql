@@ -57,3 +57,11 @@ INSERT INTO node_recovery_source_receipts(tenant_id,provision_id,payload,payload
 SELECT * FROM hub_same_store_admissions WHERE recovery_id=$1;
 -- name: AppendHubSameStoreAdmission :exec
 INSERT INTO hub_same_store_admissions(tenant_id,recovery_id,hub_id,from_epoch,to_epoch,from_boot_id,to_boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
+
+-- name: ShareHasAdmittedRecovery :one
+SELECT EXISTS(SELECT 1 FROM hub_allocation_share_bindings b
+JOIN hub_funded_allocations a ON a.tenant_id=b.tenant_id AND a.allocation_id=b.allocation_id
+JOIN hub_same_store_recoveries r ON r.hub_id=a.hub_id
+JOIN hub_same_store_admissions s ON s.recovery_id=r.id
+WHERE b.tenant_id=$1 AND b.node_id=$2 AND b.kind=$3 AND b.generation=$4
+AND EXISTS(SELECT 1 FROM jsonb_array_elements(convert_from(r.payload,'UTF8')::jsonb->'allocations') link WHERE link->>'allocation_id'=a.allocation_id));

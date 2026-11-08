@@ -23,6 +23,7 @@ type BackendClient struct {
 	Store                                     *store.Store
 	Clock                                     func() store.IssuerTime
 	RecoveryPreflight                         bool // independent candidate handshake before the funded stream
+	RecoveryAdmission                         bool // separately negotiated explicit admission after forensic retention
 }
 
 func (c *BackendClient) Run(ctx context.Context) error {
@@ -66,22 +67,51 @@ func (c *BackendClient) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	if c.RecoveryAdmission && !c.RecoveryPreflight {
+		return ErrSameStoreRecovery
+	}
 	if c.RecoveryPreflight {
 		available, e := c.runRecoveryPreflight(ctx, stream)
-		if e != nil {
+		retained := errors.Is(e, ErrRecoveryEvidenceRetained)
+		if e != nil && !(retained && c.RecoveryAdmission) {
 			return e
 		}
-		if !available {
+		if !available && !retained {
 			return ErrRecoveryEvidenceRetained
 		}
 		if e = stream.CloseSend(); e != nil {
 			return e
+		}
+		needAdmission := retained
+		if available && c.RecoveryAdmission && c.Clock != nil {
+			now := c.Clock()
+			if !validFundedClock(now) {
+				return store.ErrAuthorityTimeUncertain
+			}
+			snapshot, e := c.Store.HubControlSnapshot(ctx, c.HubID, now.Latest)
+			if e != nil {
+				return e
+			}
+			needAdmission = snapshot.Mode != store.AutonomyOnline
+		}
+		if c.RecoveryAdmission && needAdmission {
+			stream, e = controlv1.NewHubControlClient(conn).Connect(ctx)
+			if e != nil {
+				return e
+			}
+			if e = c.runRecoveryAdmission(ctx, stream); e != nil {
+				return e
+			}
+			if e = stream.CloseSend(); e != nil {
+				return e
+			}
 		}
 		stream, e = controlv1.NewHubControlClient(conn).Connect(ctx)
 		if e != nil {
 			return e
 		}
 	}
+
 	if c.Clock != nil {
 		return c.runFunded(ctx, stream)
 	}
