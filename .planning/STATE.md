@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 05
 status: executing
-stopped_at: Completed 06-04-PLAN.md; next dependency plan 06-05
-last_updated: "2026-11-07T23:00:25Z"
-last_activity: 2026-11-07
-last_activity_desc: "06-04 complete: exact owner-approved CR-006, clean source 9db5da0e Docker normal/race, contracts and real Cloudflare passed; SUMMARY 1775a7ed. Phase 6 is 7/11; next 06-05; final Actions pairing remains 06-11."
+stopped_at: 06-05 implementation verified; awaiting exact CR-007 owner approval
+last_updated: "2026-11-08T02:21:15Z"
+last_activity: 2026-11-08
+last_activity_desc: "06-05 implementation and clean source 995d7fca Docker normal/race, real usage recovery, fault, contracts, builds and Cloudflare passed; evidence 8b4a0d9e. Exact CR-007 owner approval pending; Phase 6 remains 7/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 49
-state_head: 1775a7ed
+state_head: 8b4a0d9e
 ---
 
 # Project State
@@ -32,8 +32,8 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 05
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete (7/11). Next dependency plan is 06-05; final Phase 6 acceptance remains pending.
-Last activity: 2026-11-07 — user explicitly approved CR-006 exact proposal 60487b77; database/API2.1 frozen. Clean source 9db5da0e passed full Linux arm64 Docker normal/race, real processes, four freezes, generated/wire/schema/map, dual-architecture compilation and real Cloudflare CRUD. Evidence28e4f153; SUMMARY1775a7ed. Final Actions pairing and funded ledger/lease producers remain later-plan work.
+Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete (7/11). 06-05 implementation and local runtime verification are complete; exact CR-007 owner approval remains pending. Final Phase 6 acceptance remains pending.
+Last activity: 2026-11-08 — CR-006 remains approved and 06-04 complete. Clean source995d7fca passed full local Docker backend/Agent/Hub/Engine normal/race, fault recovery, generation/compatibility, dual-architecture compilation and real Cloudflare CRUD; evidence8b4a0d9e. CR-007 exact proposal3ddd1ab7 awaits owner approval. Runtime result0, acceptance_complete=false; Phase6 remains7/11. See06-05-CHECKPOINT.md.
 
 Progress: Phase 6 [███████░░░░] 7/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -76,6 +76,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Decisions
 
+- 06-05 candidate: source995d7fca implements source-local ledger, funded unknown closure and immutable original usage identities across lost receipts and repeated Agent reboot. Exact CR-0073ddd1ab7 remains unapproved; no new freeze, summary, requirement completion or plan advancement.
+
 - 06-04: user explicitly approved CR-006 exact proposal 60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d; DB/API2.1 frozen with CR005 history unchanged. Confirmation consumes code atomically; future failure does not refund. Offline/revoked expiry persists authoritative limits/source expiry while actual stop stays pending and unknown occupation is retained. Source9db5da0e local producer passed; next06-05, final Actions06-11.
 
 - 06-03: owner-approved CR-005 exact proposal b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4 freezes database/API2.0, control1.4 and runtime1.2. Separate negotiated phased commands preserve legacy auto-apply. Missing immutable billing input stays pending; obsolete observations cannot create fresh Commit work. Source fc63d574 passed local Docker; final pairing remains 06-11.
@@ -109,6 +111,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Blockers/Concerns
 
+- 06-05 is awaiting exact CR-007 owner approval after complete local runtime verification. Database/API2.2 and control1.5 remain candidates; evidence8b4a0d9e preserves acceptance_complete=false and earlier failed/interrupted attempts. SDK session update again rejected historical Phase5 passed_with_scope; only current Phase6 continuation metadata was synchronized narrowly.
+
 - 06-04 owner freeze is resolved, all three tasks and eight PLN requirements complete; source9db5da0e clean local acceptance passed. SDK advance/metric/decision/session again rejected historical Phase5 passed_with_scope; update-progress skipped unscoped phase. Only current Phase6 state was synchronized narrowly; roadmap/requirements SDK writes succeeded. Disk inventory now has49 complete summaries, Phase6 seven of eleven.
 
 - 06-03 approval/runtime gate is resolved: CR-005-APPROVAL.json records the actual owner response; selected freezes and clean source fc63d574 normal/race pass. WINDOWS 6/7 fixed with source-bound evidence. The separate historical VLink hash mismatch remains deferred. SDK state handlers again rejected historical Phase 5 passed_with_scope; only current Phase 6 state was synchronized manually.
@@ -138,9 +142,9 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-07T23:00:25Z
-Stopped at: Completed 06-04-PLAN.md; next dependency plan 06-05
-Resume file: None
+Last session: 2026-11-08T02:21:15Z
+Stopped at: 06-05 implementation verified; awaiting exact CR-007 owner approval
+Resume file: .planning/phases/06-m4-m4-backend/06-05-CHECKPOINT.md
 
 ### Historical qualification review (not a main-workflow gate)
 

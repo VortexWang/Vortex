@@ -51,9 +51,9 @@ created: "2026-11-07"
 | 06-04-01 | 7 | catalog 与 immutable subscription/billing snapshot | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-04-02 | 7 | entitlement code atomic redemption | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-04-03 | 7 | restriction projection 与 downgrade preview/confirm | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-01 | 8 | source ledger、计费快照和 B/F/L projection | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-02 | 8 | usage idempotency、reserve/consume/final/dispute | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-03 | 8 | unknown upper bound 与 fault reconciliation | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
+| 06-05-01 | 8 | source ledger、计费快照和 B/F/L projection | source995d7fca clean Docker normal/race及故障专项通过；证据8b4a0d9e，见06-05-CHECKPOINT.md | ✅ 已实现 | ⏳ 本机通过，CR-007冻结批准待完成 |
+| 06-05-02 | 8 | usage idempotency、reserve/consume/final/dispute | source995d7fca clean Docker normal/race及故障专项通过；证据8b4a0d9e，见06-05-CHECKPOINT.md | ✅ 已实现 | ⏳ 本机通过，CR-007冻结批准待完成 |
+| 06-05-03 | 8 | unknown upper bound 与 fault reconciliation | source995d7fca clean Docker normal/race及故障专项通过；证据8b4a0d9e，见06-05-CHECKPOINT.md | ✅ 已实现 | ⏳ 本机通过，CR-007冻结批准待完成 |
 | 06-06-01 | 9 | share owner chain、lease 与 boot fencing | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-06-02 | 9 | successor handoff、receipt confirmation 与差额释放 | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
 | 06-06-03 | 9 | limits 与规则/计量联动检查 | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
