@@ -1,0 +1,17 @@
+=== RUN   TestDelegatedUnknownCannotUseGenericExactReceiptToReleaseChildren
+2026/11/08 14:49:00 goose: no migrations to run. current version: 8
+2026/11/08 14:49:00 OK   00001_authority.sql (10.24ms)
+2026/11/08 14:49:00 OK   00002_tenant_policy.sql (7.53ms)
+2026/11/08 14:49:00 OK   00003_nodes_ports.sql (16.82ms)
+2026/11/08 14:49:00 OK   00004_entry_group_domains.sql (2.04ms)
+2026/11/08 14:49:00 OK   00005_rules_compile.sql (17.07ms)
+2026/11/08 14:49:00 OK   00006_packages_entitlements.sql (16.75ms)
+2026/11/08 14:49:00 OK   00007_metering_ledger.sql (22.76ms)
+2026/11/08 14:49:00 OK   00008_limits_shares.sql (31ms)
+2026/11/08 14:49:00 goose: successfully migrated database to version: 8
+--- PASS: TestDelegatedUnknownCannotUseGenericExactReceiptToReleaseChildren (0.81s)
+=== RUN   TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback
+2026/11/08 14:49:01 goose: no migrations to run. current version: 8
+--- PASS: TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback (0.15s)
+PASS
+ok  	vortex/backend/internal/service	2.644s

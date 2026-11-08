@@ -157,6 +157,16 @@ func (s MeteringService) ReconcileExact(ctx context.Context, scope TenantScope, 
 		if e != nil {
 			return e
 		}
+		// A parent receipt cannot prove every issued child's final consumption or
+		// stop. Delegated closure must use complete issuer/Node evidence, including
+		// when the parent has unknown debt or an approved risk-budget settlement.
+		allocated, e := q.ReservationHasHubAllocation(ctx, generated.ReservationHasHubAllocationParams{TenantID: scope.TenantID(), ReservationID: r.ID})
+		if e != nil {
+			return e
+		}
+		if allocated {
+			return ErrShareUnknown
+		}
 		if _, e = q.LockSourceProjection(ctx, generated.LockSourceProjectionParams{TenantID: scope.TenantID(), SourceID: r.SourceID}); e != nil {
 			return e
 		}

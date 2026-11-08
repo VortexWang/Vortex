@@ -189,3 +189,38 @@ func TestHubIssueWithoutInstallReceiptStillFencesEmptyBootEvidence(t *testing.T)
 		t.Fatal("accepted issue was not issuer evidence", err, evidence)
 	}
 }
+
+func TestDelegatedUnknownCannotUseGenericExactReceiptToReleaseChildren(t *testing.T) {
+	x, in, hs := fundedHubFixture(t)
+	ctx := context.Background()
+	a, err := x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
+	if err != nil {
+		t.Fatal(err)
+	}
+	installAllocationFixture(t, hs, a, x.now)
+	issued, _, sequence := issueAllocationFixture(t, x, hs, a, 51)
+	if err = x.s.RecordHubIssue(x.f.contexts[in.HubID], in.HubID, in.HubBootID, sequence, issued.Payload, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	seal, err := hs.SealHubDelegation(ctx, in.HubID, in.HubBootID, a.DelegationID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, _ := json.Marshal(seal)
+	if err = x.s.RecordDelegationSeal(x.f.contexts[in.HubID], in.HubID, in.HubBootID, sequence+1, raw, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	meter := service.MeteringService{Pool: x.f.pool}
+	proof := sha256.Sum256([]byte("unknown parent does not prove child stop"))
+	if err = meter.RecordUnknown(ctx, x.f.scope, a.SourceID, proof[:], x.now, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	tables := []string{"settlements", "ledger_events", "ledger_projections", "unknown_liabilities", "operations", "tasks", "outbox", "audit_events"}
+	before := authoritySnapshot(t, x.f.pool, x.f.tenant, tables)
+	if err = meter.ReconcileExact(ctx, x.f.scope, a.SourceID, 0, proof[:], uuid.NewString()); !errors.Is(err, service.ErrShareUnknown) {
+		t.Fatal("generic exact proof released issued children", err)
+	}
+	if !bytes.Equal(before, authoritySnapshot(t, x.f.pool, x.f.tenant, tables)) {
+		t.Fatal("rejected generic proof changed child funding")
+	}
+}

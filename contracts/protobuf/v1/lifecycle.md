@@ -291,3 +291,9 @@ authority: a reconnect reporting empty/blocked epoch0 must not bootstrap it agai
 Its existing FULL state may reconnect and replay exact journal records; missing
 state requires the separate explicit recovery workflow. This check neither
 releases unknown debt nor treats an unseen receipt as non-execution.
+
+The generic exact-reconciliation receipt is also insufficient for a funded parent:
+it cannot finalize or recover that parent while bypassing the complete issued
+child/Node closure proof. This applies both to unresolved and risk-budget-settled
+parents. Ordinary nondelegated exact/risk reconciliation keeps its own existing
+semantics; issued delegated funds remain frozen pending dedicated closure.
