@@ -8,31 +8,31 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "2.1.0",
-      "sha256": "b562cea62a7bd105f8cae8b65f7d55331bbb6d8300401fd79fa889108ec37004",
+      "version": "2.2.0",
+      "sha256": "b083589caf601629bd82e43052b22ea2e0ced276fcd0d2b526f5702db86cd8d2",
       "decision": "approved"
     },
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "2.1.0",
-      "sha256": "20b19bc70178dc912a313885c3ad56755bb5c048f80155b19364fbb5efa6c67b",
+      "version": "2.2.0",
+      "sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec",
       "decision": "approved"
     },
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
       "decision": "approved",
       "artifacts": [
         {
           "path": "contracts/protobuf/v1/lifecycle.schema.json",
-          "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+          "sha256": "42310c018bbd34cc22e3acde3870422c69f56b242d62d1dd0ab66e7aa7f730de"
         },
         {
           "path": "contracts/protobuf/v1/lifecycle.md",
-          "sha256": "66dc35202464261eb65daf326b17701b2c7b0349336b4b517a2356efcf6aa6ee"
+          "sha256": "b24e7436a1d66fd2ffbf1686668367ff04cf745ed904ff0f2906d6074d763592"
         },
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
@@ -228,6 +228,53 @@
       "approved_at": "2026-11-07T20:45:23Z",
       "decision": "approved",
       "approval_record": "docs/changes/CR-006-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.database",
+      "from": "2.1.0",
+      "version": "2.2.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "b083589caf601629bd82e43052b22ea2e0ced276fcd0d2b526f5702db86cd8d2",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.1.0",
+      "version": "2.2.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.4.0",
+      "version": "1.5.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "42310c018bbd34cc22e3acde3870422c69f56b242d62d1dd0ab66e7aa7f730de"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "b24e7436a1d66fd2ffbf1686668367ff04cf745ed904ff0f2906d6074d763592"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ]
     }
   ]
 }

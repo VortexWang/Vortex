@@ -1,4 +1,4 @@
-"""Verify exact historical approvals, unchanged wire and the CR-007 candidate."""
+"""Verify exact historical approvals, unchanged wire and the exact CR-007 approval."""
 import hashlib
 import json
 from pathlib import Path
@@ -22,7 +22,7 @@ approved_source = 'fc63d57406f9f0e3eebe99ad276f95b004add710'
 history6_source='9749c7af71b5b6d430f58b67ef5398c0adc90ce2'
 def history6(path):
     return subprocess.check_output(['git','show',history6_source+':'+path],cwd=ROOT)
-for path in ('docs/changes/CR-006-packages-entitlements.json','docs/changes/CR-006-APPROVAL.json','docs/governance/contract-review.yaml'):
+for path in ('docs/changes/CR-006-packages-entitlements.json','docs/changes/CR-006-APPROVAL.json'):
     assert (ROOT/path).read_bytes()==history6(path), 'historical CR-006 approval rewritten: '+path
 for path in ('docs/changes/CR-005-rule-two-phase.json', 'docs/changes/CR-005-APPROVAL.json'):
     assert (ROOT/path).read_bytes() == approved_bytes(path), 'historical approval rewritten: '+path
@@ -45,7 +45,8 @@ for row in proposal['artifacts']:
     assert hashlib.sha256(raw).hexdigest() == row['sha256'], 'historical approved candidate hash changed: '+row['path']
 schema = load('contracts/runtime/config.schema.json')
 assert schema['$defs']['legacy'] == json.loads(git_bytes('contracts/runtime/config.schema.json')), 'legacy schema changed'
-review = load('docs/governance/contract-review.yaml')
+review = json.loads(history6('docs/governance/contract-review.yaml'))
+current_review = load('docs/governance/contract-review.yaml')
 historical = json.loads(git_bytes('docs/governance/contract-review.yaml'))
 old_approvals = historical['change_approvals']
 assert review['change_approvals'][:len(old_approvals)] == old_approvals, 'historical approvals rewritten'
@@ -138,15 +139,52 @@ expected_changes=[{'contract_id':key,'from':before,'version':after,'kind':'compa
 assert proposal7['changes']==expected_changes
 assert proposal7['candidate_versions']=={c['id']:c['version'] for c in catalog['contracts']}
 for entry in catalog['contracts']:
-    if entry['id'] in {r['contract_id'] for r in expected_changes}: assert entry['status']=='candidate'
+    if entry['id'] in {r['contract_id'] for r in expected_changes}: assert entry['status']=='frozen'
     else: assert entry==next(c for c in json.loads(history6('contracts/versions.yaml'))['contracts'] if c['id']==entry['id'])
 required7={r['path'] for r in candidate['artifacts']}|{'backend/db/migrations/00007_metering_ledger.sql'}
 assert len(proposal7['artifacts'])==len(required7) and {r['path'] for r in proposal7['artifacts']}==required7
+proposal7_hash=hashlib.sha256((ROOT/'docs/changes/CR-007-metering-ledger.json').read_bytes()).hexdigest()
+assert proposal7_hash=='3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5', 'approved CR-007 proposal changed'
+approved7=load('docs/changes/CR-007-APPROVAL.json')
+source7='995d7fca563c87cc8c3b38f3252e50b8ab94458e'
+def candidate7(path):
+    return subprocess.check_output(['git','show',source7+':'+path],cwd=ROOT)
+assert (ROOT/'docs/changes/CR-007-metering-ledger.json').read_bytes()==candidate7('docs/changes/CR-007-metering-ledger.json')
+expected7=dict(schema_version=1,id='CR-007',status='approved',proposal_path='docs/changes/CR-007-metering-ledger.json',proposal_sha256=proposal7_hash,owner_response='批准 CR-007',reviewer='user-approved-in-session',recorded_at='2026-11-08T02:49:25Z',candidate_source=source7,candidate_catalog_sha256=hashlib.sha256(candidate7('contracts/versions.yaml')).hexdigest(),frozen_catalog_sha256=hashlib.sha256((ROOT/'contracts/versions.yaml').read_bytes()).hexdigest(),changes=[])
+expected_review7=json.loads(json.dumps(review))
+for change in expected_changes:
+    contract=next(c for c in expected_review7['contracts'] if c['id']==change['contract_id'])
+    row={key:change[key] for key in ('contract_id','from','version')}
+    row.update(proposal_sha256=proposal7_hash,contract_sha256=hashlib.sha256(candidate7(contract['path'])).hexdigest(),reviewer=expected7['reviewer'],approved_at=expected7['recorded_at'],decision='approved',approval_record='docs/changes/CR-007-APPROVAL.json')
+    contract.update(version=change['version'],sha256=row['contract_sha256'])
+    if 'artifacts' in contract:
+        for artifact in contract['artifacts']:
+            artifact['sha256']=hashlib.sha256(candidate7(artifact['path'])).hexdigest()
+        row['artifacts']=json.loads(json.dumps(contract['artifacts']))
+    expected7['changes'].append(row)
+expected_review7['change_approvals']+=expected7['changes']
+assert approved7==expected7, 'exact CR-007 owner/proposal/contract/companion approval mismatch'
+assert current_review==expected_review7, 'exact CR-007 governance append mismatch'
 for artifact in proposal7['artifacts']:
-    assert hashlib.sha256((ROOT/artifact['path']).read_bytes()).hexdigest()==artifact['sha256'], 'CR-007 candidate bytes changed: '+artifact['path']
-    if artifact['baseline_sha256'] is not None: assert hashlib.sha256(history6(artifact['path'])).hexdigest()==artifact['baseline_sha256']
-assert proposal7['acceptance']['owner_approval'] is False
-assert not (ROOT/'docs/changes/CR-007-APPROVAL.json').exists(), 'unreviewed approval record'
+    candidate_raw=candidate7(artifact['path'])
+    assert hashlib.sha256(candidate_raw).hexdigest()==artifact['sha256'], 'signed CR-007 source changed: '+artifact['path']
+    raw=(ROOT/artifact['path']).read_bytes()
+    if artifact['path']=='contracts/versions.yaml':
+        thawed=json.loads(raw)
+        for contract in thawed['contracts']:
+            if contract['id'] in {r['contract_id'] for r in expected_changes}:
+                assert contract['status']=='frozen'
+                contract['status']='candidate'
+        assert (json.dumps(thawed,indent=2,ensure_ascii=False)+'\n').encode()==candidate_raw, 'CR-007 catalog exceeds exact freeze metadata'
+    elif artifact['path']=='contracts/CHANGELOG.md':
+        assert raw==candidate_raw+'\n## Phase 6 source ledger and usage (06-05 approved)\n\nThe owner explicitly approved CR-007 with “批准 CR-007”. The immutable proposal\nSHA-256 remains `3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5`.\nApproval is recorded in `docs/changes/CR-007-APPROVAL.json` and three appended\n`docs/governance/contract-review.yaml` records. Database/API 2.2.0 and control\n1.5.0 are frozen, including the exact control lifecycle companions. Only approval\nmetadata and this appended notice differ from candidate bytes. The earlier\ncandidate section remains an immutable historical statement. CR-005/006 approval\nhistory is unchanged. Unknown liabilities require funded proof to close;\n06-06 signer/lease production, 06-07 HTTP and 06-11 paired acceptance remain due.\n'.encode(), 'CR-007 changelog exceeds exact approval notice'
+    else:
+        assert raw==candidate_raw, 'approved CR-007 normative bytes changed: '+artifact['path']
+    if artifact['baseline_sha256'] is not None:
+        assert hashlib.sha256(history6(artifact['path'])).hexdigest()==artifact['baseline_sha256']
+assert proposal7['acceptance']['owner_approval'] is False, 'candidate history rewritten'
+for row in expected7['changes']:
+    subprocess.run(['python3','tools/phase1/contracts.py','check-frozen','--contract-id',row['contract_id']],cwd=ROOT,check=True)
 subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-change', '--base', history6_source], cwd=ROOT, check=True)
 work=Path(sys.argv[1]); old=work/'baseline.proto'
 old.write_bytes(git_bytes('contracts/protobuf/v1/vortex.proto'))
@@ -162,4 +200,4 @@ for kind,text in [
 new=protoc(current,'ControlMessage',text='sequence:4 rule_command{phase:"prepare" task_key:"key" target_revision:2}')
 decoded=protoc(old,'ControlMessage',data=new).decode()
 assert 'config_update' not in decoded and '18 {' in decoded, 'new rule body aliases legacy auto-apply body'
-print('Historical CR-005/CR-006 exact approvals, CR-007 candidate hashes, unchanged legacy wire/schema passed; owner freeze pending')
+print('Historical CR-005/CR-006/CR-007 exact approvals, frozen hashes and unchanged legacy wire/schema passed')

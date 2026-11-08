@@ -99,3 +99,15 @@ plan 06-06; HTTP adapters remain 06-07; final paired acceptance remains 06-11.
 Unknown upper bounds remain frozen, distinct from measured bytes; 72 hours
 is never an automatic release. Compensation requires approved actual platform
 backing and source-local atomic accounting. No owner approval is implied.
+
+## Phase 6 source ledger and usage (06-05 approved)
+
+The owner explicitly approved CR-007 with “批准 CR-007”. The immutable proposal
+SHA-256 remains `3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5`.
+Approval is recorded in `docs/changes/CR-007-APPROVAL.json` and three appended
+`docs/governance/contract-review.yaml` records. Database/API 2.2.0 and control
+1.5.0 are frozen, including the exact control lifecycle companions. Only approval
+metadata and this appended notice differ from candidate bytes. The earlier
+candidate section remains an immutable historical statement. CR-005/006 approval
+history is unchanged. Unknown liabilities require funded proof to close;
+06-06 signer/lease production, 06-07 HTTP and 06-11 paired acceptance remain due.
