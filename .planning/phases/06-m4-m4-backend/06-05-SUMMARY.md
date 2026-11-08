@@ -109,3 +109,7 @@ actuals按基线到summary前HEAD的17个提交、241个变更文件、diff字�
 ## Self-Check: PASSED
 
 确认全部源/批准/证据存在、提交为HEAD祖先、原候选摘要及35项producer摘要准确。新clone前后clean，必要普通/race用例均实际执行；SDK状态同步将在summary提交后进行，历史Phase5 passed_with_scope不被改写。
+
+## State Synchronization
+
+SUMMARY5b71afe6后实际尝试SDK advance-plan、record-session及record-metric，仍被历史Phase5 `passed_with_scope`拒绝。未改该历史报告；仅窄同步当前Phase6 8/11、50 summaries、next06-06与metric/decision/session。SDK requirements和roadmap成功，15个MTR需求完成。

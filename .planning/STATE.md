@@ -4,18 +4,18 @@ milestone: V1
 milestone_name: milestone
 current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 05
+current_plan: 06
 status: executing
-stopped_at: 06-05 implementation verified; awaiting exact CR-007 owner approval
-last_updated: "2026-11-08T02:21:15Z"
+stopped_at: 06-05 complete after exact CR-007 approval; next 06-06
+last_updated: "2026-11-08T03:01:34Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-05 implementation and clean source 995d7fca Docker normal/race, real usage recovery, fault, contracts, builds and Cloudflare passed; evidence 8b4a0d9e. Exact CR-007 owner approval pending; Phase 6 remains 7/11."
+last_activity_desc: "06-05 complete after CR-007 approval; approved clean source84821a04 Docker passed, evidence4403ac52, SUMMARY5b71afe6. Phase6 8/11; next06-06."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
-  completed_plans: 49
-state_head: 8b4a0d9e
+  completed_plans: 50
+state_head: 6c4c1a1d
 ---
 
 # Project State
@@ -30,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-11-03)
 ## Current Position
 
 Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 05
+Current Plan: 06
 Total Plans in Phase: 11
-Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete (7/11). 06-05 implementation and local runtime verification are complete; exact CR-007 owner approval remains pending. Final Phase 6 acceptance remains pending.
-Last activity: 2026-11-08 — CR-006 remains approved and 06-04 complete. Clean source995d7fca passed full local Docker backend/Agent/Hub/Engine normal/race, fault recovery, generation/compatibility, dual-architecture compilation and real Cloudflare CRUD; evidence8b4a0d9e. CR-007 exact proposal3ddd1ab7 awaits owner approval. Runtime result0, acceptance_complete=false; Phase6 remains7/11. See06-05-CHECKPOINT.md.
+Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete (8/11). Next06-06 share/lease authority; final Phase6 acceptance pending.
+Last activity: 2026-11-08 — CR-007 exact approval recorded. Clean source84821a04 full Docker normal/race, fault, freezes, generation/compatibility, dual-architecture compilation and real Cloudflare passed. Evidence4403ac52, SUMMARY5b71afe6. Next06-06; final Actions06-11.
 
-Progress: Phase 6 [███████░░░░] 7/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -72,11 +72,13 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | Phase 06 P03 | 378min multi-session | 3 tasks | 199 files before summary/state metadata, including raw evidence |
 | Phase 06 P04 | multi-session including owner approval | 3 tasks | 232 files before summary/state metadata, including raw evidence |
 
+| Phase 06 P05 | multi-session including exact approval | 3 tasks | 241 files before summary/state metadata, including raw evidence |
+
 ## Accumulated Context
 
 ### Decisions
 
-- 06-05 candidate: source995d7fca implements source-local ledger, funded unknown closure and immutable original usage identities across lost receipts and repeated Agent reboot. Exact CR-0073ddd1ab7 remains unapproved; no new freeze, summary, requirement completion or plan advancement.
+- 06-05: user explicitly approved exact CR-0073ddd1ab7. DB/API2.2 and control1.5 frozen with prior approvals immutable. Unknown funding/compensation and first-report provenance survive restart/lost receipts. Clean source84821a04 Docker passed; next06-06, final Actions06-11.
 
 - 06-04: user explicitly approved CR-006 exact proposal 60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d; DB/API2.1 frozen with CR005 history unchanged. Confirmation consumes code atomically; future failure does not refund. Offline/revoked expiry persists authoritative limits/source expiry while actual stop stays pending and unknown occupation is retained. Source9db5da0e local producer passed; next06-05, final Actions06-11.
 
@@ -111,20 +113,10 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Blockers/Concerns
 
-- 06-05 is awaiting exact CR-007 owner approval after complete local runtime verification. Database/API2.2 and control1.5 remain candidates; evidence8b4a0d9e preserves acceptance_complete=false and earlier failed/interrupted attempts. SDK session update again rejected historical Phase5 passed_with_scope; only current Phase6 continuation metadata was synchronized narrowly.
-
-- 06-04 owner freeze is resolved, all three tasks and eight PLN requirements complete; source9db5da0e clean local acceptance passed. SDK advance/metric/decision/session again rejected historical Phase5 passed_with_scope; update-progress skipped unscoped phase. Only current Phase6 state was synchronized narrowly; roadmap/requirements SDK writes succeeded. Disk inventory now has49 complete summaries, Phase6 seven of eleven.
-
-- 06-03 approval/runtime gate is resolved: CR-005-APPROVAL.json records the actual owner response; selected freezes and clean source fc63d574 normal/race pass. WINDOWS 6/7 fixed with source-bound evidence. The separate historical VLink hash mismatch remains deferred. SDK state handlers again rejected historical Phase 5 passed_with_scope; only current Phase 6 state was synchronized manually.
-
-- 06-09 authentication checkpoint is resolved: user completed browser login, VortexWang push permission was verified, exact source a9481584 passed actual Actions 42316152923 and local Docker, and both paired gates passed. TEN-009 is complete; WINDOWS item 4 is fixed. Prior 403 and two actual failed CI runs remain documented in the resolved checkpoint/summary and raw evidence.
-
-- 06-08 license decision is resolved: CR-004 A approved and enforced, full gate exit 0 on 7d43e1d2. WINDOWS 2/3/4 are fixed; balance debt 1 stays open for 06-05/06-11. TEN-002 still requires later domain ownership coverage. 06-09 adds actual same-source Actions/native amd64 functional/race evidence for implemented scope; dedicated performance and final phase acceptance remain pending.
-
-- GSD state handlers still reject Phase 5's existing `passed_with_scope` verification status; update-progress also skips the unscoped phase. Preserve that verdict. After actual SDK attempts, only Phase 6 position, metrics, decision and session were synchronized narrowly. SDK roadmap/requirements/windows updates succeeded. Disk inventory is 54 plans and 45 complete summaries; Phase 6 is 3/11. Cache-loss checks must extend to real source balances after 06-05; see WINDOWS.md.
-
-- Phase 4 restart implementation runs the five-process three-relay topology and now passes finite authorized-route/recovery regressions; this does not establish performance qualification.
-- Plan 04-06 same-load independent TLS diagnostics exceeded 70%, but formal gates remain open. The scale-test accounting discrepancy was caused by incomplete JSONL output at Docker shutdown; relay stop grace and exit-status checks now protect the evidence. Chunked event storage removes large append copies. Clean baa0a02 local Docker and Actions passed 16-stream/60-second accounting regressions with zero loss; Actions generated only 24.21 Mbps actual UDP, so 100 Mbps dedicated-host qualification remains pending. D-04 has now received a candidate review, but parameter experiments and lock approval remain pending. No Phase 4 completion is claimed.
+- CR-007 approval gate is resolved: exact owner response, three frozen contracts and approved clean source84821a04 full local evidence. Phase6 is8/11; signer/share/lease production06-06, HTTP06-07 and final same-SHA Actions06-11 remain.
+- SDK advance/metric/session still rejects historical Phase5 passed_with_scope. Preserve that verdict; after actual SDK attempts, only current Phase6 metadata was synchronized narrowly. SDK roadmap/requirements succeeded; 50 summaries of54 plans now exist.
+- Prior CR005/006, license and authentication gates are resolved; immutable proposals, failed attempts and exact evidence remain in each plan SUMMARY/CHECKPOINT. Separate historical VLink frozen-hash mismatch remains deferred.
+- WINDOWS #1 source-balance/Valkey rebuild now has06-05 implementation evidence; final cross-domain and paired acceptance remain06-11. TEN-002 needs remaining domain coverage. Phase4 dedicated-host performance/D-04 and formal NFRs remain open; no qualification is implied by finite regressions.
 
 ## Deferred Items
 
@@ -142,31 +134,10 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T02:21:15Z
-Stopped at: 06-05 implementation verified; awaiting exact CR-007 owner approval
-Resume file: .planning/phases/06-m4-m4-backend/06-05-CHECKPOINT.md
+Last session: 2026-11-08T03:01:34Z
+Stopped at: 06-05 complete after exact CR-007 approval; next 06-06
+Resume file: .planning/phases/06-m4-m4-backend/06-06-PLAN.md
 
-### Historical qualification review (not a main-workflow gate)
+### Historical qualification boundaries
 
-D-04 review completed, candidates not locked. Standard performance workload still has no production authorization
-Gate; optional finite source credit is separate from the memory event recorder; NFR-039/040/044 runtime behavior
-and NFR-007 early TCP DATA remain missing. These gaps are actionable without
-exclusive performance hardware. Updated 04-VERIFICATION.md points to the exact
-matrix; diagnostic numeric improvements do not mark formal NFRs passed.
-
-### Prior source credit slice — 6a1faf2
-
-At 6a1faf2 source authorization was opt-in for static-snapshot TCP only; finite balance,
-blocks and local replenishment/exhaustion are verified on Docker/native. UDP,
-hot routes, dynamic snapshot/grant and real issuer outcomes remain excluded.
-The standard performance workload still lacks full authorization integration.
-See 04-06-CREDIT-EVIDENCE.md; D-04 remains candidate and Phase 4 executing.
-
-### Grant and UDP increment
-
-Clean d2f21f8 Docker/native verified static-snapshot TCP/UDP credit and bounded
-trusted grant-result injection. Earlier TCP-only/UDP-exclusion notes are now
-historical. Hot routes/multiple snapshots, remote/persistent issuer, policy
-clock/share integration and formal performance qualifications remain open.
-Actions 41856742608 passed all steps on that clean SHA; extracted credit
-JSON and semantic hashes match Docker/native.
+Phase4 D-04 remains candidate; see04-VERIFICATION.md. Earlier credit6a1faf2 was TCP-only; clean d2f21f8 later verified static-snapshot TCP/UDP with bounded grant-result injection and same-SHA Actions41856742608. These increments do not complete hot routes, persistent issuer or formal performance/24h qualification. Phase4 and Phase5 historical verdicts are unchanged.
