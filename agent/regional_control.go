@@ -26,6 +26,7 @@ type RegionalConfig struct {
 	Probes                                *SchedulerConfig
 	ProbeReferences                       []ProbeTarget
 	Renewal                               *RenewalConfig
+	LeaseRefresh                          bool
 	onlineOnly                            bool
 }
 
@@ -199,7 +200,14 @@ func noUnknownFields(m protoreflect.Message) bool {
 }
 
 func validateRegionalStatus(s *controlv1.HubStatus, e HubEndpoint, r *RegionalConfig, session, issuer string, now time.Time) error {
-	if s == nil || !noUnknownFields(s.ProtoReflect()) || !canonicalUUID(s.HubId) || s.HubId != e.HubID || issuer != e.ServerName || s.SessionId != session || s.RegionId != r.Region || s.ControlVersion != "1.3.0" || !validRenewalCapabilities(s.Capabilities, r.Renewal != nil) {
+	caps := s.GetCapabilities()
+	if r.LeaseRefresh {
+		if len(caps) == 0 || caps[len(caps)-1] != "runtime-lease-refresh-v1" {
+			return fmt.Errorf("agent: lease refresh capability missing")
+		}
+		caps = caps[:len(caps)-1]
+	}
+	if s == nil || !noUnknownFields(s.ProtoReflect()) || !canonicalUUID(s.HubId) || s.HubId != e.HubID || issuer != e.ServerName || s.SessionId != session || s.RegionId != r.Region || s.ControlVersion != "1.3.0" || !validRenewalCapabilities(caps, r.Renewal != nil) {
 		return fmt.Errorf("agent: invalid authenticated regional status")
 	}
 	for _, n := range []uint64{s.SignerEpoch, s.RecoveryTargetSequence, s.ConfirmedSequence, s.PendingTailRecords, s.RevocationRevision, s.RestrictionRevision} {

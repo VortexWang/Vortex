@@ -340,6 +340,7 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	client := &agent.ControlClient{Node: n, TLSProvider: hubTLS, CredentialRevocations: revocations, Reconciler: reconciler}
 	var backendClient *agent.ControlClient
 	if *backendAddr != "" {
+		regional.LeaseRefresh = true
 		provider, e := roleTLSProvider(credentialManager, *backendCA, *sourceBackendID)
 		if e != nil {
 			return e

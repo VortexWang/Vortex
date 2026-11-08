@@ -15,7 +15,7 @@ import (
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
-var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1", "share-renewal-close-v1", "delegation-seal-v1"}
+var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1", "share-renewal-close-v1", "delegation-seal-v1", "runtime-lease-refresh-v1"}
 
 func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreamingClient[controlv1.HubMessage, controlv1.BackendMessage]) error {
 	session := uuid.NewString()
@@ -80,13 +80,16 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 				return e
 			}
 			for _, r := range records {
-				if r.Kind != "issue" && r.Kind != "delegation-seal" {
+				if r.Kind != "issue" && r.Kind != "delegation-seal" && r.Kind != "runtime-lease" {
 					continue
 				} // recovery needs its separate consumer
 				pending = &r
 				kind := "issue-v1"
 				if r.Kind == "delegation-seal" {
 					kind = "delegation-sealed-v1"
+				}
+				if r.Kind == "runtime-lease" {
+					kind = "runtime-lease-v1"
 				}
 				if e = send(&controlv1.HubMessage{Body: &controlv1.HubMessage_LedgerRecord{LedgerRecord: &controlv1.LedgerRecord{RecordId: r.ID, LedgerSequence: uint64(r.Sequence), Kind: kind, Payload: r.Payload, PayloadSha256: r.Digest}}}); e != nil {
 					return e
@@ -191,6 +194,9 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 				expected := "issue-v1"
 				if pending != nil && pending.Kind == "delegation-seal" {
 					expected = "delegation-sealed-v1"
+				}
+				if pending != nil && pending.Kind == "runtime-lease" {
+					expected = "runtime-lease-v1"
 				}
 				if pending == nil || ack.Kind != expected || ack.RecordId != pending.ID || ack.LedgerSequence != uint64(pending.Sequence) || !bytes.Equal(ack.PayloadSha256, pending.Digest) {
 					return errors.New("funded journal acknowledgement mismatch")

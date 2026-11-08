@@ -1,0 +1,24 @@
+=== RUN   TestRuntimeLeaseRefreshCadenceFullRollbackReplayAndNoCredit
+--- PASS: TestRuntimeLeaseRefreshCadenceFullRollbackReplayAndNoCredit (0.47s)
+=== RUN   TestRuntimeHeartbeatFullJournalAndLeaseCadenceStayIndependent
+--- PASS: TestRuntimeHeartbeatFullJournalAndLeaseCadenceStayIndependent (0.40s)
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/boot
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/hub
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/clock
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/closed
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/sealed
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/expired
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/source
+--- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline (2.42s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/boot (0.37s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/hub (0.41s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/clock (0.34s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/closed (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/sealed (0.34s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/expired (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/source (0.32s)
+=== RUN   TestRuntimeLeaseOnlyRenewalKeepsExistingCreditAndSessionSource
+--- PASS: TestRuntimeLeaseOnlyRenewalKeepsExistingCreditAndSessionSource (0.22s)
+PASS
+ok  	vortex/agent/store	5.123s

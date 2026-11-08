@@ -255,6 +255,17 @@ CREATE TABLE node_credit_close_receipts (
  FOREIGN KEY(tenant_id,grant_id) REFERENCES node_credit_close_commands(tenant_id,grant_id)
 );
 CREATE TRIGGER node_credit_close_receipt_immutable BEFORE UPDATE OR DELETE ON node_credit_close_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Lease-only refreshes have a separate immutable journal: no credit grant row
+-- and no contribution to the complete issued-credit inventory.
+CREATE TABLE hub_runtime_lease_receipts (
+ tenant_id text NOT NULL, issue_id text NOT NULL, allocation_id text NOT NULL,
+ hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,ledger_sequence),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
+);
+CREATE TRIGGER hub_runtime_lease_immutable BEFORE UPDATE OR DELETE ON hub_runtime_lease_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

@@ -22,11 +22,13 @@ var fundedHubCapabilities = []string{"status-v1", "backend-allocation-v1", "back
 var closureHubCapabilities = append(append([]string{}, fundedHubCapabilities...), "share-renewal-close-v1")
 
 var sealHubCapabilities = append(append([]string{}, closureHubCapabilities...), "delegation-seal-v1")
+var runtimeLeaseHubCapabilities = append(append([]string{}, sealHubCapabilities...), "runtime-lease-refresh-v1")
 
 func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.HubMessage, controlv1.BackendMessage], id string, hello *controlv1.HubMessage) error {
 	body := hello.GetLifecycleHello()
 	usageOnly := slices.Equal(body.Capabilities, []string{"status-v1", "usage-ledger-v1"})
-	sealCapable := slices.Equal(body.Capabilities, sealHubCapabilities)
+	leaseCapable := slices.Equal(body.Capabilities, runtimeLeaseHubCapabilities)
+	sealCapable := leaseCapable || slices.Equal(body.Capabilities, sealHubCapabilities)
 	closureCapable := sealCapable || slices.Equal(body.Capabilities, closureHubCapabilities)
 	expectedCapabilities := fundedHubCapabilities
 	if closureCapable {
@@ -34,6 +36,9 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 	}
 	if sealCapable {
 		expectedCapabilities = sealHubCapabilities
+	}
+	if leaseCapable {
+		expectedCapabilities = runtimeLeaseHubCapabilities
 	}
 	if usageOnly {
 		expectedCapabilities = body.Capabilities
@@ -197,6 +202,19 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 				return errors.New("funded Hub ledger digest mismatch")
 			}
 			switch r.Kind {
+			case "runtime-lease-v1":
+				if !leaseCapable {
+					return errors.New("runtime lease capability not negotiated")
+				}
+				var head struct {
+					ID string `json:"update_id"`
+				}
+				if json.Unmarshal(r.Payload, &head) != nil || head.ID != r.RecordId {
+					return service.ErrShareConflict
+				}
+				if e = h.Shares.RecordHubRuntimeLease(stream.Context(), id, hello.BootId, int64(r.LedgerSequence), r.Payload, uuid.NewString()); e != nil {
+					return e
+				}
 			case "share-renewal-closed-v1":
 				if !closureCapable {
 					return errors.New("closure capability not negotiated")

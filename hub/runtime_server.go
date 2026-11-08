@@ -81,7 +81,12 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 		return e
 	}
 	hello := helloMessage.GetLifecycleHello()
-	if helloMessage.NodeId != node || helloMessage.BootId != first.BootId || helloMessage.Sequence <= first.Sequence || len(helloMessage.ProtoReflect().GetUnknown()) != 0 || hello == nil || hello.ControlVersion != "1.3.0" || hello.RegionId != s.Region || !validStatusUUID(hello.SessionId) || !validLifecycleCapabilities(hello.Capabilities, true) || len(hello.ProtoReflect().GetUnknown()) != 0 {
+	leaseRefresh := hello != nil && len(hello.Capabilities) > 0 && hello.Capabilities[len(hello.Capabilities)-1] == "runtime-lease-refresh-v1"
+	baseCaps := hello.GetCapabilities()
+	if leaseRefresh {
+		baseCaps = baseCaps[:len(baseCaps)-1]
+	}
+	if helloMessage.NodeId != node || helloMessage.BootId != first.BootId || helloMessage.Sequence <= first.Sequence || len(helloMessage.ProtoReflect().GetUnknown()) != 0 || hello == nil || hello.ControlVersion != "1.3.0" || hello.RegionId != s.Region || !validStatusUUID(hello.SessionId) || !validLifecycleCapabilities(baseCaps, true) || len(hello.ProtoReflect().GetUnknown()) != 0 {
 		return errors.New("unnegotiated runtime lifecycle")
 	}
 	current := &runtimeSession{active: true, cancel: cancel}
@@ -136,6 +141,7 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 		return &controlv1.HubStatus{HubId: s.HubID, RegionId: s.Region, SessionId: hello.SessionId, ControlVersion: "1.3.0", Capabilities: append([]string(nil), hello.Capabilities...), Mode: snapshot.Mode, SignerEpoch: snapshot.Epoch, BackendHeartbeatAt: snapshot.BackendHeartbeat.UTC().Format(time.RFC3339Nano), AutonomyDeadline: snapshot.Deadline.UTC().Format(time.RFC3339Nano), ConfirmedSequence: snapshot.Confirmed, PendingTailRecords: snapshot.Pending}, nil
 	}
 	cursor := ""
+	leaseCursor := ""
 	sent := map[string]bool{}
 	refresh := func() error {
 		st, e := status()
@@ -145,20 +151,34 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 		if e = send(&controlv1.ControlMessage{Body: &controlv1.ControlMessage_HubStatus{HubStatus: st}}); e != nil {
 			return e
 		}
-		if st.Mode != "online" {
-			return nil
-		} // autonomy renews only explicit existing requests
 		var page store.BootstrapPage
-		if e = mutate(func() error {
-			var err error
-			page, err = s.Issuer.Store.BootstrapHubAuthorizations(ctx, s.HubID, node, first.BootId, cursor, s.Issuer.Clock())
-			return err
-		}); e != nil {
-			return e
+		if st.Mode == "online" {
+			if e = mutate(func() error {
+				var err error
+				page, err = s.Issuer.Store.BootstrapHubAuthorizations(ctx, s.HubID, node, first.BootId, cursor, s.Issuer.Clock())
+				return err
+			}); e != nil {
+				return e
+			}
+			cursor = page.After
+			if page.Complete {
+				cursor = ""
+			}
 		}
-		cursor = page.After
-		if page.Complete {
-			cursor = ""
+		if leaseRefresh && (st.Mode == "online" || st.Mode == "autonomous") {
+			var leases store.BootstrapPage
+			if e = mutate(func() error {
+				var err error
+				leases, err = s.Issuer.Store.RefreshHubLeases(ctx, s.HubID, node, first.BootId, leaseCursor, s.Issuer.Clock())
+				return err
+			}); e != nil {
+				return e
+			}
+			leaseCursor = leases.After
+			if leases.Complete {
+				leaseCursor = ""
+			}
+			page.Updates = append(page.Updates, leases.Updates...)
 		}
 		for _, update := range page.Updates {
 			hash := sha256.Sum256(update.Payload)
@@ -229,7 +249,7 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 				return e
 			}
 		case *controlv1.NodeMessage_RenewalRequest:
-			if len(hello.Capabilities) != 2 {
+			if len(baseCaps) != 2 {
 				return errors.New("renewal capability missing")
 			}
 			var result *controlv1.RenewalResult

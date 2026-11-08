@@ -1,0 +1,46 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-e216f651779a Creating 
+ Container vortex-phase6-tracer-backend-test-run-e216f651779a Created 
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit
+2026/11/08 08:15:15 OK   00001_authority.sql (11.69ms)
+2026/11/08 08:15:15 OK   00002_tenant_policy.sql (6.78ms)
+2026/11/08 08:15:15 OK   00003_nodes_ports.sql (11.59ms)
+2026/11/08 08:15:15 OK   00004_entry_group_domains.sql (2.2ms)
+2026/11/08 08:15:15 OK   00005_rules_compile.sql (12.68ms)
+2026/11/08 08:15:15 OK   00006_packages_entitlements.sql (11.76ms)
+2026/11/08 08:15:15 OK   00007_metering_ledger.sql (19.74ms)
+2026/11/08 08:15:15 OK   00008_limits_shares.sql (27.56ms)
+2026/11/08 08:15:15 goose: successfully migrated database to version: 8
+2026/11/08 08:15:15 OK   00001_authority.sql (6.25ms)
+2026/11/08 08:15:15 OK   00002_tenant_policy.sql (5.8ms)
+2026/11/08 08:15:15 OK   00003_nodes_ports.sql (10.69ms)
+2026/11/08 08:15:15 OK   00004_entry_group_domains.sql (1.22ms)
+2026/11/08 08:15:15 OK   00005_rules_compile.sql (10.98ms)
+2026/11/08 08:15:15 OK   00006_packages_entitlements.sql (14.82ms)
+2026/11/08 08:15:15 OK   00007_metering_ledger.sql (18.61ms)
+2026/11/08 08:15:15 OK   00008_limits_shares.sql (22.93ms)
+2026/11/08 08:15:15 goose: successfully migrated database to version: 8
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/unsigned
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/boot
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/sequence
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/credit
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/source
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/limits
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/revocation
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/renewal
+--- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit (0.67s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/unsigned (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/boot (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/sequence (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/credit (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/source (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/limits (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/revocation (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/renewal (0.00s)
+PASS
+ok  	vortex/backend/internal/service	0.678s

@@ -426,6 +426,10 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 }
 
 func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, heartbeat, deadline time.Time) ([]byte, error) {
+	return buildAuthorizationPayload(d, r, issued, expires, hard, heartbeat, deadline, []string{"runtime_lease", "share_lease", "credit_grant"})
+}
+
+func buildAuthorizationPayload(d HubDelegation, r IssueRequest, issued, expires, hard, heartbeat, deadline time.Time, kinds []string) ([]byte, error) {
 	var leaves map[string]ShareReference
 	if d.ShareReferences != nil {
 		var err error
@@ -445,7 +449,7 @@ func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, 
 		return s[:8] + "-" + s[8:12] + "-" + s[12:16] + "-" + s[16:20] + "-" + s[20:], nil
 	}
 	entries := make([]map[string]any, 0, 3)
-	for _, kind := range []string{"runtime_lease", "share_lease", "credit_grant"} {
+	for _, kind := range kinds {
 		id, err := newID()
 		if err != nil {
 			return nil, err

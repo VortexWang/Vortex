@@ -217,6 +217,18 @@ type HubIssueReceipt struct {
 	PayloadDigest  []byte
 }
 
+type HubRuntimeLeaseReceipt struct {
+	TenantID        string
+	IssueID         string
+	AllocationID    string
+	HubID           string
+	HubBootID       string
+	LedgerSequence  int64
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type HubSignerIncarnation struct {
 	HubID       string
 	SignerEpoch int64

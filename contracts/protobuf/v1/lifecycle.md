@@ -340,5 +340,45 @@ does not release parent funds. A separate PG transaction revalidates the complet
 sealed issue inventory, every authenticated child final and its known wire
 inventory, then settles the single original parent with its original coefficient
 and source remainder. Missing children, unknown liabilities or disputes deny
-release. Automatic funding successors require all matching predecessors to have dedicated complete parent finals (or true zero-child seal finals). Stable finalized allocation/reservation inventories bind nonces and are rechecked under the tenant lock; expiry, exhaustion and conservative estimates never authorize refill. Sustained lease refresh and explicit boot recovery remain pending. CR-008 is unprepared/unapproved and
+release. Automatic funding successors require all matching predecessors to have dedicated complete parent finals (or true zero-child seal finals). Stable finalized allocation/reservation inventories bind nonces and are rechecked under the tenant lock; expiry, exhaustion and conservative estimates never authorize refill. Explicit boot recovery remains pending. CR-008 is unprepared/unapproved and
 earlier approved contracts are unchanged.
+
+## Runtime/share lease refresh and independent heartbeat (1.6.0 candidate)
+
+The funded HubControl branch independently opts in with the exact ordered
+six-capability list `[status-v1, backend-allocation-v1, backend-ledger-v1,
+share-renewal-close-v1, delegation-seal-v1, runtime-lease-refresh-v1]`.
+The prior three/four/five-capability and usage-only branches cannot submit the
+new `runtime-lease-v1` journal kind. Its record ID is the original update UUID;
+sequence, exact bytes and SHA-256 identify one immutable FULL journal entry.
+PG stores a separate immutable receipt, task/Outbox and audit in one transaction
+before ACK. These records never enter the issue/credit inventory or reserve,
+charge, return, finalize or otherwise alter financial authority.
+
+Regional NodeControl independently appends `runtime-lease-refresh-v1` to its
+existing negotiated capabilities; this does not imply `renewal-v1`. Once an
+initial funded credit issue exists, an open current signer may refresh exactly
+the runtime/share pair when the conservative lower clock bound proves60s since
+the last issue/lease. Each lease has at most300s TTL, clamped to its immutable
+allocation, source roots, policy and autonomy boundaries. Original Node/boot,
+epoch, path/fence, delegation, sources and rate/connection limits stay bound.
+No credit, handoff, revocation or policy transition may accompany this pair.
+Existing-session lease replacement retains its original credit; exhausted or
+expired credit remains unusable regardless of the new leases. Scanning is by
+authenticated Node incarnation across delegations, rather than its last rule.
+
+A separate10s FULL envelope contains no authorizations or policy changes.
+It carries authenticated backend heartbeat evidence through the existing Node
+authorization persistence path. HubStatus remains observation only. Heartbeats
+do not postpone60s lease refresh, create rights or extend credit deadlines.
+The existing30s heartbeat recovery guard stays intact: a gap that crosses that
+boundary still requires explicit recovery. Revision-based exact replay/reopen
+retains original bytes and time; missing clock trust, closed/sealed delegation,
+changed roots or hard expiry fail closed. PG independently enforces both
+cadences, including the first heartbeat relative to the initial credit issue.
+
+Production tests include a real60s interval, actual Agent FULL installation,
+separate backend/Hub/Node TLS1.3 role roots and lost FULL receipt/PG ACK replay.
+Sustained credit closure/refill across expiry and explicit boot/epoch recovery
+remain separate acceptance work. This is still an unapproved CR-008 candidate;
+no previously approved contract snapshot is modified.

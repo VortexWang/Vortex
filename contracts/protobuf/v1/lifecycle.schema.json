@@ -22,7 +22,8 @@
               "recovery-v1",
               "share-policy-v1",
               "backend-ledger-v1",
-              "usage-ledger-v1"
+              "usage-ledger-v1",
+              "runtime-lease-refresh-v1"
             ]
           },
           "uniqueItems": true
@@ -351,7 +352,8 @@
               "identity-v1",
               "recovery-v1",
               "share-policy-v1",
-              "backend-ledger-v1"
+              "backend-ledger-v1",
+              "runtime-lease-refresh-v1"
             ]
           },
           "uniqueItems": true
@@ -1232,6 +1234,14 @@
             ],
             [
               "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1",
+              "runtime-lease-refresh-v1"
+            ],
+            [
+              "status-v1",
               "usage-ledger-v1"
             ]
           ]
@@ -1300,6 +1310,14 @@
               "backend-ledger-v1",
               "share-renewal-close-v1",
               "delegation-seal-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1",
+              "runtime-lease-refresh-v1"
             ],
             [
               "status-v1",
@@ -1426,7 +1444,8 @@
           "enum": [
             "allocation-installed-v1",
             "issue-v1",
-            "usage-v1"
+            "usage-v1",
+            "runtime-lease-v1"
           ]
         }
       },

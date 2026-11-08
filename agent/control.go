@@ -235,6 +235,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if regional.Renewal != nil {
 			caps = append(caps, "renewal-v1")
 		}
+		if regional.LeaseRefresh {
+			caps = append(caps, "runtime-lease-refresh-v1")
+		}
 		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: caps, SessionId: session, RegionId: regional.Region}}}); err != nil {
 			return err
 		}
@@ -573,6 +576,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_AuthorizationUpdate:
+				leaseOnly := false
+				if regional != nil {
+					facts, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+					if err != nil {
+						return err
+					}
+					if len(facts.Authorizations) == 2 {
+						kinds := map[string]bool{}
+						for _, a := range facts.Authorizations {
+							kinds[a.Kind] = true
+						}
+						if !regional.LeaseRefresh || !negotiated || !kinds["runtime_lease"] || !kinds["share_lease"] {
+							return fmt.Errorf("agent: unnegotiated lease refresh")
+						}
+						leaseOnly = len(facts.PolicyTransitions) == 0 && len(facts.Revocations) == 0 && facts.RenewalRequestID == "" && len(facts.Handoffs) == 0
+					}
+				}
 				issuer, ok := issuerIdentity.Load().(string)
 				if !ok || issuer == "" {
 					return fmt.Errorf("agent: authenticated Hub identity missing")
@@ -582,7 +602,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err != nil {
 						return err
 					}
-					if len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0 {
+					if (len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0) && !(leaseOnly && c.currentStatus.Mode == "autonomous") {
 						return fmt.Errorf("agent: new grants unavailable while Hub is restricted")
 					}
 				}
