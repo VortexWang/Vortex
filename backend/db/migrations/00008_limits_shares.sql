@@ -160,9 +160,9 @@ CREATE INDEX hub_allocation_share_generation ON hub_allocation_share_bindings(te
 CREATE TRIGGER hub_allocation_share_binding_immutable BEFORE UPDATE OR DELETE ON hub_allocation_share_bindings FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TABLE hub_issue_receipts (
  tenant_id text NOT NULL, issue_id text NOT NULL, allocation_id text NOT NULL,
- hub_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
+ hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
- PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,ledger_sequence),
+ PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_issue_immutable BEFORE UPDATE OR DELETE ON hub_issue_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
@@ -231,7 +231,7 @@ CREATE TABLE hub_delegation_seals (
  hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
  peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
- PRIMARY KEY(tenant_id,allocation_id), UNIQUE(tenant_id,seal_id), UNIQUE(hub_id,ledger_sequence),
+ PRIMARY KEY(tenant_id,allocation_id), UNIQUE(tenant_id,seal_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_delegation_seal_immutable BEFORE UPDATE OR DELETE ON hub_delegation_seals FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
@@ -262,10 +262,24 @@ CREATE TABLE hub_runtime_lease_receipts (
  hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
  peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
- PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,ledger_sequence),
+ PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_runtime_lease_immutable BEFORE UPDATE OR DELETE ON hub_runtime_lease_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Explicit cold recovery proves expiry of every old hard authority boundary.
+-- It never transfers unissued R, settles credit, clears capacity or rewrites
+-- incarnation history. Platform approval and fixed target boot are immutable.
+CREATE TABLE hub_cold_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL UNIQUE,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch>from_epoch),
+ from_boot_id text NOT NULL, to_boot_id text NOT NULL CHECK(to_boot_id<>from_boot_id),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ created_by text NOT NULL, PRIMARY KEY(hub_id,to_epoch),
+ FOREIGN KEY(hub_id,from_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(hub_id,to_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch)
+);
+CREATE TRIGGER hub_cold_recovery_immutable BEFORE UPDATE OR DELETE ON hub_cold_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

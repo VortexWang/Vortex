@@ -394,3 +394,21 @@ settlement remain mandatory before a funded successor can be reserved.
 Actual role-mTLS tests exercise this cycle with a short original child TTL,
 both local aggregate caps, direct source provisioning and Agent readiness for
 the new parent. Existing sessions cannot move arbitrarily to the fresh source.
+
+The candidate backend also exposes an explicit platform-only cold Hub recovery
+service. It binds one preapproved newer epoch to one specified fresh Hub boot
+only after the trusted UTC lower bound proves every prior tenant authority,
+immutable delegation autonomy boundary and immutable share hard boundary has
+expired. Every previously authorized tenant needs a current successor epoch
+approval. The complete ordered original inventory and time bounds are retained
+in an immutable recovery record with shared audit/task/Outbox commit. Concurrent
+targets cannot split ownership; an audit error rolls back the new incarnation.
+This path transfers no unissued balance, releases no financial or capacity hold
+and supplies no Node execution-stop or final-usage proof. Late original usage
+still charges its original source. Old boots remain denied. New empty Hub state
+can connect but remains without runtime rights until independently prepared,
+funded successor authority arrives. Local journal sequence identity includes
+Hub boot, preserving old evidence when fresh SQLite starts numbering again.
+The HTTP entry, early S/R recovery, same-store epoch recovery and Node boot
+recovery remain separate implementation work. This is an unapproved CR-008
+candidate, without changes to previously approved contract snapshots.

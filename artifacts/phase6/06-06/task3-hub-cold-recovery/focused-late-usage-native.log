@@ -1,0 +1,4 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/hub_cold_recovery_test.go:115:60: unknown field OriginBootId in struct literal of type controlv1.UsageBatch
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

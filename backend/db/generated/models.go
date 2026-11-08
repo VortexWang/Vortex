@@ -164,6 +164,19 @@ type HubAllocationShareBinding struct {
 	Generation   int64
 }
 
+type HubColdRecovery struct {
+	TenantID      string
+	ID            string
+	HubID         string
+	FromEpoch     int64
+	ToEpoch       int64
+	FromBootID    string
+	ToBootID      string
+	Payload       []byte
+	PayloadDigest []byte
+	CreatedBy     string
+}
+
 type HubCreditGrant struct {
 	TenantID     string
 	GrantID      string
@@ -212,6 +225,7 @@ type HubIssueReceipt struct {
 	IssueID        string
 	AllocationID   string
 	HubID          string
+	HubBootID      string
 	LedgerSequence int64
 	Payload        []byte
 	PayloadDigest  []byte

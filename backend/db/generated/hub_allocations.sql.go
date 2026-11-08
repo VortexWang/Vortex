@@ -153,7 +153,7 @@ func (q *Queries) AppendHubDelegationSeal(ctx context.Context, arg AppendHubDele
 }
 
 const appendHubIssue = `-- name: AppendHubIssue :exec
-INSERT INTO hub_issue_receipts(tenant_id,issue_id,allocation_id,hub_id,ledger_sequence,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7)
+INSERT INTO hub_issue_receipts(tenant_id,issue_id,allocation_id,hub_id,hub_boot_id,ledger_sequence,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
 `
 
 type AppendHubIssueParams struct {
@@ -161,6 +161,7 @@ type AppendHubIssueParams struct {
 	IssueID        string
 	AllocationID   string
 	HubID          string
+	HubBootID      string
 	LedgerSequence int64
 	Payload        []byte
 	PayloadDigest  []byte
@@ -172,6 +173,7 @@ func (q *Queries) AppendHubIssue(ctx context.Context, arg AppendHubIssueParams) 
 		arg.IssueID,
 		arg.AllocationID,
 		arg.HubID,
+		arg.HubBootID,
 		arg.LedgerSequence,
 		arg.Payload,
 		arg.PayloadDigest,
@@ -397,7 +399,7 @@ func (q *Queries) GetHubIncarnation(ctx context.Context, arg GetHubIncarnationPa
 }
 
 const getHubIssue = `-- name: GetHubIssue :one
-SELECT tenant_id, issue_id, allocation_id, hub_id, ledger_sequence, payload, payload_digest FROM hub_issue_receipts WHERE tenant_id=$1 AND issue_id=$2
+SELECT tenant_id, issue_id, allocation_id, hub_id, hub_boot_id, ledger_sequence, payload, payload_digest FROM hub_issue_receipts WHERE tenant_id=$1 AND issue_id=$2
 `
 
 type GetHubIssueParams struct {
@@ -413,6 +415,7 @@ func (q *Queries) GetHubIssue(ctx context.Context, arg GetHubIssueParams) (HubIs
 		&i.IssueID,
 		&i.AllocationID,
 		&i.HubID,
+		&i.HubBootID,
 		&i.LedgerSequence,
 		&i.Payload,
 		&i.PayloadDigest,

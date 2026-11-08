@@ -13,7 +13,7 @@ SELECT * FROM hub_allocation_share_bindings WHERE tenant_id=$1 AND allocation_id
 -- name: GetHubIssue :one
 SELECT * FROM hub_issue_receipts WHERE tenant_id=$1 AND issue_id=$2;
 -- name: AppendHubIssue :exec
-INSERT INTO hub_issue_receipts(tenant_id,issue_id,allocation_id,hub_id,ledger_sequence,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7);
+INSERT INTO hub_issue_receipts(tenant_id,issue_id,allocation_id,hub_id,hub_boot_id,ledger_sequence,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8);
 -- name: HubAllocationIssued :one
 SELECT coalesce(sum(raw_granted),0)::bigint AS issued FROM hub_credit_grants WHERE tenant_id=$1 AND allocation_id=$2;
 -- name: AppendHubCreditGrant :exec

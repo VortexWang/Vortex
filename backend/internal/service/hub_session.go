@@ -19,8 +19,9 @@ type HubSession struct {
 }
 
 // BindHubSession can bind an already approved epoch, never create one. Until
-// recovery supplies durable closure evidence, every other boot stays blocked,
-// including a boot presenting a newly approved epoch. No held funds move here.
+// an explicit recovery binds the next incarnation, every other boot stays
+// blocked, including a boot presenting a newly approved epoch. Cold recovery
+// requires every old hard boundary to expire; no held funds move here.
 func (s ShareService) BindHubSession(ctx context.Context, hubID, bootID, request string) (HubSession, error) {
 	var out HubSession
 	if !validID(bootID) {

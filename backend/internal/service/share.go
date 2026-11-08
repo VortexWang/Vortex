@@ -92,6 +92,13 @@ func (s ShareService) AuthorizeSigner(ctx context.Context, scope TenantScope, si
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
+		incarnation, e := q.LatestHubIncarnation(ctx, signer)
+		if e == nil && epoch < incarnation.SignerEpoch {
+			return ErrShareConflict
+		}
+		if e != nil && !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
 		floor, e := q.LatestSignerEpoch(ctx, generated.LatestSignerEpochParams{TenantID: scope.TenantID(), SignerID: signer})
 		if e != nil {
 			return e
@@ -137,6 +144,9 @@ func (s ShareService) PrepareShare(ctx context.Context, scope TenantScope, in Pr
 	}
 	digest := sha256.Sum256(raw)
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.prepare", ResourceID: in.NodeID, RequestID: request, Reason: "linear same-boot successor with globally reserved max capacity"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+in.SignerID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}

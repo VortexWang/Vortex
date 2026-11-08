@@ -45,6 +45,9 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 	}
 	digest := sha256.Sum256(raw)
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "hub.fund_allocation", ResourceID: in.NodeID, RequestID: request, Reason: "one source-funded parent hold with immutable Hub allocation and task; no transport before commit"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+in.HubID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -346,7 +349,7 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID strin
 		}
 		old, e := q.GetHubIssue(ctx, generated.GetHubIssueParams{TenantID: scope.TenantID(), IssueID: parsed.UpdateID})
 		if e == nil {
-			if old.HubID != hubID || old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
+			if old.HubID != hubID || old.HubBootID != hubBootID || old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
 				return ErrShareConflict
 			}
 			return nil
@@ -366,7 +369,7 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID strin
 		if uint64(issued) > a.RawBytes || *credit.AmountBytes > a.RawBytes-uint64(issued) {
 			return ErrShareCapacity
 		}
-		if e = q.AppendHubIssue(ctx, generated.AppendHubIssueParams{TenantID: scope.TenantID(), IssueID: parsed.UpdateID, AllocationID: a.AllocationID, HubID: hubID, LedgerSequence: sequence, Payload: payload, PayloadDigest: digest[:]}); e != nil {
+		if e = q.AppendHubIssue(ctx, generated.AppendHubIssueParams{TenantID: scope.TenantID(), IssueID: parsed.UpdateID, AllocationID: a.AllocationID, HubID: hubID, HubBootID: hubBootID, LedgerSequence: sequence, Payload: payload, PayloadDigest: digest[:]}); e != nil {
 			return e
 		}
 		if e = q.AppendHubCreditGrant(ctx, generated.AppendHubCreditGrantParams{TenantID: scope.TenantID(), GrantID: credit.AuthorizationID, AllocationID: a.AllocationID, IssueID: parsed.UpdateID, RawGranted: int64(*credit.AmountBytes)}); e != nil {
