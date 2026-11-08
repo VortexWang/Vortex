@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: seal/binding and conservative parent guards verified; child closure, sustained funding and explicit recovery pending"
-last_updated: "2026-11-08T06:51:18Z"
+stopped_at: "06-06 Task 3: local Node credit stop/final boundary verified; authenticated child closure, sustained funding and explicit recovery pending"
+last_updated: "2026-11-08T07:03:21Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: seal/binding and empty-state redelivery guard committed; generic exact reconciliation cannot release delegated child debt. Native/Linux race and builds passed. Phase6 stays8/11."
+last_activity_desc: "06-06 Task3: local Node child-credit stop/final boundary verified by actual Engine TCP relay, pending/unknown retention, FULL rollback and native/Linux race. Authenticated child closure and parent release remain pending. Phase6 stays8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 8008956b
+state_head: 1ac9ffff
 ---
 
 # Project State
@@ -33,7 +33,7 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 06
 Total Plans in Phase: 11
 Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete (8/11). 06-06 Tasks 1 and 2 complete; Task 3 allocation/runtime authority remains. Final Phase6 acceptance pending.
-Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Immutable rate/connection funding bindings and exact generation closure now pass real Node CAS, funded Hub issue, audit rollback and native/Linux race. Seal061d3d8a clean Docker completed result0 with clean source before/after; later sealed redelivery/empty-state old-boot guard passes actual TLS and native/Linux race. Generic exact reconciliation now rejects delegated parents before finalizing issued/unknown debt, with RED/GREEN and full native/Linux race evidence. Child final/unknown-safe closure, sustained funding and explicit boot recovery remain; final Actions06-11.
+Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Immutable rate/connection funding bindings and exact generation closure now pass real Node CAS, funded Hub issue, audit rollback and native/Linux race. Seal061d3d8a clean Docker completed result0 with clean source before/after; later sealed redelivery/empty-state old-boot guard passes actual TLS and native/Linux race. Generic exact reconciliation now rejects delegated parents before finalizing issued/unknown debt, with RED/GREEN and full native/Linux race evidence. Node local child-credit stop/final now passes real Engine TCP inflight-write regression, conservation, unknown retention and native/Linux race; this is not a wire receipt or parent release. Authenticated child closure, sustained funding and explicit boot recovery remain; final Actions06-11.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -134,8 +134,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T06:51:18Z
-Stopped at: 06-06 Task 3: seal/binding and conservative parent guards verified; child closure, sustained funding and explicit recovery pending
+Last session: 2026-11-08T07:03:21Z
+Stopped at: 06-06 Task 3: local Node credit stop/final boundary verified; authenticated child closure, sustained funding and explicit recovery pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries
