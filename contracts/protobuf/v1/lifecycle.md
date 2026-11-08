@@ -336,6 +336,9 @@ lost FULL receipts, reconnect replay and PG known-usage arrival. Backend durable
 close commands derive only from accepted complete Hub seals; authenticated child
 receipts pin the original issue and independently reconstruct the known wire
 inventory. Unknown liabilities and disputes remain held. Child acceptance alone
-does not release parent funds; complete all-child parent closure and sustained
-funding remain pending. CR-008 is unprepared/unapproved and
+does not release parent funds. A separate PG transaction revalidates the complete
+sealed issue inventory, every authenticated child final and its known wire
+inventory, then settles the single original parent with its original coefficient
+and source remainder. Missing children, unknown liabilities or disputes deny
+release. Sustained funding and explicit boot recovery remain pending. CR-008 is unprepared/unapproved and
 earlier approved contracts are unchanged.

@@ -216,6 +216,85 @@ func (q *Queries) GetCreditCloseReceipt(ctx context.Context, arg GetCreditCloseR
 	return i, err
 }
 
+const hubAllocationChildren = `-- name: HubAllocationChildren :many
+SELECT tenant_id, grant_id, allocation_id, issue_id, raw_granted FROM hub_credit_grants WHERE tenant_id=$1 AND allocation_id=$2 ORDER BY grant_id
+`
+
+type HubAllocationChildrenParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) HubAllocationChildren(ctx context.Context, arg HubAllocationChildrenParams) ([]HubCreditGrant, error) {
+	rows, err := q.db.Query(ctx, hubAllocationChildren, arg.TenantID, arg.AllocationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubCreditGrant{}
+	for rows.Next() {
+		var i HubCreditGrant
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.GrantID,
+			&i.AllocationID,
+			&i.IssueID,
+			&i.RawGranted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const hubCreditSettlementCandidates = `-- name: HubCreditSettlementCandidates :many
+SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a
+JOIN hub_delegation_seals s ON s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id
+WHERE NOT EXISTS(SELECT 1 FROM settlements t WHERE t.tenant_id=a.tenant_id AND t.grant_id=a.reservation_id AND t.kind IN ('final','conservative'))
+AND NOT EXISTS(SELECT 1 FROM hub_credit_grants g WHERE g.tenant_id=a.tenant_id AND g.allocation_id=a.allocation_id
+AND NOT EXISTS(SELECT 1 FROM node_credit_close_receipts r WHERE r.tenant_id=g.tenant_id AND r.grant_id=g.grant_id))
+ORDER BY a.tenant_id,a.allocation_id LIMIT 32
+`
+
+func (q *Queries) HubCreditSettlementCandidates(ctx context.Context) ([]HubFundedAllocation, error) {
+	rows, err := q.db.Query(ctx, hubCreditSettlementCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubFundedAllocation{}
+	for rows.Next() {
+		var i HubFundedAllocation
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.AllocationID,
+			&i.DelegationID,
+			&i.ReservationID,
+			&i.HubID,
+			&i.HubBootID,
+			&i.NodeID,
+			&i.BootID,
+			&i.RequestKey,
+			&i.RequestDigest,
+			&i.Payload,
+			&i.PayloadDigest,
+			&i.OperationID,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const reservationDisputed = `-- name: ReservationDisputed :one
 SELECT EXISTS(SELECT 1 FROM disputes WHERE tenant_id=$1 AND grant_id=$2)
 `

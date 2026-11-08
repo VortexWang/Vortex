@@ -108,14 +108,6 @@ func (s ShareService) RecordCreditClose(ctx context.Context, scope TenantScope, 
 	if r.State != "final" {
 		return ErrShareUnknown
 	}
-	var final store.CreditGrantFinal
-	if json.Unmarshal(r.Final, &final) != nil {
-		return ErrShareConflict
-	}
-	canonical, err := json.Marshal(final)
-	if err != nil || !bytes.Equal(canonical, r.Final) || final.KnownUsage.Validate() != nil {
-		return ErrShareUnknown
-	}
 	sum := sha256.Sum256(raw)
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "node.credit_closed", ResourceID: r.GrantID, RequestID: request, Reason: "authenticated FULL child final and independently reconstructed committed wire inventory; no parent release"}, func(q *generated.Queries) error {
 		if _, err := q.LockTenant(ctx, scope.TenantID()); err != nil {
@@ -125,21 +117,9 @@ func (s ShareService) RecordCreditClose(ctx context.Context, scope TenantScope, 
 		if err != nil {
 			return err
 		}
-		if r.CommandID != p.CommandID || r.CommandSHA256 != hex.EncodeToString(p.PayloadDigest) || r.NodeID != p.NodeID || r.BootID != p.BootID || r.BackendID != p.BackendID {
-			return ErrStaleReceipt
-		}
-		command, err := contracts.DecodeCreditCloseCommand(p.Payload)
+		command, final, err := validateCreditCloseFinal(p, raw)
 		if err != nil {
 			return err
-		}
-		expected, err := agent.InspectIssuedCreditGrant(command.Original, command.NodeID, command.BootID, command.HubID, command.GrantID, command.Generation)
-		if err != nil {
-			return err
-		}
-		actual := final.Grant
-		actual.ShareRevision = 0 // local reference-head observation, never issuer scope
-		if final.NodeID != p.NodeID || actual != expected || final.Used > expected.AmountBytes || final.Unused != expected.AmountBytes-final.Used || final.KnownUsage.Count > final.BatchCount || final.NeverInstalled && (final.Used != 0 || final.BatchCount != 0 || final.KnownUsage.Count != 0) {
-			return ErrShareConflict
 		}
 		old, err := q.GetCreditCloseReceipt(ctx, generated.GetCreditCloseReceiptParams{TenantID: scope.TenantID(), GrantID: r.GrantID})
 		if err == nil {
@@ -245,4 +225,45 @@ func verifyChildKnownUsage(ctx context.Context, q *generated.Queries, tenant str
 		return ErrShareUnknown
 	}
 	return nil
+}
+
+// Revalidate stored immutable proof at parent closure as well as first receipt.
+func validateCreditCloseFinal(p generated.NodeCreditCloseCommand, raw []byte) (contracts.CreditCloseCommand, store.CreditGrantFinal, error) {
+	var zero contracts.CreditCloseCommand
+	var final store.CreditGrantFinal
+	r, err := contracts.DecodeCreditCloseReceipt(raw)
+	if err != nil || r.State != "final" {
+		return zero, final, ErrShareConflict
+	}
+	if r.CommandID != p.CommandID || r.CommandSHA256 != hex.EncodeToString(p.PayloadDigest) || r.NodeID != p.NodeID || r.BootID != p.BootID || r.BackendID != p.BackendID || r.GrantID != p.GrantID {
+		return zero, final, ErrStaleReceipt
+	}
+	sum := sha256.Sum256(p.Payload)
+	if !bytes.Equal(sum[:], p.PayloadDigest) {
+		return zero, final, ErrShareConflict
+	}
+	command, err := contracts.DecodeCreditCloseCommand(p.Payload)
+	if err != nil {
+		return zero, final, err
+	}
+	if command.ID != p.CommandID || command.GrantID != p.GrantID || command.NodeID != p.NodeID || command.BootID != p.BootID || command.BackendID != p.BackendID {
+		return zero, final, ErrShareConflict
+	}
+	if json.Unmarshal(r.Final, &final) != nil {
+		return zero, final, ErrShareConflict
+	}
+	canonical, err := json.Marshal(final)
+	if err != nil || !bytes.Equal(canonical, r.Final) || final.KnownUsage.Validate() != nil {
+		return zero, final, ErrShareUnknown
+	}
+	expected, err := agent.InspectIssuedCreditGrant(command.Original, command.NodeID, command.BootID, command.HubID, command.GrantID, command.Generation)
+	if err != nil {
+		return zero, final, err
+	}
+	actual := final.Grant
+	actual.ShareRevision = 0
+	if final.NodeID != p.NodeID || actual != expected || final.Used > expected.AmountBytes || final.Unused != expected.AmountBytes-final.Used || final.KnownUsage.Count > final.BatchCount || final.NeverInstalled && (final.Used != 0 || final.BatchCount != 0 || final.KnownUsage.Count != 0) {
+		return zero, final, ErrShareConflict
+	}
+	return command, final, nil
 }

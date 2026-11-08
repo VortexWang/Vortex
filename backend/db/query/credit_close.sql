@@ -24,3 +24,14 @@ ORDER BY batch_id;
 
 -- name: ReservationDisputed :one
 SELECT EXISTS(SELECT 1 FROM disputes WHERE tenant_id=$1 AND grant_id=$2);
+
+-- name: HubAllocationChildren :many
+SELECT * FROM hub_credit_grants WHERE tenant_id=$1 AND allocation_id=$2 ORDER BY grant_id;
+
+-- name: HubCreditSettlementCandidates :many
+SELECT a.* FROM hub_funded_allocations a
+JOIN hub_delegation_seals s ON s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id
+WHERE NOT EXISTS(SELECT 1 FROM settlements t WHERE t.tenant_id=a.tenant_id AND t.grant_id=a.reservation_id AND t.kind IN ('final','conservative'))
+AND NOT EXISTS(SELECT 1 FROM hub_credit_grants g WHERE g.tenant_id=a.tenant_id AND g.allocation_id=a.allocation_id
+AND NOT EXISTS(SELECT 1 FROM node_credit_close_receipts r WHERE r.tenant_id=g.tenant_id AND r.grant_id=g.grant_id))
+ORDER BY a.tenant_id,a.allocation_id LIMIT 32;

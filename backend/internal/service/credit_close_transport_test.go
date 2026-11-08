@@ -162,5 +162,12 @@ func TestCreditCloseActualMTLSWorkerPendingLostFinalAndPGInventory(t *testing.T)
 	if err != nil || projection.F != 18 || projection.Charged != 44 {
 		t.Fatal("child transport released parent funds", projection, err)
 	}
-	t.Log("actual TLS1.3 capability isolation, pending stop, FULL final loss/replay and independent PG known inventory; parent hold retained")
+	if worked, err := (worker.HubCreditSettlementWorker{Service: x.s}).Once(ctx); err != nil || !worked {
+		t.Fatal("authenticated all-child final did not settle parent", worked, err)
+	}
+	projection, err = q.GetSourceProjection(ctx, generated.GetSourceProjectionParams{TenantID: x.f.tenant, SourceID: f.in.SourceID})
+	if err != nil || projection.F != 0 || projection.Charged != 44 || projection.RemainderMilli != 400 {
+		t.Fatal("parent closure altered original source rounding", projection, err)
+	}
+	t.Log("actual TLS1.3 capability isolation, pending stop, FULL final loss/replay, independent PG known inventory and all-child parent settlement")
 }

@@ -33,15 +33,19 @@ type creditCloseFixture struct {
 }
 
 func newCreditCloseFixture(t *testing.T) *creditCloseFixture {
+	return newCreditCloseFixtureMultiplier(t, 1200, 51)
+}
+
+func newCreditCloseFixtureMultiplier(t *testing.T, multiplier int64, issuedBytes uint64) *creditCloseFixture {
 	t.Helper()
-	x, in, hs := fundedHubFixtureMultiplier(t, 1200)
+	x, in, hs := fundedHubFixtureMultiplier(t, multiplier)
 	ctx := context.Background()
 	a, err := x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
 	if err != nil {
 		t.Fatal(err)
 	}
 	installAllocationFixture(t, hs, a, x.now)
-	issued, grant, seq := issueAllocationFixture(t, x, hs, a, 51)
+	issued, grant, seq := issueAllocationFixture(t, x, hs, a, issuedBytes)
 	if err = x.s.RecordHubIssue(x.f.contexts[in.HubID], in.HubID, in.HubBootID, seq, issued.Payload, uuid.NewString()); err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +215,7 @@ func (f *creditCloseFixture) commitLocalUsage(t *testing.T, used uint64) *contro
 	}
 	batch := &controlv1.UsageBatch{BatchId: uuid.NewString(), BillingSnapshotId: f.a.SnapshotID, Deltas: []*controlv1.UsageDelta{{RuleId: f.a.RuleID, GrantId: f.grant, Role: "source", Direction: "egress", Bytes: used}}}
 	when := facts.IssuedAt.Add(time.Millisecond)
-	u := store.UsageReservation{AuthorizationID: f.grant, NodeID: f.in.NodeID, BootID: f.in.BootID, BatchID: batch.BatchId, SnapshotID: f.a.SnapshotID, FlowKey: "real-committed-batch", RuleID: f.a.RuleID, Direction: "egress", Reserved: used + 1}
+	u := store.UsageReservation{AuthorizationID: f.grant, NodeID: f.in.NodeID, BootID: f.in.BootID, BatchID: batch.BatchId, SnapshotID: f.a.SnapshotID, FlowKey: "real-committed-batch", RuleID: f.a.RuleID, Direction: "egress", Reserved: min(used+1, r.AmountBytes)}
 	_, err = f.st.ReserveAuthorizedUsage(ctx, u, store.AuthorizationUse{NodeID: f.in.NodeID, BootID: f.in.BootID, AuthorizationID: f.grant, Kind: "credit_grant", RuleID: f.a.RuleID, RuleRevision: f.a.RuleRevision, PathGeneration: f.a.PathGeneration, BillingSnapshotID: f.a.SnapshotID, Earliest: when, Latest: when, TrustedTime: true})
 	if err != nil {
 		t.Fatal(err)

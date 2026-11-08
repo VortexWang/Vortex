@@ -178,12 +178,15 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	defer hubServer.Stop()
 	controlv1.RegisterNodeControlServer(server, adapter)
 	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe, Metering: adapter.Metering, Shares: adapter.Shares})
-	failures := make(chan error, 14)
+	failures := make(chan error, 15)
 	go func() {
 		failures <- (worker.NodeSourceWorker{Service: *adapter.Shares, BackendID: *backendID, Adapter: adapter}).Run(ctx)
 	}()
 	go func() {
 		failures <- (worker.CreditCloseWorker{Service: *adapter.Shares, BackendID: *backendID, Adapter: adapter}).Run(ctx)
+	}()
+	go func() {
+		failures <- (worker.HubCreditSettlementWorker{Service: *adapter.Shares}).Run(ctx)
 	}()
 	go func() { failures <- server.Serve(nodes) }()
 	go func() { failures <- hubServer.Serve(hubs) }()
