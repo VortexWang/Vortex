@@ -1,0 +1,15 @@
+2026/11/09 00:07:39 goose: no migrations to run. current version: 8
+2026/11/09 00:07:39 OK   00001_authority.sql (16.88ms)
+2026/11/09 00:07:39 OK   00002_tenant_policy.sql (12.63ms)
+2026/11/09 00:07:39 OK   00003_nodes_ports.sql (38.1ms)
+2026/11/09 00:07:39 OK   00004_entry_group_domains.sql (3.04ms)
+2026/11/09 00:07:39 OK   00005_rules_compile.sql (24.89ms)
+2026/11/09 00:07:39 OK   00006_packages_entitlements.sql (25.37ms)
+2026/11/09 00:07:39 OK   00007_metering_ledger.sql (32.97ms)
+2026/11/09 00:07:40 OK   00008_limits_shares.sql (71.21ms)
+2026/11/09 00:07:40 goose: successfully migrated database to version: 8
+--- FAIL: TestTransferredShareColdProofKeepsOriginalClosureAndDebtUntilNodeCAS (2.11s)
+    share_transferred_cold_test.go:178: proved cold closure refused CAS share_execution_unknown_occupation_retained
+FAIL
+FAIL	vortex/backend/internal/service	2.789s
+FAIL

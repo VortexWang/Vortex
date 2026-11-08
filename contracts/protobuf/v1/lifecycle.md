@@ -946,3 +946,24 @@ original closed row and original generation. It appends a new immutable admissio
 and binds only the explicit next boot; local finite FULL ACK remains separate.
 Repeated service/store cycles do not by themselves complete platform orchestration,
 later cold recovery or production RuntimeServer convergence. CR-008 is unapproved.
+
+## Cold closure of transferred generations (candidate)
+
+A committed platform cold-recovery inventory can close a generation that passed
+through one or more same-store admissions. Closure validates canonical proof
+bytes/digest, both bound incarnations and request columns, the exact original
+share row, and a trusted lower time bound past the complete original hard
+boundary. This proof closes issuance only; it does not grant renewal to the cold
+boot, transfer old credit, settle unknown usage or release financial occupation.
+
+The original renewal-authority row retains its first admission closure forever.
+The independent cold proof is consumed when preparing closure and again before
+binding the immutable Node CAS command. Unacknowledged live-closure operations
+may be retired as failed in the same audit transaction; no Hub receipt is
+manufactured. Capacity stays held until the actual Node FULL CAS receipt proves
+the new generation. Replays retain the same cold proof and CAS bytes.
+
+This closes the service-level cold path for transferred generations. Automatic
+platform recovery orchestration, effective funding/refill and RuntimeServer
+convergence remain separate unfinished work. No wire field, migration or approved
+snapshot changes in this unit. CR-008 remains unapproved.

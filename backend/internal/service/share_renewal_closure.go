@@ -77,21 +77,20 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 			return e
 		}
 		for _, a := range authorities {
+			// A complete cold proof can close transferred issuers without
+			// inventing an S/R admission into the fresh cold boot.
+			closed, e := s.closeColdHubRenewalTx(ctx, q, scope, g, a)
+			if e != nil {
+				return e
+			}
+			if closed {
+				continue
+			}
 			issuer, e := effectiveShareIssuerTx(ctx, q, prior, a)
 			if e != nil {
 				return e
 			}
 			if a.ClosedAt.Valid && !issuer.Recovered {
-				continue
-			}
-			closed := false
-			if !issuer.Recovered {
-				closed, e = s.closeColdHubRenewalTx(ctx, q, scope, g, a)
-			}
-			if e != nil {
-				return e
-			}
-			if closed {
 				continue
 			}
 			existing, e := q.ShareClosureCommands(ctx, generated.ShareClosureCommandsParams{TenantID: scope.TenantID(), HandoffID: h.ID, SignerID: a.SignerID})
@@ -243,7 +242,7 @@ func (s ShareService) RecordRenewalClosureReceipt(ctx context.Context, hub, boot
 			if chain.BootID != c.BootID || chain.ActiveGeneration != c.Generation || chain.PendingGeneration != c.SuccessorGeneration {
 				return ErrShareConflict
 			}
-			if _, e = effectiveShareClosureTx(ctx, q, g, c.HandoffID, a); e != nil {
+			if _, e = s.effectiveShareClosureTx(ctx, q, g, c.HandoffID, a); e != nil {
 				return e
 			}
 			return domainTask(ctx, q, scope, c.NodeID, "share.close_renewal", "share_handoff", c.SuccessorGeneration)

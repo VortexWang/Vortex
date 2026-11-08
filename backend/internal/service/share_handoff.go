@@ -81,7 +81,7 @@ func (s ShareService) QueueHandoff(ctx context.Context, scope TenantScope, id, r
 			}
 			closureProofs := [][]byte{}
 			for _, p := range proofs {
-				proof, e := effectiveShareClosureTx(ctx, q, prior, h.ID, p)
+				proof, e := s.effectiveShareClosureTx(ctx, q, prior, h.ID, p)
 				if e != nil {
 					return e
 				}

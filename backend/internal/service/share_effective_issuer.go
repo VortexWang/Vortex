@@ -159,9 +159,13 @@ func effectiveShareIssuerTx(ctx context.Context, q *generated.Queries, g generat
 	return out, nil
 }
 
-// Exact immutable commands and authenticated FULL receipts prove closure of
-// the effective issuer. The original old-epoch closure is deliberately unused.
-func effectiveShareClosureTx(ctx context.Context, q *generated.Queries, g generated.ShareGeneration, handoff string, a generated.ShareRenewalAuthority) ([]byte, error) {
+// Exact immutable commands and authenticated FULL receipts, or a committed
+// complete cold proof after every original hard deadline, close the effective
+// issuer. The original old-epoch admission alone cannot close later issuers.
+func (s ShareService) effectiveShareClosureTx(ctx context.Context, q *generated.Queries, g generated.ShareGeneration, handoff string, a generated.ShareRenewalAuthority) ([]byte, error) {
+	if proof, found, e := s.coldShareClosureProofTx(ctx, q, g, g.Generation+1, a); e != nil || found {
+		return proof, e
+	}
 	issuer, e := effectiveShareIssuerTx(ctx, q, g, a)
 	if e != nil {
 		return nil, e
