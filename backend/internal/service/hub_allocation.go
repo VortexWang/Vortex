@@ -21,6 +21,9 @@ import (
 // HubFundingInput is an online backend decision, not a Node request. The raw
 // budget is reserved once in its original traffic source before any delivery.
 type HubFundingInput struct {
+	// Internal scheduler barrier, rechecked under the tenant lock. The public
+	// immutable nonce binds this complete finalized predecessor inventory.
+	runtimeHistorySHA256                                                  string
 	NodeID, BootID, HubID, HubBootID, Region, SourceID, SnapshotID, Nonce string
 	SignerEpoch, PathGeneration, FencingFloor, RawBytes                   int64
 	ExpiresAt                                                             time.Time
@@ -55,6 +58,15 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		}
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
+		}
+		if in.runtimeHistorySHA256 != "" {
+			open, history, _, e := runtimeFundingHistory(ctx, q, scope.TenantID(), in.NodeID, in.BootID, in.SnapshotID, in.SignerEpoch, in.PathGeneration, in.FencingFloor)
+			if e != nil {
+				return e
+			}
+			if open || history != in.runtimeHistorySHA256 {
+				return ErrShareUnknown
+			}
 		}
 		lo, hi, e := s.bounds()
 		if e != nil {

@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -12,11 +15,10 @@ import (
 	"vortex/backend/db/generated"
 )
 
-// FundRuntimeCandidates creates an initial finite delegation only after both
-// Node aggregate kinds are confirmed. Existing allocations, including expired,
-// unacknowledged or exhausted ones, suppress automatic refill. Their funds
-// remain held until the separate delegation/child closure protocol proves
-// release. A new minute or reconnect is never a reason to reserve more credit.
+// FundRuntimeCandidates funds finite delegations after both Node aggregates are
+// confirmed. Every predecessor must be finalized by the dedicated complete
+// issuer/child closure before automatic refill. A new minute, expiry, exhausted
+// credit, conservative estimate or reconnect cannot replace that evidence.
 func (s ShareService) FundRuntimeCandidates(ctx context.Context, scope TenantScope, region, request string) error {
 	if region == "" {
 		return ErrShareConflict
@@ -46,9 +48,8 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 	q := generated.New(s.Pool)
 	// Also recognize allocations prepared through the explicit administrative
 	// producer, rather than reserving a second parent under a scheduler nonce.
-	exists, e := q.RuntimeAllocationExists(ctx, generated.RuntimeAllocationExistsParams{TenantID: scope.TenantID(), NodeID: n.NodeID, BootID: n.BootID,
-		SnapshotID: ref.SnapshotID, SignerEpoch: strconv.FormatInt(ref.SignerEpoch, 10), PathGeneration: strconv.FormatInt(ref.PathGeneration, 10), FencingFloor: strconv.FormatInt(ref.FencingGeneration, 10)})
-	if e != nil || exists {
+	open, history, predecessors, e := runtimeFundingHistory(ctx, q, scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration)
+	if e != nil || open {
 		return e
 	}
 	_, now, e := s.bounds()
@@ -150,11 +151,35 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 		if rawBytes < 1 {
 			continue
 		}
-		key := uuid.NewSHA1(uuid.NameSpaceOID, []byte(fmt.Sprintf("runtime-bootstrap/%s/%s/%s/%s/%d/%d/%d", scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration))).String()
+		keyInput := fmt.Sprintf("runtime-bootstrap/%s/%s/%s/%s/%d/%d/%d", scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration)
+		if predecessors > 0 {
+			keyInput += "/closed/" + history
+		}
+		key := uuid.NewSHA1(uuid.NameSpaceOID, []byte(keyInput)).String()
 		_, e = s.PrepareHubAllocation(ctx, scope, HubFundingInput{NodeID: n.NodeID, BootID: n.BootID, HubID: hub, HubBootID: incarnation.BootID, Region: region,
 			SourceID: src.ID, SnapshotID: ref.SnapshotID, Nonce: key, SignerEpoch: ref.SignerEpoch, PathGeneration: ref.PathGeneration, FencingFloor: ref.FencingGeneration,
-			RawBytes: rawBytes, ExpiresAt: deadline}, uuid.NewString())
+			RawBytes: rawBytes, ExpiresAt: deadline, runtimeHistorySHA256: history}, uuid.NewString())
 		return e
 	}
 	return ErrShareCapacity
+}
+
+func runtimeFundingHistory(ctx context.Context, q *generated.Queries, tenant, node, boot, snapshot string, epoch, path, fence int64) (bool, string, int, error) {
+	rows, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: tenant, NodeID: node, BootID: boot, SnapshotID: snapshot, SignerEpoch: strconv.FormatInt(epoch, 10), PathGeneration: strconv.FormatInt(path, 10), FencingFloor: strconv.FormatInt(fence, 10)})
+	if err != nil {
+		return false, "", 0, err
+	}
+	ids := make([][2]string, 0, len(rows))
+	for _, row := range rows {
+		if !row.Closed {
+			return true, "", len(rows), nil
+		}
+		ids = append(ids, [2]string{row.AllocationID, row.ReservationID})
+	}
+	raw, err := json.Marshal(ids)
+	if err != nil {
+		return false, "", 0, err
+	}
+	sum := sha256.Sum256(append([]byte("vortex/finalized-runtime-funding/v1\n"), raw...))
+	return false, hex.EncodeToString(sum[:]), len(rows), nil
 }

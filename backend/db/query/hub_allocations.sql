@@ -54,6 +54,19 @@ AND convert_from(payload,'UTF8')::jsonb->>'billing_snapshot_id'=sqlc.arg(snapsho
 AND convert_from(payload,'UTF8')::jsonb->>'signer_epoch'=sqlc.arg(signer_epoch)::text
 AND convert_from(payload,'UTF8')::jsonb->>'path_generation'=sqlc.arg(path_generation)::text
 AND convert_from(payload,'UTF8')::jsonb->>'fencing_generation_floor'=sqlc.arg(fencing_floor)::text);
+
+-- name: RuntimeFundingHistory :many
+SELECT a.allocation_id,a.reservation_id,
+EXISTS(SELECT 1 FROM settlements t WHERE t.tenant_id=a.tenant_id AND t.grant_id=a.reservation_id AND t.kind='final'
+AND (t.receipt_key='hub-credit-final/'||a.allocation_id
+OR (t.receipt_key='hub-seal/'||s.seal_id AND convert_from(s.payload,'UTF8')::jsonb->>'issue_count'='0')))::boolean AS closed
+FROM hub_funded_allocations a LEFT JOIN hub_delegation_seals s ON s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id
+WHERE a.tenant_id=$1 AND a.node_id=$2 AND a.boot_id=$3
+AND convert_from(a.payload,'UTF8')::jsonb->>'billing_snapshot_id'=sqlc.arg(snapshot_id)::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'signer_epoch'=sqlc.arg(signer_epoch)::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'path_generation'=sqlc.arg(path_generation)::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'fencing_generation_floor'=sqlc.arg(fencing_floor)::text
+ORDER BY a.allocation_id;
 -- name: NodeSourceCandidates :many
 SELECT a.* FROM hub_funded_allocations a WHERE NOT EXISTS(SELECT 1 FROM node_source_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 100;
 -- name: GetNodeSourceProvision :one

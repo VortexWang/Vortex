@@ -340,5 +340,5 @@ does not release parent funds. A separate PG transaction revalidates the complet
 sealed issue inventory, every authenticated child final and its known wire
 inventory, then settles the single original parent with its original coefficient
 and source remainder. Missing children, unknown liabilities or disputes deny
-release. Sustained funding and explicit boot recovery remain pending. CR-008 is unprepared/unapproved and
+release. Automatic funding successors require all matching predecessors to have dedicated complete parent finals (or true zero-child seal finals). Stable finalized allocation/reservation inventories bind nonces and are rechecked under the tenant lock; expiry, exhaustion and conservative estimates never authorize refill. Sustained lease refresh and explicit boot recovery remain pending. CR-008 is unprepared/unapproved and
 earlier approved contracts are unchanged.

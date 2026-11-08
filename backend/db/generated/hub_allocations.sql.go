@@ -809,6 +809,64 @@ func (q *Queries) RuntimeAllocationExists(ctx context.Context, arg RuntimeAlloca
 	return exists, err
 }
 
+const runtimeFundingHistory = `-- name: RuntimeFundingHistory :many
+SELECT a.allocation_id,a.reservation_id,
+EXISTS(SELECT 1 FROM settlements t WHERE t.tenant_id=a.tenant_id AND t.grant_id=a.reservation_id AND t.kind='final'
+AND (t.receipt_key='hub-credit-final/'||a.allocation_id
+OR (t.receipt_key='hub-seal/'||s.seal_id AND convert_from(s.payload,'UTF8')::jsonb->>'issue_count'='0')))::boolean AS closed
+FROM hub_funded_allocations a LEFT JOIN hub_delegation_seals s ON s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id
+WHERE a.tenant_id=$1 AND a.node_id=$2 AND a.boot_id=$3
+AND convert_from(a.payload,'UTF8')::jsonb->>'billing_snapshot_id'=$4::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'signer_epoch'=$5::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'path_generation'=$6::text
+AND convert_from(a.payload,'UTF8')::jsonb->>'fencing_generation_floor'=$7::text
+ORDER BY a.allocation_id
+`
+
+type RuntimeFundingHistoryParams struct {
+	TenantID       string
+	NodeID         string
+	BootID         string
+	SnapshotID     string
+	SignerEpoch    string
+	PathGeneration string
+	FencingFloor   string
+}
+
+type RuntimeFundingHistoryRow struct {
+	AllocationID  string
+	ReservationID string
+	Closed        bool
+}
+
+func (q *Queries) RuntimeFundingHistory(ctx context.Context, arg RuntimeFundingHistoryParams) ([]RuntimeFundingHistoryRow, error) {
+	rows, err := q.db.Query(ctx, runtimeFundingHistory,
+		arg.TenantID,
+		arg.NodeID,
+		arg.BootID,
+		arg.SnapshotID,
+		arg.SignerEpoch,
+		arg.PathGeneration,
+		arg.FencingFloor,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []RuntimeFundingHistoryRow{}
+	for rows.Next() {
+		var i RuntimeFundingHistoryRow
+		if err := rows.Scan(&i.AllocationID, &i.ReservationID, &i.Closed); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const setHubCreditUsage = `-- name: SetHubCreditUsage :exec
 INSERT INTO hub_credit_usage(tenant_id,grant_id,raw_cumulative) VALUES($1,$2,$3) ON CONFLICT(tenant_id,grant_id) DO UPDATE SET raw_cumulative=excluded.raw_cumulative
 `
