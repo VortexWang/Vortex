@@ -1,0 +1,24 @@
+{
+  "base_commit": "6868fa02b1ae2c0aea2fb36ff1c0630719030577",
+  "scope": "development sealed-allocation redelivery/issuer-evidence denial guard; not explicit recovery or full06-06 acceptance",
+  "source": {
+    "backend/db/generated/hub_allocations.sql.go": "5243c50cc5046d11dd2d3d7f0a9ff7a469bb5544e2d21dba29b4f215ee5cdc04",
+    "backend/db/query/hub_allocations.sql": "1ce9922c0400ec8915797d5ef7d32d90509fc88a4f2fc8db8c557d00fa27ad2e",
+    "backend/internal/control/hub_funded.go": "0acc459a1e8f4480ad617f9a847e06795e267e36a3f263a6e02e2df61ff4a741",
+    "backend/internal/service/delegation_seal_test.go": "0f49192b794d943f9d480968eba84602da514059930d662ddb99423f5f77283e",
+    "backend/internal/service/delegation_seal_transport_test.go": "f68d962fb76a4de1989fea445dfb371509dad309e12a285a14ea84895e9ea38f",
+    "contracts/protobuf/v1/lifecycle.md": "c341d3aa5af069bac37d3d3571ab233573a4f09d09ea574618bb651cf19404c8"
+  },
+  "evidence": {
+    "README.md": "c4f3b638f09b7e68e70cd8ecb7bdac90727c4ae106993b14f5913e37eb9e418e",
+    "backend-all-race.log": "90adc9fe684a79ee418c9570d710e89c8880f20c26bc6b12b95cc66b1553d28c",
+    "compile-focused-sqlc-interface-failed.log": "a8477fe8f07c2cc3017bdb2af99d76468bf3efb2b944c16a798631b25c1f354d",
+    "compile-sqlc-interface-failed.log": "a8477fe8f07c2cc3017bdb2af99d76468bf3efb2b944c16a798631b25c1f354d",
+    "focused-race.log": "865a99dbca6a2add28a16c12bf2cdcf97dd9cc1e50e0c5c38775c6839c763fd6",
+    "generators.json": "dafa35bb1e21948309ecc67a704864dff49122f2a3b988db4504c40a05084c7f",
+    "issuer-evidence-race.log": "665d78ed4be0e377a339e4545d4ad72ed2b8fe839944c86060aaab1ef2906528",
+    "linux-race-build.log": "0813fc6d12d29ade06bbc7d42755302e4c54eca8f30bc964102dbd1c5e641981",
+    "red.log": "70d06e8ab6e13cb3b398006aa9d6639d01255eba612d0e958da5ee4332f9d6e1",
+    "sqlc-initial-failure.txt": "1b6fc74e144d8ce18a0358b29bb5649f7d591e77d10aa9d1cf9d7288f23a3a29"
+  }
+}

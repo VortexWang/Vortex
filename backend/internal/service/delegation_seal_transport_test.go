@@ -5,19 +5,23 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"net"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"vortex/agent/store"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/control"
+	"vortex/backend/internal/service"
 	controlv1 "vortex/contracts/protobuf/v1"
 	"vortex/hub"
 )
@@ -26,6 +30,67 @@ type loseSealReceipts struct {
 	*control.HubAdapter
 	before, after atomic.Bool
 }
+
+func TestDelegationSealActualMTLSEmptyBootCannotRefillAfterLostInstallReceipt(t *testing.T) {
+	x, in, hs := fundedHubFixture(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	a, err := x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
+	if err != nil {
+		t.Fatal(err)
+	}
+	installAllocationFixture(t, hs, a, x.now)
+	seal, err := hs.SealHubDelegation(ctx, in.HubID, in.HubBootID, a.DelegationID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(seal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = x.s.RecordDelegationSeal(x.f.contexts[in.HubID], in.HubID, in.HubBootID, 1, raw, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	q := generated.New(x.f.pool)
+	if _, err = q.GetHubAllocationReceipt(ctx, generated.GetHubAllocationReceiptParams{TenantID: x.f.tenant, AllocationID: a.AllocationID}); !errors.Is(err, pgx.ErrNoRows) {
+		t.Fatal("fixture must preserve lost installation receipt", err)
+	}
+	empty, err := store.Open(filepath.Join(t.TempDir(), "empty-hub.db"), "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer empty.Close()
+	backendCA, backendKey := portCA(t)
+	hubCA, hubKey := portCA(t)
+	backendRoots, hubRoots := x509.NewCertPool(), x509.NewCertPool()
+	backendRoots.AddCert(backendCA)
+	hubRoots.AddCert(hubCA)
+	serverTLS := &tls.Config{Certificates: []tls.Certificate{portCertificate(t, backendCA, backendKey, shareBackendID, x509.ExtKeyUsageServerAuth)}, ClientCAs: hubRoots, ClientAuth: tls.RequireAndVerifyClientCert, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}
+	clientTLS := &tls.Config{Certificates: []tls.Certificate{portCertificate(t, hubCA, hubKey, in.HubID, x509.ExtKeyUsageClientAuth)}, RootCAs: backendRoots, ServerName: shareBackendID, MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13}
+	now := x.now.Add(time.Second)
+	x.s.SignerCA = hubCA
+	x.s.Clock = func() (time.Time, time.Time, bool) { return now, now, true }
+	clock := func() store.IssuerTime { return store.IssuerTime{Earliest: now, Latest: now, Trusted: true} }
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(serverTLS)))
+	defer server.Stop()
+	adapter := &control.HubAdapter{BackendID: shareBackendID, HubID: in.HubID, Region: in.Region, Shares: &x.s, Observe: func(context.Context, string, string, []byte) error { return nil }}
+	controlv1.RegisterHubControlServer(server, adapter)
+	go server.Serve(listener)
+	cfg := &hub.BackendClient{HubID: in.HubID, BootID: in.HubBootID, BackendID: shareBackendID, Region: in.Region, Address: listener.Addr().String(), TLS: clientTLS, Store: empty, Clock: clock}
+	if err = cfg.Run(ctx); err == nil || !strings.Contains(err.Error(), service.ErrShareUnknown.Error()) {
+		t.Fatal("empty-state reused sealed signer boot", err)
+	}
+	snapshot, err := empty.HubControlSnapshot(ctx, in.HubID, now)
+	if err != nil || snapshot.Epoch != 0 {
+		t.Fatal("sealed allocation installed on empty old boot", err, snapshot)
+	}
+	t.Log("actual TLS empty-state boot reuse denied by seal evidence before any allocation redelivery")
+}
+
 type sealStream struct {
 	grpc.BidiStreamingServer[controlv1.HubMessage, controlv1.BackendMessage]
 	server *loseSealReceipts

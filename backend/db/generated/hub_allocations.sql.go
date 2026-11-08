@@ -578,20 +578,22 @@ func (q *Queries) HubAllocationShareBindings(ctx context.Context, arg HubAllocat
 	return items, nil
 }
 
-const hubBootHasInstalledAllocation = `-- name: HubBootHasInstalledAllocation :one
-SELECT EXISTS(SELECT 1 FROM hub_allocation_receipts WHERE hub_id=$1 AND hub_boot_id=$2)
+const hubBootHasIssuerEvidence = `-- name: HubBootHasIssuerEvidence :one
+SELECT (EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.hub_id=$1 AND r.hub_boot_id=$2)
+ OR EXISTS(SELECT 1 FROM hub_delegation_seals s WHERE s.hub_id=$1 AND s.hub_boot_id=$2)
+ OR EXISTS(SELECT 1 FROM hub_issue_receipts i JOIN hub_funded_allocations a ON a.tenant_id=i.tenant_id AND a.allocation_id=i.allocation_id WHERE a.hub_id=$1 AND a.hub_boot_id=$2))::boolean AS has_issuer_evidence
 `
 
-type HubBootHasInstalledAllocationParams struct {
+type HubBootHasIssuerEvidenceParams struct {
 	HubID     string
 	HubBootID string
 }
 
-func (q *Queries) HubBootHasInstalledAllocation(ctx context.Context, arg HubBootHasInstalledAllocationParams) (bool, error) {
-	row := q.db.QueryRow(ctx, hubBootHasInstalledAllocation, arg.HubID, arg.HubBootID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+func (q *Queries) HubBootHasIssuerEvidence(ctx context.Context, arg HubBootHasIssuerEvidenceParams) (bool, error) {
+	row := q.db.QueryRow(ctx, hubBootHasIssuerEvidence, arg.HubID, arg.HubBootID)
+	var has_issuer_evidence bool
+	err := row.Scan(&has_issuer_evidence)
+	return has_issuer_evidence, err
 }
 
 const hubCreditGrant = `-- name: HubCreditGrant :one
@@ -714,7 +716,7 @@ func (q *Queries) NodeSourceCandidates(ctx context.Context) ([]HubFundedAllocati
 }
 
 const pendingHubAllocations = `-- name: PendingHubAllocations :many
-SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=a.tenant_id AND c.signer_id=a.hub_id AND c.hub_boot_id=a.hub_boot_id AND jsonb_exists(convert_from(c.payload,'UTF8')::jsonb->'delegation_ids',a.delegation_id)) ORDER BY a.allocation_id LIMIT 1
+SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) AND NOT EXISTS(SELECT 1 FROM hub_delegation_seals s WHERE s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id) AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=a.tenant_id AND c.signer_id=a.hub_id AND c.hub_boot_id=a.hub_boot_id AND jsonb_exists(convert_from(c.payload,'UTF8')::jsonb->'delegation_ids',a.delegation_id)) ORDER BY a.allocation_id LIMIT 1
 `
 
 type PendingHubAllocationsParams struct {

@@ -283,3 +283,11 @@ and not-yet-installed allocations. A missing or inconsistent dependency stays
 unknown and cannot become an empty closure proof. Existing source-reference wire
 semantics and historical approvals are unchanged; these DB artifacts are candidate
 CR-008, not an approval or an inferred Node-stop receipt.
+
+Sealed allocations are never candidates for backend redelivery, including when
+their earlier installation receipt was lost. A persisted installation receipt,
+issue mapping or seal is evidence that this Hub boot has already held issuer
+authority: a reconnect reporting empty/blocked epoch0 must not bootstrap it again.
+Its existing FULL state may reconnect and replay exact journal records; missing
+state requires the separate explicit recovery workflow. This check neither
+releases unknown debt nor treats an unseen receipt as non-execution.

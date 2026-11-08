@@ -1,0 +1,16 @@
+=== RUN   TestDelegationSealZeroIssueProofSafelyReturnsWholeParent
+2026/11/08 14:41:33 goose: no migrations to run. current version: 8
+2026/11/08 14:41:33 OK   00001_authority.sql (31.69ms)
+2026/11/08 14:41:33 OK   00002_tenant_policy.sql (20.13ms)
+2026/11/08 14:41:33 OK   00003_nodes_ports.sql (33.94ms)
+2026/11/08 14:41:33 OK   00004_entry_group_domains.sql (3.93ms)
+2026/11/08 14:41:33 OK   00005_rules_compile.sql (29.34ms)
+2026/11/08 14:41:33 OK   00006_packages_entitlements.sql (28.39ms)
+2026/11/08 14:41:33 OK   00007_metering_ledger.sql (33.22ms)
+2026/11/08 14:41:33 OK   00008_limits_shares.sql (50.89ms)
+2026/11/08 14:41:33 goose: successfully migrated database to version: 8
+    delegation_seal_test.go:115: sealed allocation remained deliverable without installation ACK <nil> 1
+--- FAIL: TestDelegationSealZeroIssueProofSafelyReturnsWholeParent (0.98s)
+FAIL
+FAIL	vortex/backend/internal/service	1.753s
+FAIL

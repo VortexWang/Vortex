@@ -160,11 +160,11 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 					return errors.New("funded Hub persisted status mismatch")
 				}
 				if status.SignerEpoch == 0 {
-					installed, e := generated.New(h.Shares.Pool).HubBootHasInstalledAllocation(stream.Context(), generated.HubBootHasInstalledAllocationParams{HubID: id, HubBootID: hello.BootId})
+					hasEvidence, e := generated.New(h.Shares.Pool).HubBootHasIssuerEvidence(stream.Context(), generated.HubBootHasIssuerEvidenceParams{HubID: id, HubBootID: hello.BootId})
 					if e != nil {
 						return e
 					}
-					if installed {
+					if hasEvidence {
 						return service.ErrShareUnknown
 					}
 				}

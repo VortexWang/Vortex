@@ -108,6 +108,16 @@ func TestDelegationSealZeroIssueProofSafelyReturnsWholeParent(t *testing.T) {
 	if e != nil || p.F != 0 || p.Charged != 0 {
 		t.Fatal(e, p)
 	}
+	// The seal itself is durable issuer evidence even if the earlier installation
+	// ACK was lost. An empty Hub DB must not receive and refill that delegation.
+	pending, e := x.s.PendingHubAllocations(x.f.contexts[in.HubID], in.HubID, in.HubBootID)
+	if e != nil || len(pending) != 0 {
+		t.Fatal("sealed allocation remained deliverable without installation ACK", e, len(pending))
+	}
+	evidence, e := q.HubBootHasIssuerEvidence(ctx, generated.HubBootHasIssuerEvidenceParams{HubID: in.HubID, HubBootID: in.HubBootID})
+	if e != nil || !evidence {
+		t.Fatal("seal failed to fence empty-state boot reuse", e, evidence)
+	}
 }
 
 func TestDelegationSealPreservesAlreadyChargedAndUnknownChildHold(t *testing.T) {
@@ -159,5 +169,23 @@ func TestDelegationSealPreservesAlreadyChargedAndUnknownChildHold(t *testing.T) 
 	p, e = generated.New(x.f.pool).GetSourceProjection(ctx, generated.GetSourceProjectionParams{TenantID: x.f.tenant, SourceID: in.SourceID})
 	if e != nil || p.F != 1 || p.Charged != 61 || p.RemainderMilli != 200 {
 		t.Fatal("delayed usage changed parent rounding or released unknown tail", e, p)
+	}
+}
+
+func TestHubIssueWithoutInstallReceiptStillFencesEmptyBootEvidence(t *testing.T) {
+	x, in, hs := fundedHubFixture(t)
+	ctx := context.Background()
+	a, err := x.s.PrepareHubAllocation(ctx, x.f.scope, in, uuid.NewString())
+	if err != nil {
+		t.Fatal(err)
+	}
+	installAllocationFixture(t, hs, a, x.now)
+	issued, _, sequence := issueAllocationFixture(t, x, hs, a, 51)
+	if err = x.s.RecordHubIssue(x.f.contexts[in.HubID], in.HubID, in.HubBootID, sequence, issued.Payload, uuid.NewString()); err != nil {
+		t.Fatal(err)
+	}
+	evidence, err := generated.New(x.f.pool).HubBootHasIssuerEvidence(ctx, generated.HubBootHasIssuerEvidenceParams{HubID: in.HubID, HubBootID: in.HubBootID})
+	if err != nil || !evidence {
+		t.Fatal("accepted issue was not issuer evidence", err, evidence)
 	}
 }
