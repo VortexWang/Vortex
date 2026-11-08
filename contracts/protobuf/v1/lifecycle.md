@@ -1089,3 +1089,9 @@ against the stopped original root. Existing source-spending checks still require
 that original root to be active. FULL rollback, replay/reopen and pending-ticket
 checks exercise these invariants; actual production Node/Hub/backend mTLS also
 checks the original37-byte known debt and subsequent financial final/refill.
+
+The production mTLS regression also covers Hub sealing before first recovery
+network delivery, with materialization both before and after that seal. The
+already persisted outbox remains byte-identical, stopped credit stays revoked,
+and the financial final/refill gates still apply. No producer behavior changes
+were needed for these orderings.

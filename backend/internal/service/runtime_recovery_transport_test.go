@@ -5,13 +5,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"google.golang.org/protobuf/proto"
 	"net"
 	"testing"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/protobuf/proto"
 	"vortex/agent"
 	"vortex/agent/store"
 	"vortex/backend/internal/control"
@@ -21,15 +21,34 @@ import (
 )
 
 func TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill(t *testing.T) {
-	testRuntimeRecoveryUpdateActualMTLS(t, false)
+	testRuntimeRecoveryUpdateActualMTLS(t, "open")
 }
 func TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt(t *testing.T) {
-	testRuntimeRecoveryUpdateActualMTLS(t, true)
+	testRuntimeRecoveryUpdateActualMTLS(t, "stopped")
 }
-func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, stopped bool) {
+func TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt(t *testing.T) {
+	for _, ordering := range []string{"sealed-before-materialization", "sealed-after-materialization"} {
+		t.Run(ordering, func(t *testing.T) { testRuntimeRecoveryUpdateActualMTLS(t, ordering) })
+	}
+}
+func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, ordering string) {
+	stopped := ordering != "open"
 	testEffectiveRuntimeFundingWithHook(t, true, func(x *shareFixture, hs, ns *store.Store, a hub.Allocation, r service.HubSameStoreRecoveryInput, node *agent.Node) {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
+		var frozenRecovery []byte
+		if ordering == "sealed-after-materialization" {
+			page, err := hs.RuntimeRecoveryUpdates(ctx, a.HubID, a.NodeID, a.BootID, "", store.IssuerTime{Earliest: x.now, Latest: x.now, Trusted: true})
+			if err != nil || len(page.Updates) != 1 {
+				t.Fatal("pre-seal recovery materialization", page, err)
+			}
+			frozenRecovery = append([]byte(nil), page.Updates[0].Payload...)
+		}
+		if ordering == "sealed-before-materialization" || ordering == "sealed-after-materialization" {
+			if _, err := hs.SealHubDelegation(ctx, a.HubID, r.ToBootID, a.DelegationID); err != nil {
+				t.Fatal("seal before first recovery delivery", err)
+			}
+		}
 		var stoppedGrant string
 		if stopped {
 			pending, err := ns.PendingUsageOutbox(ctx, a.NodeID)
@@ -100,6 +119,9 @@ func testRuntimeRecoveryUpdateActualMTLS(t *testing.T, stopped bool) {
 		page, e := hs.RuntimeRecoveryUpdates(ctx, a.HubID, a.NodeID, a.BootID, "", clock())
 		if e != nil || len(page.Updates) != 1 {
 			t.Fatal(page, e)
+		}
+		if frozenRecovery != nil && string(page.Updates[0].Payload) != string(frozenRecovery) {
+			t.Fatal("seal rewrote already committed recovery bytes")
 		}
 		for attempt := 0; attempt < 2; attempt++ {
 			run, stop := context.WithCancel(ctx)

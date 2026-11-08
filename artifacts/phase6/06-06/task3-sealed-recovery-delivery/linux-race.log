@@ -1,0 +1,84 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-66235a0059b7 Creating 
+ Container vortex-phase6-tracer-backend-test-run-66235a0059b7 Created 
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/08 17:54:53 goose: no migrations to run. current version: 8
+2026/11/08 17:54:54 OK   00001_authority.sql (7.99ms)
+2026/11/08 17:54:54 OK   00002_tenant_policy.sql (6.57ms)
+2026/11/08 17:54:54 OK   00003_nodes_ports.sql (14.22ms)
+2026/11/08 17:54:54 OK   00004_entry_group_domains.sql (1.49ms)
+2026/11/08 17:54:54 OK   00005_rules_compile.sql (12.39ms)
+2026/11/08 17:54:54 OK   00006_packages_entitlements.sql (11.66ms)
+2026/11/08 17:54:54 OK   00007_metering_ledger.sql (17.39ms)
+2026/11/08 17:54:54 OK   00008_limits_shares.sql (47.26ms)
+2026/11/08 17:54:54 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.30s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt
+2026/11/08 17:55:00 goose: no migrations to run. current version: 8
+2026/11/08 17:55:00 OK   00001_authority.sql (6.75ms)
+2026/11/08 17:55:00 OK   00002_tenant_policy.sql (5.91ms)
+2026/11/08 17:55:00 OK   00003_nodes_ports.sql (14.03ms)
+2026/11/08 17:55:00 OK   00004_entry_group_domains.sql (1.58ms)
+2026/11/08 17:55:00 OK   00005_rules_compile.sql (12.04ms)
+2026/11/08 17:55:00 OK   00006_packages_entitlements.sql (14.22ms)
+2026/11/08 17:55:00 OK   00007_metering_ledger.sql (15.34ms)
+2026/11/08 17:55:00 OK   00008_limits_shares.sql (37.52ms)
+2026/11/08 17:55:00 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt (6.23s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization
+2026/11/08 17:55:06 goose: no migrations to run. current version: 8
+2026/11/08 17:55:06 OK   00001_authority.sql (6.98ms)
+2026/11/08 17:55:06 OK   00002_tenant_policy.sql (5.86ms)
+2026/11/08 17:55:06 OK   00003_nodes_ports.sql (12.75ms)
+2026/11/08 17:55:06 OK   00004_entry_group_domains.sql (1.53ms)
+2026/11/08 17:55:06 OK   00005_rules_compile.sql (12.39ms)
+2026/11/08 17:55:06 OK   00006_packages_entitlements.sql (11.81ms)
+2026/11/08 17:55:06 OK   00007_metering_ledger.sql (15.03ms)
+2026/11/08 17:55:06 OK   00008_limits_shares.sql (35.74ms)
+2026/11/08 17:55:06 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_node_recovery_source_receipts
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization
+2026/11/08 17:55:12 goose: no migrations to run. current version: 8
+2026/11/08 17:55:12 OK   00001_authority.sql (9.5ms)
+2026/11/08 17:55:12 OK   00002_tenant_policy.sql (21.96ms)
+2026/11/08 17:55:12 OK   00003_nodes_ports.sql (13.51ms)
+2026/11/08 17:55:12 OK   00004_entry_group_domains.sql (4.3ms)
+2026/11/08 17:55:12 OK   00005_rules_compile.sql (11.45ms)
+2026/11/08 17:55:12 OK   00006_packages_entitlements.sql (11.22ms)
+2026/11/08 17:55:12 OK   00007_metering_ledger.sql (16.58ms)
+2026/11/08 17:55:12 OK   00008_limits_shares.sql (36.17ms)
+2026/11/08 17:55:12 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt (12.35s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization (6.15s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_admissions (0.01s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_hub_same_store_manifests (0.01s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-before-materialization/final_requires_node_recovery_source_receipts (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization (6.20s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_admissions (0.01s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_hub_same_store_manifests (0.01s)
+        --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterSealAndStopRetainsDebt/sealed-after-materialization/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	25.912s
