@@ -25,6 +25,12 @@ func TestUsageBatchIdempotencyAuthoritySchema(t *testing.T) {
 	}
 }
 
+func TestUnknownRiskBudgetAuthoritySchema(t *testing.T){
+ p:=testutil.Postgres(t);var exists bool
+ if e:=p.QueryRow(context.Background(),"SELECT to_regclass('risk_budget_funding') IS NOT NULL").Scan(&exists);e!=nil{t.Fatal(e)}
+ if !exists{t.Fatal("approved funded risk budget authority missing; 72h cannot release unknown")}
+}
+
 func reserveUsage(t *testing.T, f *portFixture, source, snapshot string, n int64) generated.Reservation {
 	t.Helper()
 	now := time.Now().UTC().Truncate(time.Microsecond)
