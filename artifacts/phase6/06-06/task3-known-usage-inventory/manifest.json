@@ -1,0 +1,15 @@
+{
+  "base_commit": "13892799d97595b4a6e82b7a604b18736b715763",
+  "source": {
+    "contracts/known_usage_inventory.go": "d4199767195b36528bbd1a9848374c1c5582ae6686ccd985f57cfd8eb859da43",
+    "contracts/known_usage_inventory_test.go": "817d6a94613c6c2043ff1846e1dfb8e37638a10777c4fbb6d4294ef71be064a1",
+    "agent/store/credit_grant_closure.go": "d27f5920b4d46ae8c92720c4152893410553b712a8058316aeb26d35ffe27f97",
+    "agent/store/credit_grant_closure_test.go": "6fab57580f1c2d739414cb63248cc1ecc0ad236d0bc9c44366f42cf87884342d",
+    "agent/store/uninstalled_credit_closure.go": "56dc47b77acd99bf32348e292967ecfc3510db18be5384c20dbe345fcb2934bd"
+  },
+  "evidence": {
+    "README.md": "f92f308a501a0d5125fc256200178260464ccaeda583e5427681eca971a196b7",
+    "full-native-race.log": "3239861e29b3327f9704bdd744c55729663675793f3c3808df76329f26ed449a",
+    "linux-race-build.log": "ce8063184538b21ef2e973777f112631232ce823ffa0a17d66684a3317d41c52"
+  }
+}

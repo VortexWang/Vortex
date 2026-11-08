@@ -10,6 +10,8 @@ import (
 	"errors"
 	"strconv"
 	"time"
+
+	"vortex/contracts"
 )
 
 var ErrCreditGrantUnsettled = errors.New("store: stopped credit grant has unresolved writes")
@@ -25,6 +27,7 @@ type CreditGrantFinal struct {
 	Unused         uint64
 	BatchCount     uint64
 	UsageSHA256    string
+	KnownUsage     contracts.KnownUsageInventory
 }
 
 // StopCreditGrant permanently fences further pre-write reservations. Existing
@@ -137,6 +140,7 @@ func (s *Store) FinalizeStoppedCreditGrant(ctx context.Context, node, boot, issu
 		return zero, ErrUsageBatchConflict
 	}
 	final := CreditGrantFinal{NodeID: node, Grant: r, Unused: remaining}
+	var known []contracts.KnownUsageBatch
 	digest := sha256.New()
 	_, _ = digest.Write([]byte("vortex/stopped-credit-usage/v1\n"))
 	rows, err := tx.QueryContext(ctx, `SELECT h.batch_id,h.source_id,h.reserved_bytes,h.state,u.boot_id,u.snapshot_id,u.rule_id,u.flow_key,u.direction,u.reserved_bytes,u.state,u.used_bytes,b.payload,b.payload_sha256,b.unknown_upper_bound,
@@ -172,6 +176,7 @@ func (s *Store) FinalizeStoppedCreditGrant(ctx context.Context, node, boot, issu
 				return zero, ErrUsageBatchConflict
 			}
 			payloadHash = hex.EncodeToString(sum[:])
+			known = append(known, contracts.KnownUsageBatch{BatchID: batch, SHA256: payloadHash})
 		case "returned":
 			if used != 0 || upper.Valid || len(payload) != 0 || len(payloadDigest) != 0 {
 				return zero, ErrUsageBatchConflict
@@ -200,6 +205,10 @@ func (s *Store) FinalizeStoppedCreditGrant(ctx context.Context, node, boot, issu
 		return zero, ErrUsageBatchConflict
 	}
 	final.UsageSHA256 = hex.EncodeToString(digest.Sum(nil))
+	final.KnownUsage, err = contracts.BuildKnownUsageInventory(known)
+	if err != nil {
+		return zero, err
+	}
 	payload, err := json.Marshal(final)
 	if err != nil {
 		return zero, err

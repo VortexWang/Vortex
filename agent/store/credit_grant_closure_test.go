@@ -2,11 +2,16 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"vortex/contracts"
 )
 
 func closureReservation(batch string, amount uint64) UsageReservation {
@@ -50,6 +55,11 @@ func TestCreditGrantClosureWaitsForEveryWritableTicket(t *testing.T) {
 	if err != nil || final.Used != 300 || final.Unused != 3796 || final.BatchCount != 2 || len(final.UsageSHA256) != 64 || final.Grant.SourceID != "source" {
 		t.Fatalf("final=%+v err=%v", final, err)
 	}
+	sum := sha256.Sum256([]byte("original usage"))
+	want, err := contracts.BuildKnownUsageInventory([]contracts.KnownUsageBatch{{BatchID: "write", SHA256: hex.EncodeToString(sum[:])}})
+	if err != nil || final.KnownUsage != want {
+		t.Fatalf("wire inventory included returned ticket or missed committed bytes: %+v %v", final.KnownUsage, err)
+	}
 	balance, err := s.AuditAuthorizationBalance(ctx, "node", "grant")
 	if err != nil || balance.Remaining != 3796 || balance.Committed != 300 || balance.Reserved != 0 {
 		t.Fatalf("closure changed source balance: %+v %v", balance, err)
@@ -87,6 +97,40 @@ func TestCreditGrantClosureWaitsForEveryWritableTicket(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestCreditGrantClosureHistoricalFinalDoesNotInventKnownUsageProof(t *testing.T) {
+	s, _ := fundedStore(t)
+	ctx := context.Background()
+	if err := s.StopCreditGrant(ctx, "node", "boot", "hub-one", "grant"); err != nil {
+		t.Fatal(err)
+	}
+	r, _, err := readAuthorizationTxForTest(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Simulate the immutable payload produced by the preceding candidate.
+	old := CreditGrantFinal{NodeID: "node", Grant: r, Unused: 4096}
+	raw, err := json.Marshal(old)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.db.Exec(`INSERT INTO credit_grant_finals(node_id,authorization_id,payload) VALUES('node','grant',?)`, raw); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.FinalizeStoppedCreditGrant(ctx, "node", "boot", "hub-one", "grant")
+	if err != nil || got != old || got.KnownUsage.Validate() == nil {
+		t.Fatal("historical immutable final was silently upgraded", got, err)
+	}
+}
+
+func readAuthorizationTxForTest(s *Store) (AuthorizationRecord, string, error) {
+	tx, err := s.db.BeginTx(context.Background(), nil)
+	if err != nil {
+		return AuthorizationRecord{}, "", err
+	}
+	defer tx.Rollback()
+	return readAuthorizationTx(context.Background(), tx, "node", "grant")
 }
 
 func TestCreditGrantClosureRejectsWrongScopeAndHubStore(t *testing.T) {

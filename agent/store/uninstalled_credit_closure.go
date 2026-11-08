@@ -9,6 +9,8 @@ import (
 	"errors"
 	"strconv"
 	"time"
+
+	"vortex/contracts"
 )
 
 // StopUninstalledCreditGrant is a local primitive for a verified original Hub
@@ -57,6 +59,10 @@ func (s *Store) StopUninstalledCreditGrant(ctx context.Context, node, boot strin
 	}
 	digest := sha256.Sum256([]byte("vortex/stopped-credit-usage/v1\n"))
 	final := CreditGrantFinal{NodeID: node, Grant: expected, NeverInstalled: true, Unused: expected.AmountBytes, UsageSHA256: hex.EncodeToString(digest[:])}
+	final.KnownUsage, err = contracts.BuildKnownUsageInventory(nil)
+	if err != nil {
+		return zero, err
+	}
 	raw, err := json.Marshal(final)
 	if err != nil {
 		return zero, err
