@@ -1,0 +1,32 @@
+[
+  {
+    "case": "control",
+    "exit": 0,
+    "expected": "pass"
+  },
+  {
+    "case": "wrong-owner",
+    "exit": 1,
+    "expected": "reject"
+  },
+  {
+    "case": "wrong-proposal",
+    "exit": 1,
+    "expected": "reject"
+  },
+  {
+    "case": "missing-companion",
+    "exit": 1,
+    "expected": "reject"
+  },
+  {
+    "case": "wrong-source",
+    "exit": 1,
+    "expected": "reject"
+  },
+  {
+    "case": "duplicate-record",
+    "exit": 1,
+    "expected": "reject"
+  }
+]

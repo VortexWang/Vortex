@@ -122,3 +122,13 @@ liabilities remain held. Negotiated capabilities isolate new commands/journals;
 existing field numbers and old wire encodings remain unchanged. Runtime,
 authorization and VLink frozen schemas retain their approved bytes/versions.
 No owner approval is implied; HTTP adapters remain06-07, paired acceptance06-11.
+
+## Phase 6 limits and funded runtime (06-06 approved)
+
+The owner explicitly approved CR-008 with “批准 CR-008”. The immutable proposal
+SHA-256 remains `4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd`.
+Database/API2.3.0 and control1.6.0 are frozen with the exact normative companions
+and codecs inventoried by the proposal. CR-005/006/007 proposal and approval
+bytes remain unchanged. Approval is recorded in docs/changes/CR-008-APPROVAL.json
+and three appended governance records. HTTP adapters remain06-07; final same-SHA
+Docker/Actions pairing and broader phase acceptance remain06-11.

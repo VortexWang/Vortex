@@ -21,4 +21,4 @@ for name in vortex.pb.go vortex_grpc.pb.go; do
  cmp "$work/one/contracts/protobuf/v1/$name" "contracts/protobuf/v1/$name"
 done
 python3 tools/phase6/limits_contract_check.py "$work"
-echo 'Limits contract: two clean generations and exact historical approvals passed; CR-008 remains pending owner approval'
+echo 'Limits contract: two clean generations and exact historical approvals passed; CR-008 approval checked independently'

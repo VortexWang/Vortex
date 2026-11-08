@@ -211,16 +211,16 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## LIM Requirements
 
-- [ ] **LIM-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (730-730; SHA-256 recorded there).
-- [ ] **LIM-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (731-731; SHA-256 recorded there).
-- [ ] **LIM-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (732-732; SHA-256 recorded there).
-- [ ] **LIM-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (733-733; SHA-256 recorded there).
-- [ ] **LIM-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (734-734; SHA-256 recorded there).
-- [ ] **LIM-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (735-735; SHA-256 recorded there).
-- [ ] **LIM-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (736-736; SHA-256 recorded there).
-- [ ] **LIM-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (737-737; SHA-256 recorded there).
-- [ ] **LIM-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (738-738; SHA-256 recorded there).
-- [ ] **LIM-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (739-739; SHA-256 recorded there).
+- [x] **LIM-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (730-730; SHA-256 recorded there).
+- [x] **LIM-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (731-731; SHA-256 recorded there).
+- [x] **LIM-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (732-732; SHA-256 recorded there).
+- [x] **LIM-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (733-733; SHA-256 recorded there).
+- [x] **LIM-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (734-734; SHA-256 recorded there).
+- [x] **LIM-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (735-735; SHA-256 recorded there).
+- [x] **LIM-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (736-736; SHA-256 recorded there).
+- [x] **LIM-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (737-737; SHA-256 recorded there).
+- [x] **LIM-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (738-738; SHA-256 recorded there).
+- [x] **LIM-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (739-739; SHA-256 recorded there).
 
 ## FE Requirements
 
@@ -520,16 +520,16 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | MTR-014 | Phase 6 | Complete |
 | MTR-015 | Phase 6 | Complete |
 | MTR-016 | Phase 6 | Complete |
-| LIM-001 | Phase 6 | Pending |
-| LIM-002 | Phase 6 | Pending |
-| LIM-003 | Phase 6 | Pending |
-| LIM-004 | Phase 6 | Pending |
-| LIM-005 | Phase 6 | Pending |
-| LIM-006 | Phase 6 | Pending |
-| LIM-007 | Phase 6 | Pending |
-| LIM-008 | Phase 6 | Pending |
-| LIM-009 | Phase 6 | Pending |
-| LIM-010 | Phase 6 | Pending |
+| LIM-001 | Phase 6 | Complete |
+| LIM-002 | Phase 6 | Complete |
+| LIM-003 | Phase 6 | Complete |
+| LIM-004 | Phase 6 | Complete |
+| LIM-005 | Phase 6 | Complete |
+| LIM-006 | Phase 6 | Complete |
+| LIM-007 | Phase 6 | Complete |
+| LIM-008 | Phase 6 | Complete |
+| LIM-009 | Phase 6 | Complete |
+| LIM-010 | Phase 6 | Complete |
 | FE-001 | Phase 7 | Pending |
 | FE-002 | Phase 7 | Pending |
 | FE-003 | Phase 7 | Pending |

@@ -15,3 +15,5 @@ Complete native backend race, dependency/license checks, two independent sqlc/pr
 Earlier extra reconnect observation remains unexplained and retained as failed development evidence. Later isolated3x, affected suites and this clean normal/race/fault run keep and pass the strict assertion. Bounded Engine fixture, physical power-loss and complete-model limits remain explicit in LIMITS.md; no broader system acceptance is implied.
 
 Gate source: `docs/governance/contract-review.yaml` requires owner approval, SemVer, requirements-map and changelog review for normative changes. CR-007 approval does not cover CR-008. Await an explicit owner response binding this candidate before writing CR-008-APPROVAL, freezing its contracts, completing06-06 or executing dependent06-07. Final paired acceptance stays06-11.
+
+Resolved: owner explicitly approved exact CR-008. Approval recorded at docs/changes/CR-008-APPROVAL.json, selected contracts frozen,06-06 SUMMARY created and dependent06-07 started. Original checkpoint wording above is historical.

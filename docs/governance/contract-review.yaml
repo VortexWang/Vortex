@@ -8,35 +8,39 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "2.2.0",
-      "sha256": "b083589caf601629bd82e43052b22ea2e0ced276fcd0d2b526f5702db86cd8d2",
+      "version": "2.3.0",
+      "sha256": "24ca0722b9ad9798975f9d5544cebc232d75f4df2d7140bee58e009bef018f56",
       "decision": "approved"
     },
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "2.2.0",
-      "sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec",
+      "version": "2.3.0",
+      "sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a",
       "decision": "approved"
     },
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.5.0",
-      "sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "version": "1.6.0",
+      "sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
       "decision": "approved",
       "artifacts": [
         {
           "path": "contracts/protobuf/v1/lifecycle.schema.json",
-          "sha256": "42310c018bbd34cc22e3acde3870422c69f56b242d62d1dd0ab66e7aa7f730de"
+          "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
         },
         {
           "path": "contracts/protobuf/v1/lifecycle.md",
-          "sha256": "b24e7436a1d66fd2ffbf1686668367ff04cf745ed904ff0f2906d6074d763592"
+          "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
         },
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
           "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        },
+        {
+          "path": "contracts/protobuf/v1/share-handoff.schema.json",
+          "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
         }
       ]
     },
@@ -273,6 +277,57 @@
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
           "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ]
+    },
+    {
+      "contract_id": "vortex.database",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "24ca0722b9ad9798975f9d5544cebc232d75f4df2d7140bee58e009bef018f56",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.5.0",
+      "version": "1.6.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        },
+        {
+          "path": "contracts/protobuf/v1/share-handoff.schema.json",
+          "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
         }
       ]
     }

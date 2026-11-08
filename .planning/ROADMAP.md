@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 8/11 plans executed in 11 dependency waves: 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete. User explicitly approved exact CR-0073ddd1ab7; DB/API2.2 and control1.5 frozen with CR005/006 history unchanged. Approved clean source84821a04 passed full local Linux arm64 Docker backend/Agent/Hub/Engine normal/race, fault recovery, four selected freezes, generation/compatibility, Linux dual-architecture compilation and real Cloudflare CRUD; result0, source_clean=true, local acceptance_complete=true, evidence4403ac52 and SUMMARY5b71afe6. Next06-06 signer/share/lease production, then06-07 HTTP and06-11 final same-SHA Docker/Actions pairing. Historical Phase4/5 and separate VLink debt remain unchanged.
+**Plans**: 9/11 complete. Exact CR-008 approved; DB/API2.3.0 and control1.6.0 frozen. Clean cf92b7e2 Docker full normal/race/fault and source verification passed; native backend race passed. Next06-07 REST/auth/cursor/SSE; final paired same-SHA acceptance remains06-11.
 
 **Wave 1**
 
@@ -215,7 +215,7 @@
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
-- [ ] 06-06-PLAN.md — 份额 CAS、租约、交接与限制联动
+- [x] 06-06-PLAN.md — 份额 CAS、租约、交接与限制联动
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 8/11 | In Progress — 06-05 complete; next 06-06 | - |
+| 6. M4 Backend | 9/11 | In Progress — 06-06 complete; next 06-07 | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

@@ -1,0 +1,38 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Historical CR-005/CR-006/CR-007 exact approvals, frozen hashes and unchanged legacy wire/schema passed
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract: two clean generations, historical CR-005/CR-006/CR-007 exact approvals, frozen hashes and unchanged legacy wire/schema passed
+{
+  "valid": false,
+  "errors": [
+    "vortex.vlink.v1: approved review hash is missing or stale"
+  ]
+}
+Traceback (most recent call last):
+  File "/Users/peng/Documents/123/VORTEX/tools/phase6/limits_contract_check.py", line 101, in <module>
+    subprocess.run(['python3', 'tools/phase1/contracts.py', 'check-frozen'], cwd=ROOT, check=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 528, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['python3', 'tools/phase1/contracts.py', 'check-frozen']' returned non-zero exit status 1.

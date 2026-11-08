@@ -142,6 +142,8 @@ def check_frozen(versions, review, root=ROOT, contract_ids=None):
         if reviews.get(contract_id, {}).get("decision") != "approved":
             errors.append(f"{contract_id}: individual contract decision is not approved")
         required = CONTROL_COMPANIONS if contract_id == "vortex.control.v1" and semver_tuple(version) is not None and semver_tuple(version) >= (1, 3, 0) else set()
+        if required and semver_tuple(version) >= (1, 6, 0):
+            required = required | {"contracts/protobuf/v1/share-handoff.schema.json"}
         declared = contract.get("artifacts", [])
         recorded_artifacts = recorded.get("artifacts", [])
         if not isinstance(declared, list) or any(not isinstance(x, str) for x in declared):
