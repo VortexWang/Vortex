@@ -614,6 +614,25 @@ type Settlement struct {
 	ReleasedBill      int64
 }
 
+type ShareAllocationQueue struct {
+	TenantID string
+	NodeID   string
+	Kind     string
+	QueuedAt pgtype.Timestamptz
+	WindowAt pgtype.Timestamptz
+	Target   int64
+	State    string
+}
+
+type ShareAllocationWindow struct {
+	TenantID      string
+	WindowAt      pgtype.Timestamptz
+	Payload       []byte
+	PayloadDigest []byte
+	CreatedBy     string
+	OperationID   string
+}
+
 type ShareChain struct {
 	TenantID          string
 	NodeID            string
@@ -630,6 +649,19 @@ type ShareDeliveryBinding struct {
 	TaskID    string
 	HandoffID string
 	Phase     string
+}
+
+type ShareDemandSample struct {
+	TenantID                string
+	NodeID                  string
+	BootID                  string
+	SampleID                string
+	WindowAt                pgtype.Timestamptz
+	Payload                 []byte
+	RateDemand              int64
+	ConnectionDemand        int64
+	RateExhaustionPpm       int32
+	ConnectionExhaustionPpm int32
 }
 
 type ShareGeneration struct {

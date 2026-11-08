@@ -453,3 +453,57 @@ func TestShareHandoffRejectsChangedCommandOldBootAndLowerFence(t *testing.T) {
 		t.Fatal("lower fence accepted", r, e)
 	}
 }
+
+func TestShareHandoffAdditionalPlatformRuleCannotBypassAggregate(t *testing.T) {
+	x := newShareFixture(t)
+	ctx := context.Background()
+	st, e := store.Open(filepath.Join(t.TempDir(), "node.db"), "agent")
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer st.Close()
+	// Install valid pre-existing funded runtime leases before any capacity CAS.
+	use := installRuntimeForShare(t, x, st)
+	if e = st.BindPlatformShareRule(ctx, x.f.tenant, use.NodeID, use.RuleID); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = st.OpenRuntimeSession(ctx, use, uuid.NewString(), uuid.NewString()); e == nil {
+		t.Fatal("bound rule admitted without aggregate bootstrap")
+	}
+	for _, kind := range []string{"rate", "connections"} {
+		x.in.Kind = kind
+		x.in.Nonce = uuid.NewString()
+		if kind == "connections" {
+			x.in.Amount = 1
+			x.in.BurstBytes = 0
+		}
+		p := x.prepare(t)
+		if e = x.s.QueueHandoff(ctx, x.f.scope, p.Generation.ID, uuid.NewString()); e != nil {
+			t.Fatal(e)
+		}
+		confirmHandoff(t, x, st, p.Generation.ID)
+	}
+	if _, e = st.OpenRuntimeSession(ctx, use, uuid.NewString(), uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	// A second immutable rule reference cannot obtain a fresh connection cap.
+	secondRule := ruleInput(x.f.group)
+	secondRule.Port = 20003
+	reserveRulePort(t, x.f, secondRule)
+	if _, e = (service.RuleService{Pool: x.f.pool}).Mutate(ctx, x.f.scope, secondRule, 0, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	secondBilling := durableBilling(t, x.f, secondRule.ID, 1, 1)
+	x.in.SnapshotID = secondBilling.ID
+	use2 := installRuntimeForShare(t, x, st)
+	if e = st.BindPlatformShareRule(ctx, x.f.tenant, use2.NodeID, use2.RuleID); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = st.OpenRuntimeSession(ctx, use2, uuid.NewString(), uuid.NewString()); e == nil {
+		t.Fatal("platform reference bypassed shared connection slot")
+	}
+
+	if e = st.BindPlatformShareRule(ctx, uuid.NewString(), use.NodeID, use.RuleID); e == nil {
+		t.Fatal("cross-tenant binding overwrite")
+	}
+}

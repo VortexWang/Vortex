@@ -80,3 +80,34 @@ UPDATE share_handoffs SET state='enforced',execution_state='enforced',receipt_di
 
 -- name: ActivateDrainingShare :execrows
 UPDATE share_chains SET active_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND kind=$3 AND pending_generation=$4 AND active_generation IN ($4,$5);
+
+-- name: PreparedShareArtifacts :many
+SELECT a.*,m.boot_id,m.transaction_id,d.id AS deployment_id,r.created_by
+FROM rule_artifacts a
+JOIN rule_artifact_commits ac ON ac.tenant_id=a.tenant_id AND ac.digest=a.digest
+JOIN rule_deployments d ON d.tenant_id=a.tenant_id AND d.rule_id=a.rule_id AND d.rule_revision=a.rule_revision AND d.input_digest=a.input_digest
+JOIN rule_deployment_members m ON m.tenant_id=d.tenant_id AND m.deployment_id=d.id AND m.node_id=a.node_id AND m.artifact_digest=a.digest
+JOIN rule_heads h ON h.tenant_id=a.tenant_id AND h.id=a.rule_id AND h.desired_revision=a.rule_revision
+JOIN rule_revisions r ON r.tenant_id=a.tenant_id AND r.rule_id=a.rule_id AND r.revision=a.rule_revision
+WHERE a.tenant_id=$1 AND m.state IN ('prepared','active','unknown') AND d.state NOT IN ('failed','superseded')
+AND (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean
+AND EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN rule_delivery_receipts p ON p.tenant_id=b.tenant_id AND p.task_id=b.task_id JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=a.tenant_id AND b.deployment_id=d.id AND b.node_id=a.node_id AND b.phase='prepare' AND t.state='succeeded')
+ORDER BY a.node_id,a.rule_id,a.digest;
+-- name: GetShareAllocationWindow :one
+SELECT * FROM share_allocation_windows WHERE tenant_id=$1 AND window_at=$2;
+-- name: AppendShareAllocationWindow :exec
+INSERT INTO share_allocation_windows(tenant_id,window_at,payload,payload_digest,created_by,operation_id) VALUES($1,$2,$3,$4,$5,$6);
+-- name: GetShareAllocationQueue :many
+SELECT * FROM share_allocation_queue WHERE tenant_id=$1 ORDER BY queued_at,node_id,kind;
+-- name: SetShareAllocationQueue :exec
+INSERT INTO share_allocation_queue(tenant_id,node_id,kind,queued_at,window_at,target,state) VALUES($1,$2,$3,$4,$5,$6,$7)
+ON CONFLICT(tenant_id,node_id,kind) DO UPDATE SET queued_at=excluded.queued_at,window_at=excluded.window_at,target=excluded.target,state=excluded.state;
+-- name: ShareDemandSamples :many
+SELECT * FROM share_demand_samples WHERE tenant_id=$1 AND window_at=$2 ORDER BY node_id;
+-- name: GetShareDemandSample :one
+SELECT * FROM share_demand_samples WHERE tenant_id=$1 AND node_id=$2 AND window_at=$3;
+-- name: AppendShareDemandSample :exec
+INSERT INTO share_demand_samples(tenant_id,node_id,boot_id,sample_id,window_at,payload,rate_demand,connection_demand,rate_exhaustion_ppm,connection_exhaustion_ppm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
+
+-- name: ResetShareAllocationQueues :exec
+UPDATE share_allocation_queue SET state='ineligible',target=0,window_at=$2 WHERE tenant_id=$1;

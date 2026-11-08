@@ -39,7 +39,8 @@ type shareFixture struct {
 	now time.Time
 }
 
-func newShareFixture(t *testing.T) *shareFixture {
+func newShareFixture(t *testing.T) *shareFixture { return newShareFixtureTerms(t, packageTerms()) }
+func newShareFixtureTerms(t *testing.T, terms service.PackageTerms) *shareFixture {
 	t.Helper()
 	admin := testutil.Postgres(t)
 	schema := "share_case_" + uuid.NewString()[:8]
@@ -59,7 +60,7 @@ func newShareFixture(t *testing.T) *shareFixture {
 	values.Set("search_path", schema)
 	u.RawQuery = values.Encode()
 	t.Setenv("PHASE6_DATABASE_URL", u.String())
-	f, _, snapshot := ledgerFixture(t)
+	f, _, snapshot := ledgerFixtureTerms(t, terms)
 	now := time.Now().UTC().Truncate(time.Microsecond)
 	x := &shareFixture{f: f, now: now}
 	x.s = service.ShareService{Pool: f.pool, NodeCA: f.ports.NodeCA, SignerCA: f.ports.NodeCA, Clock: func() (time.Time, time.Time, bool) { return x.now, x.now, true }}

@@ -37,6 +37,64 @@ func (q *Queries) ActivateDrainingShare(ctx context.Context, arg ActivateDrainin
 	return result.RowsAffected(), nil
 }
 
+const appendShareAllocationWindow = `-- name: AppendShareAllocationWindow :exec
+INSERT INTO share_allocation_windows(tenant_id,window_at,payload,payload_digest,created_by,operation_id) VALUES($1,$2,$3,$4,$5,$6)
+`
+
+type AppendShareAllocationWindowParams struct {
+	TenantID      string
+	WindowAt      pgtype.Timestamptz
+	Payload       []byte
+	PayloadDigest []byte
+	CreatedBy     string
+	OperationID   string
+}
+
+func (q *Queries) AppendShareAllocationWindow(ctx context.Context, arg AppendShareAllocationWindowParams) error {
+	_, err := q.db.Exec(ctx, appendShareAllocationWindow,
+		arg.TenantID,
+		arg.WindowAt,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.CreatedBy,
+		arg.OperationID,
+	)
+	return err
+}
+
+const appendShareDemandSample = `-- name: AppendShareDemandSample :exec
+INSERT INTO share_demand_samples(tenant_id,node_id,boot_id,sample_id,window_at,payload,rate_demand,connection_demand,rate_exhaustion_ppm,connection_exhaustion_ppm) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+`
+
+type AppendShareDemandSampleParams struct {
+	TenantID                string
+	NodeID                  string
+	BootID                  string
+	SampleID                string
+	WindowAt                pgtype.Timestamptz
+	Payload                 []byte
+	RateDemand              int64
+	ConnectionDemand        int64
+	RateExhaustionPpm       int32
+	ConnectionExhaustionPpm int32
+}
+
+func (q *Queries) AppendShareDemandSample(ctx context.Context, arg AppendShareDemandSampleParams) error {
+	_, err := q.db.Exec(ctx, appendShareDemandSample,
+		arg.TenantID,
+		arg.NodeID,
+		arg.BootID,
+		arg.SampleID,
+		arg.WindowAt,
+		arg.Payload,
+		arg.RateDemand,
+		arg.ConnectionDemand,
+		arg.RateExhaustionPpm,
+		arg.ConnectionExhaustionPpm,
+	)
+	return err
+}
+
 const appendShareGeneration = `-- name: AppendShareGeneration :one
 INSERT INTO share_generations(tenant_id,node_id,kind,generation,predecessor,id,boot_id,signer_id,signer_epoch,path_generation,fencing_generation,amount,burst_bytes,billing_snapshot_id,rule_id,rule_revision,created_at,ownership_until,policy_until,autonomy_until,request_key,request_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22) RETURNING tenant_id, node_id, kind, generation, predecessor, id, boot_id, signer_id, signer_epoch, path_generation, fencing_generation, amount, burst_bytes, billing_snapshot_id, rule_id, rule_revision, created_at, ownership_until, policy_until, autonomy_until, request_key, request_digest
 `
@@ -486,6 +544,61 @@ func (q *Queries) GetNodeIncarnation(ctx context.Context, id string) (GetNodeInc
 	return i, err
 }
 
+const getShareAllocationQueue = `-- name: GetShareAllocationQueue :many
+SELECT tenant_id, node_id, kind, queued_at, window_at, target, state FROM share_allocation_queue WHERE tenant_id=$1 ORDER BY queued_at,node_id,kind
+`
+
+func (q *Queries) GetShareAllocationQueue(ctx context.Context, tenantID string) ([]ShareAllocationQueue, error) {
+	rows, err := q.db.Query(ctx, getShareAllocationQueue, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ShareAllocationQueue{}
+	for rows.Next() {
+		var i ShareAllocationQueue
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.NodeID,
+			&i.Kind,
+			&i.QueuedAt,
+			&i.WindowAt,
+			&i.Target,
+			&i.State,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getShareAllocationWindow = `-- name: GetShareAllocationWindow :one
+SELECT tenant_id, window_at, payload, payload_digest, created_by, operation_id FROM share_allocation_windows WHERE tenant_id=$1 AND window_at=$2
+`
+
+type GetShareAllocationWindowParams struct {
+	TenantID string
+	WindowAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetShareAllocationWindow(ctx context.Context, arg GetShareAllocationWindowParams) (ShareAllocationWindow, error) {
+	row := q.db.QueryRow(ctx, getShareAllocationWindow, arg.TenantID, arg.WindowAt)
+	var i ShareAllocationWindow
+	err := row.Scan(
+		&i.TenantID,
+		&i.WindowAt,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.CreatedBy,
+		&i.OperationID,
+	)
+	return i, err
+}
+
 const getShareDelivery = `-- name: GetShareDelivery :one
 SELECT b.tenant_id, b.task_id, b.handoff_id, b.phase,h.node_id,h.kind,h.generation,h.command,h.command_digest,h.created_by,g.boot_id FROM share_delivery_bindings b JOIN share_handoffs h ON h.tenant_id=b.tenant_id AND h.id=b.handoff_id JOIN share_generations g ON g.tenant_id=h.tenant_id AND g.node_id=h.node_id AND g.kind=h.kind AND g.generation=h.generation WHERE b.tenant_id=$1 AND b.task_id=$2
 `
@@ -524,6 +637,34 @@ func (q *Queries) GetShareDelivery(ctx context.Context, arg GetShareDeliveryPara
 		&i.CommandDigest,
 		&i.CreatedBy,
 		&i.BootID,
+	)
+	return i, err
+}
+
+const getShareDemandSample = `-- name: GetShareDemandSample :one
+SELECT tenant_id, node_id, boot_id, sample_id, window_at, payload, rate_demand, connection_demand, rate_exhaustion_ppm, connection_exhaustion_ppm FROM share_demand_samples WHERE tenant_id=$1 AND node_id=$2 AND window_at=$3
+`
+
+type GetShareDemandSampleParams struct {
+	TenantID string
+	NodeID   string
+	WindowAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetShareDemandSample(ctx context.Context, arg GetShareDemandSampleParams) (ShareDemandSample, error) {
+	row := q.db.QueryRow(ctx, getShareDemandSample, arg.TenantID, arg.NodeID, arg.WindowAt)
+	var i ShareDemandSample
+	err := row.Scan(
+		&i.TenantID,
+		&i.NodeID,
+		&i.BootID,
+		&i.SampleID,
+		&i.WindowAt,
+		&i.Payload,
+		&i.RateDemand,
+		&i.ConnectionDemand,
+		&i.RateExhaustionPpm,
+		&i.ConnectionExhaustionPpm,
 	)
 	return i, err
 }
@@ -801,6 +942,76 @@ func (q *Queries) PendingShareDelivery(ctx context.Context, arg PendingShareDeli
 	return exists, err
 }
 
+const preparedShareArtifacts = `-- name: PreparedShareArtifacts :many
+SELECT a.tenant_id, a.rule_id, a.rule_revision, a.node_id, a.input_digest, a.digest, a.canonical, a.billing_snapshot_id, a.signer_epoch, a.path_generation, a.fencing_generation, a.created_at,m.boot_id,m.transaction_id,d.id AS deployment_id,r.created_by
+FROM rule_artifacts a
+JOIN rule_artifact_commits ac ON ac.tenant_id=a.tenant_id AND ac.digest=a.digest
+JOIN rule_deployments d ON d.tenant_id=a.tenant_id AND d.rule_id=a.rule_id AND d.rule_revision=a.rule_revision AND d.input_digest=a.input_digest
+JOIN rule_deployment_members m ON m.tenant_id=d.tenant_id AND m.deployment_id=d.id AND m.node_id=a.node_id AND m.artifact_digest=a.digest
+JOIN rule_heads h ON h.tenant_id=a.tenant_id AND h.id=a.rule_id AND h.desired_revision=a.rule_revision
+JOIN rule_revisions r ON r.tenant_id=a.tenant_id AND r.rule_id=a.rule_id AND r.revision=a.rule_revision
+WHERE a.tenant_id=$1 AND m.state IN ('prepared','active','unknown') AND d.state NOT IN ('failed','superseded')
+AND (convert_from(r.payload,'UTF8')::jsonb->>'enabled')::boolean
+AND EXISTS(SELECT 1 FROM rule_delivery_bindings b JOIN rule_delivery_receipts p ON p.tenant_id=b.tenant_id AND p.task_id=b.task_id JOIN tasks t ON t.tenant_id=b.tenant_id AND t.id=b.task_id WHERE b.tenant_id=a.tenant_id AND b.deployment_id=d.id AND b.node_id=a.node_id AND b.phase='prepare' AND t.state='succeeded')
+ORDER BY a.node_id,a.rule_id,a.digest
+`
+
+type PreparedShareArtifactsRow struct {
+	TenantID          string
+	RuleID            string
+	RuleRevision      int64
+	NodeID            string
+	InputDigest       string
+	Digest            string
+	Canonical         []byte
+	BillingSnapshotID string
+	SignerEpoch       int64
+	PathGeneration    int64
+	FencingGeneration int64
+	CreatedAt         pgtype.Timestamptz
+	BootID            string
+	TransactionID     string
+	DeploymentID      string
+	CreatedBy         string
+}
+
+func (q *Queries) PreparedShareArtifacts(ctx context.Context, tenantID string) ([]PreparedShareArtifactsRow, error) {
+	rows, err := q.db.Query(ctx, preparedShareArtifacts, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PreparedShareArtifactsRow{}
+	for rows.Next() {
+		var i PreparedShareArtifactsRow
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.RuleID,
+			&i.RuleRevision,
+			&i.NodeID,
+			&i.InputDigest,
+			&i.Digest,
+			&i.Canonical,
+			&i.BillingSnapshotID,
+			&i.SignerEpoch,
+			&i.PathGeneration,
+			&i.FencingGeneration,
+			&i.CreatedAt,
+			&i.BootID,
+			&i.TransactionID,
+			&i.DeploymentID,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const raiseNodeFencing = `-- name: RaiseNodeFencing :execrows
 UPDATE node_fencing SET fencing_generation=$4 WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3 AND fencing_generation<=$4 AND NOT renewal_closed
 `
@@ -877,6 +1088,48 @@ func (q *Queries) ReserveShareSuccessor(ctx context.Context, arg ReserveShareSuc
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const resetShareAllocationQueues = `-- name: ResetShareAllocationQueues :exec
+UPDATE share_allocation_queue SET state='ineligible',target=0,window_at=$2 WHERE tenant_id=$1
+`
+
+type ResetShareAllocationQueuesParams struct {
+	TenantID string
+	WindowAt pgtype.Timestamptz
+}
+
+func (q *Queries) ResetShareAllocationQueues(ctx context.Context, arg ResetShareAllocationQueuesParams) error {
+	_, err := q.db.Exec(ctx, resetShareAllocationQueues, arg.TenantID, arg.WindowAt)
+	return err
+}
+
+const setShareAllocationQueue = `-- name: SetShareAllocationQueue :exec
+INSERT INTO share_allocation_queue(tenant_id,node_id,kind,queued_at,window_at,target,state) VALUES($1,$2,$3,$4,$5,$6,$7)
+ON CONFLICT(tenant_id,node_id,kind) DO UPDATE SET queued_at=excluded.queued_at,window_at=excluded.window_at,target=excluded.target,state=excluded.state
+`
+
+type SetShareAllocationQueueParams struct {
+	TenantID string
+	NodeID   string
+	Kind     string
+	QueuedAt pgtype.Timestamptz
+	WindowAt pgtype.Timestamptz
+	Target   int64
+	State    string
+}
+
+func (q *Queries) SetShareAllocationQueue(ctx context.Context, arg SetShareAllocationQueueParams) error {
+	_, err := q.db.Exec(ctx, setShareAllocationQueue,
+		arg.TenantID,
+		arg.NodeID,
+		arg.Kind,
+		arg.QueuedAt,
+		arg.WindowAt,
+		arg.Target,
+		arg.State,
+	)
+	return err
 }
 
 const shareClosureEvidence = `-- name: ShareClosureEvidence :many
@@ -959,6 +1212,46 @@ func (q *Queries) ShareDeliveryCandidates(ctx context.Context) ([]ShareDeliveryC
 			&i.Attempts,
 			&i.TaskKind,
 			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const shareDemandSamples = `-- name: ShareDemandSamples :many
+SELECT tenant_id, node_id, boot_id, sample_id, window_at, payload, rate_demand, connection_demand, rate_exhaustion_ppm, connection_exhaustion_ppm FROM share_demand_samples WHERE tenant_id=$1 AND window_at=$2 ORDER BY node_id
+`
+
+type ShareDemandSamplesParams struct {
+	TenantID string
+	WindowAt pgtype.Timestamptz
+}
+
+func (q *Queries) ShareDemandSamples(ctx context.Context, arg ShareDemandSamplesParams) ([]ShareDemandSample, error) {
+	rows, err := q.db.Query(ctx, shareDemandSamples, arg.TenantID, arg.WindowAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ShareDemandSample{}
+	for rows.Next() {
+		var i ShareDemandSample
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.NodeID,
+			&i.BootID,
+			&i.SampleID,
+			&i.WindowAt,
+			&i.Payload,
+			&i.RateDemand,
+			&i.ConnectionDemand,
+			&i.RateExhaustionPpm,
+			&i.ConnectionExhaustionPpm,
 		); err != nil {
 			return nil, err
 		}

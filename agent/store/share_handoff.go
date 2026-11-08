@@ -217,3 +217,33 @@ func countNodeShareConnectionsTx(ctx context.Context, tx *sql.Tx, tenant, node s
 	e := tx.QueryRowContext(ctx, `SELECT count(*) FROM runtime_sessions r LEFT JOIN authorization_records a ON a.node_id=r.node_id AND a.authorization_id=r.grant_id LEFT JOIN node_share_bindings b ON b.node_id=r.node_id AND b.rule_id=a.rule_id WHERE r.node_id=? AND r.state='open' AND (b.tenant_id=? OR b.tenant_id IS NULL)`, node, tenant).Scan(&count)
 	return count, e
 }
+
+// BindPlatformShareRule is invoked from authenticated, validated compiler
+// Prepare before it can be acknowledged. Every platform rule then requires
+// both node capacity heads, including a second rule reusing an existing owner.
+// This only narrows admission; it creates no runtime or traffic authority.
+func (s *Store) BindPlatformShareRule(ctx context.Context, tenant, node, rule string) error {
+	if s.owner != "agent" || !validIssuerUUID(tenant) || !validIssuerUUID(node) || !validIssuerUUID(rule) {
+		return ErrAuthorizationDenied
+	}
+	tx, e := s.db.BeginTx(ctx, nil)
+	if e != nil {
+		return e
+	}
+	defer tx.Rollback()
+	var old string
+	e = tx.QueryRowContext(ctx, `SELECT tenant_id FROM node_share_bindings WHERE node_id=? AND rule_id=?`, node, rule).Scan(&old)
+	if e == nil {
+		if old != tenant {
+			return ErrAuthorizationDenied
+		}
+		return tx.Commit()
+	}
+	if !errors.Is(e, sql.ErrNoRows) {
+		return e
+	}
+	if _, e = tx.ExecContext(ctx, `INSERT INTO node_share_bindings(node_id,rule_id,tenant_id) VALUES(?,?,?)`, node, rule, tenant); e != nil {
+		return e
+	}
+	return tx.Commit()
+}

@@ -779,3 +779,28 @@ CREATE TRIGGER lease_expectation_immutable BEFORE UPDATE OR DELETE ON lease_expe
 ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query','package_due','usage_reconcile','share_handoff','share_reconcile'));
 CREATE INDEX share_handoffs_due ON share_handoffs(next_attempt) WHERE state IN ('cas_pending','activation-unknown');
+-- Allocation windows are immutable targets, not executable ownership grants.
+CREATE TABLE share_allocation_windows (
+ tenant_id text NOT NULL REFERENCES tenants(id), window_at timestamptz NOT NULL,
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ created_by text NOT NULL, operation_id text NOT NULL,
+ PRIMARY KEY(tenant_id,window_at), FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id),
+ CHECK(window_at=date_trunc('minute',window_at AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
+);
+CREATE TRIGGER share_window_immutable BEFORE UPDATE OR DELETE ON share_allocation_windows FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE share_allocation_queue (
+ tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id),
+ kind text NOT NULL CHECK(kind IN ('rate','connections')), queued_at timestamptz NOT NULL,
+ window_at timestamptz NOT NULL, target bigint NOT NULL CHECK(target>=0),
+ state text NOT NULL CHECK(state IN ('queued','target','applying','enforced','ineligible')),
+ PRIMARY KEY(tenant_id,node_id,kind), FOREIGN KEY(tenant_id,window_at) REFERENCES share_allocation_windows(tenant_id,window_at)
+);
+CREATE TABLE share_demand_samples (
+ tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id), boot_id text NOT NULL,
+ sample_id text NOT NULL, window_at timestamptz NOT NULL, payload bytea NOT NULL,
+ rate_demand bigint NOT NULL CHECK(rate_demand>=0), connection_demand bigint NOT NULL CHECK(connection_demand>=0),
+ rate_exhaustion_ppm integer NOT NULL CHECK(rate_exhaustion_ppm BETWEEN 0 AND 1000000),
+ connection_exhaustion_ppm integer NOT NULL CHECK(connection_exhaustion_ppm BETWEEN 0 AND 1000000),
+ PRIMARY KEY(tenant_id,node_id,window_at), UNIQUE(tenant_id,sample_id)
+);
+CREATE TRIGGER share_demand_immutable BEFORE UPDATE OR DELETE ON share_demand_samples FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();

@@ -34,9 +34,11 @@ func TestLedgerSourceAuthoritySchema(t *testing.T) {
 }
 
 func ledgerFixture(t *testing.T) (*portFixture, string, string) {
+	return ledgerFixtureTerms(t, packageTerms())
+}
+func ledgerFixtureTerms(t *testing.T, terms service.PackageTerms) (*portFixture, string, string) {
 	t.Helper()
 	f := newPortFixtureKind(t, true)
-	terms := packageTerms()
 	terms.TrafficReset = "none"
 	subscribePackage(t, f, createPackage(t, f, terms))
 	in := ruleInput(f.group)

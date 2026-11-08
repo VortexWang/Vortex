@@ -81,6 +81,21 @@ func (r *Reconciler) ApplyRuleCommand(ctx context.Context, node string, c *contr
 			out.ErrorCode = storeConfigError(e)
 			return out
 		}
+		// The first platform group is the billing/rate execution point.
+		// All rule references at this node reuse one tenant/node aggregate.
+		execution := -1
+		for hop, group := range artifact.Intent.Rule.Path {
+			if artifact.InputVersions["grant/"+group] != "" {
+				execution = hop
+				break
+			}
+		}
+		if execution == artifact.Intent.Hop {
+			if e = r.Store.BindPlatformShareRule(ctx, artifact.TenantID, artifact.NodeID, artifact.RuleID); e != nil {
+				out.ErrorCode = storeConfigError(e)
+				return out
+			}
+		}
 		if record.State == "received" {
 			executor, ok := r.Apply.(interface{ ExecutionID() string })
 			if !ok {
