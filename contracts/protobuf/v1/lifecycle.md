@@ -677,3 +677,41 @@ bounded six-second autonomous regional failover fixture timed out; the same
 Linux autonomous subtest passed isolated in1.979s and a serial complete Linux
 Agent/Store/Hub/contracts/Node component retry passed. This is a resource-load
 fixture timeout, not a relaxation of the failover bound.
+
+
+## Direct Node original-credit recovery fence (candidate)
+
+The direct Node Heartbeat independently advertises `node-credit-recovery-v1`
+only when an explicit source backend UUID is configured. It is not a regional
+LifecycleHello/HubStatus capability. Legacy source/credit-close/boot-recovery
+capabilities and unknown future versions do not permit this command. Candidate
+NodeMessage tag24 and ControlMessage tag23 carry exact payload bytes and SHA-256.
+No approved snapshot is changed; this remains part of the unapproved CR-008
+candidate until the complete review package is ready.
+
+After a complete immutable PG same-store manifest has been independently
+verified, a platform Grant may prepare one immutable fence per original
+allocation/recovery. The transaction locks Hub incarnation, Node authority and
+tenant; rechecks current old Hub epoch/boot, current Node boot, original unsealed
+allocation digest, backend-owned provision roots and PG child totals; and pins
+manifest SHA, sealed sequence, original raw/issued/R and sorted child IDs/amounts.
+The original parent is the delegation ID, not the separate PG reservation ID.
+The first-install expiry is bounded by the recovery command, original credit
+root and hard deadline. Exact replay never retimes it. Operation/task/Outbox and
+audit commit together before the production delivery worker can send it.
+
+Only the UUID-pinned dedicated-backend mTLS channel can install this fence at
+Node. FULL exact replay precedes clock bootstrap; a first install still needs
+trusted bounded time and the existing boot clock continuity rules. Regional
+Hub commands are rejected. The original local FULL inventory checks and delayed
+old-credit fence apply atomically before the deterministic receipt is emitted.
+
+PG accepts only canonical authenticated current-boot receipts for the exact
+stored command/digest. Installed children must be a sorted exact-amount subset
+of the expected PG list: a Hub issue may not yet have reached Node, and its
+absence cannot increase R. Receipt, command operation/task/Outbox completion and
+audit commit together. Lost FULL receipt reconnects replay the same bytes; an
+unacknowledged command remains pending. No financial/usage/share authority row,
+Hub incarnation, prefix ACK or online readiness changes here. Complete current
+state admission, independent successor root delivery and effective new-epoch
+issue/lease/seal consumers remain required before production S/R can resume.

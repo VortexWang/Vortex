@@ -76,13 +76,14 @@ type sourceRequest struct {
 	ctx     context.Context
 }
 type session struct {
-	bootRecoveries chan nodeBootRecoveryRequest
-	creditCloses   chan creditCloseRequest
-	sources        chan sourceRequest
-	requests       chan request
-	shares         chan shareRequest
-	rules          chan ruleRequest
-	done           chan struct{}
+	recoveryCreditFences chan nodeRecoveryCreditFenceRequest
+	bootRecoveries       chan nodeBootRecoveryRequest
+	creditCloses         chan creditCloseRequest
+	sources              chan sourceRequest
+	requests             chan request
+	shares               chan shareRequest
+	rules                chan ruleRequest
+	done                 chan struct{}
 }
 
 // DeliverShare returns success only after the authenticated stream handler
@@ -221,7 +222,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{bootRecoveries: make(chan nodeBootRecoveryRequest), creditCloses: make(chan creditCloseRequest), sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
+	s := &session{recoveryCreditFences: make(chan nodeRecoveryCreditFenceRequest), bootRecoveries: make(chan nodeBootRecoveryRequest), creditCloses: make(chan creditCloseRequest), sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -259,12 +260,16 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	recoveryCreditFenceCapable := false
 	bootRecoveryCapable := false
 	creditCloseCapable := false
 	sourceCapable := false
 	shareCapable := false
 	ruleCapable := false
 	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "node-credit-recovery-v1" {
+			recoveryCreditFenceCapable = true
+		}
 		if capability == "node-boot-recovery-v1" {
 			bootRecoveryCapable = true
 		}
@@ -287,6 +292,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	var pendingShare *shareRequest
 	var pendingSource *sourceRequest
 	var pendingCreditClose *creditCloseRequest
+	var pendingFence *nodeRecoveryCreditFenceRequest
 	var pendingBootRecovery *nodeBootRecoveryRequest
 	for {
 		var pendingDone <-chan struct{}
@@ -308,6 +314,9 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		if pendingBootRecovery != nil {
 			pendingDone = pendingBootRecovery.ctx.Done()
 		}
+		if pendingFence != nil {
+			pendingDone = pendingFence.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
@@ -316,12 +325,13 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			pendingSource = nil
 			pendingCreditClose = nil
 			pendingBootRecovery = nil
+			pendingFence = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -348,7 +358,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- ruleOutcome{err: errors.New("target busy")}
 				continue
 			}
@@ -365,12 +375,30 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
 				return err
 			}
+		case r := <-s.recoveryCreditFences:
+			if !recoveryCreditFenceCapable || a.Shares == nil {
+				r.result <- errors.New("target lacks node-credit-recovery-v1")
+				continue
+			}
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
+				r.result <- errors.New("target busy")
+				continue
+			}
+			if r.boot != first.BootId || r.ctx.Err() != nil {
+				r.result <- errors.New("recovery credit fence target/request expired")
+				continue
+			}
+			pendingFence = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RecoveryCreditFenceCommand{RecoveryCreditFenceCommand: r.command}}); err != nil {
+				return err
+			}
 		case r := <-s.bootRecoveries:
 			if !bootRecoveryCapable || a.Shares == nil {
 				r.result <- errors.New("target lacks node-boot-recovery-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -388,7 +416,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks credit-close-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -406,7 +434,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks source-provision-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -424,7 +452,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks share-cas-v1 authority")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil || pendingBootRecovery != nil || pendingFence != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -442,6 +470,23 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if receipt := message.GetRecoveryCreditFenceReceipt(); receipt != nil {
+				if pendingFence == nil {
+					continue
+				}
+				if len(receipt.Payload) > 1<<20 || len(receipt.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(sha256Bytes(receipt.Payload), receipt.PayloadSha256) {
+					return errors.New("invalid recovery credit fence receipt envelope")
+				}
+				var r store.RecoveryCreditFenceReceipt
+				c, e := store.DecodeRecoveryCreditFence(pendingFence.command.Payload)
+				if e != nil || json.Unmarshal(receipt.Payload, &r) != nil || r.ID != c.ID || r.NodeID != id || r.BootID != first.BootId || r.Digest != fmt.Sprintf("%x", pendingFence.command.PayloadSha256) {
+					return errors.New("recovery credit fence receipt target/command mismatch")
+				}
+				e = a.Shares.RecordNodeRecoveryCreditFence(stream.Context(), pendingFence.scope, receipt.Payload, uuid.NewString())
+				pendingFence.result <- e
+				pendingFence = nil
+				continue
+			}
 			if receipt := message.GetNodeBootRecoveryReceipt(); receipt != nil {
 				if pendingBootRecovery == nil {
 					continue

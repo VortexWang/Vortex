@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: complete retained prefix/PG partition witness verified; production preflight pending"
-last_updated: "2026-11-08T11:48:00Z"
+stopped_at: "06-06 Task 3: direct Node inventory fence delivered; independent Hub preflight/admission pending"
+last_updated: "2026-11-08T13:30:23Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: Node FULL fence now checks all locally installed original-source credits against backend expected inventory, preventing Hub snapshot rollback from inflating R. Local primitive only; authenticated PG recovery admission remains;8/11."
+last_activity_desc: "06-06 Task3: immutable PG credit fence command and authenticated FULL receipt now have independent direct-backend capability and production worker; original funds/Hub admission unchanged;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: f34c2677
+state_head: faf9fa55
 ---
 
 # Project State
@@ -42,6 +42,9 @@ Retained S/R prefix now has bounded local reads including confirmed rows, immuta
 
 Node local recovery fence now checks the complete actually installed original-source credit inventory against the immutable backend expected child list before any future early same-store admission. It prevents a rolled-back Hub snapshot from hiding a Node-installed child and rejects delayed old-epoch credit after the atomic fence; it does not create new rights or release old unknown usage. Full native root/backend race, serial Linux root race, focused Linux tests and six cross-builds pass; one first parallel Linux full-root run hit a bounded regional fixture timeout under host race contention, isolated and serial retry pass. This local primitive has no authenticated transport or production admission wiring. Evidence: artifacts/phase6/06-06/task3-node-recovery-credit-fence/.
 
+
+
+Direct Node inventory fence transport now has immutable PG command/receipt, exact manifest/allocation/root/child binding, independently negotiated UUID-pinned mTLS capability and production worker. Command/receipt audit rollback,8 concurrent replay, actual installed37-byte old child, lost FULL receipt/reconnect, legacy capability and Agent identity/clock negatives pass. Full native backend/root and Linux root/backend race pass before final allocation expiry tightening; final native/Linux focused race and six cross-builds cover the last edit. Two isolated23sqlc+2protobuf generations match. One test-only inspection-record type error is retained with corrected passing evidence. Target Hub stays unbound; no funds/share/ACK/admission changes. Evidence: artifacts/phase6/06-06/task3-node-credit-fence-transport/. Independent Hub recovery preflight/current-state admission, successor roots/effective epoch consumers and full06-06 convergence remain.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -142,8 +145,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T11:29:25Z
-Stopped at: 06-06 Task 3: complete retained prefix/PG partition witness verified; production preflight pending
+Last session: 2026-11-08T13:30:23Z
+Stopped at: 06-06 Task 3: direct Node inventory fence delivered; independent Hub preflight/admission pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

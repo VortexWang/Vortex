@@ -1,0 +1,31 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-7891beb63a23 Creating 
+ Container vortex-phase6-tracer-backend-test-run-7891beb63a23 Created 
+ok  	vortex/agent	97.768s
+ok  	vortex/agent/store	136.144s
+ok  	vortex/hub	19.209s
+ok  	vortex/contracts	1.025s
+ok  	vortex/cmd/vortex-node	2.755s
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/node_recovery_credit_fence_transport_test.go:71: cannot use facts.Records (variable of type []agent.IssuedAuthorizationRecord) as []"vortex/agent/store".AuthorizationRecord value in argument to st.PersistAuthorizationUpdate
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/cmd/vortex-hub	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/auth	[no test files]
+ok  	vortex/backend/internal/compiler	1.660s
+ok  	vortex/backend/internal/control	1.375s
+ok  	vortex/backend/internal/policy	1.016s
+?   	vortex/backend/internal/repository	[no test files]
+FAIL	vortex/backend/internal/service [build failed]
+?   	vortex/backend/internal/testutil	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.008s
+?   	vortex/backend/internal/worker	[no test files]
+FAIL
+

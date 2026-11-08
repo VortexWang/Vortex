@@ -205,7 +205,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	}
 	capabilities := []string{"rule-two-phase-v1", "share-cas-v1"}
 	if regional == nil && canonicalUUID(c.SourceBackendID) {
-		capabilities = append(capabilities, "source-provision-v1", "credit-close-v1", "node-boot-recovery-v1")
+		capabilities = append(capabilities, "source-provision-v1", "credit-close-v1", "node-boot-recovery-v1", "node-credit-recovery-v1")
 	}
 	if err := stream.Send(&controlv1.NodeMessage{
 		NodeId:   c.Node.NodeID,
@@ -465,6 +465,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_RecoveryCreditFenceCommand:
+				if regional != nil {
+					return store.ErrSourceProvision
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.fenceRecoveryCreditFromBackend(ctx, issuer, body.RecoveryCreditFenceCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RecoveryCreditFenceReceipt{RecoveryCreditFenceReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_NodeBootRecoveryCommand:
 				if regional != nil {
 					return contracts.ErrNodeBootRecovery

@@ -108,6 +108,98 @@ func (q *Queries) AppendHubSameStoreRecovery(ctx context.Context, arg AppendHubS
 	return err
 }
 
+const appendNodeRecoveryCreditFence = `-- name: AppendNodeRecoveryCreditFence :exec
+INSERT INTO node_recovery_credit_fences(tenant_id,id,recovery_id,allocation_id,node_id,boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+`
+
+type AppendNodeRecoveryCreditFenceParams struct {
+	TenantID      string
+	ID            string
+	RecoveryID    string
+	AllocationID  string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendNodeRecoveryCreditFence(ctx context.Context, arg AppendNodeRecoveryCreditFenceParams) error {
+	_, err := q.db.Exec(ctx, appendNodeRecoveryCreditFence,
+		arg.TenantID,
+		arg.ID,
+		arg.RecoveryID,
+		arg.AllocationID,
+		arg.NodeID,
+		arg.BootID,
+		arg.BackendID,
+		arg.OperationID,
+		arg.CreatedBy,
+		arg.Payload,
+		arg.PayloadDigest,
+	)
+	return err
+}
+
+const appendNodeRecoveryCreditFenceReceipt = `-- name: AppendNodeRecoveryCreditFenceReceipt :exec
+INSERT INTO node_recovery_credit_fence_receipts(tenant_id,fence_id,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5)
+`
+
+type AppendNodeRecoveryCreditFenceReceiptParams struct {
+	TenantID        string
+	FenceID         string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
+func (q *Queries) AppendNodeRecoveryCreditFenceReceipt(ctx context.Context, arg AppendNodeRecoveryCreditFenceReceiptParams) error {
+	_, err := q.db.Exec(ctx, appendNodeRecoveryCreditFenceReceipt,
+		arg.TenantID,
+		arg.FenceID,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.PeerFingerprint,
+	)
+	return err
+}
+
+const getHubCreditGrantsByAllocation = `-- name: GetHubCreditGrantsByAllocation :many
+SELECT g.grant_id,g.raw_granted FROM hub_credit_grants g WHERE g.tenant_id=$1 AND g.allocation_id=$2 ORDER BY g.grant_id
+`
+
+type GetHubCreditGrantsByAllocationParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+type GetHubCreditGrantsByAllocationRow struct {
+	GrantID    string
+	RawGranted int64
+}
+
+func (q *Queries) GetHubCreditGrantsByAllocation(ctx context.Context, arg GetHubCreditGrantsByAllocationParams) ([]GetHubCreditGrantsByAllocationRow, error) {
+	rows, err := q.db.Query(ctx, getHubCreditGrantsByAllocation, arg.TenantID, arg.AllocationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetHubCreditGrantsByAllocationRow{}
+	for rows.Next() {
+		var i GetHubCreditGrantsByAllocationRow
+		if err := rows.Scan(&i.GrantID, &i.RawGranted); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getHubSameStoreJournal = `-- name: GetHubSameStoreJournal :one
 SELECT tenant_id, recovery_id, sequence, kind, record_id, payload, payload_digest, peer_fingerprint, operation_id FROM hub_same_store_journal WHERE recovery_id=$1 AND sequence=$2
 `
@@ -180,6 +272,85 @@ func (q *Queries) GetHubSameStoreRecovery(ctx context.Context, arg GetHubSameSto
 		&i.PayloadDigest,
 		&i.Proof,
 		&i.ProofDigest,
+	)
+	return i, err
+}
+
+const getNodeRecoveryCreditFence = `-- name: GetNodeRecoveryCreditFence :one
+SELECT tenant_id, id, recovery_id, allocation_id, node_id, boot_id, backend_id, operation_id, created_by, payload, payload_digest FROM node_recovery_credit_fences WHERE tenant_id=$1 AND id=$2
+`
+
+type GetNodeRecoveryCreditFenceParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) GetNodeRecoveryCreditFence(ctx context.Context, arg GetNodeRecoveryCreditFenceParams) (NodeRecoveryCreditFence, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoveryCreditFence, arg.TenantID, arg.ID)
+	var i NodeRecoveryCreditFence
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RecoveryID,
+		&i.AllocationID,
+		&i.NodeID,
+		&i.BootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
+const getNodeRecoveryCreditFenceByAllocation = `-- name: GetNodeRecoveryCreditFenceByAllocation :one
+SELECT tenant_id, id, recovery_id, allocation_id, node_id, boot_id, backend_id, operation_id, created_by, payload, payload_digest FROM node_recovery_credit_fences WHERE tenant_id=$1 AND recovery_id=$2 AND allocation_id=$3
+`
+
+type GetNodeRecoveryCreditFenceByAllocationParams struct {
+	TenantID     string
+	RecoveryID   string
+	AllocationID string
+}
+
+func (q *Queries) GetNodeRecoveryCreditFenceByAllocation(ctx context.Context, arg GetNodeRecoveryCreditFenceByAllocationParams) (NodeRecoveryCreditFence, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoveryCreditFenceByAllocation, arg.TenantID, arg.RecoveryID, arg.AllocationID)
+	var i NodeRecoveryCreditFence
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RecoveryID,
+		&i.AllocationID,
+		&i.NodeID,
+		&i.BootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
+const getNodeRecoveryCreditFenceReceipt = `-- name: GetNodeRecoveryCreditFenceReceipt :one
+SELECT tenant_id, fence_id, payload, payload_digest, peer_fingerprint FROM node_recovery_credit_fence_receipts WHERE tenant_id=$1 AND fence_id=$2
+`
+
+type GetNodeRecoveryCreditFenceReceiptParams struct {
+	TenantID string
+	FenceID  string
+}
+
+func (q *Queries) GetNodeRecoveryCreditFenceReceipt(ctx context.Context, arg GetNodeRecoveryCreditFenceReceiptParams) (NodeRecoveryCreditFenceReceipt, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoveryCreditFenceReceipt, arg.TenantID, arg.FenceID)
+	var i NodeRecoveryCreditFenceReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.FenceID,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.PeerFingerprint,
 	)
 	return i, err
 }
@@ -262,6 +433,44 @@ func (q *Queries) PageHubSameStoreJournal(ctx context.Context, arg PageHubSameSt
 			&i.PayloadDigest,
 			&i.PeerFingerprint,
 			&i.OperationID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const pendingNodeRecoveryCreditFences = `-- name: PendingNodeRecoveryCreditFences :many
+SELECT f.tenant_id, f.id, f.recovery_id, f.allocation_id, f.node_id, f.boot_id, f.backend_id, f.operation_id, f.created_by, f.payload, f.payload_digest FROM node_recovery_credit_fences f JOIN nodes n ON n.id=f.node_id AND n.boot_id=f.boot_id
+WHERE NOT EXISTS(SELECT 1 FROM node_recovery_credit_fence_receipts r WHERE r.tenant_id=f.tenant_id AND r.fence_id=f.id)
+ORDER BY f.tenant_id,f.id LIMIT 100
+`
+
+func (q *Queries) PendingNodeRecoveryCreditFences(ctx context.Context) ([]NodeRecoveryCreditFence, error) {
+	rows, err := q.db.Query(ctx, pendingNodeRecoveryCreditFences)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []NodeRecoveryCreditFence{}
+	for rows.Next() {
+		var i NodeRecoveryCreditFence
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.ID,
+			&i.RecoveryID,
+			&i.AllocationID,
+			&i.NodeID,
+			&i.BootID,
+			&i.BackendID,
+			&i.OperationID,
+			&i.CreatedBy,
+			&i.Payload,
+			&i.PayloadDigest,
 		); err != nil {
 			return nil, err
 		}

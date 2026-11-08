@@ -1736,6 +1736,38 @@
         "issue_count",
         "issues_sha256"
       ]
+    },
+    "direct_node_heartbeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capabilities"
+      ],
+      "properties": {
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 6,
+          "items": {
+            "enum": [
+              "rule-two-phase-v1",
+              "share-cas-v1",
+              "source-provision-v1",
+              "credit-close-v1",
+              "node-boot-recovery-v1",
+              "node-credit-recovery-v1"
+            ]
+          }
+        },
+        "observed_at": {
+          "type": "string"
+        },
+        "applied_config_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
     }
   }
 }

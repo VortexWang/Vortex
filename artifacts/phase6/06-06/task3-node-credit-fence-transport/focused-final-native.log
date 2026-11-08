@@ -1,0 +1,5 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/node_recovery_credit_fence_transport_test.go:71: cannot use facts.Records (variable of type []agent.IssuedAuthorizationRecord) as []"vortex/agent/store".AuthorizationRecord value in argument to st.PersistAuthorizationUpdate
+FAIL	vortex/backend/internal/service [build failed]
+ok  	vortex/backend/internal/control	1.738s
+FAIL
