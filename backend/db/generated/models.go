@@ -148,6 +148,46 @@ type GrantHistory struct {
 	RecordedAt pgtype.Timestamptz
 }
 
+type HubCreditGrant struct {
+	TenantID     string
+	GrantID      string
+	AllocationID string
+	IssueID      string
+	RawGranted   int64
+}
+
+type HubCreditUsage struct {
+	TenantID      string
+	GrantID       string
+	RawCumulative int64
+}
+
+type HubFundedAllocation struct {
+	TenantID      string
+	AllocationID  string
+	DelegationID  string
+	ReservationID string
+	HubID         string
+	NodeID        string
+	BootID        string
+	RequestKey    string
+	RequestDigest []byte
+	Payload       []byte
+	PayloadDigest []byte
+	OperationID   string
+	CreatedBy     string
+}
+
+type HubIssueReceipt struct {
+	TenantID       string
+	IssueID        string
+	AllocationID   string
+	HubID          string
+	LedgerSequence int64
+	Payload        []byte
+	PayloadDigest  []byte
+}
+
 type LeaseExpectation struct {
 	TenantID         string
 	ID               string

@@ -135,6 +135,9 @@ func newPortFixture(t *testing.T) *portFixture {
 	return newPortFixtureKind(t, false)
 }
 func newPortFixtureKind(t *testing.T, platform bool) *portFixture {
+	return newPortFixtureKindMultiplier(t, platform, 1000)
+}
+func newPortFixtureKindMultiplier(t *testing.T, platform bool, multiplier int64) *portFixture {
 	t.Helper()
 	pool := testutil.Postgres(t)
 	tenant := seedTenant(t, pool)
@@ -164,7 +167,7 @@ func newPortFixtureKind(t *testing.T, platform bool) *portFixture {
 	in := groupInput()
 	if platform {
 		in.OwnerKind = "platform"
-		in.BillingMultiplierMilli = 1000
+		in.BillingMultiplierMilli = multiplier
 	}
 	f.group = mustGroup(t, f.nodeService, creator, in)
 	members := []service.GroupMember{}

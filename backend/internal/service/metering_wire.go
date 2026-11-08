@@ -108,7 +108,7 @@ func (s MeteringService) IngestWireUnknown(ctx context.Context, node, reportBoot
 		if e := q.LockUsageTuple(ctx, node+"/"+reportBoot); e != nil {
 			return e
 		}
-		r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: b.GrantId})
+		r, e := usageReservation(ctx, q, scope.TenantID(), b.GrantId)
 		if e != nil {
 			return e
 		}
@@ -129,7 +129,7 @@ func (s MeteringService) IngestWireUnknown(ctx context.Context, node, reportBoot
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
-		if e = recordUnknown(ctx, q, scope, b.GrantId, digest[:], time.Now()); e != nil {
+		if e = recordUnknown(ctx, q, scope, r.ID, digest[:], time.Now()); e != nil {
 			return e
 		}
 		u, e := q.GetUnknownLiability(ctx, generated.GetUnknownLiabilityParams{TenantID: scope.TenantID(), GrantID: r.ID})

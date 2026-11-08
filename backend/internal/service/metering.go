@@ -73,7 +73,19 @@ func (s MeteringService) ReserveUsage(ctx context.Context, scope TenantScope, in
 	if _, e := uuid.Parse(in.BootID); e != nil {
 		return out, e
 	}
-	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "metering.reserve", ResourceID: in.SourceID, RequestID: request, Reason: "source-local funded hold; no lease or signer invented"}, func(q *generated.Queries) error {
+	var e error
+	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "metering.reserve", ResourceID: in.SourceID, RequestID: request, Reason: "source-local funded hold; no lease or signer invented"}, func(q *generated.Queries) error {
+		out, e = reserveUsageTx(ctx, q, scope, in)
+		return e
+	})
+	return out, e
+}
+
+// reserveUsageTx participates in the caller's audit/Outbox transaction. It is
+// shared by standalone funded holds and actual Hub delegation producers.
+func reserveUsageTx(ctx context.Context, q *generated.Queries, scope TenantScope, in ReserveInput) (generated.Reservation, error) {
+	var out generated.Reservation
+	e := func() error {
 		if e := q.LockUsageTuple(ctx, in.NodeID+"/"+in.BootID+"/"+in.Nonce); e != nil {
 			return e
 		}
@@ -146,9 +158,13 @@ func (s MeteringService) ReserveUsage(ctx context.Context, scope TenantScope, in
 			return e
 		}
 		return ledgerEvent(ctx, q, scope, in.SourceID, in.SnapshotID, "reserve/"+out.ID, "reserve", 0, reserved, 0, 0, 0, map[string]any{"grant_id": out.ID, "raw_granted": in.RawBytes, "coefficient_milli": b.MultiplierMilli})
-	})
-	return out, e
+	}()
+	if e != nil {
+		return generated.Reservation{}, e
+	}
+	return out, nil
 }
+
 func activeRuleSource(ctx context.Context, q *generated.Queries, scope TenantScope) error {
 	sub, e := q.GetSubscription(ctx, scope.TenantID())
 	if e != nil {
@@ -236,7 +252,7 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 				if f.GrantID == "" {
 					continue
 				}
-				r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: f.GrantID})
+				r, e := usageReservation(ctx, q, scope.TenantID(), f.GrantID)
 				if e != nil {
 					return e
 				}
@@ -250,7 +266,13 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
-		facts := append([]UsageFact(nil), in.Facts...)
+		if e = q.LockUsageTuple(ctx, "funded-usage/"+scope.TenantID()); e != nil {
+			return e
+		}
+		facts, childUpdates, e := normalizeHubUsage(ctx, q, scope, in)
+		if e != nil {
+			return e
+		}
 		sort.Slice(facts, func(i, j int) bool { return facts[i].GrantID < facts[j].GrantID })
 		// Validate the entire batch before changing any source. A disputed member
 		// cannot partially charge the other members of this batch.
@@ -265,7 +287,7 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 				}
 				continue
 			}
-			r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: f.GrantID})
+			r, e := usageReservation(ctx, q, scope.TenantID(), f.GrantID)
 			if e != nil {
 				return e
 			}
@@ -309,7 +331,7 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 			if f.RawCumulative < 0 || (i > 0 && facts[i-1].GrantID == f.GrantID) {
 				return ErrConflict
 			}
-			r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: f.GrantID})
+			r, e := usageReservation(ctx, q, scope.TenantID(), f.GrantID)
 			if e != nil {
 				return e
 			}
@@ -326,16 +348,6 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 			if f.Role != "execution" {
 				return ErrConflict
 			}
-			if in.Delta {
-				a, e := q.ReservationAccounting(ctx, generated.ReservationAccountingParams{TenantID: scope.TenantID(), GrantID: r.ID})
-				if e != nil {
-					return e
-				}
-				if math.MaxInt64-a.RawCumulative < f.RawCumulative {
-					return ErrConflict
-				}
-				f.RawCumulative += a.RawCumulative
-			}
 			if math.MaxInt64-raw < f.RawCumulative {
 				return ErrConflict
 			}
@@ -347,6 +359,11 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 		}
 		if conflicted {
 			return nil
+		}
+		for _, u := range childUpdates {
+			if e = q.SetHubCreditUsage(ctx, generated.SetHubCreditUsageParams{TenantID: scope.TenantID(), GrantID: u.grant, RawCumulative: u.raw}); e != nil {
+				return e
+			}
 		}
 		ack = UsageAck{BatchID: in.BatchID, Digest: in.Digest, State: "accepted"}
 		return q.AppendUsageBatch(ctx, generated.AppendUsageBatchParams{TenantID: scope.TenantID(), NodeID: in.NodeID, BootID: in.BootID, Sequence: in.Sequence, BatchID: in.BatchID, BillingSnapshotID: in.SnapshotID, PayloadSha256: in.Digest, Payload: in.Payload, RawCumulative: numerator(raw, 1), BillableNumerator: pgtype.Numeric{Int: bill, Valid: true}, Acknowledgement: auditJSON(ack), Facts: auditJSON(in.Facts), UnknownUpperBound: numerator(0, 1)})
@@ -428,6 +445,15 @@ func (s MeteringService) mutateReceipt(ctx context.Context, scope TenantScope, g
 		if r.BillingSnapshotID != snapshot {
 			conflict = true
 			return dispute(ctx, q, scope, r, "receipt snapshot mismatch", map[string]any{"observed_snapshot": snapshot, "proof": proof})
+		}
+		if kind == "final" || kind == "return" {
+			allocated, e := q.ReservationHasHubAllocation(ctx, generated.ReservationHasHubAllocationParams{TenantID: scope.TenantID(), ReservationID: r.ID})
+			if e != nil {
+				return e
+			}
+			if allocated {
+				return ErrShareUnknown
+			}
 		}
 		return settleActual(ctx, q, scope, r, kind, key, raw, returned, proof)
 	})

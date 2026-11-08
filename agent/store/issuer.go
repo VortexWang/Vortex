@@ -79,6 +79,19 @@ func checkIssuerTime(now IssuerTime) error {
 // heartbeat together. Replaying the same allocation never refills its balance.
 // A higher epoch requires explicit handoff; a closed epoch cannot be reopened.
 func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now IssuerTime) error {
+	return s.installHubDelegation(ctx, d, now, "")
+}
+
+// InstallFundedHubDelegation commits all backend-provisioned roots and the
+// finite delegation in one FULL transaction. Transport may acknowledge only
+// after this returns; a disk/validation error cannot leave partial new roots.
+func (s *Store) InstallFundedHubDelegation(ctx context.Context, backendID string, d HubDelegation, now IssuerTime) error {
+	if !validIssuerUUID(backendID) || len(d.ShareReferences) != 3 {
+		return ErrAuthorizationDenied
+	}
+	return s.installHubDelegation(ctx, d, now, backendID)
+}
+func (s *Store) installHubDelegation(ctx context.Context, d HubDelegation, now IssuerTime, backendID string) error {
 	if s.owner != "hub" {
 		return ErrAuthorizationDenied
 	}
@@ -103,6 +116,13 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 		return err
 	}
 	defer tx.Rollback()
+	if backendID != "" {
+		for _, root := range d.ShareReferences {
+			if err = s.installShareSourceAnchorTx(ctx, tx, d.NodeID, backendID, root); err != nil {
+				return err
+			}
+		}
+	}
 	var previous []byte
 	err = tx.QueryRowContext(ctx, `SELECT payload FROM issuer_delegations WHERE delegation_id=?`, d.ID).Scan(&previous)
 	if err == nil {

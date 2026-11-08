@@ -348,3 +348,23 @@ func consumeJSONValue(decoder *json.Decoder) error {
 		return fmt.Errorf("unexpected JSON delimiter %q", delimiter)
 	}
 }
+
+// AuthorizationInspection exposes validated immutable facts to the backend's
+// funded-child ledger adapter. It grants no rights and performs no storage I/O.
+type AuthorizationInspection struct {
+	UpdateID, NodeID, BootID                     string
+	SchemaVersion                                string
+	SignerEpoch, PathGeneration, FencingFloor    uint64
+	IssuedAt, BackendHeartbeat, AutonomyDeadline time.Time
+	Records                                      []IssuedAuthorizationRecord
+	ShareReferences                              []store.ShareReference
+}
+type IssuedAuthorizationRecord = authorizationRecord
+
+func InspectAuthorizationUpdate(raw []byte, node, boot string, generation uint64) (AuthorizationInspection, error) {
+	p, e := validateAuthorizationUpdate(raw, node, boot, generation)
+	if e != nil {
+		return AuthorizationInspection{}, e
+	}
+	return AuthorizationInspection{UpdateID: p.UpdateID, NodeID: p.NodeID, BootID: p.BootID, SchemaVersion: p.SchemaVersion, SignerEpoch: p.SignerEpoch, PathGeneration: p.PathGeneration, FencingFloor: p.FencingGenerationFloor, IssuedAt: p.IssuedAt, BackendHeartbeat: p.BackendHeartbeatAt, AutonomyDeadline: p.AutonomyDeadline, Records: p.Authorizations, ShareReferences: p.ShareReferences}, nil
+}

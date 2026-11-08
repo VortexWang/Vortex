@@ -1,0 +1,24 @@
+=== RUN   TestHubFundingActualIssuerChildrenOneParentAndAuditRollback
+2026/11/08 12:11:43 OK   00001_authority.sql (26.9ms)
+2026/11/08 12:11:43 OK   00002_tenant_policy.sql (12.83ms)
+2026/11/08 12:11:43 OK   00003_nodes_ports.sql (38.87ms)
+2026/11/08 12:11:43 OK   00004_entry_group_domains.sql (3.48ms)
+2026/11/08 12:11:43 OK   00005_rules_compile.sql (35.09ms)
+2026/11/08 12:11:43 OK   00006_packages_entitlements.sql (28.35ms)
+2026/11/08 12:11:43 OK   00007_metering_ledger.sql (35.15ms)
+2026/11/08 12:11:43 OK   00008_limits_shares.sql (33.48ms)
+2026/11/08 12:11:43 goose: successfully migrated database to version: 8
+2026/11/08 12:11:43 OK   00001_authority.sql (12.58ms)
+2026/11/08 12:11:43 OK   00002_tenant_policy.sql (9.19ms)
+2026/11/08 12:11:43 OK   00003_nodes_ports.sql (22.85ms)
+2026/11/08 12:11:43 OK   00004_entry_group_domains.sql (2.69ms)
+2026/11/08 12:11:43 OK   00005_rules_compile.sql (27.4ms)
+2026/11/08 12:11:43 OK   00006_packages_entitlements.sql (22.36ms)
+2026/11/08 12:11:43 OK   00007_metering_ledger.sql (27.16ms)
+2026/11/08 12:11:43 OK   00008_limits_shares.sql (25.06ms)
+2026/11/08 12:11:43 goose: successfully migrated database to version: 8
+    hub_allocation_test.go:231: unknown child bound not retained <nil> {1eb2b118-54f1-46c3-8e1c-0140d104971a 6ab5bf43-ee8c-4303-9216-1603707bec81 9899 2 0 101 0 4 [245 229 184 158 233 129 38 254 107 29 215 209 15 132 78 36 164 218 97 210 172 168 2 25 0 65 40 247 205 150 185 98]}
+--- FAIL: TestHubFundingActualIssuerChildrenOneParentAndAuditRollback (1.10s)
+FAIL
+FAIL	vortex/backend/internal/service	1.854s
+FAIL

@@ -37,8 +37,11 @@ func ledgerFixture(t *testing.T) (*portFixture, string, string) {
 	return ledgerFixtureTerms(t, packageTerms())
 }
 func ledgerFixtureTerms(t *testing.T, terms service.PackageTerms) (*portFixture, string, string) {
+	return ledgerFixtureTermsMultiplier(t, terms, 1000)
+}
+func ledgerFixtureTermsMultiplier(t *testing.T, terms service.PackageTerms, multiplier int64) (*portFixture, string, string) {
 	t.Helper()
-	f := newPortFixtureKind(t, true)
+	f := newPortFixtureKindMultiplier(t, true, multiplier)
 	terms.TrafficReset = "none"
 	subscribePackage(t, f, createPackage(t, f, terms))
 	in := ruleInput(f.group)
