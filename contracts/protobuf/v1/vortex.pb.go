@@ -2511,6 +2511,7 @@ type BackendMessage struct {
 	//	*BackendMessage_Error
 	//	*BackendMessage_AuthorityRestrictions
 	//	*BackendMessage_EpochHandoffRequest
+	//	*BackendMessage_ShareRenewalClosure
 	Body          isBackendMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2630,6 +2631,15 @@ func (x *BackendMessage) GetEpochHandoffRequest() *EpochHandoffRequest {
 	return nil
 }
 
+func (x *BackendMessage) GetShareRenewalClosure() *ShareRenewalClosureCommand {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_ShareRenewalClosure); ok {
+			return x.ShareRenewalClosure
+		}
+	}
+	return nil
+}
+
 type isBackendMessage_Body interface {
 	isBackendMessage_Body()
 }
@@ -2662,6 +2672,10 @@ type BackendMessage_EpochHandoffRequest struct {
 	EpochHandoffRequest *EpochHandoffRequest `protobuf:"bytes,16,opt,name=epoch_handoff_request,json=epochHandoffRequest,proto3,oneof"`
 }
 
+type BackendMessage_ShareRenewalClosure struct {
+	ShareRenewalClosure *ShareRenewalClosureCommand `protobuf:"bytes,17,opt,name=share_renewal_closure,json=shareRenewalClosure,proto3,oneof"`
+}
+
 func (*BackendMessage_Heartbeat) isBackendMessage_Body() {}
 
 func (*BackendMessage_Allocation) isBackendMessage_Body() {}
@@ -2675,6 +2689,8 @@ func (*BackendMessage_Error) isBackendMessage_Body() {}
 func (*BackendMessage_AuthorityRestrictions) isBackendMessage_Body() {}
 
 func (*BackendMessage_EpochHandoffRequest) isBackendMessage_Body() {}
+
+func (*BackendMessage_ShareRenewalClosure) isBackendMessage_Body() {}
 
 type BackendHeartbeat struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
@@ -3368,6 +3384,67 @@ func (x *SourceProvisionReceipt) GetPayloadSha256() []byte {
 	return nil
 }
 
+// Opt-in share-renewal-close-v1: FULL old-delegation closure, no money release.
+type ShareRenewalClosureCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommandId     string                 `protobuf:"bytes,1,opt,name=command_id,json=commandId,proto3" json:"command_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ShareRenewalClosureCommand) Reset() {
+	*x = ShareRenewalClosureCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShareRenewalClosureCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShareRenewalClosureCommand) ProtoMessage() {}
+
+func (x *ShareRenewalClosureCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShareRenewalClosureCommand.ProtoReflect.Descriptor instead.
+func (*ShareRenewalClosureCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *ShareRenewalClosureCommand) GetCommandId() string {
+	if x != nil {
+		return x.CommandId
+	}
+	return ""
+}
+
+func (x *ShareRenewalClosureCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ShareRenewalClosureCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
 var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
@@ -3590,7 +3667,7 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0fledger_sequence\x18\x02 \x01(\x04R\x0eledgerSequence\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload\x12%\n" +
 	"\x0epayload_sha256\x18\x04 \x01(\fR\rpayloadSha256\x12\x12\n" +
-	"\x04kind\x18\x05 \x01(\tR\x04kind\"\x88\x05\n" +
+	"\x04kind\x18\x05 \x01(\tR\x04kind\"\xed\x05\n" +
 	"\x0eBackendMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -3605,7 +3682,8 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"ledger_ack\x18\r \x01(\v2(.vortex.control.v1.LedgerAcknowledgementH\x00R\tledgerAck\x127\n" +
 	"\x05error\x18\x0e \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12a\n" +
 	"\x16authority_restrictions\x18\x0f \x01(\v2(.vortex.control.v1.AuthorityRestrictionsH\x00R\x15authorityRestrictions\x12\\\n" +
-	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequestB\x06\n" +
+	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequest\x12c\n" +
+	"\x15share_renewal_closure\x18\x11 \x01(\v2-.vortex.control.v1.ShareRenewalClosureCommandH\x00R\x13shareRenewalClosureB\x06\n" +
 	"\x04body\"\xb6\x02\n" +
 	"\x10BackendHeartbeat\x12\x1d\n" +
 	"\n" +
@@ -3663,7 +3741,12 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"Y\n" +
 	"\x16SourceProvisionReceipt\x12\x18\n" +
 	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
-	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha2562_\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"|\n" +
+	"\x1aShareRenewalClosureCommand\x12\x1d\n" +
+	"\n" +
+	"command_id\x18\x01 \x01(\tR\tcommandId\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha2562_\n" +
 	"\vNodeControl\x12P\n" +
 	"\aConnect\x12\x1e.vortex.control.v1.NodeMessage\x1a!.vortex.control.v1.ControlMessage(\x010\x012]\n" +
 	"\n" +
@@ -3682,7 +3765,7 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 	return file_contracts_protobuf_v1_vortex_proto_rawDescData
 }
 
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*NodeMessage)(nil),                 // 0: vortex.control.v1.NodeMessage
 	(*ControlMessage)(nil),              // 1: vortex.control.v1.ControlMessage
@@ -3721,6 +3804,7 @@ var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*ShareReceipt)(nil),                // 34: vortex.control.v1.ShareReceipt
 	(*SourceProvisionCommand)(nil),      // 35: vortex.control.v1.SourceProvisionCommand
 	(*SourceProvisionReceipt)(nil),      // 36: vortex.control.v1.SourceProvisionReceipt
+	(*ShareRenewalClosureCommand)(nil),  // 37: vortex.control.v1.ShareRenewalClosureCommand
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	4,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
@@ -3760,16 +3844,17 @@ var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	3,  // 34: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
 	31, // 35: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
 	32, // 36: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
-	30, // 37: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
-	0,  // 38: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	24, // 39: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
-	1,  // 40: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	26, // 41: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
-	40, // [40:42] is the sub-list for method output_type
-	38, // [38:40] is the sub-list for method input_type
-	38, // [38:38] is the sub-list for extension type_name
-	38, // [38:38] is the sub-list for extension extendee
-	0,  // [0:38] is the sub-list for field type_name
+	37, // 37: vortex.control.v1.BackendMessage.share_renewal_closure:type_name -> vortex.control.v1.ShareRenewalClosureCommand
+	30, // 38: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
+	0,  // 39: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	24, // 40: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
+	1,  // 41: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	26, // 42: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
+	41, // [41:43] is the sub-list for method output_type
+	39, // [39:41] is the sub-list for method input_type
+	39, // [39:39] is the sub-list for extension type_name
+	39, // [39:39] is the sub-list for extension extendee
+	0,  // [0:39] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -3817,6 +3902,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*BackendMessage_Error)(nil),
 		(*BackendMessage_AuthorityRestrictions)(nil),
 		(*BackendMessage_EpochHandoffRequest)(nil),
+		(*BackendMessage_ShareRenewalClosure)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -3824,7 +3910,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

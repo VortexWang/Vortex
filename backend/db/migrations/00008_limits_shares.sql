@@ -190,6 +190,30 @@ CREATE TABLE node_source_receipts (
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES node_source_provisions(tenant_id,allocation_id)
 );
 CREATE TRIGGER node_source_receipt_immutable BEFORE UPDATE OR DELETE ON node_source_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Immutable commands are also a tenant-serialized barrier against new old-share funding.
+CREATE TABLE share_renewal_closure_commands (
+ tenant_id text NOT NULL, id text NOT NULL, handoff_id text NOT NULL,
+ node_id text NOT NULL, boot_id text NOT NULL, kind text NOT NULL CHECK(kind IN ('rate','connections')),
+ generation bigint NOT NULL CHECK(generation>0), signer_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ hub_boot_id text NOT NULL, part integer NOT NULL CHECK(part>0), parts integer NOT NULL CHECK(parts>=part),
+ operation_id text NOT NULL, payload bytea NOT NULL CHECK(octet_length(payload)<=16384),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(id), UNIQUE(tenant_id,handoff_id,signer_id,part),
+ FOREIGN KEY(tenant_id,handoff_id) REFERENCES share_handoffs(tenant_id,id),
+ FOREIGN KEY(tenant_id,node_id,kind,generation,signer_id) REFERENCES share_renewal_authorities(tenant_id,node_id,kind,generation,signer_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE INDEX share_closure_hub_delivery ON share_renewal_closure_commands(signer_id,hub_boot_id,tenant_id,handoff_id,part);
+CREATE INDEX share_closure_generation_barrier ON share_renewal_closure_commands(tenant_id,node_id,boot_id,kind,generation,signer_id);
+CREATE TRIGGER share_closure_command_immutable BEFORE UPDATE OR DELETE ON share_renewal_closure_commands FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE share_renewal_closure_receipts (
+ tenant_id text NOT NULL, command_id text NOT NULL, payload bytea NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,command_id),
+ FOREIGN KEY(tenant_id,command_id) REFERENCES share_renewal_closure_commands(tenant_id,id)
+);
+CREATE TRIGGER share_closure_receipt_immutable BEFORE UPDATE OR DELETE ON share_renewal_closure_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

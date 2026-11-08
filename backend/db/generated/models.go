@@ -800,6 +800,32 @@ type ShareRenewalAuthority struct {
 	ClosureProof []byte
 }
 
+type ShareRenewalClosureCommand struct {
+	TenantID      string
+	ID            string
+	HandoffID     string
+	NodeID        string
+	BootID        string
+	Kind          string
+	Generation    int64
+	SignerID      string
+	SignerEpoch   int64
+	HubBootID     string
+	Part          int32
+	Parts         int32
+	OperationID   string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+type ShareRenewalClosureReceipt struct {
+	TenantID        string
+	CommandID       string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type SignerAuthority struct {
 	TenantID         string
 	SignerID         string

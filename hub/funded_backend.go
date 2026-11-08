@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"time"
+	"vortex/contracts"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -13,7 +15,7 @@ import (
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
-var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1"}
+var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1", "share-renewal-close-v1"}
 
 func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreamingClient[controlv1.HubMessage, controlv1.BackendMessage]) error {
 	session := uuid.NewString()
@@ -54,6 +56,7 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 	ready := false
 	var pending *store.LedgerRecord
 	var installed *controlv1.LedgerRecord
+	var closed *controlv1.LedgerRecord
 	for {
 		select {
 		case <-ctx.Done():
@@ -106,6 +109,30 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 			if !ready {
 				return errors.New("funded heartbeat required first")
 			}
+			if command := m.GetShareRenewalClosure(); command != nil {
+				digest := sha256.Sum256(command.Payload)
+				decoded, e := contracts.DecodeShareRenewalClosure(command.Payload)
+				if e != nil || decoded.ID != command.CommandId || !bytes.Equal(digest[:], command.PayloadSha256) {
+					return contracts.ErrShareRenewalClosure
+				}
+				if closed != nil {
+					return errors.New("unconfirmed closure receipt still pending")
+				}
+				receipt, e := c.Store.ApplyShareRenewalClosure(ctx, c.HubID, c.BootID, c.BackendID, command.Payload)
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(receipt)
+				if e != nil {
+					return e
+				}
+				sum := sha256.Sum256(raw)
+				closed = &controlv1.LedgerRecord{RecordId: receipt.ID, LedgerSequence: m.Sequence, Kind: "share-renewal-closed-v1", Payload: raw, PayloadSha256: sum[:]}
+				if e = send(&controlv1.HubMessage{Body: &controlv1.HubMessage_LedgerRecord{LedgerRecord: closed}}); e != nil {
+					return e
+				}
+				continue
+			}
 			if allocation := m.GetAllocation(); allocation != nil {
 				digest := sha256.Sum256(allocation.Payload)
 				if !bytes.Equal(digest[:], allocation.PayloadSha256) {
@@ -133,6 +160,13 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 				continue
 			}
 			if ack := m.GetLedgerAck(); ack != nil {
+				if ack.Kind == "share-renewal-closed-v1" {
+					if closed == nil || ack.RecordId != closed.RecordId || ack.LedgerSequence != closed.LedgerSequence || !bytes.Equal(ack.PayloadSha256, closed.PayloadSha256) {
+						return errors.New("closure acknowledgement mismatch")
+					}
+					closed = nil
+					continue
+				}
 				if ack.Kind == "allocation-installed-v1" {
 					if installed == nil || ack.RecordId != installed.RecordId || ack.LedgerSequence != installed.LedgerSequence || !bytes.Equal(ack.PayloadSha256, installed.PayloadSha256) {
 						return errors.New("allocation acknowledgement mismatch")

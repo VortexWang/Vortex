@@ -1,0 +1,40 @@
+=== RUN   TestShareRenewalClosureActualMTLSLossReconnectAndCapabilityIsolation
+2026/11/08 14:06:40 goose: no migrations to run. current version: 8
+2026/11/08 14:06:40 OK   00001_authority.sql (26.48ms)
+2026/11/08 14:06:40 OK   00002_tenant_policy.sql (12.51ms)
+2026/11/08 14:06:40 OK   00003_nodes_ports.sql (24.35ms)
+2026/11/08 14:06:40 OK   00004_entry_group_domains.sql (2.24ms)
+2026/11/08 14:06:40 OK   00005_rules_compile.sql (17.81ms)
+2026/11/08 14:06:40 OK   00006_packages_entitlements.sql (33.71ms)
+2026/11/08 14:06:40 OK   00007_metering_ledger.sql (40.12ms)
+2026/11/08 14:06:40 OK   00008_limits_shares.sql (25.24ms)
+2026/11/08 14:06:40 goose: successfully migrated database to version: 8
+    share_closure_transport_test.go:133: lost receipt became PG closure <nil>
+--- FAIL: TestShareRenewalClosureActualMTLSLossReconnectAndCapabilityIsolation (1.20s)
+=== RUN   TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease
+2026/11/08 14:06:41 goose: no migrations to run. current version: 8
+2026/11/08 14:06:41 OK   00001_authority.sql (17.02ms)
+2026/11/08 14:06:41 OK   00002_tenant_policy.sql (8.16ms)
+2026/11/08 14:06:41 OK   00003_nodes_ports.sql (16.91ms)
+2026/11/08 14:06:41 OK   00004_entry_group_domains.sql (2.52ms)
+2026/11/08 14:06:41 OK   00005_rules_compile.sql (16.92ms)
+2026/11/08 14:06:41 OK   00006_packages_entitlements.sql (15.72ms)
+2026/11/08 14:06:41 OK   00007_metering_ledger.sql (20.27ms)
+2026/11/08 14:06:42 OK   00008_limits_shares.sql (24.74ms)
+2026/11/08 14:06:42 goose: successfully migrated database to version: 8
+--- PASS: TestShareRenewalClosureCompletePagesAuditRollbackAndCASOnlyRelease (1.80s)
+=== RUN   TestShareRenewalClosureWorkerEmptyPageAndWrongIdentity
+2026/11/08 14:06:43 goose: no migrations to run. current version: 8
+2026/11/08 14:06:43 OK   00001_authority.sql (8.23ms)
+2026/11/08 14:06:43 OK   00002_tenant_policy.sql (7.26ms)
+2026/11/08 14:06:43 OK   00003_nodes_ports.sql (17.36ms)
+2026/11/08 14:06:43 OK   00004_entry_group_domains.sql (2.28ms)
+2026/11/08 14:06:43 OK   00005_rules_compile.sql (17.31ms)
+2026/11/08 14:06:43 OK   00006_packages_entitlements.sql (16.8ms)
+2026/11/08 14:06:43 OK   00007_metering_ledger.sql (21.94ms)
+2026/11/08 14:06:43 OK   00008_limits_shares.sql (27.07ms)
+2026/11/08 14:06:43 goose: successfully migrated database to version: 8
+--- PASS: TestShareRenewalClosureWorkerEmptyPageAndWrongIdentity (0.77s)
+FAIL
+FAIL	vortex/backend/internal/service	4.514s
+FAIL

@@ -14,15 +14,21 @@ import (
 	"google.golang.org/protobuf/proto"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/service"
+	"vortex/contracts"
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
 var fundedHubCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1"}
+var closureHubCapabilities = append(append([]string{}, fundedHubCapabilities...), "share-renewal-close-v1")
 
 func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.HubMessage, controlv1.BackendMessage], id string, hello *controlv1.HubMessage) error {
 	body := hello.GetLifecycleHello()
 	usageOnly := slices.Equal(body.Capabilities, []string{"status-v1", "usage-ledger-v1"})
+	closureCapable := slices.Equal(body.Capabilities, closureHubCapabilities)
 	expectedCapabilities := fundedHubCapabilities
+	if closureCapable {
+		expectedCapabilities = closureHubCapabilities
+	}
 	if usageOnly {
 		expectedCapabilities = body.Capabilities
 	}
@@ -75,8 +81,28 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 	last := hello.Sequence
 	var pending *generated.HubFundedAllocation
 	var allocationSequence uint64
+	var pendingClosure *generated.ShareRenewalClosureCommand
+	var closureSequence uint64
+	sendClosure := func() error {
+		if !closureCapable || waitingStatus || pendingClosure != nil || pending != nil {
+			return nil
+		}
+		rows, e := h.Shares.PendingRenewalClosures(stream.Context(), id, hello.BootId)
+		if e != nil {
+			return e
+		}
+		if len(rows) == 0 {
+			return nil
+		}
+		pendingClosure = &rows[0]
+		if e = send(&controlv1.BackendMessage{Body: &controlv1.BackendMessage_ShareRenewalClosure{ShareRenewalClosure: &controlv1.ShareRenewalClosureCommand{CommandId: pendingClosure.ID, Payload: pendingClosure.Payload, PayloadSha256: pendingClosure.PayloadDigest}}}); e != nil {
+			return e
+		}
+		closureSequence = sequence
+		return nil
+	}
 	sendAllocation := func() error {
-		if usageOnly || pending != nil || waitingStatus {
+		if usageOnly || pending != nil || waitingStatus || pendingClosure != nil {
 			return nil
 		}
 		rows, e := h.Shares.PendingHubAllocations(stream.Context(), id, hello.BootId)
@@ -145,6 +171,9 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 				}
 				waitingStatus = false
 				statusConfirmed = true
+				if e = sendClosure(); e != nil {
+					return e
+				}
 				if e = sendAllocation(); e != nil {
 					return e
 				}
@@ -162,6 +191,21 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 				return errors.New("funded Hub ledger digest mismatch")
 			}
 			switch r.Kind {
+			case "share-renewal-closed-v1":
+				if !closureCapable {
+					return errors.New("closure capability not negotiated")
+				}
+				if pendingClosure == nil || r.RecordId != pendingClosure.ID || r.LedgerSequence != closureSequence {
+					return service.ErrShareConflict
+				}
+				decoded, e := contracts.DecodeShareRenewalClosureReceipt(r.Payload)
+				if e != nil || decoded.ID != pendingClosure.ID || decoded.CommandDigest != contracts.SharePayloadDigest(pendingClosure.Payload) {
+					return service.ErrShareConflict
+				}
+				if e = h.Shares.RecordRenewalClosureReceipt(stream.Context(), id, hello.BootId, r.Payload, uuid.NewString()); e != nil {
+					return e
+				}
+				pendingClosure = nil
 			case "allocation-installed-v1":
 				if usageOnly {
 					return errors.New("allocation capability not negotiated")
@@ -197,6 +241,9 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 				return errors.New("unsupported funded Hub ledger kind")
 			}
 			if e = send(&controlv1.BackendMessage{Body: &controlv1.BackendMessage_LedgerAck{LedgerAck: &controlv1.LedgerAcknowledgement{RecordId: r.RecordId, LedgerSequence: r.LedgerSequence, Kind: r.Kind, PayloadSha256: r.PayloadSha256}}}); e != nil {
+				return e
+			}
+			if e = sendClosure(); e != nil {
 				return e
 			}
 			if e = sendAllocation(); e != nil {

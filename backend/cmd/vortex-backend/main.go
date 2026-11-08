@@ -207,6 +207,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	go func() {
 		failures <- fmt.Errorf("runtime funding worker: %w", (worker.RuntimeFundingWorker{Service: *adapter.Shares, Region: "phase6"}).Run(ctx))
 	}()
+	go func() {
+		failures <- fmt.Errorf("share renewal closure worker: %w", (worker.ShareRenewalClosureWorker{Service: *adapter.Shares, BackendID: *backendID}).Run(ctx))
+	}()
 	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
 	select {
 	case <-parent.Done():

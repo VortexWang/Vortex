@@ -107,7 +107,9 @@ The old 1.3.0 Hub hello/status paths retain their blocked, signer-epoch-zero
 requirements. They cannot transport funds or reopen a signer.
 
 The new HubControl branch requires an exact 1.6.0 hello and ordered capabilities
-`[status-v1, backend-allocation-v1, backend-ledger-v1]`, or the independent
+`[status-v1, backend-allocation-v1, backend-ledger-v1]`, its optional
+`[status-v1, backend-allocation-v1, backend-ledger-v1, share-renewal-close-v1]`
+extension, or the independent
 `[status-v1, usage-ledger-v1]` observation branch. TLS 1.3 role roots are distinct:
 backend servers verify the Hub CA and clients verify the backend CA. The Hub ID
 is the certificate CN and sole DNS SAN. Hub ID, boot, session, region and increasing
@@ -206,3 +208,34 @@ production backend worker reads committed PG candidates and handles independent
 candidate errors without aborting the rest of the current bounded page. Complete
 boot recovery, stale candidate maintenance and runtime lease delivery remain
 separate work; no timeout drops unknown financial occupation.
+
+
+## Candidate old-share renewal closure
+
+Only `share-renewal-close-v1` peers receive BackendMessage field 17,
+ShareRenewalClosureCommand. The canonical JSON command and SHA-256 bind backend,
+tenant, handoff, Hub boot, Node boot, independent share kind, predecessor and
+successor generation, signer epoch, one-based part/parts and up to 64 strictly
+sorted unique delegation IDs. Every nonfinal page has 64 IDs; a sole empty page
+explicitly closes an issuer with no funded delegations. Successor is exactly
+predecessor + 1. No rate/connection generation is inferred from a merged value.
+
+In the tenant serialization transaction, PG snapshots every funded old delegation
+and commits all pages, tasks, Outbox and audit together. This is an issuance
+barrier: new old-generation funding/renewal is denied; exact nonce replays retain
+their old bytes. Queued late installations covered by a barrier are not sent.
+The Hub validates backend/Hub/boot and each installed delegation's Node/boot/epoch.
+One FULL transaction closes installed issuers, writes tombstones for uninstalled
+IDs, and persists immutable command/receipt. Later installation cannot resurrect
+them. Closure requires no trusted clock, creates no authority, and preserves all
+already issued child leases and original financial holds.
+
+LedgerRecord kind `share-renewal-closed-v1` carries canonical receipt JSON and its
+SHA-256. record_id is command_id; ledger_sequence is the BackendMessage sequence
+of that command. The receipt binds command_id and command_sha256. PG authenticates
+the Hub role and boot and matches the pending command before committing the page,
+its audit and delivery completion. Only all pages together close the predecessor
+renewal authority; this does not release capacity. Only a subsequent real Node CAS
+receipt may release the proven difference. Lost FULL receipt causes exact command
+replay; a lost PG ACK cannot duplicate closure. Older funded and usage-only peers
+cannot receive or acknowledge closure. These are candidate CR-008 artifacts.

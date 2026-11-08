@@ -177,6 +177,13 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			if e != nil {
 				return e
 			}
+			barrier, e := q.ShareClosureBarrier(ctx, generated.ShareClosureBarrierParams{TenantID: scope.TenantID(), NodeID: in.NodeID, BootID: in.BootID, Kind: kind, Generation: g.Generation, SignerID: in.HubID})
+			if e != nil {
+				return e
+			}
+			if barrier {
+				return ErrShareConflict
+			}
 			if authority.ClosedAt.Valid {
 				return ErrShareConflict
 			}

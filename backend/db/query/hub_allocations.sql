@@ -32,7 +32,7 @@ SELECT * FROM hub_signer_incarnations WHERE hub_id=$1 AND signer_epoch=$2;
 -- name: BindHubIncarnation :exec
 INSERT INTO hub_signer_incarnations(hub_id,signer_epoch,boot_id) VALUES($1,$2,$3);
 -- name: PendingHubAllocations :many
-SELECT a.* FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 1;
+SELECT a.* FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=a.tenant_id AND c.signer_id=a.hub_id AND c.hub_boot_id=a.hub_boot_id AND jsonb_exists(convert_from(c.payload,'UTF8')::jsonb->'delegation_ids',a.delegation_id)) ORDER BY a.allocation_id LIMIT 1;
 -- name: GetHubAllocationGlobal :one
 SELECT * FROM hub_funded_allocations WHERE allocation_id=$1;
 -- name: GetHubAllocationReceipt :one

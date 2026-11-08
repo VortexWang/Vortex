@@ -116,6 +116,13 @@ func (s *Store) installHubDelegation(ctx context.Context, d HubDelegation, now I
 		return err
 	}
 	defer tx.Rollback()
+	var closed int
+	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM closed_share_delegations WHERE delegation_id=?`, d.ID).Scan(&closed); err != nil {
+		return err
+	}
+	if closed != 0 {
+		return ErrAuthorizationDenied
+	}
 	if backendID != "" {
 		for _, root := range d.ShareReferences {
 			if err = s.installShareSourceAnchorTx(ctx, tx, d.NodeID, backendID, root); err != nil {

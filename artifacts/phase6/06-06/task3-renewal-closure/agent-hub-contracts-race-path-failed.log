@@ -1,0 +1,12 @@
+# ./cmd/vortex-hub
+stat /Users/peng/Documents/123/VORTEX/cmd/vortex-hub: directory not found
+FAIL	./cmd/vortex-hub [setup failed]
+ok  	vortex/agent	43.413s
+ok  	vortex/agent/identity	4.082s
+ok  	vortex/agent/store	34.194s
+ok  	vortex/agent/upgrade	6.214s
+ok  	vortex/hub	11.536s
+ok  	vortex/contracts	3.592s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/cmd/vortex-node	5.812s
+FAIL

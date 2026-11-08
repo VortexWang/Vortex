@@ -257,6 +257,7 @@ message BackendMessage {
     ControlError error = 14;
     AuthorityRestrictions authority_restrictions = 15;
     EpochHandoffRequest epoch_handoff_request = 16;
+    ShareRenewalClosureCommand share_renewal_closure = 17;
   }
 }
 message BackendHeartbeat {
@@ -321,3 +322,10 @@ message ShareReceipt {
 // lease, credit or Node activation can be inferred from this receipt.
 message SourceProvisionCommand { bytes payload = 1; bytes payload_sha256 = 2; }
 message SourceProvisionReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Opt-in share-renewal-close-v1: FULL old-delegation closure, no money release.
+message ShareRenewalClosureCommand {
+  string command_id = 1;
+  bytes payload = 2;
+  bytes payload_sha256 = 3;
+}

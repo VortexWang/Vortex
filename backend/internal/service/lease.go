@@ -102,6 +102,13 @@ func (s ShareService) RenewShare(ctx context.Context, scope TenantScope, in Leas
 		if e != nil {
 			return e
 		}
+		barrier, e := q.ShareClosureBarrier(ctx, generated.ShareClosureBarrierParams{TenantID: scope.TenantID(), NodeID: in.NodeID, BootID: in.BootID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID})
+		if e != nil {
+			return e
+		}
+		if barrier {
+			return ErrShareConflict
+		}
 		if a.ClosedAt.Valid || a.SignerEpoch != in.SignerEpoch {
 			return ErrShareConflict
 		}
@@ -150,33 +157,37 @@ func (s ShareService) CloseOldRenewal(ctx context.Context, scope TenantScope, in
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
-		_, now, e := s.bounds()
-		if e != nil {
-			return e
-		}
-		chain, e := q.LockShareChain(ctx, generated.LockShareChainParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind})
-		if e != nil {
-			return e
-		}
-		if in.Generation < 1 || in.SuccessorGeneration != in.Generation+1 || chain.BootID != in.BootID || chain.PendingGeneration != in.SuccessorGeneration || chain.ActiveGeneration != in.Generation {
-			return ErrShareConflict
-		}
-		a, e := q.ShareRenewalAuthority(ctx, generated.ShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID})
-		if e != nil {
-			return e
-		}
-		if a.SignerEpoch != in.SignerEpoch {
-			return ErrShareConflict
-		}
-		if a.ClosedAt.Valid {
-			if !bytes.Equal(a.ClosureProof, proof[:]) {
-				return ErrShareConflict
-			}
-			return nil
-		}
-		if _, e = q.CloseShareRenewalAuthority(ctx, generated.CloseShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID, ClosedAt: timestamp(now), ClosureProof: proof[:]}); e != nil {
-			return e
-		}
-		return domainTask(ctx, q, scope, in.NodeID, "share.close_renewal", "share_handoff", in.SuccessorGeneration)
+		return s.closeOldRenewalTx(ctx, q, scope, in, proof[:])
 	})
+}
+
+func (s ShareService) closeOldRenewalTx(ctx context.Context, q *generated.Queries, scope TenantScope, in RenewalClosure, proof []byte) error {
+	_, now, e := s.bounds()
+	if e != nil {
+		return e
+	}
+	chain, e := q.LockShareChain(ctx, generated.LockShareChainParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind})
+	if e != nil {
+		return e
+	}
+	if in.Generation < 1 || in.SuccessorGeneration != in.Generation+1 || chain.BootID != in.BootID || chain.PendingGeneration != in.SuccessorGeneration || chain.ActiveGeneration != in.Generation {
+		return ErrShareConflict
+	}
+	a, e := q.ShareRenewalAuthority(ctx, generated.ShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID})
+	if e != nil {
+		return e
+	}
+	if a.SignerEpoch != in.SignerEpoch {
+		return ErrShareConflict
+	}
+	if a.ClosedAt.Valid {
+		if !bytes.Equal(a.ClosureProof, proof) {
+			return ErrShareConflict
+		}
+		return nil
+	}
+	if _, e = q.CloseShareRenewalAuthority(ctx, generated.CloseShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: in.Kind, Generation: in.Generation, SignerID: in.SignerID, ClosedAt: timestamp(now), ClosureProof: proof}); e != nil {
+		return e
+	}
+	return domainTask(ctx, q, scope, in.NodeID, "share.close_renewal", "share_handoff", in.SuccessorGeneration)
 }
