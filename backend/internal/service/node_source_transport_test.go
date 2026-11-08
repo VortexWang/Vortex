@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -139,16 +140,27 @@ func TestNodeSourceProvisionActualMTLSWorkerLostReceiptAndExplicitBackend(t *tes
 	case <-ctx.Done():
 		t.Fatal(ctx.Err())
 	}
-	wrong := &agent.ControlClient{Node: node, TLS: clientTLS, SourceBackendID: uuid.NewString()}
-	wrongCtx, wrongStop := context.WithCancel(ctx)
-	go func() { done <- wrong.Connect(wrongCtx, listener.Addr().String()) }()
-	<-connected
-	if e = adapter.DeliverSources(ctx, x.f.scope, in.NodeID, in.BootID, &controlv1.SourceProvisionCommand{Payload: p.Payload, PayloadSha256: p.PayloadDigest}); e == nil {
-		t.Fatal("valid CA but wrong configured backend installed roots")
+	// The same trusted role CA and valid certificate name cannot bypass the
+	// configured backend UUID. Reject at TLS, before even sending a heartbeat.
+	wrongTLS := clientTLS.Clone()
+	var verified atomic.Int32
+	wrongTLS.VerifyConnection = func(state tls.ConnectionState) error {
+		if len(state.VerifiedChains) > 0 {
+			verified.Add(1)
+		}
+		return nil
 	}
-	wrongStop()
+	wrong := &agent.ControlClient{Node: node, TLS: wrongTLS, SourceBackendID: uuid.NewString(), ControlOnly: true}
+	wrongCtx, wrongStop := context.WithTimeout(ctx, time.Second)
+	defer wrongStop()
+	go func() { done <- wrong.Connect(wrongCtx, listener.Addr().String()) }()
 	select {
-	case <-done:
+	case e = <-done:
+		if e == nil || verified.Load() == 0 {
+			t.Fatal("wrong backend was not rejected after verified TLS", e, verified.Load())
+		}
+	case <-connected:
+		t.Fatal("valid CA but wrong backend reached application control stream")
 	case <-ctx.Done():
 		t.Fatal(ctx.Err())
 	}

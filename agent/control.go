@@ -102,6 +102,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	if c != nil && c.SourceBackendID != "" && (!canonicalUUID(c.SourceBackendID) || regional != nil) {
 		return fmt.Errorf("agent: source provisioning backend requires direct control and canonical UUID")
 	}
+	if c != nil && c.ControlOnly && (regional != nil || !canonicalUUID(c.SourceBackendID)) {
+		return fmt.Errorf("agent: configuration-only control requires pinned direct backend")
+	}
 	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
@@ -158,6 +161,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		cert := state.PeerCertificates[0]
 		if len(cert.DNSNames) != 1 || cert.Subject.CommonName != cert.DNSNames[0] {
 			return fmt.Errorf("agent: ambiguous Hub identity")
+		}
+		if c.SourceBackendID != "" && cert.DNSNames[0] != c.SourceBackendID {
+			return fmt.Errorf("agent: direct backend identity differs from pinned source backend")
 		}
 		authenticatedTLS.Store(&state)
 		issuerIdentity.CompareAndSwap(nil, cert.DNSNames[0])
