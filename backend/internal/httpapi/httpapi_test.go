@@ -335,6 +335,11 @@ func TestHTTPRuleMutationExplicitIfMatchAcceptedOperationAndStaleConflict(t *tes
 	if summary.RuleID != rule.ID || summary.OperationID == "" || summary.Revision != 2 || summary.SyncStatus != "pending" {
 		t.Fatal("accepted desired state missing", w.Body)
 	}
+	operationRead := f.request(t, "GET", "/api/v1/tenants/"+f.tenant+"/operations/"+summary.OperationID, f.pair.AccessToken, "")
+	var publicOperation repository.PublicOperation
+	if e = json.Unmarshal(operationRead.Body.Bytes(), &publicOperation); e != nil || operationRead.Code != 200 || publicOperation.ResourceID != rule.ID || publicOperation.TargetRevision != 2 {
+		t.Fatal("compile operation used synthetic identity", operationRead.Code, operationRead.Body, e)
+	}
 	if w = call(`"1"`); w.Code != 412 {
 		t.Fatal("stale revision", w.Code, w.Body)
 	}
