@@ -18,12 +18,13 @@ var ErrCreditGrantUnsettled = errors.New("store: stopped credit grant has unreso
 // permission to release a backend hold. The receiver must authenticate the Node
 // and independently match the complete issuer and usage inventories.
 type CreditGrantFinal struct {
-	NodeID      string
-	Grant       AuthorizationRecord
-	Used        uint64
-	Unused      uint64
-	BatchCount  uint64
-	UsageSHA256 string
+	NodeID         string
+	Grant          AuthorizationRecord
+	NeverInstalled bool `json:",omitempty"`
+	Used           uint64
+	Unused         uint64
+	BatchCount     uint64
+	UsageSHA256    string
 }
 
 // StopCreditGrant permanently fences further pre-write reservations. Existing
@@ -31,6 +32,16 @@ type CreditGrantFinal struct {
 // sessions, returns quota or claims the Engine has stopped. Final evidence is a
 // separate transaction after every ticket has a known terminal outcome.
 func (s *Store) StopCreditGrant(ctx context.Context, node, boot, issuer, grant string) error {
+	return s.stopCreditGrant(ctx, node, boot, issuer, grant, nil)
+}
+
+// StopMatchingCreditGrant also pins every original issuer field. ShareRevision
+// alone is a local reference observation and is not part of the issued grant.
+func (s *Store) StopMatchingCreditGrant(ctx context.Context, node, boot string, expected AuthorizationRecord) error {
+	return s.stopCreditGrant(ctx, node, boot, expected.IssuerID, expected.AuthorizationID, &expected)
+}
+
+func (s *Store) stopCreditGrant(ctx context.Context, node, boot, issuer, grant string, expected *AuthorizationRecord) error {
 	if s.owner != "agent" || node == "" || boot == "" || issuer == "" || grant == "" {
 		return ErrAuthorizationDenied
 	}
@@ -45,6 +56,9 @@ func (s *Store) StopCreditGrant(ctx context.Context, node, boot, issuer, grant s
 	}
 	if r.Kind != "credit_grant" || r.BootID != boot || r.IssuerID != issuer {
 		return ErrAuthorizationDenied
+	}
+	if expected != nil && !sameIssuedCreditGrant(r, *expected) {
+		return ErrAuthorizationUpdateConflict
 	}
 	if _, err = tx.ExecContext(ctx, `INSERT INTO credit_grant_stops(node_id,authorization_id,boot_id,issuer_id) VALUES(?,?,?,?) ON CONFLICT DO NOTHING`, node, grant, boot, issuer); err != nil {
 		return err
@@ -72,6 +86,14 @@ func (s *Store) FinalizeStoppedCreditGrant(ctx context.Context, node, boot, issu
 		return zero, err
 	}
 	defer tx.Rollback()
+	if final, found, err := uninstalledCreditFinalTx(ctx, tx, node, grant); err != nil {
+		return zero, err
+	} else if found {
+		if final.Grant.BootID != boot || final.Grant.IssuerID != issuer {
+			return zero, ErrAuthorizationDenied
+		}
+		return final, tx.Commit()
+	}
 	r, state, err := readAuthorizationTx(ctx, tx, node, grant)
 	if err != nil {
 		return zero, err
@@ -196,10 +218,13 @@ func (s *Store) migrateCreditGrantClosures() error {
 	defer tx.Rollback()
 	_, err = tx.Exec(`CREATE TABLE IF NOT EXISTS credit_grant_stops(node_id TEXT NOT NULL,authorization_id TEXT NOT NULL,boot_id TEXT NOT NULL,issuer_id TEXT NOT NULL,PRIMARY KEY(node_id,authorization_id));
 CREATE TABLE IF NOT EXISTS credit_grant_finals(node_id TEXT NOT NULL,authorization_id TEXT NOT NULL,payload BLOB NOT NULL,PRIMARY KEY(node_id,authorization_id));
+CREATE TABLE IF NOT EXISTS uninstalled_credit_grant_finals(node_id TEXT NOT NULL,authorization_id TEXT NOT NULL,payload BLOB NOT NULL,PRIMARY KEY(node_id,authorization_id));
 CREATE TRIGGER IF NOT EXISTS credit_grant_stop_no_update BEFORE UPDATE ON credit_grant_stops BEGIN SELECT RAISE(ABORT,'immutable credit stop'); END;
 CREATE TRIGGER IF NOT EXISTS credit_grant_stop_no_delete BEFORE DELETE ON credit_grant_stops BEGIN SELECT RAISE(ABORT,'immutable credit stop'); END;
 CREATE TRIGGER IF NOT EXISTS credit_grant_final_no_update BEFORE UPDATE ON credit_grant_finals BEGIN SELECT RAISE(ABORT,'immutable credit final'); END;
-CREATE TRIGGER IF NOT EXISTS credit_grant_final_no_delete BEFORE DELETE ON credit_grant_finals BEGIN SELECT RAISE(ABORT,'immutable credit final'); END;`)
+CREATE TRIGGER IF NOT EXISTS credit_grant_final_no_delete BEFORE DELETE ON credit_grant_finals BEGIN SELECT RAISE(ABORT,'immutable credit final'); END;
+CREATE TRIGGER IF NOT EXISTS uninstalled_credit_final_no_update BEFORE UPDATE ON uninstalled_credit_grant_finals BEGIN SELECT RAISE(ABORT,'immutable uninstalled credit final'); END;
+CREATE TRIGGER IF NOT EXISTS uninstalled_credit_final_no_delete BEFORE DELETE ON uninstalled_credit_grant_finals BEGIN SELECT RAISE(ABORT,'immutable uninstalled credit final'); END;`)
 	if err != nil {
 		return err
 	}

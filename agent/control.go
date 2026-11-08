@@ -680,27 +680,7 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	digest := sha256.Sum256(update.GetPayload())
 	records := make([]store.AuthorizationRecord, 0, len(payload.Authorizations))
 	for _, authorization := range payload.Authorizations {
-		record := store.AuthorizationRecord{
-			ShareReferenceID: authorization.ShareReferenceID, DelegationID: authorization.DelegationID,
-			AuthorizationID: authorization.AuthorizationID, ParentAuthorizationID: authorization.ParentAuthorizationID,
-			SourceID: authorization.SourceID, Kind: authorization.Kind, RuleID: authorization.RuleID,
-			RuleRevision: authorization.RuleRevision, PathGeneration: authorization.PathGeneration,
-			SignerEpoch: payload.SignerEpoch, BootID: payload.BootID,
-			IssuedAt:          authorization.IssuedAt.UTC().Format(time.RFC3339Nano),
-			NotBefore:         authorization.NotBefore.UTC().Format(time.RFC3339Nano),
-			ExpiresAt:         authorization.ExpiresAt.UTC().Format(time.RFC3339Nano),
-			HardDeadline:      authorization.HardDeadline.UTC().Format(time.RFC3339Nano),
-			BillingSnapshotID: authorization.BillingSnapshotID,
-		}
-		if authorization.AmountBytes != nil {
-			record.AmountBytes = *authorization.AmountBytes
-		}
-		if authorization.RateBPS != nil {
-			record.RateBPS = *authorization.RateBPS
-		}
-		if authorization.Connections != nil {
-			record.Connections = *authorization.Connections
-		}
+		record := authorizationStoreRecord(authorization, payload, issuer)
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{

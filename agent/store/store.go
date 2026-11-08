@@ -847,6 +847,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
 			return fmt.Errorf("store: authorization record does not match update identity or fencing")
 		}
+		if err := checkUninstalledCreditFinalTx(ctx, tx, update.NodeID, record); err != nil {
+			return err
+		}
 		var existing string
 		err := tx.QueryRowContext(ctx, `SELECT source_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&existing)
 		if err == nil {
