@@ -102,6 +102,24 @@ func (s MeteringService) ReserveUsage(ctx context.Context, scope TenantScope, in
 		if e != nil {
 			return e
 		}
+		var groups []BillingGroup
+		if e = json.Unmarshal(b.PathVersions, &groups); e != nil {
+			return e
+		}
+		executionGroup := ""
+		for _, g := range groups {
+			if g.Multiplier > 0 {
+				executionGroup = g.Group
+				break
+			}
+		}
+		member, e := q.UsageGroupMember(ctx, generated.UsageGroupMemberParams{GroupID: executionGroup, NodeID: in.NodeID})
+		if e != nil {
+			return e
+		}
+		if !member {
+			return ErrConflict
+		}
 		until, e := q.SnapshotEffectiveUntil(ctx, generated.SnapshotEffectiveUntilParams{TenantID: scope.TenantID(), ID: in.SnapshotID})
 		if e != nil {
 			return e
@@ -205,6 +223,9 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 			if old.BillingSnapshotID == in.SnapshotID && bytes.Equal(old.PayloadSha256, in.Digest) && old.BatchID == in.BatchID {
 				return json.Unmarshal(old.Acknowledgement, &ack)
 			}
+			if e = q.AppendUsageConflict(ctx, generated.AppendUsageConflictParams{NodeID: old.NodeID, BootID: old.BootID, Sequence: old.Sequence, ObservedDigest: in.Digest, TenantID: scope.TenantID(), Evidence: auditJSON(in)}); e != nil {
+				return e
+			}
 			// Preserve the original grant/source even if the conflicting body names a
 			// different snapshot or grant. Original facts are separately retained.
 			var original []UsageFact
@@ -212,6 +233,9 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 				return e
 			}
 			for _, f := range original {
+				if f.GrantID == "" {
+					continue
+				}
 				r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: f.GrantID})
 				if e != nil {
 					return e
@@ -232,8 +256,14 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 		// cannot partially charge the other members of this batch.
 		grants := make(map[string]generated.Reservation, len(facts))
 		for i, f := range facts {
-			if f.RawCumulative < 0 || (i > 0 && facts[i-1].GrantID == f.GrantID) {
+			if f.RawCumulative < 0 || (f.GrantID != "" && i > 0 && facts[i-1].GrantID == f.GrantID) {
 				return ErrConflict
+			}
+			if f.GrantID == "" {
+				if f.Role != "relay" && f.Role != "exit" && f.Role != "self_hosted" {
+					return ErrConflict
+				}
+				continue
 			}
 			r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: f.GrantID})
 			if e != nil {
@@ -258,6 +288,9 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 			return a.ID < b.ID
 		})
 		for _, f := range facts {
+			if f.GrantID == "" {
+				continue
+			}
 			r := grants[f.GrantID]
 			if _, e = q.LockSourceProjection(ctx, generated.LockSourceProjectionParams{TenantID: scope.TenantID(), SourceID: r.SourceID}); e != nil {
 				return e
@@ -266,6 +299,13 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 		var raw int64
 		bill := big.NewInt(0)
 		for i, f := range facts {
+			if f.GrantID == "" {
+				if math.MaxInt64-raw < f.RawCumulative {
+					return ErrConflict
+				}
+				raw += f.RawCumulative
+				continue
+			}
 			if f.RawCumulative < 0 || (i > 0 && facts[i-1].GrantID == f.GrantID) {
 				return ErrConflict
 			}
@@ -309,7 +349,7 @@ func (s MeteringService) IngestUsageBatch(ctx context.Context, scope TenantScope
 			return nil
 		}
 		ack = UsageAck{BatchID: in.BatchID, Digest: in.Digest, State: "accepted"}
-		return q.AppendUsageBatch(ctx, generated.AppendUsageBatchParams{TenantID: scope.TenantID(), NodeID: in.NodeID, BootID: in.BootID, Sequence: in.Sequence, BatchID: in.BatchID, BillingSnapshotID: in.SnapshotID, PayloadSha256: in.Digest, Payload: in.Payload, RawCumulative: numerator(raw, 1), BillableNumerator: pgtype.Numeric{Int: bill, Valid: true}, Acknowledgement: auditJSON(ack), Facts: auditJSON(in.Facts)})
+		return q.AppendUsageBatch(ctx, generated.AppendUsageBatchParams{TenantID: scope.TenantID(), NodeID: in.NodeID, BootID: in.BootID, Sequence: in.Sequence, BatchID: in.BatchID, BillingSnapshotID: in.SnapshotID, PayloadSha256: in.Digest, Payload: in.Payload, RawCumulative: numerator(raw, 1), BillableNumerator: pgtype.Numeric{Int: bill, Valid: true}, Acknowledgement: auditJSON(ack), Facts: auditJSON(in.Facts), UnknownUpperBound: numerator(0, 1)})
 	})
 	if e == nil && conflicted {
 		e = ErrUsageDisputed
@@ -379,16 +419,22 @@ func (s MeteringService) mutateReceipt(ctx context.Context, scope TenantScope, g
 	if key == "" || len(proof) != 32 {
 		return ErrConflict
 	}
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "metering." + kind, ResourceID: grant, RequestID: request, Reason: "immutable source-local authenticated receipt"}, func(q *generated.Queries) error {
+	conflict := false
+	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "metering." + kind, ResourceID: grant, RequestID: request, Reason: "immutable source-local authenticated receipt"}, func(q *generated.Queries) error {
 		r, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: grant})
 		if e != nil {
 			return e
 		}
 		if r.BillingSnapshotID != snapshot {
-			return ErrUsageDisputed
+			conflict = true
+			return dispute(ctx, q, scope, r, "receipt snapshot mismatch", map[string]any{"observed_snapshot": snapshot, "proof": proof})
 		}
 		return settleActual(ctx, q, scope, r, kind, key, raw, returned, proof)
 	})
+	if e == nil && conflict {
+		return ErrUsageDisputed
+	}
+	return e
 }
 func (s MeteringService) CommitActualUsage(ctx context.Context, scope TenantScope, grant, snapshot, key string, raw int64, proof []byte, request string) error {
 	return s.mutateReceipt(ctx, scope, grant, snapshot, "actual", key, raw, 0, proof, request)

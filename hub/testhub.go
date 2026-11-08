@@ -331,7 +331,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptUnknown(ctx, first.GetNodeId(), body.UnknownUsageBatch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUnknownUsage(ctx, first.GetNodeId(), payload)
 			}
@@ -364,7 +364,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptKnown(ctx, first.GetNodeId(), message.GetBootId(), batch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload})
 			}

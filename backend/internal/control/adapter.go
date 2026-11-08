@@ -5,8 +5,10 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"sync"
 	"time"
@@ -22,6 +24,7 @@ import (
 	"vortex/backend/internal/repository"
 	"vortex/backend/internal/service"
 	controlv1 "vortex/contracts/protobuf/v1"
+	"vortex/hub"
 )
 
 const MaxMessage = 1 << 20
@@ -284,6 +287,20 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if batch := message.GetUnknownUsageBatch(); batch != nil {
+				if a.Metering == nil {
+					return errors.New("usage authority unavailable")
+				}
+				ack, e := a.Metering.IngestWireUnknown(stream.Context(), id, first.BootId, message.Sequence, batch)
+				if e != nil {
+					return e
+				}
+				sequence++
+				if e = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_UnknownUsageAck{UnknownUsageAck: &controlv1.UnknownUsageAcknowledgement{BatchId: ack.BatchID, PayloadSha256: ack.Digest}}}); e != nil {
+					return e
+				}
+				continue
+			}
 			if batch := message.GetUsageBatch(); batch != nil {
 				if a.Metering == nil {
 					return errors.New("usage authority unavailable")
@@ -372,12 +389,13 @@ func ServerTLS(certPath, keyPath, caPath string) (*tls.Config, error) {
 	return &tls.Config{MinVersion: tls.VersionTLS13, MaxVersion: tls.VersionTLS13, Certificates: []tls.Certificate{cert}, ClientCAs: roots, ClientAuth: tls.RequireAndVerifyClientCert, SessionTicketsDisabled: true}, nil
 }
 
-// HubAdapter proves only the existing authenticated liveness/status boundary.
+// HubAdapter persists authenticated status and negotiated usage observations.
 // It cannot allocate funds or open a signer; plan 06-06 supplies that policy.
 type HubAdapter struct {
 	controlv1.UnimplementedHubControlServer
 	BackendID, HubID, Region string
 	Observe                  func(context.Context, string, string, []byte) error
+	Metering                 *service.MeteringService
 }
 
 func (h *HubAdapter) Connect(stream grpc.BidiStreamingServer[controlv1.HubMessage, controlv1.BackendMessage]) error {
@@ -399,7 +417,8 @@ func (h *HubAdapter) Connect(stream grpc.BidiStreamingServer[controlv1.HubMessag
 	if _, err = uuid.Parse(body.SessionId); err != nil {
 		return err
 	}
-	if len(body.Capabilities) != 1 || body.Capabilities[0] != "status-v1" {
+	usageCapable := len(body.Capabilities) == 2 && body.Capabilities[0] == "status-v1" && body.Capabilities[1] == "usage-ledger-v1"
+	if (len(body.Capabilities) != 1 || body.Capabilities[0] != "status-v1") && !usageCapable {
 		return errors.New("unsupported Hub capability")
 	}
 	now := time.Now().UTC()
@@ -425,6 +444,72 @@ func (h *HubAdapter) Connect(stream grpc.BidiStreamingServer[controlv1.HubMessag
 	if err = h.Observe(stream.Context(), id, body.SessionId, raw); err != nil {
 		return err
 	}
-	<-stream.Context().Done()
-	return stream.Context().Err()
+	if !usageCapable {
+		<-stream.Context().Done()
+		return stream.Context().Err()
+	}
+	if h.Metering == nil {
+		return errors.New("Hub usage authority unavailable")
+	}
+	last := reply.Sequence
+	for {
+		message, e := stream.Recv()
+		if e != nil {
+			return e
+		}
+		record := message.GetLedgerRecord()
+		if message.HubId != id || message.BootId != hello.BootId || message.Sequence <= last || record == nil || record.Kind != "usage-v1" || record.RecordId == "" || !bytes.Equal(sha256Bytes(record.Payload), record.PayloadSha256) {
+			return errors.New("Hub usage envelope identity/digest mismatch")
+		}
+		last = message.Sequence
+		var envelope hub.UsageEnvelope
+		decoder := json.NewDecoder(bytes.NewReader(record.Payload))
+		decoder.DisallowUnknownFields()
+		if e = decoder.Decode(&envelope); e != nil {
+			return e
+		}
+		var trailing any
+		if decoder.Decode(&trailing) != io.EOF {
+			return errors.New("trailing usage envelope")
+		}
+		if envelope.Version != 1 || envelope.BatchID != record.RecordId || envelope.Sequence != record.LedgerSequence || !bytes.Equal(sha256Bytes(envelope.Payload), envelope.Digest) {
+			return errors.New("original usage envelope mismatch")
+		}
+		owner, e := generated.New(h.Metering.Pool).UsageNodeHub(stream.Context(), envelope.NodeID)
+		if e != nil || owner != id {
+			return errors.New("Hub cannot report another Hub node")
+		}
+		if envelope.Kind == "known" {
+			if envelope.OriginBootID != envelope.ReportBootID {
+				return errors.New("known usage origin boot mismatch")
+			}
+			batch := new(controlv1.UsageBatch)
+			if e = proto.Unmarshal(envelope.Payload, batch); e != nil {
+				return e
+			}
+			if batch.BatchId != envelope.BatchID {
+				return errors.New("known usage batch mismatch")
+			}
+			if _, e = h.Metering.IngestWireUsage(stream.Context(), envelope.NodeID, envelope.ReportBootID, envelope.Sequence, batch); e != nil {
+				return e
+			}
+		} else if envelope.Kind == "unknown" {
+			batch := new(controlv1.UnknownUsageBatch)
+			if e = proto.Unmarshal(envelope.Payload, batch); e != nil {
+				return e
+			}
+			if batch.BatchId != envelope.BatchID || batch.OriginBootId != envelope.OriginBootID {
+				return errors.New("unknown usage origin mismatch")
+			}
+			if _, e = h.Metering.IngestWireUnknown(stream.Context(), envelope.NodeID, envelope.ReportBootID, envelope.Sequence, batch); e != nil {
+				return e
+			}
+		} else {
+			return errors.New("unsupported Hub usage kind")
+		}
+		sequence := message.Sequence
+		if e = stream.Send(&controlv1.BackendMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.BackendMessage_LedgerAck{LedgerAck: &controlv1.LedgerAcknowledgement{RecordId: record.RecordId, LedgerSequence: record.LedgerSequence, Kind: record.Kind, PayloadSha256: record.PayloadSha256}}}); e != nil {
+			return e
+		}
+	}
 }

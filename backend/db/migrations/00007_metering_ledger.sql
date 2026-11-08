@@ -6,6 +6,10 @@ ALTER TABLE billing_snapshots ADD COLUMN announced_at timestamptz;
 ALTER TABLE billing_snapshots ADD COLUMN synchronized_at timestamptz;
 ALTER TABLE billing_snapshots ADD CHECK(valid_from<valid_until);
 ALTER TABLE billing_snapshots ADD CHECK(announced_at IS NULL OR (synchronized_at IS NOT NULL AND synchronized_at>=announced_at AND valid_from>=synchronized_at+interval '24 hours'));
+-- +goose StatementBegin
+CREATE FUNCTION billing_vector_coefficient(vector jsonb) RETURNS bigint LANGUAGE SQL IMMUTABLE AS $$ SELECT coalesce(sum((g->>'multiplier_milli')::bigint),0)::bigint FROM jsonb_array_elements(vector) g $$;
+-- +goose StatementEnd
+ALTER TABLE billing_snapshots ADD CHECK(multiplier_milli=billing_vector_coefficient(path_versions));
 ALTER TABLE billing_snapshots DROP CONSTRAINT billing_snapshots_tenant_id_rule_id_rule_revision_path_gene_key;
 ALTER TABLE billing_snapshots ADD UNIQUE(tenant_id,rule_id,rule_revision,path_generation,package_snapshot_id,version);
 CREATE TABLE source_ledgers (
@@ -115,8 +119,40 @@ CREATE TABLE usage_batches (
  FOREIGN KEY(tenant_id,billing_snapshot_id) REFERENCES billing_snapshots(tenant_id,id)
 );
 CREATE TRIGGER usage_batches_immutable BEFORE UPDATE OR DELETE ON usage_batches FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE usage_conflicts (
+ node_id text NOT NULL, boot_id text NOT NULL, sequence bigint NOT NULL, observed_digest bytea NOT NULL,
+ tenant_id text NOT NULL REFERENCES tenants(id), evidence jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(node_id,boot_id,sequence,observed_digest),
+ FOREIGN KEY(node_id,boot_id,sequence) REFERENCES usage_batches(node_id,boot_id,sequence)
+);
+CREATE TRIGGER usage_conflicts_immutable BEFORE UPDATE OR DELETE ON usage_conflicts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 ALTER TABLE settlements ADD COLUMN charged_delta bigint NOT NULL DEFAULT 0 CHECK(charged_delta>=0);
 ALTER TABLE settlements ADD COLUMN released_bill bigint NOT NULL DEFAULT 0 CHECK(released_bill>=0);
+CREATE TABLE risk_budget_funding (
+ id text PRIMARY KEY, amount bigint NOT NULL CHECK(amount>0), backing_reference text NOT NULL UNIQUE,
+ approved_by text NOT NULL, approval_evidence jsonb NOT NULL, valid_until timestamptz NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TRIGGER risk_budget_funding_immutable BEFORE UPDATE OR DELETE ON risk_budget_funding FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE risk_budget_debits (
+ budget_id text NOT NULL REFERENCES risk_budget_funding(id), tenant_id text NOT NULL, grant_id text NOT NULL,
+ amount bigint NOT NULL CHECK(amount>0), compensation_source_id text NOT NULL, evidence jsonb NOT NULL,
+ PRIMARY KEY(tenant_id,grant_id), FOREIGN KEY(tenant_id,grant_id) REFERENCES reservations(tenant_id,id),
+ FOREIGN KEY(tenant_id,compensation_source_id) REFERENCES traffic_sources(tenant_id,id)
+);
+CREATE TRIGGER risk_budget_debits_immutable BEFORE UPDATE OR DELETE ON risk_budget_debits FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE risk_budget_recoveries (
+ tenant_id text NOT NULL, grant_id text NOT NULL, amount bigint NOT NULL CHECK(amount>=0), evidence jsonb NOT NULL,
+ PRIMARY KEY(tenant_id,grant_id), FOREIGN KEY(tenant_id,grant_id) REFERENCES risk_budget_debits(tenant_id,grant_id)
+);
+CREATE TRIGGER risk_budget_recoveries_immutable BEFORE UPDATE OR DELETE ON risk_budget_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE usage_reconciliation_jobs (
+ tenant_id text NOT NULL, grant_id text NOT NULL, task_id text NOT NULL, attempts integer NOT NULL DEFAULT 0,
+ next_attempt timestamptz NOT NULL, alerted_at timestamptz, PRIMARY KEY(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,grant_id) REFERENCES reservations(tenant_id,id), FOREIGN KEY(tenant_id,task_id) REFERENCES tasks(tenant_id,id)
+);
+ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
+ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query','package_due','usage_reconcile'));
 -- +goose Down
 -- +goose StatementBegin
 DO $$ BEGIN RAISE EXCEPTION '00007 immutable accounting is forward-only'; END $$;

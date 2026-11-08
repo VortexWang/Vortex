@@ -166,8 +166,8 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	defer server.Stop()
 	defer hubServer.Stop()
 	controlv1.RegisterNodeControlServer(server, adapter)
-	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe})
-	failures := make(chan error, 7)
+	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe, Metering: adapter.Metering})
+	failures := make(chan error, 8)
 	go func() { failures <- server.Serve(nodes) }()
 	go func() { failures <- hubServer.Serve(hubs) }()
 	go func() { failures <- (&worker.Worker{Pool: pool, Adapter: adapter}).Run(ctx) }()
@@ -181,6 +181,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 		failures <- fmt.Errorf("port release worker: %w", (worker.PortWorker{Pool: pool, Adapter: adapter}).Run(ctx))
 	}()
 	go func() { failures <- fmt.Errorf("package due worker: %w", (worker.PackageWorker{Pool: pool}).Run(ctx)) }()
+	go func() {
+		failures <- fmt.Errorf("usage reconciliation worker: %w", (worker.UsageReconciliationWorker{Pool: pool}).Run(ctx))
+	}()
 	fmt.Printf("backend ready node=%s hub=%s\n", nodes.Addr(), hubs.Addr())
 	select {
 	case <-parent.Done():

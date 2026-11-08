@@ -87,6 +87,40 @@ func (q *Queries) AppendPolicyBoundary(ctx context.Context, arg AppendPolicyBoun
 	return err
 }
 
+const dueSourceLedgerExpiry = `-- name: DueSourceLedgerExpiry :many
+SELECT s.id, s.tenant_id, s.snapshot_id, s.subscription_id, s.kind, s.initial_amount, s.issued_at, s.expires_at, s.period_key FROM traffic_sources s JOIN source_ledgers l ON l.tenant_id=s.tenant_id AND l.source_id=s.id WHERE (greatest(s.expires_at,coalesce((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id),s.expires_at))<=$1 OR EXISTS(SELECT 1 FROM source_expirations e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id AND e.effective_at<=$1)) AND NOT EXISTS(SELECT 1 FROM ledger_events e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id AND e.event_key='expiry') ORDER BY s.expires_at,s.id LIMIT 32
+`
+
+func (q *Queries) DueSourceLedgerExpiry(ctx context.Context, atTime pgtype.Timestamptz) ([]TrafficSource, error) {
+	rows, err := q.db.Query(ctx, dueSourceLedgerExpiry, atTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrafficSource{}
+	for rows.Next() {
+		var i TrafficSource
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.SnapshotID,
+			&i.SubscriptionID,
+			&i.Kind,
+			&i.InitialAmount,
+			&i.IssuedAt,
+			&i.ExpiresAt,
+			&i.PeriodKey,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const ensureLedgerProjection = `-- name: EnsureLedgerProjection :exec
 INSERT INTO ledger_projections(tenant_id,source_id) VALUES($1,$2) ON CONFLICT DO NOTHING
 `
@@ -444,4 +478,38 @@ func (q *Queries) SnapshotEffectiveUntil(ctx context.Context, arg SnapshotEffect
 	var valid_until pgtype.Timestamptz
 	err := row.Scan(&valid_until)
 	return valid_until, err
+}
+
+const uninitializedLedgerSources = `-- name: UninitializedLedgerSources :many
+SELECT s.id, s.tenant_id, s.snapshot_id, s.subscription_id, s.kind, s.initial_amount, s.issued_at, s.expires_at, s.period_key FROM traffic_sources s WHERE NOT EXISTS(SELECT 1 FROM source_ledgers l WHERE l.tenant_id=s.tenant_id AND l.source_id=s.id) ORDER BY s.issued_at,s.id LIMIT 32
+`
+
+func (q *Queries) UninitializedLedgerSources(ctx context.Context) ([]TrafficSource, error) {
+	rows, err := q.db.Query(ctx, uninitializedLedgerSources)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrafficSource{}
+	for rows.Next() {
+		var i TrafficSource
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.SnapshotID,
+			&i.SubscriptionID,
+			&i.Kind,
+			&i.InitialAmount,
+			&i.IssuedAt,
+			&i.ExpiresAt,
+			&i.PeriodKey,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

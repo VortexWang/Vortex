@@ -178,3 +178,29 @@ func (s LedgerService) RebuildCache(ctx context.Context, scope TenantScope, addr
 	_, e = CacheCommand(ctx, address, "SET", "vortex:source-balances:"+scope.TenantID(), string(raw))
 	return raw, e
 }
+
+func (s LedgerService) ProcessSourceLedgerLifecycle(ctx context.Context, at time.Time) (bool, error) {
+	rows, e := generated.New(s.Pool).UninitializedLedgerSources(ctx)
+	if e != nil {
+		return false, e
+	}
+	expiry := false
+	if len(rows) == 0 {
+		rows, e = generated.New(s.Pool).DueSourceLedgerExpiry(ctx, timestamp(at))
+		expiry = true
+	}
+	if e != nil || len(rows) == 0 {
+		return false, e
+	}
+	row := rows[0]
+	scope, e := NewTenantScope(uuid.NewSHA1(uuid.NameSpaceOID, []byte("vortex/source-ledger/"+row.TenantID)).String(), row.TenantID, row.TenantID)
+	if e != nil {
+		return false, e
+	}
+	if expiry {
+		e = s.ExpireSource(ctx, scope, row.ID, uuid.NewString(), at)
+	} else {
+		e = s.InitializeSource(ctx, scope, row.ID, uuid.NewString())
+	}
+	return e == nil, e
+}

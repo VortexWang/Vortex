@@ -406,6 +406,32 @@ type RestrictionEvent struct {
 	ResourceID    pgtype.Text
 }
 
+type RiskBudgetDebit struct {
+	BudgetID             string
+	TenantID             string
+	GrantID              string
+	Amount               int64
+	CompensationSourceID string
+	Evidence             []byte
+}
+
+type RiskBudgetFunding struct {
+	ID               string
+	Amount           int64
+	BackingReference string
+	ApprovedBy       string
+	ApprovalEvidence []byte
+	ValidUntil       pgtype.Timestamptz
+	CreatedAt        pgtype.Timestamptz
+}
+
+type RiskBudgetRecovery struct {
+	TenantID string
+	GrantID  string
+	Amount   int64
+	Evidence []byte
+}
+
 type RuleArtifact struct {
 	TenantID          string
 	RuleID            string
@@ -643,6 +669,25 @@ type UsageBatch struct {
 	Acknowledgement   []byte
 	Facts             []byte
 	CreatedAt         pgtype.Timestamptz
+}
+
+type UsageConflict struct {
+	NodeID         string
+	BootID         string
+	Sequence       int64
+	ObservedDigest []byte
+	TenantID       string
+	Evidence       []byte
+	CreatedAt      pgtype.Timestamptz
+}
+
+type UsageReconciliationJob struct {
+	TenantID    string
+	GrantID     string
+	TaskID      string
+	Attempts    int32
+	NextAttempt pgtype.Timestamptz
+	AlertedAt   pgtype.Timestamptz
 }
 
 type User struct {

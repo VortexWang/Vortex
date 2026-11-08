@@ -36,7 +36,9 @@ func TestLedgerSourceAuthoritySchema(t *testing.T) {
 func ledgerFixture(t *testing.T) (*portFixture, string, string) {
 	t.Helper()
 	f := newPortFixtureKind(t, true)
-	subscribePackage(t, f, createPackage(t, f, packageTerms()))
+	terms := packageTerms()
+	terms.TrafficReset = "none"
+	subscribePackage(t, f, createPackage(t, f, terms))
 	in := ruleInput(f.group)
 	reserveRulePort(t, f, in)
 	if _, e := (service.RuleService{Pool: f.pool}).Mutate(context.Background(), f.scope, in, 0, uuid.NewString()); e != nil {

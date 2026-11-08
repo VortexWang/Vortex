@@ -11,8 +11,37 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const appendUnknownLiability = `-- name: AppendUnknownLiability :exec
+INSERT INTO unknown_liabilities(tenant_id,grant_id,billing_snapshot_id,confirmed_raw,unknown_raw,unknown_bill,evidence,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+`
+
+type AppendUnknownLiabilityParams struct {
+	TenantID          string
+	GrantID           string
+	BillingSnapshotID string
+	ConfirmedRaw      int64
+	UnknownRaw        int64
+	UnknownBill       int64
+	Evidence          []byte
+	CreatedAt         pgtype.Timestamptz
+}
+
+func (q *Queries) AppendUnknownLiability(ctx context.Context, arg AppendUnknownLiabilityParams) error {
+	_, err := q.db.Exec(ctx, appendUnknownLiability,
+		arg.TenantID,
+		arg.GrantID,
+		arg.BillingSnapshotID,
+		arg.ConfirmedRaw,
+		arg.UnknownRaw,
+		arg.UnknownBill,
+		arg.Evidence,
+		arg.CreatedAt,
+	)
+	return err
+}
+
 const appendUsageBatch = `-- name: AppendUsageBatch :exec
-INSERT INTO usage_batches(tenant_id,node_id,boot_id,sequence,batch_id,billing_snapshot_id,payload_sha256,payload,raw_cumulative,billable_numerator,acknowledgement,facts) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+INSERT INTO usage_batches(tenant_id,node_id,boot_id,sequence,batch_id,billing_snapshot_id,payload_sha256,payload,raw_cumulative,billable_numerator,acknowledgement,facts,unknown_upper_bound) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 `
 
 type AppendUsageBatchParams struct {
@@ -28,6 +57,7 @@ type AppendUsageBatchParams struct {
 	BillableNumerator pgtype.Numeric
 	Acknowledgement   []byte
 	Facts             []byte
+	UnknownUpperBound pgtype.Numeric
 }
 
 func (q *Queries) AppendUsageBatch(ctx context.Context, arg AppendUsageBatchParams) error {
@@ -44,6 +74,32 @@ func (q *Queries) AppendUsageBatch(ctx context.Context, arg AppendUsageBatchPara
 		arg.BillableNumerator,
 		arg.Acknowledgement,
 		arg.Facts,
+		arg.UnknownUpperBound,
+	)
+	return err
+}
+
+const appendUsageConflict = `-- name: AppendUsageConflict :exec
+INSERT INTO usage_conflicts(node_id,boot_id,sequence,observed_digest,tenant_id,evidence) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING
+`
+
+type AppendUsageConflictParams struct {
+	NodeID         string
+	BootID         string
+	Sequence       int64
+	ObservedDigest []byte
+	TenantID       string
+	Evidence       []byte
+}
+
+func (q *Queries) AppendUsageConflict(ctx context.Context, arg AppendUsageConflictParams) error {
+	_, err := q.db.Exec(ctx, appendUsageConflict,
+		arg.NodeID,
+		arg.BootID,
+		arg.Sequence,
+		arg.ObservedDigest,
+		arg.TenantID,
+		arg.Evidence,
 	)
 	return err
 }
@@ -71,6 +127,27 @@ func (q *Queries) AppendUsageDispute(ctx context.Context, arg AppendUsageDispute
 		arg.EvidenceSha256,
 		arg.Reason,
 		arg.Evidence,
+	)
+	return err
+}
+
+const appendUsageReconciliationJob = `-- name: AppendUsageReconciliationJob :exec
+INSERT INTO usage_reconciliation_jobs(tenant_id,grant_id,task_id,next_attempt) VALUES($1,$2,$3,$4)
+`
+
+type AppendUsageReconciliationJobParams struct {
+	TenantID    string
+	GrantID     string
+	TaskID      string
+	NextAttempt pgtype.Timestamptz
+}
+
+func (q *Queries) AppendUsageReconciliationJob(ctx context.Context, arg AppendUsageReconciliationJobParams) error {
+	_, err := q.db.Exec(ctx, appendUsageReconciliationJob,
+		arg.TenantID,
+		arg.GrantID,
+		arg.TaskID,
+		arg.NextAttempt,
 	)
 	return err
 }
@@ -160,6 +237,122 @@ func (q *Queries) AppendUsageSettlement(ctx context.Context, arg AppendUsageSett
 	return err
 }
 
+const backoffUsageReconciliation = `-- name: BackoffUsageReconciliation :exec
+UPDATE usage_reconciliation_jobs SET attempts=least(attempts+1,32),next_attempt=$3,alerted_at=CASE WHEN $4::boolean THEN coalesce(alerted_at,$5::timestamptz) ELSE alerted_at END WHERE tenant_id=$1 AND grant_id=$2
+`
+
+type BackoffUsageReconciliationParams struct {
+	TenantID    string
+	GrantID     string
+	NextAttempt pgtype.Timestamptz
+	Column4     bool
+	Column5     pgtype.Timestamptz
+}
+
+func (q *Queries) BackoffUsageReconciliation(ctx context.Context, arg BackoffUsageReconciliationParams) error {
+	_, err := q.db.Exec(ctx, backoffUsageReconciliation,
+		arg.TenantID,
+		arg.GrantID,
+		arg.NextAttempt,
+		arg.Column4,
+		arg.Column5,
+	)
+	return err
+}
+
+const debitRiskBudget = `-- name: DebitRiskBudget :exec
+INSERT INTO risk_budget_debits(budget_id,tenant_id,grant_id,amount,compensation_source_id,evidence) VALUES($1,$2,$3,$4,$5,$6)
+`
+
+type DebitRiskBudgetParams struct {
+	BudgetID             string
+	TenantID             string
+	GrantID              string
+	Amount               int64
+	CompensationSourceID string
+	Evidence             []byte
+}
+
+func (q *Queries) DebitRiskBudget(ctx context.Context, arg DebitRiskBudgetParams) error {
+	_, err := q.db.Exec(ctx, debitRiskBudget,
+		arg.BudgetID,
+		arg.TenantID,
+		arg.GrantID,
+		arg.Amount,
+		arg.CompensationSourceID,
+		arg.Evidence,
+	)
+	return err
+}
+
+const dueUsageReconciliation = `-- name: DueUsageReconciliation :many
+SELECT j.tenant_id, j.grant_id, j.task_id, j.attempts, j.next_attempt, j.alerted_at FROM usage_reconciliation_jobs j JOIN tasks t ON t.tenant_id=j.tenant_id AND t.id=j.task_id WHERE j.next_attempt<=$1 AND t.state='pending' ORDER BY j.next_attempt,j.grant_id LIMIT 32
+`
+
+func (q *Queries) DueUsageReconciliation(ctx context.Context, nextAttempt pgtype.Timestamptz) ([]UsageReconciliationJob, error) {
+	rows, err := q.db.Query(ctx, dueUsageReconciliation, nextAttempt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UsageReconciliationJob{}
+	for rows.Next() {
+		var i UsageReconciliationJob
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.GrantID,
+			&i.TaskID,
+			&i.Attempts,
+			&i.NextAttempt,
+			&i.AlertedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const expiredUsageReservations = `-- name: ExpiredUsageReservations :many
+SELECT r.id, r.tenant_id, r.source_id, r.billing_snapshot_id, r.node_id, r.boot_id, r.request_nonce, r.raw_granted, r.coefficient_milli, r.reserved_bill, r.valid_until, r.created_at FROM reservations r WHERE r.valid_until<=$1 AND NOT EXISTS(SELECT 1 FROM unknown_liabilities u WHERE u.tenant_id=r.tenant_id AND u.grant_id=r.id) AND NOT EXISTS(SELECT 1 FROM settlements s WHERE s.tenant_id=r.tenant_id AND s.grant_id=r.id AND s.kind IN ('final','conservative')) ORDER BY r.valid_until,r.id LIMIT 32
+`
+
+func (q *Queries) ExpiredUsageReservations(ctx context.Context, validUntil pgtype.Timestamptz) ([]Reservation, error) {
+	rows, err := q.db.Query(ctx, expiredUsageReservations, validUntil)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Reservation{}
+	for rows.Next() {
+		var i Reservation
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.SourceID,
+			&i.BillingSnapshotID,
+			&i.NodeID,
+			&i.BootID,
+			&i.RequestNonce,
+			&i.RawGranted,
+			&i.CoefficientMilli,
+			&i.ReservedBill,
+			&i.ValidUntil,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findUsageReservation = `-- name: FindUsageReservation :one
 SELECT id, tenant_id, source_id, billing_snapshot_id, node_id, boot_id, request_nonce, raw_granted, coefficient_milli, reserved_bill, valid_until, created_at FROM reservations WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3 AND request_nonce=$4
 `
@@ -196,6 +389,31 @@ func (q *Queries) FindUsageReservation(ctx context.Context, arg FindUsageReserva
 	return i, err
 }
 
+const fundRiskBudget = `-- name: FundRiskBudget :exec
+INSERT INTO risk_budget_funding(id,amount,backing_reference,approved_by,approval_evidence,valid_until) VALUES($1,$2,$3,$4,$5,$6)
+`
+
+type FundRiskBudgetParams struct {
+	ID               string
+	Amount           int64
+	BackingReference string
+	ApprovedBy       string
+	ApprovalEvidence []byte
+	ValidUntil       pgtype.Timestamptz
+}
+
+func (q *Queries) FundRiskBudget(ctx context.Context, arg FundRiskBudgetParams) error {
+	_, err := q.db.Exec(ctx, fundRiskBudget,
+		arg.ID,
+		arg.Amount,
+		arg.BackingReference,
+		arg.ApprovedBy,
+		arg.ApprovalEvidence,
+		arg.ValidUntil,
+	)
+	return err
+}
+
 const getSettlementReceipt = `-- name: GetSettlementReceipt :one
 SELECT tenant_id, grant_id, billing_snapshot_id, kind, receipt_key, raw_cumulative, returned_raw, billable_numerator, evidence, created_at, charged_delta, released_bill FROM settlements WHERE tenant_id=$1 AND grant_id=$2 AND receipt_key=$3
 `
@@ -222,6 +440,31 @@ func (q *Queries) GetSettlementReceipt(ctx context.Context, arg GetSettlementRec
 		&i.CreatedAt,
 		&i.ChargedDelta,
 		&i.ReleasedBill,
+	)
+	return i, err
+}
+
+const getUnknownLiability = `-- name: GetUnknownLiability :one
+SELECT tenant_id, grant_id, billing_snapshot_id, confirmed_raw, unknown_raw, unknown_bill, evidence, created_at FROM unknown_liabilities WHERE tenant_id=$1 AND grant_id=$2
+`
+
+type GetUnknownLiabilityParams struct {
+	TenantID string
+	GrantID  string
+}
+
+func (q *Queries) GetUnknownLiability(ctx context.Context, arg GetUnknownLiabilityParams) (UnknownLiability, error) {
+	row := q.db.QueryRow(ctx, getUnknownLiability, arg.TenantID, arg.GrantID)
+	var i UnknownLiability
+	err := row.Scan(
+		&i.TenantID,
+		&i.GrantID,
+		&i.BillingSnapshotID,
+		&i.ConfirmedRaw,
+		&i.UnknownRaw,
+		&i.UnknownBill,
+		&i.Evidence,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -321,12 +564,98 @@ func (q *Queries) GetUsageTuple(ctx context.Context, arg GetUsageTupleParams) (U
 	return i, err
 }
 
+const grantRiskDebit = `-- name: GrantRiskDebit :one
+SELECT budget_id, tenant_id, grant_id, amount, compensation_source_id, evidence FROM risk_budget_debits WHERE tenant_id=$1 AND grant_id=$2
+`
+
+type GrantRiskDebitParams struct {
+	TenantID string
+	GrantID  string
+}
+
+func (q *Queries) GrantRiskDebit(ctx context.Context, arg GrantRiskDebitParams) (RiskBudgetDebit, error) {
+	row := q.db.QueryRow(ctx, grantRiskDebit, arg.TenantID, arg.GrantID)
+	var i RiskBudgetDebit
+	err := row.Scan(
+		&i.BudgetID,
+		&i.TenantID,
+		&i.GrantID,
+		&i.Amount,
+		&i.CompensationSourceID,
+		&i.Evidence,
+	)
+	return i, err
+}
+
+const lockRiskBudget = `-- name: LockRiskBudget :one
+SELECT id, amount, backing_reference, approved_by, approval_evidence, valid_until, created_at FROM risk_budget_funding WHERE id=$1 FOR UPDATE
+`
+
+func (q *Queries) LockRiskBudget(ctx context.Context, id string) (RiskBudgetFunding, error) {
+	row := q.db.QueryRow(ctx, lockRiskBudget, id)
+	var i RiskBudgetFunding
+	err := row.Scan(
+		&i.ID,
+		&i.Amount,
+		&i.BackingReference,
+		&i.ApprovedBy,
+		&i.ApprovalEvidence,
+		&i.ValidUntil,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const lockUsageReconciliation = `-- name: LockUsageReconciliation :one
+SELECT tenant_id, grant_id, task_id, attempts, next_attempt, alerted_at FROM usage_reconciliation_jobs WHERE tenant_id=$1 AND grant_id=$2 FOR UPDATE
+`
+
+type LockUsageReconciliationParams struct {
+	TenantID string
+	GrantID  string
+}
+
+func (q *Queries) LockUsageReconciliation(ctx context.Context, arg LockUsageReconciliationParams) (UsageReconciliationJob, error) {
+	row := q.db.QueryRow(ctx, lockUsageReconciliation, arg.TenantID, arg.GrantID)
+	var i UsageReconciliationJob
+	err := row.Scan(
+		&i.TenantID,
+		&i.GrantID,
+		&i.TaskID,
+		&i.Attempts,
+		&i.NextAttempt,
+		&i.AlertedAt,
+	)
+	return i, err
+}
+
 const lockUsageTuple = `-- name: LockUsageTuple :exec
 SELECT pg_advisory_xact_lock(hashtextextended($1::text,0))
 `
 
 func (q *Queries) LockUsageTuple(ctx context.Context, tupleKey string) error {
 	_, err := q.db.Exec(ctx, lockUsageTuple, tupleKey)
+	return err
+}
+
+const recoverRiskBudget = `-- name: RecoverRiskBudget :exec
+INSERT INTO risk_budget_recoveries(tenant_id,grant_id,amount,evidence) VALUES($1,$2,$3,$4)
+`
+
+type RecoverRiskBudgetParams struct {
+	TenantID string
+	GrantID  string
+	Amount   int64
+	Evidence []byte
+}
+
+func (q *Queries) RecoverRiskBudget(ctx context.Context, arg RecoverRiskBudgetParams) error {
+	_, err := q.db.Exec(ctx, recoverRiskBudget,
+		arg.TenantID,
+		arg.GrantID,
+		arg.Amount,
+		arg.Evidence,
+	)
 	return err
 }
 
@@ -358,6 +687,44 @@ func (q *Queries) ReservationAccounting(ctx context.Context, arg ReservationAcco
 		&i.Terminal,
 	)
 	return i, err
+}
+
+const riskBudgetUsed = `-- name: RiskBudgetUsed :one
+SELECT coalesce(sum(amount),0)::bigint AS used FROM risk_budget_debits WHERE budget_id=$1
+`
+
+func (q *Queries) RiskBudgetUsed(ctx context.Context, budgetID string) (int64, error) {
+	row := q.db.QueryRow(ctx, riskBudgetUsed, budgetID)
+	var used int64
+	err := row.Scan(&used)
+	return used, err
+}
+
+const usageGroupMember = `-- name: UsageGroupMember :one
+SELECT EXISTS(SELECT 1 FROM node_group_members WHERE group_id=$1 AND node_id=$2)
+`
+
+type UsageGroupMemberParams struct {
+	GroupID string
+	NodeID  string
+}
+
+func (q *Queries) UsageGroupMember(ctx context.Context, arg UsageGroupMemberParams) (bool, error) {
+	row := q.db.QueryRow(ctx, usageGroupMember, arg.GroupID, arg.NodeID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const usageNodeHub = `-- name: UsageNodeHub :one
+SELECT hub_id FROM nodes WHERE id=$1 AND lifecycle<>'disabled'
+`
+
+func (q *Queries) UsageNodeHub(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRow(ctx, usageNodeHub, id)
+	var hub_id string
+	err := row.Scan(&hub_id)
+	return hub_id, err
 }
 
 const wireBillingSnapshot = `-- name: WireBillingSnapshot :one

@@ -39,3 +39,9 @@ INSERT INTO billing_policy_boundaries(tenant_id,old_snapshot_id,new_snapshot_id,
 
 -- name: SnapshotEffectiveUntil :one
 SELECT least(b.valid_until,coalesce((SELECT p.boundary_at FROM billing_policy_boundaries p WHERE p.tenant_id=b.tenant_id AND p.old_snapshot_id=b.id),'infinity'::timestamptz))::timestamptz AS valid_until FROM billing_snapshots b WHERE b.tenant_id=$1 AND b.id=$2;
+
+-- name: UninitializedLedgerSources :many
+SELECT s.* FROM traffic_sources s WHERE NOT EXISTS(SELECT 1 FROM source_ledgers l WHERE l.tenant_id=s.tenant_id AND l.source_id=s.id) ORDER BY s.issued_at,s.id LIMIT 32;
+
+-- name: DueSourceLedgerExpiry :many
+SELECT s.* FROM traffic_sources s JOIN source_ledgers l ON l.tenant_id=s.tenant_id AND l.source_id=s.id WHERE (greatest(s.expires_at,coalesce((SELECT max(e.expires_at) FROM source_extensions e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id),s.expires_at))<=sqlc.arg(at_time) OR EXISTS(SELECT 1 FROM source_expirations e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id AND e.effective_at<=sqlc.arg(at_time))) AND NOT EXISTS(SELECT 1 FROM ledger_events e WHERE e.tenant_id=s.tenant_id AND e.source_id=s.id AND e.event_key='expiry') ORDER BY s.expires_at,s.id LIMIT 32;
