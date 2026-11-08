@@ -69,6 +69,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured.GET("/tenants/:tenant_id/events", a.streamEvents)
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.PATCH("/tenants/:tenant_id/nodes/:node_id", a.transitionNode)
+	secured.PUT("/tenants/:tenant_id/packages/:package_id", a.putPackageCatalog)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)
 	return r, nil

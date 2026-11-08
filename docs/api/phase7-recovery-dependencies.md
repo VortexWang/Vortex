@@ -26,6 +26,8 @@
 
 公开 operation 的 resource_id 和 target_revision 映射到原业务资源与版本；领域任务用于隔离运行配置的内部身份不用于此关联。先读取 operation 再刷新对应资源；SSE 摘要仅提示重取，不能用其任务上下文覆盖业务状态。
 
+平台管理员可 PUT `/api/v1/tenants/{tenant_id}/packages/{package_id}` 编辑全局目录；所选 tenant 是审计和 operation 的上下文，不转移目录所有权。创建 If-Match 为 `"0"`，编辑为当前目录版本；名称1..128个字符，terms 使用既有套餐业务输入。operator、auditor 和租户用户均不能写目录。返回202、确切 operation_id、新 ETag 和 Location；跨租户并发创建同一个目录仍只接受一次。目录版本与审计、任务、Outbox、事件同事务提交。
+
 套餐目录变化不改写既有订阅快照。套餐预览、确认、权益码和恢复操作的 HTTP 适配仍在本计划待完成范围内；前端不得用目录当前值替换订阅历史值，也不得在无确认或无最终回执时自行补发额度、清除限制或标记已恢复。
 
 ## SSE 与 REST 收敛

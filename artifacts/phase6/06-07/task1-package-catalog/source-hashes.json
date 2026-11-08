@@ -1,0 +1,9 @@
+{
+  "backend/internal/httpapi/router.go": "013442404eda363997ec80bf240b7f285571c3a4da6b48f8a192d018ce4ed21a",
+  "backend/internal/httpapi/package_catalog.go": "00356750a168d043a685f4c1782ff4ce23bdca79414c85ff9c8943b22fae058c",
+  "backend/internal/httpapi/package_catalog_test.go": "989c14d17acdfa251903e1a50c5fab1fc3116fca52b3efbd935ba74684b67d33",
+  "backend/internal/repository/tenant_scope.go": "d59c3cbe08381cd4443ded304f1db9fedb04b9218c1267826de28064dff5477e",
+  "backend/internal/service/package.go": "5a9d3e6cf52a51190069a855b3538b48bd278fb9c2c2a90dfbc24b843cf30c67",
+  "backend/internal/service/package_catalog_operation_test.go": "35b2fb30b710f9d4b928666f51c864fdcd4fe6bfab98ed76df6f173e8e7da747",
+  "docs/api/phase7-recovery-dependencies.md": "56591d371b7a77a61e8c43ddc0220f3638971431c10e334f0db4c0e6729c013d"
+}

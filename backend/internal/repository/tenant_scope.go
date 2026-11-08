@@ -24,6 +24,7 @@ func NewTenantScope(p auth.Principal, tenant string, action policy.Action) (Tena
 }
 func (s TenantScope) TenantID() string { return s.tenant }
 func (s TenantScope) ActorID() string  { return s.principal.ID() }
+func (s TenantScope) Role() auth.Role  { return s.principal.Role() }
 func (s TenantScope) Platform() bool   { return s.principal.Platform() }
 func (s TenantScope) Valid() bool      { return policy.Authorize(s.principal, s.tenant, s.action) == nil }
 func (s TenantScope) Allows(a policy.Action) bool {

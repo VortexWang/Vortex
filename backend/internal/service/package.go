@@ -8,12 +8,14 @@ import (
 	"errors"
 	"sort"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"vortex/backend/db/generated"
+	"vortex/backend/internal/auth"
 	"vortex/backend/internal/policy"
 	"vortex/backend/internal/repository"
 )
@@ -116,40 +118,76 @@ func MonthlyPeriod(anchor, at time.Time) (time.Time, time.Time) {
 	}
 	return nth(n), nth(n + 1)
 }
+
+// NormalizePackageTerms exposes the same pure business input validation used
+// again inside catalog writes; it does not grant authority or write state.
+func NormalizePackageTerms(p PackageTerms) (PackageTerms, error) { return normalizeTerms(p) }
+
+type CatalogMutationResult struct {
+	PackageID, OperationID string
+	Version                int64
+}
+
 func (s PackageService) PutCatalog(ctx context.Context, scope TenantScope, id, name string, expected int64, terms PackageTerms, request string) (generated.PackageVersion, error) {
+	v, _, e := s.putCatalog(ctx, scope, id, name, expected, terms, request)
+	return v, e
+}
+func (s PackageService) PutCatalogWithOperation(ctx context.Context, scope TenantScope, id, name string, expected int64, terms PackageTerms, request string) (CatalogMutationResult, error) {
+	v, op, e := s.putCatalog(ctx, scope, id, name, expected, terms, request)
+	if e != nil {
+		return CatalogMutationResult{}, e
+	}
+	return CatalogMutationResult{PackageID: v.PackageID, OperationID: op, Version: v.Version}, nil
+}
+func (s PackageService) putCatalog(ctx context.Context, scope TenantScope, id, name string, expected int64, terms PackageTerms, request string) (generated.PackageVersion, string, error) {
 	var result generated.PackageVersion
-	if !scope.Platform() || !scope.Allows(policy.Mutate) {
-		return result, ErrScope
+	var operation string
+	if !scope.Platform() || scope.Role() != auth.PlatformAdmin || !scope.Allows(policy.Mutate) {
+		return result, "", ErrScope
 	}
 	terms, e := normalizeTerms(terms)
-	if e != nil || !validID(id) || len(name) == 0 || len(name) > 128 || expected < 0 {
-		return result, ErrConflict
+	if e != nil || !validID(id) || !utf8.ValidString(name) || utf8.RuneCountInString(name) == 0 || utf8.RuneCountInString(name) > 128 || expected < 0 {
+		return result, "", ErrConflict
 	}
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "package.catalog", ResourceID: id, RequestID: request, Reason: "append future-only catalog version", After: auditJSON(terms)}, func(q *generated.Queries) error {
+		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
+			return e
+		}
+		// Covers creation as well as existing heads, across every selected tenant.
+		if e := q.LockPackageRequestKey(ctx, "catalog/"+id); e != nil {
+			return e
+		}
+		old, e := q.LockPackageCatalog(ctx, id)
+		if e != nil && !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
 		if expected == 0 {
-			if e := q.CreatePackageCatalog(ctx, generated.CreatePackageCatalogParams{ID: id, Name: name}); e != nil {
+			if e == nil {
+				return ErrPrecondition
+			}
+			if e = q.CreatePackageCatalog(ctx, generated.CreatePackageCatalogParams{ID: id, Name: name}); e != nil {
 				return e
 			}
 		} else {
-			old, e := q.LockPackageCatalog(ctx, id)
-			if e != nil {
-				return e
-			}
-			if old.CurrentVersion != expected {
-				return ErrConflict
+			if errors.Is(e, pgx.ErrNoRows) || old.CurrentVersion != expected {
+				return ErrPrecondition
 			}
 			if e = q.AdvancePackageCatalog(ctx, generated.AdvancePackageCatalogParams{ID: id, Name: name, Enabled: true}); e != nil {
 				return e
 			}
 		}
-		var e error
 		result, e = q.AppendPackageVersion(ctx, generated.AppendPackageVersionParams{PackageID: id, Version: expected + 1, Terms: auditJSON(terms)})
 		if e != nil {
 			return e
 		}
-		return domainTask(ctx, q, scope, id, "package.catalog.changed", "resource_change", expected+1)
+		op, e := newDomainTask(ctx, q, scope, id, "package.catalog.changed", "resource_change", expected+1)
+		operation = op.ID
+		return e
 	})
-	return result, e
+	if e != nil {
+		return generated.PackageVersion{}, "", e
+	}
+	return result, operation, nil
 }
 func packageSnapshot(ctx context.Context, q *generated.Queries, tenant, pkg string, version int64) (generated.PackageSnapshot, PackageTerms, error) {
 	var p PackageTerms
