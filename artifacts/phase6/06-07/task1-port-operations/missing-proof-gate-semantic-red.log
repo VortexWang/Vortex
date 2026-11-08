@@ -1,0 +1,16 @@
+2026/11/09 07:33:31 goose: no migrations to run. current version: 9
+2026/11/09 07:33:31 OK   00001_authority.sql (26.83ms)
+2026/11/09 07:33:31 OK   00002_tenant_policy.sql (19.14ms)
+2026/11/09 07:33:31 OK   00003_nodes_ports.sql (42.68ms)
+2026/11/09 07:33:31 OK   00004_entry_group_domains.sql (5.49ms)
+2026/11/09 07:33:32 OK   00005_rules_compile.sql (37.74ms)
+2026/11/09 07:33:32 OK   00006_packages_entitlements.sql (48.91ms)
+2026/11/09 07:33:32 OK   00007_metering_ledger.sql (23.56ms)
+2026/11/09 07:33:32 OK   00008_limits_shares.sql (50.4ms)
+2026/11/09 07:33:32 OK   00009_domain_events.sql (39.97ms)
+2026/11/09 07:33:32 goose: successfully migrated database to version: 9
+--- FAIL: TestPortOperationRejectsUnprovenFlagsAndIncompleteInventory (0.57s)
+    port_operation_test.go:245: flags stood in for proof true <nil>
+FAIL
+FAIL	vortex/backend/internal/service	2.191s
+FAIL

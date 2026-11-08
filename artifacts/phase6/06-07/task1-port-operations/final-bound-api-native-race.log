@@ -1,0 +1,5 @@
+ok  	vortex/backend/internal/httpapi	9.276s
+ok  	vortex/backend/internal/auth	3.066s
+ok  	vortex/backend/internal/repository	3.064s
+ok  	vortex/backend/internal/policy	1.236s
+ok  	vortex/backend/cmd/vortex-backend	2.027s

@@ -180,7 +180,52 @@ INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SE
 CREATE TRIGGER ledger_projections_public_order BEFORE INSERT OR UPDATE ON ledger_projections FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('sources','source_id','tenant_id');
 INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'restrictions',jsonb_build_array(cause,source_id)::text,gen_random_uuid()::text FROM current_restrictions;
 CREATE TRIGGER current_restrictions_public_order BEFORE INSERT OR UPDATE ON current_restrictions FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('restrictions','restriction','tenant_id');
+-- Aggregate port operations bind one accepted allocation intent to the exact
+-- frozen reservation count; they never substitute for authenticated receipts.
+CREATE TABLE port_operation_bindings (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, operation_id text NOT NULL,
+ action text NOT NULL CHECK(action='prepare'), allocation_version bigint NOT NULL CHECK(allocation_version>0),
+ actor_id text NOT NULL, expected_reservations integer NOT NULL CHECK(expected_reservations BETWEEN 1 AND 2048),
+ PRIMARY KEY(tenant_id,operation_id), UNIQUE(tenant_id,allocation_id,action,allocation_version),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES port_allocations(tenant_id,id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER port_operation_binding_immutable BEFORE UPDATE OR DELETE ON port_operation_bindings
+ FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE VIEW port_operation_projection AS
+WITH evidence AS (
+ SELECT b.*,a.state AS allocation_state,a.needs_revalidation,o.state AS actual_state,o.occupation_held AS actual_held,
+ count(p.node_id) AS actual_reservations,
+ COALESCE(bool_and(p.config_confirmed AND p.state='confirmed' AND pp.task_id IS NOT NULL),false) AS all_prepared,
+ COALESCE(bool_or(p.state='unknown' OR pt.state='unknown'),false) AS has_unknown,
+ COALESCE(bool_and(p.state='released' AND rp.task_id IS NOT NULL),false) AS all_released
+ FROM port_operation_bindings b
+ JOIN port_allocations a ON a.tenant_id=b.tenant_id AND a.id=b.allocation_id
+ JOIN operations o ON o.tenant_id=b.tenant_id AND o.id=b.operation_id
+ LEFT JOIN port_reservations p ON p.tenant_id=b.tenant_id AND p.allocation_id=b.allocation_id
+ LEFT JOIN tasks pt ON pt.tenant_id=p.tenant_id AND pt.id=p.prepare_task_id
+ LEFT JOIN operations po ON po.tenant_id=pt.tenant_id AND po.id=pt.operation_id
+ LEFT JOIN release_proofs pp ON pp.tenant_id=p.tenant_id AND pp.allocation_id=p.allocation_id
+  AND pp.node_id=p.node_id AND pp.task_id=p.prepare_task_id AND pp.proof_kind='prepare'
+  AND pp.boot_id=p.boot_id AND pp.generation=p.generation AND pp.revision=po.target_revision
+ LEFT JOIN tasks rt ON rt.tenant_id=p.tenant_id AND rt.id=p.release_task_id
+ LEFT JOIN operations ro ON ro.tenant_id=rt.tenant_id AND ro.id=rt.operation_id
+ LEFT JOIN release_proofs rp ON rp.tenant_id=p.tenant_id AND rp.allocation_id=p.allocation_id
+  AND rp.node_id=p.node_id AND rp.task_id=p.release_task_id AND rp.proof_kind='release'
+  AND rp.boot_id=p.boot_id AND rp.generation=p.generation AND rp.revision=ro.target_revision
+ GROUP BY b.tenant_id,b.operation_id,b.allocation_id,b.action,b.allocation_version,b.actor_id,b.expected_reservations,
+ a.state,a.needs_revalidation,o.state,o.occupation_held
+)
+SELECT *,CASE
+ WHEN actual_state IN ('succeeded','failed') THEN actual_state
+ WHEN needs_revalidation OR allocation_state IN ('aborting','releasing','released','aborted') THEN 'failed'
+ WHEN actual_reservations<>expected_reservations OR has_unknown THEN 'unknown'
+ WHEN all_prepared THEN 'succeeded' ELSE 'pending' END::text AS desired_state,
+ NOT(allocation_state IN ('released','aborted') AND actual_reservations=expected_reservations AND all_released)::boolean AS desired_held
+FROM evidence;
 -- +goose Down
+DROP VIEW port_operation_projection;
+DROP TABLE port_operation_bindings;
 DROP TRIGGER tenants_public_order ON tenants;
 DROP TRIGGER nodes_public_order ON nodes;
 DROP TRIGGER node_groups_public_order ON node_groups;

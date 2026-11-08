@@ -34,6 +34,7 @@ type PortRequest struct {
 type PortPreparation struct {
 	generated.PortAllocation
 	EntryAddressMayChange bool
+	OperationID           string `json:"operation_id"`
 }
 type PortConflictError struct{ SuggestedPort int32 }
 
@@ -118,6 +119,7 @@ func activeTenant(ctx context.Context, q *generated.Queries, scope TenantScope) 
 func (s PortService) PreparePortReservation(ctx context.Context, scope TenantScope, in PortRequest, request string) (PortPreparation, error) {
 	var result generated.PortAllocation
 	var reallocated bool
+	var operation string
 	if !validID(in.RuleID) || !validID(in.GroupID) || in.Purpose != "service" || in.Port < 0 || in.Port > 65535 || len(in.Protocols) < 1 || len(in.Protocols) > 2 {
 		return PortPreparation{}, ErrConflict
 	}
@@ -218,12 +220,20 @@ func (s PortService) PreparePortReservation(ctx context.Context, scope TenantSco
 				}
 			}
 		}
+		op, e := newDomainTask(ctx, q, scope, result.ID, "port.prepare.requested", "resource_change", result.Version)
+		if e != nil {
+			return e
+		}
+		if e = q.InsertPortOperationBinding(ctx, generated.InsertPortOperationBindingParams{TenantID: scope.TenantID(), AllocationID: result.ID, OperationID: op.ID, Action: "prepare", AllocationVersion: result.Version, ActorID: scope.ActorID(), ExpectedReservations: int32(len(snap.Members) * len(in.Protocols))}); e != nil {
+			return e
+		}
+		operation = op.ID
 		return nil
 	})
 	if err != nil {
 		return PortPreparation{}, err
 	}
-	return PortPreparation{PortAllocation: result, EntryAddressMayChange: reallocated}, nil
+	return PortPreparation{PortAllocation: result, EntryAddressMayChange: reallocated, OperationID: operation}, nil
 }
 
 // Group-before-allocation locking is shared with membership changes. The

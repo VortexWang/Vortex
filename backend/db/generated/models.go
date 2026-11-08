@@ -660,6 +660,36 @@ type PortAllocation struct {
 	Version           int64
 }
 
+type PortOperationBinding struct {
+	TenantID             string
+	AllocationID         string
+	OperationID          string
+	Action               string
+	AllocationVersion    int64
+	ActorID              string
+	ExpectedReservations int32
+}
+
+type PortOperationProjection struct {
+	TenantID             string
+	AllocationID         string
+	OperationID          string
+	Action               string
+	AllocationVersion    int64
+	ActorID              string
+	ExpectedReservations int32
+	AllocationState      string
+	NeedsRevalidation    bool
+	ActualState          string
+	ActualHeld           bool
+	ActualReservations   int64
+	AllPrepared          interface{}
+	HasUnknown           interface{}
+	AllReleased          interface{}
+	DesiredState         string
+	DesiredHeld          pgtype.Bool
+}
+
 type PortReservation struct {
 	TenantID        string
 	AllocationID    string
