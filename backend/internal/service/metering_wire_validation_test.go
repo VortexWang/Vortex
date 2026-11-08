@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"vortex/backend/db/generated"
@@ -33,5 +34,13 @@ func TestUsageWireRejectsMalformedAndUnfundedSelfHosted(t *testing.T) {
 	p, err := generated.New(f.pool).GetSourceProjection(ctx, generated.GetSourceProjectionParams{TenantID: f.tenant, SourceID: source})
 	if err != nil || p.B != 10000 || p.F != 0 || p.Charged != 0 {
 		t.Fatal("rejected wire changed source authority", err, p)
+	}
+}
+
+func TestUnknownProtectionRejectsFutureStart(t *testing.T) {
+	boundary := time.Date(2026, 11, 8, 0, 0, 0, 0, time.UTC)
+	hi := boundary.Add(5 * time.Second)
+	if state := service.ProtectionState(boundary.Add(-5*time.Second), hi, boundary, hi.Add(time.Second), boundary.Add(time.Hour), true); state != "close" {
+		t.Fatalf("future protection start accepted: %s", state)
 	}
 }
