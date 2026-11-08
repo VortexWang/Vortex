@@ -44,7 +44,8 @@
       "artifacts": [
         "contracts/protobuf/v1/lifecycle.schema.json",
         "contracts/protobuf/v1/lifecycle.md",
-        "contracts/protobuf/v1/identity-profile.json"
+        "contracts/protobuf/v1/identity-profile.json",
+        "contracts/protobuf/v1/share-handoff.schema.json"
       ]
     },
     {

@@ -1922,7 +1922,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-002",
@@ -1930,7 +1937,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-003",
@@ -1938,7 +1952,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-004",
@@ -1946,7 +1967,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-005",
@@ -1954,7 +1982,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-006",
@@ -1962,7 +1997,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-007",
@@ -1970,7 +2012,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-008",
@@ -1978,7 +2027,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-009",
@@ -1986,7 +2042,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-010",
@@ -1994,7 +2057,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "FE-001",

@@ -19,7 +19,7 @@ Contract source baseline: VORTEX V1.11, SHA-256 `95c73f356841da9a41f9d8bd4ada008
 Machine-readable change records (CI authority):
 
 ```json
-{"changes":[{"contract_id":"vortex.authorization.v1","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a","approved_at":"2026-11-06T02:21:16.718444+00:00","summary":"Owner-approved lifecycle capability negotiation, durable renewal/recovery, identity and share/policy boundaries; legacy input behavior retained."},{"contract_id":"vortex.runtime-config","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4","status":"approved","summary":"Owner-approved additive negotiated rule transactions and immutable per-node runtime artifacts; legacy behavior retained.","approved_at":"2026-11-07T09:33:05Z"},{"contract_id":"vortex.database","from":"2.1.0","version":"2.2.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-007 immutable source ledger, idempotent metering and provenance-preserving Hub usage; historical approvals remain immutable."},{"contract_id":"vortex.public-api","from":"2.1.0","version":"2.2.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-007 immutable source ledger, idempotent metering and provenance-preserving Hub usage; historical approvals remain immutable."},{"contract_id":"vortex.control.v1","from":"1.4.0","version":"1.5.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-007 immutable source ledger, idempotent metering and provenance-preserving Hub usage; historical approvals remain immutable."}]}
+{"changes":[{"contract_id":"vortex.authorization.v1","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a","approved_at":"2026-11-06T02:21:16.718444+00:00","summary":"Owner-approved lifecycle capability negotiation, durable renewal/recovery, identity and share/policy boundaries; legacy input behavior retained."},{"contract_id":"vortex.runtime-config","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4","status":"approved","summary":"Owner-approved additive negotiated rule transactions and immutable per-node runtime artifacts; legacy behavior retained.","approved_at":"2026-11-07T09:33:05Z"},{"contract_id":"vortex.database","from":"2.2.0","version":"2.3.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."},{"contract_id":"vortex.public-api","from":"2.2.0","version":"2.3.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."},{"contract_id":"vortex.control.v1","from":"1.5.0","version":"1.6.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."}]}
 ```
 
 ## vortex.control.v1 1.2.0 (2026-11-05)
@@ -111,3 +111,14 @@ metadata and this appended notice differ from candidate bytes. The earlier
 candidate section remains an immutable historical statement. CR-005/006 approval
 history is unchanged. Unknown liabilities require funded proof to close;
 06-06 signer/lease production, 06-07 HTTP and 06-11 paired acceptance remain due.
+
+## Phase 6 limits and funded runtime (06-06 candidate)
+
+CR-008 proposes database/API 2.3.0 and control 1.6.0 as compatible extensions.
+Shares, runtime leases and source-funded credit remain independent rights.
+Renewal/closure, complete inventory, original-source finalization and explicit
+Node/Hub boot recovery require their own durable authenticated proofs. Unknown
+liabilities remain held. Negotiated capabilities isolate new commands/journals;
+existing field numbers and old wire encodings remain unchanged. Runtime,
+authorization and VLink frozen schemas retain their approved bytes/versions.
+No owner approval is implied; HTTP adapters remain06-07, paired acceptance06-11.

@@ -679,7 +679,7 @@ ALTER TABLE tasks DROP CONSTRAINT tasks_task_kind_check;
 ALTER TABLE tasks ADD CONSTRAINT tasks_task_kind_check CHECK(task_kind IN ('control','resource_change','port_prepare','port_release','rule_compile','rule_prepare','rule_commit','rule_abort','rule_query','package_due','usage_reconcile'));
 
 -- One serialized capacity account per tenant is the existing tenants row.
--- A chain never changes boot_id. A new boot requires a separate proved close,
+-- A chain changes boot_id only after a separate authenticated FULL retirement,
 -- not a CAS on an old incarnation; generations and liabilities remain history.
 CREATE TABLE share_chains (
  tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id),
@@ -688,7 +688,8 @@ CREATE TABLE share_chains (
  active_generation bigint NOT NULL DEFAULT 0 CHECK(active_generation>=0),
  pending_generation bigint NOT NULL DEFAULT 0 CHECK(pending_generation>=0),
  held_amount bigint NOT NULL DEFAULT 0 CHECK(held_amount>=0),
- PRIMARY KEY(tenant_id,node_id,kind), CHECK(active_generation<=head_generation), CHECK(pending_generation<=head_generation)
+ retired_generation bigint NOT NULL DEFAULT 0 CHECK(retired_generation>=0),
+ PRIMARY KEY(tenant_id,node_id,kind), CHECK(active_generation<=head_generation), CHECK(pending_generation<=head_generation), CHECK(retired_generation=0 OR (retired_generation=head_generation OR retired_generation=head_generation-1) AND active_generation=0)
 );
 CREATE TABLE node_fencing (
  tenant_id text NOT NULL REFERENCES tenants(id), node_id text NOT NULL REFERENCES nodes(id),
@@ -839,9 +840,9 @@ CREATE INDEX hub_allocation_share_generation ON hub_allocation_share_bindings(te
 CREATE TRIGGER hub_allocation_share_binding_immutable BEFORE UPDATE OR DELETE ON hub_allocation_share_bindings FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 CREATE TABLE hub_issue_receipts (
  tenant_id text NOT NULL, issue_id text NOT NULL, allocation_id text NOT NULL,
- hub_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
+ hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
- PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,ledger_sequence),
+ PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_issue_immutable BEFORE UPDATE OR DELETE ON hub_issue_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
@@ -910,7 +911,180 @@ CREATE TABLE hub_delegation_seals (
  hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
  peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
- PRIMARY KEY(tenant_id,allocation_id), UNIQUE(tenant_id,seal_id), UNIQUE(hub_id,ledger_sequence),
+ PRIMARY KEY(tenant_id,allocation_id), UNIQUE(tenant_id,seal_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_delegation_seal_immutable BEFORE UPDATE OR DELETE ON hub_delegation_seals FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Child close commands derive only from a complete accepted issuer seal.
+CREATE TABLE node_credit_close_commands (
+ tenant_id text NOT NULL, grant_id text NOT NULL, allocation_id text NOT NULL,
+ command_id text NOT NULL UNIQUE, node_id text NOT NULL, boot_id text NOT NULL,
+ backend_id text NOT NULL, operation_id text NOT NULL, payload bytea NOT NULL CHECK(octet_length(payload)<=786432),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,grant_id) REFERENCES hub_credit_grants(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_delegation_seals(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER node_credit_close_command_immutable BEFORE UPDATE OR DELETE ON node_credit_close_commands FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_credit_close_receipts (
+ tenant_id text NOT NULL, grant_id text NOT NULL, payload bytea NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,grant_id) REFERENCES node_credit_close_commands(tenant_id,grant_id)
+);
+CREATE TRIGGER node_credit_close_receipt_immutable BEFORE UPDATE OR DELETE ON node_credit_close_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Lease-only refreshes have a separate immutable journal: no credit grant row
+-- and no contribution to the complete issued-credit inventory.
+CREATE TABLE hub_runtime_lease_receipts (
+ tenant_id text NOT NULL, issue_id text NOT NULL, allocation_id text NOT NULL,
+ hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,issue_id), UNIQUE(hub_id,hub_boot_id,ledger_sequence),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
+);
+CREATE TRIGGER hub_runtime_lease_immutable BEFORE UPDATE OR DELETE ON hub_runtime_lease_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Explicit cold recovery proves expiry of every old hard authority boundary.
+-- It never transfers unissued R, settles credit, clears capacity or rewrites
+-- incarnation history. Platform approval and fixed target boot are immutable.
+CREATE TABLE hub_cold_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL UNIQUE,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch>from_epoch),
+ from_boot_id text NOT NULL, to_boot_id text NOT NULL CHECK(to_boot_id<>from_boot_id),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ created_by text NOT NULL, PRIMARY KEY(hub_id,to_epoch),
+ FOREIGN KEY(hub_id,from_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(hub_id,to_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch)
+);
+CREATE TRIGGER hub_cold_recovery_immutable BEFORE UPDATE OR DELETE ON hub_cold_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Cold Node recovery is an explicit immutable platform decision. Its FULL
+-- receipt migrates only aggregate generation floors; financial occupation and
+-- configuration execution remain independent.
+CREATE TABLE node_boot_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL,
+ node_id text NOT NULL REFERENCES nodes(id), from_boot_id text NOT NULL,
+ to_boot_id text NOT NULL, backend_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ proof bytea NOT NULL, proof_digest bytea NOT NULL CHECK(octet_length(proof_digest)=32),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,node_id,from_boot_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id),
+ CHECK(from_boot_id<>to_boot_id)
+);
+CREATE TRIGGER node_boot_recovery_immutable BEFORE UPDATE OR DELETE ON node_boot_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_boot_recovery_receipts (
+ tenant_id text NOT NULL, recovery_id text NOT NULL,
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,recovery_id),
+ FOREIGN KEY(tenant_id,recovery_id) REFERENCES node_boot_recoveries(tenant_id,id)
+);
+CREATE TRIGGER node_boot_recovery_receipt_immutable BEFORE UPDATE OR DELETE ON node_boot_recovery_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Explicit same-store recovery approval contains no execution or settlement
+-- witness. Complete prefix/partition verification is required before binding
+-- the target incarnation; all original authority and money remain held.
+CREATE TABLE hub_same_store_recoveries (
+ tenant_id text NOT NULL REFERENCES tenants(id), id text NOT NULL UNIQUE,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch=from_epoch+1),
+ from_boot_id text NOT NULL, to_boot_id text NOT NULL, backend_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ proof bytea NOT NULL, proof_digest bytea NOT NULL CHECK(octet_length(proof_digest)=32),
+ PRIMARY KEY(hub_id,to_epoch), UNIQUE(hub_id,from_epoch),
+ FOREIGN KEY(hub_id,from_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_recovery_immutable BEFORE UPDATE OR DELETE ON hub_same_store_recoveries FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Recovery retention is distinct from usage settlement and online admission.
+CREATE TABLE hub_same_store_journal (
+ tenant_id text NOT NULL, recovery_id text NOT NULL,
+ sequence bigint NOT NULL CHECK(sequence>0), kind text NOT NULL,
+ record_id text NOT NULL, payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ operation_id text NOT NULL,
+ PRIMARY KEY(recovery_id,sequence), UNIQUE(recovery_id,kind,record_id),
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_recoveries(id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_journal_immutable BEFORE UPDATE OR DELETE ON hub_same_store_journal FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE hub_same_store_manifests (
+ tenant_id text NOT NULL, recovery_id text NOT NULL PRIMARY KEY,
+ sealed_sequence bigint NOT NULL CHECK(sealed_sequence>=0),
+ payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ operation_id text NOT NULL,
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_recoveries(id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_manifest_immutable BEFORE UPDATE OR DELETE ON hub_same_store_manifests FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Direct-backend Node FULL fence covers installed original-source credit that
+-- might not yet have reached PG after a Hub snapshot rollback. Receipt alone
+-- does not ACK the Hub prefix, activate rights, settle usage or release funds.
+CREATE TABLE node_recovery_credit_fences (
+ tenant_id text NOT NULL, id text NOT NULL UNIQUE,
+ recovery_id text NOT NULL, allocation_id text NOT NULL, node_id text NOT NULL,
+ boot_id text NOT NULL, backend_id text NOT NULL,
+ operation_id text NOT NULL, created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=1048576),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,recovery_id,allocation_id),
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_manifests(recovery_id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES node_source_provisions(tenant_id,allocation_id)
+);
+CREATE TRIGGER node_recovery_credit_fence_immutable BEFORE UPDATE OR DELETE ON node_recovery_credit_fences FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_recovery_credit_fence_receipts (
+ tenant_id text NOT NULL, fence_id text NOT NULL,
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,fence_id),
+ FOREIGN KEY(tenant_id,fence_id) REFERENCES node_recovery_credit_fences(tenant_id,id)
+);
+CREATE TRIGGER node_recovery_credit_fence_receipt_immutable BEFORE UPDATE OR DELETE ON node_recovery_credit_fence_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Independently delivered next roots retain original allocations and require a
+-- FULL Node inventory fence. Installation is not Hub admission or runtime right.
+CREATE TABLE node_recovery_source_provisions (
+ tenant_id text NOT NULL, id text NOT NULL UNIQUE, recovery_id text NOT NULL,
+ allocation_id text NOT NULL, fence_id text NOT NULL, node_id text NOT NULL,
+ boot_id text NOT NULL, backend_id text NOT NULL, operation_id text NOT NULL,
+ created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=16384),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,recovery_id,allocation_id),
+ FOREIGN KEY(tenant_id,fence_id) REFERENCES node_recovery_credit_fence_receipts(tenant_id,fence_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER node_recovery_source_provision_immutable BEFORE UPDATE OR DELETE ON node_recovery_source_provisions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_recovery_source_receipts (
+ tenant_id text NOT NULL, provision_id text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=16384),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,provision_id),
+ FOREIGN KEY(tenant_id,provision_id) REFERENCES node_recovery_source_provisions(tenant_id,id)
+);
+CREATE TRIGGER node_recovery_source_receipt_immutable BEFORE UPDATE OR DELETE ON node_recovery_source_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Admission commits immutable current-state evidence and one epoch binding.
+-- It is distinct from forensic retention and from the Hub's local FULL ACK.
+CREATE TABLE hub_same_store_admissions (
+ tenant_id text NOT NULL, recovery_id text NOT NULL PRIMARY KEY,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch=from_epoch+1),
+ from_boot_id text NOT NULL,to_boot_id text NOT NULL,backend_id text NOT NULL,
+ operation_id text NOT NULL,created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=4194304),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ UNIQUE(hub_id,to_epoch),
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_manifests(recovery_id),
+ FOREIGN KEY(hub_id,to_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_admission_immutable BEFORE UPDATE OR DELETE ON hub_same_store_admissions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();

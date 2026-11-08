@@ -43,7 +43,7 @@ GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-backend ./cmd/vortex-b
 GOTOOLCHAIN=local go build -race -trimpath -o /tmp/vortex-control-peer ./cmd/vortex-control-peer
 export GORACE=halt_on_error=1
 GOTOOLCHAIN=local go test -race ./... -count=1 -v
-if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-04 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-05; then
+if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-04 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-05 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-06; then
   cd ..
   (
     GOTOOLCHAIN=local go test ./contracts ./agent/... ./hub ./cmd/vortex-node -p 1 -count=1 -v
@@ -61,7 +61,19 @@ if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-03 || test "${PHASE6_THROUGH_PLAN:-
     done
   ) > /evidence/rule-builds.log 2>&1
 fi
-if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-05; then
+if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-05 || test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-06; then
  cd /src
  sh tools/phase6/ledger_fault_injection.sh > /evidence/ledger-fault.log 2>&1
+fi
+
+if test "${PHASE6_THROUGH_PLAN:-06-02}" = 06-06; then
+ cd /src
+ sh tools/phase6/share_fault_injection.sh > /evidence/share-fault.log 2>&1
+ (
+   cd backend
+   for arch in amd64 arm64; do
+     GOOS=linux GOARCH="$arch" CGO_ENABLED=0 GOTOOLCHAIN=local go build -trimpath -o "/tmp/vortex-hub-$arch" ./cmd/vortex-hub
+     GOTOOLCHAIN=local go version -m "/tmp/vortex-hub-$arch"
+   done
+ ) > /evidence/hub-builds.log 2>&1
 fi
