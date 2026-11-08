@@ -88,6 +88,16 @@ func TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields(t *testing.T) {
 	if w := f.request(t, "GET", base+"/node-groups/"+group, f.pair.AccessToken, ""); w.Code != 200 || strings.Contains(w.Body.String(), "PRIVATE_") {
 		t.Fatal(w.Code, w.Body)
 	}
+	if page := f.businessPage(t, base+"/node-groups", f.pair.AccessToken); len(page.Items) != 1 || page.Items[0]["id"] != group {
+		t.Fatal(page)
+	}
+	port := uuid.NewString()
+	if _, e := f.pool.Exec(ctx, `INSERT INTO port_allocations(id,tenant_id,rule_id,group_id,member_set_version,port,listen_address,protocols,purpose,state) VALUES($1,$2,$3,$4,repeat('0',64),20001,'PRIVATE_LISTEN_ADDRESS',ARRAY['tcp'],'service','unknown')`, port, f.tenant, uuid.NewString(), group); e != nil {
+		t.Fatal(e)
+	}
+	if page := f.businessPage(t, base+"/port-allocations", f.pair.AccessToken); len(page.Items) != 1 || page.Items[0]["id"] != port || page.Items[0]["state"] != "unknown" || strings.Contains(string(mustJSON(t, page)), "PRIVATE_") {
+		t.Fatal(page)
+	}
 }
 func TestHTTPSubscriptionLedgerAndHeldLimitsUseAuthoritativeSnapshots(t *testing.T) {
 	f := newAPI(t)
@@ -137,6 +147,21 @@ func TestHTTPSubscriptionLedgerAndHeldLimitsUseAuthoritativeSnapshots(t *testing
 		}
 		if strings.HasSuffix(path, "/limits") && (body["rate_limit_bps"] != "8000" || body["connection_limit"] != "12" || body["reserved_rate_bps"] != "1000" || body["reserved_connections"] != "3" || body["execution_state"] != "submitted") {
 			t.Fatal("held occupation or execution overclaimed", body)
+		}
+	}
+	for collection, id := range map[string]string{"packages": pkg, "subscriptions": sub.SubscriptionID, "sources": sub.SourceID} {
+		page := f.businessPage(t, base+"/"+collection, f.pair.AccessToken)
+		found := false
+		for _, item := range page.Items {
+			if item["id"] == id {
+				found = true
+				if collection == "sources" && item["balance_bytes"] != "10000" {
+					t.Fatal(item)
+				}
+			}
+		}
+		if !found {
+			t.Fatal("missing public business list record", collection, id, page)
 		}
 	}
 	terms.RateLimit = 99999

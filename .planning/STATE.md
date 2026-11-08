@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 trusted local issuance verified; REST lists/mutations/public contract next"
+stopped_at: "06-07 authorized stable lists verified; REST mutations/public contract next"
 last_updated: "2026-11-08T21:58:00.664390+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-07 trusted local initial session issuance passes native/Linux race, actual processes and dual builds;9/11."
+last_activity_desc: "06-07 authorized stable lists and schema8 ordering backfill pass full native/Linux race, double sqlc and four builds;9/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: e41cf7d1
+state_head: 62fd55dc
 ---
 
 # Project State
@@ -182,7 +182,7 @@ Live Engine rule renewal now observes current process-local Active transactions 
 ## Session Continuity
 
 Last session: 2026-11-08T17:41:06.439509+00:00
-Stopped at: 06-07 transactional SSE core verified; remaining public REST adapters and exact contract pending
+Stopped at: 06-07 authorized lists and local issuance verified; mutations and exact public contract pending
 Resume file: .planning/phases/06-m4-m4-backend/06-07-CONTINUATION.md
 
 ### Historical qualification boundaries
@@ -210,3 +210,5 @@ Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 fro
 06-07 safe detail reads verified with scope/grant/audit negatives, fixed subscription limits and decimal-string ledger/held amounts; native/Linux HTTP race and deterministic26-output generation/dualbuild pass. Remaining lists/mutations/SSE/public contract;9/11.
 
 06-07 transactional SSE core now has deferred sorted-tenant commit sequencing, immutable safe summaries, stable HMAC event positions, one-snapshot replay, retention floor/delete atomicity and production retention worker. Access expiry/revocation/current scope, crossprincipal/tenant/future cursor, audit failure, activeTLS shutdown and actual REST convergence tests pass. Native full backend race passes(service364.554); second Linux full command retains one pre-isolation bounded-batch fixture failure despite service384.285 passing; final affected Linux component validation is separate. Two27-output sqlc generations/dependency review and four Backend/Hub cross-builds pass. Initial old-schema/tracer fixtures corrected without relaxing production constraints; failed/semantic RED logs retained. Phase7 recovery file remains draft. Remaining lists/mutations/initial token provisioning/OpenAPI approval/unified checks;9/11, no06-07 SUMMARY.
+
+06-07 stable business lists and /me now pass ordinary ownership/grants, per-tenant platform audit/fail-closed, principal/collection cursors, mutable-state pagination, non-empty business projections, composite restriction identity and schema8 unchanged-authority backfill/transaction rollback. Complete native backend race(service363.733s) and Linux arm64 backend race(service371.556s) pass, with two28-output sqlc runs and four Backend/Hub cross-builds. No dependencies/frozen contracts changed; migration9 remains candidate. Evidence: artifacts/phase6/06-07/task1-resource-lists/. Remaining mutations and exact OpenAPI candidate/approval/unified checks;9/11, no SUMMARY.

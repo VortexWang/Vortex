@@ -65,6 +65,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured := r.Group("/api/v1", a.authenticate)
 	secured.POST("/auth/logout", a.logout)
 	a.registerResourceReads(secured)
+	a.registerResourceLists(secured)
 	secured.GET("/tenants/:tenant_id/events", a.streamEvents)
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
@@ -180,21 +181,9 @@ func (a *API) listOperations(c *gin.Context) {
 	if !ok {
 		return
 	}
-	limit := 50
-	query := c.Request.URL.Query()
-	for k, values := range query {
-		if (k != "limit" && k != "cursor") || len(values) != 1 {
-			fail(c, 400, "invalid_request", "Invalid query parameters", nil)
-			return
-		}
-	}
-	if raw, exists := query["limit"]; exists {
-		v, e := strconv.Atoi(raw[0])
-		if e != nil || v < 1 || v > 100 || strconv.Itoa(v) != raw[0] {
-			fail(c, 400, "invalid_request", "Invalid page size", map[string]string{"limit": "Must be between 1 and 100"})
-			return
-		}
-		limit = v
+	limit, query, ok := pageSize(c)
+	if !ok {
+		return
 	}
 	p := c.MustGet("principal").(auth.Principal)
 	cs := CursorScope{PrincipalID: p.ID(), TenantID: s.TenantID(), Collection: "operations", Direction: "forward"}

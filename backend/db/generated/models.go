@@ -675,6 +675,14 @@ type PortReservation struct {
 	State           string
 }
 
+type PublicResourceOrder struct {
+	TenantKey   string
+	Collection  string
+	ResourceKey string
+	SortID      string
+	CreatedAt   pgtype.Timestamptz
+}
+
 type RefreshToken struct {
 	TokenSha256 []byte
 	FamilyID    string

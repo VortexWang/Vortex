@@ -129,7 +129,70 @@ CREATE TRIGGER restriction_domain_event AFTER INSERT ON restriction_events FOR E
 CREATE CONSTRAINT TRIGGER flush_committed_domain_events AFTER INSERT ON domain_event_pending DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION flush_domain_events();
 CREATE TRIGGER domain_event_immutable BEFORE UPDATE OR DELETE ON domain_events FOR EACH ROW EXECUTE FUNCTION guard_domain_event_history();
 CREATE TRIGGER domain_stream_monotonic BEFORE UPDATE OR DELETE ON domain_event_streams FOR EACH ROW EXECUTE FUNCTION guard_domain_stream();
+-- Public ordering is a separate immutable registry so mutable business heads
+-- and historical generated models keep their existing columns. Backfilled rows
+-- share the migration timestamp; their stable ID breaks ties. This is ordering,
+-- never ownership or authorization, and does not claim a historical creation date.
+CREATE TABLE public_resource_order (
+ tenant_key text NOT NULL, collection text NOT NULL, resource_key text NOT NULL,
+ sort_id text NOT NULL CHECK(length(sort_id) BETWEEN 1 AND 128),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_key,collection,resource_key), UNIQUE(tenant_key,collection,sort_id)
+);
+CREATE INDEX public_resource_cursor ON public_resource_order(collection,tenant_key,created_at,sort_id);
+CREATE TRIGGER public_resource_order_immutable BEFORE UPDATE OR DELETE ON public_resource_order FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- +goose StatementBegin
+CREATE FUNCTION register_public_resource_order() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE value jsonb:=to_jsonb(NEW); prior jsonb; tenant text:=''; resource text; sort_value text;
+BEGIN
+ IF TG_ARGV[2]<>'' THEN tenant:=value->>TG_ARGV[2]; END IF;
+ IF TG_ARGV[1]='restriction' THEN resource:=jsonb_build_array(value->>'cause',value->>'source_id')::text;
+ ELSE resource:=value->>TG_ARGV[1]; END IF;
+ IF TG_OP='UPDATE' THEN
+  prior:=to_jsonb(OLD);
+  IF (TG_ARGV[2]<>'' AND value->>TG_ARGV[2] IS DISTINCT FROM prior->>TG_ARGV[2]) OR
+   (TG_ARGV[1]='restriction' AND (value->>'cause' IS DISTINCT FROM prior->>'cause' OR value->>'source_id' IS DISTINCT FROM prior->>'source_id')) OR
+   (TG_ARGV[1]<>'restriction' AND value->>TG_ARGV[1] IS DISTINCT FROM prior->>TG_ARGV[1]) THEN
+   RAISE EXCEPTION 'immutable public resource identity';
+  END IF;
+  RETURN NEW;
+ END IF;
+ sort_value:=CASE WHEN TG_ARGV[1]='restriction' THEN gen_random_uuid()::text ELSE resource END;
+ INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) VALUES(tenant,TG_ARGV[0],resource,sort_value) ON CONFLICT DO NOTHING;
+ RETURN NEW;
+END $$;
+-- +goose StatementEnd
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT id,'tenants',id,id FROM tenants;
+CREATE TRIGGER tenants_public_order BEFORE INSERT OR UPDATE ON tenants FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('tenants','id','id');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT '','nodes',id,id FROM nodes;
+CREATE TRIGGER nodes_public_order BEFORE INSERT OR UPDATE ON nodes FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('nodes','id','');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT '','node-groups',id,id FROM node_groups;
+CREATE TRIGGER node_groups_public_order BEFORE INSERT OR UPDATE ON node_groups FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('node-groups','id','');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'rules',id,id FROM rule_heads;
+CREATE TRIGGER rule_heads_public_order BEFORE INSERT OR UPDATE ON rule_heads FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('rules','id','tenant_id');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT '','packages',id,id FROM package_catalog;
+CREATE TRIGGER package_catalog_public_order BEFORE INSERT OR UPDATE ON package_catalog FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('packages','id','');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'subscriptions',id,id FROM subscriptions;
+CREATE TRIGGER subscriptions_public_order BEFORE INSERT OR UPDATE ON subscriptions FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('subscriptions','id','tenant_id');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'port-allocations',id,id FROM port_allocations;
+CREATE TRIGGER port_allocations_public_order BEFORE INSERT OR UPDATE ON port_allocations FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('port-allocations','id','tenant_id');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'sources',source_id,source_id FROM ledger_projections;
+CREATE TRIGGER ledger_projections_public_order BEFORE INSERT OR UPDATE ON ledger_projections FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('sources','source_id','tenant_id');
+INSERT INTO public_resource_order(tenant_key,collection,resource_key,sort_id) SELECT tenant_id,'restrictions',jsonb_build_array(cause,source_id)::text,gen_random_uuid()::text FROM current_restrictions;
+CREATE TRIGGER current_restrictions_public_order BEFORE INSERT OR UPDATE ON current_restrictions FOR EACH ROW EXECUTE FUNCTION register_public_resource_order('restrictions','restriction','tenant_id');
 -- +goose Down
+DROP TRIGGER tenants_public_order ON tenants;
+DROP TRIGGER nodes_public_order ON nodes;
+DROP TRIGGER node_groups_public_order ON node_groups;
+DROP TRIGGER rule_heads_public_order ON rule_heads;
+DROP TRIGGER package_catalog_public_order ON package_catalog;
+DROP TRIGGER subscriptions_public_order ON subscriptions;
+DROP TRIGGER port_allocations_public_order ON port_allocations;
+DROP TRIGGER ledger_projections_public_order ON ledger_projections;
+DROP TRIGGER current_restrictions_public_order ON current_restrictions;
+DROP FUNCTION register_public_resource_order();
+DROP TABLE public_resource_order;
+
 DROP TRIGGER operation_domain_event ON operations;
 DROP TRIGGER restriction_domain_event ON restriction_events;
 DROP TABLE domain_event_pending;

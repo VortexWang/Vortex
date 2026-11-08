@@ -10,6 +10,10 @@
 
 列表游标只在同一 principal、tenant、集合、方向与筛选条件下有效。排序字段由数据库固定，不能使用 UI 行号推断页位置。签名错误、作用域错误或过期时，丢弃游标并重新读取第一页；不能尝试解码后自行拼接新游标。Cursor 签名密钥由部署持久化，多实例共享；轮换后允许旧游标失效。
 
+`GET /api/v1/me` 返回当前持久化身份的 id、role、platform 和普通用户的 tenant_id。`GET /api/v1/tenants` 对普通用户仅列出自身租户；平台角色可分页枚举租户，每条读取同事务审计。选定租户后，nodes、node-groups、rules、packages、subscriptions、port-allocations、sources、restrictions 和 operations 使用统一的 items / next_cursor 响应，limit 默认50，范围1..100，未知或重复查询参数返回400。空列表为 []。节点/组每次读取仍检查所有权或当前有效 grant，排序记录不能保留已撤销授权。
+
+业务列表的 created_at 是后端首次登记的不可变排序时间；升级时既有资源使用迁移回填时间，不能当作其历史创建证据。状态与版本变化不改变排序位置，限制投影按 cause + source_id 保持同一公开 id。翻页不是冻结数据库快照：并发提交、授权变化或删除可能改变可见集合，收到状态提示后重新取第一页。端口列表保留 unknown、retained 等占用状态，不把到期解释为已释放。
+
 账本 B/F/L、已计费量、序号、速率及连接占用以十进制字符串读取。前端不能先转 JavaScript Number 再进行精确比较；需要精确计算时使用 BigInt 或十进制库。账本按 source 独立展示，不跨来源净额抵消未知占用。
 
 ## 修改与异步执行
