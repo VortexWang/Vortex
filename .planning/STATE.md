@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: effective renewal trigger verified; Engine scheduling/delivery pending"
-last_updated: "2026-11-08T18:07:28.024548+00:00"
+stopped_at: "06-06 Task3: live Engine rule renewal verified; post-recovery Engine/pending convergence remains"
+last_updated: "2026-11-08T18:26:37.971066+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: effective funded renewal candidate/journal passes native/Linux race;8/11."
+last_activity_desc: "06-06 Task3: live Engine rule scheduler and33-rule mTLS install/reconnect verified;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 9f396b7a
+state_head: 936edcab
 ---
 
 # Project State
@@ -81,6 +81,8 @@ Direct credit stop before recovery delivery now retains only exact independently
 Seal-before-first-runtime-recovery delivery now passes actual production Node/Hub/backend mTLS in both materialize-before-seal and materialize-after-seal orderings. Both permanently stop original credit before delivery, reconnect twice without hidden retry, retain original37-byte debt and exact outbox bytes, then complete inherited financial final/refill gates. Focused native/Linux arm64 race passes; no production code changed, so prior f1cc01c0 full race/build evidence is inherited without rerun. Evidence: artifacts/phase6/06-06/task3-sealed-recovery-delivery/. Remaining: older-path revocation-only ordering, transferred-credit automatic renewal, Engine/pending deployment convergence and complete06-06 verification before concreteCR-008. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
 Effective funded renewal observation now follows retained adjacent source handoffs and exact independently anchored flat-root revisions, retaining original scope/limits/deadlines and current path/fence. Both selected grant and original source owner must remain active. The FULL trigger journal rechecks current source/epoch/root/path/fence after observation; stop/root/epoch changes deny new intent, while exact replay remains stable. Genuine low-water-after-S/R RED now passes; FULL rollback,8 concurrent replays,reopen,unchanged200-byte pending hold and existing journal/refusal tests pass. Actual production recovery mTLS/PG usage ACK yields one epoch8 candidate and durable intent; stopped sources yield none, then inherited complete final/refill assertions pass. Final native backend race(service377.894), Linux arm64 backend race(service392.441), native/Linux root race and six builds pass. Evidence: artifacts/phase6/06-06/task3-transferred-renewal-trigger/. SQL/protobuf/generator/dependency/approval bytes unchanged; development evidence only. This is observer/journal evidence, not complete Engine scheduler or actual renewal delivery convergence. Next: dynamically committed Engine rules in automatic renewal scheduling, actual transferred renewal delivery/pending deployment, older-path revocation-only ordering and complete06-06 verification before concreteCR-008. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.
+
+Live Engine rule renewal now observes current process-local Active transactions through an atomic RuntimeApplier reference, selects latest active fence per rule and pages32 scopes; Prepare/disabled/released/superseded cases cannot trigger. Genuine two-rule RED now passes; final37-lifecycle test queues32+1 for33 active rules and completes production Agent/Hub actual mTLS issue/install/reconnect with original200-byte pending holds and1024=512+512 parents unchanged; four inactive parents remain256+768. This is explicitly finite root/child partial-issue protocol evidence, not backend flat-three bootstrap. Complete native root race passes. Original concurrent Linux root bundle remains FAIL for existing silent-stream timeout, while Store/Hub/contracts/CLI pass individually; isolated complete Agent race91.255s and subsequent affected backend integration36.774s pass, as does native integration45.358s and six builds. Original3s sealed-recovery watchdog and fixture failures remain separately classified; no cause is asserted from later resource observation. Evidence: artifacts/phase6/06-06/task3-engine-rule-renewal/. Engine module/SQL/protobuf/dependencies/approval bytes unchanged; no generator rerun or clean-source/Actions claim. Next: actual transferred renewal/Engine/pending deployment convergence, older-path revocation-only ordering and complete06-06 verification before concreteCR-008. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.
 
 ## Performance Metrics
 

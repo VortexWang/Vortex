@@ -33,6 +33,8 @@ type ControlClient struct {
 	regionalWatchdogTimeouts  atomic.Uint64
 	beginMu                   sync.Mutex
 	sessionMu                 sync.Mutex
+	renewalMu                 sync.Mutex
+	renewalAfter              string
 	sessionID                 uint64
 	sessionCancel             context.CancelFunc
 	currentStatus             *controlv1.HubStatus

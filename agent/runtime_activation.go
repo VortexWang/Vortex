@@ -72,6 +72,7 @@ func (n *Node) RuntimeApplier() (*RuntimeApplier, error) {
 		return nil, err
 	}
 	e.rules = a.rules
+	e.renewalApplier.Store(a)
 	return a, nil
 }
 

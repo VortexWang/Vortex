@@ -1,0 +1,46 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-61818118d244 Creating 
+ Container vortex-phase6-tracer-backend-test-run-61818118d244 Created 
+2026/11/08 18:17:52 ERROR vlink inbound handshake failed err="context canceled"
+--- FAIL: TestRegionalFailoverRetainsUnknownDebt (14.25s)
+    --- FAIL: TestRegionalFailoverRetainsUnknownDebt/silent-stream (6.80s)
+        regional_control_test.go:172: context deadline exceeded
+2026/11/08 18:18:53 ERROR vlink inbound handshake failed err="context canceled"
+2026/11/08 18:18:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:18:54 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:18:54 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/08 18:18:55 INFO relay target connected target=127.0.0.1 port=34363
+2026/11/08 18:18:55 INFO relay OPEN authorized stream_id=3 network=1
+2026/11/08 18:18:55 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/08 18:18:59 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/08 18:18:59 ERROR relay target bridge failed stream_id=3 err="database or disk is full (13)"
+2026/11/08 18:18:59 INFO udp link drop summary link_id=020bafad747406be4deaec9d87bd455f window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/08 18:18:59 INFO udp link drop summary link_id=cf8f4ed63d1a7a648bbc7765397f5e17 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/08 18:18:59 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:18:59 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:18:59 ERROR relay OPEN handling failed stream_id=1 err="store: durable authorization does not permit this operation"
+2026/11/08 18:19:00 INFO relay target connected target=127.0.0.1 port=37481
+2026/11/08 18:19:00 INFO relay OPEN authorized stream_id=3 network=2
+2026/11/08 18:19:00 ERROR relay OPEN handling failed stream_id=5 err="store: durable authorization does not permit this operation"
+2026/11/08 18:19:04 ERROR relay target bridge failed stream_id=3 err="database or disk is full (13)"
+2026/11/08 18:19:04 ERROR relay OPEN handling failed stream_id=7 err="accounting: gate denied operation"
+2026/11/08 18:19:04 INFO udp link drop summary link_id=ee63bb96a6fe296f8e4fa4a0aa5d3823 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/08 18:19:04 INFO udp link drop summary link_id=59f68ec7ca0469dadf6dca5e5f638530 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/08 18:19:04 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:19:04 INFO udp link drop summary link_id=ce99f6e10047ebf2884a98991a5106c7 window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+2026/11/08 18:19:05 INFO vlink TLS negotiated version=772 cipher=TLS_AES_128_GCM_SHA256
+2026/11/08 18:19:05 INFO udp link drop summary link_id=ab10bee99df532a684bb12e70155eb7b window_drops=0 queue_drops=0 receive_queue_drops=0 stream_credit_drops=0 aggregate_credit_drops=0
+FAIL
+FAIL	vortex/agent	105.424s
+ok  	vortex/agent/store	154.110s
+ok  	vortex/hub	20.987s
+ok  	vortex/contracts	1.022s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/cmd/vortex-node	2.236s
+FAIL
+

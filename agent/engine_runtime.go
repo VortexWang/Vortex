@@ -24,6 +24,7 @@ type RuntimeEngine struct {
 	runtime            *engineruntime.Runtime
 	scope              RuntimeScope
 	rules              *rule.Manager
+	renewalApplier     atomic.Pointer[RuntimeApplier]
 	credentials        *CredentialManager
 }
 

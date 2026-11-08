@@ -1,0 +1,19 @@
+{
+  "unchanged_approved_review_paths": {
+    "docs/changes/CR-001-API\u538b\u6d4b\u5de5\u5177\u66ff\u6362.md": "3000aa5832c456852ce2dacd18bcdb2dab1bc359037a89dcba84ed3939db66c5",
+    "docs/changes/CR-005-APPROVAL.json": "f7d421b277a64dcabc3afe198a38d55fb023bb4223f1d0ae084d38f7ef4ace33",
+    "docs/changes/CR-005-rule-two-phase.json": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+    "docs/changes/CR-005-rule-two-phase.md": "8b24f23274adb10f03df1e758ed64690bdaf9959888b3e302a48e165886a92f2",
+    "docs/changes/CR-006-APPROVAL.json": "86b8e33b04bfd6b7dcb935033405f2a7738c8dd8a0de4b12757cf419d12fc040",
+    "docs/changes/CR-006-packages-entitlements.json": "60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d",
+    "docs/changes/CR-006-packages-entitlements.md": "32d23f6d6fed36228a3ea57b6de0a2c9458262c620fe36ecdce3f42f3739cd0d",
+    "docs/changes/CR-007-APPROVAL.json": "a5ba7ec1f47e54769ac4eba99452afc6a04d2dfbd7470fdf998f90760839f2a0",
+    "docs/changes/CR-007-metering-ledger.json": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+    "docs/changes/CR-007-metering-ledger.md": "fe6bb070c2ef2580b86db9ec5b4bff0c7aa7db4c082662be0aac3fd65effcbc4",
+    "docs/governance/contract-review.yaml": "28f6043dfffc7b5a29f97c8639d49f09da39482ca1436e2ab6762b0b4f97f223"
+  },
+  "changed_contracts": [
+    "contracts/protobuf/v1/lifecycle.md"
+  ],
+  "engine_module_sql_protobuf_generator_dependency_inputs": "unchanged;no generation rerun claimed"
+}

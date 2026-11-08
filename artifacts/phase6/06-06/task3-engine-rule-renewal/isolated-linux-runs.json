@@ -1,0 +1,36 @@
+[
+  {
+    "log": "agent-linux-isolated-race.log",
+    "command": [
+      "docker",
+      "compose",
+      "-f",
+      "deploy/backend/compose.test.yml",
+      "run",
+      "--rm",
+      "backend-test",
+      "sh",
+      "-ec",
+      "cd /src; go test -race ./agent -count=1"
+    ],
+    "exit": 0
+  },
+  {
+    "log": "backend-linux-isolated-integration-race.log",
+    "command": [
+      "docker",
+      "compose",
+      "-f",
+      "deploy/backend/compose.test.yml",
+      "run",
+      "--rm",
+      "-e",
+      "PHASE6_DATABASE_URL=postgres://vortex:phase6-local-test-only@postgres:5432/vortex_hub_admission_linux_20261108?sslmode=disable",
+      "backend-test",
+      "sh",
+      "-ec",
+      "cd /src/backend; go test -race ./internal/service -run \"^Test(RulePortActualAgentSocketsUnknownAndQuery|RuntimeRecoveryUpdateActualMTLS|RuntimeCreditExpiryActualMTLS)\" -count=1 -v"
+    ],
+    "exit": 0
+  }
+]

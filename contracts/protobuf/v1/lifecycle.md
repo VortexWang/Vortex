@@ -1115,3 +1115,22 @@ spends transferred R, clears pending writes, finalizes money nor creates credit.
 Hub issuance and Node installation retain their independent original validators.
 This unit does not establish complete multi-rule Engine scheduler/renewal delivery
 or pending deployment convergence.
+
+## Live Engine rule renewal observation (candidate)
+
+Automatic Node renewal observes current process-local Engine rule transactions,
+in pages of at most32 enabled active rules. The latest active fencing generation
+per rule wins; a disabled successor suppresses its retained predecessor. Prepare,
+unknown/released transactions and durable receipts from an earlier process cannot
+stand in for live activation. Static-runtime renewal retains its existing path.
+The cursor is observational and changes no authority; each selected rule still
+passes trusted-time, funded-source, current path/fence and FULL intent checks.
+
+The production sender/Hub issuer/Node consumer also complete actual mTLS
+renewal and reconnect for33 active rules while excluding prepared, disabled,
+released and superseded scopes. Those tests use an explicitly provisioned finite
+root/child protocol topology with partial initial issues. The flat-three backend
+bootstrap intentionally issues its complete initial partition and retains its
+separate final/fresh-parent funding gates. Neither test topology creates default
+production budgets. Complete post-S/R Engine/pending deployment convergence
+remains separate from these scheduling and same-epoch delivery checks.

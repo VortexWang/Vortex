@@ -16,31 +16,46 @@ func (c *ControlClient) queueDueRenewals(ctx context.Context, issuer string, con
 	if !ok || e == nil {
 		return nil
 	}
-	if e.activationRequired.Load() && !e.activated.Load() {
+	c.renewalMu.Lock()
+	defer c.renewalMu.Unlock()
+	select {
+	case <-e.Done():
 		return nil
+	default:
+	}
+	var scopes []runtimeRenewalScope
+	next := ""
+	if applier := e.renewalApplier.Load(); applier != nil {
+		scopes, next = applier.activeRenewalScopes(c.renewalAfter)
+	}
+	if !e.activationRequired.Load() || e.activated.Load() {
+		scopes = append(scopes, runtimeRenewalScope{RuntimeScope: e.scope, Fence: e.activeFence.Load()})
 	}
 	low, high, trusted := c.Node.TrustedTime()
 	if !trusted {
 		return nil
 	} // the data plane independently enforces the cutoff
-	due, err := c.Node.Store.DueRenewals(ctx, store.AuthorizationUse{NodeID: c.Node.NodeID, BootID: c.Node.BootID, RuleID: e.scope.RuleID, RuleRevision: e.scope.RuleRevision, PathGeneration: e.scope.PathGeneration, FencingGeneration: e.activeFence.Load(), Earliest: low, Latest: high, TrustedTime: true}, issuer, config.Percent)
-	if err != nil {
-		return err
-	}
-	for _, candidate := range due {
-		r := candidate.Request
-		r.RequestId, err = newControlID()
+	for _, scope := range scopes {
+		due, err := c.Node.Store.DueRenewals(ctx, store.AuthorizationUse{NodeID: c.Node.NodeID, BootID: c.Node.BootID, RuleID: scope.RuleID, RuleRevision: scope.RuleRevision, PathGeneration: scope.PathGeneration, FencingGeneration: scope.Fence, Earliest: low, Latest: high, TrustedTime: true}, issuer, config.Percent)
 		if err != nil {
 			return err
 		}
-		r.RequestSha256, err = contracts.RenewalDigest(r)
-		if err != nil {
-			return err
-		}
-		if err := c.Node.Store.PersistTriggeredRenewal(ctx, issuer, r, candidate.GrantID); err != nil && !errors.Is(err, store.ErrRenewalConflict) {
-			return err
+		for _, candidate := range due {
+			r := candidate.Request
+			r.RequestId, err = newControlID()
+			if err != nil {
+				return err
+			}
+			r.RequestSha256, err = contracts.RenewalDigest(r)
+			if err != nil {
+				return err
+			}
+			if err := c.Node.Store.PersistTriggeredRenewal(ctx, issuer, r, candidate.GrantID); err != nil && !errors.Is(err, store.ErrRenewalConflict) {
+				return err
+			}
 		}
 	}
+	c.renewalAfter = next
 	return nil
 }
 
