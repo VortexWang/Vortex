@@ -7,10 +7,12 @@ package generated
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const appendHubAllocation = `-- name: AppendHubAllocation :exec
-INSERT INTO hub_funded_allocations(tenant_id,allocation_id,delegation_id,reservation_id,hub_id,node_id,boot_id,request_key,request_digest,payload,payload_digest,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+INSERT INTO hub_funded_allocations(tenant_id,allocation_id,delegation_id,reservation_id,hub_id,hub_boot_id,node_id,boot_id,request_key,request_digest,payload,payload_digest,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 `
 
 type AppendHubAllocationParams struct {
@@ -19,6 +21,7 @@ type AppendHubAllocationParams struct {
 	DelegationID  string
 	ReservationID string
 	HubID         string
+	HubBootID     string
 	NodeID        string
 	BootID        string
 	RequestKey    string
@@ -36,6 +39,7 @@ func (q *Queries) AppendHubAllocation(ctx context.Context, arg AppendHubAllocati
 		arg.DelegationID,
 		arg.ReservationID,
 		arg.HubID,
+		arg.HubBootID,
 		arg.NodeID,
 		arg.BootID,
 		arg.RequestKey,
@@ -44,6 +48,29 @@ func (q *Queries) AppendHubAllocation(ctx context.Context, arg AppendHubAllocati
 		arg.PayloadDigest,
 		arg.OperationID,
 		arg.CreatedBy,
+	)
+	return err
+}
+
+const appendHubAllocationReceipt = `-- name: AppendHubAllocationReceipt :exec
+INSERT INTO hub_allocation_receipts(tenant_id,allocation_id,hub_id,hub_boot_id,payload_digest) VALUES($1,$2,$3,$4,$5)
+`
+
+type AppendHubAllocationReceiptParams struct {
+	TenantID      string
+	AllocationID  string
+	HubID         string
+	HubBootID     string
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendHubAllocationReceipt(ctx context.Context, arg AppendHubAllocationReceiptParams) error {
+	_, err := q.db.Exec(ctx, appendHubAllocationReceipt,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.HubID,
+		arg.HubBootID,
+		arg.PayloadDigest,
 	)
 	return err
 }
@@ -98,8 +125,23 @@ func (q *Queries) AppendHubIssue(ctx context.Context, arg AppendHubIssueParams) 
 	return err
 }
 
+const bindHubIncarnation = `-- name: BindHubIncarnation :exec
+INSERT INTO hub_signer_incarnations(hub_id,signer_epoch,boot_id) VALUES($1,$2,$3)
+`
+
+type BindHubIncarnationParams struct {
+	HubID       string
+	SignerEpoch int64
+	BootID      string
+}
+
+func (q *Queries) BindHubIncarnation(ctx context.Context, arg BindHubIncarnationParams) error {
+	_, err := q.db.Exec(ctx, bindHubIncarnation, arg.HubID, arg.SignerEpoch, arg.BootID)
+	return err
+}
+
 const findHubAllocation = `-- name: FindHubAllocation :one
-SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE tenant_id=$1 AND request_key=$2
+SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, hub_boot_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE tenant_id=$1 AND request_key=$2
 `
 
 type FindHubAllocationParams struct {
@@ -116,6 +158,7 @@ func (q *Queries) FindHubAllocation(ctx context.Context, arg FindHubAllocationPa
 		&i.DelegationID,
 		&i.ReservationID,
 		&i.HubID,
+		&i.HubBootID,
 		&i.NodeID,
 		&i.BootID,
 		&i.RequestKey,
@@ -129,7 +172,7 @@ func (q *Queries) FindHubAllocation(ctx context.Context, arg FindHubAllocationPa
 }
 
 const getHubAllocation = `-- name: GetHubAllocation :one
-SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE tenant_id=$1 AND allocation_id=$2
+SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, hub_boot_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE tenant_id=$1 AND allocation_id=$2
 `
 
 type GetHubAllocationParams struct {
@@ -146,6 +189,7 @@ func (q *Queries) GetHubAllocation(ctx context.Context, arg GetHubAllocationPara
 		&i.DelegationID,
 		&i.ReservationID,
 		&i.HubID,
+		&i.HubBootID,
 		&i.NodeID,
 		&i.BootID,
 		&i.RequestKey,
@@ -155,6 +199,70 @@ func (q *Queries) GetHubAllocation(ctx context.Context, arg GetHubAllocationPara
 		&i.OperationID,
 		&i.CreatedBy,
 	)
+	return i, err
+}
+
+const getHubAllocationGlobal = `-- name: GetHubAllocationGlobal :one
+SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, hub_boot_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE allocation_id=$1
+`
+
+func (q *Queries) GetHubAllocationGlobal(ctx context.Context, allocationID string) (HubFundedAllocation, error) {
+	row := q.db.QueryRow(ctx, getHubAllocationGlobal, allocationID)
+	var i HubFundedAllocation
+	err := row.Scan(
+		&i.TenantID,
+		&i.AllocationID,
+		&i.DelegationID,
+		&i.ReservationID,
+		&i.HubID,
+		&i.HubBootID,
+		&i.NodeID,
+		&i.BootID,
+		&i.RequestKey,
+		&i.RequestDigest,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.OperationID,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
+const getHubAllocationReceipt = `-- name: GetHubAllocationReceipt :one
+SELECT tenant_id, allocation_id, hub_id, hub_boot_id, payload_digest FROM hub_allocation_receipts WHERE tenant_id=$1 AND allocation_id=$2
+`
+
+type GetHubAllocationReceiptParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) GetHubAllocationReceipt(ctx context.Context, arg GetHubAllocationReceiptParams) (HubAllocationReceipt, error) {
+	row := q.db.QueryRow(ctx, getHubAllocationReceipt, arg.TenantID, arg.AllocationID)
+	var i HubAllocationReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.AllocationID,
+		&i.HubID,
+		&i.HubBootID,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
+const getHubIncarnation = `-- name: GetHubIncarnation :one
+SELECT hub_id, signer_epoch, boot_id FROM hub_signer_incarnations WHERE hub_id=$1 AND signer_epoch=$2
+`
+
+type GetHubIncarnationParams struct {
+	HubID       string
+	SignerEpoch int64
+}
+
+func (q *Queries) GetHubIncarnation(ctx context.Context, arg GetHubIncarnationParams) (HubSignerIncarnation, error) {
+	row := q.db.QueryRow(ctx, getHubIncarnation, arg.HubID, arg.SignerEpoch)
+	var i HubSignerIncarnation
+	err := row.Scan(&i.HubID, &i.SignerEpoch, &i.BootID)
 	return i, err
 }
 
@@ -183,7 +291,7 @@ func (q *Queries) GetHubIssue(ctx context.Context, arg GetHubIssueParams) (HubIs
 }
 
 const hubAllocationByDelegation = `-- name: HubAllocationByDelegation :one
-SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE delegation_id=$1
+SELECT tenant_id, allocation_id, delegation_id, reservation_id, hub_id, hub_boot_id, node_id, boot_id, request_key, request_digest, payload, payload_digest, operation_id, created_by FROM hub_funded_allocations WHERE delegation_id=$1
 `
 
 func (q *Queries) HubAllocationByDelegation(ctx context.Context, delegationID string) (HubFundedAllocation, error) {
@@ -195,6 +303,7 @@ func (q *Queries) HubAllocationByDelegation(ctx context.Context, delegationID st
 		&i.DelegationID,
 		&i.ReservationID,
 		&i.HubID,
+		&i.HubBootID,
 		&i.NodeID,
 		&i.BootID,
 		&i.RequestKey,
@@ -221,6 +330,22 @@ func (q *Queries) HubAllocationIssued(ctx context.Context, arg HubAllocationIssu
 	var issued int64
 	err := row.Scan(&issued)
 	return issued, err
+}
+
+const hubBootHasInstalledAllocation = `-- name: HubBootHasInstalledAllocation :one
+SELECT EXISTS(SELECT 1 FROM hub_allocation_receipts WHERE hub_id=$1 AND hub_boot_id=$2)
+`
+
+type HubBootHasInstalledAllocationParams struct {
+	HubID     string
+	HubBootID string
+}
+
+func (q *Queries) HubBootHasInstalledAllocation(ctx context.Context, arg HubBootHasInstalledAllocationParams) (bool, error) {
+	row := q.db.QueryRow(ctx, hubBootHasInstalledAllocation, arg.HubID, arg.HubBootID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const hubCreditGrant = `-- name: HubCreditGrant :one
@@ -273,6 +398,78 @@ func (q *Queries) HubCreditUsage(ctx context.Context, arg HubCreditUsageParams) 
 	var raw_cumulative int64
 	err := row.Scan(&raw_cumulative)
 	return raw_cumulative, err
+}
+
+const hubSignerBoundary = `-- name: HubSignerBoundary :one
+SELECT tenant_id,signer_epoch,autonomy_until FROM signer_authorities WHERE signer_id=$1 ORDER BY signer_epoch DESC,autonomy_until,tenant_id LIMIT 1
+`
+
+type HubSignerBoundaryRow struct {
+	TenantID      string
+	SignerEpoch   int64
+	AutonomyUntil pgtype.Timestamptz
+}
+
+func (q *Queries) HubSignerBoundary(ctx context.Context, signerID string) (HubSignerBoundaryRow, error) {
+	row := q.db.QueryRow(ctx, hubSignerBoundary, signerID)
+	var i HubSignerBoundaryRow
+	err := row.Scan(&i.TenantID, &i.SignerEpoch, &i.AutonomyUntil)
+	return i, err
+}
+
+const latestHubIncarnation = `-- name: LatestHubIncarnation :one
+SELECT hub_id, signer_epoch, boot_id FROM hub_signer_incarnations WHERE hub_id=$1 ORDER BY signer_epoch DESC LIMIT 1
+`
+
+func (q *Queries) LatestHubIncarnation(ctx context.Context, hubID string) (HubSignerIncarnation, error) {
+	row := q.db.QueryRow(ctx, latestHubIncarnation, hubID)
+	var i HubSignerIncarnation
+	err := row.Scan(&i.HubID, &i.SignerEpoch, &i.BootID)
+	return i, err
+}
+
+const pendingHubAllocations = `-- name: PendingHubAllocations :many
+SELECT a.tenant_id, a.allocation_id, a.delegation_id, a.reservation_id, a.hub_id, a.hub_boot_id, a.node_id, a.boot_id, a.request_key, a.request_digest, a.payload, a.payload_digest, a.operation_id, a.created_by FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 1
+`
+
+type PendingHubAllocationsParams struct {
+	HubID     string
+	HubBootID string
+}
+
+func (q *Queries) PendingHubAllocations(ctx context.Context, arg PendingHubAllocationsParams) ([]HubFundedAllocation, error) {
+	rows, err := q.db.Query(ctx, pendingHubAllocations, arg.HubID, arg.HubBootID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubFundedAllocation{}
+	for rows.Next() {
+		var i HubFundedAllocation
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.AllocationID,
+			&i.DelegationID,
+			&i.ReservationID,
+			&i.HubID,
+			&i.HubBootID,
+			&i.NodeID,
+			&i.BootID,
+			&i.RequestKey,
+			&i.RequestDigest,
+			&i.Payload,
+			&i.PayloadDigest,
+			&i.OperationID,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const reservationHasHubAllocation = `-- name: ReservationHasHubAllocation :one

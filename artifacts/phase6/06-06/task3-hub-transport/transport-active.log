@@ -1,0 +1,69 @@
+=== RUN   TestHubFundingActualIssuerChildrenOneParentAndAuditRollback
+2026/11/08 12:34:35 goose: no migrations to run. current version: 8
+2026/11/08 12:34:35 OK   00001_authority.sql (10.16ms)
+2026/11/08 12:34:35 OK   00002_tenant_policy.sql (7.52ms)
+2026/11/08 12:34:35 OK   00003_nodes_ports.sql (17.23ms)
+2026/11/08 12:34:35 OK   00004_entry_group_domains.sql (2.27ms)
+2026/11/08 12:34:35 OK   00005_rules_compile.sql (17.89ms)
+2026/11/08 12:34:35 OK   00006_packages_entitlements.sql (16.75ms)
+2026/11/08 12:34:35 OK   00007_metering_ledger.sql (22.88ms)
+2026/11/08 12:34:35 OK   00008_limits_shares.sql (22.88ms)
+2026/11/08 12:34:35 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingActualIssuerChildrenOneParentAndAuditRollback (0.81s)
+=== RUN   TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice
+2026/11/08 12:34:36 goose: no migrations to run. current version: 8
+2026/11/08 12:34:36 OK   00001_authority.sql (8.4ms)
+2026/11/08 12:34:36 OK   00002_tenant_policy.sql (7.11ms)
+2026/11/08 12:34:36 OK   00003_nodes_ports.sql (17.38ms)
+2026/11/08 12:34:36 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/08 12:34:36 OK   00005_rules_compile.sql (17.66ms)
+2026/11/08 12:34:36 OK   00006_packages_entitlements.sql (18.59ms)
+2026/11/08 12:34:36 OK   00007_metering_ledger.sql (40.48ms)
+2026/11/08 12:34:36 OK   00008_limits_shares.sql (56.56ms)
+2026/11/08 12:34:36 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice (0.87s)
+=== RUN   TestHubBootBindingApprovedEpochAuditRollbackAndNoImplicitRecovery
+2026/11/08 12:34:37 goose: no migrations to run. current version: 8
+2026/11/08 12:34:37 OK   00001_authority.sql (9.77ms)
+2026/11/08 12:34:37 OK   00002_tenant_policy.sql (9.75ms)
+2026/11/08 12:34:37 OK   00003_nodes_ports.sql (21.17ms)
+2026/11/08 12:34:37 OK   00004_entry_group_domains.sql (2.68ms)
+2026/11/08 12:34:37 OK   00005_rules_compile.sql (21.12ms)
+2026/11/08 12:34:37 OK   00006_packages_entitlements.sql (20.5ms)
+2026/11/08 12:34:37 OK   00007_metering_ledger.sql (25.36ms)
+2026/11/08 12:34:37 OK   00008_limits_shares.sql (25.24ms)
+2026/11/08 12:34:37 goose: successfully migrated database to version: 8
+--- PASS: TestHubBootBindingApprovedEpochAuditRollbackAndNoImplicitRecovery (0.40s)
+=== RUN   TestHubAllocationReceiptAuditRollbackReplayAndBootBinding
+2026/11/08 12:34:37 goose: no migrations to run. current version: 8
+2026/11/08 12:34:37 OK   00001_authority.sql (8.17ms)
+2026/11/08 12:34:37 OK   00002_tenant_policy.sql (7.77ms)
+2026/11/08 12:34:37 OK   00003_nodes_ports.sql (18.38ms)
+2026/11/08 12:34:37 OK   00004_entry_group_domains.sql (2.25ms)
+2026/11/08 12:34:37 OK   00005_rules_compile.sql (17.98ms)
+2026/11/08 12:34:37 OK   00006_packages_entitlements.sql (17.92ms)
+2026/11/08 12:34:37 OK   00007_metering_ledger.sql (24.62ms)
+2026/11/08 12:34:37 OK   00008_limits_shares.sql (24.98ms)
+2026/11/08 12:34:37 goose: successfully migrated database to version: 8
+--- PASS: TestHubAllocationReceiptAuditRollbackReplayAndBootBinding (0.75s)
+=== RUN   TestHubFundedActualMTLSLostReceiptsReconnectAndNewBootDenied
+2026/11/08 12:34:38 goose: no migrations to run. current version: 8
+2026/11/08 12:34:38 OK   00001_authority.sql (8.93ms)
+2026/11/08 12:34:38 OK   00002_tenant_policy.sql (8.51ms)
+2026/11/08 12:34:38 OK   00003_nodes_ports.sql (18.95ms)
+2026/11/08 12:34:38 OK   00004_entry_group_domains.sql (2.55ms)
+2026/11/08 12:34:38 OK   00005_rules_compile.sql (17.03ms)
+2026/11/08 12:34:38 OK   00006_packages_entitlements.sql (16.77ms)
+2026/11/08 12:34:38 OK   00007_metering_ledger.sql (22.55ms)
+2026/11/08 12:34:38 OK   00008_limits_shares.sql (33.15ms)
+2026/11/08 12:34:38 goose: successfully migrated database to version: 8
+    hub_transport_test.go:182: real TLS 1.3 role roots, FULL lost receipt/replay, PG issue lost ACK/replay, boot refusal and funded hold verified
+--- PASS: TestHubFundedActualMTLSLostReceiptsReconnectAndNewBootDenied (3.54s)
+=== RUN   TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence
+2026/11/08 12:34:41 goose: no migrations to run. current version: 8
+--- PASS: TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence (0.56s)
+PASS
+ok  	vortex/backend/internal/service	9.216s
+testing: warning: no tests to run
+PASS
+ok  	vortex/backend/internal/control	1.677s [no tests to run]

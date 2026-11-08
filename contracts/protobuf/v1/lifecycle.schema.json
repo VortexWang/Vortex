@@ -1202,6 +1202,214 @@
           "maxLength": 44
         }
       }
+    },
+    "funded_backend_hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "enum": [
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1"
+            ],
+            [
+              "status-v1",
+              "usage-ledger-v1"
+            ]
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "control_version",
+        "capabilities",
+        "session_id",
+        "region_id"
+      ]
+    },
+    "funded_backend_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "mode": {
+          "enum": [
+            "online",
+            "autonomous",
+            "recovering",
+            "blocked"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "enum": [
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1"
+            ],
+            [
+              "status-v1",
+              "usage-ledger-v1"
+            ]
+          ]
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "recovery_target_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "confirmed_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "pending_tail_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "backend_heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "autonomy_deadline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "revocation_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "restriction_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "required": [
+        "hub_id",
+        "region_id",
+        "mode",
+        "session_id",
+        "control_version",
+        "capabilities",
+        "signer_epoch",
+        "recovery_target_sequence",
+        "confirmed_sequence",
+        "pending_tail_records",
+        "backend_heartbeat_at",
+        "autonomy_deadline",
+        "revocation_revision",
+        "restriction_revision"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "blocked"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "signer_epoch": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backend_heartbeat_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "autonomy_deadline": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "funded_backend_ledger_ack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 257
+        },
+        "ledger_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "kind": {
+          "enum": [
+            "allocation-installed-v1",
+            "issue-v1",
+            "usage-v1"
+          ]
+        }
+      },
+      "required": [
+        "record_id",
+        "ledger_sequence",
+        "payload_sha256",
+        "kind"
+      ]
     }
   }
 }

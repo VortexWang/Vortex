@@ -79,6 +79,9 @@ func (c BackendUsageClient) AcceptUsage(ctx context.Context, b store.HubUsage) (
 	if e != nil {
 		return nil, e
 	}
+	if cfg.Clock != nil {
+		return c.acceptFundedUsage(ctx, stream, b)
+	}
 	session := uuid.NewString()
 	seq, e := cfg.Store.NextControlSequence(ctx)
 	if e != nil {

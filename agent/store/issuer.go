@@ -155,7 +155,11 @@ func (s *Store) installHubDelegation(ctx context.Context, d HubDelegation, now I
 	if now.Earliest.Before(d.BackendHeartbeat) || !now.Latest.Before(d.BackendHeartbeat.Add(BackendLossGrace)) || !now.Latest.Before(d.ExpiresAt) {
 		return ErrNewAuthorityInAutonomy
 	}
-	if err := persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline); err != nil {
+	if backendID != "" {
+		if err := persistFundedDelegationHeartbeat(ctx, tx, d, now); err != nil {
+			return err
+		}
+	} else if err := persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline); err != nil {
 		return err
 	}
 	var epoch, state string
@@ -602,4 +606,39 @@ func (s *Store) AuditHubDelegation(ctx context.Context, id string) (DelegationBa
 		return result, fmt.Errorf("store: delegated source conservation violated")
 	}
 	return result, tx.Commit()
+}
+
+// A committed allocation can arrive after a newer authenticated heartbeat.
+// Installing finite rights never rolls that heartbeat back or replaces its
+// deadline. Existing non-online state still requires explicit recovery.
+func persistFundedDelegationHeartbeat(ctx context.Context, tx *sql.Tx, d HubDelegation, now IssuerTime) error {
+	previous, err := stateValue(ctx, tx, "backend_heartbeat")
+	if errors.Is(err, sql.ErrNoRows) {
+		return persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline)
+	}
+	if err != nil {
+		return err
+	}
+	hb, err := time.Parse(time.RFC3339Nano, previous)
+	if err != nil {
+		return err
+	}
+	if hb.Before(d.BackendHeartbeat) {
+		return persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline)
+	}
+	mode, err := stateValue(ctx, tx, "authority_mode")
+	if err != nil {
+		return err
+	}
+	open, err := stateValue(ctx, tx, "signer_epoch_open")
+	if err != nil {
+		return err
+	}
+	if mode != AutonomyOnline || open != "true" {
+		return ErrAuthorityHandoffRequired
+	}
+	if now.Earliest.Before(hb) || !now.Latest.Before(hb.Add(BackendLossGrace)) || !now.Latest.Before(deadlineFromTx(ctx, tx)) {
+		return ErrAuthorityExpired
+	}
+	return nil
 }

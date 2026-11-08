@@ -70,7 +70,10 @@ func fundedHubFixtureMultiplier(t *testing.T, multiplier int64) (*shareFixture, 
 		confirmHandoff(t, x, node, p.Generation.ID)
 	}
 	x.in = original
-	input := service.HubFundingInput{NodeID: x.in.NodeID, BootID: x.in.BootID, HubID: x.in.SignerID, Region: "phase6", SourceID: sources[0].ID, SnapshotID: b.ID, Nonce: uuid.NewString(), SignerEpoch: 7, PathGeneration: 1, FencingFloor: 3, RawBytes: 103, ExpiresAt: x.now.Add(10 * time.Minute)}
+	input := service.HubFundingInput{NodeID: x.in.NodeID, BootID: x.in.BootID, HubID: x.in.SignerID, HubBootID: uuid.NewString(), Region: "phase6", SourceID: sources[0].ID, SnapshotID: b.ID, Nonce: uuid.NewString(), SignerEpoch: 7, PathGeneration: 1, FencingFloor: 3, RawBytes: 103, ExpiresAt: x.now.Add(10 * time.Minute)}
+	if _, e = x.s.BindHubSession(x.f.contexts[hubID], hubID, input.HubBootID, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
 	hs, e := store.Open(filepath.Join(t.TempDir(), "hub.db"), "hub")
 	if e != nil {
 		t.Fatal(e)
@@ -153,21 +156,21 @@ func TestHubFundingActualIssuerChildrenOneParentAndAuditRollback(t *testing.T) {
 	}
 	installAllocationFixture(t, hs, a, x.now.Add(time.Second))
 	first, grant1, seq1 := issueAllocationFixture(t, x, hs, a, 51)
-	if e = x.s.RecordHubIssue(ctx, a.HubID, seq1, first.Payload, uuid.NewString()); !errors.Is(e, service.ErrScope) {
+	if e = x.s.RecordHubIssue(ctx, a.HubID, in.HubBootID, seq1, first.Payload, uuid.NewString()); !errors.Is(e, service.ErrScope) {
 		t.Fatal("unsigned issue accepted", e)
 	}
 	request = uuid.NewString()
 	failAudit(t, x.f.pool, request)
 	childTables := []string{"hub_issue_receipts", "hub_credit_grants", "ledger_events", "ledger_projections", "tasks", "outbox", "operations", "audit_events"}
 	before = authoritySnapshot(t, x.f.pool, x.f.tenant, childTables)
-	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, seq1, first.Payload, request); e == nil {
+	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, in.HubBootID, seq1, first.Payload, request); e == nil {
 		t.Fatal("issue escaped audit")
 	}
 	if !bytes.Equal(before, authoritySnapshot(t, x.f.pool, x.f.tenant, childTables)) {
 		t.Fatal("partial child mapping")
 	}
 	for i := 0; i < 2; i++ {
-		if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, seq1, first.Payload, uuid.NewString()); e != nil {
+		if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, in.HubBootID, seq1, first.Payload, uuid.NewString()); e != nil {
 			t.Fatal(e)
 		}
 	}
@@ -186,10 +189,10 @@ func TestHubFundingActualIssuerChildrenOneParentAndAuditRollback(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, seq2, over, uuid.NewString()); !errors.Is(e, service.ErrShareCapacity) {
+	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, in.HubBootID, seq2, over, uuid.NewString()); !errors.Is(e, service.ErrShareCapacity) {
 		t.Fatal("Hub exceeded funded parent", e)
 	}
-	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, seq2, second.Payload, uuid.NewString()); e != nil {
+	if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, in.HubBootID, seq2, second.Payload, uuid.NewString()); e != nil {
 		t.Fatal(e)
 	}
 	record, e := q.HubAllocationByDelegation(ctx, a.DelegationID)
@@ -281,7 +284,7 @@ func TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice(t *testing.T) {
 	deltas := []*controlv1.UsageDelta{}
 	for i := 0; i < 2; i++ {
 		result, grant, seq := issueAllocationFixture(t, x, hs, a, 1)
-		if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, seq, result.Payload, uuid.NewString()); e != nil {
+		if e = x.s.RecordHubIssue(x.f.contexts[a.HubID], a.HubID, in.HubBootID, seq, result.Payload, uuid.NewString()); e != nil {
 			t.Fatal(e)
 		}
 		deltas = append(deltas, &controlv1.UsageDelta{RuleId: a.RuleID, GrantId: grant, Role: "source", Direction: "ingress", Bytes: 1})

@@ -125,11 +125,19 @@ CREATE TABLE share_demand_samples (
  PRIMARY KEY(tenant_id,node_id,window_at), UNIQUE(tenant_id,sample_id)
 );
 CREATE TRIGGER share_demand_immutable BEFORE UPDATE OR DELETE ON share_demand_samples FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- The first authenticated production session binds an explicitly approved
+-- signer epoch to one Hub process boot. A new boot needs recovery evidence;
+-- a fresh hello or an empty SQLite database cannot reopen that epoch.
+CREATE TABLE hub_signer_incarnations (
+ hub_id text NOT NULL, signer_epoch bigint NOT NULL CHECK(signer_epoch>0),
+ boot_id text NOT NULL, PRIMARY KEY(hub_id,signer_epoch)
+);
+CREATE TRIGGER hub_incarnation_immutable BEFORE UPDATE OR DELETE ON hub_signer_incarnations FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- A delegation owns one funded parent reservation. Child credits partition
 -- raw bytes, never repeat the parent's financial reservation or ceil rounding.
 CREATE TABLE hub_funded_allocations (
  tenant_id text NOT NULL, allocation_id text NOT NULL, delegation_id text NOT NULL,
- reservation_id text NOT NULL, hub_id text NOT NULL, node_id text NOT NULL, boot_id text NOT NULL,
+ reservation_id text NOT NULL, hub_id text NOT NULL, hub_boot_id text NOT NULL, node_id text NOT NULL, boot_id text NOT NULL,
  request_key text NOT NULL, request_digest bytea NOT NULL CHECK(octet_length(request_digest)=32),
  payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
  operation_id text NOT NULL, created_by text NOT NULL,
@@ -159,6 +167,12 @@ CREATE TABLE hub_credit_usage (
  tenant_id text NOT NULL, grant_id text NOT NULL, raw_cumulative bigint NOT NULL CHECK(raw_cumulative>=0),
  PRIMARY KEY(tenant_id,grant_id), FOREIGN KEY(tenant_id,grant_id) REFERENCES hub_credit_grants(tenant_id,grant_id)
 );
+CREATE TABLE hub_allocation_receipts (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, hub_id text NOT NULL, hub_boot_id text NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,allocation_id), FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
+);
+CREATE TRIGGER hub_allocation_receipt_immutable BEFORE UPDATE OR DELETE ON hub_allocation_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

@@ -97,3 +97,71 @@ not overwrite history. Sequence-less historic SQLite records remain pending.
 This extension does not authorize a signer, allocation, runtime lease or share.
 All existing Protobuf field numbers, old messages and legacy wire behavior remain.
 CR-007 is pending owner approval; this candidate is not a frozen release claim.
+
+
+# Control 1.6.0 candidate: funded backend transport
+
+CR-007 has been approved for its exact 1.5.0 artifacts. This appended 1.6.0
+candidate is a separate CR-008 proposal under construction; it is not approved.
+The old 1.3.0 Hub hello/status paths retain their blocked, signer-epoch-zero
+requirements. They cannot transport funds or reopen a signer.
+
+The new HubControl branch requires an exact 1.6.0 hello and ordered capabilities
+`[status-v1, backend-allocation-v1, backend-ledger-v1]`, or the independent
+`[status-v1, usage-ledger-v1]` observation branch. TLS 1.3 role roots are distinct:
+backend servers verify the Hub CA and clients verify the backend CA. The Hub ID
+is the certificate CN and sole DNS SAN. Hub ID, boot, session, region and increasing
+stream sequences bind every exchange. Unknown capability combinations fail closed.
+
+PostgreSQL first binds a preapproved signer epoch to one authenticated Hub boot,
+with shared audit/task/Outbox atomicity. A hello cannot create an epoch. A different
+boot, a higher epoch without explicit recovery, or an expired approved deadline
+cannot reuse old authority. Recovery is not implemented by this branch; retained
+money and shares remain held. A same-boot reconnect reuses the fixed approved
+autonomy deadline, never `now + duration`. Across current-epoch tenant approvals,
+the session uses the earliest approved deadline. Any change closes the live session
+so its fixed boundary can be reevaluated conservatively.
+
+A backend heartbeat uses trusted UTC bounds. The Hub waits until its trusted lower
+bound proves the sender timestamp is past; it does not widen the window to accept
+a future timestamp. Missing trust, excessively wide bounds, stale samples and hard
+deadline expiry reject. Heartbeat persistence cannot reopen an autonomous signer.
+The initial status is blocked at epoch zero until a finite allocation has actually
+committed; later online status must name the approved epoch. Status is observation,
+not Node execution proof.
+
+BackendAllocation carries only a committed source-funded parent and three finite
+source anchors. Its outer delivery is restricted to the stored Hub boot. The Hub
+validates canonical payload bytes and SHA-256, then installs anchors and delegation
+in one FULL SQLite transaction. It sends LedgerRecord kind `allocation-installed-v1`
+only after commit: record_id is allocation_id, ledger_sequence is the BackendMessage
+sequence carrying that allocation, payload is those exact allocation bytes, and
+payload_sha256 is their digest. PG commits an immutable installation receipt plus
+shared audit/task/Outbox before echoing a matching LedgerAcknowledgement. Replaying
+an installed allocation never refills its spent balance. Installation cannot roll
+back a fresher authenticated heartbeat or extend its current autonomy deadline.
+The receipt says nothing about Node activation and never returns funds.
+
+The Hub uploads actual FULL issuer journal entries using LedgerRecord kind
+`issue-v1`; record_id is update_id, ledger_sequence is the original durable Hub
+journal sequence, and payload/digest are the exact authorization envelope. The
+backend validates the original allocation, signer epoch, Node/boot/path/fence,
+share roots and each child's original hard deadline. Envelope liveness can reflect
+a newer backend heartbeat; it cannot extend any child's immutable funded boundary.
+Child credit IDs partition one original-source parent reservation, without another
+hold or per-child rounding. PG journal mapping and audit commit before ACK; only
+an exact ACK lets SQLite confirm its contiguous journal prefix. Other journal
+kinds retain their existing encoding and remain pending until their specific
+recovery/closure consumers exist; they cannot be reinterpreted as new funds.
+
+The independent 1.6.0 usage branch forwards the existing provenance-preserving
+`usage-v1` envelope for an active signer. It negotiates no allocation/issue ability.
+Node-to-Hub ownership and original Node sequence/boot/hash remain mandatory. Missing
+child mapping denies ACK and preserves the original usage for retry. All successful
+usage acknowledgements follow the existing PG source-accounting/audit transaction.
+
+This candidate still lacks automatic allocation scheduling, Node anchor delivery,
+production runtime NodeControl, explicit boot/epoch recovery and complete parent
+closure/remainder return. A delayed first installation outside its original fresh
+heartbeat window fails closed; no timeout frees its parent hold. These limits are
+not a completed Phase 6 acceptance claim. No protobuf field number changes here.

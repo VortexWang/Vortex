@@ -5,7 +5,7 @@ SELECT * FROM hub_funded_allocations WHERE tenant_id=$1 AND allocation_id=$2;
 -- name: HubAllocationByDelegation :one
 SELECT * FROM hub_funded_allocations WHERE delegation_id=$1;
 -- name: AppendHubAllocation :exec
-INSERT INTO hub_funded_allocations(tenant_id,allocation_id,delegation_id,reservation_id,hub_id,node_id,boot_id,request_key,request_digest,payload,payload_digest,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);
+INSERT INTO hub_funded_allocations(tenant_id,allocation_id,delegation_id,reservation_id,hub_id,hub_boot_id,node_id,boot_id,request_key,request_digest,payload,payload_digest,operation_id,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);
 -- name: GetHubIssue :one
 SELECT * FROM hub_issue_receipts WHERE tenant_id=$1 AND issue_id=$2;
 -- name: AppendHubIssue :exec
@@ -22,3 +22,22 @@ SELECT raw_cumulative FROM hub_credit_usage WHERE tenant_id=$1 AND grant_id=$2;
 INSERT INTO hub_credit_usage(tenant_id,grant_id,raw_cumulative) VALUES($1,$2,$3) ON CONFLICT(tenant_id,grant_id) DO UPDATE SET raw_cumulative=excluded.raw_cumulative;
 -- name: ReservationHasHubAllocation :one
 SELECT EXISTS(SELECT 1 FROM hub_funded_allocations WHERE tenant_id=$1 AND reservation_id=$2);
+
+-- name: HubSignerBoundary :one
+SELECT tenant_id,signer_epoch,autonomy_until FROM signer_authorities WHERE signer_id=$1 ORDER BY signer_epoch DESC,autonomy_until,tenant_id LIMIT 1;
+-- name: LatestHubIncarnation :one
+SELECT * FROM hub_signer_incarnations WHERE hub_id=$1 ORDER BY signer_epoch DESC LIMIT 1;
+-- name: GetHubIncarnation :one
+SELECT * FROM hub_signer_incarnations WHERE hub_id=$1 AND signer_epoch=$2;
+-- name: BindHubIncarnation :exec
+INSERT INTO hub_signer_incarnations(hub_id,signer_epoch,boot_id) VALUES($1,$2,$3);
+-- name: PendingHubAllocations :many
+SELECT a.* FROM hub_funded_allocations a WHERE a.hub_id=$1 AND a.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM hub_allocation_receipts r WHERE r.tenant_id=a.tenant_id AND r.allocation_id=a.allocation_id) ORDER BY a.allocation_id LIMIT 1;
+-- name: GetHubAllocationGlobal :one
+SELECT * FROM hub_funded_allocations WHERE allocation_id=$1;
+-- name: GetHubAllocationReceipt :one
+SELECT * FROM hub_allocation_receipts WHERE tenant_id=$1 AND allocation_id=$2;
+-- name: AppendHubAllocationReceipt :exec
+INSERT INTO hub_allocation_receipts(tenant_id,allocation_id,hub_id,hub_boot_id,payload_digest) VALUES($1,$2,$3,$4,$5);
+-- name: HubBootHasInstalledAllocation :one
+SELECT EXISTS(SELECT 1 FROM hub_allocation_receipts WHERE hub_id=$1 AND hub_boot_id=$2);

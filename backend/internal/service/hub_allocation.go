@@ -21,9 +21,9 @@ import (
 // HubFundingInput is an online backend decision, not a Node request. The raw
 // budget is reserved once in its original traffic source before any delivery.
 type HubFundingInput struct {
-	NodeID, BootID, HubID, Region, SourceID, SnapshotID, Nonce string
-	SignerEpoch, PathGeneration, FencingFloor, RawBytes        int64
-	ExpiresAt                                                  time.Time
+	NodeID, BootID, HubID, HubBootID, Region, SourceID, SnapshotID, Nonce string
+	SignerEpoch, PathGeneration, FencingFloor, RawBytes                   int64
+	ExpiresAt                                                             time.Time
 }
 
 func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScope, in HubFundingInput, request string) (hub.Allocation, error) {
@@ -31,7 +31,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 	if in.RawBytes < 1 || in.Nonce == "" || len(in.Nonce) > 128 || in.SignerEpoch < 1 || in.PathGeneration < 1 || in.FencingFloor < 1 {
 		return out, ErrShareConflict
 	}
-	for _, id := range []string{in.NodeID, in.BootID, in.HubID, in.SourceID, in.SnapshotID} {
+	for _, id := range []string{in.NodeID, in.BootID, in.HubID, in.HubBootID, in.SourceID, in.SnapshotID} {
 		if !validID(id) {
 			return out, ErrShareConflict
 		}
@@ -78,6 +78,23 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		}
 		if node.BootID != in.BootID {
 			return ErrShareConflict
+		}
+		boundary, e := q.HubSignerBoundary(ctx, in.HubID)
+		if e != nil {
+			return e
+		}
+		if boundary.SignerEpoch != in.SignerEpoch {
+			return ErrShareUnknown
+		}
+		if !hi.Before(boundary.AutonomyUntil.Time) || in.ExpiresAt.After(boundary.AutonomyUntil.Time) {
+			return ErrLeaseBoundary
+		}
+		incarnation, e := q.GetHubIncarnation(ctx, generated.GetHubIncarnationParams{HubID: in.HubID, SignerEpoch: in.SignerEpoch})
+		if e != nil {
+			return e
+		}
+		if incarnation.BootID != in.HubBootID {
+			return ErrShareUnknown
 		}
 		signer, e := q.GetSignerAuthority(ctx, generated.GetSignerAuthorityParams{TenantID: scope.TenantID(), SignerID: in.HubID, SignerEpoch: in.SignerEpoch})
 		if e != nil {
@@ -209,7 +226,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		if e != nil {
 			return e
 		}
-		return q.AppendHubAllocation(ctx, generated.AppendHubAllocationParams{TenantID: scope.TenantID(), AllocationID: out.AllocationID, DelegationID: out.DelegationID, ReservationID: r.ID, HubID: in.HubID, NodeID: in.NodeID, BootID: in.BootID, RequestKey: in.Nonce, RequestDigest: digest[:], Payload: payload, PayloadDigest: sum[:], OperationID: op.ID, CreatedBy: scope.ActorID()})
+		return q.AppendHubAllocation(ctx, generated.AppendHubAllocationParams{TenantID: scope.TenantID(), AllocationID: out.AllocationID, DelegationID: out.DelegationID, ReservationID: r.ID, HubID: in.HubID, HubBootID: in.HubBootID, NodeID: in.NodeID, BootID: in.BootID, RequestKey: in.Nonce, RequestDigest: digest[:], Payload: payload, PayloadDigest: sum[:], OperationID: op.ID, CreatedBy: scope.ActorID()})
 	})
 	if e != nil {
 		return hub.Allocation{}, e
@@ -220,7 +237,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 // RecordHubIssue consumes the actual FULL-committed issuer journal. Child credit
 // IDs partition a single funded parent; no child reserves money or rounds it
 // again. A missing receipt leaves the entire parent hold in place.
-func (s ShareService) RecordHubIssue(ctx context.Context, hubID string, sequence int64, payload []byte, request string) error {
+func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID string, sequence int64, payload []byte, request string) error {
 	if sequence < 1 || len(payload) == 0 || len(payload) > 1<<20 {
 		return ErrShareConflict
 	}
@@ -247,16 +264,18 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID string, sequence
 	if e != nil {
 		return e
 	}
-	if record.HubID != hubID {
+	if record.HubID != hubID || record.HubBootID != hubBootID {
 		return ErrScope
 	}
 	a, e := hub.DecodeAllocation(record.Payload)
 	if e != nil {
 		return e
 	}
-	if parsed.NodeID != a.NodeID || parsed.BootID != a.BootID || parsed.SignerEpoch != a.SignerEpoch || parsed.PathGeneration != a.PathGeneration || parsed.FencingFloor != a.FencingFloor || parsed.IssuedAt.Before(a.ValidFrom) || !parsed.IssuedAt.Before(a.ExpiresAt) || parsed.BackendHeartbeat.Before(a.BackendHeartbeat) || !parsed.AutonomyDeadline.Equal(a.AutonomyDeadline) || !jsonEqual(parsed.ShareReferences, a.ShareReferences) {
+	if parsed.NodeID != a.NodeID || parsed.BootID != a.BootID || parsed.SignerEpoch != a.SignerEpoch || parsed.PathGeneration != a.PathGeneration || parsed.FencingFloor != a.FencingFloor || parsed.IssuedAt.Before(a.ValidFrom) || !parsed.IssuedAt.Before(a.ExpiresAt) || parsed.BackendHeartbeat.Before(a.BackendHeartbeat) || !jsonEqual(parsed.ShareReferences, a.ShareReferences) {
 		return ErrShareConflict
 	}
+	// Envelope liveness may reflect a newer backend heartbeat. Each child still
+	// has to fit this allocation's original immutable hard deadline below.
 	var credit agent.IssuedAuthorizationRecord
 	seen := map[string]bool{}
 	sources := map[string]string{"credit_grant": a.SourceID, "runtime_lease": a.RuntimeSourceID, "share_lease": a.ShareSourceID}

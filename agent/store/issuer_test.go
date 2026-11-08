@@ -241,8 +241,20 @@ func TestIssuerFundedAllocationRootsAndDelegationRollbackTogether(t *testing.T) 
 	if _, e := s.db.Exec(`DROP TRIGGER fail_funded_install`); e != nil {
 		t.Fatal(e)
 	}
+	// A fresher authenticated liveness sample must survive late installation;
+	// the allocation cannot restore its older, longer autonomy deadline.
+	newer := clock.Latest.Add(time.Second)
+	shorter := d.AutonomyDeadline.Add(-time.Minute)
+	if e := s.RecordBackendHeartbeat(ctx, newer, shorter); e != nil {
+		t.Fatal(e)
+	}
+	clock.Earliest, clock.Latest = newer, newer
 	if e := s.InstallFundedHubDelegation(ctx, shareID(799), d, clock); e != nil {
 		t.Fatal(e)
+	}
+	status, e := s.CurrentAutonomyStatus(ctx, newer, true)
+	if e != nil || !status.BackendHeartbeat.Equal(newer) || !status.HardDeadline.Equal(shorter) {
+		t.Fatal("allocation rolled back liveness/deadline", e, status)
 	}
 	request := issuerRequest(d, 705)
 	first, e := s.IssueHubAuthorization(ctx, request, clock)

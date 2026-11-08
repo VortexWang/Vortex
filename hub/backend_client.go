@@ -21,10 +21,13 @@ type BackendClient struct {
 	HubID, BootID, BackendID, Region, Address string
 	TLS                                       *tls.Config // must use a backend-role root, never the node root
 	Store                                     *store.Store
+	Clock                                     func() store.IssuerTime
 }
 
 func (c *BackendClient) Run(ctx context.Context) error {
-	if c.Store == nil || c.TLS == nil || c.TLS.InsecureSkipVerify || c.TLS.ServerName != c.BackendID || len(c.TLS.Certificates) == 0 {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	if c.Store == nil || c.TLS == nil || c.TLS.InsecureSkipVerify || c.TLS.ServerName != c.BackendID || c.TLS.RootCAs == nil || len(c.TLS.Certificates) == 0 {
 		return errors.New("Hub backend identity configuration required")
 	}
 	for _, id := range []string{c.HubID, c.BootID, c.BackendID} {
@@ -61,6 +64,9 @@ func (c *BackendClient) Run(ctx context.Context) error {
 	stream, err := controlv1.NewHubControlClient(conn).Connect(ctx)
 	if err != nil {
 		return err
+	}
+	if c.Clock != nil {
+		return c.runFunded(ctx, stream)
 	}
 	session := uuid.NewString()
 	sequence, err := c.Store.NextControlSequence(ctx)

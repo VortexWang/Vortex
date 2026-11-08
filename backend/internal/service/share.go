@@ -75,6 +75,9 @@ func (s ShareService) AuthorizeSigner(ctx context.Context, scope TenantScope, si
 		return out, ErrLeaseBoundary
 	}
 	e = (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Grant, &repository.Audit{Action: "signer.authorize", ResourceID: signer, RequestID: request, Reason: "explicit immutable signer epoch and independently bounded autonomy"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+signer); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
