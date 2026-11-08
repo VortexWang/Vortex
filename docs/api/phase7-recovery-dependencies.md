@@ -47,3 +47,5 @@
 ## 验证边界
 
 当前证据为真实 PostgreSQL、实际 HTTP/TLS、竞态、事务回滚和有限并发回放测试。维护时钟推进仅验证保留窗口逻辑，不是24小时稳定性验收。完整端点覆盖、精确 OpenAPI 复制/批准、同 SHA Docker/Actions 及阶段验收仍须在06-07/06-11完成。
+
+Package HTTP adapters now implement the five scoped subscription/entitlement preview/confirmation/redemption routes. Confirmations use strong positive If-Match checked in the service transaction plus printable-ASCII globally unique Idempotency-Key; exact retries precede current-version/time/code exhaustion checks. Keep-rule requests have an explicit512KiB/10000-item bound; ordinary request bodies remain16KiB. Pending confirmation leaves current subscription untouched; redemption preserves its existing immediate PG grant transaction. Each mutation returns202/exact operation/Location/pending and safe errors; published redemption200 and old bare tags must be reconciled explicitly in proposedCR-009. No frozen source/snapshot was changed.

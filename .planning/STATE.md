@@ -6,8 +6,8 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 transactional confirmation version foundation verified; HTTP confirmation adapters next"
-last_updated: "2026-11-08T21:58:00.664390+00:00"
+stopped_at: "06-07 package HTTP confirmation/redemption verified; group/port/DNS/recovery adapters next"
+last_updated: "2026-11-08T22:47:50.705542+00:00"
 last_activity: 2026-11-08
 last_activity_desc: "06-07 authorized stable lists and schema8 ordering backfill pass full native/Linux race, double sqlc and four builds;9/11."
 progress:
@@ -15,7 +15,7 @@ progress:
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: cc7c3e55
+state_head: a730a405
 ---
 
 # Project State

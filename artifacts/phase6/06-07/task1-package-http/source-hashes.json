@@ -1,0 +1,5 @@
+{
+  "backend/internal/httpapi/package_changes.go": "9eaf1caff8bf1b0e1d628c8282a719daa1ce1f95bc4fcb19de51d603957cca4a",
+  "backend/internal/httpapi/package_changes_test.go": "6d90de31f19052c349092def3391bdaaf6a1f0e1b416d1805f299dab29e11b6b",
+  "backend/internal/httpapi/router.go": "943d5dbe81e0cbad398e19a86d75869e1e649acf299af68b1f2743842b14802b"
+}

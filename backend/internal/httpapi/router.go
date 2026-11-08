@@ -70,6 +70,11 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.PATCH("/tenants/:tenant_id/nodes/:node_id", a.transitionNode)
 	secured.PUT("/tenants/:tenant_id/packages/:package_id", a.putPackageCatalog)
+	secured.POST("/tenants/:tenant_id/subscription/preview", a.previewPackageChange)
+	secured.POST("/tenants/:tenant_id/subscription/confirm", a.confirmPackageChange)
+	secured.POST("/tenants/:tenant_id/entitlement-redemptions/preview", a.previewEntitlementChange)
+	secured.POST("/tenants/:tenant_id/entitlement-redemptions/confirm", a.confirmEntitlementChange)
+	secured.POST("/tenants/:tenant_id/entitlement-redemptions", a.redeemEntitlement)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)
 	return r, nil
@@ -79,11 +84,14 @@ func fail(c *gin.Context, status int, code, message string, fields map[string]st
 	c.AbortWithStatusJSON(status, apiError{Code: code, Message: message, RequestID: requestID(c), FieldErrors: fields})
 }
 func decodeBody(c *gin.Context, v any) bool {
+	return decodeBodyLimit(c, v, 16*1024)
+}
+func decodeBodyLimit(c *gin.Context, v any, limit int64) bool {
 	if c.ContentType() != "application/json" {
 		fail(c, 415, "unsupported_media_type", "JSON body required", nil)
 		return false
 	}
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 16*1024)
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, limit)
 	d := json.NewDecoder(c.Request.Body)
 	d.DisallowUnknownFields()
 	if d.Decode(v) != nil || d.Decode(new(any)) != io.EOF {
