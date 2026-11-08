@@ -20,6 +20,11 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/BillingExplanation'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/sources/{source_id}/ledger:
     parameters:
       - {name: source_id, in: path, required: true, schema: {type: string, format: uuid}}
@@ -33,6 +38,11 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/SourceLedger'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/InvalidInput'}
+        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/packages/{package_id}:
     parameters:
       - {name: package_id, in: path, required: true, schema: {type: string, format: uuid}}
