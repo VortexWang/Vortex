@@ -37,3 +37,18 @@ SELECT EXISTS(SELECT 1 FROM hub_issue_receipts i WHERE i.hub_id=$1 AND i.hub_boo
 
 -- name: HubSameStoreRecoveryByTargetBoot :one
 SELECT * FROM hub_same_store_recoveries WHERE hub_id=$1 AND to_boot_id=$2 ORDER BY to_epoch DESC LIMIT 1;
+
+-- name: GetNodeRecoverySources :one
+SELECT * FROM node_recovery_source_provisions WHERE tenant_id=$1 AND id=$2;
+-- name: GetNodeRecoverySourcesByAllocation :one
+SELECT * FROM node_recovery_source_provisions WHERE tenant_id=$1 AND recovery_id=$2 AND allocation_id=$3;
+-- name: AppendNodeRecoverySources :exec
+INSERT INTO node_recovery_source_provisions(tenant_id,id,recovery_id,allocation_id,fence_id,node_id,boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
+-- name: PendingNodeRecoverySources :many
+SELECT p.* FROM node_recovery_source_provisions p JOIN nodes n ON n.id=p.node_id AND n.boot_id=p.boot_id
+WHERE NOT EXISTS(SELECT 1 FROM node_recovery_source_receipts r WHERE r.tenant_id=p.tenant_id AND r.provision_id=p.id)
+ORDER BY p.tenant_id,p.id LIMIT 100;
+-- name: GetNodeRecoverySourceReceipt :one
+SELECT * FROM node_recovery_source_receipts WHERE tenant_id=$1 AND provision_id=$2;
+-- name: AppendNodeRecoverySourceReceipt :exec
+INSERT INTO node_recovery_source_receipts(tenant_id,provision_id,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5);

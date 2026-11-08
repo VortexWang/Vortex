@@ -166,6 +166,66 @@ func (q *Queries) AppendNodeRecoveryCreditFenceReceipt(ctx context.Context, arg 
 	return err
 }
 
+const appendNodeRecoverySourceReceipt = `-- name: AppendNodeRecoverySourceReceipt :exec
+INSERT INTO node_recovery_source_receipts(tenant_id,provision_id,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5)
+`
+
+type AppendNodeRecoverySourceReceiptParams struct {
+	TenantID        string
+	ProvisionID     string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
+func (q *Queries) AppendNodeRecoverySourceReceipt(ctx context.Context, arg AppendNodeRecoverySourceReceiptParams) error {
+	_, err := q.db.Exec(ctx, appendNodeRecoverySourceReceipt,
+		arg.TenantID,
+		arg.ProvisionID,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.PeerFingerprint,
+	)
+	return err
+}
+
+const appendNodeRecoverySources = `-- name: AppendNodeRecoverySources :exec
+INSERT INTO node_recovery_source_provisions(tenant_id,id,recovery_id,allocation_id,fence_id,node_id,boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+`
+
+type AppendNodeRecoverySourcesParams struct {
+	TenantID      string
+	ID            string
+	RecoveryID    string
+	AllocationID  string
+	FenceID       string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendNodeRecoverySources(ctx context.Context, arg AppendNodeRecoverySourcesParams) error {
+	_, err := q.db.Exec(ctx, appendNodeRecoverySources,
+		arg.TenantID,
+		arg.ID,
+		arg.RecoveryID,
+		arg.AllocationID,
+		arg.FenceID,
+		arg.NodeID,
+		arg.BootID,
+		arg.BackendID,
+		arg.OperationID,
+		arg.CreatedBy,
+		arg.Payload,
+		arg.PayloadDigest,
+	)
+	return err
+}
+
 const getHubCreditGrantsByAllocation = `-- name: GetHubCreditGrantsByAllocation :many
 SELECT g.grant_id,g.raw_granted FROM hub_credit_grants g WHERE g.tenant_id=$1 AND g.allocation_id=$2 ORDER BY g.grant_id
 `
@@ -355,6 +415,87 @@ func (q *Queries) GetNodeRecoveryCreditFenceReceipt(ctx context.Context, arg Get
 	return i, err
 }
 
+const getNodeRecoverySourceReceipt = `-- name: GetNodeRecoverySourceReceipt :one
+SELECT tenant_id, provision_id, payload, payload_digest, peer_fingerprint FROM node_recovery_source_receipts WHERE tenant_id=$1 AND provision_id=$2
+`
+
+type GetNodeRecoverySourceReceiptParams struct {
+	TenantID    string
+	ProvisionID string
+}
+
+func (q *Queries) GetNodeRecoverySourceReceipt(ctx context.Context, arg GetNodeRecoverySourceReceiptParams) (NodeRecoverySourceReceipt, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoverySourceReceipt, arg.TenantID, arg.ProvisionID)
+	var i NodeRecoverySourceReceipt
+	err := row.Scan(
+		&i.TenantID,
+		&i.ProvisionID,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.PeerFingerprint,
+	)
+	return i, err
+}
+
+const getNodeRecoverySources = `-- name: GetNodeRecoverySources :one
+SELECT tenant_id, id, recovery_id, allocation_id, fence_id, node_id, boot_id, backend_id, operation_id, created_by, payload, payload_digest FROM node_recovery_source_provisions WHERE tenant_id=$1 AND id=$2
+`
+
+type GetNodeRecoverySourcesParams struct {
+	TenantID string
+	ID       string
+}
+
+func (q *Queries) GetNodeRecoverySources(ctx context.Context, arg GetNodeRecoverySourcesParams) (NodeRecoverySourceProvision, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoverySources, arg.TenantID, arg.ID)
+	var i NodeRecoverySourceProvision
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RecoveryID,
+		&i.AllocationID,
+		&i.FenceID,
+		&i.NodeID,
+		&i.BootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
+const getNodeRecoverySourcesByAllocation = `-- name: GetNodeRecoverySourcesByAllocation :one
+SELECT tenant_id, id, recovery_id, allocation_id, fence_id, node_id, boot_id, backend_id, operation_id, created_by, payload, payload_digest FROM node_recovery_source_provisions WHERE tenant_id=$1 AND recovery_id=$2 AND allocation_id=$3
+`
+
+type GetNodeRecoverySourcesByAllocationParams struct {
+	TenantID     string
+	RecoveryID   string
+	AllocationID string
+}
+
+func (q *Queries) GetNodeRecoverySourcesByAllocation(ctx context.Context, arg GetNodeRecoverySourcesByAllocationParams) (NodeRecoverySourceProvision, error) {
+	row := q.db.QueryRow(ctx, getNodeRecoverySourcesByAllocation, arg.TenantID, arg.RecoveryID, arg.AllocationID)
+	var i NodeRecoverySourceProvision
+	err := row.Scan(
+		&i.TenantID,
+		&i.ID,
+		&i.RecoveryID,
+		&i.AllocationID,
+		&i.FenceID,
+		&i.NodeID,
+		&i.BootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
+}
+
 const hubSameStoreRecoveryByID = `-- name: HubSameStoreRecoveryByID :one
 SELECT tenant_id, id, hub_id, from_epoch, to_epoch, from_boot_id, to_boot_id, backend_id, operation_id, created_by, payload, payload_digest, proof, proof_digest FROM hub_same_store_recoveries WHERE id=$1
 `
@@ -495,6 +636,45 @@ func (q *Queries) PendingNodeRecoveryCreditFences(ctx context.Context) ([]NodeRe
 			&i.ID,
 			&i.RecoveryID,
 			&i.AllocationID,
+			&i.NodeID,
+			&i.BootID,
+			&i.BackendID,
+			&i.OperationID,
+			&i.CreatedBy,
+			&i.Payload,
+			&i.PayloadDigest,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const pendingNodeRecoverySources = `-- name: PendingNodeRecoverySources :many
+SELECT p.tenant_id, p.id, p.recovery_id, p.allocation_id, p.fence_id, p.node_id, p.boot_id, p.backend_id, p.operation_id, p.created_by, p.payload, p.payload_digest FROM node_recovery_source_provisions p JOIN nodes n ON n.id=p.node_id AND n.boot_id=p.boot_id
+WHERE NOT EXISTS(SELECT 1 FROM node_recovery_source_receipts r WHERE r.tenant_id=p.tenant_id AND r.provision_id=p.id)
+ORDER BY p.tenant_id,p.id LIMIT 100
+`
+
+func (q *Queries) PendingNodeRecoverySources(ctx context.Context) ([]NodeRecoverySourceProvision, error) {
+	rows, err := q.db.Query(ctx, pendingNodeRecoverySources)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []NodeRecoverySourceProvision{}
+	for rows.Next() {
+		var i NodeRecoverySourceProvision
+		if err := rows.Scan(
+			&i.TenantID,
+			&i.ID,
+			&i.RecoveryID,
+			&i.AllocationID,
+			&i.FenceID,
 			&i.NodeID,
 			&i.BootID,
 			&i.BackendID,

@@ -755,3 +755,36 @@ the Hub stays recovering and original PG boot stays bound. The client reports
 delivers the prerequisite evidence; production admission, Node successor roots
 and effective new-epoch issue/lease/seal consumers are still required. Prior
 approved snapshots remain unchanged and CR-008 is not approved.
+
+## Independent Node successor source roots (candidate)
+
+An explicit platform Grant can derive one immutable successor source provision
+per approved S/R allocation only after PG has the complete verified manifest and
+the current Node's authenticated FULL inventory-fence receipt. Hub incarnation,
+Node authority and tenant locks stabilize preparation; changed authority,
+intervening seal, changed financial child inventory, replaced Node boot or
+expired original/recovery boundaries deny a first preparation. Installed children
+missing at Node stay occupied in the original issued partition and cannot become R.
+
+The provision has a new deterministic ID. Its three flat backend-owned roots are
+exactly the original roots with adjacent revision and signer epoch: original
+source, Node, share generation, limits, rule/path and every deadline stay fixed.
+Original allocation and original source-provision bytes remain immutable. Command,
+operation/task/Outbox and audit commit before transport. Separate immutable PG
+source-provision/receipt tables link the recovery, allocation and FULL fence.
+
+The production delivery worker uses the existing direct-only UUID-pinned
+`source-provision-v1` channel. Hub/regional issuance cannot supply these roots.
+The adapter chooses a distinct recovery receipt consumer from its pending request;
+an ordinary source receipt cannot satisfy a recovery command. Node atomically
+installs all roots under FULL. Exact persisted replay precedes clock observation;
+a first install may intersect authenticated time with existing conservative bounds,
+without bypassing boot-clock continuity/bootstrap or original expiry checks.
+
+Canonical authenticated current-boot receipts mark only this installation task
+complete. Lost FULL receipt reconnects replay identical bytes; failure remains
+pending. Roots carry no executable credit, grant no new share capacity, ACK no
+Hub journal and do not bind/admit a successor Hub. Current-state all-tenant
+admission, effective new-epoch issue/lease/seal and RuntimeServer recovery updates
+are still required. This remains an unapproved CR-008 candidate and changes no
+prior approved protocol snapshot or protobuf tag.

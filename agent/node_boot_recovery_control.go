@@ -70,3 +70,25 @@ func (c *ControlClient) fenceRecoveryCreditFromBackend(ctx context.Context, issu
 	}
 	return &controlv1.RecoveryCreditFenceReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}, nil
 }
+
+// Source root replay is an immutable FULL no-op, not new clock evidence.
+func (c *ControlClient) provisionSourcesFromBackend(ctx context.Context, issuer string, command *controlv1.SourceProvisionCommand) (store.SourceProvisionReceipt, error) {
+	var empty store.SourceProvisionReceipt
+	if c == nil || c.Node == nil || !canonicalUUID(c.SourceBackendID) || issuer != c.SourceBackendID || command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+		return empty, store.ErrSourceProvision
+	}
+	p, e := store.DecodeSourceProvision(command.Payload)
+	if e != nil || p.NodeID != c.Node.NodeID || p.BootID != c.Node.BootID || p.BackendID != issuer || c.Node.clock == nil {
+		return empty, store.ErrSourceProvision
+	}
+	lo, hi, trusted := c.Node.TrustedTime()
+	r, e := c.Node.Store.ApplySourceProvision(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Payload, store.IssuerTime{Earliest: lo, Latest: hi, Trusted: trusted})
+	if errors.Is(e, store.ErrAuthorityTimeUncertain) {
+		if e = c.Node.clock.observe(p.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
+			return empty, e
+		}
+		lo, hi, trusted = c.Node.TrustedTime()
+		r, e = c.Node.Store.ApplySourceProvision(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Payload, store.IssuerTime{Earliest: lo, Latest: hi, Trusted: trusted})
+	}
+	return r, e
+}

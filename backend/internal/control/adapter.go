@@ -69,11 +69,12 @@ type shareRequest struct {
 	ctx               context.Context
 }
 type sourceRequest struct {
-	command *controlv1.SourceProvisionCommand
-	boot    string
-	scope   service.TenantScope
-	result  chan error
-	ctx     context.Context
+	recovery bool
+	command  *controlv1.SourceProvisionCommand
+	boot     string
+	scope    service.TenantScope
+	result   chan error
+	ctx      context.Context
 }
 type session struct {
 	recoveryCreditFences chan nodeRecoveryCreditFenceRequest
@@ -548,7 +549,11 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				if observation.ID != pinned.ID || observation.Digest != fmt.Sprintf("%x", pendingSource.command.PayloadSha256) || observation.NodeID != id || observation.BootID != first.BootId {
 					return errors.New("source receipt target mismatch")
 				}
-				e = a.Shares.RecordNodeSources(stream.Context(), pendingSource.scope, observation, uuid.NewString())
+				if pendingSource.recovery {
+					e = a.Shares.RecordNodeRecoverySources(stream.Context(), pendingSource.scope, observation, uuid.NewString())
+				} else {
+					e = a.Shares.RecordNodeSources(stream.Context(), pendingSource.scope, observation, uuid.NewString())
+				}
 				pendingSource.result <- e
 				pendingSource = nil
 				continue

@@ -1,0 +1,18 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/node_recovery_source_transport_test.go:57:88: credit.ID undefined (type "vortex/agent/store".AuthorizationRecord has no field or method ID)
+internal/service/node_recovery_source_transport_test.go:157:70: credit.ID undefined (type "vortex/agent/store".AuthorizationRecord has no field or method ID)
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/cmd/vortex-hub	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/auth	[no test files]
+ok  	vortex/backend/internal/compiler	2.789s
+ok  	vortex/backend/internal/control	2.885s
+ok  	vortex/backend/internal/policy	1.473s
+?   	vortex/backend/internal/repository	[no test files]
+FAIL	vortex/backend/internal/service [build failed]
+?   	vortex/backend/internal/testutil	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.888s
+?   	vortex/backend/internal/worker	[no test files]
+FAIL

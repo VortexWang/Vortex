@@ -528,18 +528,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
 					return store.ErrSourceProvision
 				}
-				provision, e := store.DecodeSourceProvision(command.Payload)
-				if e != nil || provision.NodeID != c.Node.NodeID || provision.BootID != c.Node.BootID || provision.BackendID != issuer {
-					return store.ErrSourceProvision
-				}
-				if c.Node.clock == nil {
-					return fmt.Errorf("agent: missing trusted boot clock")
-				}
-				if e = c.Node.clock.observe(provision.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
-					return e
-				}
-				low, high, trusted := c.Node.TrustedTime()
-				receipt, e := c.Node.Store.ApplySourceProvision(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Payload, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted})
+				receipt, e := c.provisionSourcesFromBackend(ctx, issuer, command)
 				if e != nil {
 					return e
 				}

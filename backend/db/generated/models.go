@@ -467,6 +467,29 @@ type NodeRecoveryCreditFenceReceipt struct {
 	PeerFingerprint []byte
 }
 
+type NodeRecoverySourceProvision struct {
+	TenantID      string
+	ID            string
+	RecoveryID    string
+	AllocationID  string
+	FenceID       string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+type NodeRecoverySourceReceipt struct {
+	TenantID        string
+	ProvisionID     string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type NodeSourceProvision struct {
 	TenantID      string
 	AllocationID  string

@@ -370,6 +370,29 @@ CREATE TABLE node_recovery_credit_fence_receipts (
  FOREIGN KEY(tenant_id,fence_id) REFERENCES node_recovery_credit_fences(tenant_id,id)
 );
 CREATE TRIGGER node_recovery_credit_fence_receipt_immutable BEFORE UPDATE OR DELETE ON node_recovery_credit_fence_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Independently delivered next roots retain original allocations and require a
+-- FULL Node inventory fence. Installation is not Hub admission or runtime right.
+CREATE TABLE node_recovery_source_provisions (
+ tenant_id text NOT NULL, id text NOT NULL UNIQUE, recovery_id text NOT NULL,
+ allocation_id text NOT NULL, fence_id text NOT NULL, node_id text NOT NULL,
+ boot_id text NOT NULL, backend_id text NOT NULL, operation_id text NOT NULL,
+ created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=16384),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,id), UNIQUE(tenant_id,recovery_id,allocation_id),
+ FOREIGN KEY(tenant_id,fence_id) REFERENCES node_recovery_credit_fence_receipts(tenant_id,fence_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER node_recovery_source_provision_immutable BEFORE UPDATE OR DELETE ON node_recovery_source_provisions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_recovery_source_receipts (
+ tenant_id text NOT NULL, provision_id text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=16384),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,provision_id),
+ FOREIGN KEY(tenant_id,provision_id) REFERENCES node_recovery_source_provisions(tenant_id,id)
+);
+CREATE TRIGGER node_recovery_source_receipt_immutable BEFORE UPDATE OR DELETE ON node_recovery_source_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin
