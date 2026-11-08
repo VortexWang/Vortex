@@ -1,0 +1,25 @@
+2026/11/09 00:52:03 goose: no migrations to run. current version: 8
+2026/11/09 00:52:03 OK   00001_authority.sql (32.93ms)
+2026/11/09 00:52:03 OK   00002_tenant_policy.sql (21.03ms)
+2026/11/09 00:52:03 OK   00003_nodes_ports.sql (59.78ms)
+2026/11/09 00:52:03 OK   00004_entry_group_domains.sql (3.01ms)
+2026/11/09 00:52:03 OK   00005_rules_compile.sql (19.46ms)
+2026/11/09 00:52:03 OK   00006_packages_entitlements.sql (17.96ms)
+2026/11/09 00:52:03 OK   00007_metering_ledger.sql (28.92ms)
+2026/11/09 00:52:03 OK   00008_limits_shares.sql (56.78ms)
+2026/11/09 00:52:03 goose: successfully migrated database to version: 8
+2026/11/09 00:52:05 goose: no migrations to run. current version: 8
+2026/11/09 00:52:05 OK   00001_authority.sql (8.26ms)
+2026/11/09 00:52:05 OK   00002_tenant_policy.sql (7.71ms)
+2026/11/09 00:52:05 OK   00003_nodes_ports.sql (16.95ms)
+2026/11/09 00:52:05 OK   00004_entry_group_domains.sql (2.09ms)
+2026/11/09 00:52:05 OK   00005_rules_compile.sql (17.34ms)
+2026/11/09 00:52:05 OK   00006_packages_entitlements.sql (16.33ms)
+2026/11/09 00:52:05 OK   00007_metering_ledger.sql (21.84ms)
+2026/11/09 00:52:05 OK   00008_limits_shares.sql (49.52ms)
+2026/11/09 00:52:05 goose: successfully migrated database to version: 8
+--- FAIL: TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare (1.31s)
+    runtime_effective_funding_test.go:27: complete transferred parent final share_revision_conflict
+FAIL
+FAIL	vortex/backend/internal/service	3.746s
+FAIL

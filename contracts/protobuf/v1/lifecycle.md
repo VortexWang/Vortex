@@ -1028,3 +1028,21 @@ The verified service/store cycle currently covers an old zero-child parent,
 actual S/R/fence/roots/admission, real FULL seal final, audited concurrent refill
 and new effective-epoch Hub issue. Installed old-child finalization and complete
 production RuntimeServer/Engine recovery remain separate acceptance work.
+
+## Finalizing installed credit after same-store recovery (candidate)
+
+An original financial parent may have a complete seal from a later admitted
+signer boot. Finalization independently validates that exact seal epoch/boot
+through every original adjacent admission and its retained manifest/Node FULL
+witnesses; it does not require the immutable initial boot to sign again. Global
+Hub serialization precedes tenant/accounting locks. Current epoch or elapsed
+time cannot substitute for the historical proof.
+
+Original parent/source/coefficient, complete issue inventory, authenticated child
+finals, independent known usage, unknown/dispute rejection and aggregate rounding
+are unchanged. Child final alone cannot permit refill. Once the dedicated parent
+final commits, effective-epoch funding may create one fresh source-funded parent.
+Original artifact,aggregate generations and admission closure stay immutable.
+The service/store fixture now includes installed51-byte old credit with37 actual
+known bytes through S/R7->8,complete final and one concurrent effective successor.
+This does not replace production RuntimeServer/Engine/network recovery acceptance.

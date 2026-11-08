@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"vortex/backend/db/generated"
@@ -29,7 +30,17 @@ type hubCreditFinalProof struct {
 // known wire inventory and no outstanding unknown/disputed liability. Original
 // coefficient and source remainder apply once to aggregate actual usage.
 func (s ShareService) FinalizeHubAllocation(ctx context.Context, scope TenantScope, allocation, request string) error {
+	if !scope.Allows(policy.Mutate) {
+		return ErrScope
+	}
+	original, err := generated.New(s.Pool).GetHubAllocation(ctx, generated.GetHubAllocationParams{TenantID: scope.TenantID(), AllocationID: allocation})
+	if err != nil {
+		return err
+	}
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "hub.credit_final", ResourceID: allocation, RequestID: request, Reason: "complete sealed issuer and authenticated child inventories prove final original-source usage; no expiry or generic proof substitution"}, func(q *generated.Queries) error {
+		if err := q.LockUsageTuple(ctx, "hub-incarnation/"+original.HubID); err != nil {
+			return err
+		}
 		if _, err := q.LockTenant(ctx, scope.TenantID()); err != nil {
 			return err
 		}
@@ -45,8 +56,14 @@ func (s ShareService) FinalizeHubAllocation(ctx context.Context, scope TenantSco
 		}
 		seal, err := contracts.DecodeDelegationSeal(sealed.Payload)
 		sum := sha256.Sum256(sealed.Payload)
-		if err != nil || !bytes.Equal(sum[:], sealed.PayloadDigest) || seal.DelegationID != a.DelegationID || seal.NodeID != a.NodeID || seal.BootID != a.BootID || seal.HubID != a.HubID || seal.HubBootID != a.HubBootID || len(sealed.PeerFingerprint) != 32 {
+		if err != nil || !bytes.Equal(sum[:], sealed.PayloadDigest) || seal.DelegationID != a.DelegationID || seal.NodeID != a.NodeID || seal.BootID != a.BootID || seal.HubID != a.HubID || sealed.HubID != a.HubID || sealed.HubBootID != seal.HubBootID || sealed.SealID != seal.ID || len(sealed.PeerFingerprint) != 32 {
 			return ErrShareConflict
+		}
+		// The seal may belong to a later admitted issuer. Validate that exact
+		// historical chain instead of requiring the immutable initial boot. No
+		// current-epoch/expiry shortcut can replace those original witnesses.
+		if _, _, err = effectiveHubAllocationTx(ctx, q, a, uint64(seal.SignerEpoch), seal.HubBootID, time.Time{}); err != nil {
+			return err
 		}
 		// Match ordinary and unknown ingestion before inspecting inventories.
 		if err = q.LockUsageTuple(ctx, a.NodeID+"/"+a.BootID); err != nil {

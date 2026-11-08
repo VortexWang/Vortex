@@ -10,15 +10,24 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"vortex/agent"
 	"vortex/agent/store"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/auth"
 	"vortex/backend/internal/policy"
 	"vortex/backend/internal/service"
+	controlv1 "vortex/contracts/protobuf/v1"
 	"vortex/hub"
 )
 
 func TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare(t *testing.T) {
+	testEffectiveRuntimeFunding(t, false)
+}
+func TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare(t *testing.T) {
+	testEffectiveRuntimeFunding(t, true)
+}
+func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
+	t.Helper()
 	ctx := context.Background()
 	x, in, hs := fundedHubFixture(t)
 	q := generated.New(x.f.pool)
@@ -50,6 +59,21 @@ func TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare
 	}
 	if _, e = ns.ApplySourceProvision(ctx, in.NodeID, in.BootID, shareBackendID, provision.Payload, store.IssuerTime{Earliest: p.IssuedAt, Latest: p.IssuedAt, Trusted: true}); e != nil {
 		t.Fatal(e)
+	}
+	var oldCredit *creditCloseFixture
+	var oldUsage *controlv1.UsageBatch
+	if installed {
+		issued, grant, sequence := issueAllocationFixture(t, x, hs, original, 51)
+		if e = x.s.RecordHubIssue(x.f.contexts[in.HubID], in.HubID, in.HubBootID, sequence, issued.Payload, uuid.NewString()); e != nil {
+			t.Fatal(e)
+		}
+		node, e := agent.New(in.NodeID, ns, nil)
+		if e != nil {
+			t.Fatal(e)
+		}
+		node.BootID = in.BootID
+		oldCredit = &creditCloseFixture{x: x, in: in, a: original, hs: hs, st: ns, node: node, issued: issued, grant: grant}
+		oldUsage = oldCredit.commitLocalUsage(t, 37)
 	}
 	x.now = x.now.Add(5 * time.Second)
 	if _, e = x.s.AuthorizeSigner(ctx, admin, in.HubID, 8, x.now.Add(-time.Second), x.now.Add(time.Hour), make([]byte, 32), uuid.NewString()); e != nil {
@@ -120,6 +144,88 @@ func TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare
 	}
 	if e = x.s.RecordDelegationSeal(x.f.contexts[in.HubID], in.HubID, r.ToBootID, sequence, sealRaw, uuid.NewString()); e != nil {
 		t.Fatal(e)
+	}
+	if installed {
+		before = authoritySnapshot(t, x.f.pool, x.f.tenant, financial)
+		if e = x.s.FundRuntimeCandidates(ctx, x.f.scope, "phase6", uuid.NewString()); e != nil && !errors.Is(e, service.ErrShareUnknown) {
+			t.Fatal(e)
+		}
+		if !bytes.Equal(before, authoritySnapshot(t, x.f.pool, x.f.tenant, financial)) {
+			t.Fatal("sealed but unfinalized installed credit refilled")
+		}
+		if _, e = (service.MeteringService{Pool: x.f.pool}).IngestWireUsage(ctx, in.NodeID, in.BootID, 1, oldUsage); e != nil {
+			t.Fatal(e)
+		}
+		acceptCreditFinal(t, oldCredit)
+		before = authoritySnapshot(t, x.f.pool, x.f.tenant, financial)
+		if e = x.s.FundRuntimeCandidates(ctx, x.f.scope, "phase6", uuid.NewString()); e != nil && !errors.Is(e, service.ErrShareUnknown) {
+			t.Fatal(e)
+		}
+		if !bytes.Equal(before, authoritySnapshot(t, x.f.pool, x.f.tenant, financial)) {
+			t.Fatal("child final alone refilled transferred parent")
+		}
+		// Corrupt immutable evidence only in this isolated test database. A seal
+		// accepted earlier cannot bypass independent final-time chain checks.
+		for _, item := range []struct{ table, trigger, column, id string }{
+			{"hub_same_store_admissions", "hub_same_store_admission_immutable", "recovery_id", r.ID},
+			{"hub_same_store_manifests", "hub_same_store_manifest_immutable", "recovery_id", r.ID},
+			{"node_recovery_source_receipts", "node_recovery_source_receipt_immutable", "provision_id", roots.ID},
+		} {
+			t.Run("final_requires_"+item.table, func(t *testing.T) {
+				var saved []byte
+				if e := x.f.pool.QueryRow(ctx, "SELECT payload_digest FROM "+item.table+" WHERE "+item.column+"=$1", item.id).Scan(&saved); e != nil {
+					t.Fatal(e)
+				}
+				if _, e := x.f.pool.Exec(ctx, "ALTER TABLE "+item.table+" DISABLE TRIGGER "+item.trigger); e != nil {
+					t.Fatal(e)
+				}
+				corrupt := append([]byte(nil), saved...)
+				corrupt[0] ^= 1
+				if _, e := x.f.pool.Exec(ctx, "UPDATE "+item.table+" SET payload_digest=$1 WHERE "+item.column+"=$2", corrupt, item.id); e != nil {
+					t.Fatal(e)
+				}
+				defer func() {
+					if _, e := x.f.pool.Exec(ctx, "UPDATE "+item.table+" SET payload_digest=$1 WHERE "+item.column+"=$2", saved, item.id); e != nil {
+						t.Error(e)
+					}
+					if _, e := x.f.pool.Exec(ctx, "ALTER TABLE "+item.table+" ENABLE TRIGGER "+item.trigger); e != nil {
+						t.Error(e)
+					}
+				}()
+				unchanged := authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"settlements", "ledger_events", "ledger_projections", "tasks", "operations", "outbox", "audit_events"})
+				if e := x.s.FinalizeHubAllocation(ctx, x.f.scope, original.AllocationID, uuid.NewString()); e == nil {
+					t.Fatal("corrupt effective witness finalized money")
+				}
+				if !bytes.Equal(unchanged, authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"settlements", "ledger_events", "ledger_projections", "tasks", "operations", "outbox", "audit_events"})) {
+					t.Fatal("failed final changed financial/task state")
+				}
+			})
+		}
+		request := uuid.NewString()
+		failAudit(t, x.f.pool, request)
+		before = authoritySnapshot(t, x.f.pool, x.f.tenant, append(append([]string{}, financial...), "settlements", "tasks", "operations", "outbox", "audit_events"))
+		if e = x.s.FinalizeHubAllocation(ctx, x.f.scope, original.AllocationID, request); e == nil {
+			t.Fatal("transferred final escaped audit")
+		}
+		if !bytes.Equal(before, authoritySnapshot(t, x.f.pool, x.f.tenant, append(append([]string{}, financial...), "settlements", "tasks", "operations", "outbox", "audit_events"))) {
+			t.Fatal("partial transferred parent final")
+		}
+		if e = x.s.FinalizeHubAllocation(ctx, x.f.scope, original.AllocationID, uuid.NewString()); e != nil {
+			t.Fatal("complete transferred parent final", e)
+		}
+		var finalWG sync.WaitGroup
+		for range 8 {
+			finalWG.Go(func() {
+				if e := x.s.FinalizeHubAllocation(ctx, x.f.scope, original.AllocationID, uuid.NewString()); e != nil {
+					t.Error(e)
+				}
+			})
+		}
+		finalWG.Wait()
+		projection, e := q.GetSourceProjection(ctx, generated.GetSourceProjectionParams{TenantID: x.f.tenant, SourceID: in.SourceID})
+		if e != nil || projection.Charged != 37 || projection.F != 0 {
+			t.Fatal("old original-source final", projection, e)
+		}
 	}
 	// The existing funding transaction must still roll back the new reservation,
 	// immutable allocation and transport work when its final audit fails.
