@@ -154,13 +154,76 @@ func (s *Store) SealExpiredHubDelegations(ctx context.Context, hub, boot, after 
 	for _, c := range page {
 		after = c.d.ID
 		if c.state != "closed" && now.Earliest.Before(c.d.ExpiresAt) && now.Earliest.Before(c.d.HardDeadline) && now.Earliest.Before(c.d.AutonomyDeadline) {
-			continue
+			// Bootstrap can partition all credit with a shorter TTL than its
+			// delegation. Once every child expires, drive the existing stop/final
+			// protocol instead of leaving an unusable parent open for hours.
+			// This proves only issuer closure eligibility, never Node execution
+			// stop, a known outcome or permission to release original funds.
+			expired, err := s.fullyIssuedCreditExpired(ctx, c.d, now.Earliest)
+			if err != nil {
+				return "", false, err
+			}
+			if !expired {
+				continue
+			}
 		}
 		if _, e = s.SealHubDelegation(ctx, hub, boot, c.d.ID); e != nil {
 			return "", false, e
 		}
 	}
 	return after, len(page) < 32, nil
+}
+
+func (s *Store) fullyIssuedCreditExpired(ctx context.Context, d HubDelegation, lower time.Time) (bool, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT i.payload,i.payload_sha256,i.amount_bytes FROM issuer_issues i JOIN issuer_delegations d ON d.delegation_id=i.delegation_id WHERE i.delegation_id=? AND d.remaining_bytes='0'`, d.ID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	var total uint64
+	for rows.Next() {
+		var raw, digest []byte
+		var amount string
+		if err = rows.Scan(&raw, &digest, &amount); err != nil {
+			return false, err
+		}
+		sum := sha256.Sum256(raw)
+		var p struct {
+			Node           string `json:"node_id"`
+			Boot           string `json:"boot_id"`
+			Authorizations []struct {
+				Kind    string    `json:"kind"`
+				Source  string    `json:"source_id"`
+				Expires time.Time `json:"expires_at"`
+				Amount  uint64    `json:"amount_bytes"`
+			} `json:"authorizations"`
+		}
+		n, err := strconv.ParseUint(amount, 10, 64)
+		if err != nil || n == 0 || n > d.RawBytes || total > d.RawBytes-n || !bytes.Equal(sum[:], digest) || json.Unmarshal(raw, &p) != nil || p.Node != d.NodeID || p.Boot != d.BootID {
+			return false, ErrAuthorizationDenied
+		}
+		credits := 0
+		for _, r := range p.Authorizations {
+			if r.Kind != "credit_grant" {
+				continue
+			}
+			credits++
+			if r.Expires.IsZero() || r.Source != d.SourceID || r.Amount != n {
+				return false, ErrAuthorizationDenied
+			}
+			if lower.Before(r.Expires) {
+				return false, nil
+			}
+		}
+		if credits != 1 {
+			return false, ErrAuthorizationDenied
+		}
+		total += n
+	}
+	if err = rows.Err(); err != nil {
+		return false, err
+	}
+	return total > 0 && total == d.RawBytes, nil
 }
 func (s *Store) migrateDelegationSeals() error {
 	tx, e := s.db.BeginTx(context.Background(), nil)

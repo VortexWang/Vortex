@@ -382,3 +382,15 @@ separate backend/Hub/Node TLS1.3 role roots and lost FULL receipt/PG ACK replay.
 Sustained credit closure/refill across expiry and explicit boot/epoch recovery
 remain separate acceptance work. This is still an unapproved CR-008 candidate;
 no previously approved contract snapshot is modified.
+
+The production seal scanner also starts the existing closure protocol when a
+delegation is fully issued and the trusted lower time bound proves that every
+original child credit has expired, even if the parent delegation lasts longer.
+It verifies immutable issue payload hashes, original Node/boot/source/amounts
+and exact total conservation; unissued balance or any unexpired child prevents
+this early seal. Expiry still proves no child stop or known outcome. Backend
+child final receipts, independent known-usage inventories and original-parent
+settlement remain mandatory before a funded successor can be reserved.
+Actual role-mTLS tests exercise this cycle with a short original child TTL,
+both local aggregate caps, direct source provisioning and Agent readiness for
+the new parent. Existing sessions cannot move arbitrarily to the fresh source.
