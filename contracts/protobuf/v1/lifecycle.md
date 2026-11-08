@@ -628,3 +628,52 @@ expiry. It cannot establish fresh readiness: admission must revalidate current
 authority, complete partitions and original seals/closures, independently
 provision Node roots and consume the original FULL handoff. No recovery transport,
 new capability, online binding or approved snapshot is introduced by this unit.
+
+
+### Candidate Node credit-inventory fence for early same-store recovery
+
+PG prefix reconstruction cannot discover a child installed at Node but not yet
+reported to PG if a Hub snapshot is rolled back. Early admission therefore also
+requires an independent direct-backend Node credit-inventory fence. This local
+primitive is not yet exposed by NodeControl and has no negotiated wire handler.
+
+RecoveryCreditFence fixes backend, recovery/manifest digest and sealed sequence,
+Hub, actual Node boot, original parent/source/billing snapshot, original credit
+root, adjacent signer epochs, original raw budget, complete expected grant IDs
+and amounts, issued total and R. The bounded canonical command supports at most
+4096 expected credits and one MiB; larger inventories remain unsupported/held.
+The existing original source anchor must match its exact backend-owned bytes
+and SHA. Current source epoch must equal from_epoch. Every locally installed
+original-source credit, including revoked/closed historical records, must match
+an expected ID/amount and original parent/issuer/boot/snapshot/rule/path. Unknown
+or unreported local children deny; a cold/missing original Node incarnation
+cannot assert old scope. An expected but never-installed child is allowed, but
+its issued budget cannot become fresh R.
+
+Command, immutable installed-subset receipt and a source-specific admission
+fence persist atomically under SQLite FULL. It installs no root/authorization,
+changes no global generation/clock or Engine state, and releases no existing
+unknown liability. Once committed, new old-epoch credit is refused; already
+installed rights remain under their original bounds. The subsequent credit
+handoff must match the exact recovery ID, original parent, adjacent epochs, R,
+sealed sequence and manifest digest. All new child credit is independently
+bounded both by the original raw total and the approved new-epoch R, including
+when a mutable handoff remainder is corrupted. Future epochs require another
+explicit adjacent fence; no implicit floor advance is allowed. Exact receipt
+replay after reopen or clock expiry returns original bytes without reapplying
+or lowering later state.
+
+This increment supplies the Node local primitive and rollback/race tests only.
+Backend immutable producer/receipt verification, independently negotiated direct
+transport, next-root provisioning and production S/R admission remain required.
+A local fixture success does not prove a PG-approved current Node receipt or
+physical same-store continuity. No wire capability/tag or approved snapshot is
+changed here; CR-008 remains unapproved.
+
+
+The initial Agent/root race and combined Linux component race also exercise the
+current boot failover tests. Under simultaneous long native PG race load, the
+bounded six-second autonomous regional failover fixture timed out; the same
+Linux autonomous subtest passed isolated in1.979s and a serial complete Linux
+Agent/Store/Hub/contracts/Node component retry passed. This is a resource-load
+fixture timeout, not a relaxation of the failover bound.

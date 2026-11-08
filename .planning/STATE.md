@@ -7,9 +7,9 @@ current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
 stopped_at: "06-06 Task 3: complete retained prefix/PG partition witness verified; production preflight pending"
-last_updated: "2026-11-08T11:29:25Z"
+last_updated: "2026-11-08T11:48:00Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: complete retained prefix and independent PG issue partitions reject holes, missing children and balanced forgery; forensic witness preserves unknown debt and denies admission. Production S/R preflight remains;8/11."
+last_activity_desc: "06-06 Task3: Node FULL fence now checks all locally installed original-source credits against backend expected inventory, preventing Hub snapshot rollback from inflating R. Local primitive only; authenticated PG recovery admission remains;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
@@ -38,6 +38,9 @@ Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct bac
 PG same-store approval now records explicit backend/old-new boot/adjacent epoch, complete all-tenant consent and original unsealed allocation links with unchanged root sources/limits/deadlines. Command/proof/task/Outbox/audit commit together; exact replay never retimes. Approval cannot bind a new incarnation, ACK prefix, close renewal or release money/capacity. Real PG rollback/concurrency/negative tests and generated-command local FULL application retain the unconfirmed-prefix gate. This first producer supports immediately preceding original allocation epochs; effective repeated PG chains and production complete-prefix consumer/preflight/direct-Node provisioning remain pending. Validation details: artifacts/phase6/06-06/task3-hub-sr-pg-approval/.
 
 Retained S/R prefix now has bounded local reads including confirmed rows, immutable PG evidence/obligation retention and independent complete prefix/financial partition verification. Every old-boot PG child must appear; forged balanced amounts or a fully rehashed shorter prefix deny. Sorted all-tenant locks stabilize the inventory under the Hub lock. Audit rollback and eight concurrent replay workers pass; known usage remains pending and original money/capacity/Hub binding remain unchanged. Verification is a forensic witness, not online admission or an ACK; current authority/seals/partitions must be rechecked by future admission. Evidence: artifacts/phase6/06-06/task3-hub-sr-prefix-proof/.
+
+
+Node local recovery fence now checks the complete actually installed original-source credit inventory against the immutable backend expected child list before any future early same-store admission. It prevents a rolled-back Hub snapshot from hiding a Node-installed child and rejects delayed old-epoch credit after the atomic fence; it does not create new rights or release old unknown usage. Full native root/backend race, serial Linux root race, focused Linux tests and six cross-builds pass; one first parallel Linux full-root run hit a bounded regional fixture timeout under host race contention, isolated and serial retry pass. This local primitive has no authenticated transport or production admission wiring. Evidence: artifacts/phase6/06-06/task3-node-recovery-credit-fence/.
 
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.

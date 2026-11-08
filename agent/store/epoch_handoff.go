@@ -28,6 +28,9 @@ func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdat
 	if u.IssuerID == "" || !validIssuerUUID(h.TransferID) || h.ParentID == "" || h.SourceID == "" || h.From == 0 || h.From == math.MaxUint64 || h.To != h.From+1 || h.To != u.SignerEpoch || h.Remaining > math.MaxInt64 || h.SealedSequence < 0 || e != nil || len(hash) != 32 {
 		return ErrAuthorityHandoffRequired
 	}
+	if e := checkRecoveryHandoffFenceTx(ctx, tx, u, h); e != nil {
+		return e
+	}
 	raw, e := json.Marshal(h)
 	if e != nil {
 		return e

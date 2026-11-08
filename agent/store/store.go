@@ -538,6 +538,9 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if err := s.migrateFundedHandoffEvidence(); err != nil {
 		return err
 	}
+	if err := s.migrateRecoveryCreditFences(); err != nil {
+		return err
+	}
 	return s.migrateNodeBootShareRecovery()
 }
 
@@ -865,6 +868,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 			return ErrAuthorizationUpdateConflict
 		}
 		if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		if err := checkRecoveryCreditFenceTx(ctx, tx, update.NodeID, record); err != nil {
 			return err
 		}
 		var revoked int
