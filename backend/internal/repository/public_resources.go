@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"vortex/backend/db/generated"
@@ -29,7 +30,32 @@ func (r PublicResources) Get(ctx context.Context, s TenantScope, kind, id, reque
 		case "node_group":
 			body, e = q.GetPublicNodeGroup(ctx, generated.GetPublicNodeGroupParams{ResourceID: id, TenantID: pgtype.Text{String: s.TenantID(), Valid: true}})
 		case "node_group_members":
+			// Keep the safe projection and opaque digest on the same locked
+			// configuration. The selected tenant must hold its own grant even
+			// when the caller is a platform principal.
+			g, err := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: id, TenantID: s.TenantID(), PlatformRead: false})
+			if err != nil {
+				return err
+			}
+			members, err := q.GroupMembers(ctx, id)
+			if err != nil {
+				return err
+			}
+			digest, err := MemberSetDigest(g.MemberVersion, members)
+			if err != nil {
+				return err
+			}
 			body, e = q.GetPublicGroupMembers(ctx, generated.GetPublicGroupMembersParams{ResourceID: id, TenantID: pgtype.Text{String: s.TenantID(), Valid: true}})
+			if e == nil {
+				var projection map[string]json.RawMessage
+				if e = json.Unmarshal(body, &projection); e != nil {
+					return e
+				}
+				projection["member_set_version"], e = json.Marshal(digest)
+				if e == nil {
+					body, e = json.Marshal(projection)
+				}
+			}
 		case "subscription":
 			body, e = q.GetPublicSubscription(ctx, s.TenantID())
 		case "package":
@@ -58,6 +84,13 @@ func (r PublicResources) Get(ctx context.Context, s TenantScope, kind, id, reque
 	}
 	if s.Platform() {
 		e := (AuditWriter{Pool: r.Pool}).WithTransaction(ctx, s, policy.Read, &Audit{Action: kind + ".read", ResourceID: id, RequestID: request, Reason: "platform scoped public business read"}, read)
+		if e != nil {
+			return nil, e
+		}
+		return json.RawMessage(body), nil
+	}
+	if kind == "node_group_members" {
+		e := pgx.BeginTxFunc(ctx, r.Pool, pgx.TxOptions{}, func(tx pgx.Tx) error { return read(generated.New(tx)) })
 		if e != nil {
 			return nil, e
 		}

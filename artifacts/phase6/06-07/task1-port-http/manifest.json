@@ -1,0 +1,26 @@
+{
+  "base_sha": "012dd0d3ea5a44ef35457e9a46d74d5047ee8b54",
+  "scope": "06-07 public opaque member digest and port prepare/read; incomplete plan",
+  "passed": [
+    "focused-native-race.log",
+    "final-api-native-race.log",
+    "final-service-native-race.log",
+    "final-extra-native-race.log",
+    "final-linux-race.log",
+    "final-builds.json"
+  ],
+  "failed_retained": {
+    "missing-digest-red.log": "prior-source semantic RED: missing required opaque digest"
+  },
+  "evidence_sha256": {
+    "final-extra-native-race.log": "5e0a3b55fb10c7f61d35ef33d1ba7511608f555093f2849d0ec2f679ffae8053",
+    "final-service-native-race.log": "0e73942ebe5e2fb3e2af7175027d6e3970d561e9bfee4e2c6a921b12909df52d",
+    "source-hashes.json": "3833c552850302f5bd3c7118245025cf1824918fb6ef622388f3f155bbd40b09",
+    "missing-digest-red.log": "1067bc469fa0423e88b6b979a30353cf587a380fe2a62066ed0bde51970e0f02",
+    "README.md": "ce4023b0a2df552d829e238c0be3c2776e3b690b6efb4e88375cd8c74c03fde4",
+    "final-linux-race.log": "a2c6f531a8e87bd0f94b8aa6a0d99d52f4ab07b133d5cb1d79353491235f4e18",
+    "focused-native-race.log": "740bfa9d43b35a1872766d6f4073d754c3cda798ef6808033912bbeccf4becb4",
+    "final-api-native-race.log": "f615eb67e16d7f9c566e2f5b65d77042f60c26129305e28d3448b5a7a92a2c11",
+    "final-builds.json": "118cd514261f8a672b4060734e7b6e023f45ec5d1dd38ff595cf2fc98076214b"
+  }
+}

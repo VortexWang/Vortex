@@ -239,3 +239,52 @@ func TestHTTPGroupMembersGrantRevocationAndPlatformAudit(t *testing.T) {
 		t.Fatal(w.Code, w.Body)
 	}
 }
+
+// The public value is exactly the port snapshot input, never the private Node
+// fields from which the hash is derived. Health is deliberately not a version.
+func TestHTTPGroupMembersOpaqueDigestTracksAuthorityNotHealth(t *testing.T) {
+	f := newAPI(t)
+	ctx := context.Background()
+	g := f.group(t)
+	n := f.node(t, "tenant", f.ownerScope(t))
+	if w := f.replaceMembers(t, g, `"1"`, map[string]any{"members": []map[string]any{{"node_id": n, "weight": 1, "priority": 0}}}); w.Code != 202 {
+		t.Fatal(w.Code, w.Body)
+	}
+	path := "/api/v1/tenants/" + f.tenant + "/node-groups/" + g + "/members"
+	read := func() string {
+		t.Helper()
+		w := f.request(t, "GET", path, f.pair.AccessToken, "")
+		if w.Code != 200 {
+			t.Fatal(w.Code, w.Body)
+		}
+		var body struct {
+			Digest string `json:"member_set_version"`
+		}
+		if e := json.Unmarshal(w.Body.Bytes(), &body); e != nil || len(body.Digest) != 64 {
+			t.Fatal(body, e, w.Body)
+		}
+		snap, e := (service.NodeService{Pool: f.pool}).Snapshot(ctx, f.ownerScope(t), g, uuid.NewString())
+		if e != nil || snap.MemberSetVersion != body.Digest {
+			t.Fatal("public digest not usable by port service", snap.MemberSetVersion, body.Digest, e)
+		}
+		for _, key := range []string{"PRIVATE_", "boot_id", "generation", "public_address", "hub_id", "control_port", "program_version"} {
+			if strings.Contains(w.Body.String(), key) {
+				t.Fatal("private digest input leaked", w.Body)
+			}
+		}
+		return body.Digest
+	}
+	before := read()
+	if _, e := f.pool.Exec(ctx, `UPDATE nodes SET health='unhealthy' WHERE id=$1`, n); e != nil {
+		t.Fatal(e)
+	}
+	if read() != before {
+		t.Fatal("health changed configuration digest")
+	}
+	if _, e := f.pool.Exec(ctx, `UPDATE nodes SET boot_id=$2,generation=generation+1,version=version+1 WHERE id=$1`, n, uuid.NewString()); e != nil {
+		t.Fatal(e)
+	}
+	if read() == before {
+		t.Fatal("Node incarnation reused stale digest")
+	}
+}

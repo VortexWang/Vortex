@@ -10,6 +10,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc/credentials"
@@ -207,6 +208,10 @@ func (s PortService) PreparePortReservation(ctx context.Context, scope TenantSco
 		}
 		result, e = q.InsertPortAllocation(ctx, generated.InsertPortAllocationParams{ID: uuid.NewString(), TenantID: scope.TenantID(), RuleID: in.RuleID, GroupID: in.GroupID, MemberSetVersion: in.MemberSetVersion, Port: port, ListenAddress: in.ListenAddress, Protocols: in.Protocols, Purpose: in.Purpose})
 		if e != nil {
+			var pgerr *pgconn.PgError
+			if errors.As(e, &pgerr) && pgerr.Code == "23505" && pgerr.ConstraintName == "port_rule_active" {
+				return ErrConflict
+			}
 			return e
 		}
 		for _, n := range snap.Members {
