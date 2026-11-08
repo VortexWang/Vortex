@@ -1,0 +1,21 @@
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-bf7cf0979632 Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-bf7cf0979632 Created 
+go version go1.27.3 linux/arm64
+Linux a40868017e16 7.2.12-orbstack-00394-gbecdd6130068 #1 SMP PREEMPT Thu Oct 22 22:17:17 UTC 2026 aarch64 GNU/Linux
+2026-11-08T02:06:14Z
+all modules verified
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+

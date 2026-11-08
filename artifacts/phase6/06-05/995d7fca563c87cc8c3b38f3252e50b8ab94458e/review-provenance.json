@@ -1,0 +1,12 @@
+{
+  "commit": "995d7fca563c87cc8c3b38f3252e50b8ab94458e",
+  "producer_exit_code": 1,
+  "runtime_result": 0,
+  "acceptance_complete": false,
+  "pending": "exact owner approval of CR-007; final Docker/Actions pairing remains plan 06-11",
+  "checksums": {
+    "producer.log": "f15b6c5adacf0d28f009f9235f5c513d58a8e5f0cbf24c7ab8f2de1b99b85ba6",
+    "tools-tests.log": "8cf19bb69d174e20fbd7911712933f1dbf0a7021c2121ffb27034ebfc764f50a",
+    "manifest-negative-tests.json": "26f80c054f713ce64a793e25d560cab8398ff0d33c52b1c311aaf2e6fc5ac0ea"
+  }
+}
