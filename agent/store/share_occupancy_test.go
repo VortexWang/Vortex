@@ -125,3 +125,30 @@ func TestShareRuntimeAdmissionRejectsHostileInstalledChain(t *testing.T) {
 		})
 	}
 }
+
+func TestPlatformCommitNeedsDurableNodeAggregatesBeyondChildLeases(t *testing.T) {
+	s, root, update, _ := shareFixture(t)
+	ctx := context.Background()
+	root.RuleID = shareID(992)
+	if e := s.InstallShareSourceAnchor(ctx, update.NodeID, shareID(90), root); e != nil {
+		t.Fatal(e)
+	}
+	credit := shareGrant(root, update)
+	lease := credit
+	lease.AuthorizationID, lease.Kind, lease.BillingSnapshotID, lease.AmountBytes = shareID(993), "runtime_lease", "", 0
+	share := lease
+	share.AuthorizationID, share.Kind, share.RateBPS, share.Connections = shareID(994), "share_lease", root.RateBPS, root.Connections
+	if e := s.PersistAuthorizationUpdate(ctx, shareUpdate(update, 995, root), []AuthorizationRecord{credit, lease, share}, nil); e != nil {
+		t.Fatal(e)
+	}
+	scope := AuthorizationUse{NodeID: update.NodeID, BootID: update.BootID, RuleID: root.RuleID, RuleRevision: 1, PathGeneration: 1, FencingGeneration: 1, Earliest: root.NotBefore, Latest: root.NotBefore, TrustedTime: true}
+	if e := s.CheckRuntimeReady(ctx, scope); e != nil {
+		t.Fatal("fixture matching child lease", e)
+	}
+	if e := s.BindPlatformShareRule(ctx, shareID(991), scope.NodeID, scope.RuleID); e != nil {
+		t.Fatal(e)
+	}
+	if e := s.CheckRuntimeReady(ctx, scope); e == nil {
+		t.Fatal("child leases bypassed missing Node bootstrap CAS")
+	}
+}

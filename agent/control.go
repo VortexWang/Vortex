@@ -39,6 +39,7 @@ type ControlClient struct {
 	reportMu                  sync.Mutex
 	reports                   chan *controlv1.NodeReport
 	SourceBackendID           string // explicit direct backend identity; never inferred from Hub metadata
+	ControlOnly               bool   // split deployment: usage has one Hub delivery owner
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
@@ -240,7 +241,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		}
 	}
 	var initialSendErr error
-	if regional == nil {
+	if regional == nil && !c.ControlOnly {
 		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
 	}
 	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
@@ -346,6 +347,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-ticker.C:
+			if c.ControlOnly {
+				continue
+			}
 			if regional != nil && !negotiated {
 				continue
 			}
@@ -589,6 +593,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 
 			case *controlv1.ControlMessage_UsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: usage acknowledgement on configuration-only channel")
+				}
 				if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 					return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 				}
@@ -603,6 +610,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					}
 				}
 			case *controlv1.ControlMessage_UnknownUsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
+				}
 				if body.UnknownUsageAck == nil {
 					return fmt.Errorf("agent: missing unknown usage acknowledgement")
 				}

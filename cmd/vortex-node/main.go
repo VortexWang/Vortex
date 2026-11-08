@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/signal"
 	"runtime"
@@ -19,6 +20,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"vortex/agent"
 	"vortex/agent/identity"
 	"vortex/agent/store"
@@ -43,6 +45,9 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	region := flags.String("region", "default", "configured control region")
 	controlConfig := flags.String("control-config", "", "approved runtime envelope containing lifecycle region/endpoints")
 	sourceBackendID := flags.String("source-backend-id", "", "explicit direct backend UUID allowed to provision finite source roots")
+	backendAddr := flags.String("backend", "", "direct backend NodeControl address, alongside regional Hub control")
+	backendCA := flags.String("backend-ca", "", "backend-role server CA PEM for direct NodeControl")
+	runtimeHubCA := flags.String("hub-ca", "", "Hub-role server CA PEM; defaults to tls-ca for legacy deployments")
 	hubID := flags.String("hub-id", "", "configured Hub UUID for single --hub compatibility")
 	dialTimeout := flags.Duration("control-dial-timeout", 5*time.Second, "TLS and lifecycle readiness timeout")
 	watchdog := flags.Duration("control-watchdog", 15*time.Second, "current Hub status timeout")
@@ -65,6 +70,15 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	}
 	if flags.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
+	}
+	if *backendAddr != "" || *backendCA != "" || *sourceBackendID != "" {
+		id, e := uuid.Parse(*sourceBackendID)
+		if e != nil || id.String() != *sourceBackendID || *backendAddr == "" || *backendCA == "" || (*hubAddr == "" && *controlConfig == "") {
+			return errors.New("direct backend requires backend, backend-ca, canonical source-backend-id and regional Hub configuration")
+		}
+		if _, _, e = net.SplitHostPort(*backendAddr); e != nil {
+			return fmt.Errorf("invalid backend address: %w", e)
+		}
 	}
 	if *drainTimeout <= 0 || *drainTimeout > 5*time.Minute {
 		return errors.New("drain-timeout must be between zero and five minutes")
@@ -316,7 +330,25 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 		reconciler.Apply = runtimeApply
 	}
 
-	client := &agent.ControlClient{SourceBackendID: *sourceBackendID, Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler}
+	hubTLS := credentialManager.TLSConfig
+	if *runtimeHubCA != "" {
+		hubTLS, err = roleTLSProvider(credentialManager, *runtimeHubCA, *hubName)
+		if err != nil {
+			return err
+		}
+	}
+	client := &agent.ControlClient{Node: n, TLSProvider: hubTLS, CredentialRevocations: revocations, Reconciler: reconciler}
+	var backendClient *agent.ControlClient
+	if *backendAddr != "" {
+		provider, e := roleTLSProvider(credentialManager, *backendCA, *sourceBackendID)
+		if e != nil {
+			return e
+		}
+		backendClient = &agent.ControlClient{SourceBackendID: *sourceBackendID, Node: n, TLSProvider: provider, CredentialRevocations: revocations, Reconciler: reconciler, ControlOnly: true}
+		// Two clients own independent session locks. Only the direct backend may
+		// reconcile configuration; Hub failover never cancels that channel.
+		client.Reconciler = nil
+	}
 	n.SetHubModeObserver(func() string {
 		status := client.CurrentHubStatus()
 		if status == nil {
@@ -332,8 +364,12 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	var workers sync.WaitGroup
 	workers.Add(2)
 	defer func() { cancel(); workers.Wait() }()
-	runErr := make(chan error, 2)
+	runErr := make(chan error, 3)
 	go func() { defer workers.Done(); runErr <- client.RunRegion(ctx, regional) }()
+	if backendClient != nil {
+		workers.Add(1)
+		go func() { defer workers.Done(); runErr <- backendClient.Run(ctx, *backendAddr) }()
+	}
 	if scheduler != nil {
 		workers.Add(1)
 		go func() {
@@ -381,6 +417,27 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 		}
 	}
 	return shutdownNode(n, *drainTimeout)
+}
+
+// Share the rotating Node credential, while keeping server-role roots separate.
+// The existing validity/revocation verifier remains attached to each snapshot.
+func roleTLSProvider(manager *agent.CredentialManager, caPath, serverName string) (func() (*tls.Config, error), error) {
+	raw, e := os.ReadFile(caPath)
+	if e != nil {
+		return nil, e
+	}
+	roots := x509.NewCertPool()
+	if !roots.AppendCertsFromPEM(raw) {
+		return nil, errors.New("invalid control role CA")
+	}
+	return func() (*tls.Config, error) {
+		cfg, e := manager.TLSConfig()
+		if e != nil {
+			return nil, e
+		}
+		cfg.RootCAs, cfg.ClientCAs, cfg.ServerName = roots.Clone(), nil, serverName
+		return cfg, nil
+	}, nil
 }
 
 func shutdownNode(n *agent.Node, timeout time.Duration) error {
