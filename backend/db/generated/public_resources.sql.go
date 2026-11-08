@@ -11,6 +11,29 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getPublicGroupMembers = `-- name: GetPublicGroupMembers :one
+SELECT jsonb_build_object('group_id',g.id,'version',g.version,'member_version',g.member_version,
+ 'members',COALESCE((SELECT jsonb_agg(jsonb_build_object('node_id',m.node_id,'weight',m.weight,'priority',m.priority) ORDER BY m.node_id)
+ FROM node_group_members m WHERE m.group_id=g.id),'[]'::jsonb)) AS body
+FROM node_groups g JOIN resource_ownership o ON o.resource_id=g.id
+WHERE g.id=$1 AND g.deleted_at IS NULL AND
+(o.owner_tenant_id=$2 OR (o.owner_kind='platform' AND EXISTS(
+ SELECT 1 FROM resource_grants r WHERE r.resource_id=g.id AND r.tenant_id=$2
+ AND r.status='active' AND r.valid_from<=now() AND r.valid_until>now())))
+`
+
+type GetPublicGroupMembersParams struct {
+	ResourceID string
+	TenantID   pgtype.Text
+}
+
+func (q *Queries) GetPublicGroupMembers(ctx context.Context, arg GetPublicGroupMembersParams) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getPublicGroupMembers, arg.ResourceID, arg.TenantID)
+	var body []byte
+	err := row.Scan(&body)
+	return body, err
+}
+
 const getPublicLimits = `-- name: GetPublicLimits :one
 WITH current_handoffs AS (
  SELECT h.tenant_id, h.id, h.node_id, h.kind, h.generation, h.operation_id, h.created_by, h.command, h.command_digest, h.state, h.receipt_digest, h.execution_state, h.next_attempt, h.attempts FROM share_handoffs h JOIN share_chains c ON c.tenant_id=h.tenant_id AND c.node_id=h.node_id AND c.kind=h.kind AND c.head_generation=h.generation

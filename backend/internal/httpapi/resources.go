@@ -59,6 +59,7 @@ func (a *API) registerResourceReads(secured *gin.RouterGroup) {
 	secured.GET(base, a.resource("tenant", ""))
 	secured.GET(base+"/nodes/:node_id", a.resource("node", "node_id"))
 	secured.GET(base+"/node-groups/:group_id", a.resource("node_group", "group_id"))
+	secured.GET(base+"/node-groups/:group_id/members", a.resource("node_group_members", "group_id"))
 	secured.GET(base+"/subscription", a.resource("subscription", ""))
 	secured.GET(base+"/packages/:package_id", a.resource("package", "package_id"))
 	secured.GET(base+"/rules/:rule_id", a.resource("rule", "rule_id"))

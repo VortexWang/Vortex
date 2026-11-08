@@ -28,6 +28,8 @@ func (r PublicResources) Get(ctx context.Context, s TenantScope, kind, id, reque
 			body, e = q.GetPublicNode(ctx, generated.GetPublicNodeParams{ResourceID: id, TenantID: pgtype.Text{String: s.TenantID(), Valid: true}})
 		case "node_group":
 			body, e = q.GetPublicNodeGroup(ctx, generated.GetPublicNodeGroupParams{ResourceID: id, TenantID: pgtype.Text{String: s.TenantID(), Valid: true}})
+		case "node_group_members":
+			body, e = q.GetPublicGroupMembers(ctx, generated.GetPublicGroupMembersParams{ResourceID: id, TenantID: pgtype.Text{String: s.TenantID(), Valid: true}})
 		case "subscription":
 			body, e = q.GetPublicSubscription(ctx, s.TenantID())
 		case "package":

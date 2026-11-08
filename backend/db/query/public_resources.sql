@@ -20,6 +20,16 @@ WHERE n.id=sqlc.arg(resource_id) AND n.deleted_at IS NULL AND
  SELECT 1 FROM resource_grants g WHERE g.resource_id=n.id AND g.tenant_id=sqlc.arg(tenant_id)
  AND g.status='active' AND g.valid_from<=now() AND g.valid_until>now())));
 
+-- name: GetPublicGroupMembers :one
+SELECT jsonb_build_object('group_id',g.id,'version',g.version,'member_version',g.member_version,
+ 'members',COALESCE((SELECT jsonb_agg(jsonb_build_object('node_id',m.node_id,'weight',m.weight,'priority',m.priority) ORDER BY m.node_id)
+ FROM node_group_members m WHERE m.group_id=g.id),'[]'::jsonb)) AS body
+FROM node_groups g JOIN resource_ownership o ON o.resource_id=g.id
+WHERE g.id=sqlc.arg(resource_id) AND g.deleted_at IS NULL AND
+(o.owner_tenant_id=sqlc.arg(tenant_id) OR (o.owner_kind='platform' AND EXISTS(
+ SELECT 1 FROM resource_grants r WHERE r.resource_id=g.id AND r.tenant_id=sqlc.arg(tenant_id)
+ AND r.status='active' AND r.valid_from<=now() AND r.valid_until>now())));
+
 -- name: GetPublicSubscription :one
 SELECT jsonb_build_object('id',s.id,'snapshot_id',s.snapshot_id,'version',s.version,'anchor_at',s.anchor_at,'expires_at',s.expires_at,'validity_state',CASE WHEN s.expires_at>now() THEN 'active' ELSE 'expired' END,'terms',p.terms) AS body
 FROM subscriptions s JOIN package_snapshots p ON p.tenant_id=s.tenant_id AND p.id=s.snapshot_id

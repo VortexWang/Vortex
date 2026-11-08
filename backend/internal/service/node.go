@@ -138,12 +138,30 @@ func (s NodeService) CreateGroup(ctx context.Context, scope TenantScope, in Grou
 // Replacement locks the group and every node in stable order. Any failed member
 // rolls back the entire set; no member is silently filtered for availability.
 func (s NodeService) SetMembers(ctx context.Context, scope TenantScope, group string, expected int64, members []GroupMember, request string) error {
+	_, e := s.SetMembersWithOperation(ctx, scope, group, expected, members, request)
+	return e
+}
+
+type GroupMemberMutationResult struct {
+	GroupID, OperationID   string
+	Version, MemberVersion int64
+}
+
+// SetMembersWithOperation returns the exact member revalidation operation from
+// the same versioned group, dependent-rule, port, Outbox and audit transaction.
+func (s NodeService) SetMembersWithOperation(ctx context.Context, scope TenantScope, group string, expected int64, members []GroupMember, request string) (GroupMemberMutationResult, error) {
+	var result GroupMemberMutationResult
 	members = append([]GroupMember(nil), members...)
 	sort.Slice(members, func(i, j int) bool { return members[i].NodeID < members[j].NodeID })
 	if len(members) > 1024 {
-		return ErrConflict
+		return result, ErrConflict
 	}
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "group.members", ResourceID: group, RequestID: request, Reason: "replace fixed member set"}, func(q *generated.Queries) error {
+	for i, m := range members {
+		if !validID(m.NodeID) || m.Weight < 1 || m.Weight > 10000 || m.Priority < 0 || i > 0 && members[i-1].NodeID == m.NodeID {
+			return result, ErrConflict
+		}
+	}
+	e := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "group.members", ResourceID: group, RequestID: request, Reason: "replace fixed member set"}, func(q *generated.Queries) error {
 		g, err := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: group, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
 		if err != nil {
 			return err
@@ -152,15 +170,25 @@ func (s NodeService) SetMembers(ctx context.Context, scope TenantScope, group st
 			return ErrScope
 		}
 		if g.Version != expected {
-			return ErrConflict
+			return ErrPrecondition
 		}
 		for _, m := range members {
 			n, e := q.ScopedNode(ctx, generated.ScopedNodeParams{NodeID: m.NodeID, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
 			if e != nil {
 				return e
 			}
-			if !owns(scope, n.OwnerKind, n.OwnerTenantID) {
+			if !owns(scope, n.OwnerKind, n.OwnerTenantID) || n.OwnerKind != g.OwnerKind || n.OwnerTenantID != g.OwnerTenantID {
 				return ErrScope
+			}
+			capable := false
+			for _, capability := range n.Capabilities {
+				if capability == g.Purpose {
+					capable = true
+					break
+				}
+			}
+			if !capable || g.Purpose == "entry" && n.PublicAddress == "" {
+				return ErrConflict
 			}
 		}
 		if err = q.ClearGroupMembers(ctx, group); err != nil {
@@ -181,8 +209,17 @@ func (s NodeService) SetMembers(ctx context.Context, scope TenantScope, group st
 		if err = invalidateRules(ctx, q, scope, "group", group); err != nil {
 			return err
 		}
-		return domainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
+		op, err := newDomainTask(ctx, q, scope, group, "group.revalidate_all_rules", "resource_change", next.Version)
+		if err != nil {
+			return err
+		}
+		result = GroupMemberMutationResult{GroupID: group, OperationID: op.ID, Version: next.Version, MemberVersion: next.MemberVersion}
+		return nil
 	})
+	if e != nil {
+		return GroupMemberMutationResult{}, e
+	}
+	return result, nil
 }
 func snapshot(ctx context.Context, q *generated.Queries, scope TenantScope, group string) (MemberSnapshot, error) {
 	g, err := q.ScopedGroup(ctx, generated.ScopedGroupParams{GroupID: group, TenantID: scope.TenantID(), PlatformRead: scope.Platform()})
