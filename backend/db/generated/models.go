@@ -298,6 +298,27 @@ type Node struct {
 	Version        int64
 }
 
+type NodeCreditCloseCommand struct {
+	TenantID      string
+	GrantID       string
+	AllocationID  string
+	CommandID     string
+	NodeID        string
+	BootID        string
+	BackendID     string
+	OperationID   string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+type NodeCreditCloseReceipt struct {
+	TenantID        string
+	GrantID         string
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type NodeDependency struct {
 	TenantID     string
 	NodeID       string

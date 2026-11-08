@@ -20,7 +20,25 @@ func (n *Node) CloseIssuedCreditGrant(ctx context.Context, hub string, original 
 	if n == nil || n.Store == nil || !canonicalUUID(hub) || !canonicalUUID(grant) || original == nil || len(original.ProtoReflect().GetUnknown()) != 0 {
 		return zero, store.ErrAuthorizationDenied
 	}
-	p, err := validateAuthorizationUpdate(original.Payload, n.NodeID, n.BootID, original.Generation)
+	expected, err := InspectIssuedCreditGrant(original.Payload, n.NodeID, n.BootID, hub, grant, original.Generation)
+	if err != nil {
+		return zero, err
+	}
+	if err := n.Store.StopMatchingCreditGrant(ctx, n.NodeID, n.BootID, expected); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return n.Store.StopUninstalledCreditGrant(ctx, n.NodeID, n.BootID, expected)
+		}
+		return zero, err
+	}
+	return n.Store.FinalizeStoppedCreditGrant(ctx, n.NodeID, n.BootID, hub, grant)
+}
+
+// InspectIssuedCreditGrant returns the exact original identity without storage,
+// authority installation or clock updates. Both Node closure and independent
+// backend receipt verification use this interpretation of original issue bytes.
+func InspectIssuedCreditGrant(raw []byte, node, boot, hub, grant string, generation uint64) (store.AuthorizationRecord, error) {
+	var zero store.AuthorizationRecord
+	p, err := validateAuthorizationUpdate(raw, node, boot, generation)
 	if err != nil {
 		return zero, err
 	}
@@ -41,13 +59,7 @@ func (n *Node) CloseIssuedCreditGrant(ctx context.Context, hub string, original 
 	if expected.AuthorizationID == "" || expected.DelegationID == "" || expected.ShareReferenceID == "" {
 		return zero, store.ErrAuthorizationDenied
 	}
-	if err := n.Store.StopMatchingCreditGrant(ctx, n.NodeID, n.BootID, expected); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return n.Store.StopUninstalledCreditGrant(ctx, n.NodeID, n.BootID, expected)
-		}
-		return zero, err
-	}
-	return n.Store.FinalizeStoppedCreditGrant(ctx, n.NodeID, n.BootID, hub, grant)
+	return expected, nil
 }
 
 func authorizationStoreRecord(a authorizationRecord, p authorizationPayload, issuer string) store.AuthorizationRecord {

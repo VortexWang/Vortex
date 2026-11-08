@@ -322,14 +322,20 @@ tickets or closes sockets by assertion. Pending/unknown outcomes produce only
 Known terminal tickets, original payload digests and source conservation are
 verified in one transaction before an immutable local final snapshot is returned.
 The final JSON is the candidate `agent/store.CreditGrantFinal` record, including
-the complete `AuthorizationRecord`, Used/Unused, BatchCount/UsageSHA256 and optional
-NeverInstalled witness. The outer result binds the command SHA256 and exact
+the complete `AuthorizationRecord`, Used/Unused, BatchCount/UsageSHA256, explicit
+version1 `KnownUsage` inventory and optional NeverInstalled witness. KnownUsage
+binds sorted committed batch IDs and original payload SHA256 values; returned
+local tickets remain solely in the local forensic digest. Historical version0
+finals are incomplete and must not authorize financial release. The outer result binds the command SHA256 and exact
 target identities. Lost transport receipts replay durable evidence without
 reopening credit. This snapshot is evidence for a future dedicated PostgreSQL
 consumer, never financial acceptance or release authority by itself.
 
-Node consumption and actual TLS1.3 positive/negative/replay tests exist. Backend
-durable close task production, receipt acceptance and independent complete
-issuer/usage inventory verification are still pending; no end-to-end parent
-closure or sustained funding is implied. CR-008 is unprepared/unapproved and
+Node and backend actual TLS1.3 tests cover capability isolation, pending tickets,
+lost FULL receipts, reconnect replay and PG known-usage arrival. Backend durable
+close commands derive only from accepted complete Hub seals; authenticated child
+receipts pin the original issue and independently reconstruct the known wire
+inventory. Unknown liabilities and disputes remain held. Child acceptance alone
+does not release parent funds; complete all-child parent closure and sustained
+funding remain pending. CR-008 is unprepared/unapproved and
 earlier approved contracts are unchanged.

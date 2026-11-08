@@ -235,6 +235,26 @@ CREATE TABLE hub_delegation_seals (
  FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
 );
 CREATE TRIGGER hub_delegation_seal_immutable BEFORE UPDATE OR DELETE ON hub_delegation_seals FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Child close commands derive only from a complete accepted issuer seal.
+CREATE TABLE node_credit_close_commands (
+ tenant_id text NOT NULL, grant_id text NOT NULL, allocation_id text NOT NULL,
+ command_id text NOT NULL UNIQUE, node_id text NOT NULL, boot_id text NOT NULL,
+ backend_id text NOT NULL, operation_id text NOT NULL, payload bytea NOT NULL CHECK(octet_length(payload)<=786432),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ PRIMARY KEY(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,grant_id) REFERENCES hub_credit_grants(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_delegation_seals(tenant_id,allocation_id),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER node_credit_close_command_immutable BEFORE UPDATE OR DELETE ON node_credit_close_commands FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+CREATE TABLE node_credit_close_receipts (
+ tenant_id text NOT NULL, grant_id text NOT NULL, payload bytea NOT NULL,
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,grant_id),
+ FOREIGN KEY(tenant_id,grant_id) REFERENCES node_credit_close_commands(tenant_id,grant_id)
+);
+CREATE TRIGGER node_credit_close_receipt_immutable BEFORE UPDATE OR DELETE ON node_credit_close_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

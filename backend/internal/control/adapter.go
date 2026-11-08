@@ -76,11 +76,12 @@ type sourceRequest struct {
 	ctx     context.Context
 }
 type session struct {
-	sources  chan sourceRequest
-	requests chan request
-	shares   chan shareRequest
-	rules    chan ruleRequest
-	done     chan struct{}
+	creditCloses chan creditCloseRequest
+	sources      chan sourceRequest
+	requests     chan request
+	shares       chan shareRequest
+	rules        chan ruleRequest
+	done         chan struct{}
 }
 
 // DeliverShare returns success only after the authenticated stream handler
@@ -219,7 +220,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	if _, err = uuid.Parse(first.BootId); err != nil {
 		return err
 	}
-	s := &session{sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
+	s := &session{creditCloses: make(chan creditCloseRequest), sources: make(chan sourceRequest), requests: make(chan request), rules: make(chan ruleRequest), shares: make(chan shareRequest), done: make(chan struct{})}
 	a.mu.Lock()
 	if a.nodes == nil {
 		a.nodes = map[string]*session{}
@@ -257,10 +258,14 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		}
 	}()
 	nodeSequence := first.Sequence
+	creditCloseCapable := false
 	sourceCapable := false
 	shareCapable := false
 	ruleCapable := false
 	for _, capability := range first.GetHeartbeat().Capabilities {
+		if capability == "credit-close-v1" {
+			creditCloseCapable = true
+		}
 		if capability == "source-provision-v1" {
 			sourceCapable = true
 		}
@@ -276,6 +281,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 	var pendingRule *ruleRequest
 	var pendingShare *shareRequest
 	var pendingSource *sourceRequest
+	var pendingCreditClose *creditCloseRequest
 	for {
 		var pendingDone <-chan struct{}
 		if pending != nil {
@@ -290,18 +296,22 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 		if pendingSource != nil {
 			pendingDone = pendingSource.ctx.Done()
 		}
+		if pendingCreditClose != nil {
+			pendingDone = pendingCreditClose.ctx.Done()
+		}
 		select {
 		case <-pendingDone:
 			pending = nil
 			pendingRule = nil
 			pendingShare = nil
 			pendingSource = nil
+			pendingCreditClose = nil
 		case <-stream.Context().Done():
 			return stream.Context().Err()
 		case e := <-readError:
 			return e
 		case r := <-s.requests:
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
 				r.result <- outcome{err: errors.New("target busy")}
 				continue
 			}
@@ -328,7 +338,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- ruleOutcome{err: errors.New("target lacks negotiated rule-two-phase-v1 capability")}
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
 				r.result <- ruleOutcome{err: errors.New("target busy")}
 				continue
 			}
@@ -345,12 +355,30 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_RuleCommand{RuleCommand: r.command}}); err != nil {
 				return err
 			}
+		case r := <-s.creditCloses:
+			if !creditCloseCapable || a.Shares == nil {
+				r.result <- errors.New("target lacks credit-close-v1")
+				continue
+			}
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
+				r.result <- errors.New("target busy")
+				continue
+			}
+			if r.boot != first.BootId || r.ctx.Err() != nil {
+				r.result <- errors.New("credit close target boot/request expired")
+				continue
+			}
+			pendingCreditClose = &r
+			sequence++
+			if err = stream.Send(&controlv1.ControlMessage{MessageId: uuid.NewString(), Sequence: sequence, Body: &controlv1.ControlMessage_CreditCloseCommand{CreditCloseCommand: r.command}}); err != nil {
+				return err
+			}
 		case r := <-s.sources:
 			if !sourceCapable || a.Shares == nil {
 				r.result <- errors.New("target lacks source-provision-v1")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -368,7 +396,7 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				r.result <- errors.New("target lacks share-cas-v1 authority")
 				continue
 			}
-			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil {
+			if pending != nil || pendingRule != nil || pendingShare != nil || pendingSource != nil || pendingCreditClose != nil {
 				r.result <- errors.New("target busy")
 				continue
 			}
@@ -386,6 +414,26 @@ func (a *Adapter) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage,
 				return errors.New("node stream identity or sequence mismatch")
 			}
 			nodeSequence = message.Sequence
+			if receipt := message.GetCreditCloseReceipt(); receipt != nil {
+				if pendingCreditClose == nil {
+					continue
+				}
+				if len(receipt.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(sha256Bytes(receipt.Payload), receipt.PayloadSha256) {
+					return errors.New("invalid credit close receipt envelope")
+				}
+				r, e := contracts.DecodeCreditCloseReceipt(receipt.Payload)
+				if e != nil {
+					return e
+				}
+				c, e := contracts.DecodeCreditCloseCommand(pendingCreditClose.command.Payload)
+				if e != nil || r.CommandID != c.ID || r.CommandSHA256 != fmt.Sprintf("%x", pendingCreditClose.command.PayloadSha256) || r.BackendID != c.BackendID || r.GrantID != c.GrantID || r.NodeID != id || r.BootID != first.BootId {
+					return errors.New("credit close receipt target/command mismatch")
+				}
+				e = a.Shares.RecordCreditClose(stream.Context(), pendingCreditClose.scope, receipt.Payload, uuid.NewString())
+				pendingCreditClose.result <- e
+				pendingCreditClose = nil
+				continue
+			}
 			if receipt := message.GetSourceProvisionReceipt(); receipt != nil {
 				if pendingSource == nil {
 					continue
