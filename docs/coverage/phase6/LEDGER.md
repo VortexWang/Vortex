@@ -1,6 +1,8 @@
 # 来源账本、用量与未知负债（06-05）
 
-当前候选尚未获 owner 冻结批准，acceptance_complete=false。HTTP adapter 属于
+CR-007已由用户精确批准，批准提交84821a04；DB/API2.2.0和control1.5.0已冻结。
+批准后独立clean source84821a04完整Docker通过，证据4403ac52；acceptance_complete=true
+仅表示本机producer，同SHA Actions配对仍归06-11。HTTP adapter 属于
 06-07，签发代次、运行/份额租约、Hub 资金委托 producer 属于 06-06。
 本计划的 PostgreSQL 预留不能代替这些尚未签发的权利。
 

@@ -193,21 +193,21 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## MTR Requirements
 
-- [ ] **MTR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (693-693; SHA-256 recorded there).
-- [ ] **MTR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (694-694; SHA-256 recorded there).
-- [ ] **MTR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (695-695; SHA-256 recorded there).
-- [ ] **MTR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (713-713; SHA-256 recorded there).
-- [ ] **MTR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (714-714; SHA-256 recorded there).
-- [ ] **MTR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (715-715; SHA-256 recorded there).
-- [ ] **MTR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (716-716; SHA-256 recorded there).
-- [ ] **MTR-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (717-717; SHA-256 recorded there).
-- [ ] **MTR-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (718-718; SHA-256 recorded there).
-- [ ] **MTR-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (719-719; SHA-256 recorded there).
-- [ ] **MTR-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (720-720; SHA-256 recorded there).
-- [ ] **MTR-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (721-721; SHA-256 recorded there).
-- [ ] **MTR-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (722-722; SHA-256 recorded there).
-- [ ] **MTR-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (723-723; SHA-256 recorded there).
-- [ ] **MTR-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (724-724; SHA-256 recorded there).
+- [x] **MTR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (693-693; SHA-256 recorded there).
+- [x] **MTR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (694-694; SHA-256 recorded there).
+- [x] **MTR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (695-695; SHA-256 recorded there).
+- [x] **MTR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (713-713; SHA-256 recorded there).
+- [x] **MTR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (714-714; SHA-256 recorded there).
+- [x] **MTR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (715-715; SHA-256 recorded there).
+- [x] **MTR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (716-716; SHA-256 recorded there).
+- [x] **MTR-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (717-717; SHA-256 recorded there).
+- [x] **MTR-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (718-718; SHA-256 recorded there).
+- [x] **MTR-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (719-719; SHA-256 recorded there).
+- [x] **MTR-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (720-720; SHA-256 recorded there).
+- [x] **MTR-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (721-721; SHA-256 recorded there).
+- [x] **MTR-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (722-722; SHA-256 recorded there).
+- [x] **MTR-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (723-723; SHA-256 recorded there).
+- [x] **MTR-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (724-724; SHA-256 recorded there).
 
 ## LIM Requirements
 
@@ -505,21 +505,21 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | PLN-003 | Phase 6 | Complete |
 | PLN-004 | Phase 6 | Complete |
 | PLN-005 | Phase 6 | Complete |
-| MTR-001 | Phase 6 | Pending |
-| MTR-002 | Phase 6 | Pending |
-| MTR-003 | Phase 6 | Pending |
-| MTR-004 | Phase 6 | Pending |
-| MTR-005 | Phase 6 | Pending |
-| MTR-006 | Phase 6 | Pending |
-| MTR-007 | Phase 6 | Pending |
-| MTR-008 | Phase 6 | Pending |
-| MTR-009 | Phase 6 | Pending |
-| MTR-010 | Phase 6 | Pending |
-| MTR-011 | Phase 6 | Pending |
-| MTR-013 | Phase 6 | Pending |
-| MTR-014 | Phase 6 | Pending |
-| MTR-015 | Phase 6 | Pending |
-| MTR-016 | Phase 6 | Pending |
+| MTR-001 | Phase 6 | Complete |
+| MTR-002 | Phase 6 | Complete |
+| MTR-003 | Phase 6 | Complete |
+| MTR-004 | Phase 6 | Complete |
+| MTR-005 | Phase 6 | Complete |
+| MTR-006 | Phase 6 | Complete |
+| MTR-007 | Phase 6 | Complete |
+| MTR-008 | Phase 6 | Complete |
+| MTR-009 | Phase 6 | Complete |
+| MTR-010 | Phase 6 | Complete |
+| MTR-011 | Phase 6 | Complete |
+| MTR-013 | Phase 6 | Complete |
+| MTR-014 | Phase 6 | Complete |
+| MTR-015 | Phase 6 | Complete |
+| MTR-016 | Phase 6 | Complete |
 | LIM-001 | Phase 6 | Pending |
 | LIM-002 | Phase 6 | Pending |
 | LIM-003 | Phase 6 | Pending |

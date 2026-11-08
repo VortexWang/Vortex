@@ -1,10 +1,25 @@
 ---
 phase: 06-m4-m4-backend
 plan: 05
-status: awaiting-owner-contract-approval
-gate: blocking-human
+status: resolved
+gate: resolved
 implementation_tasks: 3/3
-acceptance_complete: false
+acceptance_complete: true
+---
+
+# CHECKPOINT RESOLVED
+
+用户已明确“批准 CR-007”，精确proposal SHA256保持
+`3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5`。
+2026-11-08T02:49:25Z记录真实批准，原候选不变；database/API2.2.0、
+control1.5.0及精确companion已冻结，CR005/006历史不变。批准提交84821a04。
+批准后独立clean clone完整Docker入口exit0、result0、source_clean=true、
+acceptance_complete=true（本机producer范围）；35项checksums、全部必要普通/race、
+生成/兼容/冻结、真实Cloudflare及门禁反例通过。证据提交4403ac52，SUMMARY5b71afe6。
+Phase6为8/11，next06-06；最终Actions配对仍06-11，无待用户输入阻塞。
+
+以下保留原待批准checkpoint作为历史，不代表当前状态。
+
 ---
 
 # 06-05 契约批准续接点

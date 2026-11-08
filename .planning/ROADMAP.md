@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 7/11 plans executed in 11 dependency waves: 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete. Exact owner-approved CR-006 freezes DB/API2.1. Clean source9db5da0e passed full local Linux arm64 Docker backend/Agent/Engine normal/race, four selected freezes, generated/wire/schema/map, Linux dual-architecture compilation and real Cloudflare CRUD; evidence28e4f153, SUMMARY1775a7ed. 06-05 implementation now passes full clean source995d7fca local Docker normal/race, real usage/reboot/fault tests, generation, dual-architecture compilation and real Cloudflare CRUD (evidence8b4a0d9e); exact CR-007 owner approval remains pending, acceptance_complete=false and plan count stays7/11. See06-05-CHECKPOINT.md. Signer/lease producers, HTTP presentation, final same-SHA Actions pairing and remaining phase acceptance stay with later plans. Historical Phase4/5 and separate VLink debt remain unchanged.
+**Plans**: 8/11 plans executed in 11 dependency waves: 06-01, 06-08, 06-09, 06-02, 06-10, 06-03 and 06-04 complete. Exact owner-approved CR-006 freezes DB/API2.1. Clean source9db5da0e passed full local Linux arm64 Docker backend/Agent/Engine normal/race, four selected freezes, generated/wire/schema/map, Linux dual-architecture compilation and real Cloudflare CRUD; evidence28e4f153, SUMMARY1775a7ed. 06-05 implementation now passes full clean source995d7fca local Docker normal/race, real usage/reboot/fault tests, generation, dual-architecture compilation and real Cloudflare CRUD (evidence8b4a0d9e); exact CR-007 owner approval remains pending, acceptance_complete=false and plan count stays7/11. See06-05-CHECKPOINT.md. Signer/lease producers, HTTP presentation, final same-SHA Actions pairing and remaining phase acceptance stay with later plans. Historical Phase4/5 and separate VLink debt remain unchanged.
 
 **Wave 1**
 
@@ -211,7 +211,7 @@
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 06-05-PLAN.md — 逐来源账本、用量幂等与未知负债
+- [x] 06-05-PLAN.md — 逐来源账本、用量幂等与未知负债
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 7/11 | In Progress — 06-05 runtime verified; CR-007 approval pending | - |
+| 6. M4 Backend | 8/11 | In Progress — 06-05 runtime verified; CR-007 approval pending | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
