@@ -214,6 +214,16 @@ CREATE TABLE share_renewal_closure_receipts (
  FOREIGN KEY(tenant_id,command_id) REFERENCES share_renewal_closure_commands(tenant_id,id)
 );
 CREATE TRIGGER share_closure_receipt_immutable BEFORE UPDATE OR DELETE ON share_renewal_closure_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Sealing returns only the proven never-issued portion, never child debt.
+CREATE TABLE hub_delegation_seals (
+ tenant_id text NOT NULL, allocation_id text NOT NULL, seal_id text NOT NULL,
+ hub_id text NOT NULL, hub_boot_id text NOT NULL, ledger_sequence bigint NOT NULL CHECK(ledger_sequence>0),
+ payload bytea NOT NULL, payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ peer_fingerprint bytea NOT NULL CHECK(octet_length(peer_fingerprint)=32),
+ PRIMARY KEY(tenant_id,allocation_id), UNIQUE(tenant_id,seal_id), UNIQUE(hub_id,ledger_sequence),
+ FOREIGN KEY(tenant_id,allocation_id) REFERENCES hub_funded_allocations(tenant_id,allocation_id)
+);
+CREATE TRIGGER hub_delegation_seal_immutable BEFORE UPDATE OR DELETE ON hub_delegation_seals FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

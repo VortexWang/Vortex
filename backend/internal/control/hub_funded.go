@@ -21,13 +21,19 @@ import (
 var fundedHubCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1"}
 var closureHubCapabilities = append(append([]string{}, fundedHubCapabilities...), "share-renewal-close-v1")
 
+var sealHubCapabilities = append(append([]string{}, closureHubCapabilities...), "delegation-seal-v1")
+
 func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.HubMessage, controlv1.BackendMessage], id string, hello *controlv1.HubMessage) error {
 	body := hello.GetLifecycleHello()
 	usageOnly := slices.Equal(body.Capabilities, []string{"status-v1", "usage-ledger-v1"})
-	closureCapable := slices.Equal(body.Capabilities, closureHubCapabilities)
+	sealCapable := slices.Equal(body.Capabilities, sealHubCapabilities)
+	closureCapable := sealCapable || slices.Equal(body.Capabilities, closureHubCapabilities)
 	expectedCapabilities := fundedHubCapabilities
 	if closureCapable {
 		expectedCapabilities = closureHubCapabilities
+	}
+	if sealCapable {
+		expectedCapabilities = sealHubCapabilities
 	}
 	if usageOnly {
 		expectedCapabilities = body.Capabilities
@@ -222,6 +228,17 @@ func (h *HubAdapter) connectFunded(stream grpc.BidiStreamingServer[controlv1.Hub
 					return errors.New("usage capability not negotiated")
 				}
 				if e = h.ingestHubUsage(stream.Context(), id, r); e != nil {
+					return e
+				}
+			case "delegation-sealed-v1":
+				if !sealCapable {
+					return errors.New("delegation seal capability not negotiated")
+				}
+				seal, e := contracts.DecodeDelegationSeal(r.Payload)
+				if e != nil || seal.ID != r.RecordId {
+					return service.ErrShareConflict
+				}
+				if e = h.Shares.RecordDelegationSeal(stream.Context(), id, hello.BootId, int64(r.LedgerSequence), r.Payload, uuid.NewString()); e != nil {
 					return e
 				}
 			case "issue-v1":

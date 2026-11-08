@@ -170,6 +170,18 @@ type HubCreditUsage struct {
 	RawCumulative int64
 }
 
+type HubDelegationSeal struct {
+	TenantID        string
+	AllocationID    string
+	SealID          string
+	HubID           string
+	HubBootID       string
+	LedgerSequence  int64
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
 type HubFundedAllocation struct {
 	TenantID      string
 	AllocationID  string

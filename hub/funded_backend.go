@@ -15,7 +15,7 @@ import (
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
-var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1", "share-renewal-close-v1"}
+var fundedCapabilities = []string{"status-v1", "backend-allocation-v1", "backend-ledger-v1", "share-renewal-close-v1", "delegation-seal-v1"}
 
 func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreamingClient[controlv1.HubMessage, controlv1.BackendMessage]) error {
 	session := uuid.NewString()
@@ -57,6 +57,7 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 	var pending *store.LedgerRecord
 	var installed *controlv1.LedgerRecord
 	var closed *controlv1.LedgerRecord
+	sealCursor := ""
 	for {
 		select {
 		case <-ctx.Done():
@@ -65,16 +66,29 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 			if !ready || pending != nil {
 				continue
 			}
+			var e error
+			var complete bool
+			sealCursor, complete, e = c.Store.SealExpiredHubDelegations(ctx, c.HubID, c.BootID, sealCursor, c.Clock())
+			if e != nil {
+				return e
+			}
+			if complete {
+				sealCursor = ""
+			}
 			records, e := c.Store.PendingLedger(ctx, 1000)
 			if e != nil {
 				return e
 			}
 			for _, r := range records {
-				if r.Kind != "issue" {
+				if r.Kind != "issue" && r.Kind != "delegation-seal" {
 					continue
-				} // recovery/closure need separate consumers
+				} // recovery needs its separate consumer
 				pending = &r
-				if e = send(&controlv1.HubMessage{Body: &controlv1.HubMessage_LedgerRecord{LedgerRecord: &controlv1.LedgerRecord{RecordId: r.ID, LedgerSequence: uint64(r.Sequence), Kind: "issue-v1", Payload: r.Payload, PayloadSha256: r.Digest}}}); e != nil {
+				kind := "issue-v1"
+				if r.Kind == "delegation-seal" {
+					kind = "delegation-sealed-v1"
+				}
+				if e = send(&controlv1.HubMessage{Body: &controlv1.HubMessage_LedgerRecord{LedgerRecord: &controlv1.LedgerRecord{RecordId: r.ID, LedgerSequence: uint64(r.Sequence), Kind: kind, Payload: r.Payload, PayloadSha256: r.Digest}}}); e != nil {
 					return e
 				}
 				break
@@ -174,7 +188,11 @@ func (c *BackendClient) runFunded(ctx context.Context, stream grpc.BidiStreaming
 					installed = nil
 					continue
 				}
-				if pending == nil || ack.Kind != "issue-v1" || ack.RecordId != pending.ID || ack.LedgerSequence != uint64(pending.Sequence) || !bytes.Equal(ack.PayloadSha256, pending.Digest) {
+				expected := "issue-v1"
+				if pending != nil && pending.Kind == "delegation-seal" {
+					expected = "delegation-sealed-v1"
+				}
+				if pending == nil || ack.Kind != expected || ack.RecordId != pending.ID || ack.LedgerSequence != uint64(pending.Sequence) || !bytes.Equal(ack.PayloadSha256, pending.Digest) {
 					return errors.New("funded journal acknowledgement mismatch")
 				}
 				if _, e := c.Store.ConfirmLedger(ctx, *pending, ack.PayloadSha256); e != nil {

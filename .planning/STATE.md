@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: old-signer FULL closure transport verified; parent/children closure, sustained funding and boot recovery pending"
-last_updated: "2026-11-08T06:13:26Z"
+stopped_at: "06-06 Task 3: delegation seal returns only never-issued funds; child closure, sustained funding and boot recovery pending"
+last_updated: "2026-11-08T06:32:10Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: production old-signer closure barriers/pages, FULL tombstones and authenticated receipts verified. Native/Linux race, actual mTLS and dual-architecture builds passed. Phase6 stays8/11."
+last_activity_desc: "06-06 Task3: durable delegation inventory seal returns only unissued funds; unknown/issued hold and fractional accounting retained. Native/Linux race, actual mTLS loss/replay and builds passed. Phase6 stays8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 704c213c
+state_head: f0309cd9
 ---
 
 # Project State
@@ -33,7 +33,7 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 06
 Total Plans in Phase: 11
 Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete (8/11). 06-06 Tasks 1 and 2 complete; Task 3 allocation/runtime authority remains. Final Phase6 acceptance pending.
-Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Parent/children closure, sustained funding and boot recovery remain; final Actions06-11.
+Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Child final/unknown-safe closure, sustained funding, independent kind funding binding and boot recovery remain; final Actions06-11.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -134,8 +134,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T06:13:26Z
-Stopped at: 06-06 Task 3: old-signer FULL closure transport verified; parent/children closure, sustained funding and boot recovery pending
+Last session: 2026-11-08T06:32:10Z
+Stopped at: 06-06 Task 3: delegation seal returns only never-issued funds; child closure, sustained funding and boot recovery pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

@@ -1225,6 +1225,13 @@
             ],
             [
               "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1"
+            ],
+            [
+              "status-v1",
               "usage-ledger-v1"
             ]
           ]
@@ -1286,6 +1293,13 @@
               "backend-allocation-v1",
               "backend-ledger-v1",
               "share-renewal-close-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1"
             ],
             [
               "status-v1",
@@ -1625,6 +1639,83 @@
         "version",
         "command_id",
         "command_sha256"
+      ]
+    },
+    "delegation_seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "seal_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "delegation_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "raw_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "issued_raw_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "unissued_raw_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "issue_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "issues_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "seal_id",
+        "delegation_id",
+        "hub_id",
+        "hub_boot_id",
+        "node_id",
+        "boot_id",
+        "signer_epoch",
+        "raw_bytes",
+        "issued_raw_bytes",
+        "unissued_raw_bytes",
+        "issue_count",
+        "issues_sha256"
       ]
     }
   }

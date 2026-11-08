@@ -58,3 +58,10 @@ INSERT INTO node_source_provisions(tenant_id,allocation_id,node_id,boot_id,backe
 SELECT * FROM node_source_receipts WHERE tenant_id=$1 AND allocation_id=$2;
 -- name: AppendNodeSourceReceipt :exec
 INSERT INTO node_source_receipts(tenant_id,allocation_id,payload,payload_digest) VALUES($1,$2,$3,$4);
+
+-- name: HubAllocationIssueInventory :many
+SELECT i.issue_id,i.payload_digest,g.raw_granted FROM hub_issue_receipts i JOIN hub_credit_grants g ON g.tenant_id=i.tenant_id AND g.issue_id=i.issue_id WHERE i.tenant_id=$1 AND i.allocation_id=$2 ORDER BY i.issue_id;
+-- name: GetHubDelegationSeal :one
+SELECT * FROM hub_delegation_seals WHERE tenant_id=$1 AND allocation_id=$2;
+-- name: AppendHubDelegationSeal :exec
+INSERT INTO hub_delegation_seals(tenant_id,allocation_id,seal_id,hub_id,hub_boot_id,ledger_sequence,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);

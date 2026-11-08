@@ -332,6 +332,11 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID strin
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
+		if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: scope.TenantID(), AllocationID: a.AllocationID}); e == nil {
+			return ErrShareConflict
+		} else if !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
 		issued, e := q.HubAllocationIssued(ctx, generated.HubAllocationIssuedParams{TenantID: scope.TenantID(), AllocationID: a.AllocationID})
 		if e != nil {
 			return e

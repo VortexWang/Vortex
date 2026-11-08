@@ -239,3 +239,34 @@ renewal authority; this does not release capacity. Only a subsequent real Node C
 receipt may release the proven difference. Lost FULL receipt causes exact command
 replay; a lost PG ACK cannot duplicate closure. Older funded and usage-only peers
 cannot receive or acknowledge closure. These are candidate CR-008 artifacts.
+
+
+## Candidate funded delegation seal
+
+The independently negotiated `delegation-seal-v1` extends the ordered funded
+capabilities after `share-renewal-close-v1`. Three- and four-capability peers
+remain accepted, but may not send `delegation-sealed-v1`. The production Hub
+advertises all five capabilities. An expired or renewal-closed delegation can
+be sealed in one FULL transaction: permanently stop new issuance, retain prior
+request replay bytes, persist an immutable seal and append its issuer journal.
+A trusted lower time bound must prove expiration; a closed issuer needs no
+assumption about Node stop. The seal is not child-stop evidence.
+
+The complete inventory contains issue ID, SHA-256 of exact issue payload and raw
+amount, strictly sorted by issue ID. `issues_sha256` hashes its canonical JSON
+array (empty is `[]`); issue_count and issued_raw_bytes bind its cardinality and
+sum. raw_bytes = issued_raw_bytes + unissued_raw_bytes. LedgerRecord kind
+`delegation-sealed-v1` uses seal_id and the durable Hub journal sequence, payload
+is canonical seal JSON, and payload_sha256 binds it. The normal journal uploader
+sends earlier issue records before seal. PG independently reconstructs the full
+inventory from previously accepted authenticated issue records before accepting
+any return. Missing or different inventory stays pending, without release.
+
+The PG seal, source-local return, audit/task/Outbox commit together before ACK.
+Only unissued_raw_bytes can return. All issued child bytes, including expired or
+unknown children, retain their original source hold with the single parent
+coefficient and rounding. No-child complete inventory can finalize zero actual
+usage; this cannot be inferred from expiry alone. Exact lost ACK replay returns
+nothing twice. After sealing, only previously recorded issue IDs may replay;
+new child mapping is rejected. Child final accounting, safe sustained automatic
+refill and explicit boot recovery remain separate work; CR-008 remains candidate.

@@ -98,6 +98,37 @@ func (q *Queries) AppendHubCreditGrant(ctx context.Context, arg AppendHubCreditG
 	return err
 }
 
+const appendHubDelegationSeal = `-- name: AppendHubDelegationSeal :exec
+INSERT INTO hub_delegation_seals(tenant_id,allocation_id,seal_id,hub_id,hub_boot_id,ledger_sequence,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+`
+
+type AppendHubDelegationSealParams struct {
+	TenantID        string
+	AllocationID    string
+	SealID          string
+	HubID           string
+	HubBootID       string
+	LedgerSequence  int64
+	Payload         []byte
+	PayloadDigest   []byte
+	PeerFingerprint []byte
+}
+
+func (q *Queries) AppendHubDelegationSeal(ctx context.Context, arg AppendHubDelegationSealParams) error {
+	_, err := q.db.Exec(ctx, appendHubDelegationSeal,
+		arg.TenantID,
+		arg.AllocationID,
+		arg.SealID,
+		arg.HubID,
+		arg.HubBootID,
+		arg.LedgerSequence,
+		arg.Payload,
+		arg.PayloadDigest,
+		arg.PeerFingerprint,
+	)
+	return err
+}
+
 const appendHubIssue = `-- name: AppendHubIssue :exec
 INSERT INTO hub_issue_receipts(tenant_id,issue_id,allocation_id,hub_id,ledger_sequence,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7)
 `
@@ -300,6 +331,32 @@ func (q *Queries) GetHubAllocationReceipt(ctx context.Context, arg GetHubAllocat
 	return i, err
 }
 
+const getHubDelegationSeal = `-- name: GetHubDelegationSeal :one
+SELECT tenant_id, allocation_id, seal_id, hub_id, hub_boot_id, ledger_sequence, payload, payload_digest, peer_fingerprint FROM hub_delegation_seals WHERE tenant_id=$1 AND allocation_id=$2
+`
+
+type GetHubDelegationSealParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+func (q *Queries) GetHubDelegationSeal(ctx context.Context, arg GetHubDelegationSealParams) (HubDelegationSeal, error) {
+	row := q.db.QueryRow(ctx, getHubDelegationSeal, arg.TenantID, arg.AllocationID)
+	var i HubDelegationSeal
+	err := row.Scan(
+		&i.TenantID,
+		&i.AllocationID,
+		&i.SealID,
+		&i.HubID,
+		&i.HubBootID,
+		&i.LedgerSequence,
+		&i.Payload,
+		&i.PayloadDigest,
+		&i.PeerFingerprint,
+	)
+	return i, err
+}
+
 const getHubIncarnation = `-- name: GetHubIncarnation :one
 SELECT hub_id, signer_epoch, boot_id FROM hub_signer_incarnations WHERE hub_id=$1 AND signer_epoch=$2
 `
@@ -410,6 +467,41 @@ func (q *Queries) HubAllocationByDelegation(ctx context.Context, delegationID st
 		&i.CreatedBy,
 	)
 	return i, err
+}
+
+const hubAllocationIssueInventory = `-- name: HubAllocationIssueInventory :many
+SELECT i.issue_id,i.payload_digest,g.raw_granted FROM hub_issue_receipts i JOIN hub_credit_grants g ON g.tenant_id=i.tenant_id AND g.issue_id=i.issue_id WHERE i.tenant_id=$1 AND i.allocation_id=$2 ORDER BY i.issue_id
+`
+
+type HubAllocationIssueInventoryParams struct {
+	TenantID     string
+	AllocationID string
+}
+
+type HubAllocationIssueInventoryRow struct {
+	IssueID       string
+	PayloadDigest []byte
+	RawGranted    int64
+}
+
+func (q *Queries) HubAllocationIssueInventory(ctx context.Context, arg HubAllocationIssueInventoryParams) ([]HubAllocationIssueInventoryRow, error) {
+	rows, err := q.db.Query(ctx, hubAllocationIssueInventory, arg.TenantID, arg.AllocationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []HubAllocationIssueInventoryRow{}
+	for rows.Next() {
+		var i HubAllocationIssueInventoryRow
+		if err := rows.Scan(&i.IssueID, &i.PayloadDigest, &i.RawGranted); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const hubAllocationIssued = `-- name: HubAllocationIssued :one
