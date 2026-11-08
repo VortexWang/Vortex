@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-06 exact CR-008 approved; continuing06-07 REST/auth/SSE"
-last_updated: "2026-11-08T20:47:26.805137+00:00"
+stopped_at: "06-07 Task1 token families implemented; REST/cursor/SSE next"
+last_updated: "2026-11-08T20:58:34.580526+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "CR-008 exact owner approval recorded;06-06 complete9/11;06-07 starting."
+last_activity_desc: "06-07 Task1 hash-only rotating tokens, audit rollback and role/state revocation verified;9/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: cf92b7e2
+state_head: 4dc91a55
 ---
 
 # Project State
@@ -200,3 +200,5 @@ CR-008 exact review candidate now binds database/API2.3.0 and control1.6.0, prot
 06-06 implementation and unified candidate checks complete; awaiting explicit ownerCR-008 approval. Candidate4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd remains pending and historical approvals unchanged. Exact clean cf92b7e2 Docker passes backend normal211.753/race359.668, Agent/Store/Hub/contracts/Engine normal/race including full-disk, ledger fault2.820, share/recovery fault139.984 and all six Node/Backend/Hub Linux dual builds. Source before/after clean; semantic SHA/key-case checker passes and five malformed evidence cases reject. Native full backend race334.663 and generation/license/OpenAPI/legacy wire evidence retained. Earlier intermittent extra reconnect remains unexplained with failure retained; final strict suites pass. Checkpoint06-06-CHECKPOINT.md is concrete and reviewable. No owner approval/freeze/SUMMARY; Phase6 stays8/11. After exact approval, freeze/protect the candidate, complete06-06, then execute06-07; sameSHA Actions pairing remains06-11.
 
 Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 frozen with all inventoried companions. Prior proposal/approvals unchanged. Five selected frozen contracts and exact historical/generated/wire checks pass; VLink historical review hash mismatch remains preexisting, unchanged and outsideCR-008. Completing06-06 at9/11; proceeding06-07. Final Docker/Actions pair remains06-11.
+
+06-07 Task1 token unit implemented with realPG/native+Linux race, two deterministic24-output sqlc generations and source-bound audit/reuse tests. Migration9 remains candidate; noHTTP/SSE/full06-07 claim. See06-07-CONTINUATION.md.

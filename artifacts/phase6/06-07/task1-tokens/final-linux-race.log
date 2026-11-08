@@ -1,0 +1,48 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-179f743fab19 Creating 
+ Container vortex-phase6-tracer-backend-test-run-179f743fab19 Created 
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/08 20:54:28 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.02s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/08 20:54:28 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.02s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/08 20:54:28 goose: no migrations to run. current version: 9
+--- PASS: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.03s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/08 20:54:28 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.02s)
+PASS
+ok  	vortex/backend/internal/auth	1.120s
+=== RUN   TestTenantRoleScopeMatrix
+=== RUN   TestTenantRoleScopeMatrix/platform_admin
+=== RUN   TestTenantRoleScopeMatrix/operator
+=== RUN   TestTenantRoleScopeMatrix/auditor
+=== RUN   TestTenantRoleScopeMatrix/owner
+=== RUN   TestTenantRoleScopeMatrix/member
+--- PASS: TestTenantRoleScopeMatrix (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/platform_admin (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/operator (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/auditor (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/owner (0.00s)
+    --- PASS: TestTenantRoleScopeMatrix/member (0.00s)
+PASS
+ok  	vortex/backend/internal/policy	1.010s
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant
+--- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant (0.00s)
+PASS
+ok  	vortex/backend/internal/repository	1.017s

@@ -1,0 +1,28 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-52dfdc8b3cc8 Creating 
+ Container vortex-phase6-tracer-backend-test-run-52dfdc8b3cc8 Created 
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.02s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.02s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.03s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.02s)
+=== RUN   TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole (0.02s)
+=== RUN   TestAuthTokenIssueAuditFailureAndConfigurationBounds
+2026/11/08 20:56:19 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenIssueAuditFailureAndConfigurationBounds (0.02s)
+PASS
+ok  	vortex/backend/internal/auth	1.156s

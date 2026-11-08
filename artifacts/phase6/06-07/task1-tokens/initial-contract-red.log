@@ -1,0 +1,14 @@
+# vortex/backend/internal/auth_test [vortex/backend/internal/auth.test]
+internal/auth/tokens_test.go:19:40: undefined: auth.Tokens
+internal/auth/tokens_test.go:26:15: undefined: auth.Tokens
+internal/auth/tokens_test.go:26:39: undefined: repository.TokenRepository
+internal/auth/tokens_test.go:35:87: undefined: auth.ErrTokenReuse
+internal/auth/tokens_test.go:36:127: undefined: auth.ErrToken
+internal/auth/tokens_test.go:37:85: undefined: auth.ErrToken
+internal/auth/tokens_test.go:49:180: undefined: auth.ErrToken
+internal/auth/tokens_test.go:54:76: undefined: auth.ErrToken
+internal/auth/tokens_test.go:57:76: undefined: auth.ErrToken
+internal/auth/tokens_test.go:59:82: undefined: auth.ErrToken
+internal/auth/tokens_test.go:59:82: too many errors
+FAIL	vortex/backend/internal/auth [build failed]
+FAIL

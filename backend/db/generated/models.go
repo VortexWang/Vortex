@@ -8,6 +8,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ApiAccessToken struct {
+	TokenSha256 []byte
+	FamilyID    string
+	CreatedAt   pgtype.Timestamptz
+	ExpiresAt   pgtype.Timestamptz
+}
+
 type AuditEvent struct {
 	ID            int64
 	TenantID      string
@@ -91,6 +98,16 @@ type Dispute struct {
 	Reason            string
 	Evidence          []byte
 	CreatedAt         pgtype.Timestamptz
+}
+
+type DomainEvent struct {
+	ID          int64
+	TenantID    string
+	EventType   string
+	AggregateID string
+	Revision    int64
+	Summary     []byte
+	CreatedAt   pgtype.Timestamptz
 }
 
 type EncryptedCredential struct {
@@ -638,6 +655,29 @@ type PortReservation struct {
 	ReleaseTaskID   pgtype.Text
 	ConfigConfirmed bool
 	State           string
+}
+
+type RefreshToken struct {
+	TokenSha256 []byte
+	FamilyID    string
+	CreatedAt   pgtype.Timestamptz
+	ConsumedAt  pgtype.Timestamptz
+	ExpiresAt   pgtype.Timestamptz
+}
+
+type RefreshTokenFamily struct {
+	ID          string
+	ActorID     string
+	SubjectKind string
+	TenantID    pgtype.Text
+	CreatedAt   pgtype.Timestamptz
+	ExpiresAt   pgtype.Timestamptz
+}
+
+type RefreshTokenRevocation struct {
+	FamilyID  string
+	Reason    string
+	CreatedAt pgtype.Timestamptz
 }
 
 type ReleaseProof struct {

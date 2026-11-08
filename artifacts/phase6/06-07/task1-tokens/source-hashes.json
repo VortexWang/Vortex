@@ -1,0 +1,9 @@
+{
+  "backend/db/migrations/00009_domain_events.sql": "0f438eda126dd4a20d0f26a09edab70027e4bab90646d23271f31476060bfb31",
+  "backend/db/query/tokens.sql": "c9fcf92a2d9ccb75058a1ece44edba362036e22e482c0a374e9c7f21e7c88f70",
+  "backend/db/generated/models.go": "97e4c8f8c1c7a51533ef3e282178b4abbc9a534af84b03c602072d312bde8bb0",
+  "backend/db/generated/tokens.sql.go": "7d8ff6ffe01bbf103d7f83d2d49a1473c1c7a15fdd53d99dc3189ba243070f39",
+  "backend/internal/auth/tokens.go": "27d554b94322848e990b971995025d6608adda5deb0831ad53d6b470cb888276",
+  "backend/internal/auth/tokens_test.go": "b1d19a3131decfdf31aa3f56bb8838f390eee044d52a2afeaa6f069816f8f117",
+  "backend/internal/repository/token_repository.go": "845029d925e11a5c8a1319940d7cec67686cb3b987eda89957f0fa17ef43dd04"
+}

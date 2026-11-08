@@ -1,0 +1,12 @@
+[
+  {
+    "arch": "amd64",
+    "exit": 0,
+    "sha256": "fcf65905077ac6e3ba849cd608363ecf55c510d40063e1532a5f1848e66e872a"
+  },
+  {
+    "arch": "arm64",
+    "exit": 0,
+    "sha256": "37957cc819fb2660d1f655ba5fb38ed88f624e8b8a0bf4bd132452e391fe5f11"
+  }
+]
