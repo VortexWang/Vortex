@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/proto"
 	"path/filepath"
 	"testing"
 	"time"
@@ -241,10 +242,10 @@ func TestHubFundingActualIssuerChildrenOneParentAndAuditRollback(t *testing.T) {
 	}
 	// A child is not allowed to consume sibling capacity; neither a forged parent
 	// ID nor a short final/return proof can return the unconfirmed remainder.
-	bad := *batch
+	bad := proto.Clone(batch).(*controlv1.UsageBatch)
 	bad.BatchId = uuid.NewString()
 	bad.Deltas = []*controlv1.UsageDelta{{RuleId: a.RuleID, GrantId: grant1, Role: "source", Direction: "ingress", Bytes: 1}}
-	if _, e = metering.IngestWireUsage(ctx, a.NodeID, a.BootID, 2, &bad); !errors.Is(e, service.ErrUsageDisputed) {
+	if _, e = metering.IngestWireUsage(ctx, a.NodeID, a.BootID, 2, bad); !errors.Is(e, service.ErrUsageDisputed) {
 		t.Fatal("child exceeded its own partition", e)
 	}
 	proof := sha256.Sum256([]byte("incomplete child final must not release parent"))
