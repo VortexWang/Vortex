@@ -332,3 +332,14 @@ func TestShareSignerAndFenceAuditRollbackAndSelfHostedExemption(t *testing.T) {
 		t.Fatal("self hosted path charged platform shares", e)
 	}
 }
+
+func TestShareHandoffDurableReceiptAuthoritySchema(t *testing.T) {
+	p := testutil.Postgres(t)
+	var present bool
+	if e := p.QueryRow(context.Background(), "SELECT to_regclass('share_handoff_receipts') IS NOT NULL").Scan(&present); e != nil {
+		t.Fatal(e)
+	}
+	if !present {
+		t.Fatal("handoff has no immutable durable Node receipt authority; execution cannot release capacity")
+	}
+}

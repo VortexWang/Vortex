@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/share_handoff_red_test.py",
+  "exitCode": 1,
+  "output": "test_handoff_receipt_authority (__main__.ShareHandoff) ... FAIL\n\n======================================================================\nFAIL: test_handoff_receipt_authority (__main__.ShareHandoff)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/share_handoff_red_test.py\", line 10, in test_handoff_receipt_authority\n    self.assertEqual(result.returncode,0,result.stdout)\nAssertionError: 1 != 0 : === RUN   TestShareHandoffDurableReceiptAuthoritySchema\n2026/11/08 11:17:48 goose: no migrations to run. current version: 8\n    share_test.go:343: handoff has no immutable durable Node receipt authority; execution cannot release capacity\n--- FAIL: TestShareHandoffDurableReceiptAuthoritySchema (0.02s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.659s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.827s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_handoff_receipt_authority",
+  "targetFile": "backend/internal/service/share_test.go",
+  "expected": "Durable immutable Node receipt authority exists before any difference release",
+  "actual": "Real PostgreSQL has no share_handoff_receipts relation",
+  "semanticAssessment": "The named Go assertion ran against migrated real PostgreSQL and failed on absent receipt authority, not setup or compilation."
+}
