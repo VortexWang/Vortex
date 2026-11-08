@@ -1,0 +1,15 @@
+2026/11/09 00:41:27 goose: no migrations to run. current version: 8
+2026/11/09 00:41:27 OK   00001_authority.sql (30.88ms)
+2026/11/09 00:41:27 OK   00002_tenant_policy.sql (15.17ms)
+2026/11/09 00:41:27 OK   00003_nodes_ports.sql (34.42ms)
+2026/11/09 00:41:27 OK   00004_entry_group_domains.sql (4.07ms)
+2026/11/09 00:41:27 OK   00005_rules_compile.sql (35.6ms)
+2026/11/09 00:41:27 OK   00006_packages_entitlements.sql (31.45ms)
+2026/11/09 00:41:27 OK   00007_metering_ledger.sql (38.71ms)
+2026/11/09 00:41:27 OK   00008_limits_shares.sql (85.8ms)
+2026/11/09 00:41:27 goose: successfully migrated database to version: 8
+--- FAIL: TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare (1.46s)
+    runtime_effective_funding_test.go:100: node c0daef69-9d0d-4435-af27-81d3bc26ac5f snapshot 4c8cb190-e3d8-4e97-a477-7370a6730705: no rows in result set
+FAIL
+FAIL	vortex/backend/internal/service	2.260s
+FAIL

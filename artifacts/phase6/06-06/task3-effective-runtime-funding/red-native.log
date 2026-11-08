@@ -1,0 +1,15 @@
+2026/11/09 00:40:21 goose: no migrations to run. current version: 8
+2026/11/09 00:40:21 OK   00001_authority.sql (59.68ms)
+2026/11/09 00:40:21 OK   00002_tenant_policy.sql (15.5ms)
+2026/11/09 00:40:21 OK   00003_nodes_ports.sql (36.81ms)
+2026/11/09 00:40:21 OK   00004_entry_group_domains.sql (5.1ms)
+2026/11/09 00:40:21 OK   00005_rules_compile.sql (33.95ms)
+2026/11/09 00:40:21 OK   00006_packages_entitlements.sql (34.93ms)
+2026/11/09 00:40:22 OK   00007_metering_ledger.sql (66.39ms)
+2026/11/09 00:40:22 OK   00008_limits_shares.sql (55.86ms)
+2026/11/09 00:40:22 goose: successfully migrated database to version: 8
+--- FAIL: TestEffectiveRuntimeFundingAfterTransferredZeroChildFinalKeepsOriginalShare (1.52s)
+    runtime_effective_funding_test.go:128: effective epoch successor missing [{19db7851-08f2-4d51-8360-216aeb138e24 673cf6b9-1d6f-464f-b060-241650e5ce77 true}] <nil>
+FAIL
+FAIL	vortex/backend/internal/service	2.339s
+FAIL

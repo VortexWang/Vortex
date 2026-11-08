@@ -1004,3 +1004,27 @@ FULL seal final, classifies a parent as closed. Expiry,conservative estimates,
 new epochs and missing receipts do not. This hardens the refill barrier; it does
 not authorize new funding against a transferred generation or revise an immutable
 artifact. Effective-epoch funding eligibility remains separate unfinished work.
+
+## Effective-epoch runtime funding eligibility (candidate)
+
+A prepared artifact retains its original immutable signer epoch. After S/R,
+automatic runtime funding can derive a later effective epoch only when both
+active original rate/connection generations share that original epoch and their
+complete adjacent admitted chains match the current bound Hub boot/epoch, Node
+boot, path and fencing scope. A cold generation or missing chain cannot adopt an
+old artifact. Advisory candidate reads issue no authority; funding repeats this
+derivation inside its existing Hub/tenant serialization transaction.
+
+The original generation limits/deadlines and current policy/source balance bound
+the fresh allocation. The complete cross-epoch parent-final inventory still gates
+automatic refill. New credit uses a distinct source-funded parent and fresh roots
+at the effective epoch; original artifacts/generations/closure proofs are never
+rewritten. New same-epoch source-funded allocations bound to the admitted original
+generation are included in effective issuer closure inventory independently of
+the earlier S/R transfer manifest. Earlier omitted allocations still need their
+immutable seal, and every transferred allocation keeps its original witnesses.
+
+The verified service/store cycle currently covers an old zero-child parent,
+actual S/R/fence/roots/admission, real FULL seal final, audited concurrent refill
+and new effective-epoch Hub issue. Installed old-child finalization and complete
+production RuntimeServer/Engine recovery remain separate acceptance work.

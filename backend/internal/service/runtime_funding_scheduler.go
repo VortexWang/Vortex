@@ -60,7 +60,11 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 	if e != nil {
 		return e
 	}
-	incarnation, e := q.GetHubIncarnation(ctx, generated.GetHubIncarnationParams{HubID: hub, SignerEpoch: ref.SignerEpoch})
+	epoch, e := effectiveRuntimeEpochTx(ctx, q, scope.TenantID(), n.NodeID, n.BootID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration)
+	if e != nil {
+		return e
+	}
+	incarnation, e := q.GetHubIncarnation(ctx, generated.GetHubIncarnationParams{HubID: hub, SignerEpoch: epoch})
 	if errors.Is(e, pgx.ErrNoRows) {
 		return ErrShareUnknown
 	}
@@ -74,10 +78,10 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 	if e != nil {
 		return e
 	}
-	if boundary.SignerEpoch != ref.SignerEpoch {
+	if boundary.SignerEpoch != epoch {
 		return ErrShareUnknown
 	}
-	signer, e := q.GetSignerAuthority(ctx, generated.GetSignerAuthorityParams{TenantID: scope.TenantID(), SignerID: hub, SignerEpoch: ref.SignerEpoch})
+	signer, e := q.GetSignerAuthority(ctx, generated.GetSignerAuthorityParams{TenantID: scope.TenantID(), SignerID: hub, SignerEpoch: epoch})
 	if errors.Is(e, pgx.ErrNoRows) {
 		return ErrShareUnknown
 	}
@@ -151,13 +155,13 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 		if rawBytes < 1 {
 			continue
 		}
-		keyInput := fmt.Sprintf("runtime-bootstrap/%s/%s/%s/%s/%d/%d/%d", scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration)
+		keyInput := fmt.Sprintf("runtime-bootstrap/%s/%s/%s/%s/%d/%d/%d", scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, epoch, ref.PathGeneration, ref.FencingGeneration)
 		if predecessors > 0 {
 			keyInput += "/closed/" + history
 		}
 		key := uuid.NewSHA1(uuid.NameSpaceOID, []byte(keyInput)).String()
 		_, e = s.PrepareHubAllocation(ctx, scope, HubFundingInput{NodeID: n.NodeID, BootID: n.BootID, HubID: hub, HubBootID: incarnation.BootID, Region: region,
-			SourceID: src.ID, SnapshotID: ref.SnapshotID, Nonce: key, SignerEpoch: ref.SignerEpoch, PathGeneration: ref.PathGeneration, FencingFloor: ref.FencingGeneration,
+			SourceID: src.ID, SnapshotID: ref.SnapshotID, Nonce: key, SignerEpoch: epoch, PathGeneration: ref.PathGeneration, FencingFloor: ref.FencingGeneration,
 			RawBytes: rawBytes, ExpiresAt: deadline, runtimeHistorySHA256: history}, uuid.NewString())
 		return e
 	}

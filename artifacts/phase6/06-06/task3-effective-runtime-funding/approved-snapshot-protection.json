@@ -1,0 +1,7 @@
+{
+  "changed_contracts": [
+    "contracts/protobuf/v1/lifecycle.md"
+  ],
+  "protobuf_or_approved_snapshot_changed": false,
+  "migration_or_dependency_changed": false
+}

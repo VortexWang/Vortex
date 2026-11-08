@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"vortex/backend/db/generated"
 	"vortex/contracts"
+	"vortex/hub"
 )
 
 type effectiveShareIssuer struct {
@@ -138,6 +139,29 @@ func effectiveShareIssuerTx(ctx context.Context, q *generated.Queries, g generat
 		// A delegation sealed before admission did not transfer. Transferred
 		// delegations still require every source witness after later sealing.
 		if !transferred[original.AllocationID] {
+			// New source-funded parents may be created under the already admitted
+			// effective issuer. They do not belong to the earlier transfer manifest.
+			decoded, e := hub.DecodeAllocation(original.Payload)
+			if e != nil {
+				return out, e
+			}
+			if decoded.SignerEpoch == uint64(current.SignerEpoch) {
+				if original.HubBootID != current.BootID || original.NodeID != g.NodeID || original.BootID != g.BootID {
+					return out, ErrShareUnknown
+				}
+				bindings, e := q.HubAllocationShareBindings(ctx, generated.HubAllocationShareBindingsParams{TenantID: original.TenantID, AllocationID: original.AllocationID})
+				if e != nil {
+					return out, e
+				}
+				if len(bindings) != 2 {
+					return out, ErrShareUnknown
+				}
+				if _, _, e = effectiveHubAllocationTx(ctx, q, original, uint64(current.SignerEpoch), current.BootID, time.Time{}); e != nil {
+					return out, e
+				}
+				out.Delegations = append(out.Delegations, original.DelegationID)
+				continue
+			}
 			if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: original.TenantID, AllocationID: original.AllocationID}); e != nil {
 				return out, ErrShareUnknown
 			}

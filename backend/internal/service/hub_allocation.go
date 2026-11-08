@@ -132,7 +132,14 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 		ready := false
 		var ruleRate, ruleConnections int64
 		for _, p := range prepared {
-			if p.NodeID == in.NodeID && p.BootID == in.BootID && p.BillingSnapshotID == in.SnapshotID && p.PathGeneration == in.PathGeneration && p.SignerEpoch == in.SignerEpoch && p.FencingGeneration == in.FencingFloor {
+			if p.NodeID == in.NodeID && p.BootID == in.BootID && p.BillingSnapshotID == in.SnapshotID && p.PathGeneration == in.PathGeneration && p.FencingGeneration == in.FencingFloor {
+				epoch, e := effectiveRuntimeEpochTx(ctx, q, scope.TenantID(), p.NodeID, p.BootID, p.SignerEpoch, p.PathGeneration, p.FencingGeneration)
+				if e != nil {
+					return e
+				}
+				if epoch != in.SignerEpoch {
+					continue
+				}
 				if _, e = repository.CommittedArtifact(ctx, q, scope.TenantID(), repository.ArtifactBinding{RuleID: p.RuleID, NodeID: p.NodeID, Digest: p.Digest, Revision: p.RuleRevision, FencingGeneration: p.FencingGeneration}); e != nil {
 					return e
 				}
@@ -188,7 +195,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			if e != nil {
 				return e
 			}
-			if g.SignerID != in.HubID || g.SignerEpoch != in.SignerEpoch || in.FencingFloor < g.FencingGeneration || in.ExpiresAt.After(g.OwnershipUntil.Time) || in.ExpiresAt.After(g.PolicyUntil.Time) || in.ExpiresAt.After(g.AutonomyUntil.Time) {
+			if g.SignerID != in.HubID || in.FencingFloor < g.FencingGeneration || in.ExpiresAt.After(g.OwnershipUntil.Time) || in.ExpiresAt.After(g.PolicyUntil.Time) || in.ExpiresAt.After(g.AutonomyUntil.Time) {
 				return ErrLeaseBoundary
 			}
 			authority, e := q.ShareRenewalAuthority(ctx, generated.ShareRenewalAuthorityParams{TenantID: scope.TenantID(), NodeID: in.NodeID, Kind: kind, Generation: g.Generation, SignerID: in.HubID})
@@ -202,7 +209,11 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			if barrier {
 				return ErrShareConflict
 			}
-			if authority.ClosedAt.Valid {
+			issuer, e := effectiveShareIssuerTx(ctx, q, g, authority)
+			if e != nil {
+				return e
+			}
+			if issuer.Epoch != in.SignerEpoch || (issuer.Recovered && issuer.Boot != in.HubBootID) || (!issuer.Recovered && authority.ClosedAt.Valid) {
 				return ErrShareConflict
 			}
 			if kind == "rate" {
