@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/service"
 	"vortex/backend/internal/testutil"
@@ -47,6 +49,7 @@ func TestTracerDesiredStateReceipt(t *testing.T) {
 	ctx := context.Background()
 	s := &service.Tracer{Pool: pool}
 	tenant := scope(t)
+	seedTracerTenant(t, pool, tenant)
 	m := mutation()
 	op, err := s.Mutate(ctx, tenant, m)
 	if err != nil {
@@ -149,6 +152,7 @@ func TestTracerTransactionRollback(t *testing.T) {
 	ctx := context.Background()
 	s := &service.Tracer{Pool: pool}
 	tenant := scope(t)
+	seedTracerTenant(t, pool, tenant)
 	m := mutation()
 	// A real PostgreSQL trigger causes the final audit insert to fail, after
 	// desired/operation/task/outbox writes, proving the shared rollback boundary.
@@ -158,7 +162,7 @@ func TestTracerTransactionRollback(t *testing.T) {
 	}
 	defer pool.Exec(ctx, "DROP TRIGGER phase6_audit_fault ON audit_events; DROP FUNCTION phase6_audit_fault()")
 	m.RequestID = "phase6-audit-fault"
-	if _, err = s.Mutate(ctx, tenant, m); err == nil {
+	if _, err = s.Mutate(ctx, tenant, m); err == nil || !strings.Contains(err.Error(), "injected audit failure") {
 		t.Fatal("fault did not abort transaction")
 	}
 	for _, table := range []string{"desired_state", "operations", "tasks", "outbox", "audit_events"} {
@@ -174,6 +178,7 @@ func TestTracerConcurrentMutation(t *testing.T) {
 	ctx := context.Background()
 	s := &service.Tracer{Pool: pool}
 	tenant := scope(t)
+	seedTracerTenant(t, pool, tenant)
 	m := mutation()
 	var wg sync.WaitGroup
 	results := make(chan string, 8)
@@ -208,6 +213,7 @@ func TestValkeyLossRebuild(t *testing.T) {
 		t.Fatal("PHASE6_VALKEY_ADDR required")
 	}
 	tenant := scope(t)
+	seedTracerTenant(t, pool, tenant)
 	s := &service.Tracer{Pool: pool}
 	m := mutation()
 	op, err := s.Mutate(ctx, tenant, m)
@@ -265,4 +271,15 @@ func TestValkeyLossRebuild(t *testing.T) {
 		t.Fatal("invalid projection")
 	}
 	_ = sha256.Sum256(after)
+}
+
+func seedTracerTenant(t *testing.T, pool *pgxpool.Pool, s service.TenantScope) {
+	t.Helper()
+	ctx := context.Background()
+	if _, e := pool.Exec(ctx, `INSERT INTO tenants(id) VALUES($1)`, s.TenantID()); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := pool.Exec(ctx, `INSERT INTO users(id,tenant_id,role) VALUES($1,$2,'owner')`, s.ActorID(), s.TenantID()); e != nil {
+		t.Fatal(e)
+	}
 }

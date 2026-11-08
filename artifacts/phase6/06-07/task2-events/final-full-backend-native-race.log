@@ -1,0 +1,15 @@
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/cmd/vortex-hub	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+ok  	vortex/backend/internal/auth	1.702s
+ok  	vortex/backend/internal/compiler	3.115s
+ok  	vortex/backend/internal/control	2.676s
+ok  	vortex/backend/internal/httpapi	6.953s
+ok  	vortex/backend/internal/policy	2.551s
+ok  	vortex/backend/internal/repository	3.438s
+ok  	vortex/backend/internal/service	364.554s
+?   	vortex/backend/internal/testutil	[no test files]
+ok  	vortex/backend/internal/timeauthority	3.964s
+?   	vortex/backend/internal/worker	[no test files]

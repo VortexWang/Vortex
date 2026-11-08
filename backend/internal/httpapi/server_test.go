@@ -77,7 +77,17 @@ func TestPublicTLSListenerBearerBoundaryAndShutdown(t *testing.T) {
 		t.Fatal("TLS1.2 accepted")
 	}
 	oldTLS.CloseIdleConnections()
+	streamRequest, _ := http.NewRequest("GET", "https://"+listener.Addr().String()+"/api/v1/tenants/"+f.tenant+"/events", nil)
+	streamRequest.Header.Set("Authorization", "Bearer "+f.pair.AccessToken)
+	stream, e := client.Do(streamRequest)
+	if e != nil {
+		t.Fatal(e)
+	}
 	cancel()
+	if _, e = io.ReadAll(stream.Body); e != nil {
+		t.Fatal("active event stream failed to close gracefully", e)
+	}
+	stream.Body.Close()
 	select {
 	case e := <-done:
 		if e != nil {

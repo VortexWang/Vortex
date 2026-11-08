@@ -27,6 +27,10 @@ func Serve(ctx context.Context, listener net.Listener, server *http.Server) erro
 	if ctx == nil || listener == nil || server == nil || server.TLSConfig == nil {
 		return errors.New("incomplete public API server")
 	}
+	if server.BaseContext == nil {
+		server.BaseContext = func(net.Listener) context.Context { return ctx }
+	}
+	defer server.Close()
 	done := make(chan struct{})
 	finished := make(chan struct{})
 	go func() {

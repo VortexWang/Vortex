@@ -52,6 +52,8 @@ func (w *Worker) Once(ctx context.Context) (bool, error) {
 	if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: op.ID, State: "leased"}); err != nil {
 		return false, err
 	}
+	// Commit also flushes transaction-local safe domain events and assigns
+	// tenant sequence numbers; failed commits expose neither state nor event.
 	if err = tx.Commit(ctx); err != nil {
 		return false, err
 	}

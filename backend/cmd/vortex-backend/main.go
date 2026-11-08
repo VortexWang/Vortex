@@ -289,5 +289,16 @@ func serveHTTP(ctx context.Context, pool *pgxpool.Pool, args []string) error {
 	}
 	defer listener.Close()
 	fmt.Printf("backend public API ready https=%s\n", listener.Addr())
-	return httpapi.Serve(ctx, listener, server)
+	runtime, cancel := context.WithCancel(ctx)
+	defer cancel()
+	failures := make(chan error, 2)
+	go func() { failures <- httpapi.Serve(runtime, listener, server) }()
+	go func() { failures <- (worker.EventRetentionWorker{Pool: pool}).Run(runtime) }()
+	first := <-failures
+	cancel()
+	<-failures
+	if ctx.Err() != nil {
+		return nil
+	}
+	return first
 }

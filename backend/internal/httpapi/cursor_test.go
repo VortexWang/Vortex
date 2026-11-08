@@ -102,3 +102,43 @@ func TestCursorUsesExactMicrosecondOrderingAndCopiesSigningKey(t *testing.T) {
 		}
 	}
 }
+
+func TestEventCursorStableDomainSeparatedAndBoundToScope(t *testing.T) {
+	c, _ := httpapi.NewCursorCodec([]byte(strings.Repeat("s", 32)), time.Hour)
+	scope := httpapi.CursorScope{PrincipalID: "p", TenantID: "t", Collection: "events", Direction: "forward"}
+	for _, sequence := range []int64{0, 1, 9223372036854775807} {
+		id, e := c.EncodeEventCursor(scope, sequence)
+		if e != nil {
+			t.Fatal(e)
+		}
+		repeated, _ := c.EncodeEventCursor(scope, sequence)
+		if id != repeated {
+			t.Fatal("unstable event ID")
+		}
+		got, e := c.DecodeEventCursor(id, scope)
+		if e != nil || got != sequence {
+			t.Fatal(got, e)
+		}
+		for _, changed := range []httpapi.CursorScope{{PrincipalID: "other", TenantID: "t", Collection: "events", Direction: "forward"}, {PrincipalID: "p", TenantID: "other", Collection: "events", Direction: "forward"}, {PrincipalID: "p", TenantID: "t", Collection: "operations", Direction: "forward"}} {
+			if _, e = c.DecodeEventCursor(id, changed); !errors.Is(e, httpapi.ErrCursor) {
+				t.Fatal("event scope changed", e)
+			}
+		}
+		if _, e = c.Decode(id, scope, time.Now()); !errors.Is(e, httpapi.ErrCursor) {
+			t.Fatal("event cursor used as list cursor")
+		}
+		if _, e = c.DecodeEventCursor(id+"=", scope); !errors.Is(e, httpapi.ErrCursor) {
+			t.Fatal("noncanonical event cursor")
+		}
+	}
+	if _, e := c.EncodeEventCursor(scope, -1); !errors.Is(e, httpapi.ErrCursor) {
+		t.Fatal(e)
+	}
+	list, e := c.Encode(scope, httpapi.CursorPosition{CreatedAt: time.Now().UTC().Truncate(time.Microsecond), ID: "1"}, time.Now())
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = c.DecodeEventCursor(list, scope); !errors.Is(e, httpapi.ErrCursor) {
+		t.Fatal("list cursor used as event cursor")
+	}
+}

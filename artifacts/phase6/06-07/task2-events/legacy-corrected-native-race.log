@@ -1,0 +1,64 @@
+=== RUN   TestValkeyLossRebuildAllProducedAuthority
+2026/11/09 05:39:37 goose: no migrations to run. current version: 9
+--- PASS: TestValkeyLossRebuildAllProducedAuthority (0.14s)
+=== RUN   TestPackageMigrationUpgradeSeeded00005
+2026/11/09 05:39:37 goose: no migrations to run. current version: 9
+2026/11/09 05:39:37 OK   00001_authority.sql (27.99ms)
+2026/11/09 05:39:37 OK   00002_tenant_policy.sql (11.67ms)
+2026/11/09 05:39:37 OK   00003_nodes_ports.sql (48.31ms)
+2026/11/09 05:39:37 OK   00004_entry_group_domains.sql (2.53ms)
+2026/11/09 05:39:37 OK   00005_rules_compile.sql (18.9ms)
+2026/11/09 05:39:37 goose: successfully migrated database to version: 5
+2026/11/09 05:39:37 OK   00006_packages_entitlements.sql (19.33ms)
+2026/11/09 05:39:37 OK   00007_metering_ledger.sql (24.51ms)
+2026/11/09 05:39:37 OK   00008_limits_shares.sql (52.43ms)
+2026/11/09 05:39:37 OK   00009_domain_events.sql (11.82ms)
+2026/11/09 05:39:37 goose: successfully migrated database to version: 9
+--- PASS: TestPackageMigrationUpgradeSeeded00005 (0.40s)
+=== RUN   TestTracerRealProcesses
+2026/11/09 05:39:41 goose: no migrations to run. current version: 9
+    process_test.go:313: real backend/Agent/Hub processes succeeded operation=ac56ad5e-1003-431b-903c-9d4b54b74cfe duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (9.55s)
+=== RUN   TestMigrationUpgradeTenantAuthority
+2026/11/09 05:39:47 goose: no migrations to run. current version: 9
+=== RUN   TestMigrationUpgradeTenantAuthority/seeded00001
+2026/11/09 05:39:47 OK   00001_authority.sql (16.13ms)
+2026/11/09 05:39:47 goose: successfully migrated database to version: 1
+2026/11/09 05:39:47 OK   00002_tenant_policy.sql (9.4ms)
+2026/11/09 05:39:47 OK   00003_nodes_ports.sql (21.55ms)
+2026/11/09 05:39:47 OK   00004_entry_group_domains.sql (2.81ms)
+2026/11/09 05:39:47 OK   00005_rules_compile.sql (21.38ms)
+2026/11/09 05:39:47 OK   00006_packages_entitlements.sql (21.22ms)
+2026/11/09 05:39:47 OK   00007_metering_ledger.sql (27.99ms)
+2026/11/09 05:39:47 OK   00008_limits_shares.sql (67.87ms)
+2026/11/09 05:39:47 OK   00009_domain_events.sql (16.67ms)
+2026/11/09 05:39:47 goose: successfully migrated database to version: 9
+=== RUN   TestMigrationUpgradeTenantAuthority/empty
+2026/11/09 05:39:47 OK   00001_authority.sql (7.86ms)
+2026/11/09 05:39:47 goose: successfully migrated database to version: 1
+2026/11/09 05:39:48 OK   00002_tenant_policy.sql (8.6ms)
+2026/11/09 05:39:48 OK   00003_nodes_ports.sql (23.29ms)
+2026/11/09 05:39:48 OK   00004_entry_group_domains.sql (4ms)
+2026/11/09 05:39:48 OK   00005_rules_compile.sql (23.41ms)
+2026/11/09 05:39:48 OK   00006_packages_entitlements.sql (17.01ms)
+2026/11/09 05:39:48 OK   00007_metering_ledger.sql (22.07ms)
+2026/11/09 05:39:48 OK   00008_limits_shares.sql (49.3ms)
+2026/11/09 05:39:48 OK   00009_domain_events.sql (11.43ms)
+2026/11/09 05:39:48 goose: successfully migrated database to version: 9
+--- PASS: TestMigrationUpgradeTenantAuthority (0.72s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/seeded00001 (0.38s)
+    --- PASS: TestMigrationUpgradeTenantAuthority/empty (0.31s)
+=== RUN   TestTracerDesiredStateReceipt
+2026/11/09 05:39:48 goose: no migrations to run. current version: 9
+--- PASS: TestTracerDesiredStateReceipt (0.04s)
+=== RUN   TestTracerTransactionRollback
+2026/11/09 05:39:48 goose: no migrations to run. current version: 9
+--- PASS: TestTracerTransactionRollback (0.03s)
+=== RUN   TestTracerConcurrentMutation
+2026/11/09 05:39:48 goose: no migrations to run. current version: 9
+--- PASS: TestTracerConcurrentMutation (0.04s)
+=== RUN   TestValkeyLossRebuild
+2026/11/09 05:39:48 goose: no migrations to run. current version: 9
+--- PASS: TestValkeyLossRebuild (0.04s)
+PASS
+ok  	vortex/backend/internal/service	12.782s

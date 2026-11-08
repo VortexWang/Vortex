@@ -327,14 +327,7 @@ func TestMigrationUpgradeTenantAuthority(t *testing.T) {
 			own := scope(t)
 			tables := []string{"desired_state", "operations", "tasks", "outbox", "audit_events", "control_receipts"}
 			if seeded {
-				tracer := service.Tracer{Pool: pool}
-				op, e := tracer.Mutate(ctx, own, mutation())
-				if e != nil {
-					t.Fatal(e)
-				}
-				if e = tracer.Reconcile(ctx, own.TenantID(), op.ID, service.Receipt{Revision: 1, Generation: 1, State: "succeeded", Payload: []byte("upgrade receipt")}); e != nil {
-					t.Fatal(e)
-				}
+				seedHistoricalAuthority(t, pool, own, "succeeded")
 			}
 			before := legacyAuthoritySnapshot(t, pool, own.TenantID(), tables)
 			if err = db.Migrate(ctx, u.String()); err != nil {
@@ -356,7 +349,7 @@ func TestMigrationUpgradeTenantAuthority(t *testing.T) {
 func legacyAuthoritySnapshot(t *testing.T, pool *pgxpool.Pool, tenant string, tables []string) []byte {
 	t.Helper()
 	var snapshot map[string][]map[string]any
-	if e := json.Unmarshal(authoritySnapshot(t, pool, tenant, tables), &snapshot); e != nil {
+	if e := json.Unmarshal(prePublicOrderSnapshot(t, pool, tenant, tables), &snapshot); e != nil {
 		t.Fatal(e)
 	}
 	for _, task := range snapshot["tasks"] {

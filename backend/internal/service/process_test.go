@@ -183,6 +183,7 @@ func TestTracerRealProcesses(t *testing.T) {
 	}
 	cancel()
 	tenant := scope(t)
+	seedTracerTenant(t, pool, tenant)
 	s := &service.Tracer{Pool: pool}
 	m := mutation()
 	m.ResourceID = nodeID

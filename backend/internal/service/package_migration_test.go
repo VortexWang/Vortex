@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 	"vortex/backend/db"
-	"vortex/backend/internal/service"
 	"vortex/backend/internal/testutil"
 )
 
@@ -42,14 +41,7 @@ func TestPackageMigrationUpgradeSeeded00005(t *testing.T) {
 	if _, e = pool.Exec(ctx, "INSERT INTO tenants(id) VALUES($1)", own.TenantID()); e != nil {
 		t.Fatal(e)
 	}
-	tracer := service.Tracer{Pool: pool}
-	op, e := tracer.Mutate(ctx, own, mutation())
-	if e != nil {
-		t.Fatal(e)
-	}
-	if e = tracer.Reconcile(ctx, own.TenantID(), op.ID, service.Receipt{Revision: 1, Generation: 1, State: "unknown", Payload: []byte("uncertain authority must survive upgrade")}); e != nil {
-		t.Fatal(e)
-	}
+	seedHistoricalAuthority(t, pool, own, "unknown")
 	rule := uuid.NewString()
 	if _, e = pool.Exec(ctx, "INSERT INTO rule_heads(tenant_id,id,desired_revision,sync_status) VALUES($1,$2,1,'unknown')", own.TenantID(), rule); e != nil {
 		t.Fatal(e)
@@ -61,15 +53,15 @@ func TestPackageMigrationUpgradeSeeded00005(t *testing.T) {
 		t.Fatal(e)
 	}
 	tables := []string{"desired_state", "operations", "tasks", "outbox", "audit_events", "control_receipts", "rule_heads", "rule_revisions", "rule_targets", "rule_segments", "rule_dependencies", "rule_compile_requests", "rule_compile_inputs", "rule_artifacts", "rule_artifact_commits", "port_allocations", "port_reservations", "release_proofs"}
-	before := authoritySnapshot(t, pool, own.TenantID(), tables)
+	before := prePublicOrderSnapshot(t, pool, own.TenantID(), tables)
 	if e = db.Migrate(ctx, u.String()); e != nil {
 		t.Fatal(e)
 	}
-	if !bytes.Equal(before, authoritySnapshot(t, pool, own.TenantID(), tables)) {
-		t.Fatal("upgrade through 00008 changed pre-existing authority or unknown observations")
+	if !bytes.Equal(before, prePublicOrderSnapshot(t, pool, own.TenantID(), tables)) {
+		t.Fatal("upgrade through 00009 changed pre-existing authority or unknown observations")
 	}
 	var version int
-	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 8 {
+	if e = pool.QueryRow(ctx, "SELECT max(version_id) FROM goose_db_version WHERE is_applied").Scan(&version); e != nil || version != 9 {
 		t.Fatal(version, e)
 	}
 }

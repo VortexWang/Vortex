@@ -103,11 +103,28 @@ type Dispute struct {
 type DomainEvent struct {
 	ID          int64
 	TenantID    string
+	Sequence    int64
 	EventType   string
 	AggregateID string
 	Revision    int64
 	Summary     []byte
 	CreatedAt   pgtype.Timestamptz
+}
+
+type DomainEventPending struct {
+	ID            int64
+	TransactionID int64
+	TenantID      string
+	EventType     string
+	AggregateID   string
+	Revision      int64
+	Summary       []byte
+}
+
+type DomainEventStream struct {
+	TenantID      string
+	LastSequence  int64
+	RetainedAfter int64
 }
 
 type EncryptedCredential struct {

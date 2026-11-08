@@ -1,0 +1,503 @@
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry/principal
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry/tenant
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry/collection
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry/direction
+=== RUN   TestCursorBindsPrincipalScopeCollectionSortAndExpiry/filter
+--- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry (0.00s)
+    --- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry/principal (0.00s)
+    --- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry/tenant (0.00s)
+    --- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry/collection (0.00s)
+    --- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry/direction (0.00s)
+    --- PASS: TestCursorBindsPrincipalScopeCollectionSortAndExpiry/filter (0.00s)
+=== RUN   TestCursorRejectsMalformedNonCanonicalAndTamperedTokens
+--- PASS: TestCursorRejectsMalformedNonCanonicalAndTamperedTokens (0.00s)
+=== RUN   TestCursorUsesExactMicrosecondOrderingAndCopiesSigningKey
+--- PASS: TestCursorUsesExactMicrosecondOrderingAndCopiesSigningKey (0.00s)
+=== RUN   TestEventCursorStableDomainSeparatedAndBoundToScope
+--- PASS: TestEventCursorStableDomainSeparatedAndBoundToScope (0.00s)
+=== RUN   TestDomainEventSameTransactionAuditRollbackAndDeferredVisibility
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestDomainEventSameTransactionAuditRollbackAndDeferredVisibility (0.10s)
+=== RUN   TestDomainEventLateCommitAndCrossTenantFlushOrder
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestDomainEventLateCommitAndCrossTenantFlushOrder (0.08s)
+=== RUN   TestDomainEventRetentionDeleteFailureRollsBackFloor
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestDomainEventRetentionDeleteFailureRollsBackFloor (0.03s)
+=== RUN   TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination (0.03s)
+=== RUN   TestHTTPRefreshRotationReuseAndLogout
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPRefreshRotationReuseAndLogout (0.03s)
+=== RUN   TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders (0.02s)
+=== RUN   TestHTTPPlatformReadAuditFailureReturnsSafeUnavailable
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPPlatformReadAuditFailureReturnsSafeUnavailable (0.03s)
+=== RUN   TestHTTPRealServerRequestIDAndContentType
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPRealServerRequestIDAndContentType (0.02s)
+=== RUN   TestHTTPRuleMutationExplicitIfMatchAcceptedOperationAndStaleConflict
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPRuleMutationExplicitIfMatchAcceptedOperationAndStaleConflict (0.03s)
+=== RUN   TestHTTPOperationPublicOrderCannotBeRewritten
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPOperationPublicOrderCannotBeRewritten (0.02s)
+=== RUN   TestHTTPRuleMutationScopeAndBusinessBodyBoundary
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPRuleMutationScopeAndBusinessBodyBoundary (0.02s)
+=== RUN   TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields (0.06s)
+=== RUN   TestHTTPSubscriptionLedgerAndHeldLimitsUseAuthoritativeSnapshots
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPSubscriptionLedgerAndHeldLimitsUseAuthoritativeSnapshots (0.04s)
+=== RUN   TestHTTPBusinessProjectionPlatformAuditFailureIsClosed
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestHTTPBusinessProjectionPlatformAuditFailureIsClosed (0.03s)
+=== RUN   TestPublicTLSListenerBearerBoundaryAndShutdown
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+2026/11/09 05:40:38 http: TLS handshake error from 127.0.0.1:60851: tls: client offered only unsupported versions: [303]
+--- PASS: TestPublicTLSListenerBearerBoundaryAndShutdown (0.03s)
+=== RUN   TestSSECommittedEventsReplayScopeAndRESTConvergence
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestSSECommittedEventsReplayScopeAndRESTConvergence (0.08s)
+=== RUN   TestSSERetentionGapResyncAndReauthentication
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+    sse_test.go:132: retention prefix 0 <nil>
+--- FAIL: TestSSERetentionGapResyncAndReauthentication (0.08s)
+=== RUN   TestSSERestrictionSummaryContainsNoSourceSecret
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestSSERestrictionSummaryContainsNoSourceSecret (0.08s)
+=== RUN   TestSSEAccessExpiryAndMalformedHeaders
+2026/11/09 05:40:38 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestSSEAccessExpiryAndMalformedHeaders (1.05s)
+=== RUN   TestSSEEventIDStableAcrossReplaySecond
+2026/11/09 05:40:39 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+--- PASS: TestSSEEventIDStableAcrossReplaySecond (0.16s)
+FAIL
+FAIL	vortex/backend/internal/httpapi	2.786s
+FAIL

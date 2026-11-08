@@ -25,7 +25,10 @@ type Config struct {
 	Tokens  *auth.Tokens
 	Cursors *CursorCodec
 }
-type API struct{ config Config }
+type API struct {
+	config  Config
+	streams chan struct{}
+}
 type apiError struct {
 	Code        string            `json:"code"`
 	Message     string            `json:"message"`
@@ -37,7 +40,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	if config.Pool == nil || config.Tokens == nil || config.Cursors == nil {
 		return nil, errors.New("incomplete API dependencies")
 	}
-	a := &API{config: config}
+	a := &API{config: config, streams: make(chan struct{}, 64)}
 	r := gin.New()
 	if e := r.SetTrustedProxies(nil); e != nil {
 		return nil, e
@@ -62,6 +65,7 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured := r.Group("/api/v1", a.authenticate)
 	secured.POST("/auth/logout", a.logout)
 	a.registerResourceReads(secured)
+	secured.GET("/tenants/:tenant_id/events", a.streamEvents)
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -112,4 +113,64 @@ func (c *CursorCodec) Decode(token string, scope CursorScope, now time.Time) (Cu
 		return zero, ErrCursor
 	}
 	return position, nil
+}
+
+// Event cursors have stable IDs. Retention is checked against the durable PG
+// floor rather than a newly minted wall-clock expiry on each delivery.
+type eventCursorPayload struct {
+	Version  int         `json:"v"`
+	Scope    CursorScope `json:"scope"`
+	Sequence string      `json:"sequence"`
+}
+
+func (c *CursorCodec) eventMAC(raw []byte) []byte {
+	m := hmac.New(sha256.New, c.key)
+	m.Write([]byte("vortex/api/event-cursor/v1\x00"))
+	m.Write(raw)
+	return m.Sum(nil)
+}
+func eventCursorScopeValid(scope CursorScope) bool {
+	return cursorScopeValid(scope) && scope.Collection == "events" && scope.Direction == "forward" && scope.Filter == ""
+}
+func (c *CursorCodec) EncodeEventCursor(scope CursorScope, sequence int64) (string, error) {
+	if c == nil || !eventCursorScopeValid(scope) || sequence < 0 {
+		return "", ErrCursor
+	}
+	raw, e := json.Marshal(eventCursorPayload{Version: 1, Scope: scope, Sequence: strconv.FormatInt(sequence, 10)})
+	if e != nil {
+		return "", ErrCursor
+	}
+	return base64.RawURLEncoding.EncodeToString(raw) + "." + base64.RawURLEncoding.EncodeToString(c.eventMAC(raw)), nil
+}
+func (c *CursorCodec) DecodeEventCursor(token string, scope CursorScope) (int64, error) {
+	if c == nil || !eventCursorScopeValid(scope) || len(token) == 0 || len(token) > 2048 {
+		return 0, ErrCursor
+	}
+	parts := strings.Split(token, ".")
+	if len(parts) != 2 {
+		return 0, ErrCursor
+	}
+	raw, e := base64.RawURLEncoding.DecodeString(parts[0])
+	if e != nil || base64.RawURLEncoding.EncodeToString(raw) != parts[0] {
+		return 0, ErrCursor
+	}
+	signature, e := base64.RawURLEncoding.DecodeString(parts[1])
+	if e != nil || base64.RawURLEncoding.EncodeToString(signature) != parts[1] || !hmac.Equal(signature, c.eventMAC(raw)) {
+		return 0, ErrCursor
+	}
+	var value eventCursorPayload
+	d := json.NewDecoder(bytes.NewReader(raw))
+	d.DisallowUnknownFields()
+	if d.Decode(&value) != nil || d.Decode(new(any)) != io.EOF {
+		return 0, ErrCursor
+	}
+	canonical, e := json.Marshal(value)
+	if e != nil || !bytes.Equal(canonical, raw) || value.Version != 1 || value.Scope != scope {
+		return 0, ErrCursor
+	}
+	sequence, e := strconv.ParseInt(value.Sequence, 10, 64)
+	if e != nil || sequence < 0 || strconv.FormatInt(sequence, 10) != value.Sequence {
+		return 0, ErrCursor
+	}
+	return sequence, nil
 }
