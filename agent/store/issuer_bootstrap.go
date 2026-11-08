@@ -32,6 +32,10 @@ func (s *Store) BootstrapHubAuthorizations(ctx context.Context, hub, node, boot,
 	if now.Latest.Sub(now.Earliest) > 10*time.Second {
 		return page, ErrAuthorityTimeUncertain
 	}
+	snapshot, e := s.HubControlSnapshot(ctx, hub, now.Latest)
+	if e != nil {
+		return page, e
+	}
 	rows, e := s.db.QueryContext(ctx, `SELECT payload,payload_sha256 FROM issuer_delegations WHERE hub_id=? AND state='open' AND delegation_id>? AND json_extract(CAST(payload AS TEXT),'$.NodeID')=? AND json_extract(CAST(payload AS TEXT),'$.BootID')=? ORDER BY delegation_id LIMIT 32`, hub, after, node, boot)
 	if e != nil {
 		return page, e
@@ -59,6 +63,13 @@ func (s *Store) BootstrapHubAuthorizations(ctx context.Context, hub, node, boot,
 	page.Complete = len(delegations) < 32
 	for _, d := range delegations {
 		page.After = d.ID
+		// Transferred delegations already retain their original issue partition.
+		// Recovery updates deliver those rights; bootstrap must not mint a new
+		// random partition or replay old-epoch authority after recovery.
+		if d.SignerEpoch != snapshot.Epoch {
+			continue
+		}
+
 		// Only this candidate's explicitly provisioned finite three-root shape
 		// participates; historical test/legacy delegations cannot auto-activate.
 		if len(d.ShareReferences) != 3 || now.Earliest.Before(d.ValidFrom) || !now.Latest.Before(d.ExpiresAt) || !now.Latest.Before(d.HardDeadline) || !now.Latest.Before(d.AutonomyDeadline) {

@@ -1,0 +1,56 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:34:06 goose: no migrations to run. current version: 8
+2026/11/09 01:34:06 OK   00001_authority.sql (8.61ms)
+2026/11/09 01:34:06 OK   00002_tenant_policy.sql (7.42ms)
+2026/11/09 01:34:06 OK   00003_nodes_ports.sql (17.16ms)
+2026/11/09 01:34:06 OK   00004_entry_group_domains.sql (2.06ms)
+2026/11/09 01:34:06 OK   00005_rules_compile.sql (18.05ms)
+2026/11/09 01:34:06 OK   00006_packages_entitlements.sql (16.75ms)
+2026/11/09 01:34:06 OK   00007_metering_ledger.sql (23.2ms)
+2026/11/09 01:34:06 OK   00008_limits_shares.sql (49.19ms)
+2026/11/09 01:34:06 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.49s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.03s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:34:12 goose: no migrations to run. current version: 8
+2026/11/09 01:34:12 OK   00001_authority.sql (8.09ms)
+2026/11/09 01:34:12 OK   00002_tenant_policy.sql (7.73ms)
+2026/11/09 01:34:12 OK   00003_nodes_ports.sql (16.73ms)
+2026/11/09 01:34:12 OK   00004_entry_group_domains.sql (2.03ms)
+2026/11/09 01:34:12 OK   00005_rules_compile.sql (16.83ms)
+2026/11/09 01:34:12 OK   00006_packages_entitlements.sql (16.24ms)
+2026/11/09 01:34:12 OK   00007_metering_ledger.sql (21.64ms)
+2026/11/09 01:34:12 OK   00008_limits_shares.sql (47.55ms)
+2026/11/09 01:34:12 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.41s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:34:18 goose: no migrations to run. current version: 8
+2026/11/09 01:34:18 OK   00001_authority.sql (8.63ms)
+2026/11/09 01:34:18 OK   00002_tenant_policy.sql (7.32ms)
+2026/11/09 01:34:19 OK   00003_nodes_ports.sql (17.54ms)
+2026/11/09 01:34:19 OK   00004_entry_group_domains.sql (2.27ms)
+2026/11/09 01:34:19 OK   00005_rules_compile.sql (17.76ms)
+2026/11/09 01:34:19 OK   00006_packages_entitlements.sql (24.04ms)
+2026/11/09 01:34:19 OK   00007_metering_ledger.sql (22.47ms)
+2026/11/09 01:34:19 OK   00008_limits_shares.sql (47.66ms)
+2026/11/09 01:34:19 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.41s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	21.011s

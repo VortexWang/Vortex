@@ -1,0 +1,26 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:11:35 goose: no migrations to run. current version: 8
+2026/11/09 01:11:35 OK   00001_authority.sql (20.79ms)
+2026/11/09 01:11:35 OK   00002_tenant_policy.sql (10.25ms)
+2026/11/09 01:11:35 OK   00003_nodes_ports.sql (18.9ms)
+2026/11/09 01:11:35 OK   00004_entry_group_domains.sql (2.31ms)
+2026/11/09 01:11:35 OK   00005_rules_compile.sql (17.02ms)
+2026/11/09 01:11:35 OK   00006_packages_entitlements.sql (15.1ms)
+2026/11/09 01:11:35 OK   00007_metering_ledger.sql (19.49ms)
+2026/11/09 01:11:35 OK   00008_limits_shares.sql (42.88ms)
+2026/11/09 01:11:35 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: agent: invalid backend bound
+REGIONAL DEBUG: store: authority handoff is required before recording a resumed heartbeat
+REGIONAL DEBUG: store: authority handoff is required before recording a resumed heartbeat
+    runtime_recovery_transport_test.go:79: context deadline exceeded
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (15.50s)
+FAIL
+FAIL	vortex/backend/internal/service	16.218s
+FAIL

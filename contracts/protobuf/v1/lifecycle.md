@@ -1046,3 +1046,29 @@ Original artifact,aggregate generations and admission closure stay immutable.
 The service/store fixture now includes installed51-byte old credit with37 actual
 known bytes through S/R7->8,complete final and one concurrent effective successor.
 This does not replace production RuntimeServer/Engine/network recovery acceptance.
+
+
+## Runtime recovery update delivery (candidate)
+
+After the local finite S/R barrier completes, RuntimeServer scans the authenticated
+Node incarnation's issued path scopes in bounded pages of32. Every recovery page
+precedes later bootstrap or lease updates; the scan does not use Engine's latest
+rule as an inventory. Each path has a deterministic handoff/Node/boot/path update
+ID and an immutable FULL outbox payload. Existing persisted payloads replay their
+original IDs and bytes. A path with no issue has no locally installed family to
+transfer and does not receive a handoff proof. Transferred original delegations
+are excluded from initial bootstrap; fresh current-epoch parents remain eligible.
+
+Node validates every original source/family, boot/path, adjacent epoch and direct
+recovery fence before accepting the envelope. A pure verified handoff with no new
+grants or policy transitions may cover a draining older path while preserving the
+global path/fencing admission floors. Lower signer epochs, ordinary stale
+heartbeats and new grants on an older path remain rejected. This exception cannot
+admit a new session on that old path or replenish a credit balance.
+
+The actual role-mTLS regression uses the original live Node object and all three
+FULL-installed original authorizations, committed usage, direct recovery credit
+fence and successor roots, PG admission and local finite ACK. It checks epoch8
+installation and a reconnect without hidden retries or changed credit partition.
+This is runtime control delivery evidence; actual Engine and pending deployment
+convergence and complete06-06 acceptance remain separate work.

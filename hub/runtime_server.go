@@ -142,7 +142,25 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 	}
 	cursor := ""
 	leaseCursor := ""
+	recoveryCursor := ""
 	sent := map[string]bool{}
+	sendRuntimeUpdates := func(updates []store.IssuedAuthorization) error {
+		for _, update := range updates {
+			hash := sha256.Sum256(update.Payload)
+			key := string(hash[:])
+			if sent[key] {
+				continue
+			}
+			if len(sent) >= 4096 {
+				return errors.New("Node runtime session replay bound exhausted")
+			}
+			if e := send(&controlv1.ControlMessage{Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: &controlv1.AuthorizationUpdate{Generation: update.Generation, Payload: update.Payload}}}); e != nil {
+				return e
+			}
+			sent[key] = true
+		}
+		return nil
+	}
 	refresh := func() error {
 		st, e := status()
 		if e != nil {
@@ -155,7 +173,27 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 		if st.Mode == "online" {
 			if e = mutate(func() error {
 				var err error
-				page, err = s.Issuer.Store.BootstrapHubAuthorizations(ctx, s.HubID, node, first.BootId, cursor, s.Issuer.Clock())
+				page, err = s.Issuer.Store.RuntimeRecoveryUpdates(ctx, s.HubID, node, first.BootId, recoveryCursor, s.Issuer.Clock())
+				return err
+			}); e != nil {
+				return e
+			}
+			recoveryCursor = page.After
+			if page.Complete {
+				recoveryCursor = ""
+			}
+			// Every recovery page must precede bootstrap/lease delivery. The
+			// common send loop retains original ordering and per-session digest
+			// deduplication; later refreshes continue the finite cursor.
+			if !page.Complete {
+				return sendRuntimeUpdates(page.Updates)
+			}
+			if e = mutate(func() error {
+				var err error
+				var bootstrap store.BootstrapPage
+				bootstrap, err = s.Issuer.Store.BootstrapHubAuthorizations(ctx, s.HubID, node, first.BootId, cursor, s.Issuer.Clock())
+				page.Updates = append(page.Updates, bootstrap.Updates...)
+				page.After, page.Complete = bootstrap.After, bootstrap.Complete
 				return err
 			}); e != nil {
 				return e
@@ -180,21 +218,7 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 			}
 			page.Updates = append(page.Updates, leases.Updates...)
 		}
-		for _, update := range page.Updates {
-			hash := sha256.Sum256(update.Payload)
-			key := string(hash[:])
-			if sent[key] {
-				continue
-			}
-			if len(sent) >= 4096 {
-				return errors.New("Node runtime session replay bound exhausted")
-			}
-			if e = send(&controlv1.ControlMessage{Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: &controlv1.AuthorizationUpdate{Generation: update.Generation, Payload: update.Payload}}}); e != nil {
-				return e
-			}
-			sent[key] = true
-		}
-		return nil
+		return sendRuntimeUpdates(page.Updates)
 	}
 	if e = refresh(); e != nil {
 		return e

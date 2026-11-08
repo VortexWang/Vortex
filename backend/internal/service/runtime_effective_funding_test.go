@@ -3,6 +3,7 @@ package service_test
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -27,6 +28,9 @@ func TestEffectiveRuntimeFundingAfterInstalledOldCreditFinalKeepsOriginalShare(t
 	testEffectiveRuntimeFunding(t, true)
 }
 func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
+	testEffectiveRuntimeFundingWithHook(t, installed, nil)
+}
+func testEffectiveRuntimeFundingWithHook(t *testing.T, installed bool, hook func(*shareFixture, *store.Store, *store.Store, hub.Allocation, service.HubSameStoreRecoveryInput, *agent.Node)) {
 	t.Helper()
 	ctx := context.Background()
 	x, in, hs := fundedHubFixture(t)
@@ -73,6 +77,32 @@ func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
 		}
 		node.BootID = in.BootID
 		oldCredit = &creditCloseFixture{x: x, in: in, a: original, hs: hs, st: ns, node: node, issued: issued, grant: grant}
+		// Model a real Node installation: the runtime and share leases must be
+		// present alongside the credit family before an epoch handoff can prove
+		// those three original sources. The credit-only settlement fixture is
+		// intentionally narrower than a production AuthorizationUpdate.
+		facts, err := agent.InspectAuthorizationUpdate(issued.Payload, in.NodeID, in.BootID, original.PathGeneration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var installedRecords []store.AuthorizationRecord
+		for _, a := range facts.Records {
+			r := store.AuthorizationRecord{IssuerID: in.HubID, ShareReferenceID: a.ShareReferenceID, DelegationID: a.DelegationID, AuthorizationID: a.AuthorizationID, ParentAuthorizationID: a.ParentAuthorizationID, SourceID: a.SourceID, Kind: a.Kind, RuleID: a.RuleID, RuleRevision: a.RuleRevision, PathGeneration: a.PathGeneration, SignerEpoch: facts.SignerEpoch, BootID: in.BootID, IssuedAt: a.IssuedAt.UTC().Format(time.RFC3339Nano), NotBefore: a.NotBefore.UTC().Format(time.RFC3339Nano), ExpiresAt: a.ExpiresAt.UTC().Format(time.RFC3339Nano), HardDeadline: a.HardDeadline.UTC().Format(time.RFC3339Nano), BillingSnapshotID: a.BillingSnapshotID}
+			if a.AmountBytes != nil {
+				r.AmountBytes = *a.AmountBytes
+			}
+			if a.RateBPS != nil {
+				r.RateBPS = *a.RateBPS
+			}
+			if a.Connections != nil {
+				r.Connections = *a.Connections
+			}
+			installedRecords = append(installedRecords, r)
+		}
+		digest := sha256.Sum256(issued.Payload)
+		if err = ns.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{ShareReferences: facts.ShareReferences, IssuerID: in.HubID, BackendHeartbeat: facts.BackendHeartbeat, AutonomyDeadline: facts.AutonomyDeadline, NodeID: in.NodeID, BootID: in.BootID, UpdateID: facts.UpdateID, Payload: issued.Payload, Digest: digest[:], SignerEpoch: facts.SignerEpoch, PathGeneration: facts.PathGeneration, FencingGenerationFloor: facts.FencingFloor}, installedRecords, nil); err != nil {
+			t.Fatal(err)
+		}
 		oldUsage = oldCredit.commitLocalUsage(t, 37)
 	}
 	x.now = x.now.Add(5 * time.Second)
@@ -117,6 +147,9 @@ func testEffectiveRuntimeFunding(t *testing.T, installed bool) {
 	}
 	if _, e = hs.ApplyHubRecoveryAdmission(ctx, shareBackendID, in.HubID, r.ToBootID, admission, store.IssuerTime{Earliest: x.now, Latest: x.now, Trusted: true}); e != nil {
 		t.Fatal(e)
+	}
+	if hook != nil {
+		hook(x, hs, ns, original, r, oldCredit.node)
 	}
 	retained := authoritySnapshot(t, x.f.pool, x.f.tenant, []string{"share_chains", "share_generations", "share_renewal_authorities", "rule_artifacts", "rule_compile_inputs"})
 	financial := []string{"hub_funded_allocations", "reservations", "ledger_projections", "ledger_events"}

@@ -835,7 +835,18 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key=?`, key).Scan(&previous)
 		if err == nil {
 			value, parseErr := strconv.ParseUint(previous, 10, 64)
-			if parseErr != nil || incoming < value {
+			if parseErr != nil {
+				return ErrAuthorizationGenerationStale
+			}
+			if incoming < value {
+				// A finite, fully verified handoff can cover a draining older
+				// path. It contains no new grants/policy transition and every
+				// source was checked above against its original active family.
+				// Preserve global admission floors; ordinary grants/heartbeats
+				// and lower signer epochs still fail closed.
+				if key != "authorization_signer_epoch" && len(records) == 0 && len(update.Handoffs) > 0 && len(update.PolicyTransitions) == 0 {
+					continue
+				}
 				return ErrAuthorizationGenerationStale
 			}
 		} else if !errors.Is(err, sql.ErrNoRows) {
