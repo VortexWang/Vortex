@@ -13,7 +13,6 @@ import (
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/policy"
 	"vortex/backend/internal/repository"
-	"vortex/hub"
 )
 
 // RecordHubRuntimeLease accepts authenticated lease-only journal entries. It
@@ -51,53 +50,8 @@ func (s ShareService) RecordHubRuntimeLease(ctx context.Context, hubID, boot str
 	if e != nil {
 		return e
 	}
-	if record.HubID != hubID || record.HubBootID != boot {
+	if record.HubID != hubID {
 		return ErrScope
-	}
-	a, e := hub.DecodeAllocation(record.Payload)
-	if e != nil {
-		return e
-	}
-	if p.NodeID != a.NodeID || p.BootID != a.BootID || p.SignerEpoch != a.SignerEpoch || p.PathGeneration != a.PathGeneration || p.FencingFloor != a.FencingFloor || p.IssuedAt.Before(a.ValidFrom) || !p.IssuedAt.Before(a.ExpiresAt) || p.BackendHeartbeat.Before(a.BackendHeartbeat) || !jsonEqual(p.ShareReferences, a.ShareReferences) {
-		return ErrShareConflict
-	}
-	var envelope map[string]json.RawMessage
-	if json.Unmarshal(payload, &envelope) != nil {
-		return ErrShareConflict
-	}
-	for _, key := range []string{"renewal_request_id", "renewal_request_sha256", "epoch_handoffs"} {
-		if _, ok := envelope[key]; ok {
-			return ErrShareConflict
-		}
-	}
-	for _, key := range []string{"policy_transitions", "revocations"} {
-		var values []json.RawMessage
-		if json.Unmarshal(envelope[key], &values) != nil || len(values) != 0 {
-			return ErrShareConflict
-		}
-	}
-	sources := map[string]string{"runtime_lease": a.RuntimeSourceID, "share_lease": a.ShareSourceID}
-	seen := map[string]bool{}
-	for _, r := range p.Records {
-		if sources[r.Kind] == "" || seen[r.Kind] || r.SourceID != sources[r.Kind] || r.ParentAuthorizationID != a.DelegationID || r.DelegationID != a.DelegationID || r.RuleID != a.RuleID || r.RuleRevision != a.RuleRevision || r.PathGeneration != a.PathGeneration || !r.IssuedAt.Equal(p.IssuedAt) || r.NotBefore.Before(r.IssuedAt) || r.ExpiresAt.Sub(r.IssuedAt) > 300*time.Second || r.ExpiresAt.After(a.ExpiresAt) || r.HardDeadline.After(a.HardDeadline) || r.AmountBytes != nil || r.BillingSnapshotID != "" {
-			return ErrShareConflict
-		}
-		ref := ""
-		for _, v := range a.ShareReferences {
-			if v.SourceID == r.SourceID {
-				ref = v.ID
-			}
-		}
-		if ref == "" || r.ShareReferenceID != ref {
-			return ErrShareConflict
-		}
-		if r.Kind == "share_lease" && (r.RateBPS == nil || r.Connections == nil || *r.RateBPS > a.RateBPS || *r.Connections > a.Connections) {
-			return ErrShareCapacity
-		}
-		if r.Kind == "runtime_lease" && (r.RateBPS != nil || r.Connections != nil) {
-			return ErrShareConflict
-		}
-		seen[r.Kind] = true
 	}
 	scope, e := hubScope(hubID, record.TenantID)
 	if e != nil {
@@ -105,17 +59,79 @@ func (s ShareService) RecordHubRuntimeLease(ctx context.Context, hubID, boot str
 	}
 	digest := sha256.Sum256(payload)
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "hub.runtime_lease", ResourceID: p.UpdateID, RequestID: request, Reason: "authenticated immutable lease-only refresh; no credit issuance or financial mutation"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+hubID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
 		old, e := q.GetHubRuntimeLease(ctx, generated.GetHubRuntimeLeaseParams{TenantID: scope.TenantID(), IssueID: p.UpdateID})
 		if e == nil {
-			if old.HubID != hubID || old.HubBootID != boot || old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
+			if old.HubID != hubID || old.HubBootID != boot {
+				return ErrScope
+			}
+			if old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
 				return ErrShareConflict
 			}
 			return nil
 		}
 		if !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
+		if e = currentHubEpochTx(ctx, q, hubID, boot, p.SignerEpoch); e != nil {
+			return e
+		}
+		a, handoffs, e := effectiveHubAllocationTx(ctx, q, record, p.SignerEpoch, boot, p.IssuedAt)
+		if e != nil {
+			return e
+		}
+		if len(p.Handoffs) != len(handoffs) || len(handoffs) > 0 && !jsonEqual(p.Handoffs, handoffs) {
+			return ErrShareConflict
+		}
+		if p.NodeID != a.NodeID || p.BootID != a.BootID || p.SignerEpoch != a.SignerEpoch || p.PathGeneration != a.PathGeneration || p.FencingFloor != a.FencingFloor || p.IssuedAt.Before(a.ValidFrom) || !p.IssuedAt.Before(a.ExpiresAt) || p.BackendHeartbeat.Before(a.BackendHeartbeat) || !jsonEqual(p.ShareReferences, a.ShareReferences) {
+			return ErrShareConflict
+		}
+		var envelope map[string]json.RawMessage
+		if json.Unmarshal(payload, &envelope) != nil {
+			return ErrShareConflict
+		}
+		for _, key := range []string{"renewal_request_id", "renewal_request_sha256"} {
+			if _, ok := envelope[key]; ok {
+				return ErrShareConflict
+			}
+		}
+		for _, key := range []string{"policy_transitions", "revocations"} {
+			var values []json.RawMessage
+			if json.Unmarshal(envelope[key], &values) != nil || len(values) != 0 {
+				return ErrShareConflict
+			}
+		}
+		sources := map[string]string{"runtime_lease": a.RuntimeSourceID, "share_lease": a.ShareSourceID}
+		seen := map[string]bool{}
+		for _, r := range p.Records {
+			if sources[r.Kind] == "" || seen[r.Kind] || r.SourceID != sources[r.Kind] || r.ParentAuthorizationID != a.DelegationID || r.DelegationID != a.DelegationID || r.RuleID != a.RuleID || r.RuleRevision != a.RuleRevision || r.PathGeneration != a.PathGeneration || !r.IssuedAt.Equal(p.IssuedAt) || r.NotBefore.Before(r.IssuedAt) || r.ExpiresAt.Sub(r.IssuedAt) > 300*time.Second || r.ExpiresAt.After(a.ExpiresAt) || r.HardDeadline.After(a.HardDeadline) || r.AmountBytes != nil || r.BillingSnapshotID != "" {
+				return ErrShareConflict
+			}
+			ref := ""
+			for _, v := range a.ShareReferences {
+				if v.SourceID == r.SourceID {
+					ref = v.ID
+				}
+			}
+			if ref == "" || r.ShareReferenceID != ref {
+				return ErrShareConflict
+			}
+			if r.Kind == "share_lease" && (r.RateBPS == nil || r.Connections == nil || *r.RateBPS > a.RateBPS || *r.Connections > a.Connections) {
+				return ErrShareCapacity
+			}
+			if r.Kind == "runtime_lease" && (r.RateBPS != nil || r.Connections != nil) {
+				return ErrShareConflict
+			}
+			seen[r.Kind] = true
+		}
+		if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: scope.TenantID(), AllocationID: a.AllocationID}); e == nil {
+			return ErrShareConflict
+		} else if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
 		issued, e := q.HubAllocationIssued(ctx, generated.HubAllocationIssuedParams{TenantID: scope.TenantID(), AllocationID: a.AllocationID})

@@ -1,0 +1,82 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-f89e4821db40 Creating 
+ Container vortex-phase6-tracer-backend-test-run-f89e4821db40 Created 
+=== RUN   TestHubEffectiveEpochIssueLeaseSealPreserveOriginalParentAndOldReplay
+2026/11/08 14:41:03 goose: no migrations to run. current version: 8
+2026/11/08 14:41:03 OK   00001_authority.sql (11.01ms)
+2026/11/08 14:41:03 OK   00002_tenant_policy.sql (8.73ms)
+2026/11/08 14:41:03 OK   00003_nodes_ports.sql (17.43ms)
+2026/11/08 14:41:03 OK   00004_entry_group_domains.sql (1.89ms)
+2026/11/08 14:41:03 OK   00005_rules_compile.sql (18.2ms)
+2026/11/08 14:41:03 OK   00006_packages_entitlements.sql (15.9ms)
+2026/11/08 14:41:04 OK   00007_metering_ledger.sql (20.19ms)
+2026/11/08 14:41:04 OK   00008_limits_shares.sql (51.25ms)
+2026/11/08 14:41:04 goose: successfully migrated database to version: 8
+--- PASS: TestHubEffectiveEpochIssueLeaseSealPreserveOriginalParentAndOldReplay (1.80s)
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/approval_only
+2026/11/08 14:41:05 goose: no migrations to run. current version: 8
+2026/11/08 14:41:05 OK   00001_authority.sql (9.34ms)
+2026/11/08 14:41:05 OK   00002_tenant_policy.sql (5.98ms)
+2026/11/08 14:41:05 OK   00003_nodes_ports.sql (13.15ms)
+2026/11/08 14:41:05 OK   00004_entry_group_domains.sql (1.52ms)
+2026/11/08 14:41:05 OK   00005_rules_compile.sql (12.32ms)
+2026/11/08 14:41:05 OK   00006_packages_entitlements.sql (11.97ms)
+2026/11/08 14:41:05 OK   00007_metering_ledger.sql (16.32ms)
+2026/11/08 14:41:05 OK   00008_limits_shares.sql (39ms)
+2026/11/08 14:41:05 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted
+2026/11/08 14:41:06 goose: no migrations to run. current version: 8
+2026/11/08 14:41:07 OK   00001_authority.sql (7.04ms)
+2026/11/08 14:41:07 OK   00002_tenant_policy.sql (5.93ms)
+2026/11/08 14:41:07 OK   00003_nodes_ports.sql (13.45ms)
+2026/11/08 14:41:07 OK   00004_entry_group_domains.sql (1.28ms)
+2026/11/08 14:41:07 OK   00005_rules_compile.sql (12.42ms)
+2026/11/08 14:41:07 OK   00006_packages_entitlements.sql (11.6ms)
+2026/11/08 14:41:07 OK   00007_metering_ledger.sql (15.49ms)
+2026/11/08 14:41:07 OK   00008_limits_shares.sql (41.37ms)
+2026/11/08 14:41:07 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/credit_R
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/runtime_R
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/manifest
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/transfer
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/revision
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/source
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/deadline
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/over_original_cap
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/old_boot
+--- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff (2.95s)
+    --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/approval_only (1.37s)
+    --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted (1.58s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/credit_R (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/runtime_R (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/manifest (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/transfer (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/revision (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/source (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/deadline (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/over_original_cap (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/old_boot (0.01s)
+=== RUN   TestHubEffectiveEpochActualMTLSIssuesLeaseSealLostReceipts
+2026/11/08 14:41:08 goose: no migrations to run. current version: 8
+2026/11/08 14:41:08 OK   00001_authority.sql (6.64ms)
+2026/11/08 14:41:08 OK   00002_tenant_policy.sql (7.37ms)
+2026/11/08 14:41:08 OK   00003_nodes_ports.sql (13.83ms)
+2026/11/08 14:41:08 OK   00004_entry_group_domains.sql (1.64ms)
+2026/11/08 14:41:08 OK   00005_rules_compile.sql (11.9ms)
+2026/11/08 14:41:08 OK   00006_packages_entitlements.sql (12.74ms)
+2026/11/08 14:41:08 OK   00007_metering_ledger.sql (17.71ms)
+2026/11/08 14:41:08 OK   00008_limits_shares.sql (37.83ms)
+2026/11/08 14:41:08 goose: successfully migrated database to version: 8
+    hub_effective_transport_test.go:68: actual reconnect 0 rpc error: code = Unknown desc = injected lost FULL seal before PG
+    hub_effective_transport_test.go:68: actual reconnect 1 rpc error: code = Unknown desc = injected lost seal ACK after PG
+--- PASS: TestHubEffectiveEpochActualMTLSIssuesLeaseSealLostReceipts (6.65s)
+PASS
+ok  	vortex/backend/internal/service	12.430s

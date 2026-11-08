@@ -1,0 +1,30 @@
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted
+2026/11/08 22:43:41 goose: no migrations to run. current version: 8
+2026/11/08 22:43:41 OK   00001_authority.sql (21.61ms)
+2026/11/08 22:43:41 OK   00002_tenant_policy.sql (22.93ms)
+2026/11/08 22:43:41 OK   00003_nodes_ports.sql (20.09ms)
+2026/11/08 22:43:41 OK   00004_entry_group_domains.sql (3.26ms)
+2026/11/08 22:43:41 OK   00005_rules_compile.sql (25ms)
+2026/11/08 22:43:41 OK   00006_packages_entitlements.sql (19.22ms)
+2026/11/08 22:43:41 OK   00007_metering_ledger.sql (31.2ms)
+2026/11/08 22:43:41 OK   00008_limits_shares.sql (87.11ms)
+2026/11/08 22:43:41 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs
+--- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff (1.55s)
+    --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted (1.55s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs (0.03s)
+=== RUN   TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity
+2026/11/08 22:43:42 goose: no migrations to run. current version: 8
+2026/11/08 22:43:42 OK   00001_authority.sql (14.64ms)
+2026/11/08 22:43:42 OK   00002_tenant_policy.sql (24.76ms)
+2026/11/08 22:43:42 OK   00003_nodes_ports.sql (24.42ms)
+2026/11/08 22:43:42 OK   00004_entry_group_domains.sql (2.22ms)
+2026/11/08 22:43:42 OK   00005_rules_compile.sql (17.13ms)
+2026/11/08 22:43:42 OK   00006_packages_entitlements.sql (16.51ms)
+2026/11/08 22:43:42 OK   00007_metering_ledger.sql (29.35ms)
+2026/11/08 22:43:42 OK   00008_limits_shares.sql (57.75ms)
+2026/11/08 22:43:42 goose: successfully migrated database to version: 8
+--- PASS: TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity (1.62s)
+PASS
+ok  	vortex/backend/internal/service	4.747s

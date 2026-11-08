@@ -299,47 +299,8 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID strin
 	if e != nil {
 		return e
 	}
-	if record.HubID != hubID || record.HubBootID != hubBootID {
+	if record.HubID != hubID {
 		return ErrScope
-	}
-	a, e := hub.DecodeAllocation(record.Payload)
-	if e != nil {
-		return e
-	}
-	if parsed.NodeID != a.NodeID || parsed.BootID != a.BootID || parsed.SignerEpoch != a.SignerEpoch || parsed.PathGeneration != a.PathGeneration || parsed.FencingFloor != a.FencingFloor || parsed.IssuedAt.Before(a.ValidFrom) || !parsed.IssuedAt.Before(a.ExpiresAt) || parsed.BackendHeartbeat.Before(a.BackendHeartbeat) || !jsonEqual(parsed.ShareReferences, a.ShareReferences) {
-		return ErrShareConflict
-	}
-	// Envelope liveness may reflect a newer backend heartbeat. Each child still
-	// has to fit this allocation's original immutable hard deadline below.
-	var credit agent.IssuedAuthorizationRecord
-	seen := map[string]bool{}
-	sources := map[string]string{"credit_grant": a.SourceID, "runtime_lease": a.RuntimeSourceID, "share_lease": a.ShareSourceID}
-	for _, r := range parsed.Records {
-		if seen[r.Kind] || r.ParentAuthorizationID != a.DelegationID || r.DelegationID != a.DelegationID || r.RuleID != a.RuleID || r.RuleRevision != a.RuleRevision || r.PathGeneration != a.PathGeneration || r.SourceID != sources[r.Kind] || r.ExpiresAt.After(a.ExpiresAt) || r.HardDeadline.After(a.HardDeadline) {
-			return ErrShareConflict
-		}
-		ref := ""
-		for _, v := range a.ShareReferences {
-			if v.SourceID == r.SourceID {
-				ref = v.ID
-			}
-		}
-		if ref == "" || r.ShareReferenceID != ref {
-			return ErrShareConflict
-		}
-		seen[r.Kind] = true
-		if r.Kind == "credit_grant" {
-			credit = r
-			if r.BillingSnapshotID != a.SnapshotID || r.AmountBytes == nil || *r.AmountBytes > a.RawBytes {
-				return ErrShareCapacity
-			}
-		}
-		if r.Kind == "share_lease" && (r.RateBPS == nil || r.Connections == nil || *r.RateBPS > a.RateBPS || *r.Connections > a.Connections) {
-			return ErrShareCapacity
-		}
-	}
-	if credit.AmountBytes == nil || len(seen) != 3 {
-		return ErrShareConflict
 	}
 	scope, e := NewTenantScope(uuid.NewSHA1(uuid.NameSpaceOID, []byte("vortex/hub-issue/"+hubID)).String(), record.TenantID, record.TenantID)
 	if e != nil {
@@ -347,18 +308,69 @@ func (s ShareService) RecordHubIssue(ctx context.Context, hubID, hubBootID strin
 	}
 	digest := sha256.Sum256(payload)
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "hub.record_issue", ResourceID: parsed.UpdateID, RequestID: request, Reason: "authenticated immutable Hub child issuance; original source-funded parent remains the accounting unit"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+hubID); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
 		old, e := q.GetHubIssue(ctx, generated.GetHubIssueParams{TenantID: scope.TenantID(), IssueID: parsed.UpdateID})
 		if e == nil {
-			if old.HubID != hubID || old.HubBootID != hubBootID || old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
+			if old.HubID != hubID || old.HubBootID != hubBootID {
+				return ErrScope
+			}
+			if old.LedgerSequence != sequence || !bytes.Equal(old.Payload, payload) {
 				return ErrShareConflict
 			}
 			return nil
 		}
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
+		}
+		if e = currentHubEpochTx(ctx, q, hubID, hubBootID, parsed.SignerEpoch); e != nil {
+			return e
+		}
+		a, handoffs, e := effectiveHubAllocationTx(ctx, q, record, parsed.SignerEpoch, hubBootID, parsed.IssuedAt)
+		if e != nil {
+			return e
+		}
+		if len(parsed.Handoffs) != len(handoffs) || len(handoffs) > 0 && !jsonEqual(parsed.Handoffs, handoffs) {
+			return ErrShareConflict
+		}
+		if parsed.NodeID != a.NodeID || parsed.BootID != a.BootID || parsed.SignerEpoch != a.SignerEpoch || parsed.PathGeneration != a.PathGeneration || parsed.FencingFloor != a.FencingFloor || parsed.IssuedAt.Before(a.ValidFrom) || !parsed.IssuedAt.Before(a.ExpiresAt) || parsed.BackendHeartbeat.Before(a.BackendHeartbeat) || !jsonEqual(parsed.ShareReferences, a.ShareReferences) {
+			return ErrShareConflict
+		}
+		// Envelope liveness may reflect a newer backend heartbeat. Each child still
+		// has to fit this allocation's original immutable hard deadline below.
+		var credit agent.IssuedAuthorizationRecord
+		seen := map[string]bool{}
+		sources := map[string]string{"credit_grant": a.SourceID, "runtime_lease": a.RuntimeSourceID, "share_lease": a.ShareSourceID}
+		for _, r := range parsed.Records {
+			if seen[r.Kind] || r.ParentAuthorizationID != a.DelegationID || r.DelegationID != a.DelegationID || r.RuleID != a.RuleID || r.RuleRevision != a.RuleRevision || r.PathGeneration != a.PathGeneration || r.SourceID != sources[r.Kind] || r.ExpiresAt.After(a.ExpiresAt) || r.HardDeadline.After(a.HardDeadline) {
+				return ErrShareConflict
+			}
+			ref := ""
+			for _, v := range a.ShareReferences {
+				if v.SourceID == r.SourceID {
+					ref = v.ID
+				}
+			}
+			if ref == "" || r.ShareReferenceID != ref {
+				return ErrShareConflict
+			}
+			seen[r.Kind] = true
+			if r.Kind == "credit_grant" {
+				credit = r
+				if r.BillingSnapshotID != a.SnapshotID || r.AmountBytes == nil || *r.AmountBytes > a.RawBytes {
+					return ErrShareCapacity
+				}
+			}
+			if r.Kind == "share_lease" && (r.RateBPS == nil || r.Connections == nil || *r.RateBPS > a.RateBPS || *r.Connections > a.Connections) {
+				return ErrShareCapacity
+			}
+		}
+		if credit.AmountBytes == nil || len(seen) != 3 {
+			return ErrShareConflict
 		}
 		if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: scope.TenantID(), AllocationID: a.AllocationID}); e == nil {
 			return ErrShareConflict

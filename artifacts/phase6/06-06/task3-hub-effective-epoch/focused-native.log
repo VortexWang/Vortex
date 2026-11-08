@@ -1,0 +1,60 @@
+=== RUN   TestHubEffectiveEpochIssueLeaseSealPreserveOriginalParentAndOldReplay
+2026/11/08 22:34:47 goose: no migrations to run. current version: 8
+2026/11/08 22:34:47 OK   00001_authority.sql (21.99ms)
+2026/11/08 22:34:47 OK   00002_tenant_policy.sql (9.14ms)
+2026/11/08 22:34:47 OK   00003_nodes_ports.sql (17.09ms)
+2026/11/08 22:34:47 OK   00004_entry_group_domains.sql (2.1ms)
+2026/11/08 22:34:47 OK   00005_rules_compile.sql (16.73ms)
+2026/11/08 22:34:47 OK   00006_packages_entitlements.sql (16.66ms)
+2026/11/08 22:34:47 OK   00007_metering_ledger.sql (21.74ms)
+2026/11/08 22:34:47 OK   00008_limits_shares.sql (48.31ms)
+2026/11/08 22:34:47 goose: successfully migrated database to version: 8
+--- PASS: TestHubEffectiveEpochIssueLeaseSealPreserveOriginalParentAndOldReplay (1.44s)
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/approval_only
+2026/11/08 22:34:48 goose: no migrations to run. current version: 8
+2026/11/08 22:34:48 OK   00001_authority.sql (8.06ms)
+2026/11/08 22:34:48 OK   00002_tenant_policy.sql (7.32ms)
+2026/11/08 22:34:49 OK   00003_nodes_ports.sql (16.94ms)
+2026/11/08 22:34:49 OK   00004_entry_group_domains.sql (2.05ms)
+2026/11/08 22:34:49 OK   00005_rules_compile.sql (16.84ms)
+2026/11/08 22:34:49 OK   00006_packages_entitlements.sql (16.3ms)
+2026/11/08 22:34:49 OK   00007_metering_ledger.sql (21.52ms)
+2026/11/08 22:34:49 OK   00008_limits_shares.sql (62.43ms)
+2026/11/08 22:34:49 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted
+2026/11/08 22:34:50 goose: no migrations to run. current version: 8
+2026/11/08 22:34:50 OK   00001_authority.sql (8.92ms)
+2026/11/08 22:34:50 OK   00002_tenant_policy.sql (7.81ms)
+2026/11/08 22:34:50 OK   00003_nodes_ports.sql (18.82ms)
+2026/11/08 22:34:50 OK   00004_entry_group_domains.sql (2.43ms)
+2026/11/08 22:34:50 OK   00005_rules_compile.sql (19.15ms)
+2026/11/08 22:34:50 OK   00006_packages_entitlements.sql (17.15ms)
+2026/11/08 22:34:50 OK   00007_metering_ledger.sql (22.53ms)
+2026/11/08 22:34:50 OK   00008_limits_shares.sql (50.21ms)
+2026/11/08 22:34:50 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/credit_R
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/runtime_R
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/manifest
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/transfer
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/revision
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/source
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/deadline
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/over_original_cap
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/old_boot
+--- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff (2.54s)
+    --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/approval_only (1.14s)
+    --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted (1.39s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs (0.03s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/credit_R (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/runtime_R (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/manifest (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/transfer (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/revision (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/source (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/deadline (0.01s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/over_original_cap (0.02s)
+        --- PASS: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/old_boot (0.02s)
+PASS
+ok  	vortex/backend/internal/service	5.771s

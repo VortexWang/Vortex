@@ -6,13 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"vortex/backend/db/generated"
 	"vortex/backend/internal/policy"
 	"vortex/backend/internal/repository"
 	"vortex/contracts"
-	hubmodel "vortex/hub"
 )
 
 // RecordDelegationSeal returns only the exact never-issued remainder after the
@@ -38,7 +38,7 @@ func (s ShareService) RecordDelegationSeal(ctx context.Context, hub, boot string
 	if e != nil {
 		return e
 	}
-	if a.HubID != hub || a.HubBootID != boot || a.NodeID != seal.NodeID || a.BootID != seal.BootID {
+	if a.HubID != hub || a.NodeID != seal.NodeID || a.BootID != seal.BootID {
 		return ErrShareConflict
 	}
 	scope, e := hubScope(hub, a.TenantID)
@@ -47,6 +47,9 @@ func (s ShareService) RecordDelegationSeal(ctx context.Context, hub, boot string
 	}
 	sum := sha256.Sum256(raw)
 	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "hub.delegation_sealed", ResourceID: seal.DelegationID, RequestID: request, Reason: "complete immutable issuer inventory proves unissued remainder; issued children and unknown debt remain held"}, func(q *generated.Queries) error {
+		if e := q.LockUsageTuple(ctx, "hub-incarnation/"+hub); e != nil {
+			return e
+		}
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -60,11 +63,14 @@ func (s ShareService) RecordDelegationSeal(ctx context.Context, hub, boot string
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
+		if e = currentHubEpochTx(ctx, q, hub, boot, uint64(seal.SignerEpoch)); e != nil {
+			return e
+		}
 		reservation, e := q.GetUsageReservation(ctx, generated.GetUsageReservationParams{TenantID: scope.TenantID(), ID: a.ReservationID})
 		if e != nil {
 			return e
 		}
-		allocation, e := hubmodel.DecodeAllocation(a.Payload)
+		allocation, _, e := effectiveHubAllocationTx(ctx, q, a, uint64(seal.SignerEpoch), boot, time.Time{})
 		if e != nil {
 			return e
 		}

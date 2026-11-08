@@ -1,0 +1,114 @@
+{
+  "scope": "immutable admitted effective epoch allocation projection and issue/runtime/seal receipt consumers; no admission/ACK transport or generation renewal",
+  "base_sha": "dee123475240ee417feaa7bf28fe51ffb40c524b",
+  "created_at": "2026-11-08T14:46:25.763516+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "agent/authorization.go": "9b129cb0bc59c34ab530345c877be041d4dd2ad1ddaf638c001619be99813723",
+    "backend/internal/service/hub_effective_allocation.go": "85310e2772981252e53296b6aff5fc21866994f8989d1dde246cd11c041a8e4d",
+    "backend/internal/service/hub_allocation.go": "540c57effaad518b6e84d96aeb9e01107bf60cd3049af00f4d831982809d9743",
+    "backend/internal/service/hub_runtime_lease.go": "3e59221a9e646e961ed18a3940104f72a37b241558877534cfd02f94fe284558",
+    "backend/internal/service/delegation_seal.go": "a6c81a902c68ee30f3c8e5b8844784a7b6aa3eb2e9cc6be321bec78f7e5418ad",
+    "backend/internal/service/hub_effective_allocation_test.go": "70cff649b47277784ce778fc6ddc7eb90aaace4f728a4470fbff70533f13ccda",
+    "backend/internal/service/hub_effective_transport_test.go": "00aa8ced19dc7c5f65c42e05fd2d6d9544162c59058963bd26cdcd70f66d2053",
+    "contracts/protobuf/v1/lifecycle.md": "b2f38bc8986d3ef922f1c6a293e01ec36a42480143b51ec9371dcd03d6859e63"
+  },
+  "evidence": {
+    "actual-mtls-native-corrected.log": {
+      "result": "failed: fixed test clock repeats durable heartbeat",
+      "sha256": "573c887a2968ab8f69ec1edba6a1c7bbbf9f11107c585db70f243fd1cf1fe082"
+    },
+    "actual-mtls-native-diagnosis.log": {
+      "result": "failed-diagnosis: repeated timestamp correctly rejected",
+      "sha256": "6436617c89f2d70d272ee46fc709222b12e940fb3facea219db086c8a330034d"
+    },
+    "actual-mtls-native.log": {
+      "result": "failed-build: unused test import",
+      "sha256": "368f5be01e2e7391a4750ce1970199564f8025dc7672d7686428bfe0c6882246"
+    },
+    "backend-linux-final.log": {
+      "result": "pass",
+      "sha256": "ae97d61d27ea0dd4a41086d08df8daa0790f6118b578ecb474ee6ae4f3abefff"
+    },
+    "backend-linux.log": {
+      "result": "failed: same stable error-code regression, corrected",
+      "sha256": "00c8a2da0e36451bedc0abae2f7c9d32734145e73da56a31262dd344843ed02b"
+    },
+    "backend-native-final.log": {
+      "result": "pass",
+      "sha256": "13ca17eb3490c9e5cfd3670941461103abcd3caee2322c1fabd60c498a5a3a28"
+    },
+    "backend-native.log": {
+      "result": "failed: stable ErrScope regression for boot relabeling, corrected",
+      "sha256": "5cd4e63717d609c683b034feaf5783df8392d56536dbf2074a4c2f7eb6506493"
+    },
+    "baseline-consumers-native.log": {
+      "result": "pass",
+      "sha256": "ea811542b60114fa25b226aaacd008f543d123d42ca33509897e921e71a076ab"
+    },
+    "cross-builds-final.json": {
+      "result": "pass",
+      "sha256": "1754e40b2b725c36724c0894d739590179862a1ef7385b426071f276be73b720"
+    },
+    "cross-builds.json": {
+      "result": "pass before stable-error correction",
+      "sha256": "e45fa5702a6a8bab359d4690f25be7552aceb28fa269099065fdc8fdb880d92b"
+    },
+    "environment.json": {
+      "result": "pass",
+      "sha256": "6862b17e3a46246cdf4111a28720d877bbd7fdb9c7d17445576514eab5c5c59f"
+    },
+    "focused-linux-final.log": {
+      "result": "pass",
+      "sha256": "bd9c850a5078ab2ae07c4aa8ef2da5b6b5c08f23590c902a12de57dbb3c60a6d"
+    },
+    "focused-native-final.log": {
+      "result": "pass",
+      "sha256": "becf4acedf3dce3f4a95d6aa32babb3ef11f24c89e38024cec573bedd351496c"
+    },
+    "focused-native.log": {
+      "result": "pass",
+      "sha256": "b05d0353427403a51393cabf1eba5975635042ef3df9ce11a5051cd2e1dda7fb"
+    },
+    "green-gates-final.log": {
+      "result": "pass",
+      "sha256": "e2e8934b7d745c4246aaa823f9fff95952f9710817272e45d7fae611fbf7a459"
+    },
+    "red-overlay.json": {
+      "result": "pass",
+      "sha256": "fe071d8fb440bd5bb9dcbf83f7e577f892ed0c9fac0c2cb6d76705fbecbb58fe"
+    },
+    "red-without-handoff-gate.log": {
+      "result": "expected-RED: overlay disconnect of handoff equality detected missing proof acceptance",
+      "sha256": "2248dbb049c81fd6cf548c16bd98d438568f251ad29af3816e3c98c9cff81cf4"
+    },
+    "root-linux.log": {
+      "result": "pass",
+      "sha256": "d07260578c91ac001edb58c9a9f7bfa30de94768ae4393db96d3ccfbabe85711"
+    },
+    "root-native.log": {
+      "result": "pass",
+      "sha256": "9dbdb6e0467428d9cd84d31f4f93b3873ca924e5b97465319af5d81e5b35fec5"
+    },
+    "sqlc-repro.json": {
+      "result": "pass",
+      "sha256": "fccaaaa28eff384d139b2491487109f0df5e736792270d94ebec47c9b36eba01"
+    }
+  },
+  "full_final_source_checks": [
+    "backend-native-final.log",
+    "backend-linux-final.log",
+    "cross-builds-final.json",
+    "sqlc-repro.json"
+  ],
+  "not_claimed": [
+    "production admission/ACK transport",
+    "effective generation renewal and closure",
+    "repeated PG recovery producer",
+    "clean-source Docker acceptance",
+    "GitHub Actions",
+    "native amd64 runtime",
+    "Agent/store suite rerun in this unit",
+    "06-06 completion"
+  ]
+}

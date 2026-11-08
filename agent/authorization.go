@@ -358,6 +358,7 @@ type AuthorizationInspection struct {
 	IssuedAt, BackendHeartbeat, AutonomyDeadline time.Time
 	Records                                      []IssuedAuthorizationRecord
 	ShareReferences                              []store.ShareReference
+	Handoffs                                     []store.EpochHandoff
 }
 type IssuedAuthorizationRecord = authorizationRecord
 
@@ -366,5 +367,5 @@ func InspectAuthorizationUpdate(raw []byte, node, boot string, generation uint64
 	if e != nil {
 		return AuthorizationInspection{}, e
 	}
-	return AuthorizationInspection{UpdateID: p.UpdateID, NodeID: p.NodeID, BootID: p.BootID, SchemaVersion: p.SchemaVersion, SignerEpoch: p.SignerEpoch, PathGeneration: p.PathGeneration, FencingFloor: p.FencingGenerationFloor, IssuedAt: p.IssuedAt, BackendHeartbeat: p.BackendHeartbeatAt, AutonomyDeadline: p.AutonomyDeadline, Records: p.Authorizations, ShareReferences: p.ShareReferences}, nil
+	return AuthorizationInspection{UpdateID: p.UpdateID, NodeID: p.NodeID, BootID: p.BootID, SchemaVersion: p.SchemaVersion, SignerEpoch: p.SignerEpoch, PathGeneration: p.PathGeneration, FencingFloor: p.FencingGenerationFloor, IssuedAt: p.IssuedAt, BackendHeartbeat: p.BackendHeartbeatAt, AutonomyDeadline: p.AutonomyDeadline, Records: p.Authorizations, ShareReferences: p.ShareReferences, Handoffs: p.Handoffs}, nil
 }

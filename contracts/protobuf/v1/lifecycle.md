@@ -822,3 +822,36 @@ implemented. This is a platform service primitive, not yet a production prefligh
 admission consumer or HTTP operation. Effective new-epoch issue/lease/seal/renewal
 consumers and repeated PG recovery chains are still required. CR-008 remains
 unapproved and approved snapshots remain immutable.
+
+## Effective allocation consumers after committed S/R admission (candidate)
+
+New issue, runtime/share lease refresh, empty runtime heartbeat and delegation
+seal receipts use an effective projection of the immutable original allocation.
+The projection follows every adjacent PG recovery command, verified manifest,
+committed admission and exact authenticated Node FULL fence/root receipts. Each
+step must link the original wire allocation and delegation hashes, original
+sources and financial parent; only root revision and signer epoch advance.
+Every original generation, amount, limit, validity and hard deadline stays fixed.
+A retained manifest, an epoch column or an approval without admission is insufficient.
+
+Under the global Hub lock before the tenant lock, new records require the current
+bound boot and epoch. Issues and runtime envelopes carry exactly the latest three
+handoff proofs: original R for the credit source and zero for runtime/share sources,
+with the approved transfer, sealed sequence and exact manifest hash. Earlier PG
+admissions remain part of the derivation; the payload need not repeat the whole
+historical chain. Issue time cannot predate the admitted recovery's trusted lower
+bound. The original aggregate raw cap applies across every epoch. No new financial
+reservation, per-child rounding, original root rewrite or share capacity is created.
+
+A new-epoch seal must cover the complete original and successor issue inventory.
+Only never-issued raw can return; all issued and unknown debt stays held until
+independent authenticated final evidence. Fresh runtime records after sealing deny.
+Exact historical receipts replay before current-epoch/time gates, retain their
+original boot/sequence/bytes and cannot be relabeled under the successor boot.
+All receipt mutations keep audit, task and Outbox atomicity.
+
+These consumers are exercised over ordinary funded role-mTLS after a test fixture
+explicitly completes the finite local ACK barrier. They do not implement production
+admission/ACK transport, new-epoch generation renewal or repeated PG recovery
+producers; those remain pending. No approved snapshot or protobuf tag changes here.
+CR-008 remains unapproved; Phase6 remains8/11 and06-06 incomplete.
