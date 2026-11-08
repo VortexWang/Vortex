@@ -243,6 +243,21 @@ type HubRuntimeLeaseReceipt struct {
 	PeerFingerprint []byte
 }
 
+type HubSameStoreAdmission struct {
+	TenantID      string
+	RecoveryID    string
+	HubID         string
+	FromEpoch     int64
+	ToEpoch       int64
+	FromBootID    string
+	ToBootID      string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
 type HubSameStoreJournal struct {
 	TenantID        string
 	RecoveryID      string

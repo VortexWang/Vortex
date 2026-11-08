@@ -9,6 +9,43 @@ import (
 	"context"
 )
 
+const appendHubSameStoreAdmission = `-- name: AppendHubSameStoreAdmission :exec
+INSERT INTO hub_same_store_admissions(tenant_id,recovery_id,hub_id,from_epoch,to_epoch,from_boot_id,to_boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+`
+
+type AppendHubSameStoreAdmissionParams struct {
+	TenantID      string
+	RecoveryID    string
+	HubID         string
+	FromEpoch     int64
+	ToEpoch       int64
+	FromBootID    string
+	ToBootID      string
+	BackendID     string
+	OperationID   string
+	CreatedBy     string
+	Payload       []byte
+	PayloadDigest []byte
+}
+
+func (q *Queries) AppendHubSameStoreAdmission(ctx context.Context, arg AppendHubSameStoreAdmissionParams) error {
+	_, err := q.db.Exec(ctx, appendHubSameStoreAdmission,
+		arg.TenantID,
+		arg.RecoveryID,
+		arg.HubID,
+		arg.FromEpoch,
+		arg.ToEpoch,
+		arg.FromBootID,
+		arg.ToBootID,
+		arg.BackendID,
+		arg.OperationID,
+		arg.CreatedBy,
+		arg.Payload,
+		arg.PayloadDigest,
+	)
+	return err
+}
+
 const appendHubSameStoreJournal = `-- name: AppendHubSameStoreJournal :exec
 INSERT INTO hub_same_store_journal(tenant_id,recovery_id,sequence,kind,record_id,payload,payload_digest,peer_fingerprint,operation_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
 `
@@ -258,6 +295,30 @@ func (q *Queries) GetHubCreditGrantsByAllocation(ctx context.Context, arg GetHub
 		return nil, err
 	}
 	return items, nil
+}
+
+const getHubSameStoreAdmission = `-- name: GetHubSameStoreAdmission :one
+SELECT tenant_id, recovery_id, hub_id, from_epoch, to_epoch, from_boot_id, to_boot_id, backend_id, operation_id, created_by, payload, payload_digest FROM hub_same_store_admissions WHERE recovery_id=$1
+`
+
+func (q *Queries) GetHubSameStoreAdmission(ctx context.Context, recoveryID string) (HubSameStoreAdmission, error) {
+	row := q.db.QueryRow(ctx, getHubSameStoreAdmission, recoveryID)
+	var i HubSameStoreAdmission
+	err := row.Scan(
+		&i.TenantID,
+		&i.RecoveryID,
+		&i.HubID,
+		&i.FromEpoch,
+		&i.ToEpoch,
+		&i.FromBootID,
+		&i.ToBootID,
+		&i.BackendID,
+		&i.OperationID,
+		&i.CreatedBy,
+		&i.Payload,
+		&i.PayloadDigest,
+	)
+	return i, err
 }
 
 const getHubSameStoreJournal = `-- name: GetHubSameStoreJournal :one

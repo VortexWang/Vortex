@@ -1,0 +1,7 @@
+{
+  "mutation": "disconnected admission current-state prefix verifier only via Go overlay",
+  "exit_code": 1,
+  "expected_failure": "stale proof admitted",
+  "source_sha256_before_after": "fdad007853f17fed4aa1fd24eb766dca3565876ff893d85a1c1264cf10f0e9f8",
+  "working_tree_source_unchanged": true
+}

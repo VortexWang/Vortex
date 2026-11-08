@@ -1,0 +1,4 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/hub_same_store_admission_test.go:7:2: "encoding/json" imported and not used
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

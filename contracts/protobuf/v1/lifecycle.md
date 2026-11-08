@@ -788,3 +788,37 @@ Hub journal and do not bind/admit a successor Hub. Current-state all-tenant
 admission, effective new-epoch issue/lease/seal and RuntimeServer recovery updates
 are still required. This remains an unapproved CR-008 candidate and changes no
 prior approved protocol snapshot or protobuf tag.
+
+## PostgreSQL current-state S/R admission (candidate)
+
+Forensic retention and source-root receipts alone never bind a new Hub boot.
+An explicit platform Grant calls the separate current-state admission transaction.
+It takes the global Hub incarnation lock, sorted Node authority locks, then sorted
+all-tenant locks. It reruns the complete original prefix and financial partition
+verifier, rather than replaying an old manifest as current readiness. All current
+unsealed allocations must be exactly the approved allocation set; new old-epoch
+issues, missing children, changed approvals or an intervening seal deny admission.
+
+Every allocation requires the current Node boot/assignment/fencing floor, current
+tenant/rule/package/grant eligibility and independent original rate/connections
+share bindings to remain enforced without pending replacement or renewal closure.
+Original allocation/share/source deadlines remain finite. Every authenticated FULL
+inventory fence and successor-root receipt must match the same recovery, manifest,
+Node, original allocation, source budgets and exact approved next roots. An active
+or pending share omitted from the transfer cannot acquire a new epoch implicitly.
+
+The immutable admission proof includes all tenant approvals, original shares,
+manifest/approval hashes and exact Node fence/root receipt hashes. In the same PG
+transaction it closes old renewal issuance, binds the one approved target boot to
+the adjacent epoch, writes the admission operation/task/Outbox and audit. Audit
+failure rolls back closure, incarnation and proof together. Exact same-owner replay
+returns the historical bytes without retiming or reopening a later epoch.
+
+Admission changes no original allocation/source/share generation, capacity held,
+financial reservation, known/unknown usage or settlement. It does not send a
+LedgerAcknowledgement or invoke local CompleteRecovery: the Hub remains recovering
+and refuses fresh issue until a separate authenticated admission/ACK protocol is
+implemented. This is a platform service primitive, not yet a production preflight
+admission consumer or HTTP operation. Effective new-epoch issue/lease/seal/renewal
+consumers and repeated PG recovery chains are still required. CR-008 remains
+unapproved and approved snapshots remain immutable.

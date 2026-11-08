@@ -178,100 +178,8 @@ func (s ShareService) VerifyHubSameStorePrefix(ctx context.Context, hubID, boot,
 		if !errors.Is(e, pgx.ErrNoRows) {
 			return e
 		}
-		if e = s.pendingSameStore(ctx, q, c); e != nil {
+		if e = s.recheckSameStorePrefixTx(ctx, q, proof, c, m, raw); e != nil {
 			return e
-		}
-		authorities, e := q.HubRecoveryAuthorities(ctx, generated.HubRecoveryAuthoritiesParams{SignerID: hubID, ToEpoch: int64(c.Handoff.ToEpoch)})
-		if e != nil {
-			return e
-		}
-		if !jsonEqual(authorities, proof.Authorities) {
-			return ErrShareUnknown
-		}
-		count := int64(0)
-		prefixHash := sha256.New()
-		enc := json.NewEncoder(prefixHash)
-		for {
-			page, e := q.PageHubSameStoreJournal(ctx, generated.PageHubSameStoreJournalParams{RecoveryID: id, AfterSequence: count})
-			if e != nil {
-				return e
-			}
-			if len(page) == 0 {
-				break
-			}
-			for _, r := range page {
-				if r.Sequence != count+1 || r.Sequence > m.Result.SealedSequence+1 {
-					return ErrShareUnknown
-				}
-				h := sha256.Sum256(r.Payload)
-				if !bytes.Equal(h[:], r.PayloadDigest) {
-					return ErrShareConflict
-				}
-				if r.Sequence == m.Result.SealedSequence+1 {
-					if r.Kind != "handoff" || r.RecordID != id || !bytes.Equal(r.Payload, raw) {
-						return ErrShareConflict
-					}
-				} else {
-					item := struct {
-						Sequence         int64
-						Kind, ID, SHA256 string
-					}{r.Sequence, r.Kind, r.RecordID, hex.EncodeToString(h[:])}
-					if e = enc.Encode(item); e != nil {
-						return e
-					}
-					if r.Kind == "issue" {
-						if e = verifySameStoreFinancialIssue(ctx, q, hubID, r); e != nil {
-							return e
-						}
-					}
-				}
-				count++
-			}
-		}
-		if count != m.Result.SealedSequence+1 || hex.EncodeToString(prefixHash.Sum(nil)) != m.Result.FundedInventory.PrefixSHA256 {
-			return ErrShareUnknown
-		}
-		missing, e := q.MissingHubSameStoreIssues(ctx, generated.MissingHubSameStoreIssuesParams{HubID: hubID, HubBootID: c.FromBootID, RecoveryID: id, SealedSequence: m.Result.SealedSequence})
-		if e != nil {
-			return e
-		}
-		if missing {
-			return ErrShareUnknown
-		}
-		for i, link := range c.Allocations {
-			a, e := q.GetHubAllocationGlobal(ctx, link.AllocationID)
-			if e != nil {
-				return e
-			}
-			if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: a.TenantID, AllocationID: a.AllocationID}); e == nil {
-				return ErrShareUnknown
-			} else if !errors.Is(e, pgx.ErrNoRows) {
-				return e
-			}
-			allocation, e := hub.DecodeAllocation(a.Payload)
-			if e != nil {
-				return e
-			}
-			h := sha256.Sum256(a.Payload)
-			if hex.EncodeToString(h[:]) != link.PayloadSHA256 {
-				return ErrShareConflict
-			}
-			rows, e := q.HubAllocationIssueInventory(ctx, generated.HubAllocationIssueInventoryParams{TenantID: a.TenantID, AllocationID: a.AllocationID})
-			if e != nil {
-				return e
-			}
-			items := make([]contracts.IssuedPartition, 0, len(rows))
-			for _, r := range rows {
-				items = append(items, contracts.IssuedPartition{ID: r.IssueID, Digest: hex.EncodeToString(r.PayloadDigest), Raw: r.RawGranted})
-			}
-			digest, issued, e := contracts.PartitionDigest(items)
-			if e != nil {
-				return e
-			}
-			p := m.Result.FundedInventory.Delegations[i]
-			if p.Raw != int64(allocation.RawBytes) || p.Issued != issued || p.IssueCount != int64(len(items)) || p.IssueSHA256 != digest {
-				return ErrShareUnknown
-			}
 		}
 		op, e := newDomainTask(ctx, q, scope, id, "hub.same_store_prefix_verified", "resource_change", int64(c.Handoff.ToEpoch))
 		if e != nil {
@@ -321,6 +229,108 @@ func verifySameStoreFinancialIssue(ctx context.Context, q *generated.Queries, hu
 	}
 	if prior.AllocationID != a.AllocationID || prior.HubID != hubID || prior.HubBootID != a.HubBootID || prior.LedgerSequence != r.Sequence || !bytes.Equal(prior.Payload, r.Payload) || !bytes.Equal(prior.PayloadDigest, r.PayloadDigest) {
 		return ErrShareConflict
+	}
+	return nil
+}
+
+// recheckSameStorePrefixTx intentionally reruns the complete verifier at admission.
+// A historical immutable witness is not evidence of unchanged current state.
+func (s ShareService) recheckSameStorePrefixTx(ctx context.Context, q *generated.Queries, proof hubSameStoreRecoveryProof, c hub.SameStoreRecoveryCommand, m hub.SameStoreRecoveryManifest, raw []byte) error {
+	hubID, id := c.HubID, c.ID
+	if e := s.pendingSameStore(ctx, q, c); e != nil {
+		return e
+	}
+	authorities, e := q.HubRecoveryAuthorities(ctx, generated.HubRecoveryAuthoritiesParams{SignerID: hubID, ToEpoch: int64(c.Handoff.ToEpoch)})
+	if e != nil {
+		return e
+	}
+	if !jsonEqual(authorities, proof.Authorities) {
+		return ErrShareUnknown
+	}
+	count := int64(0)
+	prefixHash := sha256.New()
+	enc := json.NewEncoder(prefixHash)
+	for {
+		page, e := q.PageHubSameStoreJournal(ctx, generated.PageHubSameStoreJournalParams{RecoveryID: id, AfterSequence: count})
+		if e != nil {
+			return e
+		}
+		if len(page) == 0 {
+			break
+		}
+		for _, r := range page {
+			if r.Sequence != count+1 || r.Sequence > m.Result.SealedSequence+1 {
+				return ErrShareUnknown
+			}
+			h := sha256.Sum256(r.Payload)
+			if !bytes.Equal(h[:], r.PayloadDigest) {
+				return ErrShareConflict
+			}
+			if r.Sequence == m.Result.SealedSequence+1 {
+				if r.Kind != "handoff" || r.RecordID != id || !bytes.Equal(r.Payload, raw) {
+					return ErrShareConflict
+				}
+			} else {
+				item := struct {
+					Sequence         int64
+					Kind, ID, SHA256 string
+				}{r.Sequence, r.Kind, r.RecordID, hex.EncodeToString(h[:])}
+				if e = enc.Encode(item); e != nil {
+					return e
+				}
+				if r.Kind == "issue" {
+					if e = verifySameStoreFinancialIssue(ctx, q, hubID, r); e != nil {
+						return e
+					}
+				}
+			}
+			count++
+		}
+	}
+	if count != m.Result.SealedSequence+1 || hex.EncodeToString(prefixHash.Sum(nil)) != m.Result.FundedInventory.PrefixSHA256 {
+		return ErrShareUnknown
+	}
+	missing, e := q.MissingHubSameStoreIssues(ctx, generated.MissingHubSameStoreIssuesParams{HubID: hubID, HubBootID: c.FromBootID, RecoveryID: id, SealedSequence: m.Result.SealedSequence})
+	if e != nil {
+		return e
+	}
+	if missing {
+		return ErrShareUnknown
+	}
+	for i, link := range c.Allocations {
+		a, e := q.GetHubAllocationGlobal(ctx, link.AllocationID)
+		if e != nil {
+			return e
+		}
+		if _, e = q.GetHubDelegationSeal(ctx, generated.GetHubDelegationSealParams{TenantID: a.TenantID, AllocationID: a.AllocationID}); e == nil {
+			return ErrShareUnknown
+		} else if !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
+		allocation, e := hub.DecodeAllocation(a.Payload)
+		if e != nil {
+			return e
+		}
+		h := sha256.Sum256(a.Payload)
+		if hex.EncodeToString(h[:]) != link.PayloadSHA256 {
+			return ErrShareConflict
+		}
+		rows, e := q.HubAllocationIssueInventory(ctx, generated.HubAllocationIssueInventoryParams{TenantID: a.TenantID, AllocationID: a.AllocationID})
+		if e != nil {
+			return e
+		}
+		items := make([]contracts.IssuedPartition, 0, len(rows))
+		for _, r := range rows {
+			items = append(items, contracts.IssuedPartition{ID: r.IssueID, Digest: hex.EncodeToString(r.PayloadDigest), Raw: r.RawGranted})
+		}
+		digest, issued, e := contracts.PartitionDigest(items)
+		if e != nil {
+			return e
+		}
+		p := m.Result.FundedInventory.Delegations[i]
+		if p.Raw != int64(allocation.RawBytes) || p.Issued != issued || p.IssueCount != int64(len(items)) || p.IssueSHA256 != digest {
+			return ErrShareUnknown
+		}
 	}
 	return nil
 }

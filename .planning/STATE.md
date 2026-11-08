@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: direct Node successor roots delivered; all-tenant admission/effective epoch pending"
-last_updated: "2026-11-08T14:12:08.626259+00:00"
+stopped_at: "06-06 Task 3: PG current-state admission complete; admission transport/effective epoch consumers pending"
+last_updated: "2026-11-08T14:26:47.255873+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: immutable next roots require PG FULL fence and have production direct Node delivery/receipt; no Hub admission;8/11."
+last_activity_desc: "06-06 Task3: all-tenant PG admission rechecks current prefix/Node FULL roots, closes old issuance and binds approved target; no local ACK;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: 6844889f
+state_head: 1110faf1
 ---
 
 # Project State
@@ -49,6 +49,8 @@ Direct Node inventory fence transport now has immutable PG command/receipt, exac
 Independent Hub S/R preflight now carries explicit actual-boot approval and local FULL command over an isolated role-mTLS capability. Complete42-record prefix/manifest retention survives lost row/final receipts and exact replay without local ACK, online, PG boot binding or financial change. Empty-state and forged Node-role certificate deny. Native complete backend/root race, serial Linux complete root/backend race, final role-separated focused race, six cross-builds and two isolated23sqlc+2protobuf outputs pass; full suites preceded only the final test-role refinement. Evidence: artifacts/phase6/06-06/task3-hub-recovery-preflight/. Current-state all-tenant admission, independent direct Node successor roots, effective epoch consumers and full06-06 convergence remain.
 
 Independent direct Node successor roots now require explicit platform Grant, current approved S/R/verified manifest and authenticated FULL Node inventory fence. Original roots advance only adjacent revision/epoch; source, generation, limits and deadlines remain fixed. Separate immutable PG provision/receipt and production worker survive lost FULL receipt/reconnect with original37-byte local credit/funds/capacity unchanged and target Hub Bind denied. Audit rollback,8 concurrent commands/receipts, changed authority/Node/expiry and clock-free FULL replay pass. Trusted lower-bound first installation intersects authenticated time without bypassing continuity checks. Full final native backend race(service222.972), native root(Store81.187), Linux root(Store149.264)/backend(service209.360), six final cross-builds and two independent23-output sqlc generations pass. Initial test-only field/clock failures remain explicitly classified. Evidence: artifacts/phase6/06-06/task3-node-recovery-sources/. No Hub admission/ACK or06-06 completion; current-state all-tenant admission, effective epoch/renewal consumers, repeated recovery and producer/pending-rule convergence remain.
+
+PG current-state Hub S/R admission now reruns complete prefix/financial verification under Hub->sorted Node->sorted tenant locks, rejects extra/changed/sealed allocations, validates current Node/fencing/tenant/rule/grants/two enforced share bindings and all exact FULL fence/root receipts. Immutable all-tenant proof, old renewal closure, approved target epoch/boot binding and operation/task/Outbox/audit commit atomically. Audit rollback and8 concurrent exact calls pass; original financial/unknown/capacity histories stay unchanged and local Hub still denies issue without ACK. Other-tenant approvals remain complete and later epoch changes deny. Deliberately disconnecting the current-state gate with a Go overlay produces expected RED(stale proof admitted); restored source GREEN passes with unchanged source SHA. Complete final native backend race(service228.161), Linux backend race(service237.058), six cross-builds and two independent23-output sqlc generations pass. Test-only unused-import/snapshot-column failures remain classified. Evidence: artifacts/phase6/06-06/task3-hub-current-admission/. This is a platform service primitive, not production admission/ACK transport or effective epoch issue/lease/seal/renewal.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -150,7 +152,7 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 ## Session Continuity
 
 Last session: 2026-11-08T13:30:23Z
-Stopped at: 06-06 Task 3: direct Node successor roots delivered; all-tenant admission/effective epoch pending
+Stopped at: 06-06 Task 3: PG current-state admission complete; admission transport/effective epoch consumers pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

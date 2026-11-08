@@ -393,6 +393,22 @@ CREATE TABLE node_recovery_source_receipts (
  FOREIGN KEY(tenant_id,provision_id) REFERENCES node_recovery_source_provisions(tenant_id,id)
 );
 CREATE TRIGGER node_recovery_source_receipt_immutable BEFORE UPDATE OR DELETE ON node_recovery_source_receipts FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
+-- Admission commits immutable current-state evidence and one epoch binding.
+-- It is distinct from forensic retention and from the Hub's local FULL ACK.
+CREATE TABLE hub_same_store_admissions (
+ tenant_id text NOT NULL, recovery_id text NOT NULL PRIMARY KEY,
+ hub_id text NOT NULL, from_epoch bigint NOT NULL CHECK(from_epoch>0),
+ to_epoch bigint NOT NULL CHECK(to_epoch=from_epoch+1),
+ from_boot_id text NOT NULL,to_boot_id text NOT NULL,backend_id text NOT NULL,
+ operation_id text NOT NULL,created_by text NOT NULL,
+ payload bytea NOT NULL CHECK(octet_length(payload)<=4194304),
+ payload_digest bytea NOT NULL CHECK(octet_length(payload_digest)=32),
+ UNIQUE(hub_id,to_epoch),
+ FOREIGN KEY(recovery_id) REFERENCES hub_same_store_manifests(recovery_id),
+ FOREIGN KEY(hub_id,to_epoch) REFERENCES hub_signer_incarnations(hub_id,signer_epoch),
+ FOREIGN KEY(tenant_id,operation_id) REFERENCES operations(tenant_id,id)
+);
+CREATE TRIGGER hub_same_store_admission_immutable BEFORE UPDATE OR DELETE ON hub_same_store_admissions FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 -- +goose Down
 -- Authority histories are intentionally not rolled back into reusable rights.
 -- +goose StatementBegin

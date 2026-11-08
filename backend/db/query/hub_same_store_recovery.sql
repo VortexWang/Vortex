@@ -52,3 +52,8 @@ ORDER BY p.tenant_id,p.id LIMIT 100;
 SELECT * FROM node_recovery_source_receipts WHERE tenant_id=$1 AND provision_id=$2;
 -- name: AppendNodeRecoverySourceReceipt :exec
 INSERT INTO node_recovery_source_receipts(tenant_id,provision_id,payload,payload_digest,peer_fingerprint) VALUES($1,$2,$3,$4,$5);
+
+-- name: GetHubSameStoreAdmission :one
+SELECT * FROM hub_same_store_admissions WHERE recovery_id=$1;
+-- name: AppendHubSameStoreAdmission :exec
+INSERT INTO hub_same_store_admissions(tenant_id,recovery_id,hub_id,from_epoch,to_epoch,from_boot_id,to_boot_id,backend_id,operation_id,created_by,payload,payload_digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
