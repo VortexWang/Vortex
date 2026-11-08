@@ -1,0 +1,4 @@
+# vortex/backend/internal/service
+internal/service/runtime_funding_scheduler.go:154:64: fmt.Sprintf format %d reads arg #7, but call has 6 args
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

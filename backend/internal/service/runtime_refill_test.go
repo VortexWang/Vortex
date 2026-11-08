@@ -66,7 +66,7 @@ func TestRuntimeRefillRequiresCompleteParentFinalAndOneAuditedSuccessor(t *testi
 		t.Fatal("refill duplicated/missing", count, err)
 	}
 	q := generated.New(x.f.pool)
-	history, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: x.f.tenant, NodeID: f.in.NodeID, BootID: f.in.BootID, SnapshotID: f.a.SnapshotID, SignerEpoch: "7", PathGeneration: "1", FencingFloor: "3"})
+	history, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: x.f.tenant, NodeID: f.in.NodeID, BootID: f.in.BootID, SnapshotID: f.a.SnapshotID, PathGeneration: "1", FencingFloor: "3"})
 	if err != nil || len(history) != 2 {
 		t.Fatal(history, err)
 	}

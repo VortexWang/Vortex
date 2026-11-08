@@ -205,7 +205,7 @@ func TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady(t *te
 	if _, err = (worker.RuntimeFundingWorker{Service: x.s, Region: in.Region}).Once(ctx); err != nil && !errors.Is(err, service.ErrShareUnknown) {
 		t.Fatal(err)
 	}
-	history, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: x.f.tenant, NodeID: in.NodeID, BootID: in.BootID, SnapshotID: a.SnapshotID, SignerEpoch: "7", PathGeneration: "1", FencingFloor: "3"})
+	history, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: x.f.tenant, NodeID: in.NodeID, BootID: in.BootID, SnapshotID: a.SnapshotID, PathGeneration: "1", FencingFloor: "3"})
 	if err != nil || len(history) != 2 {
 		t.Fatal(history, err)
 	}

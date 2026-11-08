@@ -1,0 +1,9 @@
+{
+  "backend/db/query/hub_allocations.sql": "95a6bd077089f3d1588d76c3c9e55db0598e3484dae880941a4760bd8f696090",
+  "backend/db/generated/hub_allocations.sql.go": "fb2c9c2087efeea43b6594bf3c2fe79b0815a166ad351dbc8fdd1a834185f04b",
+  "backend/internal/service/hub_allocation.go": "f6dfd4da309dcb233297525460eeaaa3e1b9d12ea87bc012c8df8fb0dcf4be06",
+  "backend/internal/service/runtime_funding_scheduler.go": "a804a571be11215f1598179708a862269d9135cab7d7a18c65df85fe1f4d5cd1",
+  "backend/internal/service/runtime_refill_test.go": "1a4bbd9972801ac12ca6735754b47b9c21e65e988d50859c148188fb449fc5d5",
+  "backend/internal/service/runtime_expiry_cycle_transport_test.go": "47e23344a17dbe42b7f3abe619be640febe35f90ae031bb890c3b60ebf3b8609",
+  "backend/internal/service/runtime_funding_history_epoch_test.go": "108b693a314c5fb5f59fa3d2777662d75a85cca078725ec5982962b8b040e15b"
+}

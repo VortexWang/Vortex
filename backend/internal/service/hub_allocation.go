@@ -66,7 +66,7 @@ func (s ShareService) PrepareHubAllocation(ctx context.Context, scope TenantScop
 			return e
 		}
 		if in.runtimeHistorySHA256 != "" {
-			open, history, _, e := runtimeFundingHistory(ctx, q, scope.TenantID(), in.NodeID, in.BootID, in.SnapshotID, in.SignerEpoch, in.PathGeneration, in.FencingFloor)
+			open, history, _, e := runtimeFundingHistory(ctx, q, scope.TenantID(), in.NodeID, in.BootID, in.SnapshotID, in.PathGeneration, in.FencingFloor)
 			if e != nil {
 				return e
 			}

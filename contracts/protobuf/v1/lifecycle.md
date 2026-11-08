@@ -989,3 +989,18 @@ This is a resumable explicitly authorized service action for the06-07 HTTP
 adapter. It is not a background worker grant and does not automatically approve
 signer authority, cold recovery or new platform actions. No public HTTP endpoint,
 wire field, migration or approved snapshot is introduced here. CR-008 is unapproved.
+
+## Cross-epoch runtime funding inventory (candidate)
+
+Automatic refill scans every immutable original financial parent in the same
+(tenant,Node,Node boot,billing snapshot,path generation,fencing floor) context,
+including parents from other signer epochs and Hub boots. Signer eligibility
+remains an independent check; an epoch transition cannot hide a still-unknown
+parent from the complete-final prerequisite. The inventory digest and its
+transactional funding recheck bind that full ordered parent/reservation set.
+
+Only the dedicated complete child/issuer final, or an authenticated zero-child
+FULL seal final, classifies a parent as closed. Expiry,conservative estimates,
+new epochs and missing receipts do not. This hardens the refill barrier; it does
+not authorize new funding against a transferred generation or revise an immutable
+artifact. Effective-epoch funding eligibility remains separate unfinished work.

@@ -48,7 +48,7 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 	q := generated.New(s.Pool)
 	// Also recognize allocations prepared through the explicit administrative
 	// producer, rather than reserving a second parent under a scheduler nonce.
-	open, history, predecessors, e := runtimeFundingHistory(ctx, q, scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.SignerEpoch, ref.PathGeneration, ref.FencingGeneration)
+	open, history, predecessors, e := runtimeFundingHistory(ctx, q, scope.TenantID(), n.NodeID, n.BootID, ref.SnapshotID, ref.PathGeneration, ref.FencingGeneration)
 	if e != nil || open {
 		return e
 	}
@@ -164,8 +164,10 @@ func (s ShareService) fundRuntimeCandidate(ctx context.Context, scope TenantScop
 	return ErrShareCapacity
 }
 
-func runtimeFundingHistory(ctx context.Context, q *generated.Queries, tenant, node, boot, snapshot string, epoch, path, fence int64) (bool, string, int, error) {
-	rows, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: tenant, NodeID: node, BootID: boot, SnapshotID: snapshot, SignerEpoch: strconv.FormatInt(epoch, 10), PathGeneration: strconv.FormatInt(path, 10), FencingFloor: strconv.FormatInt(fence, 10)})
+// Every original parent remains in this inventory across signer changes. Epoch
+// admission is checked separately; it cannot hide unknown financial occupation.
+func runtimeFundingHistory(ctx context.Context, q *generated.Queries, tenant, node, boot, snapshot string, path, fence int64) (bool, string, int, error) {
+	rows, err := q.RuntimeFundingHistory(ctx, generated.RuntimeFundingHistoryParams{TenantID: tenant, NodeID: node, BootID: boot, SnapshotID: snapshot, PathGeneration: strconv.FormatInt(path, 10), FencingFloor: strconv.FormatInt(fence, 10)})
 	if err != nil {
 		return false, "", 0, err
 	}

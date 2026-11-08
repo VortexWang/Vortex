@@ -64,7 +64,6 @@ OR (t.receipt_key='hub-seal/'||s.seal_id AND convert_from(s.payload,'UTF8')::jso
 FROM hub_funded_allocations a LEFT JOIN hub_delegation_seals s ON s.tenant_id=a.tenant_id AND s.allocation_id=a.allocation_id
 WHERE a.tenant_id=$1 AND a.node_id=$2 AND a.boot_id=$3
 AND convert_from(a.payload,'UTF8')::jsonb->>'billing_snapshot_id'=sqlc.arg(snapshot_id)::text
-AND convert_from(a.payload,'UTF8')::jsonb->>'signer_epoch'=sqlc.arg(signer_epoch)::text
 AND convert_from(a.payload,'UTF8')::jsonb->>'path_generation'=sqlc.arg(path_generation)::text
 AND convert_from(a.payload,'UTF8')::jsonb->>'fencing_generation_floor'=sqlc.arg(fencing_floor)::text
 ORDER BY a.allocation_id;
