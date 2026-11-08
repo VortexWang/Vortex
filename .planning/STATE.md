@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task3: actual pending Engine Commit after S/R verified; remaining ordering/full acceptance"
-last_updated: "2026-11-08T18:55:30.080927+00:00"
+stopped_at: "06-06 Task3: older-path pure revocation verified; unified acceptance/CR-008 pending"
+last_updated: "2026-11-08T19:11:44.550318+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: explicit pending Commit automatic renewal and actual direct mTLS Engine activation verified;8/11."
+last_activity_desc: "06-06 Task3: scoped older-path revocation; complete root and affected integration passed;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: f114fa64
+state_head: e20cd131
 ---
 
 # Project State
@@ -192,3 +192,5 @@ Transferred renewal delivery now uses the actual production Agent/RuntimeServer 
 
 
 Explicit pending Engine Commit now participates in bounded renewal observation only when the same live executor proves Prepared and its FULL journal has the exact explicit Commit digest/revision/fence/correlation. Prepare/query/malformed/different-executor/committing/unknown work cannot bootstrap. A stale share revision at the pre-Commit readiness check is classified as pending; the same executor must independently prove Prepared and all current authority checks still gate the later Commit. Genuine RED could not schedule after S/R; final actual direct backend/Node mTLS replays Prepare, leaves the first explicit Commit Prepared, then production automatic epoch8 renewal survives lost FULL response and only a second explicit Commit activates the original immutable artifact. Original103/51/37/new51/R1 and complete child/parent final/fresh funding gates pass. The other fixed member has genuinely reserved capacity plus its original prepared fixture receipt, not real Engine execution in this test. Native complete root race(Agent61.251/Store80.779), Linux arm64 complete root race(Agent111.577/Store171.388), final native/Linux affected backend integrations71.592s/68.963s and six builds pass. Final store negative enhancement passes separately after native full root; Linux full root includes it. Full backend suites inherit936edcab; no full backend/generator rerun or same-SHA clean-source/Actions claim. Failed fixture/RED/intermediate classification logs remain FAIL. Evidence: artifacts/phase6/06-06/task3-pending-engine-renewal/. SQL/protobuf/Engine module/dependencies/approved snapshots unchanged. Next: older-path revocation-only ordering and complete06-06 producer/fault/clean-source acceptance before concreteCR-008 review. Phase6 stays8/11;no06-06 SUMMARY or CR-008 approval.
+
+Restrictive older-path pure revocation now stops only authenticated matching issuer/Node boot/path IDs after a newer path/fence, without floor promotion/regression, heartbeat or financial release. Unknown IDs use immutable scoped tombstones. FULL rollback/concurrent replay/reopen, foreign/mixed-right negatives and actual issuer/Node mTLS pass. Complete native/Linux root race, final affected backend race(native67.318/Linux67.277) and six builds pass. One earlier Linux renewal-loss test observed an extra reconnect; cause unproven, failure retained, isolated3x/final suite pass with strict assertion and added server-exit diagnostics. Evidence: artifacts/phase6/06-06/task3-older-path-revocation/. Remaining: unified06-06 full/fault/clean-source acceptance and concreteCR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.

@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"net"
 	"sync/atomic"
 	"testing"
@@ -261,10 +262,16 @@ type runtimeRenewalDropServer struct {
 	runtime   *hub.RuntimeServer
 	dropped   atomic.Bool
 	requestID atomic.Value
+	ends      chan error
 }
 
 func (s *runtimeRenewalDropServer) Connect(stream controlv1.NodeControl_ConnectServer) error {
-	return s.runtime.Connect(&runtimeRenewalDropStream{NodeControl_ConnectServer: stream, owner: s})
+	err := s.runtime.Connect(&runtimeRenewalDropStream{NodeControl_ConnectServer: stream, owner: s})
+	select {
+	case s.ends <- err:
+	default:
+	}
+	return err
 }
 
 type runtimeRenewalDropStream struct {
@@ -293,7 +300,7 @@ func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, 
 		t.Fatal(err)
 	}
 	defer listener.Close()
-	faults := &runtimeRenewalDropServer{runtime: runtime}
+	faults := &runtimeRenewalDropServer{runtime: runtime, ends: make(chan error, 32)}
 	server := grpc.NewServer(grpc.Creds(credentials.NewTLS(serverTLS)))
 	defer server.Stop()
 	controlv1.RegisterNodeControlServer(server, faults)
@@ -357,7 +364,11 @@ func exerciseTransferredRenewalAfterFULLLoss(t *testing.T, ctx context.Context, 
 		}
 	}
 	if !faults.dropped.Load() || client.RegionalCounters().Attempts != 2 || client.RegionalCounters().WatchdogTimeouts != 0 {
-		t.Fatal("expected one lost FULL response and one replay", client.RegionalCounters())
+		var ended []string
+		for len(faults.ends) > 0 {
+			ended = append(ended, fmt.Sprint(<-faults.ends))
+		}
+		t.Fatal("expected one lost FULL response and one replay", client.RegionalCounters(), ended)
 	}
 	if intent.Result == nil || intent.Result.Code != "ok" || !bytes.Equal(receipt.Payload, intent.Result.AuthorizationUpdate.Payload) || receipt.HubBootID != r.ToBootID {
 		t.Fatal("PG did not accept original recovered issue", intent, receipt)

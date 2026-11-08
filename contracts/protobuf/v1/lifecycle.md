@@ -1180,3 +1180,23 @@ that same Engine transaction. Only the selected member has real Engine execution
 in this fixture; the fixed deployment's other member has reserved capacity and
 its earlier prepared fixture receipt. It is not a complete multi-member data
 forwarding or restart/rolling-upgrade acceptance result.
+
+## Restrictive older-path revocation delivery (candidate)
+
+After the Node has admitted a later path or fencing floor, a pure authenticated
+revocation update may narrow only the original issuer/Node boot/path. Each known
+authorization must match that exact scope and may not come from a newer signer
+epoch. Unknown identifiers receive immutable scoped tombstones; they cannot
+revoke another issuer, boot or path. A lower signer epoch remains denied.
+
+This exception accepts no grants, share references, source handoffs or policy
+transitions. Its FULL transaction neither advances nor regresses any current
+path/fence/signer floor, refreshes heartbeat authority, releases held or unknown
+usage, nor creates a source or fresh right. Exact update replay remains stable.
+
+Actual issuer/Node role-mTLS tests deliver the old pure revocation after an
+independent current path, including issued but never-installed identifiers,
+then reconnect and replay. The test transport is HubTestServer and uses explicit
+local journal confirmation for its unfunded fixture; it is not evidence of a
+PostgreSQL admission, production RuntimeServer recovery or financial final.
+Those production recovery chains retain their separate integration evidence.

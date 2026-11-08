@@ -1,0 +1,5 @@
+--- FAIL: TestPureOlderPathRevocationKeepsFloorsFundsAndUnknownScope (0.19s)
+    revocation_recovery_test.go:43: pure older-path revoke rejected store: authorization signer or path generation is stale
+FAIL
+FAIL	vortex/agent/store	0.878s
+FAIL

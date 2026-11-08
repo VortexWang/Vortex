@@ -1,0 +1,122 @@
+[
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/node-linux-amd64",
+      "./cmd/vortex-node"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "amd64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "5ce19ee1bbc52dfbce6f5c83100482e6411c81d032f2a762a87ec164ea641451"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/backend-linux-amd64",
+      "./cmd/vortex-backend"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "amd64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "005bdd7e0212ffd3c5aa2320adf8f127145ecae93ece758257f6534020c8cd2a"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/hub-linux-amd64",
+      "./cmd/vortex-hub"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "amd64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "ec9f7dc0a023eec302f2b6bac808a935000f958424d342f4ed3cf8d6baa42e99"
+  },
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/node-linux-arm64",
+      "./cmd/vortex-node"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "arm64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "f2d3bfb64a71c08048fcc3c9a94cf0d233b24c09d6bd92c9f7a783f033f3d0cd"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/backend-linux-arm64",
+      "./cmd/vortex-backend"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "arm64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "90d4b500237d2ad1ac77e3a0ff154a3d404c9460014b98ebd12e38b8d58cd29b"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-scoped-revocation-build-i5fyjp5_/hub-linux-arm64",
+      "./cmd/vortex-hub"
+    ],
+    "environment": {
+      "GOOS": "linux",
+      "GOARCH": "arm64",
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local"
+    },
+    "exit": 0,
+    "output": "",
+    "sha256": "00b6e5eccf53383418b1d08fe9fc7bf2217726cc7fe2fb5dcfeeb1ad260d8d94"
+  }
+]
