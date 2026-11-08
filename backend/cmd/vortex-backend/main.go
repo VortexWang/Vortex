@@ -2,17 +2,22 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+	"vortex/backend/internal/auth"
+	"vortex/backend/internal/httpapi"
+	"vortex/backend/internal/repository"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -36,7 +41,7 @@ func main() {
 }
 func run(ctx context.Context, args []string) error {
 	if len(args) == 0 {
-		return errors.New("command required: migrate, serve, mutate, operation")
+		return errors.New("command required: migrate, serve, serve-http, mutate, operation")
 	}
 	url := os.Getenv("PHASE6_DATABASE_URL")
 	if url == "" {
@@ -60,6 +65,8 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	switch args[0] {
+	case "serve-http":
+		return serveHTTP(ctx, pool, args[1:])
 	case "serve":
 		return serve(ctx, pool, args[1:])
 	case "mutate", "operation":
@@ -232,4 +239,55 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	case err := <-failures:
 		return err
 	}
+}
+
+// Public REST is a separate TLS listener/process from role-bound gRPC control.
+func serveHTTP(ctx context.Context, pool *pgxpool.Pool, args []string) error {
+	f := flag.NewFlagSet("serve-http", flag.ContinueOnError)
+	address := f.String("listen", "127.0.0.1:19443", "public HTTPS address")
+	cert := f.String("cert", "", "public HTTPS server certificate")
+	key := f.String("key", "", "public HTTPS server private key")
+	cursorKey := f.String("cursor-key-file", "", "private file containing 32..128 raw cursor signing key bytes")
+	if err := f.Parse(args); err != nil {
+		return err
+	}
+	if f.NArg() != 0 {
+		return errors.New("unexpected public API arguments")
+	}
+	info, err := os.Stat(*cursorKey)
+	if err != nil {
+		return errors.New("cursor signing key file required")
+	}
+	if !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() < 32 || info.Size() > 128 {
+		return errors.New("cursor signing key must be a private regular file with 32..128 bytes")
+	}
+	secret, err := os.ReadFile(*cursorKey)
+	if err != nil {
+		return errors.New("cannot read cursor signing key")
+	}
+	codec, err := httpapi.NewCursorCodec(secret, time.Hour)
+	if err != nil {
+		return err
+	}
+	certificate, err := tls.LoadX509KeyPair(*cert, *key)
+	if err != nil {
+		return errors.New("cannot load public HTTPS certificate")
+	}
+	gin.SetMode(gin.ReleaseMode)
+	tokens := &auth.Tokens{Store: repository.TokenRepository{Pool: pool}, AccessTTL: 5 * time.Minute, RefreshTTL: 30 * 24 * time.Hour}
+	handler, err := httpapi.NewRouter(httpapi.Config{Pool: pool, Tokens: tokens, Cursors: codec})
+	if err != nil {
+		return err
+	}
+	server, err := httpapi.NewServer(handler, certificate)
+	if err != nil {
+		return err
+	}
+	listener, err := net.Listen("tcp", *address)
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+	fmt.Printf("backend public API ready https=%s\n", listener.Addr())
+	return httpapi.Serve(ctx, listener, server)
 }

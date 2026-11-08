@@ -41,5 +41,28 @@ CREATE TABLE domain_events (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX domain_events_scope_cursor ON domain_events(tenant_id,id);
+-- Public ordering is independent of mutable worker scheduling timestamps.
+ALTER TABLE operations ADD COLUMN public_created_at timestamptz;
+UPDATE operations SET public_created_at=created_at;
+ALTER TABLE operations ALTER COLUMN public_created_at SET NOT NULL;
+-- +goose StatementBegin
+CREATE FUNCTION guard_operation_public_order() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF TG_OP='INSERT' THEN
+  NEW.public_created_at := NEW.created_at;
+ ELSIF NEW.public_created_at IS DISTINCT FROM OLD.public_created_at
+    OR NEW.id IS DISTINCT FROM OLD.id OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id THEN
+  RAISE EXCEPTION 'immutable operation public order';
+ END IF;
+ RETURN NEW;
+END $$;
+-- +goose StatementEnd
+CREATE TRIGGER operation_public_order BEFORE INSERT OR UPDATE ON operations
+FOR EACH ROW EXECUTE FUNCTION guard_operation_public_order();
+CREATE INDEX operations_public_cursor ON operations(tenant_id,public_created_at,id);
 -- +goose Down
+DROP TRIGGER operation_public_order ON operations;
+DROP FUNCTION guard_operation_public_order();
+DROP INDEX operations_public_cursor;
+ALTER TABLE operations DROP COLUMN public_created_at;
 DROP TABLE domain_events, refresh_token_revocations, api_access_tokens, refresh_tokens, refresh_token_families;

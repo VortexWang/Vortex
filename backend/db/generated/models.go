@@ -554,6 +554,7 @@ type Operation struct {
 	State            string
 	OccupationHeld   bool
 	CreatedAt        pgtype.Timestamptz
+	PublicCreatedAt  pgtype.Timestamptz
 }
 
 type Outbox struct {

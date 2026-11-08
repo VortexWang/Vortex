@@ -1,0 +1,114 @@
+[
+  {
+    "module": "github.com/gabriel-vasile/mimetype",
+    "version": "v1.4.12",
+    "sum": "h1:e9hWvmLYvtp846tLHam2o++qitpguFiYCKbn0w9jyqw=",
+    "license_files": {
+      "LICENSE": "b5a867655833aca9e27c97e28e43dcfc62be0ba0e84f24157afedf8fdaaa2fc1"
+    }
+  },
+  {
+    "module": "github.com/gin-contrib/sse",
+    "version": "v1.1.0",
+    "sum": "h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=",
+    "license_files": {
+      "LICENSE": "03458b6d5828e1be1127ca2adf122572eb574fc47b56190c3b38203b8b2a98d0"
+    }
+  },
+  {
+    "module": "github.com/gin-gonic/gin",
+    "version": "v1.12.0",
+    "sum": "h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=",
+    "license_files": {
+      "LICENSE": "03458b6d5828e1be1127ca2adf122572eb574fc47b56190c3b38203b8b2a98d0"
+    }
+  },
+  {
+    "module": "github.com/go-playground/locales",
+    "version": "v0.14.1",
+    "sum": "h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=",
+    "license_files": {
+      "LICENSE": "a1a5ca382f9e8c646fa05240a74a6554bbc3084b5675f84c9eaafd3d95686612"
+    }
+  },
+  {
+    "module": "github.com/go-playground/universal-translator",
+    "version": "v0.18.1",
+    "sum": "h1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=",
+    "license_files": {
+      "LICENSE": "a55d0c6e1a35ee6cf13afb4bbc3c8801cc570d7ac8edcd5e4503892f1c7ff4f7"
+    }
+  },
+  {
+    "module": "github.com/go-playground/validator/v10",
+    "version": "v10.30.1",
+    "sum": "h1:f3zDSN/zOma+w6+1Wswgd9fLkdwy06ntQJp0BBvFG0w=",
+    "license_files": {
+      "LICENSE": "9e321f6a1db81616a6c344d3aefddf9834fef23bdd913eae0db283dfa6753dff"
+    }
+  },
+  {
+    "module": "github.com/goccy/go-yaml",
+    "version": "v1.19.2",
+    "sum": "h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=",
+    "license_files": {
+      "LICENSE": "43fe703ea9ebe27f0a6e5d2a1f6dd094fbe324251c743498f3ec19986d7349cd"
+    }
+  },
+  {
+    "module": "github.com/leodido/go-urn",
+    "version": "v1.4.0",
+    "sum": "h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=",
+    "license_files": {
+      "LICENSE": "fe81a9072afbfe0fe32b0bc99a852d697d14fbbca99b0b1878ac8f5dcbdd6ee6"
+    }
+  },
+  {
+    "module": "github.com/pelletier/go-toml/v2",
+    "version": "v2.2.4",
+    "sum": "h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=",
+    "license_files": {
+      "LICENSE": "26844e4b53c5adec04e557fd7dfef281cc0205a7d355626b1c68b778b99e9e7b"
+    }
+  },
+  {
+    "module": "github.com/quic-go/qpack",
+    "version": "v0.6.0",
+    "sum": "h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8=",
+    "license_files": {
+      "LICENSE.md": "1b6a897efd39b20b3cdce8cd306160d115dbded39d855ceeffe21dc11e4d53df"
+    }
+  },
+  {
+    "module": "github.com/quic-go/quic-go",
+    "version": "v0.59.0",
+    "sum": "h1:OLJkp1Mlm/aS7dpKgTc6cnpynnD2Xg7C1pwL6vy/SAw=",
+    "license_files": {
+      "LICENSE": "77d0b7b53e8abb84cf4dd3f9945a7fdf27044240d2e8023966a721a9a46fe96e"
+    }
+  },
+  {
+    "module": "github.com/ugorji/go/codec",
+    "version": "v1.3.1",
+    "sum": "h1:waO7eEiFDwidsBN6agj1vJQ4AG7lh2yqXyOXqhgQuyY=",
+    "license_files": {
+      "LICENSE": "c8a84b926246b4ac76e3810722858b0f83bdea8378de49911dccbefd70b0692e"
+    }
+  },
+  {
+    "module": "go.mongodb.org/mongo-driver/v2",
+    "version": "v2.5.0",
+    "sum": "h1:yXUhImUjjAInNcpTcAlPHiT7bIXhshCTL3jVBkF3xaE=",
+    "license_files": {
+      "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  },
+  {
+    "module": "golang.org/x/crypto",
+    "version": "v0.58.0",
+    "sum": "h1:COkYLr4k7nDI4r6QtMML2AfzeIswWHAJthLS6K/M/54=",
+    "license_files": {
+      "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    }
+  }
+]

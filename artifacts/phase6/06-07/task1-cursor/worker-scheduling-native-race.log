@@ -1,0 +1,30 @@
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=true
+2026/11/09 05:13:58 goose: no migrations to run. current version: 9
+2026/11/09 05:13:59 OK   00001_authority.sql (20.74ms)
+2026/11/09 05:13:59 OK   00002_tenant_policy.sql (28.76ms)
+2026/11/09 05:13:59 OK   00003_nodes_ports.sql (51.05ms)
+2026/11/09 05:13:59 OK   00004_entry_group_domains.sql (5.61ms)
+2026/11/09 05:13:59 OK   00005_rules_compile.sql (50.72ms)
+2026/11/09 05:13:59 OK   00006_packages_entitlements.sql (51.12ms)
+2026/11/09 05:13:59 OK   00007_metering_ledger.sql (51.01ms)
+2026/11/09 05:13:59 OK   00008_limits_shares.sql (103.15ms)
+2026/11/09 05:13:59 OK   00009_domain_events.sql (9.16ms)
+2026/11/09 05:13:59 goose: successfully migrated database to version: 9
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=false
+2026/11/09 05:14:00 goose: no migrations to run. current version: 9
+2026/11/09 05:14:00 OK   00001_authority.sql (8.1ms)
+2026/11/09 05:14:00 OK   00002_tenant_policy.sql (7.11ms)
+2026/11/09 05:14:00 OK   00003_nodes_ports.sql (16.17ms)
+2026/11/09 05:14:00 OK   00004_entry_group_domains.sql (1.96ms)
+2026/11/09 05:14:00 OK   00005_rules_compile.sql (16.53ms)
+2026/11/09 05:14:00 OK   00006_packages_entitlements.sql (16.48ms)
+2026/11/09 05:14:00 OK   00007_metering_ledger.sql (23.31ms)
+2026/11/09 05:14:00 OK   00008_limits_shares.sql (48.15ms)
+2026/11/09 05:14:00 OK   00009_domain_events.sql (7.9ms)
+2026/11/09 05:14:00 goose: successfully migrated database to version: 9
+--- PASS: TestRulePortActualAgentSocketsUnknownAndQuery (2.45s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=true (1.42s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=false (1.03s)
+PASS
+ok  	vortex/backend/internal/service	4.228s

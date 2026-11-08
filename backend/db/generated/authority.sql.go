@@ -93,7 +93,7 @@ func (q *Queries) GetDesiredState(ctx context.Context, arg GetDesiredStateParams
 }
 
 const getOperation = `-- name: GetOperation :one
-SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at FROM operations WHERE tenant_id=$1 AND id=$2
+SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at, public_created_at FROM operations WHERE tenant_id=$1 AND id=$2
 `
 
 type GetOperationParams struct {
@@ -118,12 +118,13 @@ func (q *Queries) GetOperation(ctx context.Context, arg GetOperationParams) (Ope
 		&i.State,
 		&i.OccupationHeld,
 		&i.CreatedAt,
+		&i.PublicCreatedAt,
 	)
 	return i, err
 }
 
 const getOperationByKey = `-- name: GetOperationByKey :one
-SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at FROM operations WHERE tenant_id=$1 AND idempotency_key=$2
+SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at, public_created_at FROM operations WHERE tenant_id=$1 AND idempotency_key=$2
 `
 
 type GetOperationByKeyParams struct {
@@ -148,6 +149,7 @@ func (q *Queries) GetOperationByKey(ctx context.Context, arg GetOperationByKeyPa
 		&i.State,
 		&i.OccupationHeld,
 		&i.CreatedAt,
+		&i.PublicCreatedAt,
 	)
 	return i, err
 }
@@ -222,7 +224,7 @@ func (q *Queries) InsertControlObservation(ctx context.Context, arg InsertContro
 
 const insertOperation = `-- name: InsertOperation :one
 INSERT INTO operations(id,tenant_id,resource_id,idempotency_key,request_sha256,target_kind,target_revision,expected_revision,generation,payload)
-VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at, public_created_at
 `
 
 type InsertOperationParams struct {
@@ -266,6 +268,7 @@ func (q *Queries) InsertOperation(ctx context.Context, arg InsertOperationParams
 		&i.State,
 		&i.OccupationHeld,
 		&i.CreatedAt,
+		&i.PublicCreatedAt,
 	)
 	return i, err
 }
@@ -388,7 +391,7 @@ func (q *Queries) ListAuthority(ctx context.Context, tenantID string) ([]ListAut
 }
 
 const lockOperation = `-- name: LockOperation :one
-SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at FROM operations WHERE tenant_id=$1 AND id=$2 FOR UPDATE
+SELECT id, tenant_id, resource_id, idempotency_key, request_sha256, target_kind, target_revision, expected_revision, generation, payload, state, occupation_held, created_at, public_created_at FROM operations WHERE tenant_id=$1 AND id=$2 FOR UPDATE
 `
 
 type LockOperationParams struct {
@@ -413,6 +416,7 @@ func (q *Queries) LockOperation(ctx context.Context, arg LockOperationParams) (O
 		&i.State,
 		&i.OccupationHeld,
 		&i.CreatedAt,
+		&i.PublicCreatedAt,
 	)
 	return i, err
 }

@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 Task1 token families implemented; REST/cursor/SSE next"
+stopped_at: "06-07 Task1 scoped HTTP/cursor/TLS increment verified; remaining resource adapters/SSE next"
 last_updated: "2026-11-08T20:58:34.580526+00:00"
 last_activity: 2026-11-08
-last_activity_desc: "06-07 Task1 hash-only rotating tokens, audit rollback and role/state revocation verified;9/11."
+last_activity_desc: "06-07 safe HTTP operation/rule routes, immutable cursor ordering and TLS listener verified;9/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: 4dc91a55
+state_head: f7f3766d
 ---
 
 # Project State
@@ -202,3 +202,5 @@ CR-008 exact review candidate now binds database/API2.3.0 and control1.6.0, prot
 Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 frozen with all inventoried companions. Prior proposal/approvals unchanged. Five selected frozen contracts and exact historical/generated/wire checks pass; VLink historical review hash mismatch remains preexisting, unchanged and outsideCR-008. Completing06-06 at9/11; proceeding06-07. Final Docker/Actions pair remains06-11.
 
 06-07 Task1 token unit implemented with realPG/native+Linux race, two deterministic24-output sqlc generations and source-bound audit/reuse tests. Migration9 remains candidate; noHTTP/SSE/full06-07 claim. See06-07-CONTINUATION.md.
+
+06-07 Task1 HTTP increment verified on native/Linux arm64 race and realTLS listener. Public operation order is immutable and distinct from worker time; strongIf-Match/stale412 and safe pending202 do not claim activation. Gin dependency closure reviewed38 modules, deterministic25-output sqlc and dualbackend builds pass. Remaining resource/authentication adapters, SSE and public contract approval still pending;9/11.
