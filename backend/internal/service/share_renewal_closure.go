@@ -24,7 +24,7 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 	if !validID(backend) {
 		return ErrShareConflict
 	}
-	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.prepare_renewal_closure", ResourceID: handoff, RequestID: request, Reason: "freeze complete predecessor delegation pages before authenticated FULL closure; retain occupation"}, func(q *generated.Queries) error {
+	return (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "share.prepare_renewal_closure", ResourceID: handoff, RequestID: request, Reason: "freeze predecessor issuance using authenticated FULL closure or immutable cold deadline proof; retain occupation"}, func(q *generated.Queries) error {
 		if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
 			return e
 		}
@@ -62,6 +62,13 @@ func (s ShareService) PrepareRenewalClosures(ctx context.Context, scope TenantSc
 		}
 		for _, a := range authorities {
 			if a.ClosedAt.Valid {
+				continue
+			}
+			closed, e := s.closeColdHubRenewalTx(ctx, q, scope, g, a)
+			if e != nil {
+				return e
+			}
+			if closed {
 				continue
 			}
 			existing, e := q.ShareClosureCommands(ctx, generated.ShareClosureCommandsParams{TenantID: scope.TenantID(), HandoffID: h.ID, SignerID: a.SignerID})

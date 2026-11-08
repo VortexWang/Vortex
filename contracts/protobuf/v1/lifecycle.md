@@ -412,3 +412,23 @@ Hub boot, preserving old evidence when fresh SQLite starts numbering again.
 The HTTP entry, early S/R recovery, same-store epoch recovery and Node boot
 recovery remain separate implementation work. This is an unapproved CR-008
 candidate, without changes to previously approved contract snapshots.
+
+The production renewal-closure worker may consume that immutable cold Hub
+proof for the exact original predecessor share recorded in its inventory.
+It checks the proof hash, bound successor Hub incarnation and the current
+trusted lower time bound before closing issuance. Already queued live closure
+pages remain immutable: unacknowledged work is retired as failed with its
+Outbox consumed locally, and no Hub receipt is fabricated. Previously accepted
+page receipts retain their outcome. This retirement and the closure proof share
+the tenant audit transaction. A pending live closure cannot hide later eligible
+cold-proof work from the worker. Current successor shares are excluded from the
+retired-epoch inventory; their hard boundaries stay independent.
+
+Closure still does not release a capacity difference: the original Node boot
+must durably CAS the next linear rate/connection generation and return its
+matching receipt. Original child credit and parent financial holds remain.
+Tests also independently prepare/fund a fresh rule at the approved new epoch,
+FULL-issue from fresh Hub SQLite with local ledger sequence1, and accept both
+new-boot sequence1 and the exact old-boot sequence1 replay. This does not claim
+that a prior prepared/unknown rule has converged or that Node boot recovery is
+complete; those original configuration/port holds remain protected.

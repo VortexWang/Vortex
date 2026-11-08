@@ -148,14 +148,19 @@ func (s ShareService) RecoverColdHubBoot(ctx context.Context, scope TenantScope,
 			}
 			proof.Allocations = append(proof.Allocations, hubColdAllocationProof{a.TenantID, a.AllocationID, a.ReservationID, hex.EncodeToString(hash[:])})
 		}
-		proof.Shares, e = q.HubRecoveryShares(ctx, in.HubID)
+		shares, e := q.HubRecoveryShares(ctx, in.HubID)
 		if e != nil {
 			return e
 		}
-		for _, g := range proof.Shares {
-			if g.SignerEpoch >= in.ToEpoch {
+		proof.Shares = []generated.ShareGeneration{}
+		for _, g := range shares {
+			if g.SignerEpoch == in.ToEpoch {
+				continue
+			} // prepared successor rights are not retired
+			if g.SignerEpoch > in.ToEpoch {
 				return ErrShareConflict
 			}
+			proof.Shares = append(proof.Shares, g)
 			for _, end := range []time.Time{g.OwnershipUntil.Time, g.PolicyUntil.Time, g.AutonomyUntil.Time} {
 				if end.After(proof.OldHardDeadline) {
 					proof.OldHardDeadline = end

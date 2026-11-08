@@ -16,6 +16,10 @@ import (
 
 func prepareAllocationRule(t *testing.T, x *shareFixture, rule string, snapshot string) {
 	t.Helper()
+	prepareAllocationRuleEpoch(t, x, rule, snapshot, 7)
+}
+func prepareAllocationRuleEpoch(t *testing.T, x *shareFixture, rule, snapshot string, epoch int64) {
+	t.Helper()
 	ctx := context.Background()
 	q := generated.New(x.f.pool)
 	b, e := q.GetBillingSnapshot(ctx, generated.GetBillingSnapshotParams{TenantID: x.f.tenant, ID: snapshot})
@@ -23,14 +27,14 @@ func prepareAllocationRule(t *testing.T, x *shareFixture, rule string, snapshot 
 		t.Fatal(e)
 	}
 	bill := compiler.BillingSnapshot{ID: b.ID, Version: b.Version, MultiplierMilli: b.MultiplierMilli, RuleRevision: b.RuleRevision, PathGeneration: b.PathGeneration}
-	r, e := (service.RuleService{Pool: x.f.pool}).CompileRevision(ctx, x.f.scope, rule, b.RuleRevision, bill, 7, b.PathGeneration, 3, uuid.NewString())
+	r, e := (service.RuleService{Pool: x.f.pool}).CompileRevision(ctx, x.f.scope, rule, b.RuleRevision, bill, epoch, b.PathGeneration, 3, uuid.NewString())
 	if e != nil {
-		t.Fatal(e)
+		t.Fatalf("compile allocation rule epoch%d revision%d: %v", epoch, b.RuleRevision, e)
 	}
 	o := service.RuleOrchestrator{Pool: x.f.pool}
 	d, e := o.Begin(ctx, x.f.scope, rule, b.RuleRevision, r.InputDigest, uuid.NewString())
 	if e != nil {
-		t.Fatal(e)
+		t.Fatalf("begin allocation rule epoch%d revision%d: %v diagnostics=%v", epoch, b.RuleRevision, e, r.Diagnostics)
 	}
 	rows, e := x.f.pool.Query(ctx, "SELECT task_id FROM rule_delivery_bindings WHERE tenant_id=$1 AND deployment_id=$2 AND phase='prepare' ORDER BY node_id", x.f.tenant, d.ID)
 	if e != nil {
@@ -58,7 +62,7 @@ func prepareAllocationRule(t *testing.T, x *shareFixture, rule string, snapshot 
 			t.Fatal(e)
 		}
 		if e = o.ReceiptWithLease(x.f.contexts[node], x.f.scope, id, lease, receipt(c, "prepared"), uuid.NewString()); e != nil {
-			t.Fatal(e)
+			t.Fatalf("allocation Prepare receipt: %v", e)
 		}
 	}
 }

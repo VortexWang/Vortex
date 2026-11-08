@@ -6,16 +6,16 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 06
 status: executing
-stopped_at: "06-06 Task 3: explicit cold Hub recovery verified; same-store S/R and Node recovery pending"
-last_updated: "2026-11-08T09:29:02Z"
+stopped_at: "06-06 Task 3: cold Hub renewal/CAS/fresh funding verified; same-store S/R and Node recovery pending"
+last_updated: "2026-11-08T09:43:54Z"
 last_activity: 2026-11-08
-last_activity_desc: "06-06 Task3: explicit platform cold Hub boot recovery proves all-tenant original hard deadlines, preserves unknown funds/capacity, pins new boot and passes actual mTLS/concurrency/audit/late-usage plus full native/Linux backend race. Same-store S/R and Node recovery pending;8/11."
+last_activity_desc: "06-06 Task3: production cold-proof old-renewal closure, audit rollback,8 workers, actual Node FULL CAS/difference release and fresh-rule funding/Hub FULL issue pass. Old/new boot sequence1 coexist, original debt retained. Full native/Linux backend race pass;8/11."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 54
   completed_plans: 50
-state_head: f41ff501
+state_head: 3d54de81
 ---
 
 # Project State
@@ -33,7 +33,7 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
 Current Plan: 06
 Total Plans in Phase: 11
 Status: Executing — 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04 and 06-05 complete (8/11). 06-06 Tasks 1 and 2 complete; Task 3 allocation/runtime authority remains. Final Phase6 acceptance pending.
-Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Immutable rate/connection funding bindings and exact generation closure now pass real Node CAS, funded Hub issue, audit rollback and native/Linux race. Seal061d3d8a clean Docker completed result0 with clean source before/after; later sealed redelivery/empty-state old-boot guard passes actual TLS and native/Linux race. Generic exact reconciliation now rejects delegated parents before finalizing issued/unknown debt, with RED/GREEN and full native/Linux race evidence. Node local child-credit stop/final now passes real Engine TCP inflight-write regression, conservation, unknown retention and native/Linux race; this is not a wire receipt or parent release. Never-installed child credit now has exact identity tombstones and current-boot/Hub local consumer with typed unknown ACK retention, cross-connection race and native/Linux evidence. Authenticated Node credit-close transport now passes actual TLS loss/replay/scope negatives, full native backend and Node race, Linux component race and dual-architecture builds. Persistent backend child-close commands/receipts and independent PG known inventory now pass actual mTLS pending/loss/replay, audit rollback and full native/Linux race. Complete all-child parent release now passes original-source aggregate rounding, unknown retention, audit rollback, concurrent replay, actual TLS and full native/Linux backend race. Safe inventory-bound funding successors pass native/Linux race, audit rollback and concurrent-worker checks. Runtime lease/heartbeat refresh now passes final native/Linux race, actual60s Agent mTLS/loss/replay and dual-architecture builds. Credit expiry closure/refill now passes native/Linux role-mTLS with actual aggregate caps, complete native backend/root and Linux root race plus dual-architecture Node/Hub builds. Explicit cold Hub recovery now has immutable all-tenant deadline proof, new-boot binding, unknown hold retention, actual TLS and native/Linux race evidence. Same-store S/R and Node boot recovery remain; final Actions06-11.
+Last activity: 2026-11-08 — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Immutable rate/connection funding bindings and exact generation closure now pass real Node CAS, funded Hub issue, audit rollback and native/Linux race. Seal061d3d8a clean Docker completed result0 with clean source before/after; later sealed redelivery/empty-state old-boot guard passes actual TLS and native/Linux race. Generic exact reconciliation now rejects delegated parents before finalizing issued/unknown debt, with RED/GREEN and full native/Linux race evidence. Node local child-credit stop/final now passes real Engine TCP inflight-write regression, conservation, unknown retention and native/Linux race; this is not a wire receipt or parent release. Never-installed child credit now has exact identity tombstones and current-boot/Hub local consumer with typed unknown ACK retention, cross-connection race and native/Linux evidence. Authenticated Node credit-close transport now passes actual TLS loss/replay/scope negatives, full native backend and Node race, Linux component race and dual-architecture builds. Persistent backend child-close commands/receipts and independent PG known inventory now pass actual mTLS pending/loss/replay, audit rollback and full native/Linux race. Complete all-child parent release now passes original-source aggregate rounding, unknown retention, audit rollback, concurrent replay, actual TLS and full native/Linux backend race. Safe inventory-bound funding successors pass native/Linux race, audit rollback and concurrent-worker checks. Runtime lease/heartbeat refresh now passes final native/Linux race, actual60s Agent mTLS/loss/replay and dual-architecture builds. Credit expiry closure/refill now passes native/Linux role-mTLS with actual aggregate caps, complete native backend/root and Linux root race plus dual-architecture Node/Hub builds. Explicit cold Hub recovery now has immutable all-tenant deadline proof, new-boot binding, unknown hold retention, actual TLS and native/Linux race evidence. Cold proof consumption now closes only old renewal and retires unacknowledged live closure work without fabricated receipts; actual Node FULL CAS releases exact capacity differences and fresh independent rule funding/Hub FULL issue preserves old debt and both boot-local sequence1 records. Full native/Linux backend race and dual-architecture builds pass. Same-store S/R, Node boot recovery and original pending-rule convergence remain; final Actions06-11.
 
 Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -134,8 +134,8 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ## Session Continuity
 
-Last session: 2026-11-08T09:29:02Z
-Stopped at: 06-06 Task 3: explicit cold Hub recovery verified; same-store S/R and Node recovery pending
+Last session: 2026-11-08T09:43:54Z
+Stopped at: 06-06 Task 3: cold Hub renewal/CAS/fresh funding verified; same-store S/R and Node recovery pending
 Resume file: .planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md
 
 ### Historical qualification boundaries

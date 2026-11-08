@@ -1,0 +1,51 @@
+=== RUN   TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained
+2026/11/08 17:33:59 goose: no migrations to run. current version: 8
+2026/11/08 17:33:59 OK   00001_authority.sql (25.39ms)
+2026/11/08 17:33:59 OK   00002_tenant_policy.sql (15.52ms)
+2026/11/08 17:33:59 OK   00003_nodes_ports.sql (54.12ms)
+2026/11/08 17:33:59 OK   00004_entry_group_domains.sql (3.24ms)
+2026/11/08 17:33:59 OK   00005_rules_compile.sql (18.68ms)
+2026/11/08 17:33:59 OK   00006_packages_entitlements.sql (16.79ms)
+2026/11/08 17:33:59 OK   00007_metering_ledger.sql (22.7ms)
+2026/11/08 17:33:59 OK   00008_limits_shares.sql (37.02ms)
+2026/11/08 17:33:59 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained (1.03s)
+=== RUN   TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries
+2026/11/08 17:34:00 goose: no migrations to run. current version: 8
+2026/11/08 17:34:00 OK   00001_authority.sql (9.51ms)
+2026/11/08 17:34:00 OK   00002_tenant_policy.sql (8.31ms)
+2026/11/08 17:34:00 OK   00003_nodes_ports.sql (19.17ms)
+2026/11/08 17:34:00 OK   00004_entry_group_domains.sql (2.36ms)
+2026/11/08 17:34:00 OK   00005_rules_compile.sql (28.56ms)
+2026/11/08 17:34:00 OK   00006_packages_entitlements.sql (18.36ms)
+2026/11/08 17:34:00 OK   00007_metering_ledger.sql (38.39ms)
+2026/11/08 17:34:00 OK   00008_limits_shares.sql (43.45ms)
+2026/11/08 17:34:00 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries (0.42s)
+=== RUN   TestHubColdRecoveryActualMTLSFreshStoreAndOldBootDenial
+2026/11/08 17:34:00 goose: no migrations to run. current version: 8
+2026/11/08 17:34:00 OK   00001_authority.sql (8.86ms)
+2026/11/08 17:34:00 OK   00002_tenant_policy.sql (7.62ms)
+2026/11/08 17:34:00 OK   00003_nodes_ports.sql (17.59ms)
+2026/11/08 17:34:00 OK   00004_entry_group_domains.sql (2.18ms)
+2026/11/08 17:34:00 OK   00005_rules_compile.sql (17.85ms)
+2026/11/08 17:34:00 OK   00006_packages_entitlements.sql (17.23ms)
+2026/11/08 17:34:00 OK   00007_metering_ledger.sql (23.26ms)
+2026/11/08 17:34:00 OK   00008_limits_shares.sql (36.28ms)
+2026/11/08 17:34:00 goose: successfully migrated database to version: 8
+    hub_cold_recovery_transport_test.go:103: TLS1.3 fresh-store new boot accepted only after immutable cold recovery; old boot denied; no credit or runtime authority created
+--- PASS: TestHubColdRecoveryActualMTLSFreshStoreAndOldBootDenial (0.99s)
+=== RUN   TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity
+2026/11/08 17:34:01 goose: no migrations to run. current version: 8
+2026/11/08 17:34:01 OK   00001_authority.sql (8.39ms)
+2026/11/08 17:34:01 OK   00002_tenant_policy.sql (7.66ms)
+2026/11/08 17:34:01 OK   00003_nodes_ports.sql (17.67ms)
+2026/11/08 17:34:01 OK   00004_entry_group_domains.sql (2.34ms)
+2026/11/08 17:34:01 OK   00005_rules_compile.sql (17.84ms)
+2026/11/08 17:34:01 OK   00006_packages_entitlements.sql (18.17ms)
+2026/11/08 17:34:01 OK   00007_metering_ledger.sql (23.49ms)
+2026/11/08 17:34:01 OK   00008_limits_shares.sql (37.73ms)
+2026/11/08 17:34:01 goose: successfully migrated database to version: 8
+--- PASS: TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity (1.13s)
+PASS
+ok  	vortex/backend/internal/service	5.391s

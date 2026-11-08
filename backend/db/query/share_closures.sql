@@ -3,7 +3,8 @@ SELECT DISTINCT h.* FROM share_handoffs h
 JOIN share_generations g ON g.tenant_id=h.tenant_id AND g.node_id=h.node_id AND g.kind=h.kind AND g.generation=h.generation
 JOIN share_renewal_authorities a ON a.tenant_id=g.tenant_id AND a.node_id=g.node_id AND a.kind=g.kind AND a.generation=g.predecessor
 WHERE h.command IS NULL AND h.state='prepared' AND a.closed_at IS NULL
-AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=h.tenant_id AND c.handoff_id=h.id AND c.signer_id=a.signer_id)
+AND (NOT EXISTS(SELECT 1 FROM share_renewal_closure_commands c WHERE c.tenant_id=h.tenant_id AND c.handoff_id=h.id AND c.signer_id=a.signer_id)
+OR EXISTS(SELECT 1 FROM hub_cold_recoveries r WHERE r.hub_id=a.signer_id AND r.to_epoch>a.signer_epoch))
 ORDER BY h.tenant_id,h.id LIMIT 100;
 -- name: ShareClosureDelegations :many
 SELECT a.delegation_id FROM hub_funded_allocations a
@@ -23,7 +24,7 @@ INSERT INTO share_renewal_closure_commands(tenant_id,id,handoff_id,node_id,boot_
 -- name: ShareClosureBarrier :one
 SELECT EXISTS(SELECT 1 FROM share_renewal_closure_commands WHERE tenant_id=$1 AND node_id=$2 AND boot_id=$3 AND kind=$4 AND generation=$5 AND signer_id=$6);
 -- name: PendingShareClosures :many
-SELECT c.* FROM share_renewal_closure_commands c WHERE c.signer_id=$1 AND c.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_receipts r WHERE r.tenant_id=c.tenant_id AND r.command_id=c.id) ORDER BY c.tenant_id,c.handoff_id,c.part LIMIT 1;
+SELECT c.* FROM share_renewal_closure_commands c WHERE c.signer_id=$1 AND c.hub_boot_id=$2 AND NOT EXISTS(SELECT 1 FROM share_renewal_closure_receipts r WHERE r.tenant_id=c.tenant_id AND r.command_id=c.id) AND EXISTS(SELECT 1 FROM share_renewal_authorities a WHERE a.tenant_id=c.tenant_id AND a.node_id=c.node_id AND a.kind=c.kind AND a.generation=c.generation AND a.signer_id=c.signer_id AND a.closed_at IS NULL) ORDER BY c.tenant_id,c.handoff_id,c.part LIMIT 1;
 -- name: GetShareClosureCommand :one
 SELECT * FROM share_renewal_closure_commands WHERE id=$1;
 -- name: GetShareClosureReceipt :one

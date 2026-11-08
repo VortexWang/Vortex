@@ -1,0 +1,16 @@
+=== RUN   TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity
+2026/11/08 17:39:39 goose: no migrations to run. current version: 8
+2026/11/08 17:39:39 OK   00001_authority.sql (28.84ms)
+2026/11/08 17:39:39 OK   00002_tenant_policy.sql (31.22ms)
+2026/11/08 17:39:39 OK   00003_nodes_ports.sql (29.02ms)
+2026/11/08 17:39:39 OK   00004_entry_group_domains.sql (2.35ms)
+2026/11/08 17:39:39 OK   00005_rules_compile.sql (19.49ms)
+2026/11/08 17:39:40 OK   00006_packages_entitlements.sql (18.49ms)
+2026/11/08 17:39:40 OK   00007_metering_ledger.sql (22.84ms)
+2026/11/08 17:39:40 OK   00008_limits_shares.sql (37.4ms)
+2026/11/08 17:39:40 goose: successfully migrated database to version: 8
+    share_cold_recovery_test.go:117: orphaned live Hub closure work 0 <nil>
+--- FAIL: TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity (1.34s)
+FAIL
+FAIL	vortex/backend/internal/service	2.005s
+FAIL
