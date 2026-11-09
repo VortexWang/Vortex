@@ -51,4 +51,6 @@ services:
     command: [sh, tools/phase6/container_tracer.sh]
 volumes:
   phase6-gomod:
+    name: ${PHASE6_CACHE_PREFIX:-${COMPOSE_PROJECT_NAME:-vortex-phase6-tracer}}_phase6-gomod
   phase6-gocache:
+    name: ${PHASE6_CACHE_PREFIX:-${COMPOSE_PROJECT_NAME:-vortex-phase6-tracer}}_phase6-gocache
