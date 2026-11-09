@@ -55,3 +55,13 @@ Linux Docker comparison已通过64MiB完整性/半关闭和中继故障片段；
 最终干净168be8a5 Docker模式检查中，pool通过，mux的qualification被unknown用量断言正确拒绝。唯一unknown为1200字节UDP，destination日志在清理窗口明确记录向target写入ECONNREFUSED。清理原本对所有Compose服务同时stop，目标服务可能先于转发节点退出。改为只先stop五个转发节点，收取退出状态与记账日志后再down目标服务；不修改未知负债或验收断言。原失败证据保留，下一提交重新验证。
 
 F-09 修复后实际Docker mux workload通过：309264条记账事件全部已提交，左右各3910425492字节与target相等，无unknown或UDP丢失。该工作树测试只用于修复验证，最终提交另行运行。
+
+## F-10 / high / 未解决：连续流量授权在200ms内未完成
+
+Actions42606221450的完整授权race中，TestRuntimeFundingBlockContinuousTraffic的TCP/UDP子用例均失败。TCP日志明确指出1500字节admission总耗时约205ms、read-current-authority返回context deadline exceeded，随后收到RST；UDP收到两字节RST载荷，尚未确定其独立根因。Agent package299.405s，Store102.852s，真实进程105.793s。不能据此证明只是夹具问题或降低200ms上限，也未证明在该宿主上连续流量全部可成功。保留原失败，后续需要单独复现并区分控制签发、事务排队、SQLite持久化及调度时延。
+
+## F-11 / medium / 未解决：最终恢复入口的区域切换超时
+
+干净168be8a5本机Docker完整phase5-check已通过前面的全模块、真实进程、regional十轮、Engine等步骤，但最后recovery_check中的TestRegionalFailoverRetainsUnknownDebt/silent-established在5.04秒失败，PendingUnknownUsage查询返回context deadline exceeded。完整入口及恢复子报告均为failed。该5秒context也覆盖初始化，且本轮有其他本机Docker负载，但尚未证明因果，不能直接增大超时或标记通过。
+
+以上两项作为未解决项保留；不合并修复PR，不将完整Phase5验收标通过。

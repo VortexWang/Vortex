@@ -33,7 +33,7 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — READY TO EXECUTE
 Current Plan: 01
 Total Plans in Phase: 11
 Status: Ready to execute — research, patterns, validation strategy and independent plan review passed; Phase 6 implementation has not started.
-Last activity: 2026-11-09 — Completed quick 261109-n63: Phase 4 merged into main with approved CR-010; CI gaps recorded. Phase 6 planned execution state on this branch is unchanged.
+Last activity: 2026-11-09 — Reviewed the Phase 4 merge with gsd-audit-fix; VLink/fixture fixes and approved CR-011 are on draft PR #1. Complete Phase 5 gates still have continuous-admission and regional-failover failures. Phase 6 planned execution state on this branch is unchanged.
 
 Progress: Phase 6 [░░░░░░░░░░] 0/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
@@ -82,7 +82,7 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Pending Todos
 
-- Phase 4 branch stage acceptance and D-04 lock are recorded in 04-45 / 04-D04-LOCK.json. CR-010 exact migration and two-parent main merge are complete. CI gaps remain: old VLink freeze hash, 64 MiB integrity/half-close, and authorization/boot activation timeouts; see quick 261109-n63. Preserve all X5/X6 handoff boundaries and historical evidence SHAs.
+- Phase 4 branch stage acceptance and D-04 lock are recorded in 04-45 / 04-D04-LOCK.json. CR-010 exact migration and two-parent main merge are complete. Draft PR #1 fixes the VLink freeze hash through owner-approved CR-011, small-frame receive resets, OPEN_OK bookkeeping and payload ownership races, and duplicate process ports. Actions Phase 1–4 passed on source 168be8a5; complete Phase 5 gates remain failed (F-10 continuous admission, F-11 local regional failover). See audits/phase4-merge-20261109. Preserve all X5/X6 handoff boundaries and historical evidence SHAs.
 
 ### Blockers/Concerns
 

@@ -1,0 +1,61 @@
+{
+  "accounting": {
+    "left_to_right": 4550882420,
+    "right_to_left": 4550882420
+  },
+  "authorization_mode": "qualification-only",
+  "classified_drops": {
+    "kernel_rcvbuf_container_destination": 0,
+    "kernel_rcvbuf_container_source": 0,
+    "kernel_rcvbuf_container_target": 0,
+    "kernel_rcvbuf_driver_scope": 0,
+    "oversized": 0,
+    "queue_full": 0,
+    "receive_queue_full": 0,
+    "source_capacity": 0,
+    "source_queue_full": 0,
+    "window_full": 0
+  },
+  "commit": "03ca3547a8d229b378e8178dd9856e6cc2262afd",
+  "d_04": {
+    "status": "pending-review"
+  },
+  "dirty": false,
+  "end_to_end_received_bytes": 4550882420,
+  "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+  "nfr_003": {
+    "mixed_tcp_mbps": 3373.446331420894,
+    "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+    "status": "not-qualified",
+    "tcp_only_retention": 0.886512321586604
+  },
+  "nfr_005": {
+    "loss_threshold_met": true,
+    "reason": "Short diagnostic run; host and duration qualification remain open",
+    "status": "not-qualified",
+    "udp_loss": 0.0
+  },
+  "nfr_006": {
+    "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+    "status": "not-qualified"
+  },
+  "nfr_007": {
+    "reason": "independent path latency baseline is missing",
+    "status": "not-qualified"
+  },
+  "performance_qualification": "not-qualified",
+  "qualification_metrics": {
+    "duration_seconds": 5.0,
+    "mixed_tcp_mbps": 3373.446331420894,
+    "source_credit_conserved": false,
+    "source_credit_settled": false,
+    "tcp_streams": 4,
+    "udp_loss": 0.0,
+    "udp_offered_mbps": 99.92448
+  },
+  "returned_reservations": {},
+  "runtime_correctness": "pass",
+  "schema": 1,
+  "semantic_manifest_sha256": "7d2c8f0056b900e2a0f9e4ba84dcf3d526d5742576859f2051154d742f2379e8",
+  "trial_id": ""
+}
