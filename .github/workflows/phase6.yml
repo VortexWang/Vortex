@@ -29,6 +29,11 @@ jobs:
         with:
           go-version: '1.27.3'
           cache: false
+      - name: Pinned Protobuf descriptor compiler
+        uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
+        with:
+          version: "36.2"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Produce full Phase6 runtime evidence (external setup is explicit)
         env:
           GOTOOLCHAIN: local
