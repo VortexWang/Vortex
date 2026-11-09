@@ -7,10 +7,21 @@ cd "$root"
 out=$PHASE6_EVIDENCE_DIR
 export PYTHONDONTWRITEBYTECODE=1
 sh tools/phase6/rest_container_check.sh
+# The D-04 performance candidate has its own parameterized Phase4 entry. Run
+# the independent-process functional cases here with real matching binaries;
+# exclude only that named opt-in candidate, never accept required-test skips.
+python3 - "$out/root-selection.json" <<'PY'
+import json, pathlib, sys
+pathlib.Path(sys.argv[1]).write_text(json.dumps(dict(schema=1, excluded_tests={'TestRuntimeDurableD04Candidate':'Phase4 parameterized performance qualification; tools/phase4/d04_durable_scan.py'}, process_tests='required in normal and race with separately built node/test-hub binaries'),indent=2)+'\n')
+PY
 for mode in normal race; do
  flags=
  test "$mode" != race || flags=-race
- go test $flags -json ./contracts ./agent/... ./hub ./cmd/vortex-node -p 1 -count=1 > "$out/root-$mode.jsonl" 2>&1
+ export VORTEX_PROCESS_BIN_DIR="$out/process-$mode/bin"
+ mkdir -p "$VORTEX_PROCESS_BIN_DIR"
+ go build $flags -o "$VORTEX_PROCESS_BIN_DIR/vortex-node" ./cmd/vortex-node
+ go build $flags -o "$VORTEX_PROCESS_BIN_DIR/vortex-test-hub" ./cmd/vortex-test-hub
+ go test $flags -json ./contracts ./agent/... ./hub ./cmd/vortex-node -p 1 -count=1 -skip '^TestRuntimeDurableD04Candidate$' > "$out/root-$mode.jsonl" 2>&1
  go -C engine test $flags -json ./... -p 1 -count=1 > "$out/engine-$mode.jsonl" 2>&1
 done
 sh tools/phase6/ledger_fault_injection.sh > "$out/ledger-fault.log" 2>&1

@@ -32,6 +32,21 @@ func (s *Store) PrepareAutomaticDemand(ctx context.Context, scope DemandScope, a
 	return s.prepareDemand(ctx, scope, amount, ttl, true)
 }
 
+// HasPendingDemand is a scheduling hint for one exact immutable scope. It
+// cannot authorize writes or replace prepareDemand's transactional deduplication.
+func (s *Store) HasPendingDemand(ctx context.Context, scope DemandScope) (bool, error) {
+	if s.owner != "agent" {
+		return false, ErrAuthorizationDenied
+	}
+	key, err := json.Marshal(scope)
+	if err != nil {
+		return false, err
+	}
+	var pending bool
+	err = s.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM authorization_demands WHERE scope=? AND state='pending')`, key).Scan(&pending)
+	return pending, err
+}
+
 func (s *Store) prepareDemand(ctx context.Context, scope DemandScope, amount uint64, ttl time.Duration, automatic bool) (IssueRequest, error) {
 	var result IssueRequest
 	if s.owner != "agent" || amount == 0 || amount > math.MaxInt64 || ttl < time.Second || ttl > 300*time.Second || ttl%time.Second != 0 || scope.RuleID == "" || len(scope.RuleID) > 128 || scope.SignerEpoch == 0 || scope.RuleRevision == 0 || scope.PathGeneration == 0 {

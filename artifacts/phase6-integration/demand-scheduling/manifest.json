@@ -1,0 +1,35 @@
+{
+  "evidence": [
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/vortex-demand-flood-red.log.gz",
+      "sha256": "faa44eccd837e73dcdd39d3b0d390702c22144a7e3dd2d0fc0c4510c9d47157e",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    },
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/vortex-demand-flood-green.log.gz",
+      "sha256": "e843be48c51a0e2aaad809abf58ab56569de2e9f8cd05b4511e4d325fa49a604",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    },
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/vortex-demand-flood-linux-green.log.gz",
+      "sha256": "735be885385d00ae4ba26f3090f66a33566a5a7f6141a4fa6fb43fbb495d14d7",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    },
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/vortex-continuous-linux-after.log.gz",
+      "sha256": "84373c2d264e67ce32c8d899af7859f2989bc3e113fa939dcd3880ea9fe7e283",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    },
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/vortex-final-scope-gate-tests.log.gz",
+      "sha256": "ed2d45e606a0ce904c684a70e44d02c49e50aa09e44f67461af2ace40c28b2f9",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    },
+    {
+      "path": "artifacts/phase6-integration/demand-scheduling/report.json.gz",
+      "sha256": "e82ba7b7c436419dbb9f0f5bc26c81f3114ae29f353b414599827403f827e710",
+      "scope": "development snapshot; not final same-SHA acceptance"
+    }
+  ],
+  "final_acceptance": false
+}

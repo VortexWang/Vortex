@@ -331,10 +331,14 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			return initialSendErr
 		}
 	}
-	var demandCursor string
+	var demandDelivery demandDeliveryState
 	var demandTicks <-chan time.Time
 	var demandWake <-chan struct{}
 	var lastDemandWake time.Time
+	demandWakeTimer := time.NewTimer(time.Hour)
+	demandWakeTimer.Stop()
+	defer demandWakeTimer.Stop()
+	var demandWakeDue <-chan time.Time
 	if c.EnableCreditDemand && regional == nil {
 		// Register only scopes bound to this authenticated Hub. A different
 		// connection must not consume another Hub's wakeups.
@@ -363,7 +367,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		defer demandTicker.Stop()
 		demandTicks = demandTicker.C
 		issuer, _ = issuerIdentity.Load().(string)
-		if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
+		if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
 			return err
 		}
 	}
@@ -442,13 +446,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-demandWake:
-			if time.Since(lastDemandWake) < 25*time.Millisecond {
-				continue
+			// Retain a trailing wake during the throttle window: the last
+			// successful consumption may be the one crossing the waterline.
+			if demandWakeDue == nil {
+				delay := 25*time.Millisecond - time.Since(lastDemandWake)
+				if delay < 0 {
+					delay = 0
+				}
+				demandWakeTimer.Reset(delay)
+				demandWakeDue = demandWakeTimer.C
 			}
+			continue
+		case <-demandWakeDue:
+			demandWakeDue = nil
 			lastDemandWake = time.Now()
-			demandCursor = ""
+			demandDelivery.cursor = ""
 			issuer, _ := issuerIdentity.Load().(string)
-			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
@@ -457,7 +471,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			continue
 		case <-demandTicks:
 			issuer, _ := issuerIdentity.Load().(string)
-			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
@@ -745,6 +759,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
 					return err
 				}
+				delete(demandDelivery.sent, payload.UpdateID)
 				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
 					return err
 				}
@@ -757,6 +772,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.applyDemandDenial(ctx, issuer, body.CreditDemandDenied); err != nil {
 					return err
 				}
+				delete(demandDelivery.sent, body.CreditDemandDenied.RequestId)
 			case *controlv1.ControlMessage_RenewalResult:
 				if regional == nil || regional.Renewal == nil || !negotiated {
 					return fmt.Errorf("agent: unnegotiated renewal result")

@@ -13,7 +13,10 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 HOST_FILES=['commit.txt','host-source-identity.txt','host-source-status-before.txt','host-source-status-after.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','runner.log','cloudflare.log']
-CONTAINER_FILES=['source-identity.txt','source-status-before.txt','source-status-after.txt','host.txt','sqlc-install.log','sqlc-diff.log','sqlc-output-count.txt','native-build-metadata.txt','race-build-metadata.txt','cross-build-metadata.txt','migrate.log','backend-normal.jsonl','backend-race.jsonl','completion.txt','reconciliation-normal.json','reconciliation-race.json','root-normal.jsonl','root-race.jsonl','engine-normal.jsonl','engine-race.jsonl','ledger-fault.log','share-fault.log','protobuf-install.log','protobuf-diff.log','exact-freeze.log','openapi.log','dependencies.log','historical-vlink-freeze.log','historical-vlink-freeze.exit','final-completion.txt']
+CONTAINER_FILES=['source-identity.txt','source-status-before.txt','source-status-after.txt','host.txt','sqlc-install.log','sqlc-diff.log','sqlc-output-count.txt','native-build-metadata.txt','race-build-metadata.txt','cross-build-metadata.txt','migrate.log','backend-normal.jsonl','backend-race.jsonl','completion.txt','reconciliation-normal.json','reconciliation-race.json','root-selection.json','root-normal.jsonl','root-race.jsonl','engine-normal.jsonl','engine-race.jsonl','ledger-fault.log','share-fault.log','protobuf-install.log','protobuf-diff.log','exact-freeze.log','openapi.log','dependencies.log','historical-vlink-freeze.log','historical-vlink-freeze.exit','final-completion.txt']
+
+PROCESS_TESTS={'TestDurableAuthorityProcesses'+name for name in ['TCP','UDP','ConcurrentTCP','ConcurrentRenewal']}
+ROOT_SELECTION=dict(schema=1, excluded_tests={'TestRuntimeDurableD04Candidate':'Phase4 parameterized performance qualification; tools/phase4/d04_durable_scan.py'}, process_tests='required in normal and race with separately built node/test-hub binaries')
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def load(path):return json.loads(path.read_text())
@@ -45,6 +48,7 @@ def qualification(path,source):
 
 def runtime(folder,source):
  for name in HOST_FILES+CONTAINER_FILES:assert (folder/name).is_file(), 'missing '+name
+ assert load(folder/'root-selection.json')==ROOT_SELECTION, 'root test scope drift'
  assert (folder/'commit.txt').read_text()==source+'\n'
  for name in ['host-source-identity.txt','source-identity.txt']:
   identity=(folder/name).read_text().splitlines();assert len(identity)==2 and identity[0]==source and re.fullmatch('[0-9a-f]{40}',identity[1])
@@ -68,7 +72,9 @@ def runtime(folder,source):
    expected=['vortex/agent','vortex/agent/store','vortex/agent/upgrade','vortex/hub','vortex/contracts'] if family=='root' else ['vortex/engine/relay','vortex/engine/vlink','vortex/engine/runtime/rule','vortex/engine/accounting']
    assert set(expected)<=packages, 'missing complete '+family+' package'
    test_names={e.get('Test') for e in events if e.get('Action')=='pass'}
-   if family=='root':assert {'TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope','TestHubControlObservationPinsSnapshotBeforeClock'}<=test_names, 'isolated disk or control fairness proof missing'
+   if family=='root':
+    assert {'TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope','TestHubControlObservationPinsSnapshotBeforeClock'}<=test_names, 'isolated disk or control fairness proof missing'
+    assert PROCESS_TESTS|{'TestRuntimeFundingBlockContinuousTraffic','TestDemandWakeDoesNotFloodOutstandingRequest'}<=test_names, 'process or continuous demand proof missing'
    tests[family+'_'+mode+'_passed']=sum(1 for e in events if e.get('Action')=='pass' and 'Test' in e)
  for name,required in {
   'ledger-fault.log':['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback'],

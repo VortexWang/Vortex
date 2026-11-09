@@ -30,6 +30,7 @@ class FinalEvidence(unittest.TestCase):
   for name in gate.HOST_FILES+gate.CONTAINER_FILES:
    if not (folder/name).exists():(folder/name).write_text('')
   (folder/'commit.txt').write_text(source+'\n')
+  (folder/'root-selection.json').write_text(json.dumps(gate.ROOT_SELECTION))
   (folder/'host-source-identity.txt').write_text(source+'\n'+'b'*40+'\n')
   (folder/'exact-freeze.log').write_text('owner approval=approved')
   (folder/'openapi.log').write_text('45 business operations')
@@ -44,6 +45,7 @@ class FinalEvidence(unittest.TestCase):
    for family,packages in [('root',['vortex/'+p for p in ['agent','agent/store','agent/upgrade','hub','contracts']]),('engine',['vortex/engine/'+p for p in ['relay','vlink','runtime/rule','accounting']])]:
     events=[dict(Action='pass',Package=p) for p in packages]
     if family=='root':events.extend(dict(Action='pass',Package='vortex/agent/store',Test=t) for t in ['TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope','TestHubControlObservationPinsSnapshotBeforeClock'])
+    if family=='root':events.extend(dict(Action='pass',Package='vortex/agent',Test=t) for t in gate.PROCESS_TESTS|{'TestRuntimeFundingBlockContinuousTraffic','TestDemandWakeDoesNotFloodOutstandingRequest'})
     (folder/f'{family}-{mode}.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
   for name,names in [('ledger-fault.log',['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback']),('share-fault.log',['TestShareHandoffFaultSIGKILLAfterDurableCASAndExpiredWorkerRecovery','TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts','TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue'])]:
    (folder/name).write_text(''.join('--- PASS: '+name+' (1s)\n' for name in names))
@@ -55,9 +57,13 @@ class FinalEvidence(unittest.TestCase):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp);base=root/'base';source=self.fixture(base)
    self.assertTrue(gate.host(base,source)['acceptance_complete'])
-   for variant in ['checksum','skip','partial','slow','missing','dirty','source','no_cloudflare','missing_lock_proof']:
+   for variant in ['checksum','skip','partial','slow','missing','dirty','source','no_cloudflare','missing_lock_proof','missing_process','scope_drift']:
     with self.subTest(variant=variant):
      target=root/variant;shutil.copytree(base,target)
+     if variant=='scope_drift':
+      p=target/'root-selection.json';value=json.loads(p.read_text());value['excluded_tests']['TestRuntimeFundingBlockContinuousTraffic']='optional';p.write_text(json.dumps(value))
+     if variant=='missing_process':
+      p=target/'root-normal.jsonl';p.write_text(''.join(line for line in p.read_text().splitlines(True) if 'TestDurableAuthorityProcessesUDP' not in line))
      if variant=='missing_lock_proof':
       p=target/'backend-normal.jsonl';p.write_text(''.join(line for line in p.read_text().splitlines(True) if 'TestWorkerEventWaitDoesNotHoldBusinessLocks' not in line))
      if variant=='checksum':(target/'openapi.log').write_text('tampered')

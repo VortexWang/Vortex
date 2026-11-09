@@ -10,7 +10,7 @@ execution: inline
 ## Current Focus
 
 hypothesis: F-10成功消费缺少提前唤醒，F-11夹具混用初始化和实际运行预算；整合额外暴露通道权限边界与旧夹具缺失明确授权。
-next_action: 已提交真实Phase6合并fb3a9786，完整原生/Linux回归通过；CR-012已获精确批准并冻结，运行最终同SHA Docker/Actions与Phase5完整入口，再完成已授权主线整合。
+next_action: 679b5501最终Docker/Actions失败保持未通过；修复连续需求重复发送及丢尾唤醒，精确配置独立进程功能测试入口，重新提交并运行同SHA最终验收，再完成已授权主线整合。
 
 ## Symptoms
 
@@ -49,3 +49,9 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 
 - 779029b2最终Actions暴露checkpoint等待期间AfterFunc延迟的取消竞态：dispatch42623942243在cancel-member错误返回成功。新增delayed-cancel-member以FIFO follower延迟传播，确定性RED0.653s；取得事务后及提交前同步校验原member contexts，native race20轮38.400s通过，原committed/reserved/unknown/outbox及reopen/replay守恒断言保留。CR012精确门禁仍通过，规范/提案/批准字节未变。
 - PR42623892470同时在多包并行wave1中出现持续授权及恢复RST，保留FAIL。将wave1/wave2/full gate所有root多包入口统一-p1，与既有authorization策略一致；job预算60分钟覆盖累积串行全套，不改变测试内200ms/5秒deadline。779029b2的最终证据不能替代修正后新提交配对。
+
+- 679b5501最终未通过：Docker backend normal/race各502项通过，但root引入5个Phase4 opt-in skip被严格门禁拒绝；Actions42625295380两原生架构root-race持续TCP/UDP超200ms失败；Phase5 dispatch42625300678与PR42625221806 attempt2同样失败。Phase1..4在679的PR结果通过。这些结果不能用于合并放行。
+- 后续确定性RED：重复8次missing-authority wake发送同一pending请求8次（0.690s）；相同请求的sequence FULL提交、Hub重复处理和Agent重复安装与真实授权竞争。另发现25ms窗口内丢弃最后一次成功消费wake。改为session-local有界重发间隔、重连立即按原ID重放、保留trailing wake；pending精确scope直接跳过重扫账本，事务内去重和权限校验保持不变。
+- 初次仅重发节流仍在Linux双核race五轮中的一轮UDP失败，保留该FAIL；增加pending账本重扫规避后Linux双核race连续TCP/UDP三轮PASS48.802s。原生需求/身份/重放race三轮PASS47.675s、身份和重发race十轮PASS10.941s。开发快照不是最终same-SHA证据。
+- Phase6 root仍拒绝任意required skip。入口明确只排除TestRuntimeDurableD04Candidate（tools/phase4/d04_durable_scan.py独立参数矩阵）；每模式分别构建真实Node/TestHub二进制并要求四个进程功能测试通过。证据新增精确root-selection.json和scope/process缺失负向检查。原生四进程功能测试PASS48.822s，开发dirty快照不当正式验收。
+- 扩大Python discover时历史CR009原始契约测试直接针对当前CR012组合规范运行而失败，精确current_contract_check.sh仍PASS；不改写历史批准规范或将此失败写成通过。新的最终证据门禁3项含scope篡改/required skip/process缺失负向PASS。
