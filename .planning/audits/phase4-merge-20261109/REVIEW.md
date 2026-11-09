@@ -8,7 +8,7 @@
 
 Darwin 和 Linux 完整 Engine race 均通过。原 64 MiB integrity、伪造 OPEN、旁路及中继故障验证与 native comparison 全入口通过。第一轮修复后 comparison 因缺配套 workload baseline 最终报告失败，未将其标通过；随后先生成 qualification 基线，再执行完整 comparison 成功。以上工作树验证非 clean-source SHA 验收，性能不提升为正式资格化。
 
-## F-02 / medium / 待修复
+## F-02 / medium / 已修复（夹具）
 
 200ms 是明确 admission 上限，不能以延长生产 deadline 掩盖 FULL 事务测试成本。6238、2968 CI 均在16个并发 reserve/commit 的同一128字节块夹具失败；需要分开验证短写结算正确性与有界排队拒绝。
 
@@ -31,3 +31,5 @@ F-03 修复：regionalPort 在当前活动测试范围登记已选地址并在 c
 reserveEarlyData 在锁外读取 Opening；OPEN_OK 可能在 MarkLocalData 前完成。旧 MarkLocalData 会因状态不再 Opening 删除该已授权流，随后原本用于竞争恢复的 Snapshot 失效。拒绝过时早期记账应保留新状态；仅真正超出 pending-open 字节上限仍删除流。
 
 新增确定性状态交错测试，修复前失败，修复后完整 VLink race 通过 6.839 秒。原 overflow、FIN、负向状态测试均保留。
+
+F-02 修复保留生产200ms上限：短写结算测试改为4轮、每轮4个并发写者，使每轮最坏 in-flight=128 字节符合块大小；仍验证16笔17字节实际提交、块周转、wire用量与关闭后逐来源守恒。原确定性排队超时、取消不增权、group独立结算与未知负债测试保留。四项 race 连续10轮通过10.441秒。这不是提升生产存储性能或保证过载流量成功。
