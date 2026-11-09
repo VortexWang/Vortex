@@ -1,0 +1,46 @@
+=== RUN   TestWithin60sRejectsPartialAndOverBudget
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/partial
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/missing-member
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/rounded-duration
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/failed
+--- PASS: TestWithin60sRejectsPartialAndOverBudget (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/partial (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/missing-member (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/rounded-duration (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/failed (0.00s)
+PASS
+ok  	vortex/backend/internal/reconciliation	0.202s
+=== RUN   TestReconcile1000Within60s
+2026/11/09 09:01:42 goose: no migrations to run. current version: 9
+2026/11/09 09:01:42 OK   00001_authority.sql (14.02ms)
+2026/11/09 09:01:42 OK   00002_tenant_policy.sql (9.59ms)
+2026/11/09 09:01:42 OK   00003_nodes_ports.sql (20.81ms)
+2026/11/09 09:01:42 OK   00004_entry_group_domains.sql (1.76ms)
+2026/11/09 09:01:42 OK   00005_rules_compile.sql (23.28ms)
+2026/11/09 09:01:42 OK   00006_packages_entitlements.sql (17.1ms)
+2026/11/09 09:01:42 OK   00007_metering_ledger.sql (22.14ms)
+2026/11/09 09:01:42 OK   00008_limits_shares.sql (62.37ms)
+2026/11/09 09:01:42 OK   00009_domain_events.sql (24.24ms)
+2026/11/09 09:01:42 goose: successfully migrated database to version: 9
+    reconciliation_1000_test.go:159: worker stopped before reconciliation: timeout: context deadline exceeded
+    reconciliation_1000_test.go:200: {
+          "commit": "",
+          "scope": "real PostgreSQL production backend reconciliation; deterministic node adapter; no Engine/transport performance claim",
+          "started_at": "2026-11-09T01:02:44.369339Z",
+          "ended_at": "2026-11-09T01:03:44.370194Z",
+          "elapsed_ns": 60000414584,
+          "elapsed_ms": 60000.414584,
+          "rules": 1000,
+          "resolved": 300,
+          "members": 2000,
+          "observed": 600,
+          "inventory_sha256": "e1d0240ffe392041cb0fbf6af98fc170879783008f8db9a4fcc5b2b0b2c88727",
+          "status": "failed"
+        }
+    reconciliation_1000_test.go:202: incomplete 1000-rule, 2000-member reconciliation
+--- FAIL: TestReconcile1000Within60s (121.96s)
+FAIL
+FAIL	vortex/backend/internal/service	122.688s
+FAIL

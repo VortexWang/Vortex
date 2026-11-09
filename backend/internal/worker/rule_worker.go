@@ -60,7 +60,7 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 		// authority check. Nothing has been sent: leave the task pending instead
 		// of terminating the backend or inventing an execution failure.
 		if (errors.Is(e, service.ErrConflict) || errors.Is(e, service.ErrScope) || errors.Is(e, service.ErrShareUnknown)) && (b.Phase == "prepare" || b.Phase == "commit") {
-			return true, tx.Rollback(ctx)
+			return false, tx.Rollback(ctx)
 		}
 		return true, e
 	}
@@ -147,16 +147,5 @@ func (w RuleWorker) Recover(ctx context.Context) error {
 }
 
 func (w RuleWorker) Run(ctx context.Context) error {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
-	for {
-		if _, e := w.Once(ctx); e != nil {
-			return e
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-		}
-	}
+	return runRuleReconciliation(ctx, w.Once)
 }
