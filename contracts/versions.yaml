@@ -33,7 +33,7 @@
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
       "version": "1.8.0",
-      "status": "candidate",
+      "status": "frozen",
       "sources": [
         "§3.4",
         "§7",

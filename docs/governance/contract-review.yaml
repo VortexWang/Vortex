@@ -22,8 +22,8 @@
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.6.0",
-      "sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+      "version": "1.8.0",
+      "sha256": "bcb62435c2c61df953940cd2424f520432e37e8efc10012f0c5f02b845d7866e",
       "decision": "approved",
       "artifacts": [
         {
@@ -32,7 +32,7 @@
         },
         {
           "path": "contracts/protobuf/v1/lifecycle.md",
-          "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
+          "sha256": "0ca6e01d98efc7df6d43bb0b15b9e73c4effe2c05892d9507ed31594eeef3ae6"
         },
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
@@ -435,6 +435,35 @@
       },
       "decision": "approved",
       "wire_protocol_version": "0x0100 unchanged"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.7.0",
+      "version": "1.8.0",
+      "proposal_sha256": "ecc3cbbdbfcb6e0cbb4144b44fdfe70c163f7edbf722fe4bdc04d37d7dd1f547",
+      "contract_sha256": "bcb62435c2c61df953940cd2424f520432e37e8efc10012f0c5f02b845d7866e",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-09T13:14:56.202343+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-012-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "0ca6e01d98efc7df6d43bb0b15b9e73c4effe2c05892d9507ed31594eeef3ae6"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        },
+        {
+          "path": "contracts/protobuf/v1/share-handoff.schema.json",
+          "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
+        }
+      ]
     }
   ]
 }
