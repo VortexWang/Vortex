@@ -28,6 +28,8 @@ SQLite保留两分支全部迁移，完成后才发布合并schema20。FIFO事�
 
 开发验证原失败日志与修复后结果保留在 `artifacts/phase6-integration/`。已通过的focused结果包括31.196s连续/32轮续领及ACK负向、三轮角色隔离、三轮23.873s真实到期结清续资、全部五个8.702s进程恢复场景。完整native/Linux与clean-source结果以证据清单为准；早期完整root/backend失败不被覆盖。
 
+修正后完整原生root及真实PG/Valkey后端race均通过（service569.990s）。干净提交fb3a9786的Linux arm64完整root/Engine race通过，启用真实4MiB满盘夹具（Agent253.534s、Store258.953s、Phase5进程112.495s）；独立数据库的完整Linux后端race通过（service550.929s），运行前后源码干净。双Protobuf、双sqlc全部33文件一致，六个Linux构建及许可/负向检查通过。精确日志摘要及环境见 `artifacts/phase6-integration/validation-manifest.json`；这些结果不代替批准后相同SHA的最终Docker/Actions验收。
+
 原CR005..011提案和批准记录保持不可变。原CR009 exact checker与篡改测试继续在原完整catalog快照执行；新的forward checker独立校验当前全部受保护字节、两基线描述符并集、需求映射与新批准记录。没有跳过冻结门禁。
 
 最终同SHA本机Docker与Actions、完整Phase5/6入口在冻结后运行；历史Phase6完成证据不自动证明本次组合。Phase7尚未开始。

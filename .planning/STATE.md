@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase6 branch complete11/11; Phase4 regression integration under gsd-debug; CR012 candidate awaiting exact approval after validation"
-last_updated: "2026-11-09T07:08:25.800274+00:00"
+stopped_at: "Phase6 actual merge committed; complete native/Linux regressions passed; CR012 exact owner approval required before final same-SHA producer and main integration"
+last_updated: "2026-11-09T12:59:47.851223+00:00"
 last_activity: 2026-11-09
-last_activity_desc: "Phase6分支历史验收保留；fb3a9786整合已提交，修正后原生root/backend全量race通过，干净Linux与CR012精确审批及组合最终验收待完成。"
+last_activity_desc: "fb3a9786整合的完整原生root/backend和干净Linux root/Engine/backend race通过；原工作区未改。待CR012精确批准后完成同SHA最终验收及主线整合。"
 progress:
   total_phases: 6
   completed_phases: 5

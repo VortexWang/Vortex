@@ -269,7 +269,7 @@
   "review_files": [
     {
       "path": "docs/governance/proposals/CR-012-phase6-integration.md",
-      "sha256": "73e9b33567734a67011acb91b248aaa51f33253fffc020a6f1627d2ce789ba9e"
+      "sha256": "4cd2c144f14029d1ad528a124b6f844656e956bad0357d47d98b0c46bc6f109b"
     },
     {
       "path": "docs/governance/proposals/CR-012-main.diff",

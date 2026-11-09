@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "source_reference": "fb3a97860e47bdee342ca3ef2e8cab19ecc7118d",
-  "status": "development-validation-in-progress",
+  "status": "regressions-passed-awaiting-exact-CR012-approval-and-final-pair",
   "same_sha_pair": false,
   "notes": [
     "Native full tests ran in the development working tree; they do not prove clean-source qualification or full-disk behavior.",
     "The six Linux cross-builds report exact fb3a9786 and vcs.modified=false; cross-building does not prove execution on amd64.",
-    "Linux clean-source root/Engine and backend results are recorded separately when complete.",
+    "Clean Linux full root/Engine and backend race all passed on fb3a9786 with source unchanged. This remains distinct from the final approved same-SHA Docker/Actions producer.",
     "Historical failures remain in this directory and are not superseded as evidence."
   ],
   "results": [
@@ -72,6 +72,48 @@
       "scope": "clean-linux-arm64-full-root-engine-race-with-real4MiB-full-disk",
       "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-backend-source.txt.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "0d2805d5fd1e68857f16291749598bb8eaae8adeaf3fd52193ba8c472ca9fc8e",
+      "compressed_sha256": "cc95d6f33ff1ce55a25426ffcd271988b10e2bf0664c222acc91dbcfe359ceda"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-backend-source-status-before.txt.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-backend-source-status-after.txt.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-backend-migration-first.log.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "59275a7918626f9c426193c7f6701f991d78bf1f73fd34de00fd6d155696e8b7",
+      "compressed_sha256": "f913e3198b29a3ed9ad7e2d966f19696dffab54b6e7f0f769712fe8182faab06"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-backend-race.log.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "eb479323fad85e723ed6b63a09f407005363ad3bfa6c9579b514ee4ea56f0fff",
+      "compressed_sha256": "a9a821ca8ef32671b354b70841f800f32206c2701727dfce8a6a9f339ee2753e"
+    },
+    {
+      "path": "artifacts/phase6-integration/clean-linux-fb3a9786-environment.json.gz",
+      "result": "PASS",
+      "scope": "clean-linux-arm64-full-backend-race-isolated-real-PG-Valkey",
+      "raw_sha256": "88dee9cdea09a1b14f4f1af7a53336cd671d55d357def88e8d88c5dbf208cbb1",
+      "compressed_sha256": "ba399c8ad3b47fe302391609d3c18ab4a511c50bcb964ce42f6b445afa4abc6c"
     }
   ]
 }
