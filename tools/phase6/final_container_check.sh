@@ -29,12 +29,12 @@ for file in vortex.pb.go vortex_grpc.pb.go; do
 done > "$out/protobuf-diff.log" 2>&1
 # Exact contract/lint/license checks run on the invoking host as a preflight.
 # The pinned Go test image intentionally contains no Ruby installation.
-# Preserve the pre-existing Phase3 VLink review mismatch separately. It is not a
-# Phase6 contract change or a passing historical global-freeze assertion.
+# Retain the independent VLink result. CR-011 reconciles the historical mismatch;
+# the host's current exact contract gate remains authoritative for this source.
 legacy=0
 python3 tools/phase1/contracts.py check-frozen --contract-id vortex.vlink.v1 > "$out/historical-vlink-freeze.log" 2>&1 || legacy=$?
 printf '%s\n' "$legacy" > "$out/historical-vlink-freeze.exit"
 git status --porcelain=v1 > "$out/source-status-after.txt"
 test ! -s "$out/source-status-after.txt"
 test "$(git rev-parse HEAD)" = "$PHASE6_EXPECTED_SHA"
-printf '%s\n' 'phase6 backend/root/engine normal/race, finite1000 reconciliation, fault, generators, licenses and exact CR-009 freeze passed' > "$out/final-completion.txt"
+printf '%s\n' 'phase6 backend/root/engine normal/race, finite1000 reconciliation, fault, generators, licenses and current exact contract freeze passed' > "$out/final-completion.txt"

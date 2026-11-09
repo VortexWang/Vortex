@@ -1,7 +1,9 @@
 name: phase6-backend
 on:
   push:
-    branches: [codex/phase6-backend]
+    branches: [main, codex/phase6-backend]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
