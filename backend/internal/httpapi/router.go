@@ -83,6 +83,10 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured.POST("/tenants/:tenant_id/port-allocations/:allocation_id/commit", a.mutatePort("commit"))
 	secured.POST("/tenants/:tenant_id/port-allocations/:allocation_id/release", a.mutatePort("release"))
 	secured.POST("/tenants/:tenant_id/port-allocations/:allocation_id/abort", a.mutatePort("abort"))
+	secured.GET("/tenants/:tenant_id/node-recoveries/:recovery_id", a.recovery("node"))
+	secured.GET("/tenants/:tenant_id/hub-recoveries/same-store/:recovery_id", a.recovery("hub-same-store"))
+	secured.POST("/tenants/:tenant_id/hub-recoveries/same-store/:recovery_id/advances", a.advanceRecovery)
+	secured.GET("/tenants/:tenant_id/hub-recoveries/cold/:recovery_id", a.recovery("hub-cold"))
 	secured.GET("/tenants/:tenant_id/operations", a.listOperations)
 	secured.GET("/tenants/:tenant_id/operations/:operation_id", a.operation)
 	return r, nil

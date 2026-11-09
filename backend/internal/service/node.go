@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -76,14 +77,34 @@ func newDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope,
 }
 
 func appendDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope, kind string, version int64, body []byte) (generated.Operation, error) {
+	return appendKeyedDomainTask(ctx, q, scope, kind, version, "", body)
+}
+
+// Callers with a stable key serialize through the selected tenant lock before
+// appending. An exact retry returns the original immutable request identity.
+func appendKeyedDomainTask(ctx context.Context, q *generated.Queries, scope TenantScope, kind string, version int64, key string, body []byte) (generated.Operation, error) {
 	zero := generated.Operation{}
 	id := uuid.NewString()
 	revision := int64(1)
 	digest := sha256.Sum256(body)
+	if key != "" {
+		prior, e := q.GetOperationByKey(ctx, generated.GetOperationByKeyParams{TenantID: scope.TenantID(), IdempotencyKey: key})
+		if e == nil {
+			if !bytes.Equal(prior.RequestSha256, digest[:]) || !bytes.Equal(prior.Payload, body) {
+				return zero, ErrConflict
+			}
+			return prior, nil
+		}
+		if !errors.Is(e, pgx.ErrNoRows) {
+			return zero, e
+		}
+	} else {
+		key = id
+	}
 	if _, err := q.PutDesiredState(ctx, generated.PutDesiredStateParams{TenantID: scope.TenantID(), ResourceID: id, TargetKind: "node", Revision: revision, ExpectedRevision: revision - 1, Payload: body, PayloadSha256: digest[:]}); err != nil {
 		return zero, err
 	}
-	op, err := q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: scope.TenantID(), ResourceID: id, IdempotencyKey: id, RequestSha256: digest[:], TargetKind: "node", TargetRevision: revision, ExpectedRevision: revision - 1, Generation: version, Payload: body})
+	op, err := q.InsertOperation(ctx, generated.InsertOperationParams{ID: id, TenantID: scope.TenantID(), ResourceID: id, IdempotencyKey: key, RequestSha256: digest[:], TargetKind: "node", TargetRevision: revision, ExpectedRevision: revision - 1, Generation: version, Payload: body})
 	if err != nil {
 		return zero, err
 	}

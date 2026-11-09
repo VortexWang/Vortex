@@ -1,0 +1,4 @@
+ok  	vortex/backend/internal/service	26.693s
+ok  	vortex/backend/internal/httpapi	2.543s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/cmd/vortex-backend	3.431s [no tests to run]

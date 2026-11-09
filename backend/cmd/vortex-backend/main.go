@@ -189,7 +189,7 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	defer hubServer.Stop()
 	controlv1.RegisterNodeControlServer(server, adapter)
 	controlv1.RegisterHubControlServer(hubServer, &control.HubAdapter{BackendID: *backendID, HubID: *hubID, Region: "phase6", Observe: observe, Metering: adapter.Metering, Shares: adapter.Shares})
-	failures := make(chan error, 16)
+	failures := make(chan error, 32)
 	go func() {
 		failures <- (worker.NodeSourceWorker{Service: *adapter.Shares, BackendID: *backendID, Adapter: adapter}).Run(ctx)
 	}()
@@ -225,6 +225,9 @@ func serve(parent context.Context, pool *pgxpool.Pool, args []string) error {
 	}()
 	go func() {
 		failures <- fmt.Errorf("port operation worker: %w", (worker.PortOperationWorker{Pool: pool}).Run(ctx))
+	}()
+	go func() {
+		failures <- fmt.Errorf("recovery advance worker: %w", (worker.RecoveryAdvanceWorker{Service: *adapter.Shares}).Run(ctx))
 	}()
 	go func() { failures <- fmt.Errorf("package due worker: %w", (worker.PackageWorker{Pool: pool}).Run(ctx)) }()
 	go func() {
@@ -301,16 +304,20 @@ func serveHTTP(ctx context.Context, pool *pgxpool.Pool, args []string) error {
 	fmt.Printf("backend public API ready https=%s\n", listener.Addr())
 	runtime, cancel := context.WithCancel(ctx)
 	defer cancel()
-	failures := make(chan error, 4)
+	failures := make(chan error, 5)
 	go func() { failures <- httpapi.Serve(runtime, listener, server) }()
 	go func() { failures <- (worker.EventRetentionWorker{Pool: pool}).Run(runtime) }()
 	go func() { failures <- (worker.GroupRevalidationWorker{Pool: pool}).Run(runtime) }()
 	go func() { failures <- (worker.PortOperationWorker{Pool: pool}).Run(runtime) }()
+	clock := timeauthority.New()
+	go func() {
+		failures <- (worker.RecoveryAdvanceWorker{Service: service.ShareService{Pool: pool, Clock: clock.Bounds}}).Run(runtime)
+	}()
 	first := <-failures
 	cancel()
-	<-failures
-	<-failures
-	<-failures
+	for range 4 {
+		<-failures
+	}
 	if ctx.Err() != nil {
 		return nil
 	}
