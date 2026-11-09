@@ -2875,5 +2875,22 @@
       "vortex.runtime-config": "1.2.0 compatible"
     },
     "scope": "All Phase 6 implemented database/API normative bytes through 06-03, including tenant/restriction/node/port/domain authority and immutable rules. No Phase 5 acceptance change; HTTP adapters remain 06-07. Fresh 00001..00005 migrations are executable source, not an upgrade from the historical frozen conceptual schema."
+  },
+  "phase6_rest_candidate_review": {
+    "proposal": "docs/changes/CR-009-rest-events.json",
+    "approval": "pending-owner",
+    "versions": {
+      "vortex.database": "2.4.0 compatible",
+      "vortex.public-api": "3.0.0 breaking"
+    },
+    "scope": "06-07 implemented REST resource adapters and durable events; explicit tenant paths, current-role opaque sessions, immutable operation projections, strong CAS and signed cursors. No public boot/epoch/proof enrollment. Unknown execution retains occupation. Database migration9 adds sessions/events/ordering/port operation binding; approved migrations1..8 unchanged.",
+    "requirements": [
+      "BE-005",
+      "BE-006",
+      "TEN-001",
+      "GEN-007"
+    ],
+    "evidence": "artifacts/phase6/06-07/",
+    "acceptance_boundary": "Exact CR-009 approval required; final same-SHA Docker/Actions cross-domain pairing remains06-11."
   }
 }

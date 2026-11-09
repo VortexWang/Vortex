@@ -75,6 +75,7 @@ func (f *apiFixture) request(t *testing.T, method, path, token, body string) *ht
 	if w.Header().Get("X-Request-ID") == "" || w.Header().Get("Cache-Control") != "no-store" {
 		t.Fatal("missing safe headers", w.Header())
 	}
+	assertPublicContractResponse(t, method, path, w)
 	return w
 }
 func (f *apiFixture) operations(t *testing.T, n int) []string {

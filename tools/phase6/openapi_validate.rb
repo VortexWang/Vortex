@@ -25,7 +25,8 @@ begin
           # A rule's user-authored destination list is business input. Keep
           # runtime/transport target fields forbidden everywhere else.
           rule_destination = name == 'targets' && v.equal?(doc.dig('components', 'schemas', 'RuleInput'))
-          check(rule_destination || !name.match?(/password|secret|private_key|credential|runtime|vlink|wire|payload|target|boot_id|signer_epoch/i), "internal/secret property #{name}")
+          business_revision = name == 'target_revision' && v.equal?(doc.dig('components', 'schemas', 'PublicOperation'))
+          check(rule_destination || business_revision || !name.match?(/password|secret|private_key|credential|runtime|vlink|wire|payload|target|boot_id|signer_epoch/i), "internal/secret property #{name}")
         end
       end
       v.each_value { |x| visit.call(x) }
@@ -51,21 +52,34 @@ begin
       id = op['operationId']
       check(id.is_a?(String) && !id.empty? && !ids.include?(id), 'operationId must be unique')
       ids << id
-      check(!op.key?('security') || op['security'] == doc['security'], "authentication bypass #{id}")
+      refresh = path == '/api/v1/auth/refresh' && method == 'post'
+      if refresh
+        check(op['security'] == [] && op['x-vortex-refresh-auth'] == 'rotating-body-token' && op.dig('requestBody', 'content', 'application/json', 'schema', '$ref') == '#/components/schemas/RefreshRequest', 'refresh proof missing')
+        request = doc.dig('components', 'schemas', 'RefreshRequest')
+        check(request && request['required'] == ['refresh_token'] && request.dig('properties', 'refresh_token', 'writeOnly') == true, 'refresh body token required')
+      else
+        check(!op.key?('security') || op['security'] == doc['security'], "authentication bypass #{id}")
+      end
       params = (item.fetch('parameters', []) + op.fetch('parameters', [])).map { |p| resolve.call(p) }
       path.scan(/\{([^}]+)\}/).flatten.each do |name|
         check(params.any? { |p| p['name'] == name && p['in'] == 'path' && p['required'] == true }, "missing path parameter #{name}")
       end
+      params.select { |p| p['name'] == 'If-Match' }.each do |p|
+        check(p['in'] == 'header' && p['required'] == true && p.dig('schema', 'pattern').to_s.start_with?('^"') && p.dig('schema', 'pattern').to_s.end_with?('"$'), 'strong quoted If-Match required') if doc.dig('info', 'version').to_s.start_with?('3.')
+        check(op.fetch('responses').key?('412') && op.fetch('responses').key?('428'), 'CAS errors missing') if doc.dig('info', 'version').to_s.start_with?('3.')
+      end
       responses = op.fetch('responses')
       check(responses.keys.any? { |s| s.to_s.start_with?('2') }, "success response missing #{id}")
-      %w[401 403 404 422 500].each do |status|
+      modern = doc.dig('info', 'version').to_s.split('.').first.to_i >= 3
+      required_errors = modern ? (refresh ? %w[400 401 415 500 503] : (path == '/api/v1/auth/logout' ? %w[401 500 503] : %w[400 401 403 404 500 503])) : %w[401 403 404 422 500]
+      required_errors.each do |status|
         r = resolve.call(responses[status])
         check(r.is_a?(Hash) && r.dig('content', 'application/json', 'schema', '$ref') == '#/components/schemas/ApiError', "error #{status} missing #{id}")
       end
       if op['x-vortex-collection']
         check(%w[cursor limit].all? { |n| params.any? { |p| p['in'] == 'query' && p['name'] == n } }, 'cursor/limit missing')
         page = resolve.call(responses.dig('200', 'content', 'application/json', 'schema'))
-        check(page && %w[items next_cursor].all? { |k| page.fetch('required', []).include?(k) }, 'page shape missing')
+        check(page && page.fetch('required', []).include?('items') && page.fetch('properties', {}).key?('next_cursor'), 'page shape missing')
       end
       if responses.dig('200', 'content', 'text/event-stream')
         check(params.any? { |p| p['name'] == 'Last-Event-ID' && p['in'] == 'header' }, 'SSE resume header missing')
@@ -76,7 +90,7 @@ begin
     end
   end
   check(!ids.empty?, 'no operations')
-  puts "OpenAPI lint passed: #{ids.length} authenticated business operations"
+  puts "OpenAPI lint passed: #{ids.length} business operations; explicit rotating refresh exception only"
 rescue StandardError => e
   warn "OpenAPI lint failed: #{e.message}"
   exit 1

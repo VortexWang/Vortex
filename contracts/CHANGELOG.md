@@ -19,7 +19,7 @@ Contract source baseline: VORTEX V1.11, SHA-256 `95c73f356841da9a41f9d8bd4ada008
 Machine-readable change records (CI authority):
 
 ```json
-{"changes":[{"contract_id":"vortex.authorization.v1","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a","approved_at":"2026-11-06T02:21:16.718444+00:00","summary":"Owner-approved lifecycle capability negotiation, durable renewal/recovery, identity and share/policy boundaries; legacy input behavior retained."},{"contract_id":"vortex.runtime-config","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4","status":"approved","summary":"Owner-approved additive negotiated rule transactions and immutable per-node runtime artifacts; legacy behavior retained.","approved_at":"2026-11-07T09:33:05Z"},{"contract_id":"vortex.database","from":"2.2.0","version":"2.3.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."},{"contract_id":"vortex.public-api","from":"2.2.0","version":"2.3.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."},{"contract_id":"vortex.control.v1","from":"1.5.0","version":"1.6.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."}]}
+{"changes":[{"contract_id":"vortex.authorization.v1","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"fc67a1ec0b2036530d836f0d4e4b59694f21498230d45128b1f4a96dcce36e3a","approved_at":"2026-11-06T02:21:16.718444+00:00","summary":"Owner-approved lifecycle capability negotiation, durable renewal/recovery, identity and share/policy boundaries; legacy input behavior retained."},{"contract_id":"vortex.runtime-config","from":"1.1.0","version":"1.2.0","kind":"compatible","proposal_sha256":"b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4","status":"approved","summary":"Owner-approved additive negotiated rule transactions and immutable per-node runtime artifacts; legacy behavior retained.","approved_at":"2026-11-07T09:33:05Z"},{"contract_id":"vortex.database","from":"2.3.0","version":"2.4.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-009 additive hash-only sessions, transactional durable events/retention, public ordering and exact port operation binding."},{"contract_id":"vortex.public-api","from":"2.3.0","version":"3.0.0","kind":"breaking","status":"pending-owner-approval","summary":"CR-009 explicit tenant paths, strong quoted CAS, actual status/DTO/page semantics and durable REST/SSE boundary."},{"contract_id":"vortex.control.v1","from":"1.5.0","version":"1.6.0","kind":"compatible","status":"pending-owner-approval","summary":"CR-008 finite source-funded Hub runtime, independent share/lease/credit closure and explicit fenced recovery."}]}
 ```
 
 ## vortex.control.v1 1.2.0 (2026-11-05)
@@ -132,3 +132,27 @@ and codecs inventoried by the proposal. CR-005/006/007 proposal and approval
 bytes remain unchanged. Approval is recorded in docs/changes/CR-008-APPROVAL.json
 and three appended governance records. HTTP adapters remain06-07; final same-SHA
 Docker/Actions pairing and broader phase acceptance remain06-11.
+
+## CR-009 public REST / durable events candidate (06-07, unapproved)
+
+Public API2.3.0 ->3.0.0 is a breaking candidate. Implemented routes consistently
+require an explicit tenant path; old unscoped limits, ledger, billing and catalog
+paths are removed. CAS uses one strong quoted decimal ETag; invalid input is400,
+missing If-Match428, stale412, conflicts409. Code redemption returns202 with its
+exact operation; DNS idempotency is a header. Cursor pages omit next_cursor on
+last page; safe response DTOs and persisted stages now match actual adapters.
+The contract SemVer changes independently of the retained /api/v1 URL prefix.
+
+Additions include opaque rotating token families with one narrowly documented
+refresh-body authentication exception, trusted local initial session issuance,
+current-principal reads, authorized resource/operation pages, versioned business
+mutations, proof-bound aggregate port operations, DNS intent/consumer and safe
+existing recovery status/advancement. SSE uses durable per-tenant PostgreSQL
+sequence with signed principal-bound resume IDs, bounded streams and resync.
+
+Database2.3.0 ->2.4.0 is an additive candidate: migration9 introduces hash-only
+token families/revocations, transactional event sequencing/retention, immutable
+public ordering and exact aggregate port operation bindings. Existing migrations
+1..8 are unchanged. Other frozen contracts and prior approvals remain unchanged.
+No approval or freeze is implied; precise CR-009 review and clean-source evidence
+must precede owner approval. Final same-SHA Actions pairing remains06-11.
