@@ -1,0 +1,18 @@
+{
+  "mode": "planning-only",
+  "plans": 84,
+  "tasks": 168,
+  "waves": 84,
+  "max_files_modified_per_plan": 9,
+  "frontmatter_validate": {"evaluated": 84, "valid": 84},
+  "plan_structure": {"evaluated": 84, "valid": 84, "remaining_warnings": 0},
+  "estimate_check": {"evaluated": 84, "over_budget": 0, "calibration_factor": 1, "sample_count": 0, "confidence": "low"},
+  "coverage": {"requirements": 27, "locked_decisions": 32, "original_tasks_mapped": 84, "missing_original_output_paths": 0},
+  "edges": {"applicable": 53, "explicit_planning_dispositions": 51, "unclassified_flagged": 2},
+  "prohibitions": {"applicable": 4, "descriptorless_unverified": 4},
+  "ownership": {"same_wave_file_conflicts": 0, "unknown_dependencies": 0, "invalid_dependency_waves": 0, "duplicate_numeric_threat_ids": 0},
+  "task_fields": {"read_first_complete": true, "acceptance_criteria_complete": true, "automated_complete": true, "task_writes_declared": true},
+  "execution_not_performed": ["dependency installation", "compatibility probe", "product test", "backup/recovery drill", "owner approval", "UI approval", "manual custody witness"],
+  "preserved_boundaries": ["historical Phase 5 passed_with_scope STATE compatibility blocker", "Phase 4 qualification", "Phase 8 full acceptance"],
+  "notes": ["Initial estimate-check file-path invocation returned usage errors; all 84 rerun successfully with --tokens and --calibrated.", "Cross-plan exact policy approval is owned by 07-65; 07-66 implements that approved choice and is rated costly, avoiding a duplicate approval checkpoint.", "Independent checker rerun and git commit remain the parent orchestrator responsibility."]
+}

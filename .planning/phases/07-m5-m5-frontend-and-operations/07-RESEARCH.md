@@ -725,14 +725,20 @@ FE-011参考时效原文“95% 在 30 秒内”，本阶段应按当前决策记
 | A10 | 新DTO/API/目录/命令、测试映射与规划分片 | 各设计章节 | 未实现路径不可运行；Wave0及每片建立后验证 |
 | A11 | SWC、DOM peer、TS5生成工具区、TOTP库路线 | Standard Stack | 兼容/许可未知；先探针和精确闭包再安装批准 |
 
-## Open Questions
+## Planning Questions — RESOLVED
 
-1. **生成器与TS7组合如何实测锁定？** 官方openapi-typescript7.13.0 peer为TS5；本次无实际失败/成功探针。按独立生成工具区候选验证输出被应用TS7编译；若失败，带真实错误修改候选，不能把未声明解释为已不兼容。
-2. **legitimacy查询降级如何恢复？** 官方registry可读但seam23项SUS/null；安装前复跑并审查官方源/完整闭包，保留实际结果，不把失败查询写成包不存在。
-3. **部署独立权威/存储/运维凭据由什么设施提供？** 当前没有配置证据；在具体灾备方案中提供可私有部署默认、备份密钥保管与fencing证明；外部服务适配只保留接点。
-4. **新增规范的精确SemVer和批准粒度？** 根据实际变更分类确定，研究不预先编造新版本或CR编号；候选完整后提交owner审阅。
-5. **真实恢复/浏览器环境资源与证据范围？** 固定Linux/原生架构环境、开始点和测量口径；缺环境/失败保持未通过，不挪用阶段4/8证据。
-6. **UI-SPEC与UI safety gate？** 本研究仅提供约束与缺口；仍须独立生成、检查设计契约，不能以研究完成宣布UI gate通过。
+以下是本轮可执行规划选择，不是安装、owner批准或运行验收结论。原A1–A11继续记录设计来源；其规划方案由这里及对应候选任务确定，执行门禁未满足时不能消费。
+
+| Original question | Resolved planning choice | Explicit execution gate / failure disposition |
+| --- | --- | --- |
+| Q1 TS7/generator locking | 应用TypeScript7.0.2/Vite7.3.7不变；独立frontend/tools/openapi固定openapi-typescript7.13.0和TS5完整闭包，唯一OpenAPI完整生成后端副本与TS类型；typed真实principal/规则路径编译验证。 | 依赖候选列exact versions/integrity/scripts/license/双架构制品及隔离命令；owner先批准安装探针范围，再实际生成/TS7/typecheck/build/浏览器探针。当前未运行，不宣称兼容；失败保留原输出并新候选复审，不自动force peer/降TS/升Vite。 |
+| Q2 legitimacy seam degradation | 保留23包SUS/null原结果；官方精确registry页、仓库、integrity、许可及传递脚本闭包形成审查证据。seam仍降级时状态仍SUS，逐包blocking-human核实具体证据；SLOP禁止。 | 安装/下载执行前独立human验证所有SUS/ASSUMED及探针范围，不能把网络降级写成不存在或OK。新package不借已有批准扩装。当前legitimacy复核/批准均未完成。 |
+| Q3 independent storage/authority/custody | 默认自托管独立Linux恢复权威进程：串行OS锁+fsync追加journal+签名receipt；journal位于PG快照域外独立主机/耐久volume，另由分离custody维护可信单调anchor。私有backup storage具原子put/get/list/verify，上传recipient-only，解密identity/PG恢复凭据/中间CA分别custody，根离线；不引入外部共识/云依赖。 | 具体候选提供主机/卷/信任身份/权限/工具双架构hash、fencing和journal回滚证据，再owner批准；缺可信anchor/旧issuer隔离证明一律禁新发，仅原R原范围续签。部署资源目前未配置；人工托管仍human_needed，真实故障/恢复测试待执行。 |
+| Q4 SemVer and approval granularity | 完整公共API候选按新增MFA/step-up强制策略等breaking变化提public-api4.0.0；控制观察/探测的兼容追加control1.7.0，强制DestinationPolicy另提control2.0.0；观察采用只读进程内接口及兼容control字段、不改变runtime配置；必须携DestinationPolicy的新配置提runtime2.0.0。数据库00010–00026每个追加快照分别2.5.0–2.21.0，批准manifest逐快照列精确hash/版本；新增独立authority receipt格式1.0.0。VLink1.0.0/authorization1.2.0无规范差异则保持。 | 这是拟议版本，非已批准版本。候选生成后按真实diff核对分类；若与上述分类冲突，修改具体候选并重新owner批准，不静默改版本。初始owner批准完整API/DB中间快照/control观察probe/依赖探针；目标策略和灾备receipt/tool/custody各自独立具体批准。批准先记录所有快照，不提前激活；每实际源/生成片仅更新contracts/versions当前指针，映射/changelog预先枚举完整有序变更，历史批准不重写。 |
+| Q5 runtime resources/evidence | 隔离clean checkout使用固定Ubuntu24.04/PG18.6和受审工具镜像；耐久PG数据/备份/journal互不混用，独立anchor存储；真实Hub/Agent SQLite及持续TCP/UDP。最终同一实现SHA本机Docker与Actions原生amd64/arm64三producer配对，记录资源/宿主/版本/digest/测试数量/原始失败，RPO业务事务水位、RTO安全恢复服务，另记物理完成/首tenant/全对账。 | 脚本先校验环境、授权test-zone、空间、架构、固定工具和独立存储，缺项或skip/零匹配保持未通过，不用QEMU/阶段6/有限模型冒充。资源目前未核实、延迟及RPO/RTO均未测；Phase4专用性能和Phase8全量/24h保持原范围。 |
+| Q6 UI-SPEC/gate | 按32锁定决策先写完整UI-SPEC，token/浅色灰白蓝、卡片/列表、抽屉/完整页、360px纵向路径/统一确认、所有loading/stale/unknown/权限状态可机检；运行独立ui_contract_check，所有UI实现前检查该具体hash的UI gate。 | 当前gate仅允许规划；设计产物与检查尚未创建/运行/批准，不声明UI已通过。候选UI检查失败阻断UI实现，锁定决策不得重问或减配；人工真实手机和独立运维托管见证仍须最终验收。 |
+
+新增安全执行选择：step-up复用固定五分钟（仅批准后启用），PG持久actor/operation/source/tenant多维预算，验证5/5min、敏感写10/min actor-operation、来源60/min、租户30/min，具体429/503与并发、Valkey清空、PG存储失败按共享限流计划；生产SPA在既有TLS1.3 public listener同源服务，nonce CSP/安全头与Origin/Host验证，真实负测归专门部署片。探测先严格public bootstrap，再由已批准DestinationPolicy接管并独立验全路径。所有值纳入具体安全候选及owner批准，不是本研究自动授权。
 
 ## Sources
 
