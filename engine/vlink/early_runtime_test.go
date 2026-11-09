@@ -140,3 +140,31 @@ func TestBatchedEarlyDataFailureJoinsWriterBeforeReturningPayload(t *testing.T) 
 		t.Fatal("returned caller payload while writer still owned an earlier frame")
 	}
 }
+
+func TestWriteDataEarlyFailureJoinsWriterBeforeReturningPayload(t *testing.T) {
+	left, right := net.Pipe()
+	defer right.Close()
+	client, err := newMuxLink(left, MuxConfig{LocalClient: true, MaxPendingOpenBytes: MaxTLSRecordPayload, StreamWindow: 2 * MaxTLSRecordPayload, AggregateWindow: 2 * MaxTLSRecordPayload})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(io.EOF)
+	id, err := client.dispatch.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = client.windows.AddStream(id, 2*MaxTLSRecordPayload); err != nil {
+		t.Fatal(err)
+	}
+	stream := client.newStream(id, StreamTCP)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	if err = stream.WriteData(ctx, make([]byte, MaxTLSRecordPayload+1)); err == nil {
+		t.Fatal("early-data wait unexpectedly succeeded")
+	}
+	select {
+	case <-client.writerStopped:
+	default:
+		t.Fatal("returned payload while writer still owned its first frame")
+	}
+}

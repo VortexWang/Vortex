@@ -775,10 +775,8 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			// flight. The peer buffers that prefix until authorization; the
 			// local check prevents an unbounded pre-authorization queue.
 			if err := s.reserveEarlyData(ctx, size); err != nil {
-				resetCtx, cancel := context.WithTimeout(ctx, time.Second)
-				_ = s.Reset(resetCtx, 8)
-				cancel()
-				return err
+				// A preceding frame in this group may still borrow payload.
+				return s.stopDataWrite(err)
 			}
 			waitStarted := time.Now()
 			if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {

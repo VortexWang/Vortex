@@ -37,3 +37,5 @@ F-02 修复保留生产200ms上限：短写结算测试改为4轮、每轮4个�
 ## F-07 / high / 已修复：部分入队后 early-data 失败提前归还载荷所有权
 
 WriteDataFrames 第一个帧可能已由 TLS writer 使用，第二个帧在早期字节上限处等待 OPEN_OK 超时；旧代码直接返回，调用方可以 Release pooled payload，writer却仍在读原内存。确定性 net.Pipe 无读端测试先失败，修复后用既有 stopDataWrite 关闭并等待 writerStopped 再返回，完整VLink race通过。错误仍保守关闭，不把未确认写入当未执行。
+
+F-07 同类路径补齐：WriteData 也可能在同批第一帧入队后因第二帧早期上限超时；统一关闭并join writer。两个真实writer阻塞回归及完整Engine race通过。
