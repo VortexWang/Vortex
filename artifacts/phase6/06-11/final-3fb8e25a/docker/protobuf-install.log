@@ -1,0 +1,6 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0 3546k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0 53 3546k   53 1886k    0     0   923k      0  0:00:03  0:00:02  0:00:01 1989k 91 3546k   91 3246k    0     0  1066k      0  0:00:03  0:00:03 --:--:-- 1663k100 3546k  100 3546k    0     0  1093k      0  0:00:03  0:00:03 --:--:-- 1650k
+go: downloading google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.2
+go: downloading google.golang.org/protobuf v1.36.11

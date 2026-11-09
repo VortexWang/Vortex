@@ -11,7 +11,7 @@
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
 - [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；正式性能资格化、D-04 锁定和持久化权威缺口保留为后续验收债务。
 - [x] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(completed 2026-11-06 within runtime/protocol-adapter scope)*
-- [ ] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
+- [x] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
 - [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。
 - [ ] **Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)** - 完成规格全量性能、稳定性、故障恢复和交付物验收。
 
@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 10/11 complete. CR-009 approved; public API3.0.0/database2.4.0 frozen. 06-07 REST/auth/cursor/SSE implementation and clean97966a3a normal/race482each,33sqlc/six builds pass. Final1000-rule/60s and paired same-SHA acceptance remain06-11.
+**Plans**: 11/11 complete. Same implementation `65a5335894732b7d632e870acc3d8283be224cd3` passed clean-source Docker and native amd64/arm64 Actions42572674719, including normal/race/fault/generators and live Cloudflare CRUD. Strict real-PG1000-rule/2000-member reconciliation passed below60s on every host. See06-VERIFICATION.md; historical and Phase7/8 scope remains separate.
 
 **Wave 1**
 
@@ -193,37 +193,37 @@
 
 - [x] 06-09-PLAN.md — 单源 OpenAPI、多原因解除与同 SHA Docker/Actions normal/race 配对通过；源码 a9481584，Actions 42316152923
 
-**Wave 4** *(complete in durable service/task/proof scope)*
+**Wave 4** *(complete)*
 
 - [x] 06-02-PLAN.md — 节点、节点组、grant、端口预留与释放
 
-**Wave 5** *(ready after Wave 4)*
+**Wave 5** *(complete)*
 
 - [x] 06-10-PLAN.md — serving 集合、加密凭据与 Cloudflare DNS
 
-**Wave 6** *(blocked on Wave 5 completion)*
+**Wave 6** *(complete)*
 
 - [x] 06-03-PLAN.md — 不可变规则修订、确定性编译与两阶段应用
 
-**Wave 7** *(blocked on Wave 6 completion)*
+**Wave 7** *(complete)*
 
 - [x] 06-04-PLAN.md — 套餐快照、权益码、限制与降级预览
 
-**Wave 8** *(blocked on Wave 7 completion)*
+**Wave 8** *(complete)*
 
 - [x] 06-05-PLAN.md — 逐来源账本、用量幂等与未知负债
 
-**Wave 9** *(blocked on Wave 8 completion)*
+**Wave 9** *(complete)*
 
 - [x] 06-06-PLAN.md — 份额 CAS、租约、交接与限制联动
 
-**Wave 10** *(blocked on Wave 9 completion)*
+**Wave 10** *(complete)*
 
 - [x] 06-07-PLAN.md — REST、token 持久化、cursor 与 SSE
 
-**Wave 11** *(blocked on Wave 10 completion)*
+**Wave 11** *(complete)*
 
-- [ ] 06-11-PLAN.md — 1,000 规则 / 60 秒 reconciliation 与同 SHA 最终证据
+- [x] 06-11-PLAN.md — 1,000 规则 / 60 秒 reconciliation 与同 SHA 最终证据
 
 **Cross-cutting constraints:** PostgreSQL 是业务和期望状态唯一权威；业务变更、审计、task/Outbox 同事务提交；未知执行与未知负债不因超时释放；规则/计费快照不可变；SQL 变更后生成并核对 sqlc 产物；OpenAPI 单一来源确定性复制；迁移只追加且验证保留已有记录；本机 Docker 与 Actions 对同一 clean SHA 保存适用证据。Phase 4 性能/D-04、Phase 7 前端与备份/WAL 恢复、Phase 8 全量验收仍归原阶段。
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 10/11 | In Progress — 06-11 final acceptance | - |
+| 6. M4 Backend | 11/11 | Complete | 2026-11-09 |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "commit": "f466bfab22b1180e00742b5e806196684f2272fe",
+  "producer": "actions",
+  "through_plan": "06-11",
+  "runtime_status": "failed",
+  "exit_code": 1,
+  "validation": null,
+  "error": null,
+  "external_cloudflare": {
+    "exit_code": 78,
+    "status": "not_run"
+  },
+  "acceptance_complete": false,
+  "checksums": {
+    "valkey-version.txt": "ac19ded3881aa5d2becdbcca54ad39055eae0b8570de05a1ea580f995e6244cf",
+    "docker-info.json": "a63999e227c3c18dd7a72208cafc267af1a3663575a7ec810a85bce81378f21c",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host-source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "images.json": "8bd6b68e0e6aa918ba06f129ffa5eb2b661896f4c8af0b16539c137a47895c7c",
+    "host-tooling.txt": "f0692f42a0f6b4d89c22201e26423ad1e2fc129f4b979533c35276b6e11ceb87",
+    "compose.yml": "21574fe48343560338b6c3619489dfdce8fdf2f289fcc35db88da9f6e59290f4",
+    "host-source-identity.txt": "71e69d62899e53c856c8b6ae8d7c00b26ecd69e6a53733fc3b2f7878a09f04cc",
+    "sqlc-install.log": "fdc68b9489e06e93fad1c3900941e61c97cfaba5ebbc362eec0b8ce7e6e3b666",
+    "host-source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docker-version.txt": "8402d8b7679b4087fa4fb62264e49054f974146c5d134195d8b7a341747ab4ed",
+    "postgres-version.txt": "aea2fff379fe4bade1fcd099def7371d44cd97e6887df9d5e5133a2dbbeb400d",
+    "dependencies.log": "5961f6cc313072e613bc8b521471e8eee400566bbd9ed40d29a9ba66c577bf3a",
+    "exact-freeze.log": "3067976a2265da35e4bd7e2d5a550fc21ab66b35dbfe5f8df248730778a51ded",
+    "openapi.log": "72f13c1e4f80e7e40a89a9842e07b8f58086589be20bdef0f3a8d0c79d8fe850",
+    "runner.log": "d959d79f214628d3e46e71f6e5c3b0b8924a09d76dd2881cd37761be52e4eacc",
+    "commit.txt": "e966d76973d6a3dedbfd995645d1b7f5041deada404fbb0e151b7286fbd9031f",
+    "host.txt": "380b92650b9dcbbe76969bfe24ed95f06fb6b9b2f3bf767fabda74e45d9f2b54",
+    "source-identity.txt": "71e69d62899e53c856c8b6ae8d7c00b26ecd69e6a53733fc3b2f7878a09f04cc"
+  },
+  "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "run_id": "42565204602",
+  "repository": "VortexWang/Vortex",
+  "runner_arch": "X64",
+  "execution_arch": null,
+  "runner_image": "20261101.360.1",
+  "historical_vlink_scope": "pre-existing Phase3 review mismatch is recorded separately; no approval or global freeze pass granted"
+}

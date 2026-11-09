@@ -2,38 +2,40 @@
 gsd_state_version: 1.0
 milestone: V1
 milestone_name: milestone
-current_phase: 06
-current_phase_name: M4 后端业务闭环 (M4 Backend)
-current_plan: 11
-status: executing
-stopped_at: "06-11 finite1000 reconciliation passed; final clean-source Docker/dual-Actions producer ready for execution; phase6 remains10/11"
-last_updated: "2026-11-09T01:15:00Z"
+current_phase: 07
+current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
+current_plan: Not started
+status: ready_to_plan
+stopped_at: "Phase6 complete11/11; same-SHA Docker + native dual Actions42572674719 passed; ready to discuss Phase7"
+last_updated: "2026-11-09T07:08:25.800274+00:00"
 last_activity: 2026-11-09
-last_activity_desc: "06-11 finite1000 native/Linux race35.674/21.082s pass; fresh related regressions pass; final producer/dual Actions gates prepared, execution pending."
+last_activity_desc: "Phase6验证通过；96要求、35truth、29keylink和同提交三端证据完整；下一步Phase7讨论。"
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 54
-  completed_plans: 52
-state_head: 483f84e0
+  completed_plans: 53
+state_head: 65a53358
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-11-03)
+See: .planning/PROJECT.md (updated 2026-11-09)
 
 **Core value:** 在租户隔离、额度与租约安全边界内可靠转发 TCP / UDP 业务流量，并在正常运行及故障恢复中保持计量可信、权利不重复签发、未知负债不被无资金释放。
-**Current focus:** Phase 06 — M4 后端业务闭环 (M4 Backend)
+**Current focus:** Phase 07 — M5 前端与运营能力 (M5 Frontend and Operations)
 
 ## Current Position
 
-Phase: 06 (M4 后端业务闭环 (M4 Backend)) — EXECUTING
-Current Plan: 11
-Total Plans in Phase: 11
-Status: Executing — 10/11 complete through06-07; CR-009 approved/frozen;06-11 final acceptance pending.
-Last activity: 2026-11-09 — CR-009 approved/frozen with exact original proposal and historical protection;06-11 begins.
+Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — READY TO PLAN
+Current Plan: Not started
+Total Plans in Phase: TBD
+Status: Phase6 complete11/11; Phase7 ready for discussion.
+Last activity: 2026-11-09 — same implementation65a53358 Docker and native dual Actions42572674719 passed; exact CR-009 approval retained.
+
+以下执行记录为历史，不代表当前未完成状态。当前判定以06-VERIFICATION.md及本节为准。
 
 06-06 completed execution history — CR-007 remains approved. In06-06 Task3, direct backend identity pin94561be1 and automatic share/funded bootstrap704c213c are committed. Full native/Linux race, actual mTLS and amd64/arm64 backend compilation passed; clean704c213c Docker passed with clean source before/after (existing through06-05 entry). Old signer renewal closure now has production FULL transport and paging with native/Linux race, actual mTLS loss/replay and builds passed. Delegation seal now returns only the never-issued remainder, with complete inventory and capability isolation; actual mTLS auto-expiry/loss/replay, delayed usage, native/Linux race and builds passed. Immutable rate/connection funding bindings and exact generation closure now pass real Node CAS, funded Hub issue, audit rollback and native/Linux race. Seal061d3d8a clean Docker completed result0 with clean source before/after; later sealed redelivery/empty-state old-boot guard passes actual TLS and native/Linux race. Generic exact reconciliation now rejects delegated parents before finalizing issued/unknown debt, with RED/GREEN and full native/Linux race evidence. Node local child-credit stop/final now passes real Engine TCP inflight-write regression, conservation, unknown retention and native/Linux race; this is not a wire receipt or parent release. Never-installed child credit now has exact identity tombstones and current-boot/Hub local consumer with typed unknown ACK retention, cross-connection race and native/Linux evidence. Authenticated Node credit-close transport now passes actual TLS loss/replay/scope negatives, full native backend and Node race, Linux component race and dual-architecture builds. Persistent backend child-close commands/receipts and independent PG known inventory now pass actual mTLS pending/loss/replay, audit rollback and full native/Linux race. Complete all-child parent release now passes original-source aggregate rounding, unknown retention, audit rollback, concurrent replay, actual TLS and full native/Linux backend race. Safe inventory-bound funding successors pass native/Linux race, audit rollback and concurrent-worker checks. Runtime lease/heartbeat refresh now passes final native/Linux race, actual60s Agent mTLS/loss/replay and dual-architecture builds. Credit expiry closure/refill now passes native/Linux role-mTLS with actual aggregate caps, complete native backend/root and Linux root race plus dual-architecture Node/Hub builds. Explicit cold Hub recovery now has immutable all-tenant deadline proof, new-boot binding, unknown hold retention, actual TLS and native/Linux race evidence. Cold proof consumption now closes only old renewal and retires unacknowledged live closure work without fabricated receipts; actual Node FULL CAS releases exact capacity differences and fresh independent rule funding/Hub FULL issue preserves old debt and both boot-local sequence1 records. Full native/Linux backend race and dual-architecture builds pass. Local Node cold-boot retirement now preserves separate7/3 generation floors with zero capacity and unchanged old credit, independently checks later local hard deadlines, and passes FULL rollback/reopen/next CAS/corruption/concurrent-boot tests plus native/Linux component race and dual-architecture builds. It is not wired to control: PG complete proof/approval/receipt consumption and independent direct-backend capability are still required. Node PG recovery now records all-tenant immutable original deadlines and accepts only canonical authenticated FULL retirement; active capacity stays zero, held capacity and unknown credit remain until actual next per-kind CAS. Cross-tenant later deadlines, audit rollback, concurrent approvals/receipts, stale/pending refusal and late old usage pass. A reproduced Node row lock/scheduler deadlock was corrected with shared/exclusive advisory locks; complete native/Linux backend race and dual-architecture builds pass. Independent UUID-pinned direct Node recovery capability and production delivery now pass real role-mTLS with lost FULL receipt/reconnect, legacy capability rejection, strict identity/digest/boot checks and exact local replay before clock bootstrap. Complete native/Linux root/backend race, Node/Hub/backend dual-architecture builds and two independent22sqlc+2protobuf generations pass. Same-store Hub S/R and original pending-rule convergence remain; final Actions06-11. Local funded same-store S/R now requires every open non-revoked delegation to have exact backend-owned next three root revisions while retaining original allocation bytes, sources, limits, generations and deadlines. Complete local journal prefix/partition manifest and immutable witnesses gate fresh credit/lease on the finite ACK barrier. FULL rollback,8 concurrent callers,two SQLite connections,two epochs,SIGKILL,reopen and real Node mTLS preserve original unknown debt. Full native root/backend and Linux root/backend races pass before the final additional payload/amount check; final native/Linux funded faults/mTLS and all six Node/Hub/backend cross-builds pass afterward. This remains an internal primitive with explicit backend fixtures, not production S/R. PG approval, complete prefix/partition verification, boot-bound preflight and independent direct-Node reprovisioning remain required.
 
@@ -74,7 +76,7 @@ Installed-credit effective refill now closes the genuine finalization gap: origi
 
 Runtime recovery delivery now scans authenticated Node/boot issued paths in pages of32 after the finite local S/R barrier, sends every recovery page before later bootstrap/leases, and preserves FULL outbox bytes with deterministic per-path IDs for new payloads. Historical IDs replay unchanged; never-issued scopes do not transfer unknown local families and original transferred partitions cannot bootstrap again. A genuine older-path RED now passes only for fully validated no-grant/no-policy handoffs while keeping global path/fencing admission floors; ordinary stale heartbeat/grant and wrong-family cases remain denied. Actual production RuntimeServer/Agent RunRegion and independently pinned Hub/backend mTLS now persist epoch8, receive real PG usage ACK, reconnect without hidden retries and retain original credit, then complete inherited final/refill assertions. Tests caught future fixture time, incomplete three-family installation and missing online UsageBackend/fixed heartbeat clock; all failed evidence is retained. Final complete native backend race(service320.227), Linux arm64 backend race(service333.509), native/Linux root component race,33-path32+1 paging,FULL failure,concurrency,reopen/legacy replay and six Node/Backend/Hub dual-architecture builds pass. No SQL/protobuf/dependency/approved snapshot changes; no clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-runtime-recovery-updates/. Remaining: seal/child-close before first recovery delivery, older-path revocation-only ordering, transferred-credit automatic renewal, actual Engine/pending deployment convergence and complete06-06 producer/fault/clean-source checks before concreteCR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
-Progress: Phase 6 [████████░░░] 8/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [███████████] 11/11 plans complete; Phase 7 ready to discuss/plan. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 
@@ -125,6 +127,10 @@ Live Engine rule renewal now observes current process-local Active transactions 
 
 ### Decisions
 
+- Phase6最终：CR-008/009精确批准保留，96要求、35truth、29keylink和同提交65a53358三端normal/race/fault/真实Cloudflare全部通过。
+- 当前权威约束：同事务账本/audit/task/Outbox；unknown负债不因过期或重连释放；parent final须完整child证明。
+- 控制循环与观察：续资每轮4条原journal轮转，状态固定SQLite快照后采样时间；原3秒watchdog与20秒门槛保持。
+
 - 06-05: user explicitly approved exact CR-0073ddd1ab7. DB/API2.2 and control1.5 frozen with prior approvals immutable. Unknown funding/compensation and first-report provenance survive restart/lost receipts. Clean source84821a04 Docker passed; next06-06, final Actions06-11.
 
 - 06-04: user explicitly approved CR-006 exact proposal 60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d; DB/API2.1 frozen with CR005 history unchanged. Confirmation consumes code atomically; future failure does not refund. Offline/revoked expiry persists authoritative limits/source expiry while actual stop stays pending and unknown occupation is retained. Source9db5da0e local producer passed; next06-05, final Actions06-11.
@@ -160,10 +166,9 @@ Live Engine rule renewal now observes current process-local Active transactions 
 
 ### Blockers/Concerns
 
-- Historical06-05 checkpoint (superseded by approvedCR-008/9of11): CR-007 approval gate is resolved: exact owner response, three frozen contracts and approved clean source84821a04 full local evidence. Phase6 is8/11; signer/share/lease production06-06, HTTP06-07 and final same-SHA Actions06-11 remain.
-- SDK advance/metric/session still rejects historical Phase5 passed_with_scope. Preserve that verdict; after actual SDK attempts, only current Phase6 metadata was synchronized narrowly. SDK roadmap/requirements succeeded; 50 summaries of54 plans now exist.
-- Prior CR005/006, license and authentication gates are resolved; immutable proposals, failed attempts and exact evidence remain in each plan SUMMARY/CHECKPOINT. Separate historical VLink frozen-hash mismatch remains deferred.
-- WINDOWS #1 source-balance/Valkey rebuild now has06-05 implementation evidence; final cross-domain and paired acceptance remain06-11. TEN-002 needs remaining domain coverage. Phase4 dedicated-host performance/D-04 and formal NFRs remain open; no qualification is implied by finite regressions.
+- Phase6无未关闭执行项；96要求与TEN-002跨域、最终同SHA三端证据已验证。旧checkpoint/continuation及下文执行史保留当时事实。
+- GSD SDK仍拒绝历史Phase5 `passed_with_scope`，当前完成命令错误原样归档；不改历史判定，仅在Phase6验证通过后窄同步当前进度（53/54计划）。
+- 历史Phase3 VLinkreviewhash差异、Phase4专用性能/D-04与形式资格、Phase7前端/TypeScript生成/备份WAL恢复、Phase8全规模/24h仍保留原范围。
 
 ## Deferred Items
 
@@ -181,9 +186,9 @@ Live Engine rule renewal now observes current process-local Active transactions 
 
 ## Session Continuity
 
-Last session: 2026-11-08T17:41:06.439509+00:00
-Stopped at: 06-07 authorized lists and local issuance verified; mutations and exact public contract pending
-Resume file: .planning/phases/06-m4-m4-backend/06-07-CONTINUATION.md
+Last session: 2026-11-09T07:08:25.800274+00:00
+Stopped at: Phase6 complete11/11, ready to discuss/plan Phase7
+Resume file: None
 
 ### Historical qualification boundaries
 
@@ -228,3 +233,6 @@ Recovery business status and durable same-store advance now implemented. Platfor
 Exact public API3.0.0 breaking/database2.4.0 additive candidates now reflect41paths/45implemented Gin operations. Single JSON-formatted YAML source/copy equality, route bijection and actual HTTP response schema assertions pass; complete native HTTP race8.978s/Linux7.700s plus auth/repository/policy and five lint-negative groups pass. Strong CAS, explicit tenant paths, error/status/DTO/page changes requireCR-009; old published endpoints are not silently retained. Executable migration9 schema snapshot and requirement map/changelog updated, prior governance/CR-008 bytes unchanged; other frozen contracts retain versions/bytes. No productionGo/dependency change fromb55efab2. Docs operations/public-api.md gives Phase7 recovery/SSE contract. Remaining clean-source unified evidence/exactCR-009 inventory and checkpoint;9/11,no SUMMARY.
 
 06-07 exact CR-009 candidate ready: JSONSHA256 ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0,99normative artifacts matching clean source97966a3a70bff79afd43078ceadf211fe877a6d5. Clean Docker arm64 complete backend normal/race482test events each, service227.988/383.572s; source clean, double33sqlc/six builds/current-role process evidence/dependency license/actual HTTP schema and45route bijection pass. Strong exact candidate/evidence negative gates pass; port collision and quoted historical path checker failure retained. Approval remainsfalse; DB2.4.0/API3.0.0 candidate, prior approvals/frozen companions unchanged. Concrete06-07-CHECKPOINT prepared; no SUMMARY/phase completion. Owner normative approval gate is governance line70, not repeated CR-008permission. After exactCR-009approval freeze/complete06-07 then execute06-11sameSHA pair/crossdomain acceptance. Still9/11.
+
+
+Phase6最终关闭：实现`65a5335894732b7d632e870acc3d8283be224cd3`本机Docker和Actions42572674719原生amd64/arm64全部通过，含真实Cloudflare；35truth/29keylink/96要求和18前序文件91测试逐端核验。纯文档/证据提交不等于另一个经过运行测试的实现SHA。Phase7尚未开始实现。

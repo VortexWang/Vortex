@@ -54,3 +54,28 @@ results are independent evidence; only the paired manifest accepts both for
 one SHA. A Docker-only run leaves Actions/paired acceptance pending. Final
 full-phase pairing remains required in 06-11. Phase 4 performance/D-04,
 source conservation/Valkey-debt work, and Phase 7/8 acceptance are unchanged.
+
+## Current cross-domain integration
+
+The paragraphs above describe the original 06-02 delivery boundary. Plans06-03
+and06-07 now provide production rule/port consumers and REST operations. Final
+source65a53358 passed Docker and native Actions42572674719; final acceptance
+is recorded separately in06-VERIFICATION.md.
+
+NOD-012 is traced through NodeService.CheckSegment, compiler validation of the
+directed permitted path and immutable per-node artifact, then Engine's committed
+rule lookup on every OPEN. The Engine checks upstream identity/incarnation, hop,
+revision/path generation, allowed protocol and loop state before opening the
+session. Evidence: TestNodeSegmentPermitIndependentOfGrants,
+TestCompileGrantPermitAndDirection, TestApplyMultihopForwardAndReverseRealTLS,
+and TestOpenPolicyStableRejectionClassesAndAuditCorrelation. The immutable
+artifact represents the compile-time permit; Engine does not query PostgreSQL.
+
+PRT-004 combines multi-member service atomicity with actual Agent/Engine socket
+execution: TestPortAtomicFixedMembersAndServing,
+TestRulePortActualAgentSocketsUnknownAndQuery, and
+TestPortIntentAbortDoesNotReleaseWithoutAllNodeProofs. The real socket fixture
+uses one member on one host; fixed-member tests independently verify all-member
+confirmation and rollback. Unknown execution retains occupation until proof.
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。

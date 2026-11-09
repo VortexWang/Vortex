@@ -1,0 +1,1 @@
+backend normal/race, two sqlc generations, six cross-builds and source cleanliness passed

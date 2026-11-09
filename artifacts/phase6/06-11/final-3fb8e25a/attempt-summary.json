@@ -1,0 +1,9 @@
+{
+  "source": "3fb8e25a61e8c22a41e47b681b2155e50f2af7b9",
+  "status": "failed",
+  "runtime_tests": "complete backend/root/Engine normal/race and faults passed",
+  "failure": "Ruby is absent in pinned Go test image; exact contract checker cannot run there",
+  "cloudflare": "not_run",
+  "actions_run": 42547642842,
+  "actions_failure": "host could not read root-owned0600 report; complete raw artifacts not uploaded; runtime CI outcome unverified"
+}

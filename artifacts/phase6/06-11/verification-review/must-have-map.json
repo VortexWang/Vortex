@@ -1,0 +1,262 @@
+{
+  "source": "65a5335894732b7d632e870acc3d8283be224cd3",
+  "status": "verified_current_pair",
+  "items": [
+    {
+      "id": "06-01-T1",
+      "truth": "同一 clean commit 可启动 backend、pinned PostgreSQL、Valkey 和真实 Phase 5 Agent/Hub mTLS control boundary，提交一个 desired-state mutation 后产生 task/outbox，并收到匹配 revision 的 receipt/status。",
+      "required_evidence": [
+        "TestTracerRealProcesses"
+      ]
+    },
+    {
+      "id": "06-01-T2",
+      "truth": "tracer 使用明确 tenant scope，业务变更与审计同事务；06-08 扩展用户及平台固定角色策略。",
+      "required_evidence": [
+        "TestTracerTransactionRollback"
+      ]
+    },
+    {
+      "id": "06-01-T3",
+      "truth": "tracer 证明 PostgreSQL migration、sqlc 与真实控制链路可运行；原始结果记录提交 SHA，最终 Docker/Actions 配对门禁由 06-09/06-11 承接。",
+      "required_evidence": [
+        "TestTracerDesiredStateReceipt",
+        "PAIR"
+      ]
+    },
+    {
+      "id": "06-02-T1",
+      "truth": "平台节点/组与租户资源归属、grant validity/version、成员集合版本均由 PostgreSQL 约束和服务策略确定。",
+      "required_evidence": [
+        "TestNodeGroupOwnershipAndStableMembers"
+      ]
+    },
+    {
+      "id": "06-02-T2",
+      "truth": "TCP/UDP 端口按固定成员集合做事务预留，冲突、共同端口缺失、成员变化和七日保留/释放确认都不会静默绕过。",
+      "required_evidence": [
+        "TestPortAtomicFixedMembersAndServing",
+        "TestPortRestrictionClockAndProofBackedRelease"
+      ]
+    },
+    {
+      "id": "06-02-T3",
+      "truth": "入口组 serving 集合只包含配置与端口均已确认的成员；Cloudflare 真实 adapter CRUD 在受控凭据边界验证 TTL=60、DNS-only、最小域名授权和 fail-closed 行为。",
+      "required_evidence": [
+        "TestCloudflareControlledCRUD"
+      ]
+    },
+    {
+      "id": "06-03-T1",
+      "truth": "规则编辑只产生 immutable rule_revision，If-Match/expected_revision stale write 返回稳定冲突；旧 revision 不被覆盖。",
+      "required_evidence": [
+        "TestRuleImmutableRevisionConflictAndTenantScope"
+      ]
+    },
+    {
+      "id": "06-03-T2",
+      "truth": "compiler 对相同 revision/grant/member/permit/billing snapshot 产生字节相同的 canonical artifact digest，运行时只接受 committed artifact。",
+      "required_evidence": [
+        "TestCompileCanonicalDigestReplay"
+      ]
+    },
+    {
+      "id": "06-03-T3",
+      "truth": "规则应用按 fixed member set 的 Prepare/Commit/activation receipt 编排，部分成功为 partial/unknown，超时回滚产生新版本；旧任务可 superseded，迟到回执不推进新 revision。",
+      "required_evidence": [
+        "TestApplyPrepareCommitUnknownAndLateReceipt"
+      ]
+    },
+    {
+      "id": "06-04-T1",
+      "truth": "可编辑 catalog 不会改变 active subscription 的 immutable package/billing snapshot；历史 source/settlement 永远绑定旧 snapshot。",
+      "required_evidence": [
+        "TestPackageCatalogSnapshotAndSubscriptionImmutable"
+      ]
+    },
+    {
+      "id": "06-04-T2",
+      "truth": "权益码兑换以一个 PostgreSQL transaction 锁定 code/request key，重放幂等且失败整体回滚。",
+      "required_evidence": [
+        "TestEntitlementAtomicRedemptionContract"
+      ]
+    },
+    {
+      "id": "06-04-T3",
+      "truth": "restriction 原因以 immutable event 记录并由 current projection 汇总；套餐 preview/confirm 显示能力损失、无效规则和影响资源后按 effective_at 生效。",
+      "required_evidence": [
+        "TestPackageLifecycleAuditRollbackAndUnknownRetention"
+      ]
+    },
+    {
+      "id": "06-05-T1",
+      "truth": "每个 traffic source 以 immutable ledger events 和可重建 projection 保存 B_s/F_s/L_s，任何 source 的未知负债都会冻结可用权利且不跨 source netting。",
+      "required_evidence": [
+        "TestLedgerConservationRebuildSourceIsolationAndAuditRollback"
+      ]
+    },
+    {
+      "id": "06-05-T2",
+      "truth": "usage 按 (node_id, boot_id, sequence) 幂等，raw cumulative、billable、final receipt、unknown upper bound/dispute 是分离事实；重复报告不重复扣减。",
+      "required_evidence": [
+        "TestUsageIdempotentTupleDigestDisputeAndFinal"
+      ]
+    },
+    {
+      "id": "06-05-T3",
+      "truth": "每笔 reservation/consumption/settlement/unknown 绑定不可变 billing_snapshot_id，版本切换、月度来源和故障上界保持历史快照。",
+      "required_evidence": [
+        "TestRateVersionSnapshotLeadAndBillingExplanation"
+      ]
+    },
+    {
+      "id": "06-06-T1",
+      "truth": "速率/连接 share 按 (tenant_id,node_id,kind) 线性 generation 链唯一归属并绑定 boot_id，signer_epoch/path_generation/fencing_generation 不被合并。",
+      "required_evidence": [
+        "TestShareConcurrentLinearChainCapacityKindsAndAuditRollback"
+      ]
+    },
+    {
+      "id": "06-06-T2",
+      "truth": "handoff 先 prepare successor、关闭旧 renewal authority、durable node CAS、receipt confirmation，再释放差额；缺 closure proof 保留旧占用。",
+      "required_evidence": [
+        "TestShareHandoffRealMTLSAgentAndPostgresWorker"
+      ]
+    },
+    {
+      "id": "06-06-T3",
+      "truth": "activation unknown、旧 boot、低 generation 或重复 renewal 不会释放或重复发放份额。",
+      "required_evidence": [
+        "TestShareHandoffLostReceiptRestartRetainsAndConfirmsExactDifference"
+      ]
+    },
+    {
+      "id": "06-07-T1",
+      "truth": "版本化 /api/v1 REST 只暴露授权业务模型，Bearer access/rotating refresh 与 Agent/Hub mTLS 是分离的身份边界。",
+      "required_evidence": [
+        "TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders"
+      ]
+    },
+    {
+      "id": "06-07-T2",
+      "truth": "错误 envelope、cursor 分页、If-Match/operation_id 和 scope 过滤稳定；响应不泄漏 credential、SQL、内部 runtime/VLink 或跨租户数据。",
+      "required_evidence": [
+        "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination"
+      ]
+    },
+    {
+      "id": "06-07-T3",
+      "truth": "SSE domain events 使用 durable event ID 与 Last-Event-ID replay；retention gap 发 resync，客户端可通过 REST 恢复权威状态。",
+      "required_evidence": [
+        "TestSSECommittedEventsReplayScopeAndRESTConvergence"
+      ]
+    },
+    {
+      "id": "06-07-T4",
+      "truth": "同一 SHA 的本机 Docker 与 GitHub Actions 产出 migration/sqlc/race/integration/OpenAPI/SSE evidence，失败和缺失证据不通过；Phase 7 receives the documented recovery dependency contract.",
+      "required_evidence": [
+        "PAIR"
+      ]
+    },
+    {
+      "id": "06-08-T1",
+      "truth": "TenantScope and fixed role policy deny cross-tenant access at repository and service layers and audit platform reads.",
+      "required_evidence": [
+        "TestTenantRepositoryScopeAndPlatformAudit"
+      ]
+    },
+    {
+      "id": "06-08-T2",
+      "truth": "Valkey loss cannot change authoritative balances, ownership, or confirmed tasks; PostgreSQL rebuild restores projections.",
+      "required_evidence": [
+        "TestValkeyLossRebuildAllProducedAuthority",
+        "TestLedgerConservationRebuildSourceIsolationAndAuditRollback"
+      ]
+    },
+    {
+      "id": "06-09-T1",
+      "truth": "All restriction causes must clear before service resumes.",
+      "required_evidence": [
+        "TestTenantRestrictionsIndependentAndImmutable"
+      ]
+    },
+    {
+      "id": "06-09-T2",
+      "truth": "The public OpenAPI contract has one source, deterministic copy and executable lint without a Phase 6 code generator.",
+      "required_evidence": [
+        "OPENAPI"
+      ]
+    },
+    {
+      "id": "06-10-T1",
+      "truth": "Serving membership only includes confirmed configuration and ports.",
+      "required_evidence": [
+        "TestServingPlatformAggregatesAllCommittedTenantRules"
+      ]
+    },
+    {
+      "id": "06-10-T2",
+      "truth": "Cloudflare CRUD proves TTL=60, DNS-only, least-zone scope, encrypted token storage, and fail-closed behavior.",
+      "required_evidence": [
+        "TestCloudflareControlledCRUD"
+      ]
+    },
+    {
+      "id": "06-11-T1",
+      "truth": "Reconciliation processes 1,000 rules and asserts elapsed time <=60 seconds; timeout/failure remains failed evidence.",
+      "required_evidence": [
+        "TestReconcile1000Within60s"
+      ]
+    },
+    {
+      "id": "06-11-T2",
+      "truth": "Docker and Actions execute the same source SHA with explicit evidence manifest paths and fail closed on dirty/untracked source.",
+      "required_evidence": [
+        "PAIR",
+        "TestRenewalSenderYieldsAndRotatesUnansweredJournal",
+        "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope",
+        "TestHubControlObservationPinsSnapshotBeforeClock"
+      ]
+    },
+    {
+      "id": "ROADMAP-SC1",
+      "required_evidence": [
+        "TestTenantRepositoryScopeAndPlatformAudit",
+        "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields"
+      ],
+      "truth": "用户与租户数据隔离在后端访问层强制执行，管理员权限与资源归属限制正确，越权读写拒绝且按规范审计。"
+    },
+    {
+      "id": "ROADMAP-SC2",
+      "required_evidence": [
+        "TestRulePortActualAgentSocketsUnknownAndQuery",
+        "TestHTTPGroupMembersExactOperationCASAndSafeRead"
+      ],
+      "truth": "节点、节点组、端口、段许可、规则编译和变更编排能从 API 走到 Agent/Engine 并展示逐对象执行状态；事务失败或部分应用按规则回滚。"
+    },
+    {
+      "id": "ROADMAP-SC3",
+      "required_evidence": [
+        "TestEntitlementAtomicRedemptionContract",
+        "TestLedgerConservationRebuildSourceIsolationAndAuditRollback"
+      ],
+      "truth": "套餐、流量包、权益码、计费快照、预留与结算能逐来源幂等更新；Valkey 丢失不会改变余额、所有权或已确认业务。"
+    },
+    {
+      "id": "ROADMAP-SC4",
+      "required_evidence": [
+        "TestShareHandoffRealMTLSAgentAndPostgresWorker",
+        "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue"
+      ],
+      "truth": "速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。"
+    },
+    {
+      "id": "ROADMAP-SC5",
+      "required_evidence": [
+        "TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback",
+        "TestSourceLocalUnknownDoesNotNetOrFreezeNewSource"
+      ],
+      "truth": "余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。"
+    }
+  ]
+}

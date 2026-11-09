@@ -40,3 +40,5 @@ inputs beyond runtime bounds emit diagnostics and no artifact. The immutable
 snapshot binder is a production seam used by the compile worker; missing real
 billing inputs stay pending and preserve prior authority. This is an intentional
 06-04/05 dependency, not mock-funded production execution.
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。

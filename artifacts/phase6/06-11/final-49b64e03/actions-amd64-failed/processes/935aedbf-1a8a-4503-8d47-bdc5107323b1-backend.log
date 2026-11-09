@@ -1,0 +1,2 @@
+backend ready node=127.0.0.1:39141 hub=127.0.0.1:44341
+rule delivery worker: ERROR: deadlock detected (SQLSTATE 40P01)

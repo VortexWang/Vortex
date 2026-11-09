@@ -1,18 +1,17 @@
 # Phase 6 requirement ownership and evidence
 
-All 96 Phase 6 requirements have an explicit primary plan owner below. Ownership
-is not acceptance: TEN-002 still requires later domain resource ownership checks.
-Through-plan order is 06-01, 06-08, 06-09, 06-02, 06-10, 06-03, 06-04, 06-05,
-06-06, 06-07, 06-11. The implemented producer currently supports through 06-05;
-later plans extend it with actual producers before their evidence becomes required.
-Future files are neither required by 06-02 nor replaced by fixture results.
+All 96 Phase6 requirements retain one primary plan owner below. The final producer
+now supports through06-11: complete backend and Engine suites plus Agent/Hub/contracts component normal/race, real PG and Valkey,
+finite1000 reconciliation, faults, generators, exact approved contracts and live
+Cloudflare. Final65a53358 Docker and native amd64/arm64 Actions42572674719 passed;
+ownership and implementation alone are not paired acceptance.
 
 Run from a clean exact-commit clone (outputs must be outside the source tree):
 
 ```sh
-./tools/phase6/check.sh --through-plan 06-02 --expected-sha "$SHA" --produce docker --evidence-dir "$EVIDENCE"
+./tools/phase6/check.sh --through-plan 06-11 --expected-sha "$SHA" --produce docker --evidence-dir "$EVIDENCE"
 # GitHub Actions runs the same command with --produce actions and GITHUB_SHA.
-./tools/phase6/check.sh --through-plan 06-02 --expected-sha "$SHA" --evidence-dir "$EVIDENCE"
+./tools/phase6/check.sh --through-plan 06-11 --expected-sha "$SHA" --evidence-dir "$EVIDENCE"
 ```
 
 The last command requires BOTH downloaded Actions and local Docker evidence;
@@ -26,100 +25,102 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 
 | Requirement | Owner | Evidence | Acceptance boundary |
 | --- | --- | --- | --- |
-| BE-001 | 06-01 | tracer.log | implemented scope; evidence required |
-| SUP-B2-001 | 06-01 | tracer.log | implemented scope; evidence required |
-| SUP-B5-001 | 06-01 | tracer.log | implemented scope; evidence required |
-| NOD-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-011 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-012 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-013 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| NOD-014 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| PRT-016 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md); tracer.log | implemented service/task/proof boundary; downstream consumers explicit |
-| RUL-001 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-004 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-005 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-006 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-007 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-008 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-009 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-010 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-011 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-012 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-013 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-014 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-015 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| RUL-016 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| BE-002 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| BE-003 | 06-03 | RULES.md; source fc63d574 normal/race and real runtime | passed backend plan scope; final pairing 06-11 |
-| PLN-001 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-002 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-003 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-004 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-005 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md); tracer.log normal/race | passed local Docker normal/race; CR-006 frozen; final pairing 06-11 |
-| MTR-001 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log; ledger-fault.log | implemented accounting scope; CR-007 freeze and later authority producers pending |
-| MTR-002 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | implemented source fixed-point accounting; freeze pending |
-| MTR-003 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | 24h policy candidate and preauthorization; signer activation06-06 |
-| MTR-004 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | source-local B/F/L and projection rebuild; freeze pending |
-| MTR-005 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | source ledger API contract; HTTP06-07, UI Phase7 |
-| MTR-006 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log; ledger-fault.log | real Agent/Hub/PG tuple idempotency; freeze pending |
-| MTR-007 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | old boot frozen; new signed lease producer06-06 |
-| MTR-008 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | immutable reserve/actual/return/final; runtime authority06-06 |
-| MTR-009 | 06-05 | [LEDGER.md](LEDGER.md); ledger-fault.log | 72h funded conservative close or persistent frozen dispute |
-| MTR-010 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | immutable each-group coefficient explanation; HTTP06-07/UI Phase7 |
-| MTR-011 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | zero-coefficient self-hosted accounting exemption; mandatory runtime rights still required |
-| MTR-013 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | old-source L and independent new sources; freeze pending |
-| MTR-014 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | max12s UTC protection, no new holds inside band; full signer handover06-06 |
-| MTR-015 | 06-05 | [LEDGER.md](LEDGER.md); ledger-fault.log | immutable unknown, risk-funded compensation, idempotent late exact; freeze pending |
-| MTR-016 | 06-05 | [LEDGER.md](LEDGER.md); tracer.log | snapshot/source/grant binding, immutable history; freeze pending |
-| LIM-001 | 06-06 | pending producer in 06-06 | pending |
-| LIM-002 | 06-06 | pending producer in 06-06 | pending |
-| LIM-003 | 06-06 | pending producer in 06-06 | pending |
-| LIM-004 | 06-06 | pending producer in 06-06 | pending |
-| LIM-005 | 06-06 | pending producer in 06-06 | pending |
-| LIM-006 | 06-06 | pending producer in 06-06 | pending |
-| LIM-007 | 06-06 | pending producer in 06-06 | pending |
-| LIM-008 | 06-06 | pending producer in 06-06 | pending |
-| LIM-009 | 06-06 | pending producer in 06-06 | pending |
-| LIM-010 | 06-06 | pending producer in 06-06 | pending |
-| BE-005 | 06-07 | [REST-SSE.md](REST-SSE.md); task1-public-contract/task2-events/task2-unified-acceptance | implemented; CR-009 approved/frozen; final pairing remains06-11 |
-| TEN-001 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-002 | 06-08 | tracer.log | pending domain ownership coverage |
-| TEN-003 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-004 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-005 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-006 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-007 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-008 | 06-08 | tracer.log | implemented scope; evidence required |
-| BE-004 | 06-08 | tracer.log | implemented scope; evidence required |
-| TEN-009 | 06-09 | tracer.log | implemented scope; evidence required |
-| PRT-011 | 06-10 | DNS-CREDENTIALS.md; immutable one-domain-per-group binding, owner authorization, verified-zone suffix | local tests pass; final pairing pending |
-| PRT-012 | 06-10 | DNS-CREDENTIALS.md; all committed tenant rules, confirmed protocol sets, current boot/snapshot | local tests pass; final pairing pending |
-| PRT-013 | 06-10 | DNS-CREDENTIALS.md; failed/uncommitted new rule preserves existing serving members | local tests pass; final pairing pending |
-| PRT-014 | 06-10 | DNS-CREDENTIALS.md; TTL60/DNS-only owner-scoped bounded adapter | local tests pass; final pairing pending |
-| PRT-015 | 06-10 | cloudflare_integration.sh; real CRUD requires dedicated configuration | pending real Cloudflare evidence |
-| BE-006 | 06-11 | [reconciliation-qualification.md](../../operations/reconciliation-qualification.md); task1-reconciliation | finite realPG/deterministic-Node1000/2000 development gate passed; final clean-source pair pending |
+| BE-001 | 06-01 | 06-01-SUMMARY.md; real-process reports + backend normal/race | verified; final65a53358 Docker/amd64+arm64 Actions PASS; real backend/Agent/Hub roles, transaction + durable receipt |
+| SUP-B2-001 | 06-01 | 06-01-SUMMARY.md; real-process reports + backend normal/race | verified; final65a53358 Docker/amd64+arm64 Actions PASS; real backend/Agent/Hub roles, transaction + durable receipt |
+| SUP-B5-001 | 06-01 | 06-01-SUMMARY.md; real-process reports + backend normal/race | verified; final65a53358 Docker/amd64+arm64 Actions PASS; real backend/Agent/Hub roles, transaction + durable receipt |
+| NOD-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-011 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-012 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-013 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| NOD-014 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-001 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-002 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-003 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-004 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-005 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-006 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-007 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-008 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-009 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-010 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| PRT-016 | 06-02 | [NODES-PORTS.md](NODES-PORTS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; fixed members, current incarnation, scoped grant/permit, actual sockets + proof-based release |
+| RUL-001 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-002 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-003 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-004 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-005 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-006 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-007 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-008 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-009 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-010 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-011 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-012 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-013 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-014 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-015 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| RUL-016 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| BE-002 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| BE-003 | 06-03 | [RULES.md](RULES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable revisions/artifacts, fixed-member apply and unknown occupation |
+| PLN-001 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-002 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-003 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-004 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-005 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-006 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-007 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| PLN-008 | 06-04 | [PACKAGES.md](PACKAGES.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; immutable subscription, atomic redemption, independent restrictions and downgrade |
+| MTR-001 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-002 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-003 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-004 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-005 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-006 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-007 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-008 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-009 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-010 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-011 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-013 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-014 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-015 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| MTR-016 | 06-05 | [LEDGER.md](LEDGER.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; source-local B/F/L, original usage identity, unknown freeze and budget-funded close |
+| LIM-001 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-002 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-003 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-004 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-005 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-006 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-007 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-008 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-009 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| LIM-010 | 06-06 | [LIMITS.md](LIMITS.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; independent shares/leases/credit, FULL closure/CAS/recovery and original funds |
+| BE-005 | 06-07 | [REST-SSE.md](REST-SSE.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; backend REST/OpenAPI/SSE; frontend type generation belongs to Phase7 |
+| TEN-001 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-002 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-003 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-004 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-005 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-006 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-007 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-008 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| BE-004 | 06-08 | [TENANCY.md](TENANCY.md); tenant/policy/repository/Valkey tests | verified; final65a53358 Docker/amd64+arm64 Actions PASS; cross-domain tenant ownership, fixed roles, transactional audit, PG rebuild |
+| TEN-009 | 06-09 | [TENANCY.md](TENANCY.md); independent restriction tests + OpenAPI | verified; final65a53358 Docker/amd64+arm64 Actions PASS; all restriction causes clear; deterministic single-source OpenAPI |
+| PRT-011 | 06-10 | [DNS-CREDENTIALS.md](DNS-CREDENTIALS.md); controlled Cloudflare CRUD | verified; final65a53358 Docker/amd64+arm64 Actions PASS; current serving + actor-bound DNS, encrypted scoped token; external CRUD mandatory |
+| PRT-012 | 06-10 | [DNS-CREDENTIALS.md](DNS-CREDENTIALS.md); controlled Cloudflare CRUD | verified; final65a53358 Docker/amd64+arm64 Actions PASS; current serving + actor-bound DNS, encrypted scoped token; external CRUD mandatory |
+| PRT-013 | 06-10 | [DNS-CREDENTIALS.md](DNS-CREDENTIALS.md); controlled Cloudflare CRUD | verified; final65a53358 Docker/amd64+arm64 Actions PASS; current serving + actor-bound DNS, encrypted scoped token; external CRUD mandatory |
+| PRT-014 | 06-10 | [DNS-CREDENTIALS.md](DNS-CREDENTIALS.md); controlled Cloudflare CRUD | verified; final65a53358 Docker/amd64+arm64 Actions PASS; current serving + actor-bound DNS, encrypted scoped token; external CRUD mandatory |
+| PRT-015 | 06-10 | [DNS-CREDENTIALS.md](DNS-CREDENTIALS.md); controlled Cloudflare CRUD | verified; final65a53358 Docker/amd64+arm64 Actions PASS; current serving + actor-bound DNS, encrypted scoped token; external CRUD mandatory |
+| BE-006 | 06-11 | [reconciliation-qualification.md](../../operations/reconciliation-qualification.md) | verified; final65a53358 Docker/amd64+arm64 Actions PASS; finite1000rules/2000members <=60s; deterministic Node adapter, full NFR-019 remains Phase8 |
 
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。

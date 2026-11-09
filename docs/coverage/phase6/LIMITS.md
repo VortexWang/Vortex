@@ -1,6 +1,6 @@
 # 06-06：份额、运行租约、资金授权与恢复证据
 
-候选 CR-008。Phase6仍8/11；06-06的完成需要精确 owner approval。PG 是事实来源；share、runtime lease、credit 和账本 final 分别证明自己的边界。HTTP状态/管理适配器属于06-07，最终同SHA Docker/Actions配对属于06-11。
+CR-008已精确批准并冻结，06-06已完成；批准记录见 `docs/changes/CR-008-APPROVAL.json`。PG 是事实来源；share、runtime lease、credit 和账本 final 分别证明自己的边界。HTTP状态/管理适配器属于06-07，最终同SHA Docker/Actions配对属于06-11。
 
 | 需求 | 生产路径 | 主要可执行证据 |
 | --- | --- | --- |
@@ -19,6 +19,8 @@
 
 统一开发证据目录：artifacts/phase6/06-06/task3-unified-acceptance/。执行中的检查在原始日志完成前不计通过。精确提交的Docker入口：`PHASE6_THROUGH_PLAN=06-06 sh tools/phase6/docker_check.sh`；扩展包含完整backend normal/race、Agent/Hub/contracts/Engine normal/race、ledger/share fault suites、两次独立sqlc生成和Linux双架构构建。使用新Compose project和端口得到空PG，避免已应用candidate8旧schema的误用。
 
-此入口产出candidate运行证据，不能授予contract freeze；tools/phase6/check.sh的双宿主总验收仍待06-11统一扩展。tools/phase6/limits_contract_check.sh独立校验已批准CR-007原快照、当前精确候选、旧wire兼容及两次protobuf生成。
+上述入口保留06-06原单元证据。最终 `tools/phase6/check.sh --through-plan 06-11` 已包含完整producer与同SHA三端配对，当前65a53358的Docker及Actions42572674719完整通过；实现或批准不能代替运行结果。`tools/phase6/limits_contract_check.sh` 校验已批准快照、旧wire兼容及两次protobuf生成。
 
-边界：S/R pending Commit故障案例仅选定成员运行真实Engine，另一固定成员用已准备fixture及真实容量预留；不声称全成员转发、滚动升级或重启验收。SIGKILL、FULL回滚、磁盘故障及有限property算例不代表物理断电/完整模型证明。交叉编译不代表native amd64执行；专用性能/物理恢复/24h及外部Cloudflare凭据验证保持其原阶段状态。
+边界：S/R pending Commit故障案例仅选定成员运行真实Engine，另一固定成员用已准备fixture及真实容量预留；不声称全成员转发、滚动升级或重启验收。SIGKILL、FULL回滚、磁盘故障及有限property算例不代表物理断电/完整模型证明。交叉编译不代表目标CPU执行；最终Actions分别运行原生amd64/arm64。专用性能、物理恢复与24h仍归原阶段；真实Cloudflare CRUD由06-11独立产出结果。
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。

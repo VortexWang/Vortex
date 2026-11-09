@@ -45,3 +45,5 @@ signer/path/lease producer 属于 06-05/06-06；本计划不填造默认 epoch �
 运行完整 backend 普通/race、真实进程及组件回归、sqlc 两次独立生成和 Linux
 amd64/arm64 编译。交叉编译不等于目标 CPU 原生执行。契约未批准或 Cloudflare
 setup 缺失时 acceptance_complete=false，最终 06-11 配对门禁必须拒绝放行。
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。

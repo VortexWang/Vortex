@@ -1,0 +1,30 @@
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Created 
+ Network vortex-p6-docker-3fb8e25a61e8_default Created 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Creating 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Creating 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Created 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Created 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Starting 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Starting 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Started 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Started 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Waiting 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Waiting 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Healthy 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Healthy 
+time="2026-11-09T09:51:48+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-3fb8e25a61e8\"). Use `external: true` to use an existing volume"
+time="2026-11-09T09:51:48+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-3fb8e25a61e8\"). Use `external: true` to use an existing volume"
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Running 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Running 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Waiting 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Waiting 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Healthy 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Healthy 
+ Container vortex-p6-docker-3fb8e25a61e8-backend-test-run-2c3e395edc1d Creating 
+ Container vortex-p6-docker-3fb8e25a61e8-backend-test-run-2c3e395edc1d Created 
+go: downloading golang.org/x/net v0.60.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1
+go: downloading golang.org/x/text v0.42.0
+

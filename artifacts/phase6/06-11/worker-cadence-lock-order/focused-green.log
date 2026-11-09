@@ -1,0 +1,27 @@
+=== RUN   TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery
+2026/11/09 10:59:44 goose: no migrations to run. current version: 9
+--- PASS: TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery (0.37s)
+=== RUN   TestApplyPrepareCommitUnknownAndLateReceipt
+2026/11/09 10:59:45 goose: no migrations to run. current version: 9
+--- PASS: TestApplyPrepareCommitUnknownAndLateReceipt (0.17s)
+=== RUN   TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock
+2026/11/09 10:59:45 goose: no migrations to run. current version: 9
+2026/11/09 10:59:45 OK   00001_authority.sql (7.69ms)
+2026/11/09 10:59:45 OK   00002_tenant_policy.sql (6.86ms)
+2026/11/09 10:59:45 OK   00003_nodes_ports.sql (16.16ms)
+2026/11/09 10:59:45 OK   00004_entry_group_domains.sql (2.27ms)
+2026/11/09 10:59:45 OK   00005_rules_compile.sql (16.69ms)
+2026/11/09 10:59:45 OK   00006_packages_entitlements.sql (16.31ms)
+2026/11/09 10:59:45 OK   00007_metering_ledger.sql (21.72ms)
+2026/11/09 10:59:45 OK   00008_limits_shares.sql (51.6ms)
+2026/11/09 10:59:45 OK   00009_domain_events.sql (23.53ms)
+2026/11/09 10:59:45 goose: successfully migrated database to version: 9
+--- PASS: TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock (0.42s)
+PASS
+ok  	vortex/backend/internal/service	3.402s
+=== RUN   TestRuleReconciliationDrainsReadyWorkAndCancels
+--- PASS: TestRuleReconciliationDrainsReadyWorkAndCancels (0.00s)
+=== RUN   TestRuleReconciliationIdleAndFailure
+--- PASS: TestRuleReconciliationIdleAndFailure (0.00s)
+PASS
+ok  	vortex/backend/internal/worker	1.717s

@@ -1,0 +1,7 @@
+=== RUN   TestCloudflareControlledCRUD
+2026/11/09 04:48:07 goose: no migrations to run. current version: 9
+    cloudflare_integration_test.go:144: real Cloudflare create/read/update/delete passed; TTL=60; proxied=false; policy/token identity bound; encrypted storage and exact-name cleanup verified
+--- PASS: TestCloudflareControlledCRUD (2.23s)
+PASS
+ok  	vortex/backend/internal/control	2.234s
+credential byte leakage check passed

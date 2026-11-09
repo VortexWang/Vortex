@@ -1,0 +1,29 @@
+=== RUN   TestReconcile1000Within60s
+2026/11/09 11:01:18 goose: no migrations to run. current version: 9
+2026/11/09 11:01:18 OK   00001_authority.sql (15.37ms)
+2026/11/09 11:01:18 OK   00002_tenant_policy.sql (10.06ms)
+2026/11/09 11:01:18 OK   00003_nodes_ports.sql (20.07ms)
+2026/11/09 11:01:18 OK   00004_entry_group_domains.sql (2.35ms)
+2026/11/09 11:01:18 OK   00005_rules_compile.sql (20.24ms)
+2026/11/09 11:01:18 OK   00006_packages_entitlements.sql (20.4ms)
+2026/11/09 11:01:18 OK   00007_metering_ledger.sql (25.68ms)
+2026/11/09 11:01:18 OK   00008_limits_shares.sql (62.74ms)
+2026/11/09 11:01:18 OK   00009_domain_events.sql (29.67ms)
+2026/11/09 11:01:18 goose: successfully migrated database to version: 9
+    reconciliation_1000_test.go:203: {
+          "commit": "",
+          "scope": "real PostgreSQL production backend reconciliation; deterministic node adapter; no Engine/transport performance claim",
+          "started_at": "2026-11-09T03:03:57.270322Z",
+          "ended_at": "2026-11-09T03:04:24.354764Z",
+          "elapsed_ns": 27084315625,
+          "elapsed_ms": 27084.315625,
+          "rules": 1000,
+          "resolved": 1000,
+          "members": 2000,
+          "observed": 2000,
+          "inventory_sha256": "3b0569be565ae0ced7812058744c8f0056d50fefe6dd129e4f78925376d9e0ba",
+          "status": "passed"
+        }
+--- PASS: TestReconcile1000Within60s (186.10s)
+PASS
+ok  	vortex/backend/internal/service	187.798s

@@ -18,7 +18,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 ## TEN Requirements
 
 - [x] **TEN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (261-261; SHA-256 recorded there).
-- [ ] **TEN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (262-262; SHA-256 recorded there).
+- [x] **TEN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (262-262; SHA-256 recorded there).
 - [x] **TEN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (263-263; SHA-256 recorded there).
 - [x] **TEN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (264-264; SHA-256 recorded there).
 - [x] **TEN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (265-265; SHA-256 recorded there).
@@ -40,7 +40,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **NOD-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (305-305; SHA-256 recorded there).
 - [x] **NOD-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (311-311; SHA-256 recorded there).
 - [x] **NOD-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (312-312; SHA-256 recorded there).
-- [ ] **NOD-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (313-313; SHA-256 recorded there).
+- [x] **NOD-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (313-313; SHA-256 recorded there).
 - [x] **NOD-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (326-326; SHA-256 recorded there).
 - [x] **NOD-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (327-327; SHA-256 recorded there).
 
@@ -49,7 +49,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **PRT-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (335-335; SHA-256 recorded there).
 - [x] **PRT-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (336-336; SHA-256 recorded there).
 - [x] **PRT-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (337-337; SHA-256 recorded there).
-- [ ] **PRT-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (338-338; SHA-256 recorded there).
+- [x] **PRT-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (338-338; SHA-256 recorded there).
 - [x] **PRT-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (339-339; SHA-256 recorded there).
 - [x] **PRT-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (340-340; SHA-256 recorded there).
 - [x] **PRT-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (341-341; SHA-256 recorded there).
@@ -177,8 +177,8 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [x] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
 - [x] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
 - [x] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
-- [ ] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
-- [ ] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
+- [x] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
+- [x] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
 
 ## PLN Requirements
 
@@ -357,7 +357,7 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | GEN-006 | Phase 2 | Complete |
 | GEN-007 | Phase 2 | Complete |
 | TEN-001 | Phase 6 | Complete |
-| TEN-002 | Phase 6 | Pending |
+| TEN-002 | Phase 6 | Complete |
 | TEN-003 | Phase 6 | Complete |
 | TEN-004 | Phase 6 | Complete |
 | TEN-005 | Phase 6 | Complete |
@@ -376,13 +376,13 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | NOD-009 | Phase 6 | Complete |
 | NOD-010 | Phase 6 | Complete |
 | NOD-011 | Phase 6 | Complete |
-| NOD-012 | Phase 6 | Pending |
+| NOD-012 | Phase 6 | Complete |
 | NOD-013 | Phase 6 | Complete |
 | NOD-014 | Phase 6 | Complete |
 | PRT-001 | Phase 6 | Complete |
 | PRT-002 | Phase 6 | Complete |
 | PRT-003 | Phase 6 | Complete |
-| PRT-004 | Phase 6 | Pending |
+| PRT-004 | Phase 6 | Complete |
 | PRT-005 | Phase 6 | Complete |
 | PRT-006 | Phase 6 | Complete |
 | PRT-007 | Phase 6 | Complete |
@@ -495,8 +495,8 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | BE-002 | Phase 6 | Complete |
 | BE-003 | Phase 6 | Complete |
 | BE-004 | Phase 6 | Complete |
-| BE-005 | Phase 6 | Pending |
-| BE-006 | Phase 6 | Pending |
+| BE-005 | Phase 6 | Complete |
+| BE-006 | Phase 6 | Complete |
 | PLN-001 | Phase 6 | Complete |
 | PLN-002 | Phase 6 | Complete |
 | PLN-006 | Phase 6 | Complete |

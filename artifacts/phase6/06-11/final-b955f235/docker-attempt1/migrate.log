@@ -1,0 +1,10 @@
+2026/11/09 01:28:44 OK   00001_authority.sql (5.77ms)
+2026/11/09 01:28:44 OK   00002_tenant_policy.sql (4.21ms)
+2026/11/09 01:28:44 OK   00003_nodes_ports.sql (8.44ms)
+2026/11/09 01:28:44 OK   00004_entry_group_domains.sql (905.17µs)
+2026/11/09 01:28:44 OK   00005_rules_compile.sql (7.81ms)
+2026/11/09 01:28:44 OK   00006_packages_entitlements.sql (7.92ms)
+2026/11/09 01:28:44 OK   00007_metering_ledger.sql (10.1ms)
+2026/11/09 01:28:44 OK   00008_limits_shares.sql (24.76ms)
+2026/11/09 01:28:44 OK   00009_domain_events.sql (8.36ms)
+2026/11/09 01:28:44 goose: successfully migrated database to version: 9

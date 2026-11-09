@@ -1,0 +1,23 @@
+=== RUN   TestUsageFaultPowerLossAuditTransactionRollback
+2026/11/09 04:34:27 goose: no migrations to run. current version: 9
+--- PASS: TestUsageFaultPowerLossAuditTransactionRollback (0.20s)
+=== RUN   TestUsageIdempotentTupleDigestDisputeAndFinal
+2026/11/09 04:34:27 goose: no migrations to run. current version: 9
+--- PASS: TestUsageIdempotentTupleDigestDisputeAndFinal (0.06s)
+=== RUN   TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback
+2026/11/09 04:34:27 goose: no migrations to run. current version: 9
+--- PASS: TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback (0.08s)
+=== RUN   TestUnknownExactFinalReconciliationAndProtectionBand
+2026/11/09 04:34:28 goose: no migrations to run. current version: 9
+--- PASS: TestUnknownExactFinalReconciliationAndProtectionBand (0.07s)
+=== RUN   TestUsageReconciliationWorkerExpiredReceiptFreeze
+2026/11/09 04:34:28 goose: no migrations to run. current version: 9
+--- PASS: TestUsageReconciliationWorkerExpiredReceiptFreeze (0.07s)
+=== RUN   TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence
+2026/11/09 04:34:28 goose: no migrations to run. current version: 9
+--- PASS: TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence (0.95s)
+PASS
+ok  	vortex/backend/internal/service	2.468s
+testing: warning: no tests to run
+PASS
+ok  	vortex/backend/internal/worker	1.019s [no tests to run]

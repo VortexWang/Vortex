@@ -4,7 +4,7 @@ CR-007已由用户精确批准，批准提交84821a04；DB/API2.2.0和control1.5
 批准后独立clean source84821a04完整Docker通过，证据4403ac52；acceptance_complete=true
 仅表示本机producer，同SHA Actions配对仍归06-11。HTTP adapter 属于
 06-07，签发代次、运行/份额租约、Hub 资金委托 producer 属于 06-06。
-本计划的 PostgreSQL 预留不能代替这些尚未签发的权利。
+06-06现已实现独立签发与关闭生产者，见 `LIMITS.md`；PostgreSQL预留本身不能代替已耐久签发的权利。
 
 | 需求 | 实现与真实验证 |
 | --- | --- |
@@ -31,10 +31,12 @@ payload digest。既有 SQLite 用量 payload 原字节保持；历史无 envelo
 已保存身份的未知用量在回执丢失、Agent 再次重启后复用首个报告身份，既不覆盖
 原 boot/sequence，也不重复消费；store 反例和双段 mTLS 重启测试共同验证。
 生产 AccountingServer/UsageRelay 与 BackendUsageClient 只转交计量事实，不能
-签发运行或资金权利。活跃 signer 的完整后端握手仍由06-06接管。
+签发运行或资金权利。活跃signer的完整后端握手已由06-06生产路径接管，原ledger单元不独立授予权利。
 
 Valkey FLUSHALL 后 source balance 从 PG 重建测试已执行。WINDOWS #1 的06-05
 实现部分已覆盖，跨域最终验收与同 SHA Actions 配对仍归06-11。
 `ledger_fault_injection.sh` 用真实 PG、SQLite 和双段 mTLS 执行应用进程 SIGKILL、
 服务器连接终止、丢失回执、重复批次、24h/72h推进。它不声称物理主机断电、
 PG磁盘物理恢复或72小时真实等待；这些边界与虚拟时钟推进明确区分。
+
+当前最终验收：实现提交`65a5335894732b7d632e870acc3d8283be224cd3`，Docker及Actions42572674719原生amd64/arm64完整通过（含真实Cloudflare）。原始证据`artifacts/phase6/06-11/final-65a53358`；阶段完整结论与保留范围见06-VERIFICATION.md。以上较早证据仍按当时范围解释。
