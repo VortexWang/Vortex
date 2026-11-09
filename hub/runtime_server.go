@@ -134,7 +134,7 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 		if _, e := s.Issuer.Store.CurrentAutonomyStatus(ctx, now.Latest, true); e != nil {
 			return nil, e
 		}
-		snapshot, e := s.Issuer.Store.HubControlSnapshot(ctx, s.HubID, now.Latest)
+		snapshot, e := s.Issuer.Store.ObserveHubControlSnapshot(ctx, s.HubID, s.Issuer.Clock)
 		if e != nil {
 			return nil, e
 		}

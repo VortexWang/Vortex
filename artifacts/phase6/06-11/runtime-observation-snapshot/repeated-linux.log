@@ -1,0 +1,462 @@
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gocache Creating 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gocache Creating 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gomod Creating 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gomod Creating 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gocache Created 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gocache Created 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gomod Created 
+ Volume vortex-p6-docker-84f9cc86e4aa_phase6-gomod Created 
+ Container vortex-p6-docker-f466bfab22b1-backend-test-run-5e046e89aa52 Creating 
+ Container vortex-p6-docker-f466bfab22b1-backend-test-run-5e046e89aa52 Created 
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:06:18 goose: no migrations to run. current version: 9
+2026/11/09 06:06:18 OK   00001_authority.sql (8.39ms)
+2026/11/09 06:06:18 OK   00002_tenant_policy.sql (5.63ms)
+2026/11/09 06:06:18 OK   00003_nodes_ports.sql (12.76ms)
+2026/11/09 06:06:18 OK   00004_entry_group_domains.sql (1.3ms)
+2026/11/09 06:06:18 OK   00005_rules_compile.sql (11.91ms)
+2026/11/09 06:06:18 OK   00006_packages_entitlements.sql (11.4ms)
+2026/11/09 06:06:18 OK   00007_metering_ledger.sql (15.1ms)
+2026/11/09 06:06:18 OK   00008_limits_shares.sql (34.74ms)
+2026/11/09 06:06:18 OK   00009_domain_events.sql (15.13ms)
+2026/11/09 06:06:18 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=0 error=agent: Hub is not ready
+REGIONAL_DIAGNOSTIC attempt=2 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+    runtime_recovery_transport_test.go:252: expected one lost FULL response and one replay {3 2 0 0} [context canceled rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal]
+REGIONAL_DIAGNOSTIC attempt=3 ready=2 error=context canceled
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (9.09s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:06:27 goose: no migrations to run. current version: 9
+2026/11/09 06:06:27 OK   00001_authority.sql (6.43ms)
+2026/11/09 06:06:27 OK   00002_tenant_policy.sql (5.58ms)
+2026/11/09 06:06:27 OK   00003_nodes_ports.sql (12.13ms)
+2026/11/09 06:06:27 OK   00004_entry_group_domains.sql (1.29ms)
+2026/11/09 06:06:27 OK   00005_rules_compile.sql (10.91ms)
+2026/11/09 06:06:27 OK   00006_packages_entitlements.sql (10.56ms)
+2026/11/09 06:06:27 OK   00007_metering_ledger.sql (14.37ms)
+2026/11/09 06:06:27 OK   00008_limits_shares.sql (32.78ms)
+2026/11/09 06:06:27 OK   00009_domain_events.sql (13.37ms)
+2026/11/09 06:06:27 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.76s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:06:35 goose: no migrations to run. current version: 9
+2026/11/09 06:06:35 OK   00001_authority.sql (6.18ms)
+2026/11/09 06:06:35 OK   00002_tenant_policy.sql (5.17ms)
+2026/11/09 06:06:35 OK   00003_nodes_ports.sql (13.95ms)
+2026/11/09 06:06:35 OK   00004_entry_group_domains.sql (1.63ms)
+2026/11/09 06:06:36 OK   00005_rules_compile.sql (15.54ms)
+2026/11/09 06:06:36 OK   00006_packages_entitlements.sql (11.54ms)
+2026/11/09 06:06:36 OK   00007_metering_ledger.sql (15.97ms)
+2026/11/09 06:06:36 OK   00008_limits_shares.sql (47.22ms)
+2026/11/09 06:06:36 OK   00009_domain_events.sql (20.11ms)
+2026/11/09 06:06:36 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.49s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:06:44 goose: no migrations to run. current version: 9
+2026/11/09 06:06:44 OK   00001_authority.sql (6.68ms)
+2026/11/09 06:06:44 OK   00002_tenant_policy.sql (6.01ms)
+2026/11/09 06:06:44 OK   00003_nodes_ports.sql (13.42ms)
+2026/11/09 06:06:44 OK   00004_entry_group_domains.sql (1.47ms)
+2026/11/09 06:06:44 OK   00005_rules_compile.sql (12.9ms)
+2026/11/09 06:06:44 OK   00006_packages_entitlements.sql (13.56ms)
+2026/11/09 06:06:44 OK   00007_metering_ledger.sql (15.32ms)
+2026/11/09 06:06:44 OK   00008_limits_shares.sql (35.2ms)
+2026/11/09 06:06:44 OK   00009_domain_events.sql (13.58ms)
+2026/11/09 06:06:44 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.56s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:06:52 goose: no migrations to run. current version: 9
+2026/11/09 06:06:53 OK   00001_authority.sql (6.46ms)
+2026/11/09 06:06:53 OK   00002_tenant_policy.sql (5.66ms)
+2026/11/09 06:06:53 OK   00003_nodes_ports.sql (12.62ms)
+2026/11/09 06:06:53 OK   00004_entry_group_domains.sql (1.47ms)
+2026/11/09 06:06:53 OK   00005_rules_compile.sql (13.69ms)
+2026/11/09 06:06:53 OK   00006_packages_entitlements.sql (11.98ms)
+2026/11/09 06:06:53 OK   00007_metering_ledger.sql (15.33ms)
+2026/11/09 06:06:53 OK   00008_limits_shares.sql (37.96ms)
+2026/11/09 06:06:53 OK   00009_domain_events.sql (14.96ms)
+2026/11/09 06:06:53 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.46s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:07:01 goose: no migrations to run. current version: 9
+2026/11/09 06:07:01 OK   00001_authority.sql (6.12ms)
+2026/11/09 06:07:01 OK   00002_tenant_policy.sql (5.24ms)
+2026/11/09 06:07:01 OK   00003_nodes_ports.sql (13.37ms)
+2026/11/09 06:07:01 OK   00004_entry_group_domains.sql (1.66ms)
+2026/11/09 06:07:01 OK   00005_rules_compile.sql (12.71ms)
+2026/11/09 06:07:01 OK   00006_packages_entitlements.sql (12.27ms)
+2026/11/09 06:07:01 OK   00007_metering_ledger.sql (16.02ms)
+2026/11/09 06:07:01 OK   00008_limits_shares.sql (34.96ms)
+2026/11/09 06:07:01 OK   00009_domain_events.sql (13.81ms)
+2026/11/09 06:07:01 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=0 error=agent: Hub is not ready
+REGIONAL_DIAGNOSTIC attempt=2 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+    runtime_recovery_transport_test.go:252: expected one lost FULL response and one replay {3 2 0 0} [context canceled rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal]
+REGIONAL_DIAGNOSTIC attempt=3 ready=2 error=context canceled
+--- FAIL: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (9.05s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:07:10 goose: no migrations to run. current version: 9
+2026/11/09 06:07:10 OK   00001_authority.sql (5.49ms)
+2026/11/09 06:07:10 OK   00002_tenant_policy.sql (6.43ms)
+2026/11/09 06:07:10 OK   00003_nodes_ports.sql (14.05ms)
+2026/11/09 06:07:10 OK   00004_entry_group_domains.sql (1.69ms)
+2026/11/09 06:07:10 OK   00005_rules_compile.sql (10.99ms)
+2026/11/09 06:07:10 OK   00006_packages_entitlements.sql (11.3ms)
+2026/11/09 06:07:10 OK   00007_metering_ledger.sql (14.41ms)
+2026/11/09 06:07:10 OK   00008_limits_shares.sql (37.15ms)
+2026/11/09 06:07:10 OK   00009_domain_events.sql (14.07ms)
+2026/11/09 06:07:10 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.42s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:07:18 goose: no migrations to run. current version: 9
+2026/11/09 06:07:18 OK   00001_authority.sql (5.19ms)
+2026/11/09 06:07:18 OK   00002_tenant_policy.sql (5.25ms)
+2026/11/09 06:07:19 OK   00003_nodes_ports.sql (11.9ms)
+2026/11/09 06:07:19 OK   00004_entry_group_domains.sql (1.52ms)
+2026/11/09 06:07:19 OK   00005_rules_compile.sql (12.51ms)
+2026/11/09 06:07:19 OK   00006_packages_entitlements.sql (11.93ms)
+2026/11/09 06:07:19 OK   00007_metering_ledger.sql (14.28ms)
+2026/11/09 06:07:19 OK   00008_limits_shares.sql (33.87ms)
+2026/11/09 06:07:19 OK   00009_domain_events.sql (14.52ms)
+2026/11/09 06:07:19 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.53s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:07:27 goose: no migrations to run. current version: 9
+2026/11/09 06:07:27 OK   00001_authority.sql (5.46ms)
+2026/11/09 06:07:27 OK   00002_tenant_policy.sql (5.58ms)
+2026/11/09 06:07:27 OK   00003_nodes_ports.sql (13.63ms)
+2026/11/09 06:07:27 OK   00004_entry_group_domains.sql (1.53ms)
+2026/11/09 06:07:27 OK   00005_rules_compile.sql (13.41ms)
+2026/11/09 06:07:27 OK   00006_packages_entitlements.sql (11.11ms)
+2026/11/09 06:07:27 OK   00007_metering_ledger.sql (16.44ms)
+2026/11/09 06:07:27 OK   00008_limits_shares.sql (35.34ms)
+2026/11/09 06:07:27 OK   00009_domain_events.sql (14.46ms)
+2026/11/09 06:07:27 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.49s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:07:35 goose: no migrations to run. current version: 9
+2026/11/09 06:07:36 OK   00001_authority.sql (6.13ms)
+2026/11/09 06:07:36 OK   00002_tenant_policy.sql (8.13ms)
+2026/11/09 06:07:36 OK   00003_nodes_ports.sql (12.59ms)
+2026/11/09 06:07:36 OK   00004_entry_group_domains.sql (1.68ms)
+2026/11/09 06:07:36 OK   00005_rules_compile.sql (14ms)
+2026/11/09 06:07:36 OK   00006_packages_entitlements.sql (11.91ms)
+2026/11/09 06:07:36 OK   00007_metering_ledger.sql (16.12ms)
+2026/11/09 06:07:36 OK   00008_limits_shares.sql (36.63ms)
+2026/11/09 06:07:36 OK   00009_domain_events.sql (17.17ms)
+2026/11/09 06:07:36 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.55s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:07:44 goose: no migrations to run. current version: 9
+2026/11/09 06:07:44 OK   00001_authority.sql (6.15ms)
+2026/11/09 06:07:44 OK   00002_tenant_policy.sql (5.47ms)
+2026/11/09 06:07:44 OK   00003_nodes_ports.sql (13.28ms)
+2026/11/09 06:07:44 OK   00004_entry_group_domains.sql (1.4ms)
+2026/11/09 06:07:44 OK   00005_rules_compile.sql (11.68ms)
+2026/11/09 06:07:44 OK   00006_packages_entitlements.sql (11.13ms)
+2026/11/09 06:07:44 OK   00007_metering_ledger.sql (14.98ms)
+2026/11/09 06:07:44 OK   00008_limits_shares.sql (39.55ms)
+2026/11/09 06:07:44 OK   00009_domain_events.sql (13.91ms)
+2026/11/09 06:07:44 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.47s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:07:53 goose: no migrations to run. current version: 9
+2026/11/09 06:07:53 OK   00001_authority.sql (6.08ms)
+2026/11/09 06:07:53 OK   00002_tenant_policy.sql (4.99ms)
+2026/11/09 06:07:53 OK   00003_nodes_ports.sql (12.31ms)
+2026/11/09 06:07:53 OK   00004_entry_group_domains.sql (1.42ms)
+2026/11/09 06:07:53 OK   00005_rules_compile.sql (11.83ms)
+2026/11/09 06:07:53 OK   00006_packages_entitlements.sql (10.41ms)
+2026/11/09 06:07:53 OK   00007_metering_ledger.sql (13.69ms)
+2026/11/09 06:07:53 OK   00008_limits_shares.sql (34.39ms)
+2026/11/09 06:07:53 OK   00009_domain_events.sql (15.02ms)
+2026/11/09 06:07:53 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.53s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:08:01 goose: no migrations to run. current version: 9
+2026/11/09 06:08:01 OK   00001_authority.sql (5.7ms)
+2026/11/09 06:08:01 OK   00002_tenant_policy.sql (5.16ms)
+2026/11/09 06:08:01 OK   00003_nodes_ports.sql (13.25ms)
+2026/11/09 06:08:01 OK   00004_entry_group_domains.sql (2.53ms)
+2026/11/09 06:08:01 OK   00005_rules_compile.sql (11.37ms)
+2026/11/09 06:08:01 OK   00006_packages_entitlements.sql (10.43ms)
+2026/11/09 06:08:01 OK   00007_metering_ledger.sql (15.22ms)
+2026/11/09 06:08:01 OK   00008_limits_shares.sql (36.41ms)
+2026/11/09 06:08:01 OK   00009_domain_events.sql (14.3ms)
+2026/11/09 06:08:01 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.40s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:08:09 goose: no migrations to run. current version: 9
+2026/11/09 06:08:09 OK   00001_authority.sql (6.09ms)
+2026/11/09 06:08:10 OK   00002_tenant_policy.sql (5.36ms)
+2026/11/09 06:08:10 OK   00003_nodes_ports.sql (13.11ms)
+2026/11/09 06:08:10 OK   00004_entry_group_domains.sql (1.5ms)
+2026/11/09 06:08:10 OK   00005_rules_compile.sql (12.35ms)
+2026/11/09 06:08:10 OK   00006_packages_entitlements.sql (10.45ms)
+2026/11/09 06:08:10 OK   00007_metering_ledger.sql (14.45ms)
+2026/11/09 06:08:10 OK   00008_limits_shares.sql (35.43ms)
+2026/11/09 06:08:10 OK   00009_domain_events.sql (14.07ms)
+2026/11/09 06:08:10 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.48s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:08:18 goose: no migrations to run. current version: 9
+2026/11/09 06:08:18 OK   00001_authority.sql (5.54ms)
+2026/11/09 06:08:18 OK   00002_tenant_policy.sql (5.56ms)
+2026/11/09 06:08:18 OK   00003_nodes_ports.sql (11.98ms)
+2026/11/09 06:08:18 OK   00004_entry_group_domains.sql (1.93ms)
+2026/11/09 06:08:18 OK   00005_rules_compile.sql (12.61ms)
+2026/11/09 06:08:18 OK   00006_packages_entitlements.sql (11.74ms)
+2026/11/09 06:08:18 OK   00007_metering_ledger.sql (14.81ms)
+2026/11/09 06:08:18 OK   00008_limits_shares.sql (33.67ms)
+2026/11/09 06:08:18 OK   00009_domain_events.sql (13.74ms)
+2026/11/09 06:08:18 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.47s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:08:26 goose: no migrations to run. current version: 9
+2026/11/09 06:08:26 OK   00001_authority.sql (5.43ms)
+2026/11/09 06:08:26 OK   00002_tenant_policy.sql (4.78ms)
+2026/11/09 06:08:27 OK   00003_nodes_ports.sql (13.22ms)
+2026/11/09 06:08:27 OK   00004_entry_group_domains.sql (1.44ms)
+2026/11/09 06:08:27 OK   00005_rules_compile.sql (12.55ms)
+2026/11/09 06:08:27 OK   00006_packages_entitlements.sql (12.26ms)
+2026/11/09 06:08:27 OK   00007_metering_ledger.sql (16.31ms)
+2026/11/09 06:08:27 OK   00008_limits_shares.sql (34.47ms)
+2026/11/09 06:08:27 OK   00009_domain_events.sql (13.63ms)
+2026/11/09 06:08:27 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.54s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:08:35 goose: no migrations to run. current version: 9
+2026/11/09 06:08:35 OK   00001_authority.sql (6.4ms)
+2026/11/09 06:08:35 OK   00002_tenant_policy.sql (5.6ms)
+2026/11/09 06:08:35 OK   00003_nodes_ports.sql (13.5ms)
+2026/11/09 06:08:35 OK   00004_entry_group_domains.sql (1.48ms)
+2026/11/09 06:08:35 OK   00005_rules_compile.sql (12.71ms)
+2026/11/09 06:08:35 OK   00006_packages_entitlements.sql (10.84ms)
+2026/11/09 06:08:35 OK   00007_metering_ledger.sql (14.48ms)
+2026/11/09 06:08:35 OK   00008_limits_shares.sql (34.14ms)
+2026/11/09 06:08:35 OK   00009_domain_events.sql (14.62ms)
+2026/11/09 06:08:35 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.44s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:08:43 goose: no migrations to run. current version: 9
+2026/11/09 06:08:43 OK   00001_authority.sql (8.79ms)
+2026/11/09 06:08:43 OK   00002_tenant_policy.sql (5.52ms)
+2026/11/09 06:08:44 OK   00003_nodes_ports.sql (12.91ms)
+2026/11/09 06:08:44 OK   00004_entry_group_domains.sql (1.46ms)
+2026/11/09 06:08:44 OK   00005_rules_compile.sql (12.94ms)
+2026/11/09 06:08:44 OK   00006_packages_entitlements.sql (11.1ms)
+2026/11/09 06:08:44 OK   00007_metering_ledger.sql (14.48ms)
+2026/11/09 06:08:44 OK   00008_limits_shares.sql (35.27ms)
+2026/11/09 06:08:44 OK   00009_domain_events.sql (13.84ms)
+2026/11/09 06:08:44 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=0 error=agent: Hub is not ready
+REGIONAL_DIAGNOSTIC attempt=2 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+    runtime_recovery_transport_test.go:252: expected one lost FULL response and one replay {3 2 0 0} [context canceled rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal]
+REGIONAL_DIAGNOSTIC attempt=3 ready=2 error=context canceled
+--- FAIL: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (9.21s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR
+2026/11/09 06:08:53 goose: no migrations to run. current version: 9
+2026/11/09 06:08:53 OK   00001_authority.sql (5.76ms)
+2026/11/09 06:08:53 OK   00002_tenant_policy.sql (5.26ms)
+2026/11/09 06:08:53 OK   00003_nodes_ports.sql (12.63ms)
+2026/11/09 06:08:53 OK   00004_entry_group_domains.sql (1.42ms)
+2026/11/09 06:08:53 OK   00005_rules_compile.sql (12.53ms)
+2026/11/09 06:08:53 OK   00006_packages_entitlements.sql (10.29ms)
+2026/11/09 06:08:53 OK   00007_metering_ledger.sql (14.57ms)
+2026/11/09 06:08:53 OK   00008_limits_shares.sql (33.12ms)
+2026/11/09 06:08:53 OK   00009_domain_events.sql (13.54ms)
+2026/11/09 06:08:53 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR (8.45s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSRenewalLostAfterFULLConsumesOnlyR/final_requires_node_recovery_source_receipts (0.01s)
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 06:09:01 goose: no migrations to run. current version: 9
+2026/11/09 06:09:01 OK   00001_authority.sql (5.33ms)
+2026/11/09 06:09:01 OK   00002_tenant_policy.sql (4.92ms)
+2026/11/09 06:09:01 OK   00003_nodes_ports.sql (13.08ms)
+2026/11/09 06:09:01 OK   00004_entry_group_domains.sql (1.51ms)
+2026/11/09 06:09:01 OK   00005_rules_compile.sql (12.48ms)
+2026/11/09 06:09:01 OK   00006_packages_entitlements.sql (11.79ms)
+2026/11/09 06:09:01 OK   00007_metering_ledger.sql (15.58ms)
+2026/11/09 06:09:01 OK   00008_limits_shares.sql (36.78ms)
+2026/11/09 06:09:01 OK   00009_domain_events.sql (13.24ms)
+2026/11/09 06:09:01 goose: successfully migrated database to version: 9
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=context canceled
+REGIONAL_DIAGNOSTIC attempt=1 ready=1 error=agent: receive control message: rpc error: code = Unavailable desc = injected response loss after Hub FULL renewal
+REGIONAL_DIAGNOSTIC attempt=2 ready=2 error=context canceled
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (8.53s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR/final_requires_node_recovery_source_receipts (0.01s)
+FAIL
+FAIL	vortex/backend/internal/service	172.131s
+FAIL
+

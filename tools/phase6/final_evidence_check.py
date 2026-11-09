@@ -68,7 +68,7 @@ def runtime(folder,source):
    expected=['vortex/agent','vortex/agent/store','vortex/agent/upgrade','vortex/hub','vortex/contracts'] if family=='root' else ['vortex/engine/relay','vortex/engine/vlink','vortex/engine/runtime/rule','vortex/engine/accounting']
    assert set(expected)<=packages, 'missing complete '+family+' package'
    test_names={e.get('Test') for e in events if e.get('Action')=='pass'}
-   if family=='root':assert {'TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope'}<=test_names, 'isolated disk or control fairness proof missing'
+   if family=='root':assert {'TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope','TestHubControlObservationPinsSnapshotBeforeClock'}<=test_names, 'isolated disk or control fairness proof missing'
    tests[family+'_'+mode+'_passed']=sum(1 for e in events if e.get('Action')=='pass' and 'Test' in e)
  for name,required in {
   'ledger-fault.log':['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback'],

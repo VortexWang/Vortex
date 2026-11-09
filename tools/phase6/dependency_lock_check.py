@@ -82,7 +82,7 @@ def main():
     download = f"https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-{archive_platform}.zip"
     archive = work / "protoc.zip"
     # Use curl to honor the environment's proxy/CA configuration consistently.
-    subprocess.run(["curl", "--fail", "--location", "--silent", "--show-error", download, "-o", str(archive)], check=True)
+    subprocess.run([sys.executable, str(ROOT / "tools/download_release.py"), download, str(archive)], check=True)
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     assert digest == pinned["protoc"]["integrity_by_platform"][platform_key], "protoc archive checksum mismatch"
     with zipfile.ZipFile(archive) as source:

@@ -12,7 +12,7 @@ if test -n "${PHASE6_SQLC_ARCHIVE:-}"; then
   test -f "$PHASE6_SQLC_ARCHIVE" || { echo 'sqlc cache archive missing' >&2; exit 1; }
   cp "$PHASE6_SQLC_ARCHIVE" "$destination/sqlc.tar.gz"
 else
-  curl --http1.1 --retry 3 --fail --location --silent --show-error "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_${platform}.tar.gz" -o "$destination/sqlc.tar.gz"
+  python3 tools/download_release.py "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_${platform}.tar.gz" "$destination/sqlc.tar.gz"
 fi
 actual=$(shasum -a 256 "$destination/sqlc.tar.gz" | cut -d ' ' -f 1)
 test "$actual" = "$checksum"
