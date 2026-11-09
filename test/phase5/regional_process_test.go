@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -67,15 +68,42 @@ func processCredential(t *testing.T, dir, id string, ca *identity.CA, der []byte
 	}
 	return certPath, keyPath
 }
+
+// Keep selected addresses unique until the owning fixture finishes. Closing
+// the probe socket otherwise lets the OS hand a future Node address to a Hub
+// started later in the very same fixture.
+var regionalPorts = struct {
+	sync.Mutex
+	active map[string]bool
+}{active: make(map[string]bool)}
+
 func regionalPort(t *testing.T) string {
 	t.Helper()
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
+	for attempt := 0; attempt < 128; attempt++ {
+		l, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		address := l.Addr().String()
+		regionalPorts.Lock()
+		used := regionalPorts.active[address]
+		if !used {
+			regionalPorts.active[address] = true
+		}
+		regionalPorts.Unlock()
+		l.Close()
+		if used {
+			continue
+		}
+		t.Cleanup(func() {
+			regionalPorts.Lock()
+			delete(regionalPorts.active, address)
+			regionalPorts.Unlock()
+		})
+		return address
 	}
-	s := l.Addr().String()
-	l.Close()
-	return s
+	t.Fatal("could not select a unique fixture port")
+	return ""
 }
 
 func TestRegionalProcessFailover(t *testing.T) {

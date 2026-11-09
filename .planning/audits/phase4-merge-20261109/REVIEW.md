@@ -12,7 +12,7 @@ Darwin 和 Linux 完整 Engine race 均通过。原 64 MiB integrity、伪造 OP
 
 200ms 是明确 admission 上限，不能以延长生产 deadline 掩盖 FULL 事务测试成本。6238、2968 CI 均在16个并发 reserve/commit 的同一128字节块夹具失败；需要分开验证短写结算正确性与有界排队拒绝。
 
-## F-03 / medium / 已定位
+## F-03 / medium / 已修复
 
 policy-cutover 的40秒激活超时实际日志为 Node bind address already in use，且与刚启动 Hub 端口完全相同。regionalPort 分配随机端口后立刻关闭，后续同夹具可再次分配到同一端口。修复应阻止活动夹具内重复地址，不扩大激活超时。
 
@@ -23,3 +23,5 @@ policy-cutover 的40秒激活超时实际日志为 Node bind address already in 
 ## F-05 / medium / 工具兼容限制
 
 query audit-uat 拒绝历史 Phase 5 passed_with_scope。未改写历史状态；直接审阅现有 UAT/VERIFICATION 和真实 CI 失败。此处不修改外部 GSD 安装。
+
+F-03 修复：regionalPort 在当前活动测试范围登记已选地址并在 cleanup 释放，避免重复选择。完整 SharePolicyProcess 两轮真实进程 race 通过，54.706 秒；未增加等待超时。
