@@ -14,7 +14,7 @@
   "proposal": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.md",
   "proposal_sha256": "d53f94e7ca46df4522890a64fc1d5bb6c4f85642dc847a1313115353a7820d95",
   "full_diff": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.diff",
-  "full_diff_sha256": "4b993080abcc7d822c4b0611df2473261ed202d54ba5575183148fe736ddf33b",
+  "full_diff_sha256": "9cbc3f4ce2d650e734c107fecc0c4cf6a56a26d4d1ddecc20fdbb0638a1fd996",
   "approval_effects": [
     "Exact candidate normative bytes/catalog1.1.0/encoding.sha256",
     "New approval record preserving old draft approval",
