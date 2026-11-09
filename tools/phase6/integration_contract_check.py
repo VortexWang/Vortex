@@ -83,6 +83,7 @@ def check_wire():
 
 def check(require_approval=False):
     p=load(PROPOSAL)
+    assert {r['path'] for r in p['review_files']}=={'docs/governance/proposals/CR-012-phase6-integration.md','docs/governance/proposals/CR-012-main.diff','docs/governance/proposals/CR-012-phase6.diff'} and len(p['review_files'])==3, 'incomplete review file inventory'
     for row in p['review_files']:
         assert sha((ROOT/row['path']).read_bytes())==row['sha256'], 'review file drift '+row['path']
     assert p['id']=='CR-012' and p['status']=='candidate-pending-exact-owner-approval'
@@ -117,7 +118,12 @@ def check(require_approval=False):
     other=json.loads(historic(MAIN,'docs/governance/contract-review.yaml'))
     combined=prior['change_approvals']+[r for r in other['change_approvals'] if r not in prior['change_approvals']]
     assert review['change_approvals'][:len(combined)]==combined,'historical approval rows changed'
+    expected_history=set()
+    for base in [MAIN,PHASE6]:
+        expected_history.update(filter(None,subprocess.check_output(['git','ls-tree','-r','-z','--name-only',base,'--','docs/changes','docs/governance/proposals'],cwd=ROOT).decode().split('\0')))
+    assert {r['path'] for r in p['historical_records']}==expected_history and len(p['historical_records'])==len(expected_history), 'incomplete historical approval inventory'
     for row in p['historical_records']:
+        assert row['source'] in [MAIN,PHASE6]
         assert sha((ROOT/row['path']).read_bytes())==row['sha256']==sha(historic(row['source'],row['path'])),'historical review changed '+row['path']
     for contract in catalog['contracts']:
         if contract['id']=='vortex.control.v1':continue

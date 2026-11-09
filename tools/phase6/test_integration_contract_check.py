@@ -25,11 +25,12 @@ class IntegrationGate(unittest.TestCase):
    subprocess.run(['git','clone','--quiet','--shared',str(original),str(clone)],check=True)
    for p in paths:
     target=clone/p;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(original/p,target)
-   for variant in ['missing','duplicate','baseline','protected','wire','history','generated','review']:
+   for variant in ['missing','missing_history','duplicate','baseline','protected','wire','history','generated','review']:
     with self.subTest(variant=variant):
      changed=set()
      p=json.loads((original/GATE.PROPOSAL).read_text())
      if variant=='missing':p['artifacts'].pop()
+     elif variant=='missing_history':p['historical_records'].pop()
      elif variant=='duplicate':p['artifacts'].append(p['artifacts'][0])
      elif variant=='baseline':p['artifacts'][0]['baseline_sha256']['phase6']='0'*64
      else:
