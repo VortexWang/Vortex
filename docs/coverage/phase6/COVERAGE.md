@@ -121,5 +121,5 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | PRT-013 | 06-10 | DNS-CREDENTIALS.md; failed/uncommitted new rule preserves existing serving members | local tests pass; final pairing pending |
 | PRT-014 | 06-10 | DNS-CREDENTIALS.md; TTL60/DNS-only owner-scoped bounded adapter | local tests pass; final pairing pending |
 | PRT-015 | 06-10 | cloudflare_integration.sh; real CRUD requires dedicated configuration | pending real Cloudflare evidence |
-| BE-006 | 06-11 | pending producer in 06-11 | pending |
+| BE-006 | 06-11 | [reconciliation-qualification.md](../../operations/reconciliation-qualification.md); task1-reconciliation | finite realPG/deterministic-Node1000/2000 development gate passed; final clean-source pair pending |
 

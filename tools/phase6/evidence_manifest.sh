@@ -17,6 +17,14 @@ while test "$#" -gt 0; do
 done
 test -n "$expected" && test "$(git rev-parse HEAD)" = "$expected"
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
+case "$through" in
+  06-07|06-11)
+    if test -n "$host"; then
+      exec python3 tools/phase6/final_evidence_check.py host "$evidence/$host" "$expected"
+    fi
+    exec python3 tools/phase6/final_evidence_check.py pair "$evidence" "$expected"
+    ;;
+esac
 python3 - "$through" "$expected" "$evidence" "$host" <<'PY'
 import hashlib,json,pathlib,re,sys
 through,sha,evidence,host=sys.argv[1:]

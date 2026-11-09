@@ -22,6 +22,15 @@ test -z "$(git status --porcelain=v1)" || { echo 'source must be clean, includin
 export PHASE6_EXPECTED_SHA="$expected"
 export GOTOOLCHAIN=local
 test "$(go env GOVERSION)" = go1.27.3
+case "$through" in
+  06-07|06-11)
+    test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"
+    if test -n "$produce"; then
+      exec sh tools/phase6/final_check.sh "$produce" "$evidence"
+    fi
+    exec python3 tools/phase6/final_evidence_check.py pair "$evidence" "$expected"
+    ;;
+esac
 # Never silently claim future implementations from the current test suite.
 case "$through" in 06-01|06-08|06-09|06-02|06-10|06-03|06-04|06-05) ;; *) echo 'producer not implemented for requested plan' >&2; exit 1;; esac
 test -n "$evidence" || evidence="/tmp/vortex-phase6-evidence/$expected"

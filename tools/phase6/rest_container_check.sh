@@ -37,12 +37,12 @@ go -C backend build -trimpath -o "$PHASE6_BACKEND_BINARY" ./cmd/vortex-backend
 go -C backend build -trimpath -o "$PHASE6_PEER_BINARY" ./cmd/vortex-control-peer
 go version -m "$PHASE6_BACKEND_BINARY" "$PHASE6_PEER_BINARY" > "$out/native-build-metadata.txt"
 "$PHASE6_BACKEND_BINARY" migrate > "$out/migrate.log" 2>&1
-go -C backend test -json ./... -count=1 > "$out/backend-normal.jsonl" 2>&1
+PHASE6_RECONCILIATION_EVIDENCE="$out/reconciliation-normal.json" go -C backend test -json ./... -count=1 > "$out/backend-normal.jsonl" 2>&1
 go -C backend build -race -trimpath -o "$PHASE6_BACKEND_BINARY" ./cmd/vortex-backend
 go -C backend build -race -trimpath -o "$PHASE6_PEER_BINARY" ./cmd/vortex-control-peer
 go version -m "$PHASE6_BACKEND_BINARY" "$PHASE6_PEER_BINARY" > "$out/race-build-metadata.txt"
 export GORACE=halt_on_error=1
-go -C backend test -json -race ./... -count=1 > "$out/backend-race.jsonl" 2>&1
+PHASE6_RECONCILIATION_EVIDENCE="$out/reconciliation-race.json" go -C backend test -json -race ./... -count=1 > "$out/backend-race.jsonl" 2>&1
 for arch in amd64 arm64; do
  for target in vortex-backend vortex-hub; do
   GOOS=linux GOARCH="$arch" CGO_ENABLED=0 go -C backend build -trimpath -o "$work/$target-$arch" ./cmd/"$target"
