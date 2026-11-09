@@ -6,7 +6,7 @@
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
       "version": "2.4.0",
-      "status": "candidate",
+      "status": "frozen",
       "sources": [
         "V1.11 §0.2",
         "BE-001..006",
@@ -22,7 +22,7 @@
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
       "version": "3.0.0",
-      "status": "candidate",
+      "status": "frozen",
       "sources": [
         "GEN-007",
         "BE-005",

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "CR-009",
+  "status": "approved",
+  "proposal_path": "docs/changes/CR-009-rest-events.json",
+  "proposal_sha256": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0",
+  "owner_response": "批准 CR-009",
+  "reviewer": "user-approved-in-session",
+  "recorded_at": "2026-11-09T00:53:26Z",
+  "candidate_source": "97966a3a70bff79afd43078ceadf211fe877a6d5",
+  "reviewed_source": "5629543f6c83abf222d567bf9cdfc1b2e4f3a24d",
+  "candidate_catalog_sha256": "f889fdf67afbfe9f1ebd96154ccbd3e47239bdbabdaf8683cae5b896ac007c59",
+  "frozen_catalog_sha256": "a97a78d422fade9e75178620ee5f46ec92d41247358c790232d68fa5de2b7b27",
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.3.0",
+      "version": "2.4.0",
+      "proposal_sha256": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0",
+      "contract_sha256": "3c0ffe948c5171571b7b42d31d870fa7500ff98f477a52deca4ab9476add88c0",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-09T00:53:26Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-009-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.3.0",
+      "version": "3.0.0",
+      "proposal_sha256": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0",
+      "contract_sha256": "2b9c61ffa2e45c17a4ea8e1c197de535b3d409a1fb1068e409b0540afef158a5",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-09T00:53:26Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-009-APPROVAL.json"
+    }
+  ]
+}

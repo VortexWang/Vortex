@@ -179,7 +179,7 @@
 4. 速率和连接份额按 `(tenant_id,node_id)` 唯一归属，使用 PostgreSQL 事务、持久化 CAS/Outbox 与规范所有权截止，不因 Hub 切换重复发放。
 5. 余额变化、旧来源承诺和未知负债满足逐来源不变量；没有精确证明或获批扣减风险预算时持续冻结，不向用户收取未知上界。
 
-**Plans**: 9/11 complete. Exact CR-008 approved; DB/API2.3.0 and control1.6.0 frozen. Clean cf92b7e2 Docker full normal/race/fault and source verification passed; native backend race passed. 06-07 REST/auth/cursor/SSE implemented; exact CR-00999-artifact/API3.0.0/DB2.4.0 approval checkpoint pending. Clean97966a3a backend normal/race482each,33sqlc/six builds pass; final paired same-SHA acceptance remains06-11.
+**Plans**: 10/11 complete. CR-009 approved; public API3.0.0/database2.4.0 frozen. 06-07 REST/auth/cursor/SSE implementation and clean97966a3a normal/race482each,33sqlc/six builds pass. Final1000-rule/60s and paired same-SHA acceptance remain06-11.
 
 **Wave 1**
 
@@ -219,7 +219,7 @@
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
-- [ ] 06-07-PLAN.md — REST、token 持久化、cursor 与 SSE
+- [x] 06-07-PLAN.md — REST、token 持久化、cursor 与 SSE
 
 **Wave 11** *(blocked on Wave 10 completion)*
 
@@ -267,6 +267,6 @@
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
-| 6. M4 Backend | 9/11 | In Progress — 06-07 exact CR-009 approval checkpoint | - |
+| 6. M4 Backend | 10/11 | In Progress — 06-11 final acceptance | - |
 | 7. M5 Frontend and operations | 0/TBD | Not started | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |

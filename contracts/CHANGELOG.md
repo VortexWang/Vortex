@@ -156,3 +156,16 @@ public ordering and exact aggregate port operation bindings. Existing migrations
 1..8 are unchanged. Other frozen contracts and prior approvals remain unchanged.
 No approval or freeze is implied; precise CR-009 review and clean-source evidence
 must precede owner approval. Final same-SHA Actions pairing remains06-11.
+
+## Phase 6 REST and durable events (06-07 approved)
+
+The owner explicitly approved CR-009 with “批准 CR-009”. The immutable proposal
+SHA-256 remains `ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0`.
+Approval is recorded in `docs/changes/CR-009-APPROVAL.json` and two appended
+`docs/governance/contract-review.yaml` records. Public API 3.0.0 is a breaking
+release from 2.3.0; database 2.4.0 is an additive release from 2.3.0.
+All 99 candidate artifacts are bound to the clean tested source 97966a3a;
+only catalog freeze metadata and this appended notice differ from candidate bytes.
+The proposal, historical CR approvals, migrations 1–8 and other frozen contracts
+remain unchanged. Existing pending text is historical candidate metadata.
+Final same-SHA Docker/Actions and cross-domain acceptance remain 06-11.
