@@ -1,0 +1,8 @@
+{
+  "before_nonroot_read_exit": 1,
+  "after_nonroot_read_exit": 0,
+  "preserved_mode": "600",
+  "preserved_test_exit": 23,
+  "scope": "real Linux named volume, root-owned0600 artifact and independent uid1001 reader",
+  "initial_mac_bind_test": "inconclusive: host sharing remaps UID/access; assertion expecting denial failed; replaced by Linux volume"
+}

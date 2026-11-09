@@ -44,7 +44,15 @@ result=0
  docker compose -f "$compose" images --format json > "$out/images.json"
  docker compose -f "$compose" exec -T postgres psql -U vortex -c 'SELECT version();' > "$out/postgres-version.txt"
  docker compose -f "$compose" exec -T valkey valkey-cli INFO server > "$out/valkey-version.txt"
- docker compose -f "$compose" run --rm -e PHASE6_EVIDENCE_DIR=/evidence -e GOFLAGS=-p=1 -e GOMAXPROCS=2 backend-test sh tools/phase6/final_container_check.sh
+ # Linux bind mounts retain the container's root owner, including private
+ # 0600 reports. Return artifacts to the invoking user even when a test fails;
+ # retain file modes and the original test failure for validation/upload.
+ docker compose -f "$compose" run --rm -e PHASE6_EVIDENCE_DIR=/evidence -e GOFLAGS=-p=1 -e GOMAXPROCS=2 backend-test sh -c '
+  code=0
+  sh tools/phase6/final_container_check.sh || code=$?
+  chown -R "$1" /evidence || exit $?
+  exit "$code"
+ ' phase6-evidence "$(id -u):$(id -g)"
 ) > "$out/runner.log" 2>&1 || result=$?
 # Every operation above must fail closed even inside an outer || compound.
 # The container's final completion marker proves all ordered stages finished.

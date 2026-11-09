@@ -6,3 +6,8 @@ Task2 new final clean-source container/host producer and semantic pair gate prep
 
 
 Final producer review found conditional-shell errexit suppression could hide the credential-byte guard's failure behind successful CRUD. Explicit guard/source failure propagation now fixes it; a synthetic leaked-byte case exits1 and a redacted case exits0 under the actual &&/|| form. No credential leakage observed. b955f235 runtime runs are retained as pre-fix evidence; a new exact-SHA Docker/dual-Actions pair is required after this shell-only correction. Phase6 remains10/11.
+
+
+Actions42547642842 amd64 failed at host summarization/upload: root-owned0600 reconciliation JSON from the Linux container was unreadable to runner UID. Raw job log retained under final-3fb8e25a. Producer now always returns /evidence ownership to the invoking UID/GID, preserves private file modes and original suite exit. Independent real Linux-volume root/uid1001 test confirms read-denied before, readable after, mode0600 and originalexit23 retained; first macOS bind-mount assertion was inconclusive due host UID remapping and is recorded. Full3fb8 local backend/root/Engine normal/race already pass; faults/generators/external still running. This producer-only fix requires a new exact-source final pair. Phase6 remains10/11.
+
+Measured3fb8 local service normal290.468s/race521.718s makes implicit10m package timeout too close to slower nativeCI fixtures. Final backend suite now explicitly budgets20m; the finite1000 report remains strict60s and Actions90m wall limit still applies. This is a suite budget decision, not a claim that hidden failed CI tests passed; fixed ownership will expose complete raw failure artifacts.
