@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "change_request": "CR-011",
+  "status": "candidate-pending-exact-owner-approval",
+  "contract_id": "vortex.vlink.v1",
+  "from": "1.0.0",
+  "version": "1.1.0",
+  "kind": "compatible",
+  "wire_protocol_version": "0x0100 unchanged",
+  "previous_approved_sha256": "dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52",
+  "current_unapproved_spec_sha256": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e",
+  "candidate": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.encoding.md",
+  "candidate_sha256": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e",
+  "proposal": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.md",
+  "proposal_sha256": "d53f94e7ca46df4522890a64fc1d5bb6c4f85642dc847a1313115353a7820d95",
+  "full_diff": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.diff",
+  "full_diff_sha256": "4b993080abcc7d822c4b0611df2473261ed202d54ba5575183148fe736ddf33b",
+  "approval_effects": [
+    "Exact candidate normative bytes/catalog1.1.0/encoding.sha256",
+    "New approval record preserving old draft approval",
+    "CHANGELOG compatible record and all existing VLink requirement review metadata",
+    "Re-run gates; no automatic qualification claim"
+  ],
+  "does_not_authorize": [
+    "Any new wire representation or negotiation change",
+    "Relaxing authentication, deadlines, quota or debt rules",
+    "Relabeling historical failures as passing"
+  ]
+}
