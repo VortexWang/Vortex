@@ -8,8 +8,8 @@ current_plan: 01
 status: ready_to_execute
 stopped_at: Phase 6 planning complete; ready to execute 06-01
 last_updated: "2026-11-06T18:21:39.260Z"
-last_activity: 2026-11-07
-last_activity_desc: "Phase 6 planned: 11 plans / 11 waves / 25 tasks; independent plan review passed; implementation not started."
+last_activity: 2026-11-09
+last_activity_desc: "Quick 261109-n63: Phase 4 merged into main under approved CR-010; CI qualification gaps recorded; Phase 6 implementation branch unchanged."
 progress:
   total_phases: 6
   completed_phases: 4
@@ -33,11 +33,11 @@ Phase: 06 (M4 后端业务闭环 (M4 Backend)) — READY TO EXECUTE
 Current Plan: 01
 Total Plans in Phase: 11
 Status: Ready to execute — research, patterns, validation strategy and independent plan review passed; Phase 6 implementation has not started.
-Last activity: 2026-11-07 — 11 plans / 11 dependency waves / 25 tasks; 96 requirements and 24 decisions covered. See 06-PLAN-CHECK.md.
+Last activity: 2026-11-09 — Completed quick 261109-n63: Phase 4 merged into main with approved CR-010; CI gaps recorded. Phase 6 planned execution state on this branch is unchanged.
 
 Progress: Phase 6 [░░░░░░░░░░] 0/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
-Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 P4-Q1..Q5 and D-04 subsequently closed on the qualification branch (final audit 04-45, measured source 0c2ba71). This merge candidate does not transfer those historical performance results to its new code; X5/X6 production scopes remain separate.
+Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 P4-Q1..Q5 and D-04 subsequently closed on the qualification branch (final audit 04-45, measured source 0c2ba71). This merge does not transfer those historical performance results to its new code; X5/X6 production scopes remain separate.
 
 ## Performance Metrics
 
@@ -82,7 +82,7 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Pending Todos
 
-- Phase 4 branch stage acceptance and D-04 lock are recorded in 04-45 / 04-D04-LOCK.json. Local merge regressions passed; CR-010 exact migration was approved; main integration is being finalized; preserve all X5/X6 handoff boundaries and historical evidence SHAs.
+- Phase 4 branch stage acceptance and D-04 lock are recorded in 04-45 / 04-D04-LOCK.json. CR-010 exact migration and two-parent main merge are complete. CI gaps remain: old VLink freeze hash, 64 MiB integrity/half-close, and authorization/boot activation timeouts; see quick 261109-n63. Preserve all X5/X6 handoff boundaries and historical evidence SHAs.
 
 ### Blockers/Concerns
 
@@ -102,19 +102,24 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | 261103-l7e | Project restart governance clarified; Phase 1 complete for M0 entry | 2026-11-03 | 62f4687 | complete | [261103-l7e-project-restart-governance](./quick/261103-l7e-project-restart-governance/) |
 | 261103-lt9 | Restart governance aligned; M0 TCP relay tracer implemented | 2026-11-03 | a9b79f1 | complete | [261103-lt9-align-restart-governance-and-enter-m0-im](./quick/261103-lt9-align-restart-governance-and-enter-m0-im/) |
 | 261105-9j7 | Native host preflight and formal qualification runbook | 2026-11-05 | pending | complete | [20261105-native-host-preflight](./quick/20261105-native-host-preflight/) |
+| 261109-n63 | Phase 4 merged into main with CR-010; CI gaps recorded | 2026-11-09 | 2968ce05 | complete | [261109-n63-merge-phase4-main](./quick/261109-n63-merge-phase4-main/) |
 
-## Phase 4 merge candidate — 2026-11-09
+## Phase 4 main merge — 2026-11-09
 
 Worktree `/tmp/vortex-merge-phase4-main`, branch `codex/merge-phase4-main`.
-Base main synchronized at `00704144`; source `2cb3ab53`. Original Phase 6
-worktree and its uncommitted changes are untouched. Phase 6 implementation is
-not imported by this merge. CR-010 exact field-100 migration was approved on 2026-11-09;
-source branch approval of field 16/15 does not approve these new bytes.
-Local Darwin/Linux regressions and four independent process cases passed;
-see quick 261109-n63/EVIDENCE.md and artifacts/merge-phase4-main/report.json.
-Candidate Actions and full Phase 5 clean-source release entry are not run.
-Approved hashes are frozen and contract checks passed. Two-parent merge,
-clean-source Docker verification and main push are being finalized.
+Two-parent merge `fc28d1b8` integrates target `00704144` and source `2cb3ab53`.
+Fixture fix `6238a4ee` and conservative rate fix `2968ce05` were pushed to main.
+Original Phase 6 worktree and uncommitted changes are untouched; its implementation
+was not imported. CR-010 tag-100/control-1.7.0 exact approval is recorded and
+normative/generated hashes match. Source and previous main are ancestors.
+
+Git merge complete; qualification is not all green. Phase 1 has a preexisting
+VLink freeze hash mismatch; Phase 4 fails 64 MiB integrity/half-close; Phase 5
+on 6238 fails funding-block timeout and policy-cutover boot activation. Clean Docker repeat on 6238 passed; latest 2968 Actions were still running
+at evidence capture.
+Latest rate fix passed full Store race and five regional TCP/UDP process runs.
+See quick 261109-n63 SUMMARY/EVIDENCE and artifacts/merge-phase4-main/final-integration.json.
+No final-SHA Docker/Actions pass pair or new performance qualification is claimed.
 
 The following historical qualification notes describe earlier snapshots. Their
 open findings are superseded within the Phase 4 Engine/tracer boundary by

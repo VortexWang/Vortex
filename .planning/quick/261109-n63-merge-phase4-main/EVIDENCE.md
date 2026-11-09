@@ -1,6 +1,6 @@
 # Phase 4 合并候选：验证与批准边界
 
-状态：`review-ready / awaiting CR-010`。本文件不代表合并已经完成。来源、主线及原 Phase 6 工作区保留，未创建最终合并提交，未推送 main。
+本节保留批准前 `review-ready / awaiting CR-010` 的审阅快照；批准后合并与验证结果见末尾以及 SUMMARY。旧候选机器报告不改写。
 
 - 来源：`phase4-runtime-authority-qualification@2cb3ab5326a4339ec4c4e9e2917073ba869fa5bb`。
 - 目标基线：`00704144c17f69dfb0a1cb2f8b1005e5c97e1ad9`；已包含远端 main `7b0363c96c9f3196dc48ce2aec39936caeffc4e4` 的 Phase 5 闭环。
@@ -71,3 +71,21 @@
 首个两父合并 `fc28d1b8` 的完整 Docker 入口未通过；原始失败报告与日志保留为 `post-approval-first-docker-*`。全局 4 MiB 磁盘满变量把新增长期/持续续领的 WAL 也放在小分区，负载先于注入耗尽磁盘；此外首次未启用实验需求速率时钟的传输可能遇到宽保守时间区间。修复仅在 `agent/runtime_authority_test.go`：长期/持续负载使用普通临时目录，短程案例仍执行原真实磁盘满注入与拒绝未记录流量断言；首次实验控制连接显式启用既有需求模式。规范、生成物及运行代码不变。修复后先重新验证全部受影响场景，再提交并重新跑干净入口。
 
 受影响五个场景在启用真实 4 MiB tmpfs 的 Linux 下全部通过，181.757 秒；见 `post-approval-disk-scoping-regression.log.gz`。
+
+## 主线合并结果与批准后验证
+
+两父合并 `fc28d1b8`、夹具修复 `6238a4ee` 和保守速率修复 `2968ce05` 已推送 main；来源与旧 main 均为祖先。原 Phase 6 工作区 head、porcelain 状态及 tracked diff 摘要与合并前一致。
+
+第二次 clean Docker（6238）在 `TestSchedulerProcessRenewal/low-water-tcp-udp` 失败。宽绝对时间区间会误拒绝已有 burst；新增确定性回归先失败，再修复为仅按已证实时间间隔补充 token，区间重叠不增加权利。原授权、额度、boot 和租约检查不放宽，区域路径不启用实验单调时钟。完整 Store race 63.558 秒、专项 race 及 Linux 区域 TCP/UDP 真实进程连续五轮 race 通过；批准后的契约两次生成与检查仍通过。证据为 `rate-*` 和 `post-rate-contracts.log.gz`。
+
+CI 未全绿，不能声称本轮完整资格化通过：
+
+- Phase 1：VLink encoding 文档的旧批准摘要在双方合并前即不匹配；详见 `preexisting-vlink-freeze-mismatch.json`，没有擅自重新批准。
+- Phase 4：6238 的 pool mode 和 2968 的 comparison 均报 64 MiB binary integrity/half-close failed；保留日志，根因尚未解决。
+- Phase 5（6238）：增量授权回归失败，分别是 FundingBlockGate 并发短写/关闭的 context deadline exceeded，以及 policy-cutover 启动 boot authority 超时；没有把重试成功替代原失败。
+
+完整 clean Docker 复跑绑定 6238，不包含 2968 的速率修复。最终状态和各 Actions SHA 记录于 `final-integration.json`；候选 `report.json` 仍是 CR-010 审阅时原字节，不代表最终通过结果。
+
+最终 clean-source Docker 复跑（6238）已 exit 0，report、recovery/audit 与完整文本日志保存为 `clean-docker-6238-*`。范围是 Phase 5 runtime regressions、protocol-test-only backend；不能视为生产后端或 2968 的同 SHA 配对结果。
+
+GSD quick-tasks-append 被历史 Phase 5 `passed_with_scope` 的闭集校验拒绝。本轮保留历史 frontmatter，使用 CLI 共享的 schema-backed appendQuickTaskRow 生成本条完成记录，不手工拼表格，不改变历史验收。

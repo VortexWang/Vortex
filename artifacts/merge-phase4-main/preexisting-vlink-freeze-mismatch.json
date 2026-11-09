@@ -1,0 +1,13 @@
+{
+  "path": "contracts/vlink/v1/encoding.md",
+  "actual_sha256": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e",
+  "recorded_approved_sha256": "dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52",
+  "history": {
+    "00704144c17f69dfb0a1cb2f8b1005e5c97e1ad9": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e",
+    "7b0363c96c9f3196dc48ce2aec39936caeffc4e4": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e",
+    "2cb3ab5326a4339ec4c4e9e2917073ba869fa5bb": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e",
+    "2968ce05916c779aeca16e617efb8d4cceb2c9c3": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e"
+  },
+  "status": "preexisting-freeze-mismatch-not-reapproved",
+  "note": "CR-010 approves control migration only; VLink approval was not changed."
+}

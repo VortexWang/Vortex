@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-11-09T10:28:05.035288+00:00",
+  "task_status": "git-merge-complete",
+  "qualification_status": "not-all-checks-passed",
+  "source": "2cb3ab5326a4339ec4c4e9e2917073ba869fa5bb",
+  "base": "00704144c17f69dfb0a1cb2f8b1005e5c97e1ad9",
+  "merge_commit": "fc28d1b8bbc204be5560a2f081a7bcdcf8db10af",
+  "code_tip": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+  "remote_main_at_capture": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+  "merge_parents_verified": true,
+  "source_and_previous_main_are_ancestors": true,
+  "approved_candidate_hashes_unchanged": true,
+  "original_workspace_unchanged": true,
+  "actions": [
+    {
+      "conclusion": "",
+      "databaseId": 42600191534,
+      "headSha": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+      "status": "in_progress",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42600191534",
+      "workflowName": "phase5-agent-hub-wave1"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 42600191431,
+      "headSha": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42600191431",
+      "workflowName": "phase1"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42600191495,
+      "headSha": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42600191495",
+      "workflowName": "phase3-m1-vlink"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42600191587,
+      "headSha": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42600191587",
+      "workflowName": "phase2-m0"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 42600191363,
+      "headSha": "2968ce05916c779aeca16e617efb8d4cceb2c9c3",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42600191363",
+      "workflowName": "phase4-m2-multi-hop"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 42598682805,
+      "headSha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42598682805",
+      "workflowName": "phase1"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42598682736,
+      "headSha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42598682736",
+      "workflowName": "phase2-m0"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 42598682793,
+      "headSha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42598682793",
+      "workflowName": "phase3-m1-vlink"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 42598682744,
+      "headSha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42598682744",
+      "workflowName": "phase4-m2-multi-hop"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 42598682807,
+      "headSha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+      "status": "completed",
+      "url": "https://github.com/VortexWang/Vortex/actions/runs/42598682807",
+      "workflowName": "phase5-agent-hub-wave1"
+    }
+  ],
+  "latest_code_targeted_tests": {
+    "store_full_race": "passed",
+    "rate_focused_race": "passed",
+    "regional_low_water_tcp_udp_real_process_race_count_5": "passed",
+    "control_contracts_two_generations": "passed"
+  },
+  "clean_source_docker": {
+    "tested_sha": "6238a4ee4dab5e59b9843e370befd4c7e6ef8835",
+    "latest_repeat": "passed",
+    "earlier_runs": "failed; retained",
+    "latest_rate_fix_included": false,
+    "latest_repeat_scope": "phase5-runtime-regressions; protocol-test-only backend",
+    "exit_code": 0
+  },
+  "open_findings": [
+    "Phase 1: preexisting VLink encoding approval hash mismatch; no silent reapproval.",
+    "Phase 4: 64 MiB binary integrity/half-close failure on both 6238 and 2968; 6238 mode/pool, 2968 comparison. Root cause remains unresolved.",
+    "Phase 5 on 6238: TestFundingBlockGateConcurrentShortWritesAndClose context deadline exceeded and TestSharePolicyProcess/policy-cutover boot authority activation timeout. Latest code Actions still running at capture."
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/merge-phase4-main/post-rate-contracts.log.gz",
+      "sha256": "2273edae90cc30a89937aea39b788d92c205c9b81924123f7b66fe65aa6728b6",
+      "raw_sha256": "3ad75d6a37477407831e52d065945bf1eb3b941c19a7acb73fdfde96e5d4fde6"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/rate-wide-before-failure.log.gz",
+      "sha256": "2db3358e82dba376e78cdb68b30a9073a22a2f8709e362843f441da2ec5a685a",
+      "raw_sha256": "86ca10ecfab3cb61a5a37af1f69877ebb9291ea8d78f57efa4512abec713807a"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/rate-focused-race.log.gz",
+      "sha256": "60330147daf96d537c04b8ec6cd7fca711fcbdacccd31748e23e93d71fc5253e",
+      "raw_sha256": "373727652d0b4d053711e7b4edec57e20f5d20b4318327c1b6639fbeab6ecd7e"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/rate-full-store-race.log.gz",
+      "sha256": "0d3759ddfaad280f93134a44c527a2952d62118238d38fe72b51c09aff50d94f",
+      "raw_sha256": "9d1d1fa18ea32be603396455bb3fc9513d42d855b11e7d99fad76c41c687f2c5"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/rate-process-five-race.log.gz",
+      "sha256": "d31edc6b3e04519d9758b76c3051761a938d0da4ba4a4c5579ae69d551ed3cfa",
+      "raw_sha256": "fa96bd31123697bc0db03c6c907607dd27d9f390e81d76a461a524d5a055c349"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/post-approval-second-docker-root.log.gz",
+      "sha256": "e384884e7c21a4a9b0493db0742ddde5c92b1f9846620b5206a2425f261b9ffe",
+      "raw_sha256": "fc094561f6c25fed33be9f09e415ff088370a1c1d979a0c4c4b61232d98a1412"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/actions-phase1-6238-failed.log.gz",
+      "sha256": "41b5525e74900eda8a7a0a7657121302fd10a3dcf22d6f3e56bdd814354c0437",
+      "raw_sha256": "a32e35f67badbc56d929fb49e08e3bef22f9b1a11b8d8e3cbad4826417e4376e"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/actions-phase4-6238-failed.log.gz",
+      "sha256": "f91ae0613da37276c3969a0fbc7c3d890ac3145d26b52f0343eab4ee5be594d8",
+      "raw_sha256": "741feba298cfb6564dc9c35ce0fec23a9b14365fc11c550a30e64f3c4522c99c"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/actions-phase4-2968-failed.log.gz",
+      "sha256": "d983a72e7ba43550a07f6498eabd0769da407ba8a95ae2153c79f07d104cdbd8",
+      "raw_sha256": "76d132440d8d391453c1f663548d8d7ab09ed8f3c4ca76e018df2bd4872a0df1"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/actions-phase5-6238-failed.log.gz",
+      "sha256": "11b86f17f5fd50598a3116aa64450f4ddf612922759bd182a1983f989d2a0d4a",
+      "raw_sha256": "e6160c59a03ddd25d9c0b6a6300ecb00d68e02d37721b77f3e7bfed12ebb0ed5"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/actions-phase5-6238-authorization-race.log.gz",
+      "sha256": "dca9e185f640e283ac089bfa1cde0731d68156d5f2755b6092d7cf154a793741",
+      "raw_sha256": "a4131a32c56dd2c87f095d82aebf8e0d318f9b49245ac39cf334fdc52ff08c99"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-report.json",
+      "sha256": "5d744ff81894d0ba5bd5395f088c27ab49a32a636f768b93af7cdd9c53bc5222"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-audit.json",
+      "sha256": "2c4ebb954f14f550aeedd9790940a6b9ba43aa03e44b5adfe18ef9d8c69e9365"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-recovery-report.json",
+      "sha256": "faecd2090de16edcb9b9081b8f37d2a634182c9ee8509ea1483f760e2c94c3e9"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-recovery-audit.json",
+      "sha256": "2c4ebb954f14f550aeedd9790940a6b9ba43aa03e44b5adfe18ef9d8c69e9365"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-root-test.log.gz",
+      "sha256": "630c634fecbfcee33fe876a23c976d89ad69c51ec5e74a152e9026dec670c0d0"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-engine-race.log.gz",
+      "sha256": "5b346707edfdad1c2213dfa5c69b05503e508afcc21ce35a2745fdaa275d14d8"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-recovery-recovery-race.log.gz",
+      "sha256": "67ead2146f780348ff7d80ca53c9ca1d00cc9e3b86661a4ed188d3137be6ffa6"
+    },
+    {
+      "path": "artifacts/merge-phase4-main/clean-docker-6238-recovery-vet.log.gz",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    }
+  ],
+  "limitations": [
+    "No final-SHA full Docker/Actions pass pair.",
+    "Cross builds are not native amd64 runtime qualification.",
+    "Historical performance evidence keeps its original source identity.",
+    "Phase 6 implementation and private credentials were not imported."
+  ],
+  "gsd_state_append": {
+    "cli": "rejected preexisting Phase 5 passed_with_scope frontmatter outside tool closed set",
+    "fallback": "same schema-backed appendQuickTaskRow helper; no raw table row construction; no historical verification edited"
+  }
+}
