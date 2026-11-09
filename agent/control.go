@@ -297,6 +297,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	}
 	lastHeartbeat := time.Now()
 	lastRenewal := time.Now()
+	renewalSendAfter := ""
 	reports := c.reportQueue()
 	for {
 		var response received
@@ -347,7 +348,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err := c.queueDueRenewals(ctx, issuer, *regional.Renewal); err != nil {
 						return err
 					}
-					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence)
+					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence, &renewalSendAfter)
 				}); err != nil {
 					return err
 				}

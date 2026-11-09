@@ -142,19 +142,30 @@ func (c *ControlClient) acceptRenewalResult(ctx context.Context, issuer string, 
 	return c.Node.Store.MarkRenewalInstalled(ctx, issuer, c.Node.NodeID, c.Node.BootID, result.RequestId, payload.UpdateID)
 }
 
-// Each connection replays the original bounded journal page. The sender calls
+// Each connection rotates through the original journal in batches of four.
+// Yield to heartbeat and response handling between batches; a large FULL-backed
+// renewal burst must not monopolize the serialized control loop. The sender calls
 // this no more often than the configured retry interval; transport loss never
 // changes request IDs, moves ownership, or clears unresolved liabilities.
-func (c *ControlClient) sendPendingRenewals(ctx context.Context, stream controlv1.NodeControl_ConnectClient, issuer string, lastSequence *uint64) error {
-	intents, err := c.Node.Store.PendingRenewalIntents(ctx, issuer, c.Node.NodeID, c.Node.BootID, "")
+func (c *ControlClient) sendPendingRenewals(ctx context.Context, stream controlv1.NodeControl_ConnectClient, issuer string, lastSequence *uint64, after *string) error {
+	intents, err := c.Node.Store.PendingRenewalIntents(ctx, issuer, c.Node.NodeID, c.Node.BootID, *after)
 	if err != nil {
 		return err
+	}
+	if len(intents) == 0 {
+		*after = ""
+		return nil
+	}
+	complete := len(intents) <= 4
+	if len(intents) > 4 {
+		intents = intents[:4]
 	}
 	for _, intent := range intents {
 		if intent.State == "received" {
 			if err := c.acceptRenewalResult(ctx, issuer, intent.Result); err != nil {
 				return err
 			}
+			*after = intent.Request.RequestId
 			continue
 		}
 		seq, err := c.Node.Store.NextControlSequence(ctx)
@@ -165,6 +176,10 @@ func (c *ControlClient) sendPendingRenewals(ctx context.Context, stream controlv
 			return err
 		}
 		*lastSequence = seq
+		*after = intent.Request.RequestId
+	}
+	if complete {
+		*after = ""
 	}
 	return nil
 }

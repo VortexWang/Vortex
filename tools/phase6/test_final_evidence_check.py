@@ -43,7 +43,7 @@ class FinalEvidence(unittest.TestCase):
    (folder/f'reconciliation-{mode}.json').write_text(json.dumps(r))
    for family,packages in [('root',['vortex/'+p for p in ['agent','agent/store','agent/upgrade','hub','contracts']]),('engine',['vortex/engine/'+p for p in ['relay','vlink','runtime/rule','accounting']])]:
     events=[dict(Action='pass',Package=p) for p in packages]
-    if family=='root':events.extend(dict(Action='pass',Package='vortex/agent/store',Test=t) for t in ['TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate'])
+    if family=='root':events.extend(dict(Action='pass',Package='vortex/agent/store',Test=t) for t in ['TestHandoffFullDiskDoesNotPartiallyTransfer','TestServiceFullDiskCannotStopOrSelectCandidate','TestRenewalSenderYieldsAndRotatesUnansweredJournal','TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope'])
     (folder/f'{family}-{mode}.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
   for name,names in [('ledger-fault.log',['TestUsageFaultPowerLossAuditTransactionRollback','TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence','TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback']),('share-fault.log',['TestShareHandoffFaultSIGKILLAfterDurableCASAndExpiredWorkerRecovery','TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts','TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue'])]:
    (folder/name).write_text(''.join('--- PASS: '+name+' (1s)\n' for name in names))
