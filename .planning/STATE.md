@@ -6,7 +6,7 @@ current_phase: 06
 current_phase_name: M4 后端业务闭环 (M4 Backend)
 current_plan: 07
 status: executing
-stopped_at: "06-07 versioned proof-bound port commit/release/abort verified; DNS/recovery adapters next"
+stopped_at: "06-07 serving/DNS adapters and consumer verified; recovery business adapters and exact contract next"
 last_updated: "2026-11-08T23:36:40.178261+00:00"
 last_activity: 2026-11-08
 last_activity_desc: "06-07 package/group REST and durable global group revalidation; final full native/Linux backend race, double29 sqlc/four builds pass;9/11."
@@ -15,7 +15,7 @@ progress:
   completed_phases: 4
   total_plans: 54
   completed_plans: 51
-state_head: a22917c0
+state_head: 10cd5b9e
 ---
 
 # Project State
@@ -220,3 +220,5 @@ Owner explicitly approved exact CR-0084e29497f; DB/API2.3.0 and control1.6.0 fro
 06-07 public opaque group digest and safe port prepare/read pass concurrent single-allocation, exact operation, audit rollback, changed-incarnation/auditor and cross-tenant negatives. Native API7.921s/service8.802s and Linux API7.059s/service7.324s race plus four cross-builds pass. No SQL/schema/dependency/frozen contract change;30-file generation inherited012dd0d3. Remaining commit/release/abort, DNS/recovery, exactCR-009 and unified checks;9/11,no SUMMARY.
 
 06-07 versioned port commit/release/abort now return exact stage operations with positive strongCAS. Commit requires original immutable prepare proofs; release/abort aggregate pending/unknown until full authenticated release. Native broad related service16.519s, strict API10.733s; Linux related service11.112s/strict HTTP7.630s; final actual-proof HTTP+intent suites native2.675s/Linux1.710s pass. Failed fixture logs retained; two30-file sqlc/four builds pass. Candidate9 extended; fresh port_actions native/Linux DBs migrated. No migration8/frozen change. Remaining DNS/recovery/exactCR-009/unified evidence;9/11,no SUMMARY.
+
+06-07 serving/DNS HTTP and actor-bound production run-dns consumer implemented. Accepted snapshot replay stable across health changes; current roles, audit rollback, concurrent lease and unknown parking retain authority. Complete native backend race(service385.276s/HTTP12.488s) and Linux arm64 race(service392.053s/HTTP9.010s) pass,344 source hashes unchanged; double31-file sqlc/four builds pass. No schema/dependency/frozen change. Remaining recovery business adapters/exactCR-009/unified evidence;9/11,no SUMMARY.

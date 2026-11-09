@@ -28,7 +28,7 @@
 
 平台管理员可 PUT `/api/v1/tenants/{tenant_id}/packages/{package_id}` 编辑全局目录；所选 tenant 是审计和 operation 的上下文，不转移目录所有权。创建 If-Match 为 `"0"`，编辑为当前目录版本；名称1..128个字符，terms 使用既有套餐业务输入。operator、auditor 和租户用户均不能写目录。返回202、确切 operation_id、新 ETag 和 Location；跨租户并发创建同一个目录仍只接受一次。目录版本与审计、任务、Outbox、事件同事务提交。
 
-套餐目录变化不改写既有订阅快照。套餐预览、确认、权益码和恢复操作的 HTTP 适配仍在本计划待完成范围内；前端不得用目录当前值替换订阅历史值，也不得在无确认或无最终回执时自行补发额度、清除限制或标记已恢复。
+套餐目录变化不改写既有订阅快照。套餐预览、确认与权益码的 HTTP 适配已实现；恢复管理适配仍在本计划待完成范围内；前端不得用目录当前值替换订阅历史值，也不得在无确认或无最终回执时自行补发额度、清除限制或标记已恢复。
 
 ## SSE 与 REST 收敛
 
@@ -59,3 +59,5 @@ Internal port preparation now returns a transaction-bound aggregate operation ID
 Draft06-07 port preparation: GET scoped node-groups/{group_id}/members exposes opaque member_set_version usable directly by POST scoped port-reservations. Re-read after configuration/incarnation conflict.202 returns id/version/operation_id/pending and Location to exact aggregate operation; it confirms reservation intent only. GET scoped port-allocations/{id} returns business state/version/needs_revalidation and strong ETag. No public receipt submission or boot/runtime inputs. Commit/release adapters and finalCR-009 contract remain pending.
 
 Draft06-07 port actions: POST scoped port-allocations/{id}/commit,/release,/abort requires positive strong If-Match and empty JSON object.202 returns exact operation_id/Location and updated business version/ETag. Commit sync_status=succeeded denotes only the audited PG allocation stage after all stored authenticated prepare proofs; rule Engine activation is separate. Release/abort sync_status=pending retain occupation until all authenticated release proofs; unknown is not stopped.412 requires authoritative REST reread;409 denotes a current state conflict. Historical unknown allocations lacking original inventory require recovery rather than inventing a smaller public completion set. Exact paths/compatibility remain subject toCR-009.
+
+Draft06-07 serving/DNS: GET scoped node-groups/{group_id}/serving returns sorted unique confirmed business addresses only. POST /dns takes access_id/name and Idempotency-Key header, returns202/exact operation_id/current state/Location without external I/O. Same key replays accepted snapshot even after health changes; a fresh recompute uses a new key. DNS consumer runs separately via run-dns with private deployment keyring; unknown is parked and preserves all occupation. TTL60/DNS-only and fixed verified zone binding remain. This differs from old published body idempotency_key and32-address bound; exact compatibility is pendingCR-009.

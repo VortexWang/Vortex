@@ -1,0 +1,6 @@
+2026/11/09 07:55:53 goose: no migrations to run. current version: 9
+--- FAIL: TestDNSReplayAcceptedSnapshotSurvivesHealthChange (0.10s)
+    serving_http_test.go:194: retry did not retain accepted snapshot  3808bacf-fc6c-44d1-8267-451618172137 DNS operation conflict
+FAIL
+FAIL	vortex/backend/internal/service	1.654s
+FAIL

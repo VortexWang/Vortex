@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -26,13 +28,20 @@ type ServingService struct{ Pool *pgxpool.Pool }
 
 var entryDomainName = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$`)
 
+func ValidEntryDomain(name string) bool {
+	return len(name) <= 253 && entryDomainName.MatchString(name) && name == strings.ToLower(name)
+}
+
 type DNSDesired struct {
-	Action    string   `json:"action"`
-	GroupID   string   `json:"group_id"`
-	AccessID  string   `json:"access_id"`
-	ZoneID    string   `json:"zone_id"`
-	Name      string   `json:"name"`
-	Addresses []string `json:"addresses"`
+	ActorID       string   `json:"actor_id,omitempty"`
+	PlatformActor bool     `json:"platform_actor,omitempty"`
+	Schema        int      `json:"dns_schema,omitempty"`
+	Action        string   `json:"action"`
+	GroupID       string   `json:"group_id"`
+	AccessID      string   `json:"access_id"`
+	ZoneID        string   `json:"zone_id"`
+	Name          string   `json:"name"`
+	Addresses     []string `json:"addresses"`
 }
 
 // RecomputeDNS takes the membership and confirmed ports from one transaction,
@@ -40,7 +49,7 @@ type DNSDesired struct {
 // Queueing never performs external I/O or treats DNS as a port release proof.
 func (s ServingService) RecomputeDNS(ctx context.Context, scope TenantScope, group, access, name, key, request string) (generated.Operation, error) {
 	var op generated.Operation
-	if len(key) < 1 || len(key) > 128 || len(name) > 253 || !entryDomainName.MatchString(name) || name != strings.ToLower(name) {
+	if len(key) < 1 || len(key) > 128 || !ValidEntryDomain(name) {
 		return op, ErrConflict
 	}
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "dns.recompute", ResourceID: group, RequestID: request, Reason: "confirmed current members only; TTL 60 DNS-only"}, func(q *generated.Queries) error {
@@ -67,6 +76,21 @@ func (s ServingService) RecomputeDNS(ctx context.Context, scope TenantScope, gro
 		if _, e = q.BindEntryGroupDomain(ctx, generated.BindEntryGroupDomainParams{TenantID: scope.TenantID(), ID: group, CredentialID: access, ZoneID: credential.ZoneID, Name: name}); e != nil {
 			return ErrConflict
 		}
+		// A retry refers to the already accepted snapshot, even if serving has
+		// since changed. Current role/ownership/zone binding are still checked.
+		prior, e := q.GetOperationByKey(ctx, generated.GetOperationByKeyParams{TenantID: scope.TenantID(), IdempotencyKey: "dns/" + key})
+		if e == nil {
+			var desired DNSDesired
+			digest := sha256.Sum256(prior.Payload)
+			if json.Unmarshal(prior.Payload, &desired) != nil || desired.Action != "dns.reconcile" || desired.GroupID != group || desired.AccessID != access || desired.Name != name || desired.ZoneID != credential.ZoneID || !bytes.Equal(digest[:], prior.RequestSha256) {
+				return repository.ErrDNSOperation
+			}
+			op = prior
+			return nil
+		}
+		if !errors.Is(e, pgx.ErrNoRows) {
+			return e
+		}
 		addresses := []string{}
 		if e = activeTenant(ctx, q, scope); e == nil || scope.Platform() {
 			rows, e := repository.ServingMembers(ctx, q, scope, group)
@@ -84,7 +108,7 @@ func (s ServingService) RecomputeDNS(ctx context.Context, scope TenantScope, gro
 		} else if !errors.Is(e, ErrScope) {
 			return e
 		}
-		op, e = repository.EnqueueDNS(ctx, q, scope, key, DNSDesired{Action: "dns.reconcile", GroupID: group, AccessID: access, ZoneID: credential.ZoneID, Name: name, Addresses: addresses})
+		op, e = repository.EnqueueDNS(ctx, q, scope, key, DNSDesired{ActorID: scope.ActorID(), PlatformActor: scope.Platform(), Schema: 1, Action: "dns.reconcile", GroupID: group, AccessID: access, ZoneID: credential.ZoneID, Name: name, Addresses: addresses})
 		return e
 	})
 	if err != nil {
@@ -114,6 +138,9 @@ func (s ServingService) ApplyDNS(ctx context.Context, scope TenantScope, id, req
 	var desired DNSDesired
 	lease := uuid.NewString()
 	err := (repository.AuditWriter{Pool: s.Pool}).WithTransaction(ctx, scope, policy.Mutate, &repository.Audit{Action: "dns.lease", ResourceID: id, RequestID: request, Reason: "lease persisted DNS desired state"}, func(q *generated.Queries) error {
+		if e := servingCurrentRole(ctx, q, scope); e != nil {
+			return e
+		}
 		op, e := q.LockOperation(ctx, generated.LockOperationParams{TenantID: scope.TenantID(), ID: id})
 		if e != nil {
 			return e

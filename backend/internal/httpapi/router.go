@@ -70,6 +70,8 @@ func NewRouter(config Config) (http.Handler, error) {
 	secured.PUT("/tenants/:tenant_id/rules/:rule_id", a.reviseRule)
 	secured.PATCH("/tenants/:tenant_id/nodes/:node_id", a.transitionNode)
 	secured.PUT("/tenants/:tenant_id/node-groups/:group_id/members", a.replaceGroupMembers)
+	secured.GET("/tenants/:tenant_id/node-groups/:group_id/serving", a.serving)
+	secured.POST("/tenants/:tenant_id/node-groups/:group_id/dns", a.recomputeDNS)
 	secured.PUT("/tenants/:tenant_id/packages/:package_id", a.putPackageCatalog)
 	secured.POST("/tenants/:tenant_id/subscription/preview", a.previewPackageChange)
 	secured.POST("/tenants/:tenant_id/subscription/confirm", a.confirmPackageChange)

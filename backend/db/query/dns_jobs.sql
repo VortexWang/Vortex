@@ -1,0 +1,17 @@
+-- Consume only new actor-bound DNS intents. Historical actorless notifications
+-- and control protobuf bytes are never interpreted as worker credentials.
+-- Unknown provider outcomes are parked for explicit recomputation, not polled.
+-- name: PendingDNSJobs :many
+WITH candidates AS MATERIALIZED (
+ SELECT o.tenant_id,o.id,b.id AS sort_id,
+ CASE WHEN t.task_kind='resource_change' THEN convert_from(o.payload,'UTF8')::jsonb ELSE '{}'::jsonb END AS body
+ FROM tasks t JOIN operations o ON o.tenant_id=t.tenant_id AND o.id=t.operation_id
+ JOIN outbox b ON b.tenant_id=o.tenant_id AND b.operation_id=o.id
+ WHERE t.task_kind='resource_change' AND b.delivered_at IS NULL
+ AND (t.state='pending' OR (t.state='leased' AND t.lease_until<now()))
+)
+SELECT c.tenant_id,c.id FROM candidates c
+WHERE c.body->>'action'='dns.reconcile' AND c.body->>'dns_schema'='1'
+ AND ((c.body->>'platform_actor'='true' AND EXISTS(SELECT 1 FROM platform_principals p WHERE p.id=c.body->>'actor_id' AND p.state='active' AND p.role IN ('platform_admin','operator')))
+ OR (coalesce(c.body->>'platform_actor','false')='false' AND EXISTS(SELECT 1 FROM users u JOIN tenants t ON t.id=u.tenant_id WHERE u.id=c.body->>'actor_id' AND u.tenant_id=c.tenant_id AND u.state='active' AND t.account_state='active' AND u.role IN ('owner','member'))))
+ORDER BY c.sort_id LIMIT 32;
