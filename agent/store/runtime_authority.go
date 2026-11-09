@@ -160,6 +160,30 @@ func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use
 		anchor = tick
 	} // Backward bounds never mint credit.
 	fill := int64(burst*8000000000/share.RateBPS) + 1
+	if !monotonic && (rateHigh-rateLow < 0 || rateHigh-rateLow >= fill) {
+		// Preserve main's conservative bucket when the absolute uncertainty
+		// covers the whole burst window. Existing tokens remain spendable;
+		// only a proven gap from the previous upper bound earns new tokens.
+		// Overlapping intervals never earn refill, nor does a backward clock.
+		delta := rateLow - tick
+		if delta > 0 {
+			if delta >= fill {
+				tokens = burst
+			} else {
+				earned := uint64(delta) * share.RateBPS / 8000000000
+				if earned >= burst-tokens {
+					tokens = burst
+				} else {
+					tokens += earned
+				}
+			}
+		}
+		if tokens < n {
+			return &RateLimited{RetryAfter: time.Duration((n-tokens)*8000000000/share.RateBPS + 1)}
+		}
+		_, err = tx.ExecContext(ctx, `INSERT INTO runtime_rate_buckets(node_id,source_id,boot_id,tokens,last_tick) VALUES(?,?,?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET boot_id=excluded.boot_id,tokens=excluded.tokens,last_tick=excluded.last_tick`, use.NodeID, share.SourceID, use.BootID, tokens-n, anchor)
+		return err
+	}
 	if anchor > tick {
 		delta := anchor - tick
 		if monotonic && delta > 0 {
