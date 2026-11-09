@@ -43,6 +43,20 @@ result=0
  python3 tools/phase6/rest_contract_check.py > "$out/exact-freeze.log" 2>&1 || exit $?
  ruby tools/phase6/openapi_validate.rb contracts/openapi/v1/openapi.yaml > "$out/openapi.log" 2>&1 || exit $?
  sh tools/phase6/dependency_lock_check.sh > "$out/dependencies.log" 2>&1 || exit $?
+ # Validate local private-file references before paying for runtime suites.
+ # The actual credential use and byte-leak scan remain in the external stage.
+ if test -n "${PHASE6_CLOUDFLARE_ENV_FILE:-}"; then
+  (
+   test "$(stat -f '%Lp' "$PHASE6_CLOUDFLARE_ENV_FILE" 2>/dev/null || stat -c '%a' "$PHASE6_CLOUDFLARE_ENV_FILE")" = 600 || exit 1
+   set -a
+   . "$PHASE6_CLOUDFLARE_ENV_FILE" || exit 1
+   set +a
+   if test -n "${CLOUDFLARE_TOKEN_POLICY_FILE:-}"; then
+    case "$CLOUDFLARE_TOKEN_POLICY_FILE" in /*) ;; *) echo 'private policy file must use an absolute path' >&2; exit 1;; esac
+    test -r "$CLOUDFLARE_TOKEN_POLICY_FILE" || exit 1
+   fi
+  ) || exit $?
+ fi
  docker compose -f "$compose" up -d --wait postgres valkey
  docker compose -f "$compose" config > "$out/compose.yml"
  docker version > "$out/docker-version.txt"

@@ -16,6 +16,14 @@ spec=importlib.util.spec_from_file_location('final_evidence',HERE/'final_evidenc
 spec=importlib.util.spec_from_file_location('rest_fixture',HERE/'test_rest_evidence_check.py');fixture=importlib.util.module_from_spec(spec);spec.loader.exec_module(fixture)
 
 class FinalEvidence(unittest.TestCase):
+ def test_go_rfc3339nano_precision_and_invalid_timestamps(self):
+  base=gate.utc_nanoseconds('2026-11-09T00:00:00Z')
+  for fraction in ['1','123','123456','1234567','12345678','123456789']:
+   self.assertEqual(gate.utc_nanoseconds('2026-11-09T00:00:00.'+fraction+'Z')-base,int(fraction.ljust(9,'0')))
+  self.assertEqual(gate.utc_nanoseconds('2026-11-09T00:00:01.000000001Z')-gate.utc_nanoseconds('2026-11-09T00:00:00.999999999Z'),2)
+  for invalid in ['2026-11-09T00:00:00.1234567890Z','2026-11-09T00:00:00Zjunk','2026-11-09T00:00:00+00:00','2026-11-09T00:00:00.Z','2026-13-09T00:00:00Z']:
+   with self.assertRaises((AssertionError,ValueError)):gate.utc_nanoseconds(invalid)
+
  def fixture(self,folder,producer='docker',arch='arm64'):
   folder.mkdir()
   source=fixture.EvidenceGate().fixture(folder)
@@ -30,7 +38,7 @@ class FinalEvidence(unittest.TestCase):
   (folder/'native-build-metadata.txt').write_text((folder/'native-build-metadata.txt').read_text()+'GOARCH='+arch+'\n')
   for mode in ['normal','race']:
    with (folder/f'backend-{mode}.jsonl').open('a') as out:
-    for package,test in [('service','TestReconcile1000Within60s'),('service','TestTracerDesiredStateReceipt'),('service','TestTracerRealProcesses'),('worker','TestRuleReconciliationDrainsReadyWorkAndCancels')]:out.write(json.dumps(dict(Action='pass',Package='vortex/backend/internal/'+package,Test=test))+'\n')
+    for package,test in [('service','TestReconcile1000Within60s'),('service','TestTracerDesiredStateReceipt'),('service','TestTracerRealProcesses'),('service','TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock'),('worker','TestRuleReconciliationDrainsReadyWorkAndCancels')]:out.write(json.dumps(dict(Action='pass',Package='vortex/backend/internal/'+package,Test=test))+'\n')
    r=dict(commit=source,status='passed',rules=1000,resolved=1000,members=2000,observed=2000,elapsed_ns=1000000,elapsed_ms=1,started_at='2026-11-09T00:00:00Z',ended_at='2026-11-09T00:00:00.001Z',inventory_sha256='a'*64,scope='real PG; deterministic node adapter')
    (folder/f'reconciliation-{mode}.json').write_text(json.dumps(r))
    for family,packages in [('root',['vortex/'+p for p in ['agent','agent/store','agent/upgrade','hub','contracts']]),('engine',['vortex/engine/'+p for p in ['relay','vlink','runtime/rule','accounting']])]:

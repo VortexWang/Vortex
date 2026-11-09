@@ -23,14 +23,23 @@ def go_events(path):
  assert not any('WARNING: DATA RACE' in e.get('Output','') for e in events), 'race detected'
  return events
 
+def utc_nanoseconds(value):
+ # Go's RFC3339Nano emits 0..9 fractional digits. Python 3.9's fromisoformat
+ # accepts only selected microsecond widths; parse explicitly and retain all
+ # nanoseconds so host Python versions enforce the same timing assertion.
+ match=re.fullmatch(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?Z',value)
+ assert match, 'invalid UTC RFC3339Nano timestamp'
+ base=datetime.datetime.strptime(match.group(1),'%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+ return int(base.timestamp())*1000000000+int((match.group(2) or '').ljust(9,'0'))
+
 def qualification(path,source):
  r=load(path)
  assert r['commit']==source and r['status']=='passed'
  assert (r['rules'],r['resolved'],r['members'],r['observed'])==(1000,1000,2000,2000)
  assert 0<=r['elapsed_ns']<=60000000000 and r['elapsed_ms']==r['elapsed_ns']/1000000
  assert re.fullmatch('[0-9a-f]{64}',r['inventory_sha256'])
- start,end=(datetime.datetime.fromisoformat(r[k].replace('Z','+00:00')) for k in ('started_at','ended_at'))
- assert abs((end-start).total_seconds()*1e9-r['elapsed_ns'])<10000000
+ start,end=(utc_nanoseconds(r[k]) for k in ('started_at','ended_at'))
+ assert 0<=end-start and abs(end-start-r['elapsed_ns'])<10000000
  assert 'deterministic node adapter' in r['scope']
  return r['elapsed_ms']
 
@@ -51,6 +60,7 @@ def runtime(folder,source):
   for name in ['TestTracerDesiredStateReceipt','TestTracerRealProcesses']:
    assert ('vortex/backend/internal/service',name) in passes, 'real control-plane process proof missing'
   assert ('vortex/backend/internal/worker','TestRuleReconciliationDrainsReadyWorkAndCancels') in passes
+  assert ('vortex/backend/internal/service','TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock') in passes
   tests['reconciliation_'+mode+'_ms']=qualification(folder/f'reconciliation-{mode}.json',source)
   for family in ['root','engine']:
    events=go_events(folder/f'{family}-{mode}.jsonl');packages={e['Package'] for e in events if e.get('Action')=='pass' and 'Test' not in e}

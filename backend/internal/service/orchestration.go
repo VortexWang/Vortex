@@ -28,6 +28,9 @@ type RuleOrchestrator struct{ Pool *pgxpool.Pool }
 // compile already take this head lock first; a late receipt must not enqueue
 // activation concurrently with the transaction superseding its pending work.
 func lockRuleDeployment(ctx context.Context, q *generated.Queries, tenant, id string) (generated.RuleDeployment, generated.RuleHead, error) {
+	if _, e := q.LockTenant(ctx, tenant); e != nil {
+		return generated.RuleDeployment{}, generated.RuleHead{}, e
+	}
 	d, e := q.GetRuleDeployment(ctx, generated.GetRuleDeploymentParams{TenantID: tenant, ID: id})
 	if e != nil {
 		return d, generated.RuleHead{}, e
@@ -51,6 +54,9 @@ func (s RuleOrchestrator) Begin(ctx context.Context, scope TenantScope, rule str
 }
 
 func beginRuleDeployment(ctx context.Context, q *generated.Queries, scope TenantScope, rule string, revision int64, input string) (generated.RuleDeployment, error) {
+	if _, e := q.LockTenant(ctx, scope.TenantID()); e != nil {
+		return generated.RuleDeployment{}, e
+	}
 	head, e := q.LockRuleHead(ctx, generated.LockRuleHeadParams{TenantID: scope.TenantID(), ID: rule})
 	if e != nil {
 		return generated.RuleDeployment{}, e

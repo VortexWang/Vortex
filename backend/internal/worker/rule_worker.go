@@ -30,6 +30,10 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 	if e := w.Recover(ctx); e != nil {
 		return false, e
 	}
+	return w.deliverOnce(ctx)
+}
+
+func (w RuleWorker) deliverOnce(ctx context.Context) (bool, error) {
 	tx, e := w.Pool.Begin(ctx)
 	if e != nil {
 		return false, e
@@ -43,6 +47,28 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 	}
 	if e != nil {
 		return false, e
+	}
+	// Commit the task-only lease before waiting for current tenant authority.
+	// A concurrent tenant mutation may need this task: holding it while waiting
+	// for the tenant row would invert tenant -> head/deployment -> task.
+	if e = tx.Commit(ctx); e != nil {
+		return true, e
+	}
+	tx, e = w.Pool.Begin(ctx)
+	if e != nil {
+		return true, e
+	}
+	defer tx.Rollback(ctx)
+	q = generated.New(tx)
+	if _, e = q.LockTenant(ctx, task.TenantID); e != nil {
+		return true, e
+	}
+	locked, e := q.LockTask(ctx, generated.LockTaskParams{TenantID: task.TenantID, OperationID: task.OperationID})
+	if e != nil {
+		return true, e
+	}
+	if locked.LeaseToken != token || locked.State != "leased" || !locked.LeaseUntil.Valid || !locked.LeaseUntil.Time.After(time.Now()) {
+		return false, tx.Commit(ctx)
 	}
 	b, e := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: task.TenantID, TaskID: task.ID})
 	if e != nil {
@@ -60,15 +86,22 @@ func (w RuleWorker) Once(ctx context.Context) (bool, error) {
 		// authority check. Nothing has been sent: leave the task pending instead
 		// of terminating the backend or inventing an execution failure.
 		if (errors.Is(e, service.ErrConflict) || errors.Is(e, service.ErrScope) || errors.Is(e, service.ErrShareUnknown)) && (b.Phase == "prepare" || b.Phase == "commit") {
-			return false, tx.Rollback(ctx)
+			if e = q.ReconcileTask(ctx, generated.ReconcileTaskParams{TenantID: task.TenantID, OperationID: task.OperationID, State: "pending"}); e != nil {
+				return false, e
+			}
+			return false, tx.Commit(ctx)
 		}
 		return true, e
 	}
 	if e = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: task.OperationID, State: "running"}); e != nil {
 		return true, e
 	}
-	if _, e = q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: task.TenantID, OperationID: task.OperationID, LeaseToken: token}); e != nil {
+	count, e := q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: task.TenantID, OperationID: task.OperationID, LeaseToken: token})
+	if e != nil {
 		return true, e
+	}
+	if count != 1 {
+		return false, tx.Rollback(ctx)
 	}
 	// Lease/running and all authority/outbox facts are durable before transport.
 	if e = tx.Commit(ctx); e != nil {
@@ -147,5 +180,21 @@ func (w RuleWorker) Recover(ctx context.Context) error {
 }
 
 func (w RuleWorker) Run(ctx context.Context) error {
-	return runRuleReconciliation(ctx, w.Once)
+	if w.Adapter == nil {
+		return errors.New("rule adapter required")
+	}
+	// Recovery scans are global and bounded, not per delivered member. Run on
+	// startup and at most once per second while retaining Once's explicit scan
+	// semantics for one-shot callers. Expiry still creates uncertainty, never a
+	// success or release, and every delivery independently rechecks authority.
+	var nextRecovery time.Time
+	return runRuleReconciliation(ctx, func(ctx context.Context) (bool, error) {
+		if !time.Now().Before(nextRecovery) {
+			if err := w.Recover(ctx); err != nil {
+				return false, err
+			}
+			nextRecovery = time.Now().Add(time.Second)
+		}
+		return w.deliverOnce(ctx)
+	})
 }
