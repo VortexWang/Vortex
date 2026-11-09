@@ -15,7 +15,7 @@ test -z "$(git status --porcelain=v1)"
 test "$(GOTOOLCHAIN=local go env GOVERSION)" = go1.27.3
 git rev-parse HEAD HEAD^{tree} > "$out/source-identity.txt"
 git status --porcelain=v1 > "$out/source-status-before.txt"
-(go version; uname -a; date -u '+%Y-%m-%dT%H:%M:%SZ') > "$out/host.txt"
+(go version; uname -a; date -u '+%Y-%m-%dT%H:%M:%SZ'; printf 'GOFLAGS=%s\nGOMAXPROCS=%s\n' "${GOFLAGS:-}" "${GOMAXPROCS:-}") > "$out/host.txt"
 work=$(mktemp -d /tmp/vortex-rest-check.XXXXXX)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
 sh tools/phase6/install_sqlc.sh "$work/tools" > "$out/sqlc-install.log" 2>&1
