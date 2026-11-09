@@ -1,0 +1,6 @@
+ Container vortex-phase6-tracer-backend-test-run-905a39bdc577 Creating 
+ Container vortex-phase6-tracer-backend-test-run-905a39bdc577 Created 
+ok  	vortex/backend/internal/service	85.551s
+ok  	vortex/backend/internal/control	1.374s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.006s

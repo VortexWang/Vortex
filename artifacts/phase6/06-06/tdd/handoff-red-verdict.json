@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "block": false,
+  "verdict": "RED_EVIDENCE_OK",
+  "reason": "target_test_failed",
+  "evidence": {
+    "command": "python3 tools/phase6/share_handoff_red_test.py",
+    "exit_code": 1,
+    "target_test": "test_handoff_receipt_authority",
+    "tests": 1,
+    "pass": 0,
+    "fail": 1,
+    "failing_tests": [
+      "test_handoff_receipt_authority"
+    ],
+    "matched_test": "test_handoff_receipt_authority",
+    "format": "unittest",
+    "report_errors": []
+  },
+  "record": {
+    "command": "python3 tools/phase6/share_handoff_red_test.py",
+    "exit_code": 1,
+    "failing_test": "test_handoff_receipt_authority",
+    "target_test": "test_handoff_receipt_authority",
+    "expected": "Durable immutable Node receipt authority exists before any difference release",
+    "actual": "Real PostgreSQL has no share_handoff_receipts relation",
+    "verdict": "RED_EVIDENCE_OK",
+    "reason": "target_test_failed"
+  },
+  "message": "RED evidence verified: target test \"test_handoff_receipt_authority\" failed as expected (exit 1). GREEN authorized."
+}

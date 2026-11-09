@@ -1,0 +1,27 @@
+ Network vortex-p6-docker-a209743035fd_default Creating 
+ Network vortex-p6-docker-a209743035fd_default Creating 
+ Network vortex-p6-docker-a209743035fd_default Created 
+ Network vortex-p6-docker-a209743035fd_default Created 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Creating 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Creating 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Created 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Created 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Starting 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Starting 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Started 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Started 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Waiting 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Waiting 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Healthy 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Healthy 
+time="2026-11-09T11:37:57+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+time="2026-11-09T11:37:57+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+ Container vortex-p6-docker-a209743035fd-postgres-1 Running 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Running 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Waiting 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Waiting 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Healthy 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Healthy 
+ Container vortex-p6-docker-a209743035fd-backend-test-run-e851e1baf775 Creating 
+ Container vortex-p6-docker-a209743035fd-backend-test-run-e851e1baf775 Created 
+

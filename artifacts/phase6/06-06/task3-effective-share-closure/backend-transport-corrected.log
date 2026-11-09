@@ -1,0 +1,29 @@
+=== RUN   TestRecoveredShareIssuerRenewalClosureOriginalProofAndCAS
+2026/11/08 23:30:07 goose: no migrations to run. current version: 8
+2026/11/08 23:30:07 OK   00001_authority.sql (16.41ms)
+2026/11/08 23:30:07 OK   00002_tenant_policy.sql (7.84ms)
+2026/11/08 23:30:07 OK   00003_nodes_ports.sql (17.29ms)
+2026/11/08 23:30:07 OK   00004_entry_group_domains.sql (2.22ms)
+2026/11/08 23:30:07 OK   00005_rules_compile.sql (15.95ms)
+2026/11/08 23:30:07 OK   00006_packages_entitlements.sql (15.54ms)
+2026/11/08 23:30:07 OK   00007_metering_ledger.sql (20.63ms)
+2026/11/08 23:30:08 OK   00008_limits_shares.sql (45.17ms)
+2026/11/08 23:30:08 goose: successfully migrated database to version: 8
+--- PASS: TestRecoveredShareIssuerRenewalClosureOriginalProofAndCAS (1.68s)
+=== RUN   TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay
+2026/11/08 23:30:09 goose: no migrations to run. current version: 8
+2026/11/08 23:30:09 OK   00001_authority.sql (7.97ms)
+2026/11/08 23:30:09 OK   00002_tenant_policy.sql (6.99ms)
+2026/11/08 23:30:09 OK   00003_nodes_ports.sql (16.41ms)
+2026/11/08 23:30:09 OK   00004_entry_group_domains.sql (1.97ms)
+2026/11/08 23:30:09 OK   00005_rules_compile.sql (16.64ms)
+2026/11/08 23:30:09 OK   00006_packages_entitlements.sql (16.5ms)
+2026/11/08 23:30:09 OK   00007_metering_ledger.sql (24.17ms)
+2026/11/08 23:30:09 OK   00008_limits_shares.sql (53.49ms)
+2026/11/08 23:30:09 goose: successfully migrated database to version: 8
+    share_effective_transport_test.go:64: first disconnect store: trusted time is required for authorization
+    share_effective_transport_test.go:66: did not reach FULL closure store: trusted time is required for authorization
+--- FAIL: TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay (11.21s)
+FAIL
+FAIL	vortex/backend/internal/service	13.560s
+FAIL

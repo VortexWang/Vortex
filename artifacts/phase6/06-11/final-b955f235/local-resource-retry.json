@@ -1,0 +1,14 @@
+{
+  "first_attempt": "failed: worker.test linker killed by Linux OOM after489test/subtest passes",
+  "kernel_evidence": "dmesg explicitly reports OOM-killed compile/link/postgres",
+  "stopped_completed_test_containers": [
+    "vortex-p6-docker-efdb89dedc75-postgres-1",
+    "vortex-p6-docker-efdb89dedc75-valkey-1",
+    "vortex-p6-docker-84f9cc86e4aa-postgres-1",
+    "vortex-p6-docker-84f9cc86e4aa-valkey-1",
+    "vortex-p6-docker-b955f235bbb8-postgres-1",
+    "vortex-p6-docker-b955f235bbb8-valkey-1"
+  ],
+  "scope": "Only the three final validation projects created in this turn; no unrelated containers or volumes removed",
+  "retry": "same source SHA, new evidence directory, isolated fresh PG; same assertions/resource limits"
+}

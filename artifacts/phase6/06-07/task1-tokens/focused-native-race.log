@@ -1,0 +1,23 @@
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/09 04:51:27 OK   00001_authority.sql (34.98ms)
+2026/11/09 04:51:27 OK   00002_tenant_policy.sql (8.29ms)
+2026/11/09 04:51:27 OK   00003_nodes_ports.sql (16.77ms)
+2026/11/09 04:51:27 OK   00004_entry_group_domains.sql (1.83ms)
+2026/11/09 04:51:27 OK   00005_rules_compile.sql (17.13ms)
+2026/11/09 04:51:27 OK   00006_packages_entitlements.sql (16.96ms)
+2026/11/09 04:51:27 OK   00007_metering_ledger.sql (24.32ms)
+2026/11/09 04:51:27 OK   00008_limits_shares.sql (51.5ms)
+2026/11/09 04:51:27 OK   00009_domain_events.sql (5.81ms)
+2026/11/09 04:51:27 goose: successfully migrated database to version: 9
+--- PASS: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.29s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/09 04:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.03s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/09 04:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.04s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/09 04:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.03s)
+PASS
+ok  	vortex/backend/internal/auth	1.981s

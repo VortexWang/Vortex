@@ -1,0 +1,44 @@
+{
+  "base_sha": "73b9cc1bb523d5f351f13885c6b5478fe39dc946",
+  "scope": "Exact fenced settlement-only handoff after permanent direct credit stop; retains revoked original source and pending debt",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "native_backend": "backend-native-race.log;service361.732s",
+    "linux_arm64_backend": "backend-linux-race.log;service386.522s",
+    "native_root": "root-native-race.log",
+    "linux_arm64_root": "root-linux-race.log",
+    "store": "focused-final-store.log",
+    "actual_mtls": "green-mtls-native.log;normal and stopped-before-recovery delivery",
+    "contracts": "contracts.log",
+    "builds": "cross-builds.json;six linux builds"
+  },
+  "failed_retained": [
+    "red-native.log",
+    "red-store.log"
+  ],
+  "not_claimed": [
+    "Seal-before-first-recovery-delivery ordering",
+    "Complete Engine/pending deployment convergence",
+    "Clean-source same-SHA Docker/Actions pairing",
+    "Native amd64 execution",
+    "06-06 completion or CR-008 approval"
+  ],
+  "inherited_unchanged": "No SQL/protobuf/generator/dependency or approved snapshot input changed",
+  "evidence_sha256": {
+    "README.md": "84ac033bca63b4cffae89d7b4424b119a1dcafc0afb31cc38f64799c7c1f1062",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "bc652c6bd403473cc55b617c8c9669bb51b49529c2c50f88d4e64062007339e3",
+    "backend-native-race.log": "6a44fb0102c9d5736842cc2694c384171d04183569d9f4f323cec7b8aca813fb",
+    "contracts.log": "3c647aa726aeeaf7cf685647d9a95697dcb4afadf973de5bc4e3c1740e2e4267",
+    "cross-builds.json": "4a3b855b33ee43e7cda7f9644190906bc3151764c14eb48c8fc83758f4f2ddcd",
+    "environment.json": "bcf6debdbf0b8e943a125913c81204dceb95de8a0e888faa4dab40bc958a9254",
+    "focused-final-store.log": "428ae15dad7f1f193d824dea80eba33daf9b6b80cac8d5a0e143f37e1727026d",
+    "green-mtls-native.log": "8aac82c5a5eaacb80fe071cb234bf7ba1e701620a2286dc8572eaa87a9b0da92",
+    "green-store.log": "add853f93f61facec5dcb72d77be960c65c0eeb110d01bffcdd61e9becf63687",
+    "red-native.log": "d86c89139f2f5b699d61f9d3006253e8b2607ca5718879bff32c8a828eb68373",
+    "red-store.log": "344d98cfd6ee59655c6157a2feed6b544d64c2186f8b8dfff2141957367d8eb2",
+    "root-linux-race.log": "e740e078a615af50e063f76ad1a62f8dd4d781e747fcdc5e614f09a75ccab491",
+    "root-native-race.log": "921f30edb9f21b5783d791866435c0724ba245f7950b87705565098ee0ed3c8b",
+    "source-hashes.json": "981a52ac1611183ae8552427c15d03f963b6eb372fc7163291dc1b0a50fca5f8"
+  }
+}

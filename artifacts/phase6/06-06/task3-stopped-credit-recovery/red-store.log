@@ -1,0 +1,6 @@
+--- FAIL: TestStoppedCreditRecoveryHandoffRequiresBackendFenceAndMintsNoRights (0.92s)
+    --- FAIL: TestStoppedCreditRecoveryHandoffRequiresBackendFenceAndMintsNoRights/valid (0.20s)
+        stopped_credit_handoff_test.go:58: exact settlement-only recovery refused store: authority handoff is required before recording a resumed heartbeat
+FAIL
+FAIL	vortex/agent/store	1.516s
+FAIL

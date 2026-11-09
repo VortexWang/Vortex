@@ -1,0 +1,15 @@
+2026/11/08 23:38:28 goose: no migrations to run. current version: 8
+2026/11/08 23:38:28 OK   00001_authority.sql (23.4ms)
+2026/11/08 23:38:28 OK   00002_tenant_policy.sql (9.86ms)
+2026/11/08 23:38:28 OK   00003_nodes_ports.sql (23.59ms)
+2026/11/08 23:38:28 OK   00004_entry_group_domains.sql (2.43ms)
+2026/11/08 23:38:28 OK   00005_rules_compile.sql (19.72ms)
+2026/11/08 23:38:28 OK   00006_packages_entitlements.sql (18.64ms)
+2026/11/08 23:38:28 OK   00007_metering_ledger.sql (24.77ms)
+2026/11/08 23:38:28 OK   00008_limits_shares.sql (55.22ms)
+2026/11/08 23:38:28 goose: successfully migrated database to version: 8
+--- FAIL: TestHubRecoveryAdmissionOldEpochClosureCannotQueueGenerationSuccessor (1.25s)
+    hub_recovery_admission_test.go:103: old-epoch admission closure authorized generation CAS 62bd3047-9775-4913-b170-621a8e7f18af <nil>
+FAIL
+FAIL	vortex/backend/internal/service	1.943s
+FAIL

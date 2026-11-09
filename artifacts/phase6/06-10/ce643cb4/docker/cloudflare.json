@@ -1,0 +1,7 @@
+{
+  "commit": "ce643cb420f8a41a4e7794ee3f98a02e0d04dd03",
+  "exit_code": 0,
+  "status": "passed",
+  "policy_sha256": "fb4f26a53f1df357767586d01da7be83cc36b6656b522fbfd0831e9ce7836cfb",
+  "scope_evidence": "reviewed_creation_policy"
+}

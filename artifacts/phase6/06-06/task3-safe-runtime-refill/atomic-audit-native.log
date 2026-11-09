@@ -1,0 +1,14 @@
+=== RUN   TestRuntimeRefillRequiresCompleteParentFinalAndOneAuditedSuccessor
+2026/11/08 15:53:32 goose: no migrations to run. current version: 8
+2026/11/08 15:53:32 OK   00001_authority.sql (21.6ms)
+2026/11/08 15:53:32 OK   00002_tenant_policy.sql (12.1ms)
+2026/11/08 15:53:32 OK   00003_nodes_ports.sql (24.05ms)
+2026/11/08 15:53:32 OK   00004_entry_group_domains.sql (2.53ms)
+2026/11/08 15:53:32 OK   00005_rules_compile.sql (35.58ms)
+2026/11/08 15:53:32 OK   00006_packages_entitlements.sql (22.91ms)
+2026/11/08 15:53:32 OK   00007_metering_ledger.sql (28.65ms)
+2026/11/08 15:53:33 OK   00008_limits_shares.sql (43.38ms)
+2026/11/08 15:53:33 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeRefillRequiresCompleteParentFinalAndOneAuditedSuccessor (1.63s)
+PASS
+ok  	vortex/backend/internal/service	3.408s

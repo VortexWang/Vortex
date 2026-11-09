@@ -1,0 +1,6 @@
+{
+  "valid": false,
+  "errors": [
+    "vortex.vlink.v1: approved review hash is missing or stale"
+  ]
+}

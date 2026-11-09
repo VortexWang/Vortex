@@ -1,0 +1,9 @@
+{
+  "agent/control.go": "a53cff2c98d0523b5fd7e6f5e7c9603a80cad423c6880d664394f775b740a278",
+  "agent/engine_runtime.go": "e374f810ba81583b29304e1397bd1c36cf5355ba26746897ef8731db58c3e8e2",
+  "agent/runtime_activation.go": "249d8fe79bd5f12926eac8411abf4cce9a925b522f995a0ce0b8f4cfebd40292",
+  "agent/renewal.go": "eb6e5fa2e3973b23693455a43a8f6254cd4958cc6520c9ab59e1ea080c86e648",
+  "agent/renewal_rules.go": "16afa66eca846935ceac503923c445f01a018f381d1c93340bbc6fa0d2132a65",
+  "agent/renewal_rules_test.go": "4038dfc2ba4ff4e5bbe35b728579acbd62890acff56f3ab14e1c924efac7c06c",
+  "contracts/protobuf/v1/lifecycle.md": "e877bfdbf71861f4699f301b23a564bc59181e12db177740df75e4e9ef874c41"
+}

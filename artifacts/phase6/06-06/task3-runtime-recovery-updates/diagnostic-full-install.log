@@ -1,0 +1,24 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:14:23 goose: no migrations to run. current version: 8
+2026/11/09 01:14:23 OK   00001_authority.sql (20.32ms)
+2026/11/09 01:14:23 OK   00002_tenant_policy.sql (11.78ms)
+2026/11/09 01:14:23 OK   00003_nodes_ports.sql (21.77ms)
+2026/11/09 01:14:23 OK   00004_entry_group_domains.sql (2.44ms)
+2026/11/09 01:14:23 OK   00005_rules_compile.sql (17.7ms)
+2026/11/09 01:14:23 OK   00006_packages_entitlements.sql (15.89ms)
+2026/11/09 01:14:23 OK   00007_metering_ledger.sql (20.12ms)
+2026/11/09 01:14:23 OK   00008_limits_shares.sql (43.61ms)
+2026/11/09 01:14:23 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.96s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	6.645s

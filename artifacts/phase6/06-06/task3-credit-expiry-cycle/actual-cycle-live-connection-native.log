@@ -1,0 +1,23 @@
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 17:09:57 goose: no migrations to run. current version: 8
+2026/11/08 17:09:57 OK   00001_authority.sql (37.82ms)
+2026/11/08 17:09:57 OK   00002_tenant_policy.sql (10.11ms)
+2026/11/08 17:09:57 OK   00003_nodes_ports.sql (19.65ms)
+2026/11/08 17:09:57 OK   00004_entry_group_domains.sql (2.4ms)
+2026/11/08 17:09:57 OK   00005_rules_compile.sql (18.65ms)
+2026/11/08 17:09:57 OK   00006_packages_entitlements.sql (17.31ms)
+2026/11/08 17:09:57 OK   00007_metering_ledger.sql (24.01ms)
+2026/11/08 17:09:57 OK   00008_limits_shares.sql (37.4ms)
+2026/11/08 17:09:57 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:238: expiry cycle did not converge context deadline exceeded
+    runtime_expiry_cycle_transport_test.go:222: successor Hub delegation {8296 8296 0} <nil>
+    runtime_expiry_cycle_transport_test.go:224: pending allocations 0 forbidden tenant scope
+    runtime_expiry_cycle_transport_test.go:226: Hub snapshot {online 7 2026-11-08 09:10:16.942384 +0000 UTC 2026-11-08 10:09:57.899961 +0000 UTC 2 1} <nil>
+    runtime_expiry_cycle_transport_test.go:228: pending journal 1 <nil>
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+--- FAIL: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (20.91s)
+FAIL
+FAIL	vortex/backend/internal/service	21.711s
+FAIL

@@ -1,0 +1,39 @@
+{
+  "base_sha": "f41ff501bf68a7e24149cf3ed29a8bca23c80716",
+  "utc": "2026-11-08T09:29:02.154121+00:00",
+  "evidence_scope": "development working tree; not clean-source or Actions",
+  "source_sha256": {
+    "backend/db/migrations/00008_limits_shares.sql": "eb5169a0acf1a79f2bef49d285372f0800eadda1ce760030cec76bf2b8c50a71",
+    "backend/db/query/hub_recovery.sql": "4425e7cb9c8a42cc3b06be9d68715bb4c35dc2672260c7e6b4ed0ee7ea539e5b",
+    "backend/db/query/hub_allocations.sql": "bd5668c7fe64248fafcb8c9016363a4a4ecc2584bc6cb0683bae9aaa9ac25fee",
+    "backend/db/generated/models.go": "b469b55d40419415fb816ace461985ab856fc99e5e923b1ac5cf552cfab81755",
+    "backend/db/generated/hub_recovery.sql.go": "d6e99ded809f70d7c73e87e8bba71a8f1940bff2323a4ab0df6d019455621bca",
+    "backend/db/generated/hub_allocations.sql.go": "4f1467c93d1d6cd576fcfae535128d382b0bfb421386c447e0ed6665473f2b12",
+    "backend/internal/service/hub_cold_recovery.go": "071cbb94e72b5dabb4df15f13ebf766536c8051559c032a04f311ea09062caf4",
+    "backend/internal/service/hub_cold_recovery_test.go": "48a84be766256490b981c94fc80131b5b0cfc7054568073d7b11124f3e1a1e09",
+    "backend/internal/service/hub_cold_recovery_transport_test.go": "03401819b62f6fa94738691dc5b0011b9246f1ad916d777b21933c42159c3e38",
+    "backend/internal/service/hub_session.go": "f39c404a49e8f5a18818c9b265df99462ff473ddbd4595c84495b8035a06daaa",
+    "backend/internal/service/hub_allocation.go": "cddc08ee6d30cd3d146e0b44cb1fbbe857a243fd18e5c8e4f787c867c31f04de",
+    "backend/internal/service/share.go": "5e13a7f96265b7e2209cf30765a6cf83e95b8a16c347c7f7d6ec2f0fb01a3e34",
+    "contracts/protobuf/v1/lifecycle.md": "59080756007fe119fac7d92a967843d4af182fd41f9c9f57afc26dfd69081317"
+  },
+  "evidence_sha256": {
+    "README.md": "cdcba85a83e2ddd7ca8c6c194c3b1a0746972764c4beaf8d60c773cdf7071cb2",
+    "focused-late-usage-native-corrected.log": "09f007c2ce1dc9cc3748c50d4839333d13e33fe8a50b6bd6660d9c521ce69a5e",
+    "focused-late-usage-native.log": "e9fe7ca46a17e2f582ec62681d28f13e37664dc1b935b2e16b6ca27aad5ff653",
+    "focused-mtls-native.log": "e2bc251946181dd783606710482fb026ebdbc5929fc3df292e790e2047b7c609",
+    "focused-native.log": "10b1a7aa63db1c7b069750557cd4723cdb8f42de9737050d17f59d78b852eeaf",
+    "full-backend-native-race.log": "41a2e8b78256bf848c17d121d29174942c3a4b16d7e854e97c674b1f1d9cbed1",
+    "generation.json": "dc1e4bc001ebed9764bffbfb6c0c53ed35b9c332cb4200400f89464bb47ce7d4",
+    "linux-final-late-usage.log": "92eefa979acc0c818a45fd2ccecf93d7abc85a6b2f6af2c1bb3aff2d2437aa3e",
+    "linux-race-build.log": "4b3a1b29dde9bcb5e2c9487bf4b9853aac7e1f3f46a089935f6714d524eafaef"
+  },
+  "results": {
+    "full_backend_native_race": 0,
+    "linux_service_control_worker_clock_race_and_dual_arch_backend_hub_builds": 0,
+    "final_native_cold_recovery_mtls_unknown_late_usage": 0,
+    "final_linux_cold_recovery_mtls_unknown_late_usage": 0,
+    "independent_sqlc_output_count": 21,
+    "late_usage_first_compile_wrong_field": 1
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "commit": "30653e9bf5529cc83e2e8875b873b32cd3b1f299",
+  "producer": "docker",
+  "through_plan": "06-11",
+  "runtime_status": "failed",
+  "exit_code": 1,
+  "validation": null,
+  "error": null,
+  "external_cloudflare": {
+    "exit_code": 78,
+    "status": "not_run"
+  },
+  "acceptance_complete": false,
+  "checksums": {
+    "host-source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host-source-identity.txt": "cf6079de439f3a513d611781bf8119c801efcc9d350694760bc8cca8c3f192c7",
+    "dependencies.log": "526cce40200c74b84dd13d33e823faa46a9cb539029f3bdff3261f1621a7c487",
+    "openapi.log": "72f13c1e4f80e7e40a89a9842e07b8f58086589be20bdef0f3a8d0c79d8fe850",
+    "commit.txt": "264d6dce328763ec054933ffcc522a992cf97732a03c1c15df13ead12a212c6f",
+    "runner.log": "cd83055edb43c79fbbec2fb5ee17b209d2e777cd7efcd5ab7be116de35c585dd",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "docker-info.json": "89337beaba0ca39b45c2e4556a5e3a25090969f92116dd3a868a9dc18c59bd73",
+    "images.json": "7912de5928d75d0c3eb3bf83dd205b8ec277d4a8045aac3aee9f14e174179e66",
+    "host-source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host-tooling.txt": "3a6b6a036ac2d74ac095efe9f841fa3880a643ff6e0e4f1acf2fdaa0806a2760",
+    "exact-freeze.log": "3067976a2265da35e4bd7e2d5a550fc21ab66b35dbfe5f8df248730778a51ded",
+    "source-identity.txt": "f566cbb67d0c940e88eebb0bca1caf3adca999c053dbfcd913f588cbbfa6c710",
+    "valkey-version.txt": "28ed66712d76f77fa525aa8bd3f45dfa3b0cf3414d0ba449fbf29ba5eb949536",
+    "compose.yml": "5935a39d2f527bb12a3e49a35fa6b11846ebcaeb86afc0d6de55603d15533b82",
+    "docker-version.txt": "ed342474cbba3f029cdc502bd718ca98db996b40d531c55a390182bd440dd5fa"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "repository": null,
+  "runner_arch": null,
+  "execution_arch": null,
+  "runner_image": null,
+  "historical_vlink_scope": "pre-existing Phase3 review mismatch is recorded separately; no approval or global freeze pass granted"
+}

@@ -1,0 +1,66 @@
+{
+  "base_sha": "52f66c56316214c91c14656bd55fb78efde470dd",
+  "scope": "Effective original share generation renewal and authenticated new-epoch complete closure; actual Node CAS releases only capacity difference",
+  "phase_progress": "8/11; no06-06 SUMMARY or CR-008 approval",
+  "passed": {
+    "backend_native": "backend-final-native-race.log; service280.487s",
+    "backend_linux_arm64": "backend-final-linux-race.log; service290.487s",
+    "root_native": "root-native-race.log; Store84.777s",
+    "root_linux_arm64": "root-linux-race.log; Store190.650s",
+    "focused": "backend-final-scope-corrected.log; service21.818s; local-focused-corrected.log; Store4.452s",
+    "generators": "generators-repro-final.json; two independent23-output sqlc runs",
+    "cross_builds": "cross-builds-final.json; six builds"
+  },
+  "expected_red": "red-old-closure-overlay.log; wrong old closure accepted; source unchanged",
+  "failed": [
+    "local-focused.log: trusted clock/FK fixture misuse",
+    "backend-focused.log: original closed row suppressed new epoch delivery",
+    "backend-transport.log: stale fixed heartbeat",
+    "backend-transport-diagnostic.log: stale fixed heartbeat",
+    "backend-transport-corrected.log: only server clock updated",
+    "backend-final-focused.log: PascalCase JSON key mismatch and two parameterized statements fixture"
+  ],
+  "snapshot_results": [
+    "backend-native-race.log passed before final tightening",
+    "backend-linux-race.log passed before final tightening",
+    "backend-complete-scope.log predates final query correction",
+    "generators-repro.json and cross-builds.json precede final tightening"
+  ],
+  "not_claimed": [
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "Repeated PG recovery producers",
+    "Later cold recovery of transferred generations",
+    "Effective funding/refill and production full06-06 convergence"
+  ],
+  "evidence_sha256": {
+    "README.md": "4e41a6d661e23af8084d59937a392c254f3b5cc52ba6abb3dcee2e12257dd055",
+    "approved-snapshot-protection.json": "2c02521eab36470fefe65f1ccda35e21485b5cfc79f2ec6f21e796b019b794f8",
+    "backend-complete-scope.log": "769b03c029e147bd81edfeb66f0774902594c0b063cd3db7e09727bc7be0ab4a",
+    "backend-final-focused.log": "ef4d498847202253452840e3728ffcec1eb83191b0d2418f22a55b368537221d",
+    "backend-final-linux-race.log": "744c06005ead2a660b504d15c0132698484a93d38145d747bdc03de8506b58ac",
+    "backend-final-native-race.log": "c5d547c47839db75c64e7d43100e6d342c2e5aed596912627a959faa3f864754",
+    "backend-final-scope-corrected.log": "b10ab8f940dc8db659a0d53799f539212a24c3931e7b744040b9ad95a00a7e85",
+    "backend-focused-corrected.log": "40e2d171db553b326bd47ec049c6b16c31aa8da5094070dcbc4696f0a9f337ef",
+    "backend-focused.log": "2e09b13c797630f6e115c75965a7653efe1902e58b3045008d519585343bcb3a",
+    "backend-linux-race.log": "585666a92e58c53f9558ff608c45ddec9265de35e4bea3f691f5e43e5bc839fc",
+    "backend-native-race.log": "aad4eb54af37caf5cd90fd46b6eee6c2b9d3529046a5a811cb7fd5cf14932a7c",
+    "backend-negative.log": "38296198f514e16f25bb26015c6dd016849550aac61f52e5ca554c62d7c51c4e",
+    "backend-transport-corrected.log": "c8099bf2e1be6fd8ab5d93220b70f9b92cfb8bc6ef4ef3d37b2a38223fb7ee5b",
+    "backend-transport-diagnostic.log": "9a711d10e08e4cd7afc00d0cd10ba38f60c9058039b48d986fe1a7cdd2a73067",
+    "backend-transport-final.log": "da288a3637db5a65451d76532164b3a203ad166a388fbaca69ce63c003eb447b",
+    "backend-transport.log": "4009ade20d45a2baee7c0af885dc2acd67de9b087826e942f70eb9a40543927e",
+    "cross-builds-final.json": "4ac8d6a911db3d84a90d4fb15f14e72d16a63efad4772aebf2348ce6b73e591c",
+    "cross-builds.json": "a786ca8ffbf686ae8096f4d583f63284af3af73949d17425c4cf4842e5de1975",
+    "environment.json": "992a1eccea236e65e334046b41627c81e399b5419774cfdbe2009418bfb6b446",
+    "generators-repro-final.json": "1ee6b18b5a65b95315e7ec942d4f486200698368c35b825aa94eadffea3bd3a7",
+    "generators-repro.json": "cabe036427b998fe96ac6ff61dff8a7a4d079335a7423b377fc6cb3e5dd3030b",
+    "local-focused-corrected.log": "84fe68d5a7fdb6fae17d51af1b2521f32919933e0360a2f1eaa82668ad96eddc",
+    "local-focused.log": "6b611d56c6a7605be563b971c20919d40abc499c04ebafa16753a34fe228519e",
+    "red-old-closure-overlay.log": "59e7b780e80de584969608c780fc2257dab5111b665e6640def52e4d71710e87",
+    "red-overlay.json": "b236737f03004be939baa1463ca98bc5f9d35c73c23687c65a66314bcc4ca259",
+    "root-linux-race.log": "2564100b38ae4b02c0f2172f18f4d6074eec6ba97cd4c558677ca95bd46133f2",
+    "root-native-race.log": "e1545221b1ea10f6bd1064c039fb910c6dcaab121eae2ebc91957a558f35cb3d",
+    "source-hashes.json": "dca9377960b2d2652f8ccd3dbf55fcb49bfef2f579b725ecf4e9aa9bde6345d5"
+  }
+}

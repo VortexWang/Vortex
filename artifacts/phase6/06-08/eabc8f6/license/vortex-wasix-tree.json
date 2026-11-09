@@ -1,0 +1,85 @@
+{
+  "sha": "fc94d603e92e2597fc605261127e9aabcf0a30b1",
+  "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/trees/fc94d603e92e2597fc605261127e9aabcf0a30b1",
+  "tree": [
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+      "size": 19,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/6313b56c57848efce05faa7aa7e901ccfc2886ea"
+    },
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "500a9fdd0110b8d7ba969721831a5eb14bd7f197",
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/trees/500a9fdd0110b8d7ba969721831a5eb14bd7f197"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6f6d2d5dce96783401518e7d4fc7a8f146eb6819",
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/trees/6f6d2d5dce96783401518e7d4fc7a8f146eb6819"
+    },
+    {
+      "path": ".github/workflows/docker.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3cb1ea44afe70d63e931a53f3512f4a23d9606aa",
+      "size": 1366,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/3cb1ea44afe70d63e931a53f3512f4a23d9606aa"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4afcf19ee2c2e23dce60276a530084b33508c817",
+      "size": 11,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/4afcf19ee2c2e23dce60276a530084b33508c817"
+    },
+    {
+      "path": "Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f47b6c28694056dc166e973c01d183b73128f810",
+      "size": 1589,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/f47b6c28694056dc166e973c01d183b73128f810"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41189cd15c21883aa9b71c7747ba0de3cebc791f",
+      "size": 1068,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/41189cd15c21883aa9b71c7747ba0de3cebc791f"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64093ea193b1c00432d3cd665cfa79066a431b4a",
+      "size": 261,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/64093ea193b1c00432d3cd665cfa79066a431b4a"
+    },
+    {
+      "path": "WASIX.cmake",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4330d28dcd81d93d74b59099980401a7dc2da72b",
+      "size": 13,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/4330d28dcd81d93d74b59099980401a7dc2da72b"
+    },
+    {
+      "path": "wasix-sdk.cmake",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfc0a69a1d0778b302dbc5f1679a7235d4fc8f95",
+      "size": 1110,
+      "url": "https://api.github.com/repos/wasilibs/wasix-sdk/git/blobs/bfc0a69a1d0778b302dbc5f1679a7235d4fc8f95"
+    }
+  ],
+  "truncated": false
+}

@@ -1,0 +1,15 @@
+=== RUN   TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts
+2026/11/08 16:09:57 goose: no migrations to run. current version: 8
+2026/11/08 16:09:57 OK   00001_authority.sql (29.44ms)
+2026/11/08 16:09:57 OK   00002_tenant_policy.sql (14.79ms)
+2026/11/08 16:09:57 OK   00003_nodes_ports.sql (37.25ms)
+2026/11/08 16:09:57 OK   00004_entry_group_domains.sql (4.49ms)
+2026/11/08 16:09:57 OK   00005_rules_compile.sql (34.91ms)
+2026/11/08 16:09:57 OK   00006_packages_entitlements.sql (27.4ms)
+2026/11/08 16:09:57 OK   00007_metering_ledger.sql (32.1ms)
+2026/11/08 16:09:57 OK   00008_limits_shares.sql (50.27ms)
+2026/11/08 16:09:57 goose: successfully migrated database to version: 8
+    hub_runtime_lease_transport_test.go:225: actual60s runtime/share refresh, actual Agent FULL install, independent role mTLS, FULL receipt/PG ACK loss and replay, no additional Node/PG credit
+--- PASS: TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts (67.35s)
+PASS
+ok  	vortex/backend/internal/service	69.097s

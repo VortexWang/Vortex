@@ -79,3 +79,48 @@ func TestControlSequenceExhaustionPersistsAcrossReopen(t *testing.T) {
 		t.Fatalf("sequence mutated: %s %v", v, err)
 	}
 }
+
+// Force a backend heartbeat commit between the old caller-time sample and the
+// eventual snapshot read. The observer must keep one consistent read snapshot
+// and sample time afterward; neither a future heartbeat nor a stale signer may
+// be repaired by fabricating authority.
+func TestHubControlObservationPinsSnapshotBeforeClock(t *testing.T) {
+	ctx := context.Background()
+	s, d, base, path := issuerFixture(t)
+	defer s.Close()
+	writer, err := Open(path, "hub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer writer.Close()
+	advanced := base.Latest.Add(time.Millisecond)
+	calls := 0
+	got, err := s.ObserveHubControlSnapshot(ctx, d.HubID, func() IssuerTime {
+		calls++
+		if err := writer.RecordBackendHeartbeat(ctx, advanced, d.AutonomyDeadline); err != nil {
+			t.Fatal(err)
+		}
+		return base
+	})
+	if err != nil || calls != 1 || got.Mode != "online" || !got.BackendHeartbeat.Equal(d.BackendHeartbeat) || !got.Deadline.Equal(d.AutonomyDeadline) {
+		t.Fatal("mixed observation snapshot/time", got, calls, err)
+	}
+	stale, err := s.HubControlSnapshot(ctx, d.HubID, base.Latest)
+	if err != nil || stale.Mode != "blocked" {
+		t.Fatal("future durable heartbeat was accepted", stale, err)
+	}
+	fresh := IssuerTime{Earliest: advanced, Latest: advanced, Trusted: true}
+	got, err = s.ObserveHubControlSnapshot(ctx, d.HubID, func() IssuerTime { return fresh })
+	if err != nil || got.Mode != "online" || !got.BackendHeartbeat.Equal(advanced) || !got.Deadline.Equal(d.AutonomyDeadline) {
+		t.Fatal(got, err)
+	}
+	for _, clock := range []func() IssuerTime{nil, func() IssuerTime { v := fresh; v.Trusted = false; return v }, func() IssuerTime { v := fresh; v.Latest = v.Earliest.Add(-time.Second); return v }} {
+		if _, err := s.ObserveHubControlSnapshot(ctx, d.HubID, clock); err != ErrAuthorityTimeUncertain {
+			t.Fatal("untrusted observation", err)
+		}
+	}
+	deadline, err := s.AgentState(ctx, "autonomy_deadline")
+	if err != nil || deadline != d.AutonomyDeadline.UTC().Format(time.RFC3339Nano) {
+		t.Fatal("observation changed original deadline", deadline, err)
+	}
+}

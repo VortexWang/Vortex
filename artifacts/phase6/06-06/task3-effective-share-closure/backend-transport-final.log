@@ -1,0 +1,27 @@
+=== RUN   TestRecoveredShareIssuerRenewalClosureOriginalProofAndCAS
+2026/11/08 23:31:06 goose: no migrations to run. current version: 8
+2026/11/08 23:31:06 OK   00001_authority.sql (14.31ms)
+2026/11/08 23:31:06 OK   00002_tenant_policy.sql (9.76ms)
+2026/11/08 23:31:06 OK   00003_nodes_ports.sql (22.98ms)
+2026/11/08 23:31:06 OK   00004_entry_group_domains.sql (3.16ms)
+2026/11/08 23:31:06 OK   00005_rules_compile.sql (21.73ms)
+2026/11/08 23:31:06 OK   00006_packages_entitlements.sql (22.23ms)
+2026/11/08 23:31:06 OK   00007_metering_ledger.sql (29.1ms)
+2026/11/08 23:31:06 OK   00008_limits_shares.sql (80.01ms)
+2026/11/08 23:31:06 goose: successfully migrated database to version: 8
+--- PASS: TestRecoveredShareIssuerRenewalClosureOriginalProofAndCAS (1.78s)
+=== RUN   TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay
+2026/11/08 23:31:08 goose: no migrations to run. current version: 8
+2026/11/08 23:31:08 OK   00001_authority.sql (9.03ms)
+2026/11/08 23:31:08 OK   00002_tenant_policy.sql (9.21ms)
+2026/11/08 23:31:08 OK   00003_nodes_ports.sql (20.81ms)
+2026/11/08 23:31:08 OK   00004_entry_group_domains.sql (2.64ms)
+2026/11/08 23:31:08 OK   00005_rules_compile.sql (25.25ms)
+2026/11/08 23:31:08 OK   00006_packages_entitlements.sql (34.4ms)
+2026/11/08 23:31:08 OK   00007_metering_ledger.sql (22.44ms)
+2026/11/08 23:31:08 OK   00008_limits_shares.sql (47.2ms)
+2026/11/08 23:31:08 goose: successfully migrated database to version: 8
+    share_effective_transport_test.go:64: first disconnect rpc error: code = Unknown desc = injected lost FULL closure receipt before PG
+--- PASS: TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay (1.33s)
+PASS
+ok  	vortex/backend/internal/service	4.811s

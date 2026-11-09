@@ -1,0 +1,18 @@
+uname -srm
+Darwin 25.5.0 arm64
+/Users/peng/.local/go/bin/go version
+go version go1.27.3 darwin/arm64
+/tmp/vortex-phase6-tools/sqlc version
+v1.31.1
+/tmp/vortex0603-generators/bin/protoc --version
+libprotoc 36.2
+/tmp/vortex0603-generators/bin/protoc-gen-go --version
+protoc-gen-go v1.36.12
+/tmp/vortex0603-generators/bin/protoc-gen-go-grpc --version
+protoc-gen-go-grpc 1.6.2
+docker version --format {{.Client.Version}}/{{.Server.Version}}
+29.8.2/29.8.2
+docker compose version --short
+5.5.0
+docker info --format {{.Architecture}}/{{.OSType}}
+aarch64/linux

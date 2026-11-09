@@ -39,6 +39,48 @@ func (r *UsageRelay) AcceptKnown(ctx context.Context, node, boot string, b *cont
 	return r.ackBoundary(ctx, store.HubUsage{NodeID: node, BootID: boot, BatchID: b.BatchId, Kind: "known", Payload: payload, Digest: digest[:]})
 }
 
+// AcceptEnvelope persists the actual authenticated report sequence. Existing
+// AcceptKnown/AcceptUnknown callers without provenance stay compatible locally;
+// the production backend refuses sequence-zero legacy facts rather than invent it.
+func (r *UsageRelay) AcceptEnvelope(ctx context.Context, m *controlv1.NodeMessage) error {
+	if r == nil || r.Store == nil || m == nil || m.NodeId == "" || m.BootId == "" || m.Sequence == 0 {
+		return store.ErrUsageOriginMissing
+	}
+	var b store.HubUsage
+	if known := m.GetUsageBatch(); known != nil {
+		payload, e := proto.MarshalOptions{Deterministic: true}.Marshal(known)
+		if e != nil {
+			return e
+		}
+		if e = r.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, SnapshotID: known.BillingSnapshotId, Payload: payload}); e != nil {
+			return e
+		}
+		digest := sha256.Sum256(payload)
+		b = store.HubUsage{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, Kind: "known", Payload: payload, Digest: digest[:]}
+	} else if unknown := m.GetUnknownUsageBatch(); unknown != nil {
+		payload, e := contracts.EncodeUnknownUsage(unknown)
+		if e != nil {
+			return e
+		}
+		if e = r.Store.PersistUnknownUsage(ctx, m.NodeId, payload); e != nil {
+			return e
+		}
+		digest := sha256.Sum256(payload)
+		b = store.HubUsage{NodeID: m.NodeId, BootID: unknown.OriginBootId, BatchID: unknown.BatchId, Kind: "unknown", Payload: payload, Digest: digest[:]}
+	} else {
+		return store.ErrUsageOriginMissing
+	}
+	if e := r.Store.RecordUsageOrigin(ctx, b.NodeID, b.BatchID, m.BootId, m.Sequence, b.Payload); e != nil {
+		return e
+	}
+	boot, seq, e := r.Store.UsageOrigin(ctx, b.NodeID, b.BatchID)
+	if e != nil {
+		return e
+	}
+	b.ReportBootID, b.Sequence = boot, seq
+	return r.ackBoundary(ctx, b)
+}
+
 func (r *UsageRelay) AcceptUnknown(ctx context.Context, node string, b *controlv1.UnknownUsageBatch) error {
 	if r == nil || r.Store == nil {
 		return fmt.Errorf("hub: missing durable usage store")

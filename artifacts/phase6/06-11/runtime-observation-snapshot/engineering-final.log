@@ -1,0 +1,34 @@
+.........{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+OpenAPI lint passed: 45 business operations; explicit rotating refresh exception only
+.................
+----------------------------------------------------------------------
+Ran 26 tests in 3.676s
+
+OK

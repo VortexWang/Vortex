@@ -89,6 +89,12 @@ type NodeMessage struct {
 	//	*NodeMessage_LifecycleHello
 	//	*NodeMessage_NodeReport
 	//	*NodeMessage_RenewalRequest
+	//	*NodeMessage_RuleReceipt
+	//	*NodeMessage_ShareReceipt
+	//	*NodeMessage_SourceProvisionReceipt
+	//	*NodeMessage_CreditCloseReceipt
+	//	*NodeMessage_NodeBootRecoveryReceipt
+	//	*NodeMessage_RecoveryCreditFenceReceipt
 	//	*NodeMessage_CreditDemand
 	Body          isNodeMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
@@ -234,6 +240,60 @@ func (x *NodeMessage) GetRenewalRequest() *RenewalRequest {
 	return nil
 }
 
+func (x *NodeMessage) GetRuleReceipt() *RuleReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_RuleReceipt); ok {
+			return x.RuleReceipt
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetShareReceipt() *ShareReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_ShareReceipt); ok {
+			return x.ShareReceipt
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetSourceProvisionReceipt() *SourceProvisionReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_SourceProvisionReceipt); ok {
+			return x.SourceProvisionReceipt
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetCreditCloseReceipt() *CreditCloseReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_CreditCloseReceipt); ok {
+			return x.CreditCloseReceipt
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetNodeBootRecoveryReceipt() *NodeBootRecoveryReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_NodeBootRecoveryReceipt); ok {
+			return x.NodeBootRecoveryReceipt
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetRecoveryCreditFenceReceipt() *RecoveryCreditFenceReceipt {
+	if x != nil {
+		if x, ok := x.Body.(*NodeMessage_RecoveryCreditFenceReceipt); ok {
+			return x.RecoveryCreditFenceReceipt
+		}
+	}
+	return nil
+}
+
 func (x *NodeMessage) GetCreditDemand() *CreditDemand {
 	if x != nil {
 		if x, ok := x.Body.(*NodeMessage_CreditDemand); ok {
@@ -283,6 +343,30 @@ type NodeMessage_RenewalRequest struct {
 	RenewalRequest *RenewalRequest `protobuf:"bytes,18,opt,name=renewal_request,json=renewalRequest,proto3,oneof"`
 }
 
+type NodeMessage_RuleReceipt struct {
+	RuleReceipt *RuleReceipt `protobuf:"bytes,19,opt,name=rule_receipt,json=ruleReceipt,proto3,oneof"`
+}
+
+type NodeMessage_ShareReceipt struct {
+	ShareReceipt *ShareReceipt `protobuf:"bytes,20,opt,name=share_receipt,json=shareReceipt,proto3,oneof"`
+}
+
+type NodeMessage_SourceProvisionReceipt struct {
+	SourceProvisionReceipt *SourceProvisionReceipt `protobuf:"bytes,21,opt,name=source_provision_receipt,json=sourceProvisionReceipt,proto3,oneof"`
+}
+
+type NodeMessage_CreditCloseReceipt struct {
+	CreditCloseReceipt *CreditCloseReceipt `protobuf:"bytes,22,opt,name=credit_close_receipt,json=creditCloseReceipt,proto3,oneof"`
+}
+
+type NodeMessage_NodeBootRecoveryReceipt struct {
+	NodeBootRecoveryReceipt *NodeBootRecoveryReceipt `protobuf:"bytes,23,opt,name=node_boot_recovery_receipt,json=nodeBootRecoveryReceipt,proto3,oneof"`
+}
+
+type NodeMessage_RecoveryCreditFenceReceipt struct {
+	RecoveryCreditFenceReceipt *RecoveryCreditFenceReceipt `protobuf:"bytes,24,opt,name=recovery_credit_fence_receipt,json=recoveryCreditFenceReceipt,proto3,oneof"`
+}
+
 type NodeMessage_CreditDemand struct {
 	// Explicit experimental legacy fixture only; never alias lifecycle tag 16.
 	CreditDemand *CreditDemand `protobuf:"bytes,100,opt,name=credit_demand,json=creditDemand,proto3,oneof"`
@@ -306,6 +390,18 @@ func (*NodeMessage_NodeReport) isNodeMessage_Body() {}
 
 func (*NodeMessage_RenewalRequest) isNodeMessage_Body() {}
 
+func (*NodeMessage_RuleReceipt) isNodeMessage_Body() {}
+
+func (*NodeMessage_ShareReceipt) isNodeMessage_Body() {}
+
+func (*NodeMessage_SourceProvisionReceipt) isNodeMessage_Body() {}
+
+func (*NodeMessage_CreditCloseReceipt) isNodeMessage_Body() {}
+
+func (*NodeMessage_NodeBootRecoveryReceipt) isNodeMessage_Body() {}
+
+func (*NodeMessage_RecoveryCreditFenceReceipt) isNodeMessage_Body() {}
+
 func (*NodeMessage_CreditDemand) isNodeMessage_Body() {}
 
 type ControlMessage struct {
@@ -322,6 +418,12 @@ type ControlMessage struct {
 	//	*ControlMessage_HubStatus
 	//	*ControlMessage_RenewalResult
 	//	*ControlMessage_CredentialRevocations
+	//	*ControlMessage_RuleCommand
+	//	*ControlMessage_ShareCommand
+	//	*ControlMessage_SourceProvisionCommand
+	//	*ControlMessage_CreditCloseCommand
+	//	*ControlMessage_NodeBootRecoveryCommand
+	//	*ControlMessage_RecoveryCreditFenceCommand
 	//	*ControlMessage_CreditDemandDenied
 	Body          isControlMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
@@ -451,6 +553,60 @@ func (x *ControlMessage) GetCredentialRevocations() *CredentialRevocations {
 	return nil
 }
 
+func (x *ControlMessage) GetRuleCommand() *RuleCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_RuleCommand); ok {
+			return x.RuleCommand
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetShareCommand() *ShareCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_ShareCommand); ok {
+			return x.ShareCommand
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetSourceProvisionCommand() *SourceProvisionCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_SourceProvisionCommand); ok {
+			return x.SourceProvisionCommand
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetCreditCloseCommand() *CreditCloseCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_CreditCloseCommand); ok {
+			return x.CreditCloseCommand
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetNodeBootRecoveryCommand() *NodeBootRecoveryCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_NodeBootRecoveryCommand); ok {
+			return x.NodeBootRecoveryCommand
+		}
+	}
+	return nil
+}
+
+func (x *ControlMessage) GetRecoveryCreditFenceCommand() *RecoveryCreditFenceCommand {
+	if x != nil {
+		if x, ok := x.Body.(*ControlMessage_RecoveryCreditFenceCommand); ok {
+			return x.RecoveryCreditFenceCommand
+		}
+	}
+	return nil
+}
+
 func (x *ControlMessage) GetCreditDemandDenied() *CreditDemandDenied {
 	if x != nil {
 		if x, ok := x.Body.(*ControlMessage_CreditDemandDenied); ok {
@@ -496,6 +652,30 @@ type ControlMessage_CredentialRevocations struct {
 	CredentialRevocations *CredentialRevocations `protobuf:"bytes,17,opt,name=credential_revocations,json=credentialRevocations,proto3,oneof"`
 }
 
+type ControlMessage_RuleCommand struct {
+	RuleCommand *RuleCommand `protobuf:"bytes,18,opt,name=rule_command,json=ruleCommand,proto3,oneof"`
+}
+
+type ControlMessage_ShareCommand struct {
+	ShareCommand *ShareCommand `protobuf:"bytes,19,opt,name=share_command,json=shareCommand,proto3,oneof"`
+}
+
+type ControlMessage_SourceProvisionCommand struct {
+	SourceProvisionCommand *SourceProvisionCommand `protobuf:"bytes,20,opt,name=source_provision_command,json=sourceProvisionCommand,proto3,oneof"`
+}
+
+type ControlMessage_CreditCloseCommand struct {
+	CreditCloseCommand *CreditCloseCommand `protobuf:"bytes,21,opt,name=credit_close_command,json=creditCloseCommand,proto3,oneof"`
+}
+
+type ControlMessage_NodeBootRecoveryCommand struct {
+	NodeBootRecoveryCommand *NodeBootRecoveryCommand `protobuf:"bytes,22,opt,name=node_boot_recovery_command,json=nodeBootRecoveryCommand,proto3,oneof"`
+}
+
+type ControlMessage_RecoveryCreditFenceCommand struct {
+	RecoveryCreditFenceCommand *RecoveryCreditFenceCommand `protobuf:"bytes,23,opt,name=recovery_credit_fence_command,json=recoveryCreditFenceCommand,proto3,oneof"`
+}
+
 type ControlMessage_CreditDemandDenied struct {
 	// Explicit experimental legacy fixture only; never alias HubStatus tag 15.
 	CreditDemandDenied *CreditDemandDenied `protobuf:"bytes,100,opt,name=credit_demand_denied,json=creditDemandDenied,proto3,oneof"`
@@ -516,6 +696,18 @@ func (*ControlMessage_HubStatus) isControlMessage_Body() {}
 func (*ControlMessage_RenewalResult) isControlMessage_Body() {}
 
 func (*ControlMessage_CredentialRevocations) isControlMessage_Body() {}
+
+func (*ControlMessage_RuleCommand) isControlMessage_Body() {}
+
+func (*ControlMessage_ShareCommand) isControlMessage_Body() {}
+
+func (*ControlMessage_SourceProvisionCommand) isControlMessage_Body() {}
+
+func (*ControlMessage_CreditCloseCommand) isControlMessage_Body() {}
+
+func (*ControlMessage_NodeBootRecoveryCommand) isControlMessage_Body() {}
+
+func (*ControlMessage_RecoveryCreditFenceCommand) isControlMessage_Body() {}
 
 func (*ControlMessage_CreditDemandDenied) isControlMessage_Body() {}
 
@@ -643,6 +835,7 @@ type Heartbeat struct {
 	state                protoimpl.MessageState `protogen:"open.v1"`
 	AppliedConfigVersion uint64                 `protobuf:"varint,1,opt,name=applied_config_version,json=appliedConfigVersion,proto3" json:"applied_config_version,omitempty"`
 	ObservedAt           string                 `protobuf:"bytes,2,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Capabilities         []string               `protobuf:"bytes,3,rep,name=capabilities,proto3" json:"capabilities,omitempty"` // additive 1.4: rule-two-phase-v1
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -689,6 +882,13 @@ func (x *Heartbeat) GetObservedAt() string {
 		return x.ObservedAt
 	}
 	return ""
+}
+
+func (x *Heartbeat) GetCapabilities() []string {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
 }
 
 type UsageBatch struct {
@@ -1251,6 +1451,232 @@ func (x *RuntimeConfigUpdate) GetExpectedVersion() uint64 {
 	return 0
 }
 
+// RuleCommand is an additive, explicitly phased control path. Older 1.3
+// readers never receive this oneof; they continue to use RuntimeConfigUpdate.
+type RuleCommand struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // prepare, commit, query, abort, release
+	TransactionId     []byte                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	TaskKey           string                 `protobuf:"bytes,3,opt,name=task_key,json=taskKey,proto3" json:"task_key,omitempty"`
+	TargetRevision    uint64                 `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	IdempotencyKey    string                 `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	ArtifactSha256    []byte                 `protobuf:"bytes,6,opt,name=artifact_sha256,json=artifactSha256,proto3" json:"artifact_sha256,omitempty"`
+	FencingGeneration uint64                 `protobuf:"varint,7,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
+	Payload           []byte                 `protobuf:"bytes,8,opt,name=payload,proto3" json:"payload,omitempty"`
+	ExpectedVersion   uint64                 `protobuf:"varint,9,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RuleCommand) Reset() {
+	*x = RuleCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleCommand) ProtoMessage() {}
+
+func (x *RuleCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleCommand.ProtoReflect.Descriptor instead.
+func (*RuleCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RuleCommand) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetTransactionId() []byte {
+	if x != nil {
+		return x.TransactionId
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetTaskKey() string {
+	if x != nil {
+		return x.TaskKey
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetTargetRevision() uint64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RuleCommand) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *RuleCommand) GetArtifactSha256() []byte {
+	if x != nil {
+		return x.ArtifactSha256
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetFencingGeneration() uint64 {
+	if x != nil {
+		return x.FencingGeneration
+	}
+	return 0
+}
+
+func (x *RuleCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *RuleCommand) GetExpectedVersion() uint64 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+type RuleReceipt struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Phase             string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"`
+	TransactionId     []byte                 `protobuf:"bytes,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	TaskKey           string                 `protobuf:"bytes,3,opt,name=task_key,json=taskKey,proto3" json:"task_key,omitempty"`
+	TargetRevision    uint64                 `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	IdempotencyKey    string                 `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	ArtifactSha256    []byte                 `protobuf:"bytes,6,opt,name=artifact_sha256,json=artifactSha256,proto3" json:"artifact_sha256,omitempty"`
+	FencingGeneration uint64                 `protobuf:"varint,7,opt,name=fencing_generation,json=fencingGeneration,proto3" json:"fencing_generation,omitempty"`
+	State             string                 `protobuf:"bytes,8,opt,name=state,proto3" json:"state,omitempty"` // prepared, active, aborted, released, failed, unknown
+	ErrorCode         string                 `protobuf:"bytes,9,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	Payload           []byte                 `protobuf:"bytes,10,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RuleReceipt) Reset() {
+	*x = RuleReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleReceipt) ProtoMessage() {}
+
+func (x *RuleReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleReceipt.ProtoReflect.Descriptor instead.
+func (*RuleReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RuleReceipt) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetTransactionId() []byte {
+	if x != nil {
+		return x.TransactionId
+	}
+	return nil
+}
+
+func (x *RuleReceipt) GetTaskKey() string {
+	if x != nil {
+		return x.TaskKey
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetTargetRevision() uint64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RuleReceipt) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetArtifactSha256() []byte {
+	if x != nil {
+		return x.ArtifactSha256
+	}
+	return nil
+}
+
+func (x *RuleReceipt) GetFencingGeneration() uint64 {
+	if x != nil {
+		return x.FencingGeneration
+	}
+	return 0
+}
+
+func (x *RuleReceipt) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetErrorCode() string {
+	if x != nil {
+		return x.ErrorCode
+	}
+	return ""
+}
+
+func (x *RuleReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
 type AuthorizationUpdate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Generation    uint64                 `protobuf:"varint,1,opt,name=generation,proto3" json:"generation,omitempty"`
@@ -1261,7 +1687,7 @@ type AuthorizationUpdate struct {
 
 func (x *AuthorizationUpdate) Reset() {
 	*x = AuthorizationUpdate{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1273,7 +1699,7 @@ func (x *AuthorizationUpdate) String() string {
 func (*AuthorizationUpdate) ProtoMessage() {}
 
 func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[13]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1286,7 +1712,7 @@ func (x *AuthorizationUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizationUpdate.ProtoReflect.Descriptor instead.
 func (*AuthorizationUpdate) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{13}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AuthorizationUpdate) GetGeneration() uint64 {
@@ -1314,7 +1740,7 @@ type NodeEvent struct {
 
 func (x *NodeEvent) Reset() {
 	*x = NodeEvent{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1326,7 +1752,7 @@ func (x *NodeEvent) String() string {
 func (*NodeEvent) ProtoMessage() {}
 
 func (x *NodeEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[14]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1339,7 +1765,7 @@ func (x *NodeEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeEvent.ProtoReflect.Descriptor instead.
 func (*NodeEvent) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{14}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *NodeEvent) GetEventId() string {
@@ -1376,7 +1802,7 @@ type LifecycleHello struct {
 
 func (x *LifecycleHello) Reset() {
 	*x = LifecycleHello{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1388,7 +1814,7 @@ func (x *LifecycleHello) String() string {
 func (*LifecycleHello) ProtoMessage() {}
 
 func (x *LifecycleHello) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[15]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1401,7 +1827,7 @@ func (x *LifecycleHello) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LifecycleHello.ProtoReflect.Descriptor instead.
 func (*LifecycleHello) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{15}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LifecycleHello) GetControlVersion() string {
@@ -1446,7 +1872,7 @@ type ProbeObservation struct {
 
 func (x *ProbeObservation) Reset() {
 	*x = ProbeObservation{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1458,7 +1884,7 @@ func (x *ProbeObservation) String() string {
 func (*ProbeObservation) ProtoMessage() {}
 
 func (x *ProbeObservation) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[16]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1471,7 +1897,7 @@ func (x *ProbeObservation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProbeObservation.ProtoReflect.Descriptor instead.
 func (*ProbeObservation) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{16}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ProbeObservation) GetTargetId() string {
@@ -1531,7 +1957,7 @@ type NodeReport struct {
 
 func (x *NodeReport) Reset() {
 	*x = NodeReport{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1543,7 +1969,7 @@ func (x *NodeReport) String() string {
 func (*NodeReport) ProtoMessage() {}
 
 func (x *NodeReport) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[17]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1556,7 +1982,7 @@ func (x *NodeReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeReport.ProtoReflect.Descriptor instead.
 func (*NodeReport) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{17}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *NodeReport) GetReportId() string {
@@ -1630,7 +2056,7 @@ type HubStatus struct {
 
 func (x *HubStatus) Reset() {
 	*x = HubStatus{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1642,7 +2068,7 @@ func (x *HubStatus) String() string {
 func (*HubStatus) ProtoMessage() {}
 
 func (x *HubStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[18]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1655,7 +2081,7 @@ func (x *HubStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HubStatus.ProtoReflect.Descriptor instead.
 func (*HubStatus) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{18}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *HubStatus) GetHubId() string {
@@ -1778,7 +2204,7 @@ type RenewalRequest struct {
 
 func (x *RenewalRequest) Reset() {
 	*x = RenewalRequest{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1790,7 +2216,7 @@ func (x *RenewalRequest) String() string {
 func (*RenewalRequest) ProtoMessage() {}
 
 func (x *RenewalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[19]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1803,7 +2229,7 @@ func (x *RenewalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenewalRequest.ProtoReflect.Descriptor instead.
 func (*RenewalRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{19}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RenewalRequest) GetRequestId() string {
@@ -1917,7 +2343,7 @@ type RenewalResult struct {
 
 func (x *RenewalResult) Reset() {
 	*x = RenewalResult{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1929,7 +2355,7 @@ func (x *RenewalResult) String() string {
 func (*RenewalResult) ProtoMessage() {}
 
 func (x *RenewalResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[20]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1942,7 +2368,7 @@ func (x *RenewalResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenewalResult.ProtoReflect.Descriptor instead.
 func (*RenewalResult) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{20}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RenewalResult) GetRequestId() string {
@@ -1993,7 +2419,7 @@ type CredentialRevocations struct {
 
 func (x *CredentialRevocations) Reset() {
 	*x = CredentialRevocations{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2005,7 +2431,7 @@ func (x *CredentialRevocations) String() string {
 func (*CredentialRevocations) ProtoMessage() {}
 
 func (x *CredentialRevocations) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[21]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2018,7 +2444,7 @@ func (x *CredentialRevocations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialRevocations.ProtoReflect.Descriptor instead.
 func (*CredentialRevocations) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{21}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CredentialRevocations) GetIssuerId() string {
@@ -2066,6 +2492,8 @@ type HubMessage struct {
 	//	*HubMessage_LifecycleHello
 	//	*HubMessage_Status
 	//	*HubMessage_LedgerRecord
+	//	*HubMessage_RecoveryRecord
+	//	*HubMessage_RecoveryManifest
 	Body          isHubMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2073,7 +2501,7 @@ type HubMessage struct {
 
 func (x *HubMessage) Reset() {
 	*x = HubMessage{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2085,7 +2513,7 @@ func (x *HubMessage) String() string {
 func (*HubMessage) ProtoMessage() {}
 
 func (x *HubMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[22]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2098,7 +2526,7 @@ func (x *HubMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HubMessage.ProtoReflect.Descriptor instead.
 func (*HubMessage) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{22}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *HubMessage) GetHubId() string {
@@ -2156,6 +2584,24 @@ func (x *HubMessage) GetLedgerRecord() *LedgerRecord {
 	return nil
 }
 
+func (x *HubMessage) GetRecoveryRecord() *HubRecoveryRecord {
+	if x != nil {
+		if x, ok := x.Body.(*HubMessage_RecoveryRecord); ok {
+			return x.RecoveryRecord
+		}
+	}
+	return nil
+}
+
+func (x *HubMessage) GetRecoveryManifest() *HubRecoveryManifest {
+	if x != nil {
+		if x, ok := x.Body.(*HubMessage_RecoveryManifest); ok {
+			return x.RecoveryManifest
+		}
+	}
+	return nil
+}
+
 type isHubMessage_Body interface {
 	isHubMessage_Body()
 }
@@ -2172,11 +2618,23 @@ type HubMessage_LedgerRecord struct {
 	LedgerRecord *LedgerRecord `protobuf:"bytes,12,opt,name=ledger_record,json=ledgerRecord,proto3,oneof"`
 }
 
+type HubMessage_RecoveryRecord struct {
+	RecoveryRecord *HubRecoveryRecord `protobuf:"bytes,13,opt,name=recovery_record,json=recoveryRecord,proto3,oneof"`
+}
+
+type HubMessage_RecoveryManifest struct {
+	RecoveryManifest *HubRecoveryManifest `protobuf:"bytes,14,opt,name=recovery_manifest,json=recoveryManifest,proto3,oneof"`
+}
+
 func (*HubMessage_LifecycleHello) isHubMessage_Body() {}
 
 func (*HubMessage_Status) isHubMessage_Body() {}
 
 func (*HubMessage_LedgerRecord) isHubMessage_Body() {}
+
+func (*HubMessage_RecoveryRecord) isHubMessage_Body() {}
+
+func (*HubMessage_RecoveryManifest) isHubMessage_Body() {}
 
 type LedgerRecord struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -2191,7 +2649,7 @@ type LedgerRecord struct {
 
 func (x *LedgerRecord) Reset() {
 	*x = LedgerRecord{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2203,7 +2661,7 @@ func (x *LedgerRecord) String() string {
 func (*LedgerRecord) ProtoMessage() {}
 
 func (x *LedgerRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[23]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2216,7 +2674,7 @@ func (x *LedgerRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LedgerRecord.ProtoReflect.Descriptor instead.
 func (*LedgerRecord) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{23}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *LedgerRecord) GetRecordId() string {
@@ -2267,6 +2725,10 @@ type BackendMessage struct {
 	//	*BackendMessage_Error
 	//	*BackendMessage_AuthorityRestrictions
 	//	*BackendMessage_EpochHandoffRequest
+	//	*BackendMessage_ShareRenewalClosure
+	//	*BackendMessage_RecoveryCommand
+	//	*BackendMessage_RecoveryRetention
+	//	*BackendMessage_RecoveryAdmission
 	Body          isBackendMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2274,7 +2736,7 @@ type BackendMessage struct {
 
 func (x *BackendMessage) Reset() {
 	*x = BackendMessage{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2286,7 +2748,7 @@ func (x *BackendMessage) String() string {
 func (*BackendMessage) ProtoMessage() {}
 
 func (x *BackendMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[24]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2299,7 +2761,7 @@ func (x *BackendMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendMessage.ProtoReflect.Descriptor instead.
 func (*BackendMessage) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{24}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *BackendMessage) GetMessageId() string {
@@ -2386,6 +2848,42 @@ func (x *BackendMessage) GetEpochHandoffRequest() *EpochHandoffRequest {
 	return nil
 }
 
+func (x *BackendMessage) GetShareRenewalClosure() *ShareRenewalClosureCommand {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_ShareRenewalClosure); ok {
+			return x.ShareRenewalClosure
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetRecoveryCommand() *HubRecoveryCommand {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_RecoveryCommand); ok {
+			return x.RecoveryCommand
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetRecoveryRetention() *HubRecoveryRetention {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_RecoveryRetention); ok {
+			return x.RecoveryRetention
+		}
+	}
+	return nil
+}
+
+func (x *BackendMessage) GetRecoveryAdmission() *HubRecoveryAdmission {
+	if x != nil {
+		if x, ok := x.Body.(*BackendMessage_RecoveryAdmission); ok {
+			return x.RecoveryAdmission
+		}
+	}
+	return nil
+}
+
 type isBackendMessage_Body interface {
 	isBackendMessage_Body()
 }
@@ -2418,6 +2916,22 @@ type BackendMessage_EpochHandoffRequest struct {
 	EpochHandoffRequest *EpochHandoffRequest `protobuf:"bytes,16,opt,name=epoch_handoff_request,json=epochHandoffRequest,proto3,oneof"`
 }
 
+type BackendMessage_ShareRenewalClosure struct {
+	ShareRenewalClosure *ShareRenewalClosureCommand `protobuf:"bytes,17,opt,name=share_renewal_closure,json=shareRenewalClosure,proto3,oneof"`
+}
+
+type BackendMessage_RecoveryCommand struct {
+	RecoveryCommand *HubRecoveryCommand `protobuf:"bytes,18,opt,name=recovery_command,json=recoveryCommand,proto3,oneof"`
+}
+
+type BackendMessage_RecoveryRetention struct {
+	RecoveryRetention *HubRecoveryRetention `protobuf:"bytes,19,opt,name=recovery_retention,json=recoveryRetention,proto3,oneof"`
+}
+
+type BackendMessage_RecoveryAdmission struct {
+	RecoveryAdmission *HubRecoveryAdmission `protobuf:"bytes,20,opt,name=recovery_admission,json=recoveryAdmission,proto3,oneof"`
+}
+
 func (*BackendMessage_Heartbeat) isBackendMessage_Body() {}
 
 func (*BackendMessage_Allocation) isBackendMessage_Body() {}
@@ -2431,6 +2945,14 @@ func (*BackendMessage_Error) isBackendMessage_Body() {}
 func (*BackendMessage_AuthorityRestrictions) isBackendMessage_Body() {}
 
 func (*BackendMessage_EpochHandoffRequest) isBackendMessage_Body() {}
+
+func (*BackendMessage_ShareRenewalClosure) isBackendMessage_Body() {}
+
+func (*BackendMessage_RecoveryCommand) isBackendMessage_Body() {}
+
+func (*BackendMessage_RecoveryRetention) isBackendMessage_Body() {}
+
+func (*BackendMessage_RecoveryAdmission) isBackendMessage_Body() {}
 
 type BackendHeartbeat struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
@@ -2448,7 +2970,7 @@ type BackendHeartbeat struct {
 
 func (x *BackendHeartbeat) Reset() {
 	*x = BackendHeartbeat{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2460,7 +2982,7 @@ func (x *BackendHeartbeat) String() string {
 func (*BackendHeartbeat) ProtoMessage() {}
 
 func (x *BackendHeartbeat) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[25]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2473,7 +2995,7 @@ func (x *BackendHeartbeat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendHeartbeat.ProtoReflect.Descriptor instead.
 func (*BackendHeartbeat) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{25}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *BackendHeartbeat) GetBackendId() string {
@@ -2543,7 +3065,7 @@ type BackendAllocation struct {
 
 func (x *BackendAllocation) Reset() {
 	*x = BackendAllocation{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2555,7 +3077,7 @@ func (x *BackendAllocation) String() string {
 func (*BackendAllocation) ProtoMessage() {}
 
 func (x *BackendAllocation) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[26]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2568,7 +3090,7 @@ func (x *BackendAllocation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendAllocation.ProtoReflect.Descriptor instead.
 func (*BackendAllocation) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{26}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *BackendAllocation) GetAllocationId() string {
@@ -2604,7 +3126,7 @@ type LedgerAcknowledgement struct {
 
 func (x *LedgerAcknowledgement) Reset() {
 	*x = LedgerAcknowledgement{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2616,7 +3138,7 @@ func (x *LedgerAcknowledgement) String() string {
 func (*LedgerAcknowledgement) ProtoMessage() {}
 
 func (x *LedgerAcknowledgement) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[27]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2629,7 +3151,7 @@ func (x *LedgerAcknowledgement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LedgerAcknowledgement.ProtoReflect.Descriptor instead.
 func (*LedgerAcknowledgement) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{27}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *LedgerAcknowledgement) GetRecordId() string {
@@ -2672,7 +3194,7 @@ type DelegationRestriction struct {
 
 func (x *DelegationRestriction) Reset() {
 	*x = DelegationRestriction{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2684,7 +3206,7 @@ func (x *DelegationRestriction) String() string {
 func (*DelegationRestriction) ProtoMessage() {}
 
 func (x *DelegationRestriction) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[28]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2697,7 +3219,7 @@ func (x *DelegationRestriction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DelegationRestriction.ProtoReflect.Descriptor instead.
 func (*DelegationRestriction) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{28}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *DelegationRestriction) GetDelegationId() string {
@@ -2743,7 +3265,7 @@ type AuthorityRestrictions struct {
 
 func (x *AuthorityRestrictions) Reset() {
 	*x = AuthorityRestrictions{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2755,7 +3277,7 @@ func (x *AuthorityRestrictions) String() string {
 func (*AuthorityRestrictions) ProtoMessage() {}
 
 func (x *AuthorityRestrictions) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[29]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2768,7 +3290,7 @@ func (x *AuthorityRestrictions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorityRestrictions.ProtoReflect.Descriptor instead.
 func (*AuthorityRestrictions) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{29}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *AuthorityRestrictions) GetRestrictionId() string {
@@ -2834,7 +3356,7 @@ type EpochHandoffRequest struct {
 
 func (x *EpochHandoffRequest) Reset() {
 	*x = EpochHandoffRequest{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2846,7 +3368,7 @@ func (x *EpochHandoffRequest) String() string {
 func (*EpochHandoffRequest) ProtoMessage() {}
 
 func (x *EpochHandoffRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[30]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2859,7 +3381,7 @@ func (x *EpochHandoffRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EpochHandoffRequest.ProtoReflect.Descriptor instead.
 func (*EpochHandoffRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{30}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *EpochHandoffRequest) GetHandoffId() string {
@@ -2919,7 +3441,7 @@ type CreditDemand struct {
 
 func (x *CreditDemand) Reset() {
 	*x = CreditDemand{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2931,7 +3453,7 @@ func (x *CreditDemand) String() string {
 func (*CreditDemand) ProtoMessage() {}
 
 func (x *CreditDemand) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[31]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2944,7 +3466,7 @@ func (x *CreditDemand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreditDemand.ProtoReflect.Descriptor instead.
 func (*CreditDemand) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{31}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *CreditDemand) GetRequestId() string {
@@ -2987,7 +3509,7 @@ type CreditDemandDenied struct {
 
 func (x *CreditDemandDenied) Reset() {
 	*x = CreditDemandDenied{}
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2999,7 +3521,7 @@ func (x *CreditDemandDenied) String() string {
 func (*CreditDemandDenied) ProtoMessage() {}
 
 func (x *CreditDemandDenied) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[32]
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3012,7 +3534,7 @@ func (x *CreditDemandDenied) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreditDemandDenied.ProtoReflect.Descriptor instead.
 func (*CreditDemandDenied) Descriptor() ([]byte, []int) {
-	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{32}
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *CreditDemandDenied) GetRequestId() string {
@@ -3029,11 +3551,1026 @@ func (x *CreditDemandDenied) GetReason() CreditDemandDenial {
 	return CreditDemandDenial_CREDIT_DEMAND_DENIAL_UNSPECIFIED
 }
 
+// Negotiated share-cas-v1 only. The immutable JSON decision is documented in
+// share-handoff.schema.json; query uses the same payload and digest as CAS.
+type ShareCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Phase         string                 `protobuf:"bytes,1,opt,name=phase,proto3" json:"phase,omitempty"` // cas, query
+	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ShareCommand) Reset() {
+	*x = ShareCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShareCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShareCommand) ProtoMessage() {}
+
+func (x *ShareCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShareCommand.ProtoReflect.Descriptor instead.
+func (*ShareCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *ShareCommand) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *ShareCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ShareCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type ShareReceipt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ShareReceipt) Reset() {
+	*x = ShareReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShareReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShareReceipt) ProtoMessage() {}
+
+func (x *ShareReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShareReceipt.ProtoReflect.Descriptor instead.
+func (*ShareReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *ShareReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ShareReceipt) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Direct backend-only source roots. Negotiated source-provision-v1; no runtime
+// lease, credit or Node activation can be inferred from this receipt.
+type SourceProvisionCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SourceProvisionCommand) Reset() {
+	*x = SourceProvisionCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SourceProvisionCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SourceProvisionCommand) ProtoMessage() {}
+
+func (x *SourceProvisionCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SourceProvisionCommand.ProtoReflect.Descriptor instead.
+func (*SourceProvisionCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *SourceProvisionCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *SourceProvisionCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type SourceProvisionReceipt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SourceProvisionReceipt) Reset() {
+	*x = SourceProvisionReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SourceProvisionReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SourceProvisionReceipt) ProtoMessage() {}
+
+func (x *SourceProvisionReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SourceProvisionReceipt.ProtoReflect.Descriptor instead.
+func (*SourceProvisionReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *SourceProvisionReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *SourceProvisionReceipt) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Direct pinned-backend only, independent credit-close-v1 capability. A final
+// Node witness never replaces backend verification of complete issue/usage.
+type CreditCloseCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreditCloseCommand) Reset() {
+	*x = CreditCloseCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreditCloseCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreditCloseCommand) ProtoMessage() {}
+
+func (x *CreditCloseCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreditCloseCommand.ProtoReflect.Descriptor instead.
+func (*CreditCloseCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *CreditCloseCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *CreditCloseCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type CreditCloseReceipt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreditCloseReceipt) Reset() {
+	*x = CreditCloseReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreditCloseReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreditCloseReceipt) ProtoMessage() {}
+
+func (x *CreditCloseReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreditCloseReceipt.ProtoReflect.Descriptor instead.
+func (*CreditCloseReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *CreditCloseReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *CreditCloseReceipt) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Opt-in share-renewal-close-v1: FULL old-delegation closure, no money release.
+type ShareRenewalClosureCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommandId     string                 `protobuf:"bytes,1,opt,name=command_id,json=commandId,proto3" json:"command_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ShareRenewalClosureCommand) Reset() {
+	*x = ShareRenewalClosureCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShareRenewalClosureCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShareRenewalClosureCommand) ProtoMessage() {}
+
+func (x *ShareRenewalClosureCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShareRenewalClosureCommand.ProtoReflect.Descriptor instead.
+func (*ShareRenewalClosureCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ShareRenewalClosureCommand) GetCommandId() string {
+	if x != nil {
+		return x.CommandId
+	}
+	return ""
+}
+
+func (x *ShareRenewalClosureCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ShareRenewalClosureCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Independent node-boot-recovery-v1, pinned direct backend only. A retirement
+// receipt is zero-capacity generation checkpointing, never an old stop/final.
+type NodeBootRecoveryCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NodeBootRecoveryCommand) Reset() {
+	*x = NodeBootRecoveryCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeBootRecoveryCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeBootRecoveryCommand) ProtoMessage() {}
+
+func (x *NodeBootRecoveryCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeBootRecoveryCommand.ProtoReflect.Descriptor instead.
+func (*NodeBootRecoveryCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *NodeBootRecoveryCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *NodeBootRecoveryCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type NodeBootRecoveryReceipt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NodeBootRecoveryReceipt) Reset() {
+	*x = NodeBootRecoveryReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeBootRecoveryReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeBootRecoveryReceipt) ProtoMessage() {}
+
+func (x *NodeBootRecoveryReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeBootRecoveryReceipt.ProtoReflect.Descriptor instead.
+func (*NodeBootRecoveryReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *NodeBootRecoveryReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *NodeBootRecoveryReceipt) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Candidate direct-backend Node inventory fence; never negotiated over a Hub link.
+type RecoveryCreditFenceCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecoveryCreditFenceCommand) Reset() {
+	*x = RecoveryCreditFenceCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecoveryCreditFenceCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecoveryCreditFenceCommand) ProtoMessage() {}
+
+func (x *RecoveryCreditFenceCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecoveryCreditFenceCommand.ProtoReflect.Descriptor instead.
+func (*RecoveryCreditFenceCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *RecoveryCreditFenceCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *RecoveryCreditFenceCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type RecoveryCreditFenceReceipt struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,2,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecoveryCreditFenceReceipt) Reset() {
+	*x = RecoveryCreditFenceReceipt{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecoveryCreditFenceReceipt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecoveryCreditFenceReceipt) ProtoMessage() {}
+
+func (x *RecoveryCreditFenceReceipt) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecoveryCreditFenceReceipt.ProtoReflect.Descriptor instead.
+func (*RecoveryCreditFenceReceipt) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *RecoveryCreditFenceReceipt) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *RecoveryCreditFenceReceipt) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Independent hub-sr-preflight-v1 stream. Retention is forensic persistence;
+// it must never be applied as a local ledger ACK or an online admission.
+type HubRecoveryCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackendId     string                 `protobuf:"bytes,1,opt,name=backend_id,json=backendId,proto3" json:"backend_id,omitempty"`
+	HubId         string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	BootId        string                 `protobuf:"bytes,3,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId      string                 `protobuf:"bytes,5,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,6,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,7,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubRecoveryCommand) Reset() {
+	*x = HubRecoveryCommand{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryCommand) ProtoMessage() {}
+
+func (x *HubRecoveryCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryCommand.ProtoReflect.Descriptor instead.
+func (*HubRecoveryCommand) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *HubRecoveryCommand) GetBackendId() string {
+	if x != nil {
+		return x.BackendId
+	}
+	return ""
+}
+
+func (x *HubRecoveryCommand) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubRecoveryCommand) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *HubRecoveryCommand) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryCommand) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryCommand) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *HubRecoveryCommand) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type HubRecoveryRecord struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RecoveryId    string                 `protobuf:"bytes,1,opt,name=recovery_id,json=recoveryId,proto3" json:"recovery_id,omitempty"`
+	Record        *LedgerRecord          `protobuf:"bytes,2,opt,name=record,proto3" json:"record,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubRecoveryRecord) Reset() {
+	*x = HubRecoveryRecord{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryRecord) ProtoMessage() {}
+
+func (x *HubRecoveryRecord) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryRecord.ProtoReflect.Descriptor instead.
+func (*HubRecoveryRecord) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *HubRecoveryRecord) GetRecoveryId() string {
+	if x != nil {
+		return x.RecoveryId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRecord) GetRecord() *LedgerRecord {
+	if x != nil {
+		return x.Record
+	}
+	return nil
+}
+
+type HubRecoveryManifest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RecoveryId    string                 `protobuf:"bytes,1,opt,name=recovery_id,json=recoveryId,proto3" json:"recovery_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,3,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubRecoveryManifest) Reset() {
+	*x = HubRecoveryManifest{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryManifest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryManifest) ProtoMessage() {}
+
+func (x *HubRecoveryManifest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryManifest.ProtoReflect.Descriptor instead.
+func (*HubRecoveryManifest) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *HubRecoveryManifest) GetRecoveryId() string {
+	if x != nil {
+		return x.RecoveryId
+	}
+	return ""
+}
+
+func (x *HubRecoveryManifest) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *HubRecoveryManifest) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+type HubRecoveryRetention struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	BackendId      string                 `protobuf:"bytes,1,opt,name=backend_id,json=backendId,proto3" json:"backend_id,omitempty"`
+	HubId          string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	BootId         string                 `protobuf:"bytes,3,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	SessionId      string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId       string                 `protobuf:"bytes,5,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	RecoveryId     string                 `protobuf:"bytes,6,opt,name=recovery_id,json=recoveryId,proto3" json:"recovery_id,omitempty"`
+	RecordId       string                 `protobuf:"bytes,7,opt,name=record_id,json=recordId,proto3" json:"record_id,omitempty"`
+	Kind           string                 `protobuf:"bytes,8,opt,name=kind,proto3" json:"kind,omitempty"`
+	LedgerSequence uint64                 `protobuf:"varint,9,opt,name=ledger_sequence,json=ledgerSequence,proto3" json:"ledger_sequence,omitempty"`
+	PayloadSha256  []byte                 `protobuf:"bytes,10,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *HubRecoveryRetention) Reset() {
+	*x = HubRecoveryRetention{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryRetention) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryRetention) ProtoMessage() {}
+
+func (x *HubRecoveryRetention) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryRetention.ProtoReflect.Descriptor instead.
+func (*HubRecoveryRetention) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *HubRecoveryRetention) GetBackendId() string {
+	if x != nil {
+		return x.BackendId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetRecoveryId() string {
+	if x != nil {
+		return x.RecoveryId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetRecordId() string {
+	if x != nil {
+		return x.RecordId
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *HubRecoveryRetention) GetLedgerSequence() uint64 {
+	if x != nil {
+		return x.LedgerSequence
+	}
+	return 0
+}
+
+func (x *HubRecoveryRetention) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
+// Separate hub-sr-admission-v1 stream; this body cannot be consumed as retention
+// or an ordinary funded LedgerAcknowledgement.
+type HubRecoveryAdmission struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackendId     string                 `protobuf:"bytes,1,opt,name=backend_id,json=backendId,proto3" json:"backend_id,omitempty"`
+	HubId         string                 `protobuf:"bytes,2,opt,name=hub_id,json=hubId,proto3" json:"hub_id,omitempty"`
+	BootId        string                 `protobuf:"bytes,3,opt,name=boot_id,json=bootId,proto3" json:"boot_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RegionId      string                 `protobuf:"bytes,5,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,6,opt,name=payload,proto3" json:"payload,omitempty"`
+	PayloadSha256 []byte                 `protobuf:"bytes,7,opt,name=payload_sha256,json=payloadSha256,proto3" json:"payload_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HubRecoveryAdmission) Reset() {
+	*x = HubRecoveryAdmission{}
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HubRecoveryAdmission) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubRecoveryAdmission) ProtoMessage() {}
+
+func (x *HubRecoveryAdmission) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_protobuf_v1_vortex_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubRecoveryAdmission.ProtoReflect.Descriptor instead.
+func (*HubRecoveryAdmission) Descriptor() ([]byte, []int) {
+	return file_contracts_protobuf_v1_vortex_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *HubRecoveryAdmission) GetBackendId() string {
+	if x != nil {
+		return x.BackendId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetHubId() string {
+	if x != nil {
+		return x.HubId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetBootId() string {
+	if x != nil {
+		return x.BootId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *HubRecoveryAdmission) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *HubRecoveryAdmission) GetPayloadSha256() []byte {
+	if x != nil {
+		return x.PayloadSha256
+	}
+	return nil
+}
+
 var File_contracts_protobuf_v1_vortex_proto protoreflect.FileDescriptor
 
 const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
-	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\x9e\x06\n" +
+	"\"contracts/protobuf/v1/vortex.proto\x12\x11vortex.control.v1\"\xcc\n" +
+	"\n" +
 	"\vNodeMessage\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x17\n" +
 	"\aboot_id\x18\x02 \x01(\tR\x06bootId\x12\x1a\n" +
@@ -3049,9 +4586,16 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0flifecycle_hello\x18\x10 \x01(\v2!.vortex.control.v1.LifecycleHelloH\x00R\x0elifecycleHello\x12@\n" +
 	"\vnode_report\x18\x11 \x01(\v2\x1d.vortex.control.v1.NodeReportH\x00R\n" +
 	"nodeReport\x12L\n" +
-	"\x0frenewal_request\x18\x12 \x01(\v2!.vortex.control.v1.RenewalRequestH\x00R\x0erenewalRequest\x12F\n" +
+	"\x0frenewal_request\x18\x12 \x01(\v2!.vortex.control.v1.RenewalRequestH\x00R\x0erenewalRequest\x12C\n" +
+	"\frule_receipt\x18\x13 \x01(\v2\x1e.vortex.control.v1.RuleReceiptH\x00R\vruleReceipt\x12F\n" +
+	"\rshare_receipt\x18\x14 \x01(\v2\x1f.vortex.control.v1.ShareReceiptH\x00R\fshareReceipt\x12e\n" +
+	"\x18source_provision_receipt\x18\x15 \x01(\v2).vortex.control.v1.SourceProvisionReceiptH\x00R\x16sourceProvisionReceipt\x12Y\n" +
+	"\x14credit_close_receipt\x18\x16 \x01(\v2%.vortex.control.v1.CreditCloseReceiptH\x00R\x12creditCloseReceipt\x12i\n" +
+	"\x1anode_boot_recovery_receipt\x18\x17 \x01(\v2*.vortex.control.v1.NodeBootRecoveryReceiptH\x00R\x17nodeBootRecoveryReceipt\x12r\n" +
+	"\x1drecovery_credit_fence_receipt\x18\x18 \x01(\v2-.vortex.control.v1.RecoveryCreditFenceReceiptH\x00R\x1arecoveryCreditFenceReceipt\x12F\n" +
 	"\rcredit_demand\x18d \x01(\v2\x1f.vortex.control.v1.CreditDemandH\x00R\fcreditDemandB\x06\n" +
-	"\x04body\"\xa6\x06\n" +
+	"\x04body\"\xd4\n" +
+	"\n" +
 	"\x0eControlMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -3065,7 +4609,13 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\n" +
 	"hub_status\x18\x0f \x01(\v2\x1c.vortex.control.v1.HubStatusH\x00R\thubStatus\x12I\n" +
 	"\x0erenewal_result\x18\x10 \x01(\v2 .vortex.control.v1.RenewalResultH\x00R\rrenewalResult\x12a\n" +
-	"\x16credential_revocations\x18\x11 \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocations\x12Y\n" +
+	"\x16credential_revocations\x18\x11 \x01(\v2(.vortex.control.v1.CredentialRevocationsH\x00R\x15credentialRevocations\x12C\n" +
+	"\frule_command\x18\x12 \x01(\v2\x1e.vortex.control.v1.RuleCommandH\x00R\vruleCommand\x12F\n" +
+	"\rshare_command\x18\x13 \x01(\v2\x1f.vortex.control.v1.ShareCommandH\x00R\fshareCommand\x12e\n" +
+	"\x18source_provision_command\x18\x14 \x01(\v2).vortex.control.v1.SourceProvisionCommandH\x00R\x16sourceProvisionCommand\x12Y\n" +
+	"\x14credit_close_command\x18\x15 \x01(\v2%.vortex.control.v1.CreditCloseCommandH\x00R\x12creditCloseCommand\x12i\n" +
+	"\x1anode_boot_recovery_command\x18\x16 \x01(\v2*.vortex.control.v1.NodeBootRecoveryCommandH\x00R\x17nodeBootRecoveryCommand\x12r\n" +
+	"\x1drecovery_credit_fence_command\x18\x17 \x01(\v2-.vortex.control.v1.RecoveryCreditFenceCommandH\x00R\x1arecoveryCreditFenceCommand\x12Y\n" +
 	"\x14credit_demand_denied\x18d \x01(\v2%.vortex.control.v1.CreditDemandDeniedH\x00R\x12creditDemandDeniedB\x06\n" +
 	"\x04body\"\x81\x01\n" +
 	"\x0fRegisterRequest\x12)\n" +
@@ -3076,11 +4626,12 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x02 \x01(\tR\tmessageId\x12\x1c\n" +
-	"\tretryable\x18\x03 \x01(\bR\tretryable\"b\n" +
+	"\tretryable\x18\x03 \x01(\bR\tretryable\"\x86\x01\n" +
 	"\tHeartbeat\x124\n" +
 	"\x16applied_config_version\x18\x01 \x01(\x04R\x14appliedConfigVersion\x12\x1f\n" +
 	"\vobserved_at\x18\x02 \x01(\tR\n" +
-	"observedAt\"\x8e\x01\n" +
+	"observedAt\x12\"\n" +
+	"\fcapabilities\x18\x03 \x03(\tR\fcapabilities\"\x8e\x01\n" +
 	"\n" +
 	"UsageBatch\x12\x19\n" +
 	"\bbatch_id\x18\x01 \x01(\tR\abatchId\x12.\n" +
@@ -3125,7 +4676,30 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0etransaction_id\x18\x03 \x01(\fR\rtransactionId\x12-\n" +
 	"\x12fencing_generation\x18\x04 \x01(\x04R\x11fencingGeneration\x12%\n" +
 	"\x0epayload_sha256\x18\x05 \x01(\fR\rpayloadSha256\x12)\n" +
-	"\x10expected_version\x18\x06 \x01(\x04R\x0fexpectedVersion\"O\n" +
+	"\x10expected_version\x18\x06 \x01(\x04R\x0fexpectedVersion\"\xd4\x02\n" +
+	"\vRuleCommand\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12%\n" +
+	"\x0etransaction_id\x18\x02 \x01(\fR\rtransactionId\x12\x19\n" +
+	"\btask_key\x18\x03 \x01(\tR\ataskKey\x12'\n" +
+	"\x0ftarget_revision\x18\x04 \x01(\x04R\x0etargetRevision\x12'\n" +
+	"\x0fidempotency_key\x18\x05 \x01(\tR\x0eidempotencyKey\x12'\n" +
+	"\x0fartifact_sha256\x18\x06 \x01(\fR\x0eartifactSha256\x12-\n" +
+	"\x12fencing_generation\x18\a \x01(\x04R\x11fencingGeneration\x12\x18\n" +
+	"\apayload\x18\b \x01(\fR\apayload\x12)\n" +
+	"\x10expected_version\x18\t \x01(\x04R\x0fexpectedVersion\"\xde\x02\n" +
+	"\vRuleReceipt\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12%\n" +
+	"\x0etransaction_id\x18\x02 \x01(\fR\rtransactionId\x12\x19\n" +
+	"\btask_key\x18\x03 \x01(\tR\ataskKey\x12'\n" +
+	"\x0ftarget_revision\x18\x04 \x01(\x04R\x0etargetRevision\x12'\n" +
+	"\x0fidempotency_key\x18\x05 \x01(\tR\x0eidempotencyKey\x12'\n" +
+	"\x0fartifact_sha256\x18\x06 \x01(\fR\x0eartifactSha256\x12-\n" +
+	"\x12fencing_generation\x18\a \x01(\x04R\x11fencingGeneration\x12\x14\n" +
+	"\x05state\x18\b \x01(\tR\x05state\x12\x1d\n" +
+	"\n" +
+	"error_code\x18\t \x01(\tR\terrorCode\x12\x18\n" +
+	"\apayload\x18\n" +
+	" \x01(\fR\apayload\"O\n" +
 	"\x13AuthorizationUpdate\x12\x1e\n" +
 	"\n" +
 	"generation\x18\x01 \x01(\x04R\n" +
@@ -3207,7 +4781,7 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\brevision\x18\x02 \x01(\x04R\brevision\x12/\n" +
 	"\x13certificate_serials\x18\x03 \x03(\tR\x12certificateSerials\x12\x19\n" +
 	"\bnode_ids\x18\x04 \x03(\tR\anodeIds\x12!\n" +
-	"\feffective_at\x18\x05 \x01(\tR\veffectiveAt\"\xae\x02\n" +
+	"\feffective_at\x18\x05 \x01(\tR\veffectiveAt\"\xd6\x03\n" +
 	"\n" +
 	"HubMessage\x12\x15\n" +
 	"\x06hub_id\x18\x01 \x01(\tR\x05hubId\x12\x17\n" +
@@ -3216,14 +4790,16 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x0flifecycle_hello\x18\n" +
 	" \x01(\v2!.vortex.control.v1.LifecycleHelloH\x00R\x0elifecycleHello\x126\n" +
 	"\x06status\x18\v \x01(\v2\x1c.vortex.control.v1.HubStatusH\x00R\x06status\x12F\n" +
-	"\rledger_record\x18\f \x01(\v2\x1f.vortex.control.v1.LedgerRecordH\x00R\fledgerRecordB\x06\n" +
+	"\rledger_record\x18\f \x01(\v2\x1f.vortex.control.v1.LedgerRecordH\x00R\fledgerRecord\x12O\n" +
+	"\x0frecovery_record\x18\r \x01(\v2$.vortex.control.v1.HubRecoveryRecordH\x00R\x0erecoveryRecord\x12U\n" +
+	"\x11recovery_manifest\x18\x0e \x01(\v2&.vortex.control.v1.HubRecoveryManifestH\x00R\x10recoveryManifestB\x06\n" +
 	"\x04body\"\xa9\x01\n" +
 	"\fLedgerRecord\x12\x1b\n" +
 	"\trecord_id\x18\x01 \x01(\tR\brecordId\x12'\n" +
 	"\x0fledger_sequence\x18\x02 \x01(\x04R\x0eledgerSequence\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload\x12%\n" +
 	"\x0epayload_sha256\x18\x04 \x01(\fR\rpayloadSha256\x12\x12\n" +
-	"\x04kind\x18\x05 \x01(\tR\x04kind\"\x88\x05\n" +
+	"\x04kind\x18\x05 \x01(\tR\x04kind\"\xf5\a\n" +
 	"\x0eBackendMessage\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
@@ -3238,7 +4814,11 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"ledger_ack\x18\r \x01(\v2(.vortex.control.v1.LedgerAcknowledgementH\x00R\tledgerAck\x127\n" +
 	"\x05error\x18\x0e \x01(\v2\x1f.vortex.control.v1.ControlErrorH\x00R\x05error\x12a\n" +
 	"\x16authority_restrictions\x18\x0f \x01(\v2(.vortex.control.v1.AuthorityRestrictionsH\x00R\x15authorityRestrictions\x12\\\n" +
-	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequestB\x06\n" +
+	"\x15epoch_handoff_request\x18\x10 \x01(\v2&.vortex.control.v1.EpochHandoffRequestH\x00R\x13epochHandoffRequest\x12c\n" +
+	"\x15share_renewal_closure\x18\x11 \x01(\v2-.vortex.control.v1.ShareRenewalClosureCommandH\x00R\x13shareRenewalClosure\x12R\n" +
+	"\x10recovery_command\x18\x12 \x01(\v2%.vortex.control.v1.HubRecoveryCommandH\x00R\x0frecoveryCommand\x12X\n" +
+	"\x12recovery_retention\x18\x13 \x01(\v2'.vortex.control.v1.HubRecoveryRetentionH\x00R\x11recoveryRetention\x12X\n" +
+	"\x12recovery_admission\x18\x14 \x01(\v2'.vortex.control.v1.HubRecoveryAdmissionH\x00R\x11recoveryAdmissionB\x06\n" +
 	"\x04body\"\xb6\x02\n" +
 	"\x10BackendHeartbeat\x12\x1d\n" +
 	"\n" +
@@ -3294,7 +4874,87 @@ const file_contracts_protobuf_v1_vortex_proto_rawDesc = "" +
 	"\x12CreditDemandDenied\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12=\n" +
-	"\x06reason\x18\x02 \x01(\x0e2%.vortex.control.v1.CreditDemandDenialR\x06reason*\xb1\x01\n" +
+	"\x06reason\x18\x02 \x01(\x0e2%.vortex.control.v1.CreditDemandDenialR\x06reason\"e\n" +
+	"\fShareCommand\x12\x14\n" +
+	"\x05phase\x18\x01 \x01(\tR\x05phase\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha256\"O\n" +
+	"\fShareReceipt\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"Y\n" +
+	"\x16SourceProvisionCommand\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"Y\n" +
+	"\x16SourceProvisionReceipt\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"U\n" +
+	"\x12CreditCloseCommand\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"U\n" +
+	"\x12CreditCloseReceipt\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"|\n" +
+	"\x1aShareRenewalClosureCommand\x12\x1d\n" +
+	"\n" +
+	"command_id\x18\x01 \x01(\tR\tcommandId\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha256\"Z\n" +
+	"\x17NodeBootRecoveryCommand\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"Z\n" +
+	"\x17NodeBootRecoveryReceipt\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"]\n" +
+	"\x1aRecoveryCreditFenceCommand\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"]\n" +
+	"\x1aRecoveryCreditFenceReceipt\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x02 \x01(\fR\rpayloadSha256\"\xe0\x01\n" +
+	"\x12HubRecoveryCommand\x12\x1d\n" +
+	"\n" +
+	"backend_id\x18\x01 \x01(\tR\tbackendId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x17\n" +
+	"\aboot_id\x18\x03 \x01(\tR\x06bootId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x05 \x01(\tR\bregionId\x12\x18\n" +
+	"\apayload\x18\x06 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\a \x01(\fR\rpayloadSha256\"m\n" +
+	"\x11HubRecoveryRecord\x12\x1f\n" +
+	"\vrecovery_id\x18\x01 \x01(\tR\n" +
+	"recoveryId\x127\n" +
+	"\x06record\x18\x02 \x01(\v2\x1f.vortex.control.v1.LedgerRecordR\x06record\"w\n" +
+	"\x13HubRecoveryManifest\x12\x1f\n" +
+	"\vrecovery_id\x18\x01 \x01(\tR\n" +
+	"recoveryId\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\x03 \x01(\fR\rpayloadSha256\"\xc3\x02\n" +
+	"\x14HubRecoveryRetention\x12\x1d\n" +
+	"\n" +
+	"backend_id\x18\x01 \x01(\tR\tbackendId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x17\n" +
+	"\aboot_id\x18\x03 \x01(\tR\x06bootId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x05 \x01(\tR\bregionId\x12\x1f\n" +
+	"\vrecovery_id\x18\x06 \x01(\tR\n" +
+	"recoveryId\x12\x1b\n" +
+	"\trecord_id\x18\a \x01(\tR\brecordId\x12\x12\n" +
+	"\x04kind\x18\b \x01(\tR\x04kind\x12'\n" +
+	"\x0fledger_sequence\x18\t \x01(\x04R\x0eledgerSequence\x12%\n" +
+	"\x0epayload_sha256\x18\n" +
+	" \x01(\fR\rpayloadSha256\"\xe2\x01\n" +
+	"\x14HubRecoveryAdmission\x12\x1d\n" +
+	"\n" +
+	"backend_id\x18\x01 \x01(\tR\tbackendId\x12\x15\n" +
+	"\x06hub_id\x18\x02 \x01(\tR\x05hubId\x12\x17\n" +
+	"\aboot_id\x18\x03 \x01(\tR\x06bootId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tregion_id\x18\x05 \x01(\tR\bregionId\x12\x18\n" +
+	"\apayload\x18\x06 \x01(\fR\apayload\x12%\n" +
+	"\x0epayload_sha256\x18\a \x01(\fR\rpayloadSha256*\xb1\x01\n" +
 	"\x12CreditDemandDenial\x12$\n" +
 	" CREDIT_DEMAND_DENIAL_UNSPECIFIED\x10\x00\x12&\n" +
 	"\"CREDIT_DEMAND_DENIAL_INVALID_SCOPE\x10\x01\x12+\n" +
@@ -3319,7 +4979,7 @@ func file_contracts_protobuf_v1_vortex_proto_rawDescGZIP() []byte {
 }
 
 var file_contracts_protobuf_v1_vortex_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_contracts_protobuf_v1_vortex_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
 var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(CreditDemandDenial)(0),             // 0: vortex.control.v1.CreditDemandDenial
 	(*NodeMessage)(nil),                 // 1: vortex.control.v1.NodeMessage
@@ -3335,72 +4995,109 @@ var file_contracts_protobuf_v1_vortex_proto_goTypes = []any{
 	(*ApplyResult)(nil),                 // 11: vortex.control.v1.ApplyResult
 	(*ObjectResult)(nil),                // 12: vortex.control.v1.ObjectResult
 	(*RuntimeConfigUpdate)(nil),         // 13: vortex.control.v1.RuntimeConfigUpdate
-	(*AuthorizationUpdate)(nil),         // 14: vortex.control.v1.AuthorizationUpdate
-	(*NodeEvent)(nil),                   // 15: vortex.control.v1.NodeEvent
-	(*LifecycleHello)(nil),              // 16: vortex.control.v1.LifecycleHello
-	(*ProbeObservation)(nil),            // 17: vortex.control.v1.ProbeObservation
-	(*NodeReport)(nil),                  // 18: vortex.control.v1.NodeReport
-	(*HubStatus)(nil),                   // 19: vortex.control.v1.HubStatus
-	(*RenewalRequest)(nil),              // 20: vortex.control.v1.RenewalRequest
-	(*RenewalResult)(nil),               // 21: vortex.control.v1.RenewalResult
-	(*CredentialRevocations)(nil),       // 22: vortex.control.v1.CredentialRevocations
-	(*HubMessage)(nil),                  // 23: vortex.control.v1.HubMessage
-	(*LedgerRecord)(nil),                // 24: vortex.control.v1.LedgerRecord
-	(*BackendMessage)(nil),              // 25: vortex.control.v1.BackendMessage
-	(*BackendHeartbeat)(nil),            // 26: vortex.control.v1.BackendHeartbeat
-	(*BackendAllocation)(nil),           // 27: vortex.control.v1.BackendAllocation
-	(*LedgerAcknowledgement)(nil),       // 28: vortex.control.v1.LedgerAcknowledgement
-	(*DelegationRestriction)(nil),       // 29: vortex.control.v1.DelegationRestriction
-	(*AuthorityRestrictions)(nil),       // 30: vortex.control.v1.AuthorityRestrictions
-	(*EpochHandoffRequest)(nil),         // 31: vortex.control.v1.EpochHandoffRequest
-	(*CreditDemand)(nil),                // 32: vortex.control.v1.CreditDemand
-	(*CreditDemandDenied)(nil),          // 33: vortex.control.v1.CreditDemandDenied
+	(*RuleCommand)(nil),                 // 14: vortex.control.v1.RuleCommand
+	(*RuleReceipt)(nil),                 // 15: vortex.control.v1.RuleReceipt
+	(*AuthorizationUpdate)(nil),         // 16: vortex.control.v1.AuthorizationUpdate
+	(*NodeEvent)(nil),                   // 17: vortex.control.v1.NodeEvent
+	(*LifecycleHello)(nil),              // 18: vortex.control.v1.LifecycleHello
+	(*ProbeObservation)(nil),            // 19: vortex.control.v1.ProbeObservation
+	(*NodeReport)(nil),                  // 20: vortex.control.v1.NodeReport
+	(*HubStatus)(nil),                   // 21: vortex.control.v1.HubStatus
+	(*RenewalRequest)(nil),              // 22: vortex.control.v1.RenewalRequest
+	(*RenewalResult)(nil),               // 23: vortex.control.v1.RenewalResult
+	(*CredentialRevocations)(nil),       // 24: vortex.control.v1.CredentialRevocations
+	(*HubMessage)(nil),                  // 25: vortex.control.v1.HubMessage
+	(*LedgerRecord)(nil),                // 26: vortex.control.v1.LedgerRecord
+	(*BackendMessage)(nil),              // 27: vortex.control.v1.BackendMessage
+	(*BackendHeartbeat)(nil),            // 28: vortex.control.v1.BackendHeartbeat
+	(*BackendAllocation)(nil),           // 29: vortex.control.v1.BackendAllocation
+	(*LedgerAcknowledgement)(nil),       // 30: vortex.control.v1.LedgerAcknowledgement
+	(*DelegationRestriction)(nil),       // 31: vortex.control.v1.DelegationRestriction
+	(*AuthorityRestrictions)(nil),       // 32: vortex.control.v1.AuthorityRestrictions
+	(*EpochHandoffRequest)(nil),         // 33: vortex.control.v1.EpochHandoffRequest
+	(*CreditDemand)(nil),                // 34: vortex.control.v1.CreditDemand
+	(*CreditDemandDenied)(nil),          // 35: vortex.control.v1.CreditDemandDenied
+	(*ShareCommand)(nil),                // 36: vortex.control.v1.ShareCommand
+	(*ShareReceipt)(nil),                // 37: vortex.control.v1.ShareReceipt
+	(*SourceProvisionCommand)(nil),      // 38: vortex.control.v1.SourceProvisionCommand
+	(*SourceProvisionReceipt)(nil),      // 39: vortex.control.v1.SourceProvisionReceipt
+	(*CreditCloseCommand)(nil),          // 40: vortex.control.v1.CreditCloseCommand
+	(*CreditCloseReceipt)(nil),          // 41: vortex.control.v1.CreditCloseReceipt
+	(*ShareRenewalClosureCommand)(nil),  // 42: vortex.control.v1.ShareRenewalClosureCommand
+	(*NodeBootRecoveryCommand)(nil),     // 43: vortex.control.v1.NodeBootRecoveryCommand
+	(*NodeBootRecoveryReceipt)(nil),     // 44: vortex.control.v1.NodeBootRecoveryReceipt
+	(*RecoveryCreditFenceCommand)(nil),  // 45: vortex.control.v1.RecoveryCreditFenceCommand
+	(*RecoveryCreditFenceReceipt)(nil),  // 46: vortex.control.v1.RecoveryCreditFenceReceipt
+	(*HubRecoveryCommand)(nil),          // 47: vortex.control.v1.HubRecoveryCommand
+	(*HubRecoveryRecord)(nil),           // 48: vortex.control.v1.HubRecoveryRecord
+	(*HubRecoveryManifest)(nil),         // 49: vortex.control.v1.HubRecoveryManifest
+	(*HubRecoveryRetention)(nil),        // 50: vortex.control.v1.HubRecoveryRetention
+	(*HubRecoveryAdmission)(nil),        // 51: vortex.control.v1.HubRecoveryAdmission
 }
 var file_contracts_protobuf_v1_vortex_proto_depIdxs = []int32{
 	5,  // 0: vortex.control.v1.NodeMessage.heartbeat:type_name -> vortex.control.v1.Heartbeat
 	6,  // 1: vortex.control.v1.NodeMessage.usage_batch:type_name -> vortex.control.v1.UsageBatch
 	11, // 2: vortex.control.v1.NodeMessage.apply_result:type_name -> vortex.control.v1.ApplyResult
-	15, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
+	17, // 3: vortex.control.v1.NodeMessage.event:type_name -> vortex.control.v1.NodeEvent
 	3,  // 4: vortex.control.v1.NodeMessage.register:type_name -> vortex.control.v1.RegisterRequest
 	9,  // 5: vortex.control.v1.NodeMessage.unknown_usage_batch:type_name -> vortex.control.v1.UnknownUsageBatch
-	16, // 6: vortex.control.v1.NodeMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
-	18, // 7: vortex.control.v1.NodeMessage.node_report:type_name -> vortex.control.v1.NodeReport
-	20, // 8: vortex.control.v1.NodeMessage.renewal_request:type_name -> vortex.control.v1.RenewalRequest
-	32, // 9: vortex.control.v1.NodeMessage.credit_demand:type_name -> vortex.control.v1.CreditDemand
-	13, // 10: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
-	8,  // 11: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
-	14, // 12: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	4,  // 13: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
-	10, // 14: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
-	19, // 15: vortex.control.v1.ControlMessage.hub_status:type_name -> vortex.control.v1.HubStatus
-	21, // 16: vortex.control.v1.ControlMessage.renewal_result:type_name -> vortex.control.v1.RenewalResult
-	22, // 17: vortex.control.v1.ControlMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
-	33, // 18: vortex.control.v1.ControlMessage.credit_demand_denied:type_name -> vortex.control.v1.CreditDemandDenied
-	7,  // 19: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
-	12, // 20: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
-	17, // 21: vortex.control.v1.NodeReport.probes:type_name -> vortex.control.v1.ProbeObservation
-	14, // 22: vortex.control.v1.RenewalResult.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
-	16, // 23: vortex.control.v1.HubMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
-	19, // 24: vortex.control.v1.HubMessage.status:type_name -> vortex.control.v1.HubStatus
-	24, // 25: vortex.control.v1.HubMessage.ledger_record:type_name -> vortex.control.v1.LedgerRecord
-	26, // 26: vortex.control.v1.BackendMessage.heartbeat:type_name -> vortex.control.v1.BackendHeartbeat
-	27, // 27: vortex.control.v1.BackendMessage.allocation:type_name -> vortex.control.v1.BackendAllocation
-	22, // 28: vortex.control.v1.BackendMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
-	28, // 29: vortex.control.v1.BackendMessage.ledger_ack:type_name -> vortex.control.v1.LedgerAcknowledgement
-	4,  // 30: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
-	30, // 31: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
-	31, // 32: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
-	29, // 33: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
-	0,  // 34: vortex.control.v1.CreditDemandDenied.reason:type_name -> vortex.control.v1.CreditDemandDenial
-	1,  // 35: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
-	23, // 36: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
-	2,  // 37: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
-	25, // 38: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
-	37, // [37:39] is the sub-list for method output_type
-	35, // [35:37] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	18, // 6: vortex.control.v1.NodeMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	20, // 7: vortex.control.v1.NodeMessage.node_report:type_name -> vortex.control.v1.NodeReport
+	22, // 8: vortex.control.v1.NodeMessage.renewal_request:type_name -> vortex.control.v1.RenewalRequest
+	15, // 9: vortex.control.v1.NodeMessage.rule_receipt:type_name -> vortex.control.v1.RuleReceipt
+	37, // 10: vortex.control.v1.NodeMessage.share_receipt:type_name -> vortex.control.v1.ShareReceipt
+	39, // 11: vortex.control.v1.NodeMessage.source_provision_receipt:type_name -> vortex.control.v1.SourceProvisionReceipt
+	41, // 12: vortex.control.v1.NodeMessage.credit_close_receipt:type_name -> vortex.control.v1.CreditCloseReceipt
+	44, // 13: vortex.control.v1.NodeMessage.node_boot_recovery_receipt:type_name -> vortex.control.v1.NodeBootRecoveryReceipt
+	46, // 14: vortex.control.v1.NodeMessage.recovery_credit_fence_receipt:type_name -> vortex.control.v1.RecoveryCreditFenceReceipt
+	34, // 15: vortex.control.v1.NodeMessage.credit_demand:type_name -> vortex.control.v1.CreditDemand
+	13, // 16: vortex.control.v1.ControlMessage.config_update:type_name -> vortex.control.v1.RuntimeConfigUpdate
+	8,  // 17: vortex.control.v1.ControlMessage.usage_ack:type_name -> vortex.control.v1.UsageAcknowledgement
+	16, // 18: vortex.control.v1.ControlMessage.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	4,  // 19: vortex.control.v1.ControlMessage.error:type_name -> vortex.control.v1.ControlError
+	10, // 20: vortex.control.v1.ControlMessage.unknown_usage_ack:type_name -> vortex.control.v1.UnknownUsageAcknowledgement
+	21, // 21: vortex.control.v1.ControlMessage.hub_status:type_name -> vortex.control.v1.HubStatus
+	23, // 22: vortex.control.v1.ControlMessage.renewal_result:type_name -> vortex.control.v1.RenewalResult
+	24, // 23: vortex.control.v1.ControlMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	14, // 24: vortex.control.v1.ControlMessage.rule_command:type_name -> vortex.control.v1.RuleCommand
+	36, // 25: vortex.control.v1.ControlMessage.share_command:type_name -> vortex.control.v1.ShareCommand
+	38, // 26: vortex.control.v1.ControlMessage.source_provision_command:type_name -> vortex.control.v1.SourceProvisionCommand
+	40, // 27: vortex.control.v1.ControlMessage.credit_close_command:type_name -> vortex.control.v1.CreditCloseCommand
+	43, // 28: vortex.control.v1.ControlMessage.node_boot_recovery_command:type_name -> vortex.control.v1.NodeBootRecoveryCommand
+	45, // 29: vortex.control.v1.ControlMessage.recovery_credit_fence_command:type_name -> vortex.control.v1.RecoveryCreditFenceCommand
+	35, // 30: vortex.control.v1.ControlMessage.credit_demand_denied:type_name -> vortex.control.v1.CreditDemandDenied
+	7,  // 31: vortex.control.v1.UsageBatch.deltas:type_name -> vortex.control.v1.UsageDelta
+	12, // 32: vortex.control.v1.ApplyResult.objects:type_name -> vortex.control.v1.ObjectResult
+	19, // 33: vortex.control.v1.NodeReport.probes:type_name -> vortex.control.v1.ProbeObservation
+	16, // 34: vortex.control.v1.RenewalResult.authorization_update:type_name -> vortex.control.v1.AuthorizationUpdate
+	18, // 35: vortex.control.v1.HubMessage.lifecycle_hello:type_name -> vortex.control.v1.LifecycleHello
+	21, // 36: vortex.control.v1.HubMessage.status:type_name -> vortex.control.v1.HubStatus
+	26, // 37: vortex.control.v1.HubMessage.ledger_record:type_name -> vortex.control.v1.LedgerRecord
+	48, // 38: vortex.control.v1.HubMessage.recovery_record:type_name -> vortex.control.v1.HubRecoveryRecord
+	49, // 39: vortex.control.v1.HubMessage.recovery_manifest:type_name -> vortex.control.v1.HubRecoveryManifest
+	28, // 40: vortex.control.v1.BackendMessage.heartbeat:type_name -> vortex.control.v1.BackendHeartbeat
+	29, // 41: vortex.control.v1.BackendMessage.allocation:type_name -> vortex.control.v1.BackendAllocation
+	24, // 42: vortex.control.v1.BackendMessage.credential_revocations:type_name -> vortex.control.v1.CredentialRevocations
+	30, // 43: vortex.control.v1.BackendMessage.ledger_ack:type_name -> vortex.control.v1.LedgerAcknowledgement
+	4,  // 44: vortex.control.v1.BackendMessage.error:type_name -> vortex.control.v1.ControlError
+	32, // 45: vortex.control.v1.BackendMessage.authority_restrictions:type_name -> vortex.control.v1.AuthorityRestrictions
+	33, // 46: vortex.control.v1.BackendMessage.epoch_handoff_request:type_name -> vortex.control.v1.EpochHandoffRequest
+	42, // 47: vortex.control.v1.BackendMessage.share_renewal_closure:type_name -> vortex.control.v1.ShareRenewalClosureCommand
+	47, // 48: vortex.control.v1.BackendMessage.recovery_command:type_name -> vortex.control.v1.HubRecoveryCommand
+	50, // 49: vortex.control.v1.BackendMessage.recovery_retention:type_name -> vortex.control.v1.HubRecoveryRetention
+	51, // 50: vortex.control.v1.BackendMessage.recovery_admission:type_name -> vortex.control.v1.HubRecoveryAdmission
+	31, // 51: vortex.control.v1.AuthorityRestrictions.limits:type_name -> vortex.control.v1.DelegationRestriction
+	0,  // 52: vortex.control.v1.CreditDemandDenied.reason:type_name -> vortex.control.v1.CreditDemandDenial
+	26, // 53: vortex.control.v1.HubRecoveryRecord.record:type_name -> vortex.control.v1.LedgerRecord
+	1,  // 54: vortex.control.v1.NodeControl.Connect:input_type -> vortex.control.v1.NodeMessage
+	25, // 55: vortex.control.v1.HubControl.Connect:input_type -> vortex.control.v1.HubMessage
+	2,  // 56: vortex.control.v1.NodeControl.Connect:output_type -> vortex.control.v1.ControlMessage
+	27, // 57: vortex.control.v1.HubControl.Connect:output_type -> vortex.control.v1.BackendMessage
+	56, // [56:58] is the sub-list for method output_type
+	54, // [54:56] is the sub-list for method input_type
+	54, // [54:54] is the sub-list for extension type_name
+	54, // [54:54] is the sub-list for extension extendee
+	0,  // [0:54] is the sub-list for field type_name
 }
 
 func init() { file_contracts_protobuf_v1_vortex_proto_init() }
@@ -3418,6 +5115,12 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*NodeMessage_LifecycleHello)(nil),
 		(*NodeMessage_NodeReport)(nil),
 		(*NodeMessage_RenewalRequest)(nil),
+		(*NodeMessage_RuleReceipt)(nil),
+		(*NodeMessage_ShareReceipt)(nil),
+		(*NodeMessage_SourceProvisionReceipt)(nil),
+		(*NodeMessage_CreditCloseReceipt)(nil),
+		(*NodeMessage_NodeBootRecoveryReceipt)(nil),
+		(*NodeMessage_RecoveryCreditFenceReceipt)(nil),
 		(*NodeMessage_CreditDemand)(nil),
 	}
 	file_contracts_protobuf_v1_vortex_proto_msgTypes[1].OneofWrappers = []any{
@@ -3429,14 +5132,22 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*ControlMessage_HubStatus)(nil),
 		(*ControlMessage_RenewalResult)(nil),
 		(*ControlMessage_CredentialRevocations)(nil),
+		(*ControlMessage_RuleCommand)(nil),
+		(*ControlMessage_ShareCommand)(nil),
+		(*ControlMessage_SourceProvisionCommand)(nil),
+		(*ControlMessage_CreditCloseCommand)(nil),
+		(*ControlMessage_NodeBootRecoveryCommand)(nil),
+		(*ControlMessage_RecoveryCreditFenceCommand)(nil),
 		(*ControlMessage_CreditDemandDenied)(nil),
 	}
-	file_contracts_protobuf_v1_vortex_proto_msgTypes[22].OneofWrappers = []any{
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[24].OneofWrappers = []any{
 		(*HubMessage_LifecycleHello)(nil),
 		(*HubMessage_Status)(nil),
 		(*HubMessage_LedgerRecord)(nil),
+		(*HubMessage_RecoveryRecord)(nil),
+		(*HubMessage_RecoveryManifest)(nil),
 	}
-	file_contracts_protobuf_v1_vortex_proto_msgTypes[24].OneofWrappers = []any{
+	file_contracts_protobuf_v1_vortex_proto_msgTypes[26].OneofWrappers = []any{
 		(*BackendMessage_Heartbeat)(nil),
 		(*BackendMessage_Allocation)(nil),
 		(*BackendMessage_CredentialRevocations)(nil),
@@ -3444,6 +5155,10 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 		(*BackendMessage_Error)(nil),
 		(*BackendMessage_AuthorityRestrictions)(nil),
 		(*BackendMessage_EpochHandoffRequest)(nil),
+		(*BackendMessage_ShareRenewalClosure)(nil),
+		(*BackendMessage_RecoveryCommand)(nil),
+		(*BackendMessage_RecoveryRetention)(nil),
+		(*BackendMessage_RecoveryAdmission)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -3451,7 +5166,7 @@ func file_contracts_protobuf_v1_vortex_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_protobuf_v1_vortex_proto_rawDesc), len(file_contracts_protobuf_v1_vortex_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   33,
+			NumMessages:   51,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

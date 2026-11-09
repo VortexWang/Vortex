@@ -1,0 +1,34 @@
+{
+  "base_sha": "325db1017248949b423766fdcd79b62875e72db4",
+  "scope": "Derive effective runtime funding epoch from both complete admitted original aggregate chains; fresh source-funded parent after complete finals",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "focused": "focused-complete-native.log;27.830s",
+    "native_backend": "backend-native-race.log;315.137s",
+    "linux_arm64_backend": "backend-linux-race.log;337.859s",
+    "builds": "cross-builds.json;four Backend/Hub linux builds"
+  },
+  "expected_red": "red-native.log;effective epoch successor missing",
+  "retained_failure": "green-native.log;unbound candidate exposed raw no-rows; stable pending mapping added",
+  "inherited_unchanged": "No SQL/protobuf/root/dependency changes; earlier generation/root evidence retained",
+  "not_claimed": [
+    "Installed old-child settlement/refill cycle",
+    "Production RuntimeServer/Engine recovery convergence",
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "New network recovery acceptance"
+  ],
+  "evidence_sha256": {
+    "README.md": "85b9e442fe2992bc9e8390da9a87c961b3035a92d72445d200da05f445fb49c4",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "5be33f3e15a32b57c132ca877547065353f3c3dff52385ef965200c80182ac85",
+    "backend-native-race.log": "619beb29c50eb2b942776d3682a03aa9a807d58e2d4ba21417570dcf153c2e81",
+    "cross-builds.json": "14395c98468781f6821af0326ef264249b6a9eda8e4de8d05b78c953b98e73a4",
+    "environment.json": "f58e64198ec710b0290ab3c76403d125d8e55c87ca2835e68b89993ed80866c7",
+    "focused-complete-native.log": "71e77e04217dcf5e4192c7927f3e235f35c452f489e800794b76c8aa522e7e82",
+    "green-corrected-native.log": "3d84a2f1adb43bf6ac1af2ac3825f05225119e102b7343d4ce0ea3bfe9ee8e6c",
+    "green-native.log": "ffd6c792308c99af956d14b535ae37a0f0684bc3fe5e4d1641f1efa188989ee2",
+    "red-native.log": "90819abd0336a7504c0cac8e06b873b03c6d3afc94cd9b3ca6019015aecce916",
+    "source-hashes.json": "d9dc88834b8540861f321f0cffbe3b3450dda224dc0907af9d98667f8bd2ff7b"
+  }
+}

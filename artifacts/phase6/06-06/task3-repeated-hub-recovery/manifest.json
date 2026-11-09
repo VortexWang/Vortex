@@ -1,0 +1,41 @@
+{
+  "base_sha": "4f2e351edd7501329836c317aa49c8d6403bbef7",
+  "scope": "Repeated adjacent PG same-store recovery derives effective roots while retaining original source-funded parent and all historical issue receipts",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "native_backend": "backend-native-race.log; service281.814s",
+    "linux_arm64_backend": "backend-linux-race.log; service297.312s",
+    "focused": "repeated-complete-corrected-native.log;6.243s",
+    "installed_Node_credit": "repeated-installed-native.log;4.005s; final complete suite includes it",
+    "sqlc": "generators-repro.json;2 isolated23-output runs",
+    "builds": "cross-builds.json;Backend/Hub linuxamd64+arm64"
+  },
+  "inherited_unchanged": "Root Agent/Store/Hub wire source unchanged from4f2e351e; its root race evidence is not rerun/reclassified",
+  "failures": [
+    "bootstrap-regression.log and repeated-native.log: inferred generated ID API; explicit named sqlc arg corrected",
+    "repeated-complete-native.log: fixture used tenant-only snapshot on global table; corrected"
+  ],
+  "not_claimed": [
+    "Repeated network transport acceptance",
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "Later cold recovery and automatic platform orchestration",
+    "Effective funding/refill or production06-06 convergence"
+  ],
+  "evidence_sha256": {
+    "README.md": "c235c2e2d214cb536cfc3965523450b6fc9d3aa20390f0f87663c92a9a861cbc",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "4bd3e0760cfcb53f9c37a9fde51b7faade9ddbebaa9f93f5bbd29aaa585da7e4",
+    "backend-native-race.log": "0122c2999fef34bc29b255ace56aff04be669bb08677e37606c1c70da6f0cbf3",
+    "bootstrap-regression.log": "67ef3b535192b1d3b97b8bdd114ce1c2604f34a2345e45e2972f3b6aaa6e93cc",
+    "cross-builds.json": "a655dc21e263ac300eab8210cdeb22f32dab9228b5c4d8c687f2130bba63992c",
+    "environment.json": "ee9cca0d11a9769af77c2e22dc744a065dbeaa8f85d592ab71c82c7525aadcf1",
+    "generators-repro.json": "5b0220a80d50dd1b7ce6fd45a901fb7e6d533290b284bdcca4c560568b05aa6f",
+    "repeated-complete-corrected-native.log": "bfdd24170a70f3f9b991bddf70cfd02d65f6d3c059f343c36de9413481a23d56",
+    "repeated-complete-native.log": "0abc9ce9300b8de63a23b70d736057ce69597e7066ac1f2dd1af55a5d9184561",
+    "repeated-installed-native.log": "254ed9608874afdd7b9ae8677c78da5e7e970f3c3811d5edc5298a7d800cd221",
+    "repeated-native-corrected.log": "8b60a346cd32b76d739bec7d6365a389f1fff3814f99e8fa7c0386817a735d7b",
+    "repeated-native.log": "67ef3b535192b1d3b97b8bdd114ce1c2604f34a2345e45e2972f3b6aaa6e93cc",
+    "source-hashes.json": "a0f5c9083f4ee64d912915c2f8d7acfafd0b81904633e274e919f6ae890a3d9b"
+  }
+}

@@ -1,0 +1,8 @@
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row
+    recovery_admission_test.go:157: invalid admission accepted rehashed-row
+--- FAIL: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives (0.45s)
+    --- FAIL: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row (0.45s)
+FAIL
+FAIL	vortex/agent/store	1.155s
+FAIL

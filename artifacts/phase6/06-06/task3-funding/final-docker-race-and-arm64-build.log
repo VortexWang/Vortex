@@ -1,0 +1,34 @@
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-4e3ce3a9b8a0 Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-4e3ce3a9b8a0 Created 
+=== RUN   TestHubFundingActualIssuerChildrenOneParentAndAuditRollback
+2026/11/08 04:19:30 goose: no migrations to run. current version: 8
+2026/11/08 04:19:30 OK   00001_authority.sql (6.6ms)
+2026/11/08 04:19:30 OK   00002_tenant_policy.sql (5.02ms)
+2026/11/08 04:19:30 OK   00003_nodes_ports.sql (11.74ms)
+2026/11/08 04:19:30 OK   00004_entry_group_domains.sql (1.35ms)
+2026/11/08 04:19:30 OK   00005_rules_compile.sql (11.62ms)
+2026/11/08 04:19:31 OK   00006_packages_entitlements.sql (10.73ms)
+2026/11/08 04:19:31 OK   00007_metering_ledger.sql (14.33ms)
+2026/11/08 04:19:31 OK   00008_limits_shares.sql (14.87ms)
+2026/11/08 04:19:31 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingActualIssuerChildrenOneParentAndAuditRollback (0.81s)
+=== RUN   TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice
+2026/11/08 04:19:31 goose: no migrations to run. current version: 8
+2026/11/08 04:19:31 OK   00001_authority.sql (6.35ms)
+2026/11/08 04:19:31 OK   00002_tenant_policy.sql (5.43ms)
+2026/11/08 04:19:31 OK   00003_nodes_ports.sql (12.29ms)
+2026/11/08 04:19:31 OK   00004_entry_group_domains.sql (1.46ms)
+2026/11/08 04:19:31 OK   00005_rules_compile.sql (11.59ms)
+2026/11/08 04:19:31 OK   00006_packages_entitlements.sql (10.64ms)
+2026/11/08 04:19:31 OK   00007_metering_ledger.sql (14.41ms)
+2026/11/08 04:19:31 OK   00008_limits_shares.sql (15.72ms)
+2026/11/08 04:19:31 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice (0.70s)
+PASS
+ok  	vortex/backend/internal/service	2.530s

@@ -1,0 +1,13 @@
+{
+  "backend/db/generated/port_operations.sql.go": "eae6eb441b914406e9427693e66229d611ade4490710862de9078777b467651b",
+  "backend/db/migrations/00009_domain_events.sql": "2797fd044648fc7d7a15ebc677133f16296e551426bacf1fea5f780454c2d373",
+  "backend/db/query/port_operations.sql": "4eb62dca76956f1484ab05cc9aa22d646e978cb4a5726ff1bc4a1c2e15466af1",
+  "backend/internal/httpapi/ports.go": "b0e814d1c3ffe4ce5e6a05cb2611f74ed72485d4bec3807542f6674eb542fef0",
+  "backend/internal/httpapi/ports_test.go": "62398eb0cc7f56d205b1fe754b511d5ae2dc879d9fd9eb65016141ed426ae6f6",
+  "backend/internal/httpapi/router.go": "9b84ffb250c48bc7a679d47ea570bbe32275c5a1fe8af789157cb8233ccd3f95",
+  "backend/internal/service/port.go": "a4c4146cdff967a90d556772b0fd6845ef9921b10b7891e0461a7a5cefc74eae",
+  "backend/internal/service/port_operation.go": "b62383df94a81ee814ccd712ca0905c0e234a57f12753b84087a898b29d3c06d",
+  "backend/internal/service/port_intent.go": "caf8ceeb584b7cbfd7bfac8fa594d8deaf758407d50fe666b4475bd7f1c78041",
+  "backend/internal/service/port_intent_http_test.go": "dee58a26bea5b14c2c8654b509f3d71f2a61a69f97523d26c4863952a59d379b",
+  "backend/internal/service/port_intent_test.go": "c7090e87cf1ac645a961d96a64fba264cbddef8b857bf7872a2be03aa01cd81c"
+}

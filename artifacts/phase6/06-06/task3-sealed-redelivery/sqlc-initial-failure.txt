@@ -1,0 +1,3 @@
+Captured sqlc tool output before query alias qualification:
+# package generated
+query/hub_allocations.sql:47:59: column reference "hub_id" is ambiguous

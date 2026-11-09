@@ -1,0 +1,12 @@
+{
+  "format": "unittest",
+  "output": "test_node_authority (__main__.NodeAuthority) ... FAIL\n\n======================================================================\nFAIL: test_node_authority (__main__.NodeAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/node_red_test.py\", line 9, in test_node_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestNodeGroupAuthoritySchema\n2026/11/07 08:19:55 goose: no migrations to run. current version: 2\n    node_test.go:14: node authority table nodes missing\n    node_test.go:14: node authority table node_groups missing\n    node_test.go:14: node authority table node_group_members missing\n    node_test.go:14: node authority table platform_grants missing\n    node_test.go:14: node authority table grant_history missing\n    node_test.go:14: node authority table segment_permits missing\n    node_test.go:14: node authority table encrypted_credentials missing\n--- FAIL: TestNodeGroupAuthoritySchema (0.03s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.685s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.177s\n\nFAILED (failures=1)\n",
+  "exitCode": 1,
+  "target": "test_node_authority",
+  "semanticAssessment": "Real PostgreSQL target executed; missing planned node authority tables are assertion failures, not fixtures/imports.",
+  "command": "python3 tools/phase6/node_red_test.py",
+  "targetTest": "test_node_authority",
+  "targetFile": "backend/internal/service/node_test.go",
+  "expected": "All seven node authority tables exist",
+  "actual": "All seven planned tables absent"
+}

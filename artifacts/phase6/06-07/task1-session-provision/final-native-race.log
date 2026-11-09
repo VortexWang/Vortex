@@ -1,0 +1,43 @@
+=== RUN   TestLocalSessionUsesPersistedPrincipalAndSeparateCredentialNamespace
+2026/11/09 05:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestLocalSessionUsesPersistedPrincipalAndSeparateCredentialNamespace (0.06s)
+=== RUN   TestLocalPlatformSessionPersistsIssueAudit
+2026/11/09 05:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestLocalPlatformSessionPersistsIssueAudit (0.04s)
+=== RUN   TestLocalSessionAuditFailureOutputsNoCredential
+2026/11/09 05:51:27 goose: no migrations to run. current version: 9
+--- PASS: TestLocalSessionAuditFailureOutputsNoCredential (0.04s)
+PASS
+ok  	vortex/backend/cmd/vortex-backend	3.098s
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.11s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.03s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.05s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.05s)
+=== RUN   TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthPlatformSubjectBindingAndIssueRejectsUnpersistedRole (0.03s)
+=== RUN   TestAuthTokenIssueAuditFailureAndConfigurationBounds
+2026/11/09 05:51:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenIssueAuditFailureAndConfigurationBounds (0.02s)
+PASS
+ok  	vortex/backend/internal/auth	2.650s
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant
+--- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant (0.00s)
+PASS
+ok  	vortex/backend/internal/repository	3.381s

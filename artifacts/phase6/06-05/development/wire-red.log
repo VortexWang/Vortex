@@ -1,0 +1,25 @@
+2026/11/08 10:03:21 goose: no migrations to run. current version: 7
+--- FAIL: TestUsageWireRejectsMalformedAndUnfundedSelfHosted (0.15s)
+    --- FAIL: TestUsageWireRejectsMalformedAndUnfundedSelfHosted/self_hosted (0.01s)
+        metering_wire_validation_test.go:29: malformed or paid-snapshot self-hosted usage accepted
+    --- FAIL: TestUsageWireRejectsMalformedAndUnfundedSelfHosted/nil (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x8 pc=0x101699748]
+
+goroutine 20 [running]:
+testing.tRunner.func1.2({0x10253bb48, 0x1026c9ed0})
+	/Users/peng/.local/go/src/testing/testing.go:2125 +0x1a0
+testing.tRunner.func1()
+	/Users/peng/.local/go/src/testing/testing.go:2128 +0x2c8
+panic({0x10253bb48?, 0x1026c9ed0?})
+	/Users/peng/.local/go/src/runtime/panic.go:859 +0x120
+vortex/backend/internal/service.MeteringService.IngestWireUsage({0x68504810a000?}, {0x1026265c8, 0x10271bd20}, {0x685047fc2de0, 0x24}, {0x685048259ec0, 0x24}, 0x1, 0x68504825f9e0)
+	/Users/peng/Documents/123/VORTEX/backend/internal/service/metering_wire.go:43 +0x498
+vortex/backend/internal/service_test.TestUsageWireRejectsMalformedAndUnfundedSelfHosted.func1(0x6850482a86c8)
+	/Users/peng/Documents/123/VORTEX/backend/internal/service/metering_wire_validation_test.go:28 +0x1c8
+testing.tRunner(0x6850482a86c8, 0x68504826cd20)
+	/Users/peng/.local/go/src/testing/testing.go:2195 +0xc4
+created by testing.(*T).Run in goroutine 35
+	/Users/peng/.local/go/src/testing/testing.go:2260 +0x3b8
+FAIL	vortex/backend/internal/service	0.836s
+FAIL

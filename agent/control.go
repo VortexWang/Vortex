@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -35,11 +36,15 @@ type ControlClient struct {
 	regionalWatchdogTimeouts  atomic.Uint64
 	beginMu                   sync.Mutex
 	sessionMu                 sync.Mutex
+	renewalMu                 sync.Mutex
+	renewalAfter              string
 	sessionID                 uint64
 	sessionCancel             context.CancelFunc
 	currentStatus             *controlv1.HubStatus
 	reportMu                  sync.Mutex
 	reports                   chan *controlv1.NodeReport
+	SourceBackendID           string // explicit direct backend identity; never inferred from Hub metadata
+	ControlOnly               bool   // split deployment: usage has one Hub delivery owner
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
@@ -99,13 +104,19 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 }
 
 func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) (resultErr error) {
+	if c != nil && c.SourceBackendID != "" && (!canonicalUUID(c.SourceBackendID) || regional != nil) {
+		return fmt.Errorf("agent: source provisioning backend requires direct control and canonical UUID")
+	}
+	if c != nil && c.ControlOnly && (regional != nil || !canonicalUUID(c.SourceBackendID)) {
+		return fmt.Errorf("agent: configuration-only control requires pinned direct backend")
+	}
 	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
 	if c.EnableCreditDemand {
-		if regional != nil {
-			return fmt.Errorf("agent: experimental demand cannot use regional lifecycle")
+		if regional != nil || c.SourceBackendID != "" || c.ControlOnly {
+			return fmt.Errorf("agent: experimental demand requires an independent non-regional Hub channel")
 		}
 		// Local monotonic time controls rate refill only. Every write still checks
 		// authenticated conservative lease bounds. Reconnect keeps the same epoch;
@@ -174,6 +185,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if len(cert.DNSNames) != 1 || cert.Subject.CommonName != cert.DNSNames[0] {
 			return fmt.Errorf("agent: ambiguous Hub identity")
 		}
+		if c.SourceBackendID != "" && cert.DNSNames[0] != c.SourceBackendID {
+			return fmt.Errorf("agent: direct backend identity differs from pinned source backend")
+		}
 		authenticatedTLS.Store(&state)
 		issuerIdentity.CompareAndSwap(nil, cert.DNSNames[0])
 		if issuerIdentity.Load().(string) != cert.DNSNames[0] {
@@ -212,6 +226,10 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	} else if !errors.Is(stateErr, sql.ErrNoRows) {
 		return stateErr
 	}
+	capabilities := []string{"rule-two-phase-v1", "share-cas-v1"}
+	if regional == nil && canonicalUUID(c.SourceBackendID) {
+		capabilities = append(capabilities, "source-provision-v1", "credit-close-v1", "node-boot-recovery-v1", "node-credit-recovery-v1")
+	}
 	if err := stream.Send(&controlv1.NodeMessage{
 		NodeId:   c.Node.NodeID,
 		BootId:   c.Node.BootID,
@@ -219,6 +237,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{
 			AppliedConfigVersion: appliedVersion,
 			ObservedAt:           time.Now().UTC().Format(time.RFC3339Nano),
+			Capabilities:         capabilities,
 		}},
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
@@ -238,6 +257,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		caps := []string{"status-v1"}
 		if regional.Renewal != nil {
 			caps = append(caps, "renewal-v1")
+		}
+		if regional.LeaseRefresh {
+			caps = append(caps, "runtime-lease-refresh-v1")
 		}
 		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: caps, SessionId: session, RegionId: regional.Region}}}); err != nil {
 			return err
@@ -300,7 +322,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 		}
 	}()
-	if regional == nil {
+	if regional == nil && !c.ControlOnly {
 		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 			return err
 		}
@@ -358,6 +380,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	}
 	lastHeartbeat := time.Now()
 	lastRenewal := time.Now()
+	renewalSendAfter := ""
 	reports := c.reportQueue()
 	for {
 		var response received
@@ -408,7 +431,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err := c.queueDueRenewals(ctx, issuer, *regional.Renewal); err != nil {
 						return err
 					}
-					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence)
+					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence, &renewalSendAfter)
 				}); err != nil {
 					return err
 				}
@@ -442,6 +465,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-ticker.C:
+			if c.ControlOnly {
+				continue
+			}
 			if regional != nil && !negotiated {
 				continue
 			}
@@ -542,7 +568,157 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_RecoveryCreditFenceCommand:
+				if regional != nil {
+					return store.ErrSourceProvision
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.fenceRecoveryCreditFromBackend(ctx, issuer, body.RecoveryCreditFenceCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RecoveryCreditFenceReceipt{RecoveryCreditFenceReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_NodeBootRecoveryCommand:
+				if regional != nil {
+					return contracts.ErrNodeBootRecovery
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.recoverNodeBootFromBackend(ctx, issuer, body.NodeBootRecoveryCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_NodeBootRecoveryReceipt{NodeBootRecoveryReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_CreditCloseCommand:
+				if regional != nil {
+					return contracts.ErrCreditClose
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.closeCreditFromBackend(ctx, issuer, body.CreditCloseCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_CreditCloseReceipt{CreditCloseReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_SourceProvisionCommand:
+				if regional != nil || !canonicalUUID(c.SourceBackendID) {
+					return fmt.Errorf("agent: source provisioning requires configured direct backend")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if issuer != c.SourceBackendID {
+					return fmt.Errorf("agent: wrong source provisioning backend identity")
+				}
+				command := body.SourceProvisionCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return store.ErrSourceProvision
+				}
+				receipt, e := c.provisionSourcesFromBackend(ctx, issuer, command)
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(receipt)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_SourceProvisionReceipt{SourceProvisionReceipt: &controlv1.SourceProvisionReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_ShareCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: share CAS requires direct authenticated backend")
+				}
+				command := body.ShareCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return fmt.Errorf("agent: invalid share command digest")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				decision, e := contracts.DecodeShareHandoff(command.Payload)
+				if e != nil || decision.NodeID != c.Node.NodeID || decision.BootID != c.Node.BootID {
+					return contracts.ErrShareHandoff
+				}
+				if command.Phase == "cas" {
+					if c.Node.clock == nil {
+						return fmt.Errorf("agent: missing boot clock")
+					}
+					if e = c.Node.clock.observe(decision.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
+						return e
+					}
+				}
+				low, high, trusted := c.Node.TrustedTime()
+				observation, e := c.Node.Store.ApplyShareHandoff(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Phase, command.Payload, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted})
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(observation)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ShareReceipt{ShareReceipt: &controlv1.ShareReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_RuleCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: rule two-phase capability requires backend direct control")
+				}
+				if c.Reconciler == nil {
+					return fmt.Errorf("agent: rule reconciler unavailable")
+				}
+				result := c.Reconciler.ApplyRuleCommand(ctx, c.Node.NodeID, body.RuleCommand)
+				sequence, err := c.Node.Store.NextControlSequence(ctx)
+				if err != nil {
+					return err
+				}
+				if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RuleReceipt{RuleReceipt: result}}); err != nil {
+					return err
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_AuthorizationUpdate:
+				leaseOnly := false
+				if regional != nil {
+					facts, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+					if err != nil {
+						return err
+					}
+					if len(facts.Authorizations) == 2 {
+						kinds := map[string]bool{}
+						for _, a := range facts.Authorizations {
+							kinds[a.Kind] = true
+						}
+						if !regional.LeaseRefresh || !negotiated || !kinds["runtime_lease"] || !kinds["share_lease"] {
+							return fmt.Errorf("agent: unnegotiated lease refresh")
+						}
+						leaseOnly = len(facts.PolicyTransitions) == 0 && len(facts.Revocations) == 0 && facts.RenewalRequestID == "" && len(facts.Handoffs) == 0
+					}
+				}
 				issuer, ok := issuerIdentity.Load().(string)
 				if !ok || issuer == "" {
 					return fmt.Errorf("agent: authenticated Hub identity missing")
@@ -552,7 +728,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err != nil {
 						return err
 					}
-					if len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0 {
+					if (len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0) && !(leaseOnly && c.currentStatus.Mode == "autonomous") {
 						return fmt.Errorf("agent: new grants unavailable while Hub is restricted")
 					}
 				}
@@ -594,6 +770,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 
 			case *controlv1.ControlMessage_UsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: usage acknowledgement on configuration-only channel")
+				}
 				if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 					return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 				}
@@ -608,6 +787,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					}
 				}
 			case *controlv1.ControlMessage_UnknownUsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
+				}
 				if body.UnknownUsageAck == nil {
 					return fmt.Errorf("agent: missing unknown usage acknowledgement")
 				}
@@ -669,27 +851,7 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	digest := sha256.Sum256(update.GetPayload())
 	records := make([]store.AuthorizationRecord, 0, len(payload.Authorizations))
 	for _, authorization := range payload.Authorizations {
-		record := store.AuthorizationRecord{
-			ShareReferenceID: authorization.ShareReferenceID, DelegationID: authorization.DelegationID,
-			AuthorizationID: authorization.AuthorizationID, ParentAuthorizationID: authorization.ParentAuthorizationID,
-			SourceID: authorization.SourceID, Kind: authorization.Kind, RuleID: authorization.RuleID,
-			RuleRevision: authorization.RuleRevision, PathGeneration: authorization.PathGeneration,
-			SignerEpoch: payload.SignerEpoch, BootID: payload.BootID,
-			IssuedAt:          authorization.IssuedAt.UTC().Format(time.RFC3339Nano),
-			NotBefore:         authorization.NotBefore.UTC().Format(time.RFC3339Nano),
-			ExpiresAt:         authorization.ExpiresAt.UTC().Format(time.RFC3339Nano),
-			HardDeadline:      authorization.HardDeadline.UTC().Format(time.RFC3339Nano),
-			BillingSnapshotID: authorization.BillingSnapshotID,
-		}
-		if authorization.AmountBytes != nil {
-			record.AmountBytes = *authorization.AmountBytes
-		}
-		if authorization.RateBPS != nil {
-			record.RateBPS = *authorization.RateBPS
-		}
-		if authorization.Connections != nil {
-			record.Connections = *authorization.Connections
-		}
+		record := authorizationStoreRecord(authorization, payload, issuer)
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
@@ -907,6 +1069,13 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 		return err
 	}
 	for _, record := range prepared {
+		phased, err := c.Node.Store.IsPhasedConfig(ctx, record.TransactionID)
+		if err != nil {
+			return err
+		}
+		if phased {
+			continue
+		}
 		err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
 		if errors.Is(err, ErrActivationPending) {
 			continue
@@ -935,6 +1104,9 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *controlv1.ControlMessage) (bool, error) {
 	switch body := message.GetBody().(type) {
 	case *controlv1.ControlMessage_UsageAck:
+		if c.ControlOnly {
+			return true, fmt.Errorf("agent: usage acknowledgement on configuration-only channel")
+		}
 		if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 			return true, fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 		}
@@ -949,6 +1121,9 @@ func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *
 			}
 		}
 	case *controlv1.ControlMessage_UnknownUsageAck:
+		if c.ControlOnly {
+			return true, fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
+		}
 		if body.UnknownUsageAck == nil {
 			return true, fmt.Errorf("agent: missing unknown usage acknowledgement")
 		}
@@ -961,3 +1136,5 @@ func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *
 	}
 	return true, nil
 }
+
+func sha256BytesControl(b []byte) []byte { s := sha256.Sum256(b); return s[:] }

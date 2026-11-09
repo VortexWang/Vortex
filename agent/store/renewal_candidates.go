@@ -53,6 +53,7 @@ func (s *Store) DueRenewals(ctx context.Context, scope AuthorizationUse, issuer 
 	}
 	type lineage struct {
 		grant           AuthorizationRecord
+		epoch           uint64
 		issued, expires time.Time
 		remaining       uint64
 	}
@@ -65,6 +66,10 @@ func (s *Store) DueRenewals(ctx context.Context, scope AuthorizationUse, issuer 
 		use := scope
 		use.AuthorizationID = id
 		use.Kind = "credit_grant"
+		// Retained old revisions are evidence for a trigger, not new admission.
+		// The helper below independently requires the current path and exact
+		// funded source handoff/root chain.
+		use.ExistingSession = true
 		use.BillingSnapshotID = a.BillingSnapshotID
 		if _, err := checkAuthorizationTx(ctx, tx, use); err != nil {
 			if errors.Is(err, ErrAuthorizationDenied) || errors.Is(err, ErrAuthorizationGenerationStale) {
@@ -72,12 +77,12 @@ func (s *Store) DueRenewals(ctx context.Context, scope AuthorizationUse, issuer 
 			}
 			return nil, err
 		}
-		var epoch string
-		if err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key='authorization_signer_epoch'`).Scan(&epoch); err != nil {
+		epoch, err := renewalTriggerEpochTx(ctx, tx, scope.NodeID, a)
+		if err != nil {
+			if errors.Is(err, ErrAuthorizationDenied) || errors.Is(err, ErrAuthorizationGenerationStale) || errors.Is(err, ErrAuthorityHandoffRequired) {
+				continue
+			}
 			return nil, err
-		}
-		if epoch != strconv.FormatUint(a.SignerEpoch, 10) {
-			continue
 		}
 		var amount string
 		if err := tx.QueryRowContext(ctx, `SELECT remaining_bytes FROM authorization_balances WHERE node_id=? AND authorization_id=?`, scope.NodeID, id).Scan(&amount); err != nil {
@@ -104,6 +109,7 @@ func (s *Store) DueRenewals(ctx context.Context, scope AuthorizationUse, issuer 
 		g.remaining += remaining
 		if g.grant.AuthorizationID == "" || issued.After(g.issued) || issued.Equal(g.issued) && id > g.grant.AuthorizationID {
 			g.grant = a
+			g.epoch = epoch
 			g.issued = issued
 			g.expires = expires
 		}
@@ -142,7 +148,7 @@ func (s *Store) DueRenewals(ctx context.Context, scope AuthorizationUse, issuer 
 		if scope.FencingGeneration != 0 && scope.FencingGeneration != fence {
 			continue
 		}
-		due = append(due, RenewalCandidate{GrantID: a.AuthorizationID, Request: &controlv1.RenewalRequest{NodeId: scope.NodeID, BootId: scope.BootID, DelegationId: a.DelegationID, SourceId: a.SourceID, RuleId: a.RuleID, RuleRevision: a.RuleRevision, PathGeneration: a.PathGeneration, FencingGeneration: fence, SignerEpoch: a.SignerEpoch, BillingSnapshotId: a.BillingSnapshotID, RequestedRawBytes: a.AmountBytes, RequestedTtlSeconds: seconds}})
+		due = append(due, RenewalCandidate{GrantID: a.AuthorizationID, Request: &controlv1.RenewalRequest{NodeId: scope.NodeID, BootId: scope.BootID, DelegationId: a.DelegationID, SourceId: a.SourceID, RuleId: a.RuleID, RuleRevision: a.RuleRevision, PathGeneration: a.PathGeneration, FencingGeneration: fence, SignerEpoch: g.epoch, BillingSnapshotId: a.BillingSnapshotID, RequestedRawBytes: a.AmountBytes, RequestedTtlSeconds: seconds}})
 		if len(due) > 128 {
 			return nil, ErrAuthorizationDenied
 		}

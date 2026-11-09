@@ -1,0 +1,33 @@
+=== RUN   TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS
+=== RUN   TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS/fresh-disk
+=== RUN   TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS/retained-disk
+--- PASS: TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS (0.44s)
+    --- PASS: TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS/fresh-disk (0.21s)
+    --- PASS: TestNodeBootRetirementFULLRollbackIndependentHeadsReopenAndNextCAS/retained-disk (0.23s)
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-backend
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-node
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-boot
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/uncertain
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/lower-bound
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/expired
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/changed-original
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/existing-new-head
+=== RUN   TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-floor
+--- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals (1.64s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-backend (0.18s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-node (0.20s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-boot (0.18s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/uncertain (0.18s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/lower-bound (0.18s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/expired (0.17s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/changed-original (0.17s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/existing-new-head (0.20s)
+    --- PASS: TestNodeBootRetirementRejectsClockScopeAndConflictingOriginals/wrong-floor (0.18s)
+=== RUN   TestNodeBootRetirementConcurrentDifferentBootsCannotSplitHeads
+--- PASS: TestNodeBootRetirementConcurrentDifferentBootsCannotSplitHeads (0.21s)
+PASS
+ok  	vortex/agent/store	3.981s
+testing: warning: no tests to run
+PASS
+ok  	vortex/contracts	2.149s [no tests to run]

@@ -1,0 +1,130 @@
+{
+  "06-01-PLAN.md": {
+    "declared_links": [
+      "service mutation -> PostgreSQL transaction -> task + transactional outbox -> mTLS control adapter -> receipt reconciliation",
+      "tracer tenant scope -> SQL tenant predicate -> same-transaction audit_events row",
+      "migration apply -> sqlc generate -> reproducible generated source check"
+    ],
+    "manual_trace": "backend/internal/service/tracer.go -> backend/internal/worker/outbox.go -> backend/internal/control/adapter.go -> agent/control.go",
+    "behavioral_evidence": "TestTracerRealProcesses; TestTracerTransactionRollback",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-02-PLAN.md": {
+    "declared_links": [
+      "node/group/grant -> member-set version -> port reservation",
+      "restriction event -> retained port -> proof-backed release task",
+      "serving eligibility -> domain-event/task adapter; no business traffic in backend"
+    ],
+    "manual_trace": "node/group/grant version -> PortService fixed member set -> authenticated proof -> occupation projection",
+    "behavioral_evidence": "TestPortAtomicFixedMembersAndServing; TestPortProofAuthenticationAndGenerationFence",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-03-PLAN.md": {
+    "declared_links": [
+      "If-Match -> immutable revision -> compiler input versions -> per-node artifact digest",
+      "artifact commit -> revision-scoped task -> NodeControl/HubControl receipt",
+      "dependency change -> async recompilation while prior active revision remains"
+    ],
+    "manual_trace": "immutable revision -> committed compiler artifact -> RuleWorker lease -> authenticated Agent phase receipt",
+    "behavioral_evidence": "TestRuleCompileCommittedArtifactAndAuditRollback; TestRuleCommandPrepareCommitQueryRestartRealRuntime",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-04-PLAN.md": {
+    "declared_links": [
+      "catalog edit -> immutable package snapshot -> billing/source references",
+      "redemption request key -> locked code -> subscription/source -> audit",
+      "downgrade preview -> confirmation transaction -> restriction events -> rule/port tasks"
+    ],
+    "manual_trace": "locked catalog/code -> immutable package/billing/source -> restrictions -> domainTask/audit",
+    "behavioral_evidence": "TestPackageDurableSnapshotProductionCompileAndHistory; TestEntitlementAtomicRedemptionContract",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-05-PLAN.md": {
+    "declared_links": [
+      "usage tuple -> immutable usage batch -> ledger event -> projection",
+      "billing snapshot -> source ledger -> settlement/dispute/unknown",
+      "unknown receipt -> frozen F_s/L_s -> proof-backed reconciliation"
+    ],
+    "manual_trace": "original usage tuple -> immutable batch -> source event/projection -> exact final or frozen unknown",
+    "behavioral_evidence": "TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence; TestLedgerConservationRebuildSourceIsolationAndAuditRollback",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-06-PLAN.md": {
+    "declared_links": [
+      "share candidate -> durable CAS -> Agent/Hub receipt -> release delta",
+      "boot_id/fencing floor -> renewal authority",
+      "unknown activation -> retained occupation and reconciliation"
+    ],
+    "manual_trace": "share chain -> close old renewal -> Node FULL CAS -> matching receipt -> release delta; complete S/R proof -> direct Node fence/root -> current Hub admission",
+    "behavioral_evidence": "TestShareHandoffRealMTLSAgentAndPostgresWorker; TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-07-PLAN.md": {
+    "declared_links": [
+      "Bearer principal -> policy/scope -> service -> stable ApiError",
+      "committed domain event -> SSE cursor -> Last-Event-ID gap -> REST resync",
+      "same SHA -> Docker Compose/Actions -> raw evidence artifacts"
+    ],
+    "manual_trace": "Bearer current PG principal -> TenantScope -> public safe projection; PG events -> signed ID -> SSE replay/gap -> REST",
+    "behavioral_evidence": "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination; TestSSECommittedEventsReplayScopeAndRESTConvergence",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-08-PLAN.md": {
+    "declared_links": [
+      "principal -> policy -> TenantScope query -> same-transaction AuditWriter",
+      "Valkey loss -> PostgreSQL rebuild -> unchanged authority"
+    ],
+    "manual_trace": "authenticated principal -> scope/SQL predicate -> same transaction audit; nonempty Valkey FLUSHALL -> unchanged PG -> rebuild",
+    "behavioral_evidence": "TestTenantRepositoryScopeAndPlatformAudit; TestValkeyLossRebuildAllProducedAuthority; TestLedgerConservationRebuildSourceIsolationAndAuditRollback",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-09-PLAN.md": {
+    "declared_links": [
+      "restriction cause projection -> tenant service eligibility",
+      "contracts OpenAPI source -> deterministic backend copy -> lint/cmp gate"
+    ],
+    "manual_trace": "all independent restriction causes -> current eligibility; canonical OpenAPI -> exact copy -> Ruby lint",
+    "behavioral_evidence": "TestTenantRestrictionsIndependentAndImmutable; TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-10-PLAN.md": {
+    "declared_links": [
+      "serving eligibility -> DNS task/outbox -> Cloudflare adapter",
+      "credential secret -> encrypted repository -> scoped Cloudflare request"
+    ],
+    "manual_trace": "current serving/actor -> immutable domain/access binding -> typed DNS worker -> fixed Cloudflare endpoint/AEAD",
+    "behavioral_evidence": "TestServingPlatformAggregatesAllCommittedTenantRules; TestCloudflareControlledCRUD",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  },
+  "06-11-PLAN.md": {
+    "declared_links": [
+      "rule reconciliation workload -> timed assertion -> explicit evidence artifact",
+      "verified SHA -> Docker manifest cmp -> Actions manifest cmp"
+    ],
+    "manual_trace": "1000 persisted revisions/2000 members -> production RuleWorker Run -> nanosecond report -> exact SHA host/paired gate",
+    "behavioral_evidence": "TestReconcile1000Within60s; TestRuleReconciliationDrainsReadyWorkAndCancels; final_evidence_check pair",
+    "status": "implementation and current three-host normal/race verified",
+    "cli_result": "total0/all_verifiedfalse because current parser does not interpret these prose-string key_links; raw preserved separately",
+    "source": "65a5335894732b7d632e870acc3d8283be224cd3"
+  }
+}

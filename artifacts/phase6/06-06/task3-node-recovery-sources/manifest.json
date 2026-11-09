@@ -1,0 +1,103 @@
+{
+  "scope": "candidate immutable PG successor-root producer, authenticated FULL Node receipt and production direct-backend delivery; no Hub admission",
+  "base_sha": "6844889fde1ba5590886c4f6c97faac66bd64747",
+  "created_at": "2026-11-08T14:12:08.626259+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "agent/control.go": "1ece1153d5f8561119e50d5eb9af4363e0028784361e2e5997df2bbbff6f78e9",
+    "agent/node_boot_recovery_control.go": "d4d0c8aafa602e137559f8a8d4d6cd02582f8220361ce55f3c334433c179d4b9",
+    "agent/source_replay_control_test.go": "5df8834d2765c96f35c3335511a3e637837b0ba38a77753ea27777f889769818",
+    "backend/cmd/vortex-backend/main.go": "b3d37ad3f943a54118ac071a8fbd99bce09f263d12f5a95f2bf78c6defb21087",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "83e00b28854c0e65159a307b0df6557c48d57b3002db4f3b806f314f39854678",
+    "backend/db/generated/models.go": "aee68a30c4b17582b102dabd144551d202a0484a31cfa4f2b54098f892260b17",
+    "backend/db/migrations/00008_limits_shares.sql": "2e331469f97be2197500f5b245570d52f97ebe5ac8f6900e1868446b19b08c2b",
+    "backend/db/query/hub_same_store_recovery.sql": "08086a6fc4d107c610ce0a8b5cf5232f375f8447892544b6023c38e43fac18a8",
+    "backend/internal/control/adapter.go": "774e6d306cd51f83faec634a0941535f9cfa2eb53df8069dbed52bd7f942019a",
+    "backend/internal/control/node_source.go": "472437cfdaf9132ce19fc98ead425500f5f22ef851c2a824b17155fc48e00a2a",
+    "backend/internal/service/node_recovery_source.go": "76858168be337d5948602c032b8986665490fbb7d061100eb7447fd255c79f28",
+    "backend/internal/service/node_recovery_source_test.go": "3053cc9eced6f5e93ceb447fc31bf71995c9a756912b58ca450418f9884a720f",
+    "backend/internal/service/node_recovery_source_transport_test.go": "f89c0c08aa1eb54dafa86a445d99837240fda42f7e4fbc34315da991a745b371",
+    "backend/internal/worker/node_recovery_source.go": "80ddae5c94365faf7219fb43d651733c863dd3deeef18c2f052309935cd5c87f",
+    "contracts/protobuf/v1/lifecycle.md": "4c6de6bf2287791791812dbc1e50f8c93ea2a4c31b749a85f3509e29b73faa75"
+  },
+  "evidence": {
+    "actual-mtls-native.log": {
+      "result": "pass",
+      "sha256": "272840fc7960f754f35714659e7d51f70ae2abaf1e7f7fb89114e5851ef1cc25"
+    },
+    "agent-replay-corrected-native.log": {
+      "result": "failed: fixed test clock preceded received timestamp",
+      "sha256": "83cafa4b36d7809853745c3edbd9a0f5796b57a051791c7537a8a8587294c1fa"
+    },
+    "agent-replay-final-native.log": {
+      "result": "pass",
+      "sha256": "4d55ed883684629f53fc8582bd0987b20391eb47f56a6d89864c8043da053156"
+    },
+    "agent-replay-native.log": {
+      "result": "pass",
+      "sha256": "62f77d81a48f2ab6fa9c1b0e67fb038f77be60c90e41ed4f3b08fb05dd4fc9e8"
+    },
+    "backend-native-race-corrected.log": {
+      "result": "pass",
+      "sha256": "bcbd3c96474236c21e30621bd6deb064b0dd90d3578b488d5c0f0dbd11f2aca0"
+    },
+    "backend-native-race.log": {
+      "result": "failed-build: test AuthorizationRecord.ID field",
+      "sha256": "373a77aeaf45471fd0aa6a7dee3a5fe9faf5ecb26eb38f3e369dd51b4b9270f4"
+    },
+    "cross-builds-final.json": {
+      "result": "pass",
+      "sha256": "d94806c1b446c68668b28970472824eaa8e20ab91ef50035fdc6b2620869cb44"
+    },
+    "cross-builds.json": {
+      "result": "pass",
+      "sha256": "310da22496de3e7ad1631a7f25649f65a8e71a0d360d6dff358b1db333f2332e"
+    },
+    "environment.json": {
+      "result": "observed",
+      "sha256": "042fc5b21e15ee55d7a5788dbcc81cbacf289e352c2555fec6bad087306dcdaf"
+    },
+    "focused-corrected-native.log": {
+      "result": "pass",
+      "sha256": "b9c8910c4a06bdb3254d5582387c2e35de3928eba5dd3bc15f3ac452c9cae284"
+    },
+    "focused-native.log": {
+      "result": "pass",
+      "sha256": "9204a1abd266179581d4e4faaeee98fa52ac3cbc42554888902192ba92aa4a03"
+    },
+    "generators-repro.json": {
+      "result": "pass",
+      "sha256": "75f42aa0fa716874d9bf3637f2cd339820fd2f6d2d1f473b3ac8640d106ae8db"
+    },
+    "linux-race-corrected.log": {
+      "result": "pass",
+      "sha256": "52e72d9bfdb8cd76d54fe14e23d690b2832f91ff0e3954288d12934eceb5754c"
+    },
+    "linux-race.log": {
+      "result": "failed-build before root/full backend suites: test AuthorizationRecord.ID field",
+      "sha256": "91111eb38da77cc5d9eb45cd28c17f5c0c99d84a030e97f17812d7e4050295ad"
+    },
+    "root-native-race-final.log": {
+      "result": "pass",
+      "sha256": "2ab5d8dd1d823f4272810d1ecf6b095d17588869398d3fff4525350d1d94eb06"
+    },
+    "root-native-race.log": {
+      "result": "pass",
+      "sha256": "81b638a18088fbbaf1353e213efd817f55194faf71f6a96bd0c525f067e3859e"
+    }
+  },
+  "final_source_checks": [
+    "backend-native-race-corrected.log",
+    "root-native-race-final.log",
+    "linux-race-corrected.log",
+    "cross-builds-final.json",
+    "generators-repro.json"
+  ],
+  "not_claimed": [
+    "clean-source acceptance",
+    "GitHub Actions",
+    "native amd64 runtime/performance",
+    "Hub production S/R admission",
+    "06-06 completion"
+  ]
+}

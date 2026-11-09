@@ -1,0 +1,106 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-7d8d509d7acb Creating 
+ Container vortex-phase6-tracer-backend-test-run-7d8d509d7acb Created 
+=== RUN   TestProductionHubRuntimeActualMTLSFundedBootstrapReconnectAndBootIsolation
+2026/11/08 05:48:09 goose: no migrations to run. current version: 8
+2026/11/08 05:48:09 OK   00001_authority.sql (6.14ms)
+2026/11/08 05:48:09 OK   00002_tenant_policy.sql (5.62ms)
+2026/11/08 05:48:09 OK   00003_nodes_ports.sql (12.25ms)
+2026/11/08 05:48:09 OK   00004_entry_group_domains.sql (1.44ms)
+2026/11/08 05:48:09 OK   00005_rules_compile.sql (11.42ms)
+2026/11/08 05:48:09 OK   00006_packages_entitlements.sql (12.88ms)
+2026/11/08 05:48:09 OK   00007_metering_ledger.sql (15.09ms)
+2026/11/08 05:48:09 OK   00008_limits_shares.sql (17.63ms)
+2026/11/08 05:48:09 goose: successfully migrated database to version: 8
+    hub_runtime_test.go:186: production RuntimeServer, actual Node/Hub mTLS, exact FULL replay and PG child mapping, boot isolation and actual Agent runtime-ready boundary verified
+--- PASS: TestProductionHubRuntimeActualMTLSFundedBootstrapReconnectAndBootIsolation (1.05s)
+=== RUN   TestProductionHubRuntimeAutomaticFundingActualMTLS
+2026/11/08 05:48:10 goose: no migrations to run. current version: 8
+2026/11/08 05:48:10 OK   00001_authority.sql (6.19ms)
+2026/11/08 05:48:10 OK   00002_tenant_policy.sql (5.58ms)
+2026/11/08 05:48:10 OK   00003_nodes_ports.sql (12.26ms)
+2026/11/08 05:48:10 OK   00004_entry_group_domains.sql (1.48ms)
+2026/11/08 05:48:10 OK   00005_rules_compile.sql (11.56ms)
+2026/11/08 05:48:10 OK   00006_packages_entitlements.sql (11.94ms)
+2026/11/08 05:48:10 OK   00007_metering_ledger.sql (14.55ms)
+2026/11/08 05:48:10 OK   00008_limits_shares.sql (17.75ms)
+2026/11/08 05:48:10 goose: successfully migrated database to version: 8
+    hub_runtime_test.go:186: production RuntimeServer, actual Node/Hub mTLS, exact FULL replay and PG child mapping, boot isolation and actual Agent runtime-ready boundary verified
+--- PASS: TestProductionHubRuntimeAutomaticFundingActualMTLS (1.05s)
+=== RUN   TestRuntimeFundingSchedulerRequiresCASAndKeepsOneFiniteParentAcrossRetries
+2026/11/08 05:48:11 goose: no migrations to run. current version: 8
+2026/11/08 05:48:11 OK   00001_authority.sql (5.98ms)
+2026/11/08 05:48:11 OK   00002_tenant_policy.sql (5.43ms)
+2026/11/08 05:48:11 OK   00003_nodes_ports.sql (12.87ms)
+2026/11/08 05:48:11 OK   00004_entry_group_domains.sql (1.52ms)
+2026/11/08 05:48:11 OK   00005_rules_compile.sql (11.81ms)
+2026/11/08 05:48:11 OK   00006_packages_entitlements.sql (11.01ms)
+2026/11/08 05:48:11 OK   00007_metering_ledger.sql (15.07ms)
+2026/11/08 05:48:11 OK   00008_limits_shares.sql (17.59ms)
+2026/11/08 05:48:11 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeFundingSchedulerRequiresCASAndKeepsOneFiniteParentAcrossRetries (0.86s)
+=== RUN   TestRuntimeFundingSchedulerRecognizesExplicitAllocationWithoutRefill
+2026/11/08 05:48:12 goose: no migrations to run. current version: 8
+2026/11/08 05:48:12 OK   00001_authority.sql (6.53ms)
+2026/11/08 05:48:12 OK   00002_tenant_policy.sql (5.78ms)
+2026/11/08 05:48:12 OK   00003_nodes_ports.sql (12.6ms)
+2026/11/08 05:48:12 OK   00004_entry_group_domains.sql (1.59ms)
+2026/11/08 05:48:12 OK   00005_rules_compile.sql (11.55ms)
+2026/11/08 05:48:12 OK   00006_packages_entitlements.sql (11.04ms)
+2026/11/08 05:48:12 OK   00007_metering_ledger.sql (16.13ms)
+2026/11/08 05:48:12 OK   00008_limits_shares.sql (18.33ms)
+2026/11/08 05:48:12 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeFundingSchedulerRecognizesExplicitAllocationWithoutRefill (0.78s)
+=== RUN   TestShareSchedulingConcurrentWorkersDurableBootstrapAndUnchangedTarget
+2026/11/08 05:48:12 goose: no migrations to run. current version: 8
+2026/11/08 05:48:12 OK   00001_authority.sql (6.23ms)
+2026/11/08 05:48:12 OK   00002_tenant_policy.sql (6.09ms)
+2026/11/08 05:48:12 OK   00003_nodes_ports.sql (15.29ms)
+2026/11/08 05:48:12 OK   00004_entry_group_domains.sql (1.62ms)
+2026/11/08 05:48:12 OK   00005_rules_compile.sql (11.93ms)
+2026/11/08 05:48:12 OK   00006_packages_entitlements.sql (11.7ms)
+2026/11/08 05:48:12 OK   00007_metering_ledger.sql (14.96ms)
+2026/11/08 05:48:12 OK   00008_limits_shares.sql (18.1ms)
+2026/11/08 05:48:12 goose: successfully migrated database to version: 8
+--- PASS: TestShareSchedulingConcurrentWorkersDurableBootstrapAndUnchangedTarget (0.80s)
+=== RUN   TestShareSchedulingQueueMissingApprovalClockAndAuditFailClosed
+2026/11/08 05:48:13 goose: no migrations to run. current version: 8
+2026/11/08 05:48:13 OK   00001_authority.sql (6.61ms)
+2026/11/08 05:48:13 OK   00002_tenant_policy.sql (7.94ms)
+2026/11/08 05:48:13 OK   00003_nodes_ports.sql (15.17ms)
+2026/11/08 05:48:13 OK   00004_entry_group_domains.sql (2.55ms)
+2026/11/08 05:48:13 OK   00005_rules_compile.sql (27.6ms)
+2026/11/08 05:48:13 OK   00006_packages_entitlements.sql (25.81ms)
+2026/11/08 05:48:13 OK   00007_metering_ledger.sql (15.05ms)
+2026/11/08 05:48:13 OK   00008_limits_shares.sql (18.59ms)
+2026/11/08 05:48:13 goose: successfully migrated database to version: 8
+2026/11/08 05:48:13 goose: no migrations to run. current version: 8
+2026/11/08 05:48:13 OK   00001_authority.sql (6.92ms)
+2026/11/08 05:48:13 OK   00002_tenant_policy.sql (5.61ms)
+2026/11/08 05:48:13 OK   00003_nodes_ports.sql (13.54ms)
+2026/11/08 05:48:13 OK   00004_entry_group_domains.sql (1.58ms)
+2026/11/08 05:48:14 OK   00005_rules_compile.sql (12.82ms)
+2026/11/08 05:48:14 OK   00006_packages_entitlements.sql (11.39ms)
+2026/11/08 05:48:14 OK   00007_metering_ledger.sql (17ms)
+2026/11/08 05:48:14 OK   00008_limits_shares.sql (18.82ms)
+2026/11/08 05:48:14 goose: successfully migrated database to version: 8
+--- PASS: TestShareSchedulingQueueMissingApprovalClockAndAuditFailClosed (0.67s)
+=== RUN   TestShareSchedulingResumesPreparedSuccessorWithoutForgingClosure
+2026/11/08 05:48:14 goose: no migrations to run. current version: 8
+2026/11/08 05:48:14 OK   00001_authority.sql (6.38ms)
+2026/11/08 05:48:14 OK   00002_tenant_policy.sql (5.61ms)
+2026/11/08 05:48:14 OK   00003_nodes_ports.sql (13.05ms)
+2026/11/08 05:48:14 OK   00004_entry_group_domains.sql (1.57ms)
+2026/11/08 05:48:14 OK   00005_rules_compile.sql (13.32ms)
+2026/11/08 05:48:14 OK   00006_packages_entitlements.sql (11.89ms)
+2026/11/08 05:48:14 OK   00007_metering_ledger.sql (17.07ms)
+2026/11/08 05:48:14 OK   00008_limits_shares.sql (18.34ms)
+2026/11/08 05:48:14 goose: successfully migrated database to version: 8
+--- PASS: TestShareSchedulingResumesPreparedSuccessorWithoutForgingClosure (0.58s)
+PASS
+ok  	vortex/backend/internal/service	6.809s

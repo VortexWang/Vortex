@@ -1,0 +1,10 @@
+{
+  "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/rule_red_test.py",
+  "exitCode": 1,
+  "output": "test_immutable_revision (__main__.RuleRevision) ... FAIL\n\n======================================================================\nFAIL: test_immutable_revision (__main__.RuleRevision)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/rule_red_test.py\", line 9, in test_immutable_revision\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestRuleRevisionSchema\n2026/11/07 11:52:29 goose: no migrations to run. current version: 4\n    rule_test.go:14: immutable rule authority table rule_heads missing\n    rule_test.go:14: immutable rule authority table rule_revisions missing\n    rule_test.go:14: immutable rule authority table rule_targets missing\n    rule_test.go:14: immutable rule authority table rule_segments missing\n    rule_test.go:14: immutable rule authority table rule_dependencies missing\n--- FAIL: TestRuleRevisionSchema (0.04s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.742s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.726s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_immutable_revision",
+  "targetFile": "tools/phase6/rule_red_test.py",
+  "expected": "immutable rule authority tables exist",
+  "actual": "five rule tables missing at applied migration 4",
+  "semanticAssessment": "The target Go test compiled, connected to real PostgreSQL and ran; each intended table-existence assertion failed, without fixture/load fault."
+}

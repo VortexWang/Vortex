@@ -1,0 +1,13 @@
+{
+  "backend/db/generated/public_resources.sql.go": "0562b7c37e8c8e414385f6fecc3ebe1f2e90adcd3e81c5fe60b290b8863c73f3",
+  "backend/db/query/public_resources.sql": "d5f3105fdd010fec4d9f8e99f6f53e7672220adc6ca01ea74f15e69a7deea33d",
+  "backend/internal/httpapi/cursor.go": "49f1ad56c04b6d562f8c8dadce55fa55c294d17246dda768bb5f33e437f0f3ef",
+  "backend/internal/httpapi/cursor_test.go": "bf953c25dc87d501b1801438bdeefbcc7debe1c54fad4db12c5a9eec6e7abb18",
+  "backend/internal/httpapi/httpapi_test.go": "d9d1edd4f9d6e020eea90c2f9229f7acb47d50478f2d1892bcb5ac3d80b0036a",
+  "backend/internal/httpapi/resources.go": "377fbbdebe7d0a16880d4965fb7822403b37e7fbfdd72db51ce48ee99f5d888b",
+  "backend/internal/httpapi/resources_test.go": "0671069d40cc726d8bd550d9580258fe263046703faf050dd1754c0bbcf5b8a3",
+  "backend/internal/httpapi/router.go": "8bec4e488fa36dabf5899e47b91b00688b9697dfbdb37aed50e43526586e83fe",
+  "backend/internal/httpapi/server.go": "ea06fe30ba79f66d65d3c0c34834a757cd3932b1360839657e3e3dc0c374bcc1",
+  "backend/internal/httpapi/server_test.go": "25f77e37f2c81e944b5cc63e1cd7e7a925afe1b4157cf29e2ff7aac6f73a1e91",
+  "backend/internal/repository/public_resources.go": "ceb1dc13ed737928dcdc3477fe4d3540810f987c4ad55d4858f2f3ae78eaa814"
+}

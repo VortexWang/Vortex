@@ -1,0 +1,42 @@
+{
+  "base_sha": "a22917c056b127a174cd0d400e740530bc9be2b1",
+  "scope": "versioned public port management stages; incomplete06-07",
+  "passed": [
+    "final-service-native-race.log",
+    "final-intents-native-race.log",
+    "final-intents-linux-race.log",
+    "final-strict-api-native-race.log",
+    "migration-native.log",
+    "actual-proof-http-corrected-native-race.log",
+    "actual-proof-http-corrected-linux-race.log",
+    "final-linux-race.log",
+    "focused-native-race.log",
+    "final-api-native-race.log",
+    "sqlc-generation.json",
+    "final-builds.json"
+  ],
+  "failed_retained": {
+    "missing-proof-guard-red.log": "intentional proof-guard removal semantic RED",
+    "actual-proof-http-native-race.log": "new service fixture omitted persisted users row; current token authority correctly rejects it",
+    "final-strict-linux-race.log": "HTTP/CLI pass; same new fixture identity failure makes combined command failed"
+  },
+  "evidence_sha256": {
+    "final-service-native-race.log": "89ff37544d24f90c7c7333b14b2de02a8156d8d68d3cccde5e42b9c901af9e4e",
+    "source-hashes.json": "b62fe3d1dd68d19163dec9176936e10e1624ece353a72c4b95754a4279ccb2cc",
+    "final-strict-linux-race.log": "99f9e0466d0e34b8d7ff975e701125db09aaa3d5baa21805fb1b51acf6b7503e",
+    "missing-proof-guard-red.log": "ca2d6d8778034630a5fd08e99d44392e51b9dca79f0d175fe8830246af8c0c3c",
+    "sqlc-generation.json": "d8190f817d24915ba6c8c95dc18619b7ee3118b1834647a97d6d58206ee8c2a2",
+    "final-intents-native-race.log": "283a027a41897b3d5ec633673cffe12e9210e1c3b08cbf8a28c387eb82fe9581",
+    "final-intents-linux-race.log": "fbaaf98786136c8afc63853ece2210d4c2b098feb83d2e1c1c899709401f500f",
+    "final-strict-api-native-race.log": "85bd1ebd5cf8e0f69f89a5c739671d7851cbd09c047580ffd29b0404078caa8a",
+    "README.md": "09ff5cd46dc525f5805bb1a13491af9b51b377512b3b096efb65f1758924c2d4",
+    "migration-native.log": "746f27c035eeb46a37d16cb9fd208e06c8c95dc2d6da8ad8b1443e51614bc470",
+    "actual-proof-http-corrected-native-race.log": "a222df92222363e8ee4f87c8edbecb9e3ce8792cfb1981759b476ec47beef24d",
+    "actual-proof-http-corrected-linux-race.log": "ebe25dc77ac4a1fc744a73725d18c3f569595d3712e4e3a3d0691247ba972cd1",
+    "final-linux-race.log": "ce0d60ae5af28bb6b9097e9461b9c4c782ca780afec63d36c6ed7232836ba73d",
+    "focused-native-race.log": "412d90bf37f28d7f4dabd0217f966317e897f93b891227b3b7cba9e99bfb7498",
+    "final-api-native-race.log": "f0fc00ebbcbf744787392053003ea07827876fafe8f1b5e74cebc66f88a7f4ee",
+    "actual-proof-http-native-race.log": "552d0b9e93d5fbf8abd9e2202a2859738084cc20d7ad77b0bab99b00c2b225fe",
+    "final-builds.json": "225c00b8e006ea9165df5c53eec5a31f5d59f67c62bb503de0ff671419c70344"
+  }
+}

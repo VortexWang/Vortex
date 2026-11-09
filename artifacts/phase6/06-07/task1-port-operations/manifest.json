@@ -1,0 +1,42 @@
+{
+  "base_sha": "c9962d618649201031528e5ac9b3cc55c2244469",
+  "scope": "06-07 aggregate port prepare evidence foundation;not public adapters/complete plan",
+  "passed": [
+    "final-service-native-race.log",
+    "corrected-native-race.log",
+    "final-bound-api-native-race.log",
+    "final-release-flags-native-race.log",
+    "final-focused-native-race.log",
+    "final-linux-race.log",
+    "final-release-flags-linux-race.log",
+    "final-api-native-race.log",
+    "final-bound-linux-race.log",
+    "final-bound-service-native-race.log",
+    "generation-builds.json",
+    "final-bound-builds.json"
+  ],
+  "failed_retained": {
+    "missing-aggregate-red.log": "existing prepare returned no durable aggregate operation",
+    "focused-native-race.log": "fixture snapshot preceded separate audited read",
+    "missing-proof-gate-semantic-red.log": "intentional Go overlay removes proof requirement; working source unchanged"
+  },
+  "evidence_sha256": {
+    "final-service-native-race.log": "b86ccc3bed511d948f80694d4a005797ad7c39275f6ee56451dcd2dd9742583c",
+    "source-hashes.json": "6601c59fad9f7ae31f03f0baa68740bc7f2c9cb0ca193db3f624b6b955a79fda",
+    "corrected-native-race.log": "a9c4dcb5bba40800d748c389be1173fb9d1eb64cbbc9c0aa4bd81015c9eaa761",
+    "final-bound-api-native-race.log": "18f594bdc1d57344b2a9419331116f8199ac38b721635f2c77dd9324f6434370",
+    "final-release-flags-native-race.log": "f90ce9b604b7712b50bccb5fa9068fcde71ee3210bf8482c3a6bf786aeab4ff6",
+    "generation-builds.json": "dfd0bd370fe5b3ba636b3070cc4a89a9235bf269ae80346e3faceaeaefd6fe95",
+    "README.md": "5515abc72cf4e127e2b44b17c0c88f25e7eb2bde9b6bf6ca60c64bfadd7fbb1b",
+    "final-focused-native-race.log": "6ced1d0639be1752d540be6138f24424c201f2f76eecd84ba07e73052f58eae9",
+    "missing-aggregate-red.log": "8cc01c0ca97b8547fe0ff1e41577dadbbc0c6a742b94e3def237590cc0713980",
+    "missing-proof-gate-semantic-red.log": "4c46341b0e63ebc83c253339145e0b95dec9a80badeffece573e50fc7ef3be29",
+    "final-linux-race.log": "ef3e99ff766c9236f710a60a3632e362fe17b8c7211650879cee8dfd22fd428c",
+    "focused-native-race.log": "3082d105b126102bfa358f4585a0a5a574f5c275a6638c79f3b127ff11e9596c",
+    "final-release-flags-linux-race.log": "54f9b69995141fa140633384a4d2424397a1d514cb6657ba8a077b47e38656a4",
+    "final-api-native-race.log": "c4e151074c2dc66b3087fdea118d14b4be5160f88cb6131943eb7c73d8d880de",
+    "final-bound-builds.json": "960575d368ae15d0444e4eb4509501c8d312afc36b652ec9f75f156722881279",
+    "final-bound-linux-race.log": "944a316f4ee4934ce421c31354d7e0e5233e354059d126c2bc262d332677c971",
+    "final-bound-service-native-race.log": "56e37812fef04cf91d1b137d69e3b43c2a41259b37a394221f0d817908280d33"
+  }
+}

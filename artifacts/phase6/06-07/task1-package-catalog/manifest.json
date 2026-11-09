@@ -1,0 +1,32 @@
+{
+  "base_sha": "5deb1fc5dea5d6bc930deeff36e34f6b21ddfe24",
+  "scope": "06-07 catalog mutation;not complete plan",
+  "passed": [
+    "focused-native-race.log",
+    "final-api-native-race.log",
+    "final-service-native-race.log",
+    "final-linux-race.log",
+    "builds.json",
+    "final-unicode-api-native-race.log",
+    "final-unicode-service-native-race.log",
+    "final-unicode-linux-race.log",
+    "final-unicode-builds.json"
+  ],
+  "failed_retained": {
+    "routes-red.log": "missing PUT collection path404"
+  },
+  "evidence_sha256": {
+    "README.md": "b1dd1dabc431a0445de8df32a8980270f19eb33d624691db50757bc91c88948d",
+    "builds.json": "adcc4fd4a856a3a59b379d6b0433e836e61cb9602e904398e9779d7017c9895d",
+    "final-api-native-race.log": "cd99cdd0df9cfda3e8a01ce6648cfcf0ba910f75d281224a365a95caec0e4bdc",
+    "final-linux-race.log": "f5f523ad02e5885cfa523beaa9c5187471c244caabec193e756835b42af69aaf",
+    "final-service-native-race.log": "04429f80108faa12fb50a8d2e8e55467e1e16afef4639ad427397b166bd25af4",
+    "final-unicode-api-native-race.log": "324b1467417d35059a420662390faa2e7765266343a776fac5ece538a3d1975e",
+    "final-unicode-builds.json": "1baecf1469c5a8d99ca2d8c25c3965a03516cf068d08228abeb4820071e99ada",
+    "final-unicode-linux-race.log": "a9030b9c76f27e56098b9d5e9c710c3b7a3d49952221089651de58a545f9adf6",
+    "final-unicode-service-native-race.log": "e8f2d66c8639b71e6ad7345feb233f2e4dca20c18c3eb6978d556fafd63618b6",
+    "focused-native-race.log": "c08ebb4451fdaa5e2692b4f7a5e10d7038b6401e5abe50fb2adf013055116bcd",
+    "routes-red.log": "5f275e25568d60dcb0e84502b0adbde7395014290fe8ba71bd1f7d4e8fa7f11b",
+    "source-hashes.json": "7adbbdea63bb738d7769f462a6865095435c2c37365216252b2b302d99b380f2"
+  }
+}

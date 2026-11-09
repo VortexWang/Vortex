@@ -1,0 +1,53 @@
+name: phase6-backend
+on:
+  push:
+    branches: [codex/phase6-backend]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backend:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Pinned Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Produce full Phase6 runtime evidence (external setup is explicit)
+        env:
+          GOTOOLCHAIN: local
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_POLICY_TOKEN: ${{ secrets.CLOUDFLARE_POLICY_TOKEN }}
+          CLOUDFLARE_TOKEN_POLICY_JSON: ${{ secrets.CLOUDFLARE_TOKEN_POLICY_JSON }}
+        run: |
+          if test -n "$CLOUDFLARE_TOKEN_POLICY_JSON"; then
+            umask 077
+            export CLOUDFLARE_TOKEN_POLICY_FILE="$RUNNER_TEMP/cloudflare-policy.json"
+            python3 - <<'PY'
+          import os,pathlib
+          pathlib.Path(os.environ['CLOUDFLARE_TOKEN_POLICY_FILE']).write_text(os.environ['CLOUDFLARE_TOKEN_POLICY_JSON'])
+          PY
+          fi
+          ./tools/phase6/check.sh --through-plan 06-11 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"
+      - name: Retain result including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase6-${{ github.sha }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/phase6/${{ github.sha }}/actions/
+          if-no-files-found: error

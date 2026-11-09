@@ -1,0 +1,4 @@
+# vortex/backend/internal/repository
+internal/repository/token_repository.go:23:71: cannot use row.State (variable of type interface{}) as string value in argument to auth.NewPrincipal: need type assertion
+FAIL	vortex/backend/internal/auth [build failed]
+FAIL

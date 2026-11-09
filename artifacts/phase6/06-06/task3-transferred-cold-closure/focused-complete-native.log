@@ -1,0 +1,36 @@
+2026/11/09 00:05:26 goose: no migrations to run. current version: 8
+2026/11/09 00:05:26 OK   00001_authority.sql (12.47ms)
+2026/11/09 00:05:26 OK   00002_tenant_policy.sql (10.22ms)
+2026/11/09 00:05:26 OK   00003_nodes_ports.sql (17.76ms)
+2026/11/09 00:05:26 OK   00004_entry_group_domains.sql (2.3ms)
+2026/11/09 00:05:26 OK   00005_rules_compile.sql (17.86ms)
+2026/11/09 00:05:26 OK   00006_packages_entitlements.sql (17.04ms)
+2026/11/09 00:05:26 OK   00007_metering_ledger.sql (22.61ms)
+2026/11/09 00:05:26 OK   00008_limits_shares.sql (51.72ms)
+2026/11/09 00:05:26 goose: successfully migrated database to version: 8
+2026/11/09 00:05:27 goose: no migrations to run. current version: 8
+2026/11/09 00:05:27 OK   00001_authority.sql (10.81ms)
+2026/11/09 00:05:27 OK   00002_tenant_policy.sql (8.01ms)
+2026/11/09 00:05:27 OK   00003_nodes_ports.sql (17.29ms)
+2026/11/09 00:05:27 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/09 00:05:27 OK   00005_rules_compile.sql (18.36ms)
+2026/11/09 00:05:27 OK   00006_packages_entitlements.sql (16.35ms)
+2026/11/09 00:05:27 OK   00007_metering_ledger.sql (22.28ms)
+2026/11/09 00:05:28 OK   00008_limits_shares.sql (48.41ms)
+2026/11/09 00:05:28 goose: successfully migrated database to version: 8
+2026/11/09 00:05:29 goose: no migrations to run. current version: 8
+2026/11/09 00:05:29 OK   00001_authority.sql (9.19ms)
+2026/11/09 00:05:29 OK   00002_tenant_policy.sql (7.76ms)
+2026/11/09 00:05:29 OK   00003_nodes_ports.sql (16.84ms)
+2026/11/09 00:05:29 OK   00004_entry_group_domains.sql (2.09ms)
+2026/11/09 00:05:29 OK   00005_rules_compile.sql (18.56ms)
+2026/11/09 00:05:29 OK   00006_packages_entitlements.sql (17.68ms)
+2026/11/09 00:05:29 OK   00007_metering_ledger.sql (22.83ms)
+2026/11/09 00:05:29 OK   00008_limits_shares.sql (50.76ms)
+2026/11/09 00:05:29 goose: successfully migrated database to version: 8
+--- FAIL: TestTransferredShareColdProofKeepsOriginalClosureAndDebtUntilNodeCAS (1.57s)
+    --- FAIL: TestTransferredShareColdProofKeepsOriginalClosureAndDebtUntilNodeCAS/changed_share (0.01s)
+        share_transferred_cold_test.go:160: invalid cold proof consumed
+FAIL
+FAIL	vortex/backend/internal/service	5.606s
+FAIL

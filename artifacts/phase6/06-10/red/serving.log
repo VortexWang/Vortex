@@ -1,0 +1,21 @@
+test_serving_boundary (__main__.ServingBoundary) ... FAIL
+
+======================================================================
+FAIL: test_serving_boundary (__main__.ServingBoundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/peng/Documents/123/VORTEX/tools/phase6/serving_red_test.py", line 9, in test_serving_boundary
+    self.assertEqual(result.returncode, 0, result.stdout)
+AssertionError: 1 != 0 : === RUN   TestServingRejectsDeletedMember
+2026/11/07 08:59:23 goose: no migrations to run. current version: 3
+    serving_test.go:18: deleted member must never enter serving despite retained confirmed ports
+--- FAIL: TestServingRejectsDeletedMember (0.09s)
+FAIL
+FAIL	vortex/backend/internal/service	0.743s
+FAIL
+
+
+----------------------------------------------------------------------
+Ran 1 test in 1.696s
+
+FAILED (failures=1)

@@ -1,0 +1,92 @@
+[
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/node-linux-amd64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "8f19f00b97c1ca385a610c6d9bbd95823c733f18e4d92170dd5d253d902846c2"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/backend-linux-amd64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "cc3a7d1822ba39fad1c9d14c6386ad1293ca38c291b6f0b672da26a368c3a057"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/hub-linux-amd64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "a9895c02f797a8c514860b5a8f39a2017513fcc64e8730f21dabe0318daef2e6"
+  },
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/node-linux-arm64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "c71fbbb20d66b62db78230215df1e8ff9a6e78c9a585ab57c6676d96c6016ce0"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/backend-linux-arm64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "3494040cbf66a02a0b48de5b7d5458112d24f5fafd8edc9b9fe94ea3b139f4bb"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-stopped-recovery-build-7ezibxyt/hub-linux-arm64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "195b289736cc62d10f344ea3198b6fd82ba3a15c9b1f74e5f3dbe40f5b23130a"
+  }
+]

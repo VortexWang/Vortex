@@ -24,6 +24,22 @@ func (s *Store) RuntimeSessionCount(ctx context.Context, nodeID, bootID string) 
 }
 
 func (s *Store) HubControlSnapshot(ctx context.Context, hubID string, now time.Time) (HubControlSnapshot, error) {
+	return s.hubControlSnapshot(ctx, hubID, func() (time.Time, error) { return now, nil })
+}
+
+// ObserveHubControlSnapshot samples a trusted clock after the read snapshot is
+// fixed. It observes existing state and never changes authority or deadlines.
+func (s *Store) ObserveHubControlSnapshot(ctx context.Context, hubID string, clock func() IssuerTime) (HubControlSnapshot, error) {
+	return s.hubControlSnapshot(ctx, hubID, func() (time.Time, error) {
+		if clock == nil {
+			return time.Time{}, ErrAuthorityTimeUncertain
+		}
+		now := clock()
+		return now.Latest, checkIssuerTime(now)
+	})
+}
+
+func (s *Store) hubControlSnapshot(ctx context.Context, hubID string, clock func() (time.Time, error)) (HubControlSnapshot, error) {
 	result := HubControlSnapshot{Mode: "blocked"}
 	if s.owner != "hub" || !validIssuerUUID(hubID) {
 		return result, ErrAuthorizationDenied
@@ -58,6 +74,24 @@ func (s *Store) HubControlSnapshot(ctx context.Context, hubID string, now time.T
 	if err != nil {
 		return result, err
 	}
+	checkpoint, err := stateValue(ctx, tx, "ledger_checkpoint")
+	if err == nil {
+		result.Confirmed, err = strconv.ParseUint(checkpoint, 10, 63)
+	}
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return result, err
+	}
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM hub_ledger WHERE confirmed=0").Scan(&result.Pending); err != nil {
+		return result, err
+	}
+	// Pin every durable field before sampling the observation clock. A backend
+	// heartbeat may commit while this read waits; sampling first can falsely
+	// classify that newer persisted heartbeat as being in the future.
+	observed, err := clock()
+	if err != nil {
+		return result, err
+	}
+	now := observed
 	if state != "open" || now.Before(result.BackendHeartbeat) || !now.Before(result.Deadline) {
 		return result, nil
 	}
@@ -69,16 +103,6 @@ func (s *Store) HubControlSnapshot(ctx context.Context, hubID string, now time.T
 		}
 	case "autonomous", "recovering":
 		result.Mode = mode
-	}
-	checkpoint, err := stateValue(ctx, tx, "ledger_checkpoint")
-	if err == nil {
-		result.Confirmed, err = strconv.ParseUint(checkpoint, 10, 63)
-	}
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return result, err
-	}
-	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM hub_ledger WHERE confirmed=0").Scan(&result.Pending); err != nil {
-		return result, err
 	}
 	return result, tx.Commit()
 }

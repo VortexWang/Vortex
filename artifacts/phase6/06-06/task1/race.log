@@ -1,0 +1,82 @@
+=== RUN   TestLedgerConservationRebuildSourceIsolationAndAuditRollback
+2026/11/08 11:15:39 goose: no migrations to run. current version: 8
+--- PASS: TestLedgerConservationRebuildSourceIsolationAndAuditRollback (0.18s)
+=== RUN   TestUsageAuditRollback
+2026/11/08 11:15:39 goose: no migrations to run. current version: 8
+--- PASS: TestUsageAuditRollback (0.10s)
+=== RUN   TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback
+2026/11/08 11:15:39 goose: no migrations to run. current version: 8
+--- PASS: TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback (0.15s)
+=== RUN   TestNodeLifecycleDrainDeleteAndAuditRollback
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestNodeLifecycleDrainDeleteAndAuditRollback (0.03s)
+=== RUN   TestPackageLifecycleAuditRollbackAndUnknownRetention
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+2026/11/08 11:15:40 OK   00001_authority.sql (8.73ms)
+2026/11/08 11:15:40 OK   00002_tenant_policy.sql (7.52ms)
+2026/11/08 11:15:40 OK   00003_nodes_ports.sql (16.54ms)
+2026/11/08 11:15:40 OK   00004_entry_group_domains.sql (2.2ms)
+2026/11/08 11:15:40 OK   00005_rules_compile.sql (17.25ms)
+2026/11/08 11:15:40 OK   00006_packages_entitlements.sql (15.97ms)
+2026/11/08 11:15:40 OK   00007_metering_ledger.sql (22.14ms)
+2026/11/08 11:15:40 OK   00008_limits_shares.sql (10.59ms)
+2026/11/08 11:15:40 goose: successfully migrated database to version: 8
+--- PASS: TestPackageLifecycleAuditRollbackAndUnknownRetention (0.29s)
+=== RUN   TestPackageSubscriptionConcurrentPrimaryAndAuditRollback
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestPackageSubscriptionConcurrentPrimaryAndAuditRollback (0.07s)
+=== RUN   TestEntitlementAuditRollbackExpiredRevokedApplicability
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestEntitlementAuditRollbackExpiredRevokedApplicability (0.07s)
+=== RUN   TestReleaseOldBootAndDisconnectRetainOccupation
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestReleaseOldBootAndDisconnectRetainOccupation (0.08s)
+=== RUN   TestPortProofAuthenticationAndGenerationFence
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestPortProofAuthenticationAndGenerationFence (0.10s)
+=== RUN   TestPortAuditRollbackAndForeignAllocation
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestPortAuditRollbackAndForeignAllocation (0.07s)
+=== RUN   TestPortRestrictionAuditRollbackSameTransaction
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestPortRestrictionAuditRollbackSameTransaction (0.10s)
+=== RUN   TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation
+2026/11/08 11:15:40 goose: no migrations to run. current version: 8
+--- PASS: TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation (0.11s)
+=== RUN   TestCompileWorkerAuditRollback
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestCompileWorkerAuditRollback (0.14s)
+=== RUN   TestRuleAuditRollback
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestRuleAuditRollback (0.06s)
+=== RUN   TestRuleCompileCommittedArtifactAndAuditRollback
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestRuleCompileCommittedArtifactAndAuditRollback (0.09s)
+=== RUN   TestDNSAuditRollbackAndCurrentRole
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestDNSAuditRollbackAndCurrentRole (0.06s)
+=== RUN   TestShareLeaseAuthoritySchema
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestShareLeaseAuthoritySchema (0.02s)
+=== RUN   TestShareConcurrentLinearChainCapacityKindsAndAuditRollback
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestShareConcurrentLinearChainCapacityKindsAndAuditRollback (0.20s)
+=== RUN   TestShareLeaseDeadlineNonceBootFloorAndRenewalClosure
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestShareLeaseDeadlineNonceBootFloorAndRenewalClosure (0.13s)
+=== RUN   TestShareBurstSignerTimeAndRenewAuditRollback
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestShareBurstSignerTimeAndRenewAuditRollback (0.10s)
+=== RUN   TestShareSignerAndFenceAuditRollbackAndSelfHostedExemption
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestShareSignerAndFenceAuditRollbackAndSelfHostedExemption (0.16s)
+=== RUN   TestTenantAuditRollbackSharedAuthority
+2026/11/08 11:15:41 goose: no migrations to run. current version: 8
+--- PASS: TestTenantAuditRollbackSharedAuthority (0.04s)
+=== RUN   TestRestrictionAuditRollback
+2026/11/08 11:15:42 goose: no migrations to run. current version: 8
+--- PASS: TestRestrictionAuditRollback (0.03s)
+PASS
+ok  	vortex/backend/internal/service	3.831s
+?   	vortex/backend/internal/repository	[no test files]

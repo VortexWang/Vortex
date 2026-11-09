@@ -1,0 +1,4 @@
+=== RUN   TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope
+--- PASS: TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope (6.71s)
+PASS
+ok  	vortex/agent	8.362s

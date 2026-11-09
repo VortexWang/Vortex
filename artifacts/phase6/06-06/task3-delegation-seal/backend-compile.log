@@ -1,0 +1,6 @@
+# vortex/backend/internal/service
+internal/service/delegation_seal.go:66:76: reservation.SignerEpoch undefined (type generated.Reservation has no field or method SignerEpoch)
+FAIL	vortex/backend/internal/service [build failed]
+FAIL	vortex/backend/internal/control [build failed]
+FAIL	vortex/backend/cmd/vortex-backend [build failed]
+FAIL

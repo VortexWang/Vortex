@@ -1,0 +1,5 @@
+# vortex/backend/internal/service
+internal/service/delegation_seal.go:15:2: "vortex/hub" imported and not used
+internal/service/delegation_seal.go:67:24: hub.DecodeAllocation undefined (type string has no field or method DecodeAllocation)
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

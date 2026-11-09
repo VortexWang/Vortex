@@ -1,0 +1,16 @@
+2026/11/09 06:35:44 goose: no migrations to run. current version: 9
+2026/11/09 06:35:44 OK   00001_authority.sql (18.19ms)
+2026/11/09 06:35:44 OK   00002_tenant_policy.sql (9.87ms)
+2026/11/09 06:35:44 OK   00003_nodes_ports.sql (18.34ms)
+2026/11/09 06:35:44 OK   00004_entry_group_domains.sql (2.25ms)
+2026/11/09 06:35:44 OK   00005_rules_compile.sql (17.14ms)
+2026/11/09 06:35:44 OK   00006_packages_entitlements.sql (14.82ms)
+2026/11/09 06:35:44 OK   00007_metering_ledger.sql (24.53ms)
+2026/11/09 06:35:44 OK   00008_limits_shares.sql (41.87ms)
+2026/11/09 06:35:45 OK   00009_domain_events.sql (13.44ms)
+2026/11/09 06:35:45 goose: successfully migrated database to version: 9
+--- FAIL: TestPackageConfirmationVersionCASIsTransactionalAndReplayKeepsOriginalIdentity (0.30s)
+    package_confirmation_version_test.go:69: stale If-Match was not independently enforced <nil>
+FAIL
+FAIL	vortex/backend/internal/service	0.901s
+FAIL

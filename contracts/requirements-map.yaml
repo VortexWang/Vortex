@@ -300,9 +300,18 @@
       "id": "NOD-012",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "NOD-013",
@@ -348,9 +357,18 @@
       "id": "PRT-004",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "PRT-005",
@@ -452,129 +470,273 @@
       "id": "RUL-001",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-002",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-003",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-004",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-005",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-006",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-007",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-008",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-009",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-010",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-011",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-012",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-013",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-014",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-015",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "RUL-016",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "ENG-001",
@@ -1980,17 +2142,35 @@
       "id": "BE-002",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "BE-003",
       "contracts": [
         "vortex.database",
-        "vortex.public-api"
+        "vortex.public-api",
+        "vortex.control.v1",
+        "vortex.runtime-config"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "rule_transaction_review": {
+        "control": "1.4.0 candidate",
+        "runtime": "1.2.0 candidate",
+        "approval": "pending-owner",
+        "proposal": "docs/changes/CR-005-rule-two-phase.json",
+        "scope": "Immutable per-node artifacts; negotiated direct NodeControl Prepare/Commit/query/release; authenticated current-incarnation receipts. Formal billing/source producers remain later Phase 6 plans."
+      }
     },
     {
       "id": "BE-004",
@@ -2022,7 +2202,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageCatalogSnapshotAndSubscriptionImmutable",
+        "TestPackageMonthlyAnchorAndCapabilityIntersection"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-002",
@@ -2030,7 +2217,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageSubscriptionConcurrentPrimaryAndAuditRollback",
+        "TestPackageLifecycleMonthlyExpiryAndReplay"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-006",
@@ -2038,7 +2232,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestPackageDurableSnapshotProductionCompileAndHistory"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-007",
@@ -2046,7 +2246,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestEntitlementRenewalMonthlyNoneDurationAndIndependentSources"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-008",
@@ -2054,7 +2260,16 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestEntitlementAtomicRedemptionContract",
+        "TestEntitlementDifferentPackageConfirmationAtomic",
+        "TestEntitlementRedeemConcurrentUsesAndRequestConflict",
+        "TestEntitlementAuditRollbackExpiredRevokedApplicability"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-003",
@@ -2062,7 +2277,13 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestDowngradePreviewConfirmDueAuthority"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-004",
@@ -2070,7 +2291,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestRestrictionAllCauses",
+        "TestRestrictionBlocksDispatchButPreservesLateObservation"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "PLN-005",
@@ -2078,7 +2306,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-04",
+      "contract_candidate": "CR-006",
+      "verification": [
+        "TestRestrictionAllowsStopRevisionAndCompile",
+        "TestPackageLifecycleAuditRollbackAndUnknownRetention"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-001",
@@ -2086,7 +2321,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-002",
@@ -2094,7 +2336,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-003",
@@ -2102,7 +2351,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-004",
@@ -2110,7 +2366,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-005",
@@ -2118,7 +2381,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-006",
@@ -2126,7 +2396,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-007",
@@ -2134,7 +2411,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-008",
@@ -2142,7 +2426,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-009",
@@ -2150,7 +2441,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-010",
@@ -2158,7 +2456,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-011",
@@ -2166,7 +2471,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-013",
@@ -2174,7 +2486,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-014",
@@ -2182,7 +2501,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-015",
@@ -2190,7 +2516,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "MTR-016",
@@ -2198,7 +2531,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-05",
+      "contract_candidate": "CR-007",
+      "verification": [
+        "docs/coverage/phase6/LEDGER.md",
+        "tools/phase6/ledger_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-001",
@@ -2206,7 +2546,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-002",
@@ -2214,7 +2561,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-003",
@@ -2222,7 +2576,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-004",
@@ -2230,7 +2591,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-005",
@@ -2238,7 +2606,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-006",
@@ -2246,7 +2621,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-007",
@@ -2254,7 +2636,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-008",
@@ -2262,7 +2651,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-009",
@@ -2270,7 +2666,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "LIM-010",
@@ -2278,7 +2681,14 @@
         "vortex.database",
         "vortex.public-api"
       ],
-      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
+      "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
+      "implementation_plan": "06-06",
+      "contract_candidate": "CR-008",
+      "verification": [
+        "docs/coverage/phase6/LIMITS.md",
+        "tools/phase6/share_fault_injection.sh"
+      ],
+      "http_adapter_plan": "06-07"
     },
     {
       "id": "FE-001",
@@ -3147,5 +3557,44 @@
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md"
     }
-  ]
+  ],
+  "phase6_candidate_review": {
+    "proposal": "docs/changes/CR-005-rule-two-phase.json",
+    "approval": "pending-owner",
+    "versions": {
+      "vortex.database": "2.0.0 breaking",
+      "vortex.public-api": "2.0.0 breaking",
+      "vortex.control.v1": "1.4.0 compatible",
+      "vortex.runtime-config": "1.2.0 compatible"
+    },
+    "scope": "All Phase 6 implemented database/API normative bytes through 06-03, including tenant/restriction/node/port/domain authority and immutable rules. No Phase 5 acceptance change; HTTP adapters remain 06-07. Fresh 00001..00005 migrations are executable source, not an upgrade from the historical frozen conceptual schema."
+  },
+  "phase6_rest_candidate_review": {
+    "proposal": "docs/changes/CR-009-rest-events.json",
+    "approval": "pending-owner",
+    "versions": {
+      "vortex.database": "2.4.0 compatible",
+      "vortex.public-api": "3.0.0 breaking"
+    },
+    "scope": "06-07 implemented REST resource adapters and durable events; explicit tenant paths, current-role opaque sessions, immutable operation projections, strong CAS and signed cursors. No public boot/epoch/proof enrollment. Unknown execution retains occupation. Database migration9 adds sessions/events/ordering/port operation binding; approved migrations1..8 unchanged.",
+    "requirements": [
+      "BE-005",
+      "BE-006",
+      "TEN-001",
+      "GEN-007"
+    ],
+    "evidence": "artifacts/phase6/06-07/",
+    "acceptance_boundary": "Exact CR-009 approval required; final same-SHA Docker/Actions cross-domain pairing remains06-11."
+  },
+  "integration_review": {
+    "change_request": "CR-012",
+    "status": "candidate",
+    "contract_id": "vortex.control.v1",
+    "version": "1.8.0",
+    "baselines": {
+      "main": "729cd8de",
+      "phase6": "c85ed753"
+    },
+    "scope": "All existing control requirement references retain their meaning; union preserves production messages and explicit non-regional experimental field100. No new requirement is marked complete by contract publication."
+  }
 }

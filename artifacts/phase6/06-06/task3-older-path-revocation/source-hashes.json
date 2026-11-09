@@ -1,0 +1,10 @@
+{
+  "agent/store/store.go": "26f621f03c457c2f77368aefad97985683340298ac7ce783261303cf807e2122",
+  "agent/store/revocation_recovery.go": "bd323d2fbfcdf213042812cd2bc44bdda596eedd46df15919ef8b41fc08e2c0a",
+  "agent/store/revocation_recovery_test.go": "56308a6ac9e708d0e2b769fbc435b248283b21463f414436efaa6b076d36dd43",
+  "agent/epoch_handoff_test.go": "263046bcb0d86fbc530c7dbe113b0d59b87cb4114ee54b1665e7155b1e4c4573",
+  "backend/internal/service/runtime_recovery_transport_test.go": "10cf4d79b22c8fc5c90f9a1d6bf16ddc4518d57a52cb7aafa3d4084ced7e03f1",
+  "contracts/protobuf/v1/lifecycle.md": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6",
+  ".planning/STATE.md": "366a893c089c1032ca9137829448ad23bdb9b990c137f8b96ae477a12111880b",
+  ".planning/phases/06-m4-m4-backend/06-06-CONTINUATION.md": "5f9279a3810407e80974d8a2271f9e66bf5b401439c4f5e2b0b6a5e20ffd7c79"
+}

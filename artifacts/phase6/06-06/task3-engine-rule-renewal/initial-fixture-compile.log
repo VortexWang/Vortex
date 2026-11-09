@@ -1,0 +1,4 @@
+# vortex/agent [vortex/agent.test]
+agent/renewal_rules_test.go:78:15: a.ID undefined (type authorizationRecord has no field or method ID)
+FAIL	vortex/agent [build failed]
+FAIL

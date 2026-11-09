@@ -1,0 +1,6 @@
+ok  	vortex/agent	67.824s
+ok  	vortex/agent/store	100.482s
+ok  	vortex/hub	16.011s
+ok  	vortex/contracts	3.401s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/cmd/vortex-node	4.317s

@@ -1,0 +1,53 @@
+=== RUN   TestDelegationSealInventoryGateAuditRollbackReturnsOnlyNeverIssued
+2026/11/08 14:29:29 goose: no migrations to run. current version: 8
+2026/11/08 14:29:29 OK   00001_authority.sql (28.34ms)
+2026/11/08 14:29:29 OK   00002_tenant_policy.sql (21.23ms)
+2026/11/08 14:29:30 OK   00003_nodes_ports.sql (38.44ms)
+2026/11/08 14:29:30 OK   00004_entry_group_domains.sql (4.49ms)
+2026/11/08 14:29:30 OK   00005_rules_compile.sql (30.83ms)
+2026/11/08 14:29:30 OK   00006_packages_entitlements.sql (33.84ms)
+2026/11/08 14:29:30 OK   00007_metering_ledger.sql (36.74ms)
+2026/11/08 14:29:30 OK   00008_limits_shares.sql (50.23ms)
+2026/11/08 14:29:30 goose: successfully migrated database to version: 8
+    delegation_seal_test.go:84: sealed parent retains issued child ea5780be-e69e-4403-86b9-fb1737430157 and original fractional accounting
+--- PASS: TestDelegationSealInventoryGateAuditRollbackReturnsOnlyNeverIssued (1.02s)
+=== RUN   TestDelegationSealZeroIssueProofSafelyReturnsWholeParent
+2026/11/08 14:29:30 goose: no migrations to run. current version: 8
+2026/11/08 14:29:30 OK   00001_authority.sql (8.28ms)
+2026/11/08 14:29:30 OK   00002_tenant_policy.sql (7.98ms)
+2026/11/08 14:29:30 OK   00003_nodes_ports.sql (17.51ms)
+2026/11/08 14:29:30 OK   00004_entry_group_domains.sql (2.17ms)
+2026/11/08 14:29:30 OK   00005_rules_compile.sql (17.33ms)
+2026/11/08 14:29:30 OK   00006_packages_entitlements.sql (16.92ms)
+2026/11/08 14:29:31 OK   00007_metering_ledger.sql (22.68ms)
+2026/11/08 14:29:31 OK   00008_limits_shares.sql (31.03ms)
+2026/11/08 14:29:31 goose: successfully migrated database to version: 8
+--- PASS: TestDelegationSealZeroIssueProofSafelyReturnsWholeParent (0.76s)
+=== RUN   TestDelegationSealPreservesAlreadyChargedAndUnknownChildHold
+2026/11/08 14:29:31 goose: no migrations to run. current version: 8
+2026/11/08 14:29:31 OK   00001_authority.sql (8.85ms)
+2026/11/08 14:29:31 OK   00002_tenant_policy.sql (7.58ms)
+2026/11/08 14:29:31 OK   00003_nodes_ports.sql (17.53ms)
+2026/11/08 14:29:31 OK   00004_entry_group_domains.sql (2.23ms)
+2026/11/08 14:29:31 OK   00005_rules_compile.sql (17.44ms)
+2026/11/08 14:29:31 OK   00006_packages_entitlements.sql (16.08ms)
+2026/11/08 14:29:31 OK   00007_metering_ledger.sql (22.07ms)
+2026/11/08 14:29:31 OK   00008_limits_shares.sql (29.5ms)
+2026/11/08 14:29:31 goose: successfully migrated database to version: 8
+--- PASS: TestDelegationSealPreservesAlreadyChargedAndUnknownChildHold (0.79s)
+=== RUN   TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay
+2026/11/08 14:29:32 goose: no migrations to run. current version: 8
+2026/11/08 14:29:32 OK   00001_authority.sql (9.1ms)
+2026/11/08 14:29:32 OK   00002_tenant_policy.sql (7.99ms)
+2026/11/08 14:29:32 OK   00003_nodes_ports.sql (18.11ms)
+2026/11/08 14:29:32 OK   00004_entry_group_domains.sql (2.3ms)
+2026/11/08 14:29:32 OK   00005_rules_compile.sql (17.73ms)
+2026/11/08 14:29:32 OK   00006_packages_entitlements.sql (20.68ms)
+2026/11/08 14:29:32 OK   00007_metering_ledger.sql (28.12ms)
+2026/11/08 14:29:32 OK   00008_limits_shares.sql (49.45ms)
+2026/11/08 14:29:32 goose: successfully migrated database to version: 8
+    delegation_seal_transport_test.go:136: first transport ended: rpc error: code = Unknown desc = injected lost FULL seal before PG
+    delegation_seal_transport_test.go:168: actual mTLS automatic expiry seal, issue-before-seal ordering and lost FULL/PG ACK keep issued51 held and return unissued52 exactly once
+--- PASS: TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay (4.98s)
+PASS
+ok  	vortex/backend/internal/service	9.222s

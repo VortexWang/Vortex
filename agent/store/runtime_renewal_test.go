@@ -331,3 +331,36 @@ func TestRuntimeRenewalFallsBackFromExhaustedNewestGrant(t *testing.T) {
 		t.Fatalf("conservation: %+v %v", b, err)
 	}
 }
+
+func TestRuntimeLeaseOnlyRenewalKeepsExistingCreditAndSessionSource(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	a, e := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if e != nil {
+		t.Fatal(e)
+	}
+	var leases []AuthorizationRecord
+	for _, r := range renewedRuntimeRecords(t, s, a.Use) {
+		if r.Kind != "credit_grant" {
+			leases = append(leases, r)
+		}
+	}
+	if e = installRuntimeRenewal(s, leases); e != nil {
+		t.Fatal(e)
+	}
+	use := a.Use
+	use.Earliest = use.Earliest.Add(2 * time.Second)
+	use.Latest = use.Latest.Add(2 * time.Second)
+	if id, e := s.ReserveRuntimeUsage(ctx, runtimeReservation("lease-only", 10), use); e != nil || id != "grant" {
+		t.Fatal("lease changed original credit", id, e)
+	}
+	grant, runtime, share := runtimeSessionIDs(t, s)
+	if grant != "grant" || runtime != "renewed-runtime" || share != "renewed-share" {
+		t.Fatal("live session did not adopt only compatible leases", grant, runtime, share)
+	}
+	use.Earliest = use.Earliest.Add(6 * time.Minute)
+	use.Latest = use.Latest.Add(6 * time.Minute)
+	if _, e = s.ReserveRuntimeUsage(ctx, runtimeReservation("expired-original-credit", 1), use); e == nil {
+		t.Fatal("lease refresh extended original credit expiry")
+	}
+}

@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 02:44:49 goose: no migrations to run. current version: 8
+2026/11/09 02:44:49 OK   00001_authority.sql (11.65ms)
+2026/11/09 02:44:49 OK   00002_tenant_policy.sql (8.45ms)
+2026/11/09 02:44:49 OK   00003_nodes_ports.sql (18.64ms)
+2026/11/09 02:44:49 OK   00004_entry_group_domains.sql (2.19ms)
+2026/11/09 02:44:49 OK   00005_rules_compile.sql (17.85ms)
+2026/11/09 02:44:49 OK   00006_packages_entitlements.sql (16.89ms)
+2026/11/09 02:44:49 OK   00007_metering_ledger.sql (22.49ms)
+2026/11/09 02:44:49 OK   00008_limits_shares.sql (50.61ms)
+2026/11/09 02:44:49 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:245: pending Engine Commit could not schedule transferred renewal context deadline exceeded
+--- FAIL: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (26.34s)
+FAIL
+FAIL	vortex/backend/internal/service	27.399s
+FAIL

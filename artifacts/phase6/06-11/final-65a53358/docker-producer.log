@@ -1,0 +1,2 @@
+{"commit": "65a5335894732b7d632e870acc3d8283be224cd3", "producer": "docker", "runtime_status": "passed", "external_cloudflare": {"exit_code": 0, "status": "passed"}, "acceptance_complete": true, "error": null}
+host runtime evidence passed; full acceptance=True

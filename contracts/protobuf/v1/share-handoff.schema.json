@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vortex.invalid/control/1.6/share-handoff.schema.json",
+  "title": "share-cas-v1 capacity decision and Node observation (candidate)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/decision"
+    },
+    {
+      "$ref": "#/$defs/observation"
+    }
+  ],
+  "$defs": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "handoff_id",
+        "node_id",
+        "boot_id",
+        "kind",
+        "signer_id",
+        "billing_snapshot_id",
+        "rule_id",
+        "generation",
+        "predecessor",
+        "signer_epoch",
+        "path_generation",
+        "fencing_generation",
+        "rule_revision",
+        "amount",
+        "burst_bytes",
+        "closure_sha256",
+        "issued_at",
+        "ownership_until",
+        "policy_until",
+        "autonomy_until"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "handoff_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "enum": [
+            "rate",
+            "connections"
+          ]
+        },
+        "signer_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "billing_snapshot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "rule_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "predecessor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "path_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "fencing_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "rule_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "burst_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "closure_sha256": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ownership_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "policy_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "autonomy_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "rate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "amount": {
+                "maximum": 1000000000000
+              },
+              "burst_bytes": {
+                "maximum": 125000000000
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "amount": {
+                "maximum": 1000000
+              },
+              "burst_bytes": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predecessor": {
+                "const": 0
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "closure_sha256": {
+                "const": ""
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "closure_sha256": {
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "handoff_id",
+        "node_id",
+        "boot_id",
+        "kind",
+        "command_sha256",
+        "state",
+        "generation",
+        "minimum_generation",
+        "active_generation",
+        "fencing_generation",
+        "open_connections"
+      ],
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "handoff_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "enum": [
+            "rate",
+            "connections"
+          ]
+        },
+        "command_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "state": {
+          "enum": [
+            "enforced",
+            "draining",
+            "unknown"
+          ]
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "minimum_generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "active_generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "fencing_generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "open_connections": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "draining"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "connections"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$comment": "Application validation additionally enforces predecessor=generation-1, burst_bytes<=amount/8, UTC authority ordering, and exact receipt floors."
+}

@@ -162,6 +162,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		return nil
 	}
 	demandsReceived := 0
+	// Only finite fixtures retain identities, bounded by DemandLimit. Replays
+	// return original durable bytes but cannot consume a new logical round.
+	demandSeen := make(map[string]bool)
 	usageReceived := 0
 	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
@@ -343,7 +346,12 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err != nil {
 				return err
 			}
-			if s.BeforeDemandResponse != nil {
+			newDemand := true
+			if s.DemandLimit > 0 {
+				newDemand = !demandSeen[body.CreditDemand.RequestId]
+				demandSeen[body.CreditDemand.RequestId] = true
+			}
+			if newDemand && s.BeforeDemandResponse != nil {
 				if err := s.BeforeDemandResponse(ctx); err != nil {
 					return err
 				}
@@ -365,7 +373,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := stream.Send(response); err != nil {
 				return err
 			}
-			demandsReceived++
+			if newDemand {
+				demandsReceived++
+			}
 			if s.DemandLimit > 0 && demandsReceived >= s.DemandLimit {
 				return nil
 			}
@@ -375,7 +385,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptUnknown(ctx, first.GetNodeId(), body.UnknownUsageBatch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUnknownUsage(ctx, first.GetNodeId(), payload)
 			}
@@ -408,7 +418,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptKnown(ctx, first.GetNodeId(), message.GetBootId(), batch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload})
 			}

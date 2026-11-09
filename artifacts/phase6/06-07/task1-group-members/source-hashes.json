@@ -1,0 +1,10 @@
+{
+  "backend/db/query/public_resources.sql": "17df48f647d22a3e40c70964fa4c07c5bb5763c7519b82cbe5509d5dab94d53c",
+  "backend/db/generated/public_resources.sql.go": "8ccd1fe40f229c140101455f8ac6d1620478e0f0d65bb9f5c61743198f19685f",
+  "backend/internal/repository/public_resources.go": "99ca9885b36ec33839f9a7906d4199d950405de190faab69f0e08e67e7d128d4",
+  "backend/internal/service/node.go": "1fe5f86779e0accbd7a53cf3657752cfdc788c2a9d507bc02c6c915d6d15342a",
+  "backend/internal/httpapi/resources.go": "9c6c154767f0b628e8b29966a82cf7c881f6d6e63aa174c36790f6ac95fa44a7",
+  "backend/internal/httpapi/router.go": "bfdba529b30cbdf931c42c73dbdf315c6d9ed84e076a84dfdb1d23b11883e5de",
+  "backend/internal/httpapi/group_members.go": "a556a90cd66006ec6a1d4e37412537b70d5a1ef5a7787601823517c47a924d54",
+  "backend/internal/httpapi/group_members_test.go": "2dd4564eaa1e69e8661130ad968266d948a93f3b624fcf8110385a385a5e2c2b"
+}

@@ -1,0 +1,28 @@
+{
+  "base_sha": "a730a405a1b694588b862b008255bbdd951ad592",
+  "scope": "06-07 package HTTP adapters;not complete plan",
+  "passed": [
+    "final-focused-native-race.log",
+    "final-api-native-race.log",
+    "final-linux-race.log",
+    "builds.json"
+  ],
+  "failed_retained": {
+    "routes-red.log": "fixture failure or intentional route-removal RED; see README",
+    "corrected-focused-native-race.log": "fixture failure or intentional route-removal RED; see README",
+    "missing-routes-semantic-red.log": "fixture failure or intentional route-removal RED; see README",
+    "focused-native-race.log": "fixture failure or intentional route-removal RED; see README"
+  },
+  "evidence_sha256": {
+    "source-hashes.json": "eff98991b4408b4210d250c0c0050ddd61b138d47d3da86a2c045fcb7e402030",
+    "routes-red.log": "47a612fb7dee67f54706ab77019f672095dc79d158a8fdbe5ee01949c1d880f1",
+    "README.md": "c805abde6606f5a8d7144d8a5de8c3be0887ee05a6f1fa96559d33c915396e85",
+    "corrected-focused-native-race.log": "00c34de8ea7fdd1ee867dd0c0cec83f907ba4f5f6e401ca6bc5e1571d6e73087",
+    "final-focused-native-race.log": "35218b4e56cdf6a833fc56def81ccf30cd1b8226679cd718d140afd782db8dba",
+    "final-linux-race.log": "7ffdd6f93536e20fc9ac1db5f428422405e87ae519f1df09b7789e1d682d7b65",
+    "missing-routes-semantic-red.log": "733fb8e188067122b5e2744e11b5d94635e4207a4bba80ff466cff30a7aff683",
+    "focused-native-race.log": "e9afc6bb2ae673c22b129811af2d3314e82d412a57fe5a2968b2b92fa784046f",
+    "final-api-native-race.log": "3d727e2ef83abef8471fa5aa51d2678f995668e007290f634ded2df6ef406daf",
+    "builds.json": "1982640d9034df7c50602e2e8a29d8b6e7b5a3a1fa6671c6c633a9f4bfe450da"
+  }
+}

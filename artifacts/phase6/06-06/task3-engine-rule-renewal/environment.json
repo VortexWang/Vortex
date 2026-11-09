@@ -1,0 +1,9 @@
+{
+  "observed_at_utc": "2026-11-08T18:21:22.197171+00:00",
+  "base_sha": "936edcab7ca46846cddd909c95d22fdd43665d2b",
+  "native_platform": "macOS-26.5.1-arm64-arm-64bit",
+  "native_arch": "arm64",
+  "go": "go version go1.27.3 darwin/arm64",
+  "linux_run": "Docker arm64 development checkout; exact Compose images pinned in deploy/backend/compose.test.yml",
+  "same_sha_actions_pair": "not run;06-11"
+}

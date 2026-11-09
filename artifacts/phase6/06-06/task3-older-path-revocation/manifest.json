@@ -1,0 +1,45 @@
+{
+  "base_sha": "e20cd131",
+  "scope": "Restrictive authenticated older-path pure revocation",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": [
+    "root-native-race.log",
+    "root-linux-race.log",
+    "focused-mtls-native.log",
+    "diagnostic-renewal-linux.log (3x)",
+    "final-affected-backend-native-race.log",
+    "final-affected-backend-linux-race.log",
+    "cross-builds.json"
+  ],
+  "failed_retained": {
+    "red-native.log": "original genuine RED",
+    "initial-mtls-barrier-native.log": "unconfirmed journal fixture barrier, corrected explicitly",
+    "affected-backend-linux-race.log": "extra reconnect; cause unproven; strict assertions retained"
+  },
+  "inherited_full_backend": "936edcab",
+  "not_claimed": [
+    "Full backend rerun",
+    "Same-SHA clean-source Docker/Actions",
+    "Native amd64 execution",
+    "CR-008 approval",
+    "06-06 completion"
+  ],
+  "evidence_sha256": {
+    "README.md": "da284d34bac9a40eb21ee1f2ecd93513808f8bdd49e06623c2b8b506a63e393c",
+    "affected-backend-linux-race.log": "8cfcb38dda9dede14d1b3e08380524a60eefd0c1606afb59e72155972aee6a37",
+    "affected-backend-native-race.log": "e8f0a52092a6801477f1525ecfb7b4ed927828904eb5650f42d3e62aab839f9d",
+    "approved-snapshot-protection.json": "6d76df938fc4c0d62bd4e54814722f2e010ba14373fdd41696897f5194bb50fc",
+    "cross-builds.json": "3cb555d948cb21ed44a1e7204e6b8e9859ad69196c2b2b7c114740cf2763233e",
+    "diagnostic-renewal-linux.log": "196c2d8a57f59705345b6358052bee27ee7ca1ca6e4e7522032b85bc96b5c17e",
+    "environment.json": "c6b948ce8c8c3199632b1ab2f1281f16ec4ca604f41ba32d6b3c2fd95d30c4c5",
+    "final-affected-backend-linux-race.log": "951680dcad9a590688e9c1e9a4d8b643d5b85c1408c95546b6aaf7b0ca5d3bb9",
+    "final-affected-backend-native-race.log": "e0db4ebf16827121d7f5a9eab3fe43f87ebe1d8387ec84aed850860710277070",
+    "focused-mtls-native.log": "bd44a594ab3c33fbc171e414a439336d55cda9dd68106261f3b04c44225fd7e4",
+    "focused-store-native.log": "66d32560c5676d4017d8f45373c7b7542d455afc08b7fc47d6cd22f642e6e2ed",
+    "initial-mtls-barrier-native.log": "5df2b49bfc1a43f5a13e3195878aa8503f6bc8792f25a46d3649bad5eb04a048",
+    "red-native.log": "f223e84dfed67a9d6da8f593d571512b8068f0fc9c53e4f41a05f7362ce3d2b2",
+    "root-linux-race.log": "f90759a85bef2678ac6ec3041f4ec9272ab0d4d396f0aa02ab02bfc52be16154",
+    "root-native-race.log": "20b81a54aac90f448a86dfb0a9d26731558c2b338eba8f437a8f139f05201bb3",
+    "source-hashes.json": "8f87501a2abd52b6f94fa140dd80923a4f937c61e32fff03ee0e069e6b2f03b6"
+  }
+}

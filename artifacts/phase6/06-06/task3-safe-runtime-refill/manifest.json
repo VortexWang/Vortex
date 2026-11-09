@@ -1,0 +1,20 @@
+{
+  "base_commit": "7d49a0d88446c35590a72502fdf1ffcab6978495",
+  "scope": "candidate safe runtime funding successors after complete predecessor closure; lease refresh/recovery/full06-06 pending",
+  "source": {
+    "backend/db/query/hub_allocations.sql": "e0d30422ed48029505c0f46e833f1c2c1019c1d32aba9c86f13b63976c8792be",
+    "backend/db/generated/hub_allocations.sql.go": "26c85d763726db83faf6e10ca42a08bb808ca7b402ca1ee86660cdb5f191e1ac",
+    "backend/internal/service/hub_allocation.go": "d852bf9ca2ac0e1fb62831bfe96739246a17adc20f4694ca9d0601bd70139cda",
+    "backend/internal/service/runtime_funding_scheduler.go": "8580dc081c307abceda66dbe43e0a3b0d5ed76cafd0b4ec349998177cdf91697",
+    "backend/internal/service/runtime_refill_test.go": "6dc30eb0e88525b781394444913ae4d782a8720cc33a2a39d0f16e260eb081a8",
+    "contracts/protobuf/v1/lifecycle.md": "98579f266d029cedceccbab4b36a0e8955de1adb32ee929e9de20c52a34b5bee"
+  },
+  "evidence": {
+    "README.md": "f2e281cbc256d654c47ed6b861e24a437619ac9dd19099e7e0ac2072716f18d9",
+    "atomic-audit-native.log": "c55c614d9563a1918c6e7b702e81b82d3b5a99545f8935f2c23ca77e2d27c7fa",
+    "focused-native.log": "36366df81bf03248a9aaefb61e8da2c2f450f2b908791f6b40bafd6acd7381ff",
+    "full-backend-native-race.log": "173fa1947c057a66c940e557a23eaa79f4a69db1e4eb31d7e2fb514a7f6cc804",
+    "generation.json": "30b2b7db12d225061c610997090c50bf67ceba4f03ada7ef5c7915e459ef381e",
+    "linux-race-build.log": "b0d2d9ad1300e6836237f38d35e6d052ea5b77e788b1dac115f7516ac28f37cc"
+  }
+}

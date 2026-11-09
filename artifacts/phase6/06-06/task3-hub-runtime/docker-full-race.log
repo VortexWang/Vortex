@@ -1,0 +1,24 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-9b0365fa238b Creating 
+ Container vortex-phase6-tracer-backend-test-run-9b0365fa238b Created 
+ok  	vortex/agent	50.970s
+ok  	vortex/agent/identity	1.052s
+ok  	vortex/agent/store	46.448s
+ok  	vortex/agent/upgrade	1.516s
+ok  	vortex/hub	10.481s
+ok  	vortex/contracts	1.013s
+ok  	vortex/cmd/vortex-node	1.846s
+ok  	vortex/backend/internal/service	37.560s
+ok  	vortex/backend/internal/control	1.391s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.010s
+# vortex/backend/cmd/vortex-hub
+cmd/vortex-hub/main.go:16:2: could not import sync (open : no such file or directory)
+FAIL	vortex/backend/cmd/vortex-hub [build failed]
+FAIL
+

@@ -175,6 +175,25 @@ func (s *Store) configure() error {
 		}
 	}
 	_, err := s.db.Exec(`
+CREATE TABLE IF NOT EXISTS node_share_heads (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,kind TEXT NOT NULL,boot_id TEXT NOT NULL,
+ generation INTEGER NOT NULL,fencing_generation INTEGER NOT NULL,
+ amount INTEGER NOT NULL,burst_bytes INTEGER NOT NULL,payload BLOB NOT NULL,
+ PRIMARY KEY(tenant_id,node_id,kind)
+);
+CREATE TABLE IF NOT EXISTS node_share_commands (
+ handoff_id TEXT PRIMARY KEY NOT NULL,backend_id TEXT NOT NULL,payload BLOB NOT NULL,
+ payload_sha256 TEXT NOT NULL,receipt BLOB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS node_share_bindings (
+ node_id TEXT NOT NULL,rule_id TEXT NOT NULL,tenant_id TEXT NOT NULL,
+ PRIMARY KEY(node_id,rule_id)
+);
+CREATE TABLE IF NOT EXISTS node_share_buckets (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,boot_id TEXT NOT NULL,
+ tokens INTEGER NOT NULL,last_tick INTEGER NOT NULL,
+ PRIMARY KEY(tenant_id,node_id)
+);
 CREATE TABLE IF NOT EXISTS schema_meta (
   key TEXT PRIMARY KEY NOT NULL,
   value TEXT NOT NULL
@@ -586,8 +605,40 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '19')
 	if err := s.migrateDemandDenialState(); err != nil {
 		return err
 	}
-	// Version 20 combines the Phase 4 block/demand schema and Phase 5 renewal,
-	// retention, credential, recovery and policy migrations. Publish only last.
+	if err := s.migrateUsageOrigin(); err != nil {
+		return err
+	}
+	if err := s.migrateSourceProvisions(); err != nil {
+		return err
+	}
+	if err := s.migrateShareRenewalClosures(); err != nil {
+		return err
+	}
+	if err := s.migrateDelegationSeals(); err != nil {
+		return err
+	}
+	if err := s.migrateCreditGrantClosures(); err != nil {
+		return err
+	}
+	if err := s.migrateHubLeaseRefreshes(); err != nil {
+		return err
+	}
+	if err := s.migrateFundedHandoffEvidence(); err != nil {
+		return err
+	}
+	if err := s.migrateRecoveryCreditFences(); err != nil {
+		return err
+	}
+	if err := s.migrateNodeBootShareRecovery(); err != nil {
+		return err
+	}
+	if err := s.migrateScopedRevocations(); err != nil {
+		return err
+	}
+	if err := s.migrateHubRecoveryAdmissions(); err != nil {
+		return err
+	}
+	// Publish the combined schema version only after every migration succeeds.
 	_, err = s.db.Exec(`UPDATE schema_meta SET value='20' WHERE key='schema_version' AND CAST(value AS INTEGER)<20`)
 	return err
 }
@@ -860,10 +911,23 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	scopedRevocations, err := olderRevocationOnlyTx(ctx, tx, update, records, revocations)
+	if err != nil {
+		return err
+	}
 	if err := persistShareReferencesTx(ctx, tx, update); err != nil {
 		return err
 	}
 	for _, id := range revocations {
+		if scopedRevocations {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_scoped_revocations(node_id,issuer_id,boot_id,path_generation,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT DO NOTHING`, update.NodeID, update.IssuerID, update.BootID, strconv.FormatUint(update.PathGeneration, 10), id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+				return err
+			}
+			if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET state='revoked' WHERE node_id=? AND authorization_id=? AND issuer_id=? AND boot_id=? AND path_generation=?`, update.NodeID, id, update.IssuerID, update.BootID, strconv.FormatUint(update.PathGeneration, 10)); err != nil {
+				return err
+			}
+			continue
+		}
 		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 			return err
 		}
@@ -872,7 +936,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		}
 	}
 	for _, h := range update.Handoffs {
-		if err := persistEpochHandoffTx(ctx, tx, update, h); err != nil {
+		if err := persistEpochHandoffTx(ctx, tx, update, h, len(records) == 0 && len(update.PolicyTransitions) == 0); err != nil {
 			return err
 		}
 	}
@@ -895,11 +959,28 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key=?`, key).Scan(&previous)
 		if err == nil {
 			value, parseErr := strconv.ParseUint(previous, 10, 64)
-			if parseErr != nil || incoming < value {
+			if parseErr != nil {
+				return ErrAuthorizationGenerationStale
+			}
+			if incoming < value {
+				if scopedRevocations && key != "authorization_signer_epoch" {
+					continue
+				}
+				// A finite, fully verified handoff can cover a draining older
+				// path. It contains no new grants/policy transition and every
+				// source was checked above against its original active family.
+				// Preserve global admission floors; ordinary grants/heartbeats
+				// and lower signer epochs still fail closed.
+				if key != "authorization_signer_epoch" && len(records) == 0 && len(update.Handoffs) > 0 && len(update.PolicyTransitions) == 0 {
+					continue
+				}
 				return ErrAuthorizationGenerationStale
 			}
 		} else if !errors.Is(err, sql.ErrNoRows) {
 			return err
+		}
+		if scopedRevocations {
+			continue
 		}
 		if err := putState(ctx, tx, key, strconv.FormatUint(incoming, 10), time.Now().UTC()); err != nil {
 			return err
@@ -922,6 +1003,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
 			return fmt.Errorf("store: authorization record does not match update identity or fencing")
 		}
+		if err := checkUninstalledCreditFinalTx(ctx, tx, update.NodeID, record); err != nil {
+			return err
+		}
 		var existing string
 		err := tx.QueryRowContext(ctx, `SELECT source_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&existing)
 		if err == nil {
@@ -930,12 +1014,20 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if !errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
+		if err := checkRecoveryCreditFenceTx(ctx, tx, update.NodeID, record); err != nil {
+			return err
+		}
 		var revoked int
 		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM authorization_revocations WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&revoked); err != nil {
 			return err
 		}
+
+		var scoped int
+		if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM authorization_scoped_revocations WHERE node_id=? AND issuer_id=? AND boot_id=? AND path_generation=? AND authorization_id=?`, update.NodeID, update.IssuerID, record.BootID, strconv.FormatUint(record.PathGeneration, 10), record.AuthorizationID).Scan(&scoped); err != nil {
+			return err
+		}
 		state := "active"
-		if revoked > 0 {
+		if revoked > 0 || scoped > 0 {
 			state = "revoked"
 		}
 		_, err = tx.ExecContext(ctx, `INSERT INTO authorization_records(node_id,authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.ParentAuthorizationID, record.SourceID, record.Kind, record.RuleID, strconv.FormatUint(record.RuleRevision, 10), strconv.FormatUint(record.PathGeneration, 10), strconv.FormatUint(record.SignerEpoch, 10), record.BootID, record.IssuedAt, record.NotBefore, record.ExpiresAt, record.HardDeadline, record.BillingSnapshotID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.RateBPS, 10), strconv.FormatUint(record.Connections, 10), state)

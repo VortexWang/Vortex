@@ -1,0 +1,30 @@
+[
+  {
+    "target": "vortex-backend",
+    "os": "linux",
+    "arch": "amd64",
+    "result": "pass",
+    "execution": false
+  },
+  {
+    "target": "vortex-hub",
+    "os": "linux",
+    "arch": "amd64",
+    "result": "pass",
+    "execution": false
+  },
+  {
+    "target": "vortex-backend",
+    "os": "linux",
+    "arch": "arm64",
+    "result": "pass",
+    "execution": false
+  },
+  {
+    "target": "vortex-hub",
+    "os": "linux",
+    "arch": "arm64",
+    "result": "pass",
+    "execution": false
+  }
+]

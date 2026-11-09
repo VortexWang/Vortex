@@ -213,3 +213,63 @@ func TestIssuerCommitFailureDoesNotConsumeOrRespond(t *testing.T) {
 		t.Fatalf("failed commit consumed funds: %+v %v", b, err)
 	}
 }
+
+func TestIssuerFundedAllocationRootsAndDelegationRollbackTogether(t *testing.T) {
+	s, d, clock, _ := issuerFixture(t)
+	ctx := context.Background()
+	// Use a new finite delegation with a different source for each root. The
+	// existing fixture has no references and supplies no implicit anchor.
+	d.ID = shareID(701)
+	d.SourceID = shareID(702)
+	d.RuntimeSourceID = shareID(703)
+	d.ShareSourceID = shareID(704)
+	for i, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
+		d.ShareReferences = append(d.ShareReferences, ShareReference{ID: shareID(710 + i), SourceID: source, IssuerID: d.HubID, NodeID: d.NodeID, SignerEpoch: d.SignerEpoch, Generation: 1, Revision: 1, RuleID: d.RuleID, RuleRevision: d.RuleRevision, PathGeneration: d.PathGeneration, RateBPS: d.RateBPS, Connections: d.Connections, NotBefore: d.ValidFrom, ExpiresAt: d.ExpiresAt, HardDeadline: d.HardDeadline})
+	}
+	if _, e := s.db.Exec(`CREATE TRIGGER fail_funded_install BEFORE INSERT ON issuer_delegations BEGIN SELECT RAISE(ABORT,'injected durable write failure'); END;`); e != nil {
+		t.Fatal(e)
+	}
+	if e := s.InstallFundedHubDelegation(ctx, shareID(799), d, clock); e == nil {
+		t.Fatal("injected failure acknowledged")
+	}
+	for _, table := range []string{"share_source_anchors", "share_source_heads", "share_references"} {
+		var n int
+		if e := s.db.QueryRow("SELECT count(*) FROM " + table).Scan(&n); e != nil || n != 0 {
+			t.Fatal("partial source authority", table, n, e)
+		}
+	}
+	if _, e := s.db.Exec(`DROP TRIGGER fail_funded_install`); e != nil {
+		t.Fatal(e)
+	}
+	// A fresher authenticated liveness sample must survive late installation;
+	// the allocation cannot restore its older, longer autonomy deadline.
+	newer := clock.Latest.Add(time.Second)
+	shorter := d.AutonomyDeadline.Add(-time.Minute)
+	if e := s.RecordBackendHeartbeat(ctx, newer, shorter); e != nil {
+		t.Fatal(e)
+	}
+	clock.Earliest, clock.Latest = newer, newer
+	if e := s.InstallFundedHubDelegation(ctx, shareID(799), d, clock); e != nil {
+		t.Fatal(e)
+	}
+	status, e := s.CurrentAutonomyStatus(ctx, newer, true)
+	if e != nil || !status.BackendHeartbeat.Equal(newer) || !status.HardDeadline.Equal(shorter) {
+		t.Fatal("allocation rolled back liveness/deadline", e, status)
+	}
+	request := issuerRequest(d, 705)
+	first, e := s.IssueHubAuthorization(ctx, request, clock)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = s.InstallFundedHubDelegation(ctx, shareID(799), d, clock); e != nil {
+		t.Fatal(e)
+	}
+	replay, e := s.IssueHubAuthorization(ctx, request, clock)
+	if e != nil || !bytes.Equal(first.Payload, replay.Payload) {
+		t.Fatal("replay changed funded issue", e)
+	}
+	b, e := s.AuditHubDelegation(ctx, d.ID)
+	if e != nil || b.Remaining != d.RawBytes-request.RawBytes {
+		t.Fatal("replayed installation refilled", e, b)
+	}
+}

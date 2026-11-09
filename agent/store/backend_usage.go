@@ -14,6 +14,8 @@ import (
 // acknowledged it. Confirmation never settles or releases an unknown liability.
 type HubUsage struct {
 	NodeID, BootID, BatchID, Kind string
+	ReportBootID                  string
+	Sequence                      uint64
 	Payload, Digest               []byte
 }
 
@@ -108,7 +110,22 @@ UNION ALL SELECT u.node_id,u.origin_boot_id,u.batch_id,'unknown',u.payload,u.pay
 		if !bytes.Equal(digest[:], b.Digest) {
 			return nil, fmt.Errorf("hub usage: corrupt durable payload")
 		}
+		// Query after closing these rows: SQLite intentionally uses one writer
+		// connection. Missing historic metadata remains explicit pending state.
 		result = append(result, b)
 	}
-	return result, rows.Err()
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	if err = rows.Close(); err != nil {
+		return nil, err
+	}
+	for i := range result {
+		boot, seq, e := s.UsageOrigin(ctx, result[i].NodeID, result[i].BatchID)
+		if e != nil && !errors.Is(e, ErrUsageOriginMissing) {
+			return nil, e
+		}
+		result[i].ReportBootID, result[i].Sequence = boot, seq
+	}
+	return result, nil
 }

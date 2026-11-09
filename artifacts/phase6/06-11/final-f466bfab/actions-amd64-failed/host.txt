@@ -1,0 +1,5 @@
+go version go1.27.3 linux/amd64
+Linux 0e9b36104a3f 7.0.0-1017-azure #17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026 x86_64 GNU/Linux
+2026-11-09T05:05:53Z
+GOFLAGS=-p=1
+GOMAXPROCS=2

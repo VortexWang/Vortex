@@ -1,0 +1,15 @@
+=== RUN   TestNodeSourceProvisionActualMTLSWorkerLostReceiptAndExplicitBackend
+2026/11/08 13:36:44 goose: no migrations to run. current version: 8
+2026/11/08 13:36:44 OK   00001_authority.sql (16.93ms)
+2026/11/08 13:36:44 OK   00002_tenant_policy.sql (10.21ms)
+2026/11/08 13:36:44 OK   00003_nodes_ports.sql (18.86ms)
+2026/11/08 13:36:44 OK   00004_entry_group_domains.sql (2.14ms)
+2026/11/08 13:36:44 OK   00005_rules_compile.sql (17.98ms)
+2026/11/08 13:36:44 OK   00006_packages_entitlements.sql (17.26ms)
+2026/11/08 13:36:44 OK   00007_metering_ledger.sql (28.14ms)
+2026/11/08 13:36:44 OK   00008_limits_shares.sql (51.34ms)
+2026/11/08 13:36:44 goose: successfully migrated database to version: 8
+    node_source_transport_test.go:167: actual direct backend TLS, opt-in capability, atomic FULL roots, lost receipt/replay, PG task completion verified
+--- PASS: TestNodeSourceProvisionActualMTLSWorkerLostReceiptAndExplicitBackend (1.99s)
+PASS
+ok  	vortex/backend/internal/service	3.690s

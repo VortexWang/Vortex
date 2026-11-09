@@ -1,0 +1,12 @@
+{
+  "agent/store/store.go": "4fdab6a5c51f0a03b6ad24bb83c81ce768f697f05a28bf95889a577e6073ec4e",
+  "agent/store/epoch_handoff_test.go": "01c1ebe156d1e5242930bc2c2ec93673ef1ddd425a7d8981fa7352dd73844243",
+  "agent/store/issuer_bootstrap.go": "39ee4f938be354bc5027aea9c5d3cbeeca911bba45d60373cab078d9fa0f318e",
+  "agent/store/recovery_authorization.go": "5160950ca1b1fac9c89606233b94ee02a87c3fd9922bc5374e617ae4c9be4011",
+  "agent/store/runtime_recovery_updates.go": "93b58f4b3275e04d407d4d9d13129cbdc0a472be1456a2faf7a64b6d7d62c538",
+  "agent/store/runtime_recovery_updates_test.go": "f6e893c250630632ff4a68c5ccac5bf0253e5eebaf2844751e31a036ee9b8e64",
+  "hub/runtime_server.go": "d405213992548bccc9797cdeb6652b0dcb2ba999a72fc6caf144f511aab68b81",
+  "backend/internal/service/runtime_effective_funding_test.go": "d422c812c48ec2914869cba4ffdb34fdb904350134b84f568c493f309e92edab",
+  "backend/internal/service/runtime_recovery_transport_test.go": "ed9349352c88793c3704e3bf09e6fbfe7d631622b3164d03a15e5f9a5fa67f88",
+  "contracts/protobuf/v1/lifecycle.md": "f3db507340fae5f144b4cb1c15b7555ed6170dc015832ddcfa4a2064b0e0871c"
+}

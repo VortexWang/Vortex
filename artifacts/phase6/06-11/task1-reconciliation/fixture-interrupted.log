@@ -1,0 +1,19 @@
+=== RUN   TestWithin60sRejectsPartialAndOverBudget
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/partial
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/missing-member
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/rounded-duration
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/failed
+--- PASS: TestWithin60sRejectsPartialAndOverBudget (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/partial (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/missing-member (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/rounded-duration (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/failed (0.00s)
+PASS
+ok  	vortex/backend/internal/reconciliation	0.784s
+=== RUN   TestReconcile1000Within60s
+2026/11/09 09:01:02 goose: no migrations to run. current version: 9
+signal: interrupt
+FAIL	vortex/backend/internal/service	37.658s
+FAIL

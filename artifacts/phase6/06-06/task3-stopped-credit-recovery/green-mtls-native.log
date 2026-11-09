@@ -1,0 +1,38 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:43:33 goose: no migrations to run. current version: 8
+2026/11/09 01:43:33 OK   00001_authority.sql (12.15ms)
+2026/11/09 01:43:33 OK   00002_tenant_policy.sql (8.51ms)
+2026/11/09 01:43:33 OK   00003_nodes_ports.sql (18.7ms)
+2026/11/09 01:43:33 OK   00004_entry_group_domains.sql (2.35ms)
+2026/11/09 01:43:33 OK   00005_rules_compile.sql (17.76ms)
+2026/11/09 01:43:33 OK   00006_packages_entitlements.sql (16.67ms)
+2026/11/09 01:43:33 OK   00007_metering_ledger.sql (22.62ms)
+2026/11/09 01:43:33 OK   00008_limits_shares.sql (50.62ms)
+2026/11/09 01:43:33 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (6.50s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_admissions (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_hub_same_store_manifests (0.02s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill/final_requires_node_recovery_source_receipts (0.02s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt
+2026/11/09 01:43:39 goose: no migrations to run. current version: 8
+2026/11/09 01:43:39 OK   00001_authority.sql (8.37ms)
+2026/11/09 01:43:39 OK   00002_tenant_policy.sql (7.11ms)
+2026/11/09 01:43:39 OK   00003_nodes_ports.sql (16.47ms)
+2026/11/09 01:43:39 OK   00004_entry_group_domains.sql (2.04ms)
+2026/11/09 01:43:39 OK   00005_rules_compile.sql (17.99ms)
+2026/11/09 01:43:39 OK   00006_packages_entitlements.sql (16.16ms)
+2026/11/09 01:43:39 OK   00007_metering_ledger.sql (21.49ms)
+2026/11/09 01:43:39 OK   00008_limits_shares.sql (47.41ms)
+2026/11/09 01:43:39 goose: successfully migrated database to version: 8
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts
+--- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt (6.40s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_admissions (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_hub_same_store_manifests (0.01s)
+    --- PASS: TestRuntimeRecoveryUpdateActualMTLSAfterDirectCreditStopRetainsDebt/final_requires_node_recovery_source_receipts (0.01s)
+PASS
+ok  	vortex/backend/internal/service	14.552s

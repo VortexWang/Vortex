@@ -1,0 +1,22 @@
+{
+  "point": "execute:post",
+  "activeHooks": [
+    {
+      "capId": "code-review",
+      "kind": "step",
+      "ref": {
+        "skill": "code-review"
+      },
+      "when": "workflow.code_review",
+      "produces": [
+        "REVIEW.md"
+      ],
+      "consumes": [
+        "SUMMARY.md"
+      ],
+      "onError": "skip",
+      "supportsReviewerLanes": true
+    }
+  ],
+  "rendered": "### Step 1: skill:code-review (code-review)\n- produces: REVIEW.md\n- consumes: SUMMARY.md\n- when: `workflow.code_review`\n- onError: skip"
+}

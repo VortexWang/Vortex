@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 02:45:57 goose: no migrations to run. current version: 8
+2026/11/09 02:45:57 OK   00001_authority.sql (13.77ms)
+2026/11/09 02:45:57 OK   00002_tenant_policy.sql (17.04ms)
+2026/11/09 02:45:57 OK   00003_nodes_ports.sql (36.25ms)
+2026/11/09 02:45:57 OK   00004_entry_group_domains.sql (4.07ms)
+2026/11/09 02:45:57 OK   00005_rules_compile.sql (35.92ms)
+2026/11/09 02:45:57 OK   00006_packages_entitlements.sql (32.96ms)
+2026/11/09 02:45:57 OK   00007_metering_ledger.sql (35.63ms)
+2026/11/09 02:45:57 OK   00008_limits_shares.sql (114.93ms)
+2026/11/09 02:45:57 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:243: missing exact pending Commit witness false <nil>
+--- FAIL: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (6.15s)
+FAIL
+FAIL	vortex/backend/internal/service	6.934s
+FAIL

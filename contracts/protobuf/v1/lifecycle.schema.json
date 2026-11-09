@@ -21,7 +21,9 @@
               "identity-v1",
               "recovery-v1",
               "share-policy-v1",
-              "backend-ledger-v1"
+              "backend-ledger-v1",
+              "usage-ledger-v1",
+              "runtime-lease-refresh-v1"
             ]
           },
           "uniqueItems": true
@@ -350,7 +352,8 @@
               "identity-v1",
               "recovery-v1",
               "share-policy-v1",
-              "backend-ledger-v1"
+              "backend-ledger-v1",
+              "runtime-lease-refresh-v1"
             ]
           },
           "uniqueItems": true
@@ -1141,6 +1144,876 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9223372036854775807
+        }
+      }
+    },
+    "usage_envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "node_id",
+        "origin_boot_id",
+        "report_boot_id",
+        "sequence",
+        "batch_id",
+        "kind",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "node_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "origin_boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "report_boot_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "batch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "kind": {
+          "enum": [
+            "known",
+            "unknown"
+          ]
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "funded_backend_hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "enum": [
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1",
+              "runtime-lease-refresh-v1"
+            ],
+            [
+              "status-v1",
+              "usage-ledger-v1"
+            ]
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "control_version",
+        "capabilities",
+        "session_id",
+        "region_id"
+      ]
+    },
+    "funded_backend_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "mode": {
+          "enum": [
+            "online",
+            "autonomous",
+            "recovering",
+            "blocked"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "enum": [
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1"
+            ],
+            [
+              "status-v1",
+              "backend-allocation-v1",
+              "backend-ledger-v1",
+              "share-renewal-close-v1",
+              "delegation-seal-v1",
+              "runtime-lease-refresh-v1"
+            ],
+            [
+              "status-v1",
+              "usage-ledger-v1"
+            ]
+          ]
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "recovery_target_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "confirmed_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "pending_tail_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "backend_heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "autonomy_deadline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "revocation_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "restriction_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "required": [
+        "hub_id",
+        "region_id",
+        "mode",
+        "session_id",
+        "control_version",
+        "capabilities",
+        "signer_epoch",
+        "recovery_target_sequence",
+        "confirmed_sequence",
+        "pending_tail_records",
+        "backend_heartbeat_at",
+        "autonomy_deadline",
+        "revocation_revision",
+        "restriction_revision"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "blocked"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "signer_epoch": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backend_heartbeat_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "autonomy_deadline": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "funded_backend_ledger_ack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 257
+        },
+        "ledger_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "kind": {
+          "enum": [
+            "allocation-installed-v1",
+            "issue-v1",
+            "usage-v1",
+            "runtime-lease-v1"
+          ]
+        }
+      },
+      "required": [
+        "record_id",
+        "ledger_sequence",
+        "payload_sha256",
+        "kind"
+      ]
+    },
+    "source_provision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "provision_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "roots": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/share_reference"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "provision_id",
+        "backend_id",
+        "node_id",
+        "boot_id",
+        "issued_at",
+        "roots"
+      ]
+    },
+    "source_provision_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "provision_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "provision_id",
+        "backend_id",
+        "node_id",
+        "boot_id",
+        "payload_sha256"
+      ]
+    },
+    "share_renewal_closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "command_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "handoff_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "kind": {
+          "enum": [
+            "rate",
+            "connections"
+          ]
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775806
+        },
+        "successor_generation": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 9223372036854775807
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "part": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "parts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "delegation_ids": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "command_id",
+        "backend_id",
+        "tenant_id",
+        "handoff_id",
+        "hub_id",
+        "hub_boot_id",
+        "node_id",
+        "boot_id",
+        "kind",
+        "generation",
+        "successor_generation",
+        "signer_epoch",
+        "part",
+        "parts",
+        "delegation_ids"
+      ]
+    },
+    "share_renewal_closure_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "command_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "command_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "command_id",
+        "command_sha256"
+      ]
+    },
+    "delegation_seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "seal_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "delegation_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "node_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "signer_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "raw_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "issued_raw_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "unissued_raw_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "issue_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "issues_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "seal_id",
+        "delegation_id",
+        "hub_id",
+        "hub_boot_id",
+        "node_id",
+        "boot_id",
+        "signer_epoch",
+        "raw_bytes",
+        "issued_raw_bytes",
+        "unissued_raw_bytes",
+        "issue_count",
+        "issues_sha256"
+      ]
+    },
+    "direct_node_heartbeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capabilities"
+      ],
+      "properties": {
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 6,
+          "items": {
+            "enum": [
+              "rule-two-phase-v1",
+              "share-cas-v1",
+              "source-provision-v1",
+              "credit-close-v1",
+              "node-boot-recovery-v1",
+              "node-credit-recovery-v1"
+            ]
+          }
+        },
+        "observed_at": {
+          "type": "string"
+        },
+        "applied_config_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "hub_recovery_preflight_hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_version",
+        "capabilities",
+        "session_id",
+        "region_id"
+      ],
+      "properties": {
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "const": [
+            "hub-sr-preflight-v1"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "hub_recovery_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_id",
+        "hub_id",
+        "boot_id",
+        "session_id",
+        "region_id",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "hub_recovery_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recovery_id",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "recovery_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1398104
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "hub_recovery_retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_id",
+        "hub_id",
+        "boot_id",
+        "session_id",
+        "region_id",
+        "recovery_id",
+        "record_id",
+        "kind",
+        "ledger_sequence",
+        "payload_sha256"
+      ],
+      "properties": {
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "recovery_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "kind": {
+          "enum": [
+            "issue",
+            "runtime-lease",
+            "delegation-seal",
+            "known",
+            "unknown",
+            "handoff",
+            "manifest"
+          ]
+        },
+        "ledger_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775806
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
+        }
+      }
+    },
+    "hub_recovery_admission_hello": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_version",
+        "capabilities",
+        "session_id",
+        "region_id"
+      ],
+      "properties": {
+        "control_version": {
+          "const": "1.6.0"
+        },
+        "capabilities": {
+          "const": [
+            "hub-sr-admission-v1"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "hub_recovery_admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_id",
+        "hub_id",
+        "boot_id",
+        "session_id",
+        "region_id",
+        "payload",
+        "payload_sha256"
+      ],
+      "properties": {
+        "backend_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "hub_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "boot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "region_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 21848
+        },
+        "payload_sha256": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 44,
+          "maxLength": 44
         }
       }
     }

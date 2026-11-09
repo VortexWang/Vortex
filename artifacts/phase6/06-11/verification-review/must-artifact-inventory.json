@@ -1,0 +1,254 @@
+[
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-01-PLAN.md",
+    "path": "backend/db/migrations/00001_authority.sql",
+    "exists": true,
+    "bytes": 3674
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-01-PLAN.md",
+    "path": "backend/db/generated",
+    "exists": true,
+    "bytes": null
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-01-PLAN.md",
+    "path": "backend/internal/control/adapter.go",
+    "exists": true,
+    "bytes": 29079
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-01-PLAN.md",
+    "path": "deploy/backend/compose.test.yml",
+    "exists": true,
+    "bytes": 2033
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-02-PLAN.md",
+    "path": "backend/db/migrations/00003_nodes_ports.sql",
+    "exists": true,
+    "bytes": 12480
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-02-PLAN.md",
+    "path": "backend/internal/service/port.go",
+    "exists": true,
+    "bytes": 28113
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-02-PLAN.md",
+    "path": "backend/internal/repository/port_repository.go",
+    "exists": true,
+    "bytes": 3373
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-02-PLAN.md",
+    "path": "docs/coverage/phase6/COVERAGE.md",
+    "exists": true,
+    "bytes": 20033
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-03-PLAN.md",
+    "path": "backend/internal/compiler/compiler.go",
+    "exists": true,
+    "bytes": 13432
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-03-PLAN.md",
+    "path": "backend/internal/service/orchestration.go",
+    "exists": true,
+    "bytes": 18661
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-03-PLAN.md",
+    "path": "backend/db/migrations/00005_rules_compile.sql",
+    "exists": true,
+    "bytes": 10334
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-03-PLAN.md",
+    "path": "backend/internal/worker/rule_worker.go",
+    "exists": true,
+    "bytes": 7159
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-04-PLAN.md",
+    "path": "backend/db/migrations/00006_packages_entitlements.sql",
+    "exists": true,
+    "bytes": 7908
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-04-PLAN.md",
+    "path": "backend/internal/service/package.go",
+    "exists": true,
+    "bytes": 14385
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-04-PLAN.md",
+    "path": "backend/internal/service/entitlement.go",
+    "exists": true,
+    "bytes": 12766
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-04-PLAN.md",
+    "path": "backend/internal/service/restriction.go",
+    "exists": true,
+    "bytes": 21733
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-05-PLAN.md",
+    "path": "backend/db/migrations/00007_metering_ledger.sql",
+    "exists": true,
+    "bytes": 12673
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-05-PLAN.md",
+    "path": "backend/internal/service/ledger.go",
+    "exists": true,
+    "bytes": 9949
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-05-PLAN.md",
+    "path": "backend/internal/service/metering.go",
+    "exists": true,
+    "bytes": 19195
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-05-PLAN.md",
+    "path": "backend/internal/worker/usage_reconciliation.go",
+    "exists": true,
+    "bytes": 1305
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-06-PLAN.md",
+    "path": "backend/db/migrations/00008_limits_shares.sql",
+    "exists": true,
+    "bytes": 31369
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-06-PLAN.md",
+    "path": "backend/internal/service/share.go",
+    "exists": true,
+    "bytes": 16215
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-06-PLAN.md",
+    "path": "backend/internal/service/lease.go",
+    "exists": true,
+    "bytes": 9083
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-06-PLAN.md",
+    "path": "backend/internal/worker/share_reconciliation.go",
+    "exists": true,
+    "bytes": 2679
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-07-PLAN.md",
+    "path": "contracts/openapi/v1/openapi.yaml",
+    "exists": true,
+    "bytes": 151144
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-07-PLAN.md",
+    "path": "backend/internal/httpapi/router.go",
+    "exists": true,
+    "bytes": 10384
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-07-PLAN.md",
+    "path": "backend/internal/httpapi/sse.go",
+    "exists": true,
+    "bytes": 4095
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-07-PLAN.md",
+    "path": "backend/db/migrations/00009_domain_events.sql",
+    "exists": true,
+    "bytes": 17097
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-07-PLAN.md",
+    "path": ".github/workflows/phase6.yml",
+    "exists": true,
+    "bytes": 2006
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-08-PLAN.md",
+    "path": "backend/internal/policy/policy.go",
+    "exists": true,
+    "bytes": 1372
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-08-PLAN.md",
+    "path": "backend/internal/service/tenant.go",
+    "exists": true,
+    "bytes": 11697
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-08-PLAN.md",
+    "path": "backend/internal/testutil/valkey.go",
+    "exists": true,
+    "bytes": 927
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-08-PLAN.md",
+    "path": "backend/db/migrations/00002_tenant_policy.sql",
+    "exists": true,
+    "bytes": 3679
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-09-PLAN.md",
+    "path": "tools/phase6/openapi_validate.rb",
+    "exists": true,
+    "bytes": 5982
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-09-PLAN.md",
+    "path": "backend/openapi/v1/README.md",
+    "exists": true,
+    "bytes": 1429
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-09-PLAN.md",
+    "path": "tools/phase6/check.sh",
+    "exists": true,
+    "bytes": 8383
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-10-PLAN.md",
+    "path": "backend/internal/control/dns_adapter.go",
+    "exists": true,
+    "bytes": 11988
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-10-PLAN.md",
+    "path": "backend/internal/control/credential_store.go",
+    "exists": true,
+    "bytes": 5148
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-10-PLAN.md",
+    "path": "tools/phase6/cloudflare_integration.sh",
+    "exists": true,
+    "bytes": 1320
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-11-PLAN.md",
+    "path": "backend/internal/service/reconciliation_1000_test.go",
+    "exists": true,
+    "bytes": 7727
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-11-PLAN.md",
+    "path": "tools/phase6/reconciliation_1000.sh",
+    "exists": true,
+    "bytes": 1707
+  },
+  {
+    "plan": ".planning/phases/06-m4-m4-backend/06-11-PLAN.md",
+    "path": "tools/phase6/check.sh",
+    "exists": true,
+    "bytes": 8383
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "source": "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rest-clean-y4acfd6r/source",
+  "sha": "97966a3a70bff79afd43078ceadf211fe877a6d5",
+  "evidence": "/Users/peng/Documents/123/VORTEX/artifacts/phase6/06-07/task2-unified-acceptance/docker",
+  "project": "vortex-rest-cr009",
+  "pg_port": 57902,
+  "valkey_port": 57903
+}

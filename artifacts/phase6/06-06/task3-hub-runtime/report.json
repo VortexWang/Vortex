@@ -1,0 +1,33 @@
+{
+  "scope": "development runtime server and split Node control composition",
+  "source_base": "71e554b7",
+  "source_clean": false,
+  "actions": "not_run",
+  "checks": {
+    "components_native_race": 0,
+    "backend_linux_full_race": 0,
+    "linux_focused_runtime_and_commands": 0,
+    "linux_amd64_arm64_node_and_hub_compilation": 0
+  },
+  "retained_failures": {
+    "backend-initial-stale-db-failed.log": "old public schema missing rule_compile_requests; isolated new database used for successful Linux rerun",
+    "components-initial-failed.log": "platform Commit test had non-UUID fixture rule ID; corrected before passing full rerun",
+    "docker-full-race.log": "all package races passed except Hub command build raced an in-place import update; fixed files passed docker-final-focus-build.log"
+  },
+  "pending": [
+    "automatic allocation scheduling",
+    "signer renewal closure transport",
+    "boot recovery and funded-parent closure",
+    "clean-source producer",
+    "CR-008 exact contract review",
+    "final same-source Actions in 06-11"
+  ],
+  "checksums": {
+    "docker-final-focus-build.log": "a9d6108f7d46cabb1a16da058cca4eb5ce99b0293c7aa4b9cda13fb312fbe0db",
+    "docker-full-race.log": "e620314db19c0157dbdb4de886ac9dbb7bc7f4d38321b8bf4e2206643b0ef769",
+    "backend-initial-stale-db-failed.log": "ef114d6fbe766585bc246fd15f03da938b66d73b1210bdd5d90cda1e72a04994",
+    "components-race.log": "9b9b1f4844452cc9fcbc49a14e0fc09382dbf0900ba4e79c9aedabfe7c9b7c99",
+    "docker-focused.log": "1ebde045473a8b870a055b3d46c33e7c2da17fc22315c0a987a309d55c7c6fb2",
+    "components-initial-failed.log": "7254bf5f5f26097b6dfa990a4d28b1bb9fced73d89716270b97666a07189cc19"
+  }
+}

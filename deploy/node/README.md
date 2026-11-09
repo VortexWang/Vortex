@@ -46,6 +46,27 @@ period of at least50s. Do not place SQLite/WAL on NFS or shared cross-host stora
 A kill/restart creates a new boot and preserves prior ledger/unknown debt; it
 cannot revive old authorization. No deployment mode puts traffic in Hub/backend.
 
+## Backend and Hub control (06-06)
+
+生产节点同时运行两个 mTLS 控制连接。现有 `--hub` / `--control-config`
+指定同区域 Hub，负责运行授权、续租与计量批次；新增
+`--backend host:port --backend-ca backend-role-ca.pem --source-backend-id UUID`
+指定后端直接控制连接，负责规则 Prepare/Commit、节点总份额 CAS 和有限来源根。
+三个 backend 参数必须同时配置，后端证书的唯一 DNS SAN/CN 必须匹配该固定 UUID。
+两个连接各自重连，Hub 切换不会取消后端会话，后端连接不会竞争计量批次确认。
+
+`--tls-ca` 继续指定注册和节点凭据校验信任；Hub 使用独立角色 CA 时显式设置
+`--hub-ca hub-role-ca.pem`。各通道共享轮换后的节点凭据，分别验证服务器角色根。
+缺少可信时间、资金、份额执行回执或当前 boot 授权时，连接成功也不会允许 Commit。
+
+生产 Hub 入口是 `go -C backend build -o vortex-hub ./cmd/vortex-hub`。
+配置 `--hub-id UUID --region REGION --backend-id UUID --backend host:port`
+及 `--tls-cert hub.pem --tls-key hub-key.pem --node-ca node-role-ca.pem`
+`--backend-ca backend-role-ca.pem --db /state/hub.db --node-listen :19093`。
+该进程只承载控制 RPC、FULL/WAL 签发账本和计量转交；节点 CA 与后端 CA 必须分离。
+Linux 内核时间未同步或误差过大时停止签发。启动生成新 Hub boot；后端未完成
+旧 boot 恢复时保持阻塞，不能通过复用 boot 参数或重启清零旧资金占用。
+
 ## External signed service upgrade (05-11)
 
 Use a separate trusted `/usr/local/libexec/vortex-node-upgrader` invocation,

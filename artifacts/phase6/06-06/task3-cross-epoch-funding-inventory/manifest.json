@@ -1,0 +1,39 @@
+{
+  "base_sha": "aacfec065e5bdafcd431bf2e53a7f67c7192cfab",
+  "scope": "Complete runtime financial parent inventory spans signer epochs while retaining every independent runtime context predicate and complete-final barrier",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "focused": "green-complete-native.log;3.995s",
+    "native_backend": "backend-native-race.log;302.138s",
+    "linux_arm64_backend": "backend-linux-race.log;318.172s",
+    "builds": "cross-builds.json;four Backend/Hub linux builds",
+    "sqlc": "generators-repro.json;2 isolated23-output runs"
+  },
+  "expected_red": "red-exact-epoch-native.log;current epoch filters out earlier unknown parent",
+  "retained_failures": [
+    "red-native.log omitted old epoch parameter; exact-epoch RED corrected",
+    "green-native.log nonce format argument removed by textual edit; restored unchanged epoch-scoped nonce",
+    "green-corrected-native.log expected pending ErrShareUnknown; fixture now accepts that exact refusal and still asserts no financial changes"
+  ],
+  "not_claimed": [
+    "Effective-epoch funding eligibility or runtime convergence",
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "New network recovery acceptance"
+  ],
+  "evidence_sha256": {
+    "README.md": "d252eeabe4ace631faed4c46bcb7d11a8996f7a10f0c1b1abdbe24f2c7a6052d",
+    "approved-snapshot-protection.json": "d483a17730d4892af673de075cb0ffe7e43ff9613bf974f1d52cac32582d1fb9",
+    "backend-linux-race.log": "5379fa0e85de2761b15a370bb3596c86e341b7beafc26d756321c88247f270b0",
+    "backend-native-race.log": "b53d13e014061dd3ff6e8c250fe35473d6dc49d3e46016ce5cbd80cb7d983adf",
+    "cross-builds.json": "d31ede1fb981b596548cfbd0afa1c22b2e4425964bb433e4e33f29ca5228bf8e",
+    "environment.json": "efca46207719554508c7b14ea20c70ff819f0bf6f3ec6adcbf0dfcd33739ad91",
+    "generators-repro.json": "94235cc7c598f17c0f513d2fd9726765b852fc6410eb12402112e53de1239987",
+    "green-complete-native.log": "a5bca70ddd8fac6d894a98e158e0268251a680b2d1ea011e4c9a48829f924009",
+    "green-corrected-native.log": "2f79d963b59e47231854fc341560e97ada4ab190a2391427207f37497a2252fc",
+    "green-native.log": "8a923ac3e67a19d59d753af9858d1e4e97d16a82c6a592fa72071164114b5c9d",
+    "red-exact-epoch-native.log": "4b9ffb8b40e55dca861237e18f924a15490aec71e0fca905f26bdab98cc7916c",
+    "red-native.log": "0d94347b12dfbe01e3877025132a2e7cdfd28bc79e3d07780e78d67a86cc185d",
+    "source-hashes.json": "fbf843827565fbf30cbb876d12eae5f5e5ab0c0e6c846c257b58643c80f402bf"
+  }
+}

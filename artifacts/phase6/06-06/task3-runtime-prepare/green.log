@@ -1,0 +1,6 @@
+--- FAIL: TestEnabledRulePreparesWithoutAuthorityAndCommitWaitsForLease (0.17s)
+    rule_command_test.go:89: matching funded lease did not activate: phase:"commit"  transaction_id:"enabled-rule-001"  task_key:"commit-with-lease"  target_revision:2  idempotency_key:"commit-with-lease"  artifact_sha256:"\x85\x0e\x00j\x03;^\xb6\x81\xc1{\xdc(\x19\xf3\x0e\xfaJ,N\xa2ۮ\x19O\x01\x9c\xdc\x0f*;\xe1"  fencing_generation:8  state:"failed"  error_code:"tx_conflict"
+2026/11/08 13:10:21 ERROR vlink inbound handshake failed err="context canceled"
+FAIL
+FAIL	vortex/agent	1.039s
+FAIL

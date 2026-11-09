@@ -1,0 +1,11 @@
+version: "2"
+sql:
+  - engine: postgresql
+    queries: query
+    schema: migrations
+    gen:
+      go:
+        package: generated
+        out: generated
+        sql_package: pgx/v5
+        emit_empty_slices: true

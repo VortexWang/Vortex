@@ -1,0 +1,36 @@
+{
+  "base_sha": "8200038c4fe8084a9db6abd2589671ef58d233dc",
+  "utc": "2026-11-08T09:17:38.783037+00:00",
+  "evidence_scope": "development working tree; not clean-source or Actions",
+  "source_sha256": {
+    "agent/store/delegation_seal.go": "8ba5eb609710f2ba691814a9e1d4e61a47636953977a4c0f1fc6edb0891a12ef",
+    "agent/store/issuer_credit_expiry_test.go": "71d5c36077c316d13ffa861e41550aa31c8b57666c6c15e8c1ddd98cba0a459b",
+    "backend/internal/service/runtime_expiry_cycle_transport_test.go": "031f1a61d439a5870cb4efade328d8c66481abe469e9de1f48cc054c4bdc9279",
+    "contracts/protobuf/v1/lifecycle.md": "15ba4af4c279c1b028329bd9acf16dd6c3d46e0adabaee6f40724001dfda8c37"
+  },
+  "evidence_sha256": {
+    "README.md": "4602cabf0dfa427a35a65ee7f675ff13606f79e917e3da80f9136cf4a40d67ab",
+    "actual-cycle-aggregate-native.log": "da8fbe273a008e1e529f031bcf9d711bbd12c66e9037392548027ec2161a65ab",
+    "actual-cycle-clock-corrected-native.log": "aaa24de4ae527ca19455a837202bc0682045d83158b57a6940da325ef631e285",
+    "actual-cycle-diagnostic-native.log": "0e49cf550805a33755968d4d922d08a257893ed514cdb2c7c549e22218ef938e",
+    "actual-cycle-diagnostic2-native.log": "8a3aff19bc57d2a6924f08ee97317bae50385507ff077a73d400bb5ea9236839",
+    "actual-cycle-install-diagnostic-native.log": "103e62b633a6d1dc12809299973cbd28b34bc0d61e2b3aff052d2b327867b57c",
+    "actual-cycle-live-connection-native.log": "3cce00424ebea6c892fbf0427b754e2416fc9947bdc30745b71ed8e4335406c4",
+    "actual-cycle-native.log": "c073b937953f46f55350b9067f7e45daba00918e7d2a7762b1a5dd920d5dd6c5",
+    "actual-cycle-wait-corrected-native.log": "acb1838d107d97f516333932e194771903fbf4fa3ea7ef62bda445fa018bfa25",
+    "expiry-green.log": "9ac40c2a7974de124ffc448cf50f154fe094f2a408d6bdabf7937e7e2977c701",
+    "expiry-red.log": "9c8ca1db264524e64237165b95e916589862867ac1b93db1d204593e969791cf",
+    "full-backend-native-race.log": "2d8b15541300b3859ec4085002cfbaa704272b8edaaa046990a054b9a9e84b85",
+    "linux-cycle-aggregate.log": "1c5328d291d4c2751f16ca343cad36b26756755630a9442383106b282680fbb5",
+    "linux-cycle-components-race-build-corrected.log": "0859439f4c842fbc7491d32ff4d4bfc3855980ea3c07c974c62903f6ffd75698",
+    "linux-cycle-components-race-build.log": "c503fcfdd7b708cec831ea1599136fcf3d0e6202575356a1855412be90550c1d",
+    "root-components-native-race.log": "1f0f3f2ec1fa4ec53bbbd0b111085d1be02aee07afb8e3a8fee30777c1ff3e85"
+  },
+  "results": {
+    "native_backend_full_race": 0,
+    "native_root_components_race": 0,
+    "linux_cycle_components_race_node_hub_dual_arch_builds": 0,
+    "native_final_aggregate_cycle": 0,
+    "linux_final_aggregate_cycle": 0
+  }
+}

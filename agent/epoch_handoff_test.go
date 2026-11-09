@@ -15,6 +15,12 @@ import (
 )
 
 func TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor(t *testing.T) {
+	testAuthenticatedEpochHandoff(t, false)
+}
+func TestAuthenticatedOlderPathPureRevocationKeepsCurrentPathAndUnknownDebt(t *testing.T) {
+	testAuthenticatedEpochHandoff(t, true)
+}
+func testAuthenticatedEpochHandoff(t *testing.T, older bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	dir := t.TempDir()
@@ -154,6 +160,65 @@ func TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor(t *testing.
 	if _, err = validateAuthorizationUpdate(bad, node.NodeID, node.BootID, 4); err == nil {
 		t.Fatal("legacy handoff accepted")
 	}
+
+	var currentUse *store.AuthorizationUse
+	if older {
+		// Explicit internal fixture ACK of this unfunded Hub journal; this is
+		// not a PostgreSQL recovery-admission or unknown-liability final.
+		pending, err := hs.PendingLedger(ctx, 100)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, r := range pending {
+			if _, err = hs.ConfirmLedger(ctx, r, r.Digest); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if done, err := hs.CompleteRecovery(ctx, clock()); err != nil || !done {
+			t.Fatal(done, err)
+		}
+		current := d
+		current.ID = "550e8400-e29b-41d4-a716-446655440030"
+		current.SourceID = "550e8400-e29b-41d4-a716-446655440031"
+		current.RuntimeSourceID = "550e8400-e29b-41d4-a716-446655440032"
+		current.ShareSourceID = "550e8400-e29b-41d4-a716-446655440033"
+		current.PathGeneration = 5
+		current.FencingFloor = 10
+		current.SignerEpoch = 2
+		current.BackendHeartbeat = time.Now().UTC()
+		if err = hs.InstallHubDelegation(ctx, current, clock()); err != nil {
+			t.Fatal(err)
+		}
+		newer, err := issuer.Issue(ctx, current.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440034", 4096, time.Minute)
+		if err != nil {
+			t.Fatal(err)
+		}
+		currentLn := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(string, string) (*controlv1.AuthorizationUpdate, error) { return newer, nil }}, serverTLS)
+		if err = client.Connect(ctx, currentLn.Addr().String()); err != nil {
+			t.Fatal(err)
+		}
+		p, err := validateAuthorizationUpdate(newer.Payload, node.NodeID, node.BootID, 5)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, r := range p.Authorizations {
+			if r.Kind == "credit_grant" {
+				u := use
+				u.AuthorizationID = r.AuthorizationID
+				u.PathGeneration = 5
+				currentUse = &u
+			}
+		}
+		if currentUse == nil {
+			t.Fatal("current path credit missing")
+		}
+
+		// This issue was FULL at the Hub but never reached Node. Recovery must
+		// retain its revocations without poisoning unrelated current authority.
+		if _, err = issuer.Issue(ctx, d.ID, node.NodeID, node.BootID, "550e8400-e29b-41d4-a716-446655440035", 1024, time.Minute); err != nil {
+			t.Fatal(err)
+		}
+	}
 	// Revoke every delegation during the next handoff. Recovery must still
 	// deliver revocations even though issuing a successor grant is impossible.
 	revoke := store.HandoffRequest{ID: "550e8400-e29b-41d4-a716-446655440801", HubID: d.HubID, FromEpoch: 2, ToEpoch: 3, Heartbeat: time.Now().UTC(), RevokeDelegations: []string{d.ID}}
@@ -176,6 +241,23 @@ func TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor(t *testing.
 	if _, err = s.CheckStoredAuthorization(ctx, use); err == nil {
 		t.Fatal("revocation did not stop successor authorization")
 	}
+	if older {
+		for key, want := range map[string]string{"authorization_path_generation": "5", "authorization_fencing_floor": "10", "authorization_signer_epoch": "2"} {
+			got, err := s.AgentState(ctx, key)
+			if err != nil || got != want {
+				t.Fatal("pure revoke changed current admission floor", key, got, err)
+			}
+		}
+		if err = client.Connect(ctx, revokeLn.Addr().String()); err != nil {
+			t.Fatal("exact pure revoke replay", err)
+		}
+		currentUse.Earliest, currentUse.Latest, currentUse.TrustedTime = node.TrustedTime()
+		if _, err = s.CheckStoredAuthorization(ctx, *currentUse); err != nil {
+			t.Fatal("pure older revoke changed current path rights", err)
+		}
+
+	}
+
 	balance, err = s.AuditAuthorizationBalance(ctx, node.NodeID, old)
 	if err != nil || balance.Unknown != 512 {
 		t.Fatalf("revocation released debt %+v %v", balance, err)

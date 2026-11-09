@@ -1,0 +1,24 @@
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit
+2026/11/08 16:01:43 OK   00001_authority.sql (37.08ms)
+2026/11/08 16:01:43 OK   00002_tenant_policy.sql (8.73ms)
+2026/11/08 16:01:43 OK   00003_nodes_ports.sql (34.64ms)
+2026/11/08 16:01:43 OK   00004_entry_group_domains.sql (2.85ms)
+2026/11/08 16:01:43 OK   00005_rules_compile.sql (27.84ms)
+2026/11/08 16:01:43 OK   00006_packages_entitlements.sql (32.04ms)
+2026/11/08 16:01:43 OK   00007_metering_ledger.sql (26.52ms)
+2026/11/08 16:01:43 OK   00008_limits_shares.sql (43.27ms)
+2026/11/08 16:01:43 goose: successfully migrated database to version: 8
+2026/11/08 16:01:43 OK   00001_authority.sql (14.25ms)
+2026/11/08 16:01:43 OK   00002_tenant_policy.sql (9.97ms)
+2026/11/08 16:01:43 OK   00003_nodes_ports.sql (21.88ms)
+2026/11/08 16:01:43 OK   00004_entry_group_domains.sql (2.5ms)
+2026/11/08 16:01:43 OK   00005_rules_compile.sql (21.11ms)
+2026/11/08 16:01:43 OK   00006_packages_entitlements.sql (44.14ms)
+2026/11/08 16:01:43 OK   00007_metering_ledger.sql (40.25ms)
+2026/11/08 16:01:44 OK   00008_limits_shares.sql (53.56ms)
+2026/11/08 16:01:44 goose: successfully migrated database to version: 8
+    hub_runtime_lease_test.go:30: store: authority handoff is required before recording a resumed heartbeat
+--- FAIL: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit (1.38s)
+FAIL
+FAIL	vortex/backend/internal/service	2.543s
+FAIL

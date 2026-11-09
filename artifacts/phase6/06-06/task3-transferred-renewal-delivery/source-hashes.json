@@ -1,0 +1,5 @@
+{
+  "backend/internal/service/runtime_effective_funding_test.go": "d348bea8269559a1b02aaecfc170303091cecde72a2185af24c243a8e0034952",
+  "backend/internal/service/runtime_recovery_transport_test.go": "892ad3308dd2730fe0d1fcdeb5ae2ea01a2792763129948a4ecfaa75a9797fd7",
+  "contracts/protobuf/v1/lifecycle.md": "81c8c44d90c7575b190c9baf20cc1d285b819c73e279d22e079e48e78ea05517"
+}

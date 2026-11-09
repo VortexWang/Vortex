@@ -1,0 +1,5 @@
+--- FAIL: TestEnabledRulePreparesWithoutAuthorityAndCommitWaitsForLease (0.02s)
+    rule_command_test.go:53: bootstrap Prepare needs no executable rights: phase:"prepare" transaction_id:"enabled-rule-001" task_key:"prepare-enabled" target_revision:2 idempotency_key:"enabled-prepare" artifact_sha256:"w\xdb>\x90wjV#\t\x8d\xb7\x07 N\xb5v\xa90\xd9\xeb\x1c\xe7iY\xf0\xec\x04܎\xa8W]" fencing_generation:8 state:"failed" error_code:"invalid_config"
+FAIL
+FAIL	vortex/agent	0.658s
+FAIL

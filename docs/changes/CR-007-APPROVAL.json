@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "id": "CR-007",
+  "status": "approved",
+  "proposal_path": "docs/changes/CR-007-metering-ledger.json",
+  "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+  "owner_response": "批准 CR-007",
+  "reviewer": "user-approved-in-session",
+  "recorded_at": "2026-11-08T02:49:25Z",
+  "candidate_source": "995d7fca563c87cc8c3b38f3252e50b8ab94458e",
+  "candidate_catalog_sha256": "a576605b808fd52a051cd8e6b7cf240d7488ea0ed1eaaf4ff250c05d3e23ed2c",
+  "frozen_catalog_sha256": "ae6bc90bd9f3abc51e08c9a36ca3ebf073656d149a7945966e7ecda98cec3135",
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.1.0",
+      "version": "2.2.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "b083589caf601629bd82e43052b22ea2e0ced276fcd0d2b526f5702db86cd8d2",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.1.0",
+      "version": "2.2.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.4.0",
+      "version": "1.5.0",
+      "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5",
+      "contract_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T02:49:25Z",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-007-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "42310c018bbd34cc22e3acde3870422c69f56b242d62d1dd0ab66e7aa7f730de"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "b24e7436a1d66fd2ffbf1686668367ff04cf745ed904ff0f2906d6074d763592"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ]
+    }
+  ]
+}

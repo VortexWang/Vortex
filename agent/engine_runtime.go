@@ -9,6 +9,7 @@ import (
 	engineruntime "vortex/engine/runtime"
 	"vortex/engine/runtime/config"
 	"vortex/engine/runtime/relay"
+	"vortex/engine/runtime/rule"
 )
 
 // RuntimeEngine adapts the Engine runtime lifecycle to the Agent process.
@@ -22,6 +23,9 @@ type RuntimeEngine struct {
 	ConfigPath         string
 	runtime            *engineruntime.Runtime
 	scope              RuntimeScope
+	rules              *rule.Manager
+	renewalApplier     atomic.Pointer[RuntimeApplier]
+	credentials        *CredentialManager
 }
 
 func NewRuntimeEngine(configPath, nodeID string) (*RuntimeEngine, error) {
@@ -75,6 +79,11 @@ func (e *RuntimeEngine) SetAccountingGate(gate engineaccounting.Gate) error {
 func (e *RuntimeEngine) Stop(ctx context.Context) error {
 	if e == nil || e.runtime == nil {
 		return nil
+	}
+	if e.rules != nil {
+		if err := e.rules.Stop(ctx); err != nil {
+			return err
+		}
 	}
 	return e.runtime.Stop(ctx)
 }

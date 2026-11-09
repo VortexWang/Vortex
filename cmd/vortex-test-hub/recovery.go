@@ -58,6 +58,7 @@ func runTestRecovery(ctx context.Context, s *store.Store, id, request, endpoint,
 		now := time.Now().UTC()
 		return store.IssuerTime{Earliest: now, Latest: now, Trusted: true}
 	}}
+	lastError := ""
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 	for {
@@ -74,6 +75,10 @@ func runTestRecovery(ctx context.Context, s *store.Store, id, request, endpoint,
 				continue
 			}
 			if _, err = issuer.Recover(ctx, h, backend); err != nil {
+				if err.Error() != lastError {
+					fmt.Fprintln(os.Stderr, "test recovery pending:", err)
+					lastError = err.Error()
+				}
 				continue
 			}
 		}

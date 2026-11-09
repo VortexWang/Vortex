@@ -1,0 +1,23 @@
+{
+  "scope": "development qualification and affected regression; final clean-source acceptance pending",
+  "qualification": {
+    "native_race_ms": 35673.607917,
+    "linux_race_ms": 21082.300572,
+    "rules": 1000,
+    "members": 2000,
+    "adapter": "deterministic Node model"
+  },
+  "checksums": {
+    "README.md": "8115964cab979062fd1d46e8f6411d160cb32556befe831528faa1c3537e022e",
+    "fixture-interrupted.log": "104ed95635b226b0b94d969bc7e87fb94f69c17bc50a2d42bf40e78dc3a8198b",
+    "linux-drain-race.json": "6d051a94a32c83326ac480a3c2c6e973f161085810e010b01b23ca8ebfba0d50",
+    "linux-drain-race.log": "48b370180354143cab8a8c9d5bfc36c084910a830a04b204b15f3565b13c23dd",
+    "linux-related-fresh-race.log": "c624189c4ce01866ad4f4745de89760dc3d1b93fe082b424bd5ad7bb557d8ace",
+    "native-before-drain.json": "21b407f3bda6a10688c227109ea7af683a6527657e59eafcff2eddd1c049f2c0",
+    "native-before-drain.log": "ed6db56119f8496b89fe4c8b83cec3597860a38145fd3ec5ccdfcfcb08381bea",
+    "native-drain-race.json": "7dd8251231a2c7be94e9f2ba4b43b98a29edbf49eaebe52ef4ae05a06b88409a",
+    "native-drain-race.log": "10dd3a7ecd833df37542cab86e994d73e84e2cbe55562c0f5b173c7e40558762",
+    "native-related-fresh-race.log": "e9390f561568781b55515e42ef428de5243c8e8565a0977c2d7b4acad5faa563",
+    "native-related-race.log": "6354054c5178635502d5c928d0e3084d73454d521190e56c8d0d0c690368f5c5"
+  }
+}

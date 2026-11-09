@@ -1,0 +1,162 @@
+{
+  "created": "2023-10-23T13:59:12.947603986Z",
+  "architecture": "arm64",
+  "os": "linux",
+  "config": {
+    "Env": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LLVM_VERSION=16",
+      "CMAKE_TOOLCHAIN_FILE=/usr/share/cmake/wasix-sdk.cmake",
+      "CC=clang-16",
+      "CXX=clang++-16",
+      "LD=wasm-ld-16",
+      "AR=llvm-ar-16",
+      "RANLIB=llvm-ranlib-16",
+      "NM=llvm-nm-16",
+      "CFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot",
+      "CXXFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot -fno-exceptions",
+      "LDFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot"
+    ],
+    "Cmd": [
+      "/bin/bash"
+    ],
+    "Labels": {
+      "org.opencontainers.image.created": "2023-10-23T13:58:44.460Z",
+      "org.opencontainers.image.description": "",
+      "org.opencontainers.image.licenses": "MIT",
+      "org.opencontainers.image.ref.name": "ubuntu",
+      "org.opencontainers.image.revision": "fc94d603e92e2597fc605261127e9aabcf0a30b1",
+      "org.opencontainers.image.source": "https://github.com/wasilibs/wasix-sdk",
+      "org.opencontainers.image.title": "wasix-sdk",
+      "org.opencontainers.image.url": "https://github.com/wasilibs/wasix-sdk",
+      "org.opencontainers.image.version": "main"
+    }
+  },
+  "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+      "sha256:d2d3127fc3d362a0516c53fcb8fb983ebb9d1ea2dfbd63b69967a0084f0d45a3",
+      "sha256:497f0d2cbc0d46f93f3071007909a2d3d9ac71a7b2cd7b7b3157b77d57063b1f",
+      "sha256:91d13f52a65b4120eed327a27f23644ccabbfdc7da474ab5a5e1cd7b99e7a3df",
+      "sha256:212045d11ce06b908f19f9da4d88a1ecf8fda8312535c45b190e4bd2e261f2c2",
+      "sha256:93647cac139228b285ee88b1d0df8319322474f2cc7f17cc7cecd2de06802c99"
+    ]
+  },
+  "history": [
+    {
+      "created": "2023-10-05T07:32:20.951880606Z",
+      "created_by": "/bin/sh -c #(nop)  ARG RELEASE",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-05T07:32:21.015770292Z",
+      "created_by": "/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-05T07:32:21.080364699Z",
+      "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.ref.name=ubuntu",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-05T07:32:21.153596992Z",
+      "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.version=22.04",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-05T07:32:22.639154667Z",
+      "created_by": "/bin/sh -c #(nop) ADD file:f8594e26831508c318e42c8dfd9942041031087b8de1bf3fec11fd75b8b30fd4 in / "
+    },
+    {
+      "created": "2023-10-05T07:32:22.848629339Z",
+      "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T01:22:21.495397665Z",
+      "created_by": "ENV LLVM_VERSION=16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T01:22:21.495397665Z",
+      "created_by": "RUN /bin/sh -c apt-get update \u0026\u0026     apt-get install -y curl gnupg \u0026\u0026     curl -sS https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor \u003e /etc/apt/trusted.gpg.d/llvm.gpg \u0026\u0026     echo \"deb [signed-by=/etc/apt/trusted.gpg.d/llvm.gpg] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${LLVM_VERSION} main\" \u003e\u003e /etc/apt/sources.list.d/llvm.list \u0026\u0026     echo \"deb-src [signed-by=/etc/apt/trusted.gpg.d/llvm.gpg] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${LLVM_VERSION} main\" \u003e\u003e /etc/apt/sources.list.d/llvm.list \u0026\u0026     apt-get update \u0026\u0026     apt-get install -y clang-${LLVM_VERSION} lld-${LLVM_VERSION} cmake ninja-build make autoconf autogen automake libtool \u0026\u0026     apt-get remove -y curl gnupg \u0026\u0026     rm -rf /var/lib/apt/lists/* # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2023-10-23T01:18:56.327294801Z",
+      "created_by": "COPY wasix-sysroot /wasix-sysroot # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2023-10-23T13:59:12.930488414Z",
+      "created_by": "ADD wasix-sdk.cmake /usr/share/cmake/wasix-sdk.cmake # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2023-10-23T13:59:12.930488414Z",
+      "created_by": "ENV CMAKE_TOOLCHAIN_FILE=/usr/share/cmake/wasix-sdk.cmake",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ADD WASIX.cmake /usr/share/cmake/Modules/Platform/WASIX.cmake # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV CC=clang-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV CXX=clang++-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV LD=wasm-ld-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV AR=llvm-ar-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV RANLIB=llvm-ranlib-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV NM=llvm-nm-16",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV CFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV CXXFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot -fno-exceptions",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2023-10-23T13:59:12.947603986Z",
+      "created_by": "ENV LDFLAGS=--target=wasm32-wasmer-wasi --sysroot=/wasix-sysroot",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    }
+  ]
+}

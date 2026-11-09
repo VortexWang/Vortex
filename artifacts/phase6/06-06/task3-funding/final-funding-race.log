@@ -1,0 +1,26 @@
+=== RUN   TestHubFundingActualIssuerChildrenOneParentAndAuditRollback
+2026/11/08 12:19:17 goose: no migrations to run. current version: 8
+2026/11/08 12:19:17 OK   00001_authority.sql (27.08ms)
+2026/11/08 12:19:17 OK   00002_tenant_policy.sql (21.37ms)
+2026/11/08 12:19:17 OK   00003_nodes_ports.sql (45.63ms)
+2026/11/08 12:19:17 OK   00004_entry_group_domains.sql (4.84ms)
+2026/11/08 12:19:17 OK   00005_rules_compile.sql (42.73ms)
+2026/11/08 12:19:17 OK   00006_packages_entitlements.sql (32.11ms)
+2026/11/08 12:19:17 OK   00007_metering_ledger.sql (39.72ms)
+2026/11/08 12:19:17 OK   00008_limits_shares.sql (41.53ms)
+2026/11/08 12:19:17 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingActualIssuerChildrenOneParentAndAuditRollback (1.08s)
+=== RUN   TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice
+2026/11/08 12:19:18 goose: no migrations to run. current version: 8
+2026/11/08 12:19:18 OK   00001_authority.sql (8.65ms)
+2026/11/08 12:19:18 OK   00002_tenant_policy.sql (7.26ms)
+2026/11/08 12:19:18 OK   00003_nodes_ports.sql (16.89ms)
+2026/11/08 12:19:18 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/08 12:19:18 OK   00005_rules_compile.sql (16.88ms)
+2026/11/08 12:19:18 OK   00006_packages_entitlements.sql (16.34ms)
+2026/11/08 12:19:18 OK   00007_metering_ledger.sql (21.71ms)
+2026/11/08 12:19:18 OK   00008_limits_shares.sql (21.12ms)
+2026/11/08 12:19:18 goose: successfully migrated database to version: 8
+--- PASS: TestHubFundingFractionalChildrenDoNotCeilOrReserveTwice (0.73s)
+PASS
+ok  	vortex/backend/internal/service	3.487s

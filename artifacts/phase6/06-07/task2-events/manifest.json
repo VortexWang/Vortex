@@ -1,0 +1,67 @@
+{
+  "base_sha": "2ebbf0554c4064fc7109d984f619c963b6f2fe0b",
+  "scope": "06-07 durable event/SSE core;not complete plan",
+  "phase_progress": "9/11",
+  "passed": [
+    "final-full-backend-native-race.log",
+    "legacy-corrected-native-race.log",
+    "isolated-final-http-native-race.log",
+    "final-security-native-race.log",
+    "final-components-linux-race.log",
+    "dependencies.log",
+    "builds.json"
+  ],
+  "component_evidence": [
+    {
+      "log": "final-full-backend-native-race.log",
+      "service": "passed364.554s",
+      "note": "final production source;later HTTP test additions covered by final-security-native-race.log"
+    },
+    {
+      "log": "final-full-backend-linux-race.log",
+      "whole_command": "failed",
+      "service": "passed384.285s",
+      "failure": "pre-isolation32-tenant maintenance fixture;final HTTP components separately pass"
+    }
+  ],
+  "failed_retained": {
+    "principal-binding-semantic-red.log": "deliberate shared principal binding accepted forbidden cursor200",
+    "stable-event-id-semantic-red.log": "genuine time-dependent event ID mismatch across seconds",
+    "full-backend-native-race.log": "six old schema/missing-tenant fixture failures",
+    "full-backend-linux-race.log": "same six fixture failures",
+    "final-http-native-race.log": "shared fixture did not fit32-tenant maintenance batch",
+    "final-full-backend-linux-race.log": "same pre-isolation maintenance fixture;not a passing command"
+  },
+  "not_claimed": [
+    "full final Linux command success",
+    "complete06-07",
+    "finalized OpenAPI/CR009",
+    "24h stability",
+    "physical PostgreSQL recovery",
+    "native amd64 execution",
+    "sameSHA clean-source Docker/Actions"
+  ],
+  "evidence_sha256": {
+    "README.md": "c8f2984cc6cc6c97db1517160c0d0362e471b4fcf9abeb8ad93a2f1847e4fdbf",
+    "builds.json": "44876a1ec6550b9a0e564246b931b49bc8e8d00f233cb49ce78f2b7f3f692ab6",
+    "complete-native-race.log": "f87f271dab22dffabc1f70590a2fa2264bee15fa753008a8d9a7d1dcbfded439",
+    "dependencies.log": "ba2b2ac9518f1debdc2ca9e5f140dc1be285f03f6e9b3c2bfda40a0e4211b693",
+    "events-native-race.log": "0624e42f507bfe1ffcd3175b7b265c02dd5135004e6d7ee26c86c52f528b900b",
+    "final-components-linux-race.log": "ab34c7e49d383a75bc5a341a1b6583a110ec9c5ce67d7ce9ea48698fb14a058e",
+    "final-full-backend-linux-race.log": "7b166c1540f2793a14210cc0e01de863b967551095300206853cf45c440cc675",
+    "final-full-backend-native-race.log": "b8fa19f41c032a1ae5a242aea351e374d3d883d2638e75856866ced290cde568",
+    "final-http-native-race.log": "9340b492341f390ba634847d6be844d6bcba813389a72b80f3de01273408d6ce",
+    "final-security-native-race.log": "01b4848aa8f270b3b1e0db1622b56f5be11914a396f26886cf6494a1aa2dea7a",
+    "full-backend-linux-race.log": "9fe8a072dc6736631e4315ada02a28e71a4ed9df8eb46a64b20264460d78cd75",
+    "full-backend-native-race.log": "a3047d5ca60234ff5e1e6b72f1048c67b69d0fa4ee001d4eb7545e0aca764a99",
+    "full-suite-source-before-cursor-refinement.json": "d4ac83d4d5ce3b3924ea3d66d0c6283126ef88a8f2c72b774317c671080f8cd9",
+    "isolated-final-http-native-race.log": "8d7c29f6ea5387a60a154ad417ba30c01757bd01809cc72e093e107a35027720",
+    "legacy-corrected-native-race.log": "d7c3d999e1700858c1718b41a64f8016a85145a2a93a81be12d72fd1cab2c639",
+    "principal-binding-semantic-red.log": "2298045c38d477581dfc8fa255ffedc2ea39ec960d80baabfa234c281ffb97a2",
+    "schema-build.log": "0d9768f384866131c1a5d952da3afecd75709dbad5d55d6950d492d2a14b6be2",
+    "schema-http-build.log": "82141f9b5e07c2e80e9edc44a81c5f12cb546328a510ed6b9fcd1b05a4093349",
+    "source-hashes.json": "2973580fb4adf2a912cdd5d22e48dd35bc68a3cedc226390ae37d104477450d2",
+    "sse-initial-native-race.log": "ce2eb5a9058a1655b64d3e6efbd3cce660c2b62886e6610a931dfe56d63ea87c",
+    "stable-event-id-semantic-red.log": "e336ba2d3cf05aba59fa8940cb42be788ffad222c8da985f6c436f6cc64a0e74"
+  }
+}

@@ -1,0 +1,41 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-7eeecd428d20 Creating 
+ Container vortex-phase6-tracer-backend-test-run-7eeecd428d20 Created 
+go: downloading golang.org/x/net v0.60.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1
+go: downloading golang.org/x/text v0.42.0
+=== RUN   TestFundedBootstrapReplayReopenAndWriteFailureRetainOnePartition
+--- PASS: TestFundedBootstrapReplayReopenAndWriteFailureRetainOnePartition (0.56s)
+=== RUN   TestFundedBootstrapConcurrentStreamsSpendOnce
+--- PASS: TestFundedBootstrapConcurrentStreamsSpendOnce (0.46s)
+PASS
+ok  	vortex/agent/store	2.035s
+testing: warning: no tests to run
+PASS
+ok  	vortex/hub	1.012s [no tests to run]
+=== RUN   TestRunNodeSplitBackendAndHubActualMTLSIndependentSessions
+--- PASS: TestRunNodeSplitBackendAndHubActualMTLSIndependentSessions (0.38s)
+=== RUN   TestRunNodeRejectsIncompleteDirectBackendBeforeOpeningStore
+--- PASS: TestRunNodeRejectsIncompleteDirectBackendBeforeOpeningStore (0.00s)
+PASS
+ok  	vortex/cmd/vortex-node	1.402s
+=== RUN   TestProductionHubRuntimeActualMTLSFundedBootstrapReconnectAndBootIsolation
+2026/11/08 05:24:28 goose: no migrations to run. current version: 8
+2026/11/08 05:24:28 OK   00001_authority.sql (6.3ms)
+2026/11/08 05:24:28 OK   00002_tenant_policy.sql (6.04ms)
+2026/11/08 05:24:28 OK   00003_nodes_ports.sql (14.12ms)
+2026/11/08 05:24:28 OK   00004_entry_group_domains.sql (1.54ms)
+2026/11/08 05:24:28 OK   00005_rules_compile.sql (13ms)
+2026/11/08 05:24:28 OK   00006_packages_entitlements.sql (13.37ms)
+2026/11/08 05:24:28 OK   00007_metering_ledger.sql (19.85ms)
+2026/11/08 05:24:28 OK   00008_limits_shares.sql (19.84ms)
+2026/11/08 05:24:28 goose: successfully migrated database to version: 8
+    hub_runtime_test.go:151: production RuntimeServer, actual Node/Hub mTLS, exact FULL replay and PG child mapping, boot isolation and actual Agent runtime-ready boundary verified
+--- PASS: TestProductionHubRuntimeActualMTLSFundedBootstrapReconnectAndBootIsolation (1.21s)
+PASS
+ok  	vortex/backend/internal/service	2.217s

@@ -1,0 +1,18 @@
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 16:29:31 goose: no migrations to run. current version: 8
+2026/11/08 16:29:31 OK   00001_authority.sql (27.19ms)
+2026/11/08 16:29:31 OK   00002_tenant_policy.sql (19.94ms)
+2026/11/08 16:29:31 OK   00003_nodes_ports.sql (30.07ms)
+2026/11/08 16:29:31 OK   00004_entry_group_domains.sql (3.92ms)
+2026/11/08 16:29:31 OK   00005_rules_compile.sql (45.4ms)
+2026/11/08 16:29:32 OK   00006_packages_entitlements.sql (20.66ms)
+2026/11/08 16:29:32 OK   00007_metering_ledger.sql (47.43ms)
+2026/11/08 16:29:32 OK   00008_limits_shares.sql (32.73ms)
+2026/11/08 16:29:32 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:224: expiry cycle did not converge context deadline exceeded
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+--- FAIL: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (20.95s)
+FAIL
+FAIL	vortex/backend/internal/service	21.615s
+FAIL

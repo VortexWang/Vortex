@@ -1,0 +1,10 @@
+{
+  "valid": true,
+  "errors": []
+}
+Exact CR-005 candidate hashes and legacy wire/schema compatibility passed
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract candidate: two clean generations, unchanged legacy schema and exact-baseline wire compatibility passed; freeze approval is separate

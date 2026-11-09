@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "proposal_sha256": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0",
+  "owner_response": "批准 CR-009",
+  "candidate_source": "97966a3a70bff79afd43078ceadf211fe877a6d5",
+  "checksums": {
+    "docs/changes/CR-009-rest-events.json": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0",
+    "docs/changes/CR-009-APPROVAL.json": "30b78e6f422a304bfe19677ccca2bb0e584fe6b75706ee7ab88892c679bd16e4",
+    "contracts/versions.yaml": "a97a78d422fade9e75178620ee5f46ec92d41247358c790232d68fa5de2b7b27",
+    "contracts/CHANGELOG.md": "bc4da7a5903125693fd54f52eef54dd8763d2221f1e44638de419350b39470fa",
+    "docs/governance/contract-review.yaml": "803b5d0ebac6105c80f96f9f4dd811659a39dc72bba69f7f1ec9bcc196eef69e",
+    "tools/phase6/rest_contract_check.py": "d2067a45f313d851e23205a140759cbe6df8d819715b891d5b56d18d1de7bba3",
+    "tools/phase6/test_rest_contract_check.py": "ff06f11365ff8d2994e5d562286df9c4d835e8a00273b73eec51d97bbada7a43",
+    "artifacts/phase6/06-07/approval/changelog-notice.txt": "fa67667a86e54d56e34082a4fde20e391060b3bfb46142a187979072295a6944",
+    "artifacts/phase6/06-07/approval/exact-freeze.log": "3067976a2265da35e4bd7e2d5a550fc21ab66b35dbfe5f8df248730778a51ded",
+    "artifacts/phase6/06-07/approval/semantic-gates.log": "0760a9d1f44d1805e083134e477b9f78916aa10d3bc92f168aeee323fe8bb658"
+  }
+}

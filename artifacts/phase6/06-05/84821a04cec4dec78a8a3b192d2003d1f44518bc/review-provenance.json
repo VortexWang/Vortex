@@ -1,0 +1,13 @@
+{
+  "commit": "84821a04cec4dec78a8a3b192d2003d1f44518bc",
+  "producer_exit_code": 0,
+  "runtime_result": 0,
+  "acceptance_complete": true,
+  "approval": "docs/changes/CR-007-APPROVAL.json",
+  "pairing": "pending plan 06-11",
+  "checksums": {
+    "producer.log": "f554136d488c882233cb1b44b3a991f1430904c03dbffdcb019ce54bd6733230",
+    "tools-tests.log": "01917600e64f4cd0473352123a5883ce9b2bb3424094ecde92ed6d5dc4e03fe8",
+    "manifest-negative-tests.json": "6dfe5e34b7a3825c9150e035b39b5207d31bf03cfc8240595f1d342aaaf3484e"
+  }
+}

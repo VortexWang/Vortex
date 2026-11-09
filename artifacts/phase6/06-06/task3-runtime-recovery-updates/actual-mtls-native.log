@@ -1,0 +1,15 @@
+2026/11/09 01:07:04 goose: no migrations to run. current version: 8
+2026/11/09 01:07:04 OK   00001_authority.sql (36.16ms)
+2026/11/09 01:07:04 OK   00002_tenant_policy.sql (12.21ms)
+2026/11/09 01:07:04 OK   00003_nodes_ports.sql (27.95ms)
+2026/11/09 01:07:04 OK   00004_entry_group_domains.sql (3.15ms)
+2026/11/09 01:07:04 OK   00005_rules_compile.sql (26.78ms)
+2026/11/09 01:07:04 OK   00006_packages_entitlements.sql (26.22ms)
+2026/11/09 01:07:04 OK   00007_metering_ledger.sql (30.2ms)
+2026/11/09 01:07:05 OK   00008_limits_shares.sql (76.57ms)
+2026/11/09 01:07:05 goose: successfully migrated database to version: 8
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (16.49s)
+    runtime_recovery_transport_test.go:79: context deadline exceeded
+FAIL
+FAIL	vortex/backend/internal/service	17.281s
+FAIL

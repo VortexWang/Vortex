@@ -1,0 +1,30 @@
+{
+  "base_source": "eb5badcd",
+  "scope": "development independent pinned direct Node cold-recovery transport; no full phase or Actions acceptance",
+  "native_root_race": "passed",
+  "native_backend_race": "passed",
+  "linux_arm64_root_backend_race": "passed",
+  "cross_builds": [
+    "Node linux/amd64",
+    "Node linux/arm64",
+    "Hub linux/amd64",
+    "Hub linux/arm64",
+    "backend linux/amd64",
+    "backend linux/arm64"
+  ],
+  "sqlc_outputs": 22,
+  "protobuf_outputs": 2,
+  "independent_generations": 2,
+  "files": {
+    "README.md": "df1786e248fa2d90bafb1ff99bc7d9d2c5479e0598a0e81b98e21c72e4038931",
+    "actual-mtls-native-corrected.log": "3ba33ed5eb22f9ef4ff12f1654e815720533a00879cbc3285b5a19b5ba40c077",
+    "actual-mtls-native.log": "10f3d09a73a611a8ea7064ae5d70c5a252d4ebc0eb181bfa8e428c8b2876c1c8",
+    "backend-compile.log": "6187c1a58307a34fae60b9dcb90fc26e8a35c9dea740f0b0571bb4e7b29295a7",
+    "backend-native-race.log": "548f2f1b80ec074370b493696297db5a7790791b3f8663add8940c55e3d8029a",
+    "focused-agent-native.log": "87f0f83e0f3809bd22060982eaf4289751b7699926e6c135b8fed2d448ff651d",
+    "generators-reproducibility.json": "43497e9380b6bba08ccb01285c1efaf4edaa1b4395c39e73bc4717988d5d6d02",
+    "linux-components-backend-build.log": "61ea7fe456d3be7be08f13d44b7885f6d8a322a3c057855dde098bc314cef19c",
+    "root-compile.log": "d678b933bc86a0e46e0416ec25e25214cfdd42c02bd434840ffcd92bd3d955ea",
+    "root-components-native-race.log": "d1f2789e01ec7fd9c48671d4d26fc4b94c709dbfad4a869292fd52869d4302ac"
+  }
+}

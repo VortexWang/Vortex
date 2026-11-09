@@ -1,0 +1,256 @@
+backend	Set up job	﻿2026-11-07T00:06:26.2987010Z Current runner version: '2.338.2'
+backend	Set up job	2026-11-07T00:06:26.3009440Z ##[group]Runner Image Provisioner
+backend	Set up job	2026-11-07T00:06:26.3010482Z Hosted Compute Agent
+backend	Set up job	2026-11-07T00:06:26.3011132Z Version: 20261028.624
+backend	Set up job	2026-11-07T00:06:26.3011676Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+backend	Set up job	2026-11-07T00:06:26.3012271Z Build Date: 2026-10-28T21:51:42Z
+backend	Set up job	2026-11-07T00:06:26.3012908Z Worker ID: {a2211815-a3db-4246-9737-e69b3ad62bf3}
+backend	Set up job	2026-11-07T00:06:26.3013503Z Region: westus3
+backend	Set up job	2026-11-07T00:06:26.3013996Z Cloud: Azure
+backend	Set up job	2026-11-07T00:06:26.3014504Z ##[endgroup]
+backend	Set up job	2026-11-07T00:06:26.3015913Z ##[group]Operating System
+backend	Set up job	2026-11-07T00:06:26.3016522Z Ubuntu
+backend	Set up job	2026-11-07T00:06:26.3016982Z 24.04.5
+backend	Set up job	2026-11-07T00:06:26.3017518Z LTS
+backend	Set up job	2026-11-07T00:06:26.3017991Z ##[endgroup]
+backend	Set up job	2026-11-07T00:06:26.3018478Z ##[group]Runner Image
+backend	Set up job	2026-11-07T00:06:26.3019021Z Image: ubuntu-24.04
+backend	Set up job	2026-11-07T00:06:26.3019514Z Version: 20261101.360.1
+backend	Set up job	2026-11-07T00:06:26.3020954Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+backend	Set up job	2026-11-07T00:06:26.3022528Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+backend	Set up job	2026-11-07T00:06:26.3023362Z ##[endgroup]
+backend	Set up job	2026-11-07T00:06:26.3024326Z ##[group]GITHUB_TOKEN Permissions
+backend	Set up job	2026-11-07T00:06:26.3026176Z Contents: read
+backend	Set up job	2026-11-07T00:06:26.3026718Z Metadata: read
+backend	Set up job	2026-11-07T00:06:26.3027182Z ##[endgroup]
+backend	Set up job	2026-11-07T00:06:26.3029065Z Secret source: Actions
+backend	Set up job	2026-11-07T00:06:26.3030148Z Cache mode: write
+backend	Set up job	2026-11-07T00:06:26.3031065Z Prepare workflow directory
+backend	Set up job	2026-11-07T00:06:26.3310304Z Prepare all required actions
+backend	Set up job	2026-11-07T00:06:26.3365220Z Getting action download info
+backend	Set up job	2026-11-07T00:06:26.6278814Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+backend	Set up job	2026-11-07T00:06:26.6984960Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+backend	Set up job	2026-11-07T00:06:27.3638820Z Download action repository 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9' (SHA:cf430e030ddbb5b0abf93d22962f4752f3646cd9)
+backend	Set up job	2026-11-07T00:06:27.6010910Z Complete job name: backend
+backend	Checkout exact source	﻿2026-11-07T00:06:27.6811375Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+backend	Checkout exact source	2026-11-07T00:06:27.6812960Z with:
+backend	Checkout exact source	2026-11-07T00:06:27.6813662Z   fetch-depth: 0
+backend	Checkout exact source	2026-11-07T00:06:27.6814446Z   repository: VortexWang/Vortex
+backend	Checkout exact source	2026-11-07T00:06:27.6822555Z   token: ***
+backend	Checkout exact source	2026-11-07T00:06:27.6823303Z   ssh-strict: true
+backend	Checkout exact source	2026-11-07T00:06:27.6824052Z   ssh-user: git
+backend	Checkout exact source	2026-11-07T00:06:27.6824805Z   persist-credentials: true
+backend	Checkout exact source	2026-11-07T00:06:27.6825775Z   clean: true
+backend	Checkout exact source	2026-11-07T00:06:27.6826695Z   sparse-checkout-cone-mode: true
+backend	Checkout exact source	2026-11-07T00:06:27.6827871Z   fetch-tags: false
+backend	Checkout exact source	2026-11-07T00:06:27.6828839Z   show-progress: true
+backend	Checkout exact source	2026-11-07T00:06:27.6830043Z   lfs: false
+backend	Checkout exact source	2026-11-07T00:06:27.6831038Z   submodules: false
+backend	Checkout exact source	2026-11-07T00:06:27.6832100Z   set-safe-directory: true
+backend	Checkout exact source	2026-11-07T00:06:27.6833036Z   allow-unsafe-pr-checkout: false
+backend	Checkout exact source	2026-11-07T00:06:27.6834305Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:27.9296668Z Syncing repository: VortexWang/Vortex
+backend	Checkout exact source	2026-11-07T00:06:27.9299804Z ##[group]Getting Git version info
+backend	Checkout exact source	2026-11-07T00:06:27.9301167Z Working directory is '/home/runner/work/Vortex/Vortex'
+backend	Checkout exact source	2026-11-07T00:06:27.9303495Z [command]/usr/bin/git version
+backend	Checkout exact source	2026-11-07T00:06:27.9383323Z git version 2.56.0
+backend	Checkout exact source	2026-11-07T00:06:27.9403364Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:27.9411482Z Temporarily overriding HOME='/home/runner/work/_temp/3ccfa87b-12ea-4d2e-96d9-fd96d1750dec' before making global git config changes
+backend	Checkout exact source	2026-11-07T00:06:27.9414997Z Adding repository directory to the temporary git global config as a safe directory
+backend	Checkout exact source	2026-11-07T00:06:27.9417673Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Vortex/Vortex
+backend	Checkout exact source	2026-11-07T00:06:27.9473624Z Deleting the contents of '/home/runner/work/Vortex/Vortex'
+backend	Checkout exact source	2026-11-07T00:06:27.9480168Z ##[group]Determining repository object format
+backend	Checkout exact source	2026-11-07T00:06:27.9482510Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:27.9486114Z ##[group]Initializing the repository
+backend	Checkout exact source	2026-11-07T00:06:27.9488061Z [command]/usr/bin/git init /home/runner/work/Vortex/Vortex
+backend	Checkout exact source	2026-11-07T00:06:27.9613836Z hint: Using 'master' as the name for the initial branch. This default branch name
+backend	Checkout exact source	2026-11-07T00:06:27.9616719Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+backend	Checkout exact source	2026-11-07T00:06:27.9619209Z hint: to use in all of your new repositories, which will suppress this warning,
+backend	Checkout exact source	2026-11-07T00:06:27.9621443Z hint: call:
+backend	Checkout exact source	2026-11-07T00:06:27.9622572Z hint:
+backend	Checkout exact source	2026-11-07T00:06:27.9623979Z hint: 	git config --global init.defaultBranch <name>
+backend	Checkout exact source	2026-11-07T00:06:27.9625600Z hint:
+backend	Checkout exact source	2026-11-07T00:06:27.9627396Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+backend	Checkout exact source	2026-11-07T00:06:27.9629804Z hint: 'development'. The just-created branch can be renamed via this command:
+backend	Checkout exact source	2026-11-07T00:06:27.9631868Z hint:
+backend	Checkout exact source	2026-11-07T00:06:27.9632918Z hint: 	git branch -m <name>
+backend	Checkout exact source	2026-11-07T00:06:27.9634082Z hint:
+backend	Checkout exact source	2026-11-07T00:06:27.9635595Z hint: Disable this message with "git config set advice.defaultBranchName false"
+backend	Checkout exact source	2026-11-07T00:06:27.9637968Z Initialized empty Git repository in /home/runner/work/Vortex/Vortex/.git/
+backend	Checkout exact source	2026-11-07T00:06:27.9642256Z [command]/usr/bin/git remote add origin https://github.com/VortexWang/Vortex
+backend	Checkout exact source	2026-11-07T00:06:27.9688345Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:27.9690420Z ##[group]Disabling automatic garbage collection
+backend	Checkout exact source	2026-11-07T00:06:27.9692056Z [command]/usr/bin/git config --local gc.auto 0
+backend	Checkout exact source	2026-11-07T00:06:27.9723679Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:27.9738662Z ##[group]Setting up auth
+backend	Checkout exact source	2026-11-07T00:06:27.9740237Z Removing SSH command configuration
+backend	Checkout exact source	2026-11-07T00:06:27.9742072Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+backend	Checkout exact source	2026-11-07T00:06:27.9782695Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+backend	Checkout exact source	2026-11-07T00:06:28.0152379Z Removing HTTP extra header
+backend	Checkout exact source	2026-11-07T00:06:28.0157262Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+backend	Checkout exact source	2026-11-07T00:06:28.0197553Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+backend	Checkout exact source	2026-11-07T00:06:28.0402990Z Removing includeIf entries pointing to credentials config files
+backend	Checkout exact source	2026-11-07T00:06:28.0413167Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+backend	Checkout exact source	2026-11-07T00:06:28.0452449Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+backend	Checkout exact source	2026-11-07T00:06:28.0667855Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+backend	Checkout exact source	2026-11-07T00:06:28.0712675Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Vortex/Vortex/.git.path /home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Checkout exact source	2026-11-07T00:06:28.0752699Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Checkout exact source	2026-11-07T00:06:28.0792495Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Checkout exact source	2026-11-07T00:06:28.0830145Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Checkout exact source	2026-11-07T00:06:28.0866431Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:28.0867694Z ##[group]Fetching the repository
+backend	Checkout exact source	2026-11-07T00:06:28.0871992Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+backend	Checkout exact source	2026-11-07T00:06:29.3258057Z From https://github.com/VortexWang/Vortex
+backend	Checkout exact source	2026-11-07T00:06:29.3259543Z  * [new branch]      codex/phase6-backend -> origin/codex/phase6-backend
+backend	Checkout exact source	2026-11-07T00:06:29.3260366Z  * [new branch]      main                 -> origin/main
+backend	Checkout exact source	2026-11-07T00:06:29.3267115Z [command]/usr/bin/git branch --list --remote origin/codex/phase6-backend
+backend	Checkout exact source	2026-11-07T00:06:29.3300357Z   origin/codex/phase6-backend
+backend	Checkout exact source	2026-11-07T00:06:29.3307750Z [command]/usr/bin/git rev-parse refs/remotes/origin/codex/phase6-backend
+backend	Checkout exact source	2026-11-07T00:06:29.3338948Z a948158446255e2eb2e2a975c435ddbb2f357ecf
+backend	Checkout exact source	2026-11-07T00:06:29.3342712Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:29.3343143Z ##[group]Determining the checkout info
+backend	Checkout exact source	2026-11-07T00:06:29.3343783Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:29.3347511Z [command]/usr/bin/git sparse-checkout disable
+backend	Checkout exact source	2026-11-07T00:06:29.3405746Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+backend	Checkout exact source	2026-11-07T00:06:29.3442333Z ##[group]Checking out the ref
+backend	Checkout exact source	2026-11-07T00:06:29.3445741Z [command]/usr/bin/git checkout --progress --force -B codex/phase6-backend refs/remotes/origin/codex/phase6-backend
+backend	Checkout exact source	2026-11-07T00:06:29.5766559Z Switched to a new branch 'codex/phase6-backend'
+backend	Checkout exact source	2026-11-07T00:06:29.5770772Z branch 'codex/phase6-backend' set up to track 'origin/codex/phase6-backend'.
+backend	Checkout exact source	2026-11-07T00:06:29.5785230Z ##[endgroup]
+backend	Checkout exact source	2026-11-07T00:06:29.5843075Z [command]/usr/bin/git log -1 --format=%H
+backend	Checkout exact source	2026-11-07T00:06:29.5879438Z a948158446255e2eb2e2a975c435ddbb2f357ecf
+backend	Pinned Go	﻿2026-11-07T00:06:29.6101328Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+backend	Pinned Go	2026-11-07T00:06:29.6101652Z with:
+backend	Pinned Go	2026-11-07T00:06:29.6101822Z   go-version: 1.27.3
+backend	Pinned Go	2026-11-07T00:06:29.6101999Z   cache: false
+backend	Pinned Go	2026-11-07T00:06:29.6102176Z   check-latest: false
+backend	Pinned Go	2026-11-07T00:06:29.6104235Z   token: ***
+backend	Pinned Go	2026-11-07T00:06:29.6104411Z ##[endgroup]
+backend	Pinned Go	2026-11-07T00:06:29.7098187Z Setup go version spec 1.27.3
+backend	Pinned Go	2026-11-07T00:06:29.7110736Z Attempting to download 1.27.3...
+backend	Pinned Go	2026-11-07T00:06:30.6301542Z matching 1.27.3...
+backend	Pinned Go	2026-11-07T00:06:30.6322690Z Acquiring 1.27.3 from https://github.com/actions/go-versions/releases/download/1.27.3-39437817176/go-1.27.3-linux-x64.tar.gz
+backend	Pinned Go	2026-11-07T00:06:31.1425427Z Extracting Go...
+backend	Pinned Go	2026-11-07T00:06:31.1690982Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/5a33fbe5-ed66-46e6-9b1e-f81c0733b0ca -f /home/runner/work/_temp/85e81653-05fb-46e7-a288-ba58197ca3e2
+backend	Pinned Go	2026-11-07T00:06:32.5816474Z Successfully extracted go to /home/runner/work/_temp/5a33fbe5-ed66-46e6-9b1e-f81c0733b0ca
+backend	Pinned Go	2026-11-07T00:06:32.5817022Z Adding to the cache ...
+backend	Pinned Go	2026-11-07T00:06:37.5683920Z Successfully cached go to /opt/hostedtoolcache/go/1.27.3/x64
+backend	Pinned Go	2026-11-07T00:06:37.5685542Z Added go to the path
+backend	Pinned Go	2026-11-07T00:06:37.5687881Z Successfully set up Go version 1.27.3
+backend	Pinned Go	2026-11-07T00:06:37.5928544Z go version go1.27.3 linux/amd64
+backend	Pinned Go	2026-11-07T00:06:37.5928736Z 
+backend	Pinned Go	2026-11-07T00:06:37.5929005Z ##[group]go env
+backend	Pinned Go	2026-11-07T00:06:38.1664494Z AR='ar'
+backend	Pinned Go	2026-11-07T00:06:38.1664810Z CC='gcc'
+backend	Pinned Go	2026-11-07T00:06:38.1665129Z CGO_CFLAGS='-O2 -g'
+backend	Pinned Go	2026-11-07T00:06:38.1665392Z CGO_CPPFLAGS=''
+backend	Pinned Go	2026-11-07T00:06:38.1665631Z CGO_CXXFLAGS='-O2 -g'
+backend	Pinned Go	2026-11-07T00:06:38.1665884Z CGO_ENABLED='1'
+backend	Pinned Go	2026-11-07T00:06:38.1666116Z CGO_FFLAGS='-O2 -g'
+backend	Pinned Go	2026-11-07T00:06:38.1666370Z CGO_LDFLAGS='-O2 -g'
+backend	Pinned Go	2026-11-07T00:06:38.1666615Z CXX='g++'
+backend	Pinned Go	2026-11-07T00:06:38.1666837Z GCCGO='gccgo'
+backend	Pinned Go	2026-11-07T00:06:38.1667058Z GO111MODULE=''
+backend	Pinned Go	2026-11-07T00:06:38.1667280Z GOAMD64='v1'
+backend	Pinned Go	2026-11-07T00:06:38.1667493Z GOARCH='amd64'
+backend	Pinned Go	2026-11-07T00:06:38.1668603Z GOAUTH='netrc'
+backend	Pinned Go	2026-11-07T00:06:38.1668901Z GOBIN='/home/runner/go/bin'
+backend	Pinned Go	2026-11-07T00:06:38.1669210Z GOCACHE='/home/runner/.cache/go-build'
+backend	Pinned Go	2026-11-07T00:06:38.1669515Z GOCACHEPROG=''
+backend	Pinned Go	2026-11-07T00:06:38.1669736Z GODEBUG=''
+backend	Pinned Go	2026-11-07T00:06:38.1670285Z GOENV='/home/runner/.config/go/env'
+backend	Pinned Go	2026-11-07T00:06:38.1670593Z GOEXE=''
+backend	Pinned Go	2026-11-07T00:06:38.1670826Z GOEXPERIMENT=''
+backend	Pinned Go	2026-11-07T00:06:38.1671078Z GOFIPS140='off'
+backend	Pinned Go	2026-11-07T00:06:38.1671324Z GOFLAGS=''
+backend	Pinned Go	2026-11-07T00:06:38.1672139Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3738885389=/tmp/go-build -gno-record-gcc-switches'
+backend	Pinned Go	2026-11-07T00:06:38.1673339Z GOHOSTARCH='amd64'
+backend	Pinned Go	2026-11-07T00:06:38.1673608Z GOHOSTOS='linux'
+backend	Pinned Go	2026-11-07T00:06:38.1673860Z GOINSECURE=''
+backend	Pinned Go	2026-11-07T00:06:38.1674156Z GOMOD='/home/runner/work/Vortex/Vortex/go.mod'
+backend	Pinned Go	2026-11-07T00:06:38.1674554Z GOMODCACHE='/home/runner/go/pkg/mod'
+backend	Pinned Go	2026-11-07T00:06:38.1674882Z GONOPROXY=''
+backend	Pinned Go	2026-11-07T00:06:38.1675125Z GONOSUMDB=''
+backend	Pinned Go	2026-11-07T00:06:38.1675360Z GOOS='linux'
+backend	Pinned Go	2026-11-07T00:06:38.1675606Z GOPACKAGESDRIVER=''
+backend	Pinned Go	2026-11-07T00:06:38.1675868Z GOPATH='/home/runner/go'
+backend	Pinned Go	2026-11-07T00:06:38.1676121Z GOPRIVATE=''
+backend	Pinned Go	2026-11-07T00:06:38.1676430Z GOPROXY='https://proxy.golang.org,direct'
+backend	Pinned Go	2026-11-07T00:06:38.1676840Z GOROOT='/opt/hostedtoolcache/go/1.27.3/x64'
+backend	Pinned Go	2026-11-07T00:06:38.1677174Z GOSUMDB='sum.golang.org'
+backend	Pinned Go	2026-11-07T00:06:38.1677454Z GOTELEMETRY='local'
+backend	Pinned Go	2026-11-07T00:06:38.1677754Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+backend	Pinned Go	2026-11-07T00:06:38.1678164Z GOTMPDIR=''
+backend	Pinned Go	2026-11-07T00:06:38.1678392Z GOTOOLCHAIN='local'
+backend	Pinned Go	2026-11-07T00:06:38.1678750Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.3/x64/pkg/tool/linux_amd64'
+backend	Pinned Go	2026-11-07T00:06:38.1679141Z GOVCS=''
+backend	Pinned Go	2026-11-07T00:06:38.1679360Z GOVERSION='go1.27.3'
+backend	Pinned Go	2026-11-07T00:06:38.1679594Z GOWORK=''
+backend	Pinned Go	2026-11-07T00:06:38.1680020Z PKG_CONFIG='pkg-config'
+backend	Pinned Go	2026-11-07T00:06:38.1680175Z 
+backend	Pinned Go	2026-11-07T00:06:38.1680655Z ##[endgroup]
+backend	Produce real Linux backend evidence	﻿2026-11-07T00:06:38.1854567Z ##[group]Run ./tools/phase6/check.sh --through-plan 06-09 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"
+backend	Produce real Linux backend evidence	2026-11-07T00:06:38.1855436Z ^[[36;1m./tools/phase6/check.sh --through-plan 06-09 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"^[[0m
+backend	Produce real Linux backend evidence	2026-11-07T00:06:38.1878265Z shell: /usr/bin/bash -e {0}
+backend	Produce real Linux backend evidence	2026-11-07T00:06:38.1878492Z env:
+backend	Produce real Linux backend evidence	2026-11-07T00:06:38.1878664Z   GOTOOLCHAIN: local
+backend	Produce real Linux backend evidence	2026-11-07T00:06:38.1878841Z ##[endgroup]
+backend	Produce real Linux backend evidence	2026-11-07T00:10:53.7229610Z manifest passed: 96 owners; actions producer only; pairing pending
+backend	Retain result including failures	﻿2026-11-07T00:10:53.7357010Z ##[group]Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+backend	Retain result including failures	2026-11-07T00:10:53.7357350Z with:
+backend	Retain result including failures	2026-11-07T00:10:53.7357554Z   name: phase6-a948158446255e2eb2e2a975c435ddbb2f357ecf
+backend	Retain result including failures	2026-11-07T00:10:53.7357908Z   path: /home/runner/work/_temp/phase6/a948158446255e2eb2e2a975c435ddbb2f357ecf/actions/
+backend	Retain result including failures	2026-11-07T00:10:53.7358236Z   if-no-files-found: error
+backend	Retain result including failures	2026-11-07T00:10:53.7358427Z   compression-level: 6
+backend	Retain result including failures	2026-11-07T00:10:53.7358607Z   overwrite: false
+backend	Retain result including failures	2026-11-07T00:10:53.7358785Z   include-hidden-files: false
+backend	Retain result including failures	2026-11-07T00:10:53.7358975Z   archive: true
+backend	Retain result including failures	2026-11-07T00:10:53.7359133Z env:
+backend	Retain result including failures	2026-11-07T00:10:53.7359302Z   GOTOOLCHAIN: local
+backend	Retain result including failures	2026-11-07T00:10:53.7359468Z ##[endgroup]
+backend	Retain result including failures	2026-11-07T00:10:53.8577648Z With the provided path, there will be 25 files uploaded
+backend	Retain result including failures	2026-11-07T00:10:53.8581970Z Artifact name is valid!
+backend	Retain result including failures	2026-11-07T00:10:53.8582495Z Root directory input is valid!
+backend	Retain result including failures	2026-11-07T00:10:54.1944646Z Uploading artifact: phase6-a948158446255e2eb2e2a975c435ddbb2f357ecf.zip
+backend	Retain result including failures	2026-11-07T00:10:54.1976283Z Beginning upload of artifact content to blob storage
+backend	Retain result including failures	2026-11-07T00:10:54.5510058Z Uploaded bytes 22020
+backend	Retain result including failures	2026-11-07T00:10:54.6109367Z Finished uploading artifact content to blob storage!
+backend	Retain result including failures	2026-11-07T00:10:54.6110199Z SHA256 digest of uploaded artifact is 56178643cd7e66551525b519d195436a2bb45a9b59f62c5209de9a68aa88d604
+backend	Retain result including failures	2026-11-07T00:10:54.6110746Z Finalizing artifact upload
+backend	Retain result including failures	2026-11-07T00:10:55.1632767Z Artifact phase6-a948158446255e2eb2e2a975c435ddbb2f357ecf successfully finalized. Artifact ID 13551186760
+backend	Retain result including failures	2026-11-07T00:10:55.1633677Z Artifact phase6-a948158446255e2eb2e2a975c435ddbb2f357ecf has been successfully uploaded! Final size is 22020 bytes. Artifact ID is 13551186760
+backend	Retain result including failures	2026-11-07T00:10:55.1635721Z Artifact download URL: https://github.com/VortexWang/Vortex/actions/runs/42316152923/artifacts/13551186760
+backend	Post Pinned Go	﻿2026-11-07T00:10:55.1807203Z Post job cleanup.
+backend	Post Checkout exact source	﻿2026-11-07T00:10:55.2899406Z Post job cleanup.
+backend	Post Checkout exact source	2026-11-07T00:10:55.3620134Z [command]/usr/bin/git version
+backend	Post Checkout exact source	2026-11-07T00:10:55.3657793Z git version 2.56.0
+backend	Post Checkout exact source	2026-11-07T00:10:55.3692006Z Temporarily overriding HOME='/home/runner/work/_temp/b584e8bf-641b-4e77-b79c-7db62fba5fef' before making global git config changes
+backend	Post Checkout exact source	2026-11-07T00:10:55.3693221Z Adding repository directory to the temporary git global config as a safe directory
+backend	Post Checkout exact source	2026-11-07T00:10:55.3694899Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Vortex/Vortex
+backend	Post Checkout exact source	2026-11-07T00:10:55.3726372Z Removing SSH command configuration
+backend	Post Checkout exact source	2026-11-07T00:10:55.3732504Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+backend	Post Checkout exact source	2026-11-07T00:10:55.3770021Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+backend	Post Checkout exact source	2026-11-07T00:10:55.3991841Z Removing HTTP extra header
+backend	Post Checkout exact source	2026-11-07T00:10:55.3997857Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+backend	Post Checkout exact source	2026-11-07T00:10:55.4038028Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+backend	Post Checkout exact source	2026-11-07T00:10:55.4261664Z Removing includeIf entries pointing to credentials config files
+backend	Post Checkout exact source	2026-11-07T00:10:55.4267986Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+backend	Post Checkout exact source	2026-11-07T00:10:55.4312470Z includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4313208Z includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4313755Z includeif.gitdir:/github/workspace/.git.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4314286Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4315452Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4339237Z /home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4347692Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-0d16378d\-79aa\-4611\-97f0\-650d46a70fd7\.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4393103Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4431951Z /home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4439438Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-0d16378d\-79aa\-4611\-97f0\-650d46a70fd7\.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4489808Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4520376Z /github/runner_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4558036Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-0d16378d\-79aa\-4611\-97f0\-650d46a70fd7\.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4596447Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+backend	Post Checkout exact source	2026-11-07T00:10:55.4625807Z /github/runner_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4631900Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-0d16378d\-79aa\-4611\-97f0\-650d46a70fd7\.config
+backend	Post Checkout exact source	2026-11-07T00:10:55.4671288Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+backend	Post Checkout exact source	2026-11-07T00:10:55.4881262Z Removing credentials config '/home/runner/work/_temp/git-credentials-0d16378d-79aa-4611-97f0-650d46a70fd7.config'
+backend	Complete job	﻿2026-11-07T00:10:55.5013581Z Cleaning up orphan processes

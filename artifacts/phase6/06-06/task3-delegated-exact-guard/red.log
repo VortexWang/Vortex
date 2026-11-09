@@ -1,0 +1,16 @@
+=== RUN   TestDelegatedUnknownCannotUseGenericExactReceiptToReleaseChildren
+2026/11/08 14:48:04 goose: no migrations to run. current version: 8
+2026/11/08 14:48:04 OK   00001_authority.sql (13.42ms)
+2026/11/08 14:48:04 OK   00002_tenant_policy.sql (9.14ms)
+2026/11/08 14:48:04 OK   00003_nodes_ports.sql (19.32ms)
+2026/11/08 14:48:04 OK   00004_entry_group_domains.sql (2.49ms)
+2026/11/08 14:48:04 OK   00005_rules_compile.sql (19.98ms)
+2026/11/08 14:48:05 OK   00006_packages_entitlements.sql (19.4ms)
+2026/11/08 14:48:05 OK   00007_metering_ledger.sql (25.49ms)
+2026/11/08 14:48:05 OK   00008_limits_shares.sql (34.93ms)
+2026/11/08 14:48:05 goose: successfully migrated database to version: 8
+    delegation_seal_test.go:221: generic exact proof released issued children <nil>
+--- FAIL: TestDelegatedUnknownCannotUseGenericExactReceiptToReleaseChildren (0.87s)
+FAIL
+FAIL	vortex/backend/internal/service	1.647s
+FAIL

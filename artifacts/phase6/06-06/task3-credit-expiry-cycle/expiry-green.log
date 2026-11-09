@@ -1,0 +1,16 @@
+=== RUN   TestDelegationSealFULLRollbackInventoryRestartAndNoRefill
+--- PASS: TestDelegationSealFULLRollbackInventoryRestartAndNoRefill (0.20s)
+=== RUN   TestDelegationSealExpiryNeverMeansChildStop
+--- PASS: TestDelegationSealExpiryNeverMeansChildStop (0.17s)
+=== RUN   TestDelegationSealConcurrentIssueCannotSpendReturnedPartition
+--- PASS: TestDelegationSealConcurrentIssueCannotSpendReturnedPartition (0.15s)
+=== RUN   TestFullyIssuedCreditExpirySealsBeforeLongDelegationDeadline
+--- PASS: TestFullyIssuedCreditExpirySealsBeforeLongDelegationDeadline (0.31s)
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/unissued
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/all-issued
+--- PASS: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations (0.63s)
+    --- PASS: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/unissued (0.30s)
+    --- PASS: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/all-issued (0.33s)
+PASS
+ok  	vortex/agent/store	3.146s

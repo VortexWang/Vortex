@@ -1,0 +1,5 @@
+--- FAIL: TestSourceControlFULLReplayBeforeClockAndStaleFirstInstall (0.20s)
+    source_replay_control_test.go:42: fresh command could not narrow trusted time store: trusted time is required for authorization
+FAIL
+FAIL	vortex/agent	0.932s
+FAIL

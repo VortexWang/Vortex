@@ -1,0 +1,18 @@
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Error Error response from daemon: all predefined address pools have been fully subnetted
+ network:default failed to create network vortex-p6-docker-3fb8e25a61e8_default: Error response from daemon: all predefined address pools have been fully subnetted 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Creating 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Creating 
+failed to create network vortex-p6-docker-3fb8e25a61e8_default: Error response from daemon: all predefined address pools have been fully subnetted
+service "postgres" is not running
+service "valkey" is not running
+time="2026-11-09T09:51:02+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-3fb8e25a61e8\"). Use `external: true` to use an existing volume"
+time="2026-11-09T09:51:02+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-3fb8e25a61e8\"). Use `external: true` to use an existing volume"
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Creating 
+ Network vortex-p6-docker-3fb8e25a61e8_default Error Error response from daemon: all predefined address pools have been fully subnetted
+ network:default failed to create network vortex-p6-docker-3fb8e25a61e8_default: Error response from daemon: all predefined address pools have been fully subnetted 
+ Container vortex-p6-docker-3fb8e25a61e8-valkey-1 Creating 
+ Container vortex-p6-docker-3fb8e25a61e8-postgres-1 Creating 
+failed to create network vortex-p6-docker-3fb8e25a61e8_default: Error response from daemon: all predefined address pools have been fully subnetted

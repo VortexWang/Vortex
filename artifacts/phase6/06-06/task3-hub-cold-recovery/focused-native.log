@@ -1,0 +1,34 @@
+=== RUN   TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained
+2026/11/08 17:23:04 OK   00001_authority.sql (51.46ms)
+2026/11/08 17:23:04 OK   00002_tenant_policy.sql (14.69ms)
+2026/11/08 17:23:04 OK   00003_nodes_ports.sql (31.04ms)
+2026/11/08 17:23:04 OK   00004_entry_group_domains.sql (3.94ms)
+2026/11/08 17:23:04 OK   00005_rules_compile.sql (32.39ms)
+2026/11/08 17:23:04 OK   00006_packages_entitlements.sql (28.61ms)
+2026/11/08 17:23:04 OK   00007_metering_ledger.sql (35.12ms)
+2026/11/08 17:23:04 OK   00008_limits_shares.sql (55.83ms)
+2026/11/08 17:23:04 goose: successfully migrated database to version: 8
+2026/11/08 17:23:04 OK   00001_authority.sql (11.17ms)
+2026/11/08 17:23:04 OK   00002_tenant_policy.sql (10.09ms)
+2026/11/08 17:23:04 OK   00003_nodes_ports.sql (22.19ms)
+2026/11/08 17:23:04 OK   00004_entry_group_domains.sql (2.95ms)
+2026/11/08 17:23:04 OK   00005_rules_compile.sql (21.16ms)
+2026/11/08 17:23:04 OK   00006_packages_entitlements.sql (21.19ms)
+2026/11/08 17:23:04 OK   00007_metering_ledger.sql (28.96ms)
+2026/11/08 17:23:04 OK   00008_limits_shares.sql (55.17ms)
+2026/11/08 17:23:04 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained (1.32s)
+=== RUN   TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries
+2026/11/08 17:23:05 goose: no migrations to run. current version: 8
+2026/11/08 17:23:05 OK   00001_authority.sql (9.2ms)
+2026/11/08 17:23:05 OK   00002_tenant_policy.sql (8.09ms)
+2026/11/08 17:23:05 OK   00003_nodes_ports.sql (17.99ms)
+2026/11/08 17:23:05 OK   00004_entry_group_domains.sql (2.44ms)
+2026/11/08 17:23:05 OK   00005_rules_compile.sql (17.97ms)
+2026/11/08 17:23:05 OK   00006_packages_entitlements.sql (17.82ms)
+2026/11/08 17:23:05 OK   00007_metering_ledger.sql (23.18ms)
+2026/11/08 17:23:05 OK   00008_limits_shares.sql (37.28ms)
+2026/11/08 17:23:05 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries (0.42s)
+PASS
+ok  	vortex/backend/internal/service	3.489s

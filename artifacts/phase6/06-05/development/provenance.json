@@ -1,0 +1,25 @@
+{
+  "scope": "Development RED/GREEN and tool checks; pre-commit or mixed checkout. These do not replace clean same-commit Docker evidence.",
+  "red_commits": {
+    "wire": "3b3a91df",
+    "protection": "56c63092",
+    "origin": "33db4c25"
+  },
+  "implementation_commits": [
+    "577b69a0",
+    "0c18aab8",
+    "995d7fca"
+  ],
+  "checksums": {
+    "approval-tests.log": "8082f59a0b2c69af0469065c86ba929759e3df030931f6aaf45d494b2dad0772",
+    "origin-green.log": "4a77125d06502cbe63d79c49319668d0b5df4e51c112117a6047399e8ff1d228",
+    "origin-red.log": "ad39b38eb83b58709e0cd0608e2816ab43a910bce930264916455dc4f2221337",
+    "origin-transport-green.log": "7fa4d6e597f11e81f74b851626ef47de74152b49687503cd360daaf52500a783",
+    "origin-transport-red.log": "e23b5d46c6a6e16031891c3e966caf3f28e8a71e814714929095fd774fa2beb7",
+    "protection-green.log": "d18471c87c3462925eb1737497830757299b5bdbff203421b9cc5d6fe6e68f33",
+    "protection-red.log": "a36d6f6b4219730edb087f3c9ee0ab6fe64cd074f19bd9400e0302226b9ecb3d",
+    "tools-tests.log": "912eb59c21f714700204ce8e34ce323910f8477d3d1338b6bb3f97e70bcec9da",
+    "wire-green.log": "0b8fdd1253a8feb0e677cb2f176bf69d7f788ba876b1fd6950e9793992524d53",
+    "wire-red.log": "87b553cd701f8a0d64ca31174a09c93319710dae1fd57496fcac3a12e4c8ddc6"
+  }
+}

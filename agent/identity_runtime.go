@@ -71,5 +71,6 @@ func (e *RuntimeEngine) SetIdentityProvider(manager *CredentialManager, bootID s
 	if err != nil {
 		return err
 	}
+	e.credentials = manager
 	return e.runtime.SetIdentityProvider(manager.RuntimeIdentity, vlink.BootID(id))
 }

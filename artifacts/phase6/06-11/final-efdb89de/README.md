@@ -1,0 +1,1 @@
+Initial final-producer attempt failed before any Go test: Compose did not export PHASE6_EVIDENCE_DIR inside backend-test. Raw result/runner retained; no suite or Cloudflare pass claimed. Corrected explicit container -e PHASE6_EVIDENCE_DIR=/evidence in the next implementation commit. Actions of this SHA is superseded for acceptance.

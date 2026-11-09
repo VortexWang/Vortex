@@ -1,0 +1,55 @@
+{
+  "source_sha": "97966a3a70bff79afd43078ceadf211fe877a6d5",
+  "result": "passed",
+  "scope": "bounded clean-source backend REST/SSE acceptance; Actions pair pending06-11",
+  "tests": {
+    "normal": {
+      "packages_without_test_files": [
+        "vortex/backend/cmd/vortex-control-peer",
+        "vortex/backend/cmd/vortex-hub",
+        "vortex/backend/db",
+        "vortex/backend/db/generated",
+        "vortex/backend/internal/testutil",
+        "vortex/backend/internal/worker"
+      ],
+      "passed_test_events": 482,
+      "service_seconds": 227.988
+    },
+    "race": {
+      "packages_without_test_files": [
+        "vortex/backend/cmd/vortex-control-peer",
+        "vortex/backend/cmd/vortex-hub",
+        "vortex/backend/db",
+        "vortex/backend/db/generated",
+        "vortex/backend/internal/testutil",
+        "vortex/backend/internal/worker"
+      ],
+      "passed_test_events": 482,
+      "service_seconds": 383.572
+    }
+  },
+  "evidence_sha256": {
+    "sqlc-install.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-build-metadata.txt": "aa419fbc8ff591d483254a147070ac6f8a00a6f5c15452d8648e978a1dec2dc1",
+    "backend-race.jsonl": "fc438b61ab763d3813769b54b555dc20a23fd25ac0768276bc94c1963774ae09",
+    "backend-normal.jsonl": "e46d701aebe3f8c90e7b5f95931fad5e3ea97e0db550796c647665184926c345",
+    "race-build-metadata.txt": "a84baa41f21d059300111e85f99778c2a6bbed44816c77946b0488c3587360e4",
+    "host.txt": "748e0c3ef6a099f5bdb8317fd6f4a32559c92340fe1ff946960db08264ea224a",
+    "cross-build-metadata.txt": "ecee93c97968b9def7ba790f1472faa7aca2baced5832ccdfcb8ae7f79ee3f1e",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sqlc-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "completion.txt": "38a95bae7477c443f06558da14286aa35ae43f8485cbf0a484ca7f86e0cdaead",
+    "sqlc-output-count.txt": "19b8d5c59e421f037fe563007c7254eb8d98bc221b278c3db3e5fdbbfd52e273",
+    "migrate.log": "085de746494bdc98484bc502669c86561fa3c5e09592626fafd301c921c99de5",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "4f0b9e7e9324e48fd9bc95a49ab42ed88670c009a6dfd1f4c95a4dbef4b97cb0",
+    "processes/ffdfc9db-0544-40e8-b438-b41d2b50c686-result.json": "a21dab191ccddccdf5fe3c3832652840693abc266775e98d4be35e41e943fd7c",
+    "processes/9b597c6d-92fd-46f7-82b4-0ffbb6f31d22-result.json": "6dec92b64f2d949496449a816357767693420dcf9faa93d6ebb5456493a3f748",
+    "processes/9b597c6d-92fd-46f7-82b4-0ffbb6f31d22-backend.log": "8523435553f5c633bdd2f1cc0d82a53d817efb57ef49812daf524c32119a09e2",
+    "processes/ffdfc9db-0544-40e8-b438-b41d2b50c686-backend.log": "03b5c5564a86fc1f90decd40cc75ec8a5fb3d8431070771f3e74c73a635c9ba3",
+    "processes/9b597c6d-92fd-46f7-82b4-0ffbb6f31d22-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/ffdfc9db-0544-40e8-b438-b41d2b50c686-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/ffdfc9db-0544-40e8-b438-b41d2b50c686-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/9b597c6d-92fd-46f7-82b4-0ffbb6f31d22-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

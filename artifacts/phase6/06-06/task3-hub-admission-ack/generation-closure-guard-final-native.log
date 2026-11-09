@@ -1,0 +1,14 @@
+=== RUN   TestHubRecoveryAdmissionOldEpochClosureCannotQueueGenerationSuccessor
+2026/11/08 23:10:54 goose: no migrations to run. current version: 8
+2026/11/08 23:10:54 OK   00001_authority.sql (16.6ms)
+2026/11/08 23:10:54 OK   00002_tenant_policy.sql (16.9ms)
+2026/11/08 23:10:54 OK   00003_nodes_ports.sql (21.77ms)
+2026/11/08 23:10:54 OK   00004_entry_group_domains.sql (3.19ms)
+2026/11/08 23:10:54 OK   00005_rules_compile.sql (30.36ms)
+2026/11/08 23:10:54 OK   00006_packages_entitlements.sql (38.45ms)
+2026/11/08 23:10:54 OK   00007_metering_ledger.sql (38.53ms)
+2026/11/08 23:10:54 OK   00008_limits_shares.sql (89.74ms)
+2026/11/08 23:10:54 goose: successfully migrated database to version: 8
+--- PASS: TestHubRecoveryAdmissionOldEpochClosureCannotQueueGenerationSuccessor (1.74s)
+PASS
+ok  	vortex/backend/internal/service	3.395s

@@ -4,7 +4,7 @@ package vortex.control.v1;
 
 option go_package = "vortex/contracts/protobuf/v1;controlv1";
 
-// CONTRACT 1.7.0. Approval is bound by the exact governance record.
+// CONTRACT 1.8.0 integration candidate. Exact owner freeze approval is required.
 // Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
 
 service NodeControl {
@@ -26,6 +26,12 @@ message NodeMessage {
     LifecycleHello lifecycle_hello = 16;
     NodeReport node_report = 17;
     RenewalRequest renewal_request = 18;
+    RuleReceipt rule_receipt = 19;
+    ShareReceipt share_receipt = 20;
+    SourceProvisionReceipt source_provision_receipt = 21;
+    CreditCloseReceipt credit_close_receipt = 22;
+    NodeBootRecoveryReceipt node_boot_recovery_receipt = 23;
+    RecoveryCreditFenceReceipt recovery_credit_fence_receipt = 24;
     // Explicit experimental legacy fixture only; never alias lifecycle tag 16.
     CreditDemand credit_demand = 100;
   }
@@ -43,6 +49,12 @@ message ControlMessage {
     HubStatus hub_status = 15;
     RenewalResult renewal_result = 16;
     CredentialRevocations credential_revocations = 17;
+    RuleCommand rule_command = 18;
+    ShareCommand share_command = 19;
+    SourceProvisionCommand source_provision_command = 20;
+    CreditCloseCommand credit_close_command = 21;
+    NodeBootRecoveryCommand node_boot_recovery_command = 22;
+    RecoveryCreditFenceCommand recovery_credit_fence_command = 23;
     // Explicit experimental legacy fixture only; never alias HubStatus tag 15.
     CreditDemandDenied credit_demand_denied = 100;
   }
@@ -63,6 +75,7 @@ message ControlError {
 message Heartbeat {
   uint64 applied_config_version = 1;
   string observed_at = 2;
+  repeated string capabilities = 3; // additive 1.4: rule-two-phase-v1
 }
 
 message UsageBatch {
@@ -115,6 +128,33 @@ message RuntimeConfigUpdate {
   uint64 fencing_generation = 4;
   bytes payload_sha256 = 5;
   uint64 expected_version = 6;
+}
+
+// RuleCommand is an additive, explicitly phased control path. Older 1.3
+// readers never receive this oneof; they continue to use RuntimeConfigUpdate.
+message RuleCommand {
+  string phase = 1; // prepare, commit, query, abort, release
+  bytes transaction_id = 2;
+  string task_key = 3;
+  uint64 target_revision = 4;
+  string idempotency_key = 5;
+  bytes artifact_sha256 = 6;
+  uint64 fencing_generation = 7;
+  bytes payload = 8;
+  uint64 expected_version = 9;
+}
+
+message RuleReceipt {
+  string phase = 1;
+  bytes transaction_id = 2;
+  string task_key = 3;
+  uint64 target_revision = 4;
+  string idempotency_key = 5;
+  bytes artifact_sha256 = 6;
+  uint64 fencing_generation = 7;
+  string state = 8; // prepared, active, aborted, released, failed, unknown
+  string error_code = 9;
+  bytes payload = 10;
 }
 
 message AuthorizationUpdate { uint64 generation = 1; bytes payload = 2; }
@@ -207,6 +247,8 @@ message HubMessage {
     LifecycleHello lifecycle_hello = 10;
     HubStatus status = 11;
     LedgerRecord ledger_record = 12;
+    HubRecoveryRecord recovery_record = 13;
+    HubRecoveryManifest recovery_manifest = 14;
   }
 }
 message LedgerRecord {
@@ -227,6 +269,10 @@ message BackendMessage {
     ControlError error = 14;
     AuthorityRestrictions authority_restrictions = 15;
     EpochHandoffRequest epoch_handoff_request = 16;
+    ShareRenewalClosureCommand share_renewal_closure = 17;
+    HubRecoveryCommand recovery_command = 18;
+    HubRecoveryRetention recovery_retention = 19;
+    HubRecoveryAdmission recovery_admission = 20;
   }
 }
 message BackendHeartbeat {
@@ -295,4 +341,80 @@ enum CreditDemandDenial {
   CREDIT_DEMAND_DENIAL_INVALID_SCOPE = 1;
   CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS = 2;
   CREDIT_DEMAND_DENIAL_EXPIRED = 3;
+}
+
+// Negotiated share-cas-v1 only. The immutable JSON decision is documented in
+// share-handoff.schema.json; query uses the same payload and digest as CAS.
+message ShareCommand {
+  string phase = 1; // cas, query
+  bytes payload = 2;
+  bytes payload_sha256 = 3;
+}
+message ShareReceipt {
+  bytes payload = 1;
+  bytes payload_sha256 = 2;
+}
+
+// Direct backend-only source roots. Negotiated source-provision-v1; no runtime
+// lease, credit or Node activation can be inferred from this receipt.
+message SourceProvisionCommand { bytes payload = 1; bytes payload_sha256 = 2; }
+message SourceProvisionReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Direct pinned-backend only, independent credit-close-v1 capability. A final
+// Node witness never replaces backend verification of complete issue/usage.
+message CreditCloseCommand { bytes payload = 1; bytes payload_sha256 = 2; }
+message CreditCloseReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Opt-in share-renewal-close-v1: FULL old-delegation closure, no money release.
+message ShareRenewalClosureCommand {
+  string command_id = 1;
+  bytes payload = 2;
+  bytes payload_sha256 = 3;
+}
+
+// Independent node-boot-recovery-v1, pinned direct backend only. A retirement
+// receipt is zero-capacity generation checkpointing, never an old stop/final.
+message NodeBootRecoveryCommand { bytes payload = 1; bytes payload_sha256 = 2; }
+message NodeBootRecoveryReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Candidate direct-backend Node inventory fence; never negotiated over a Hub link.
+message RecoveryCreditFenceCommand { bytes payload = 1; bytes payload_sha256 = 2; }
+message RecoveryCreditFenceReceipt { bytes payload = 1; bytes payload_sha256 = 2; }
+
+// Independent hub-sr-preflight-v1 stream. Retention is forensic persistence;
+// it must never be applied as a local ledger ACK or an online admission.
+message HubRecoveryCommand {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  bytes payload = 6;
+  bytes payload_sha256 = 7;
+}
+message HubRecoveryRecord { string recovery_id = 1; LedgerRecord record = 2; }
+message HubRecoveryManifest { string recovery_id = 1; bytes payload = 2; bytes payload_sha256 = 3; }
+message HubRecoveryRetention {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  string recovery_id = 6;
+  string record_id = 7;
+  string kind = 8;
+  uint64 ledger_sequence = 9;
+  bytes payload_sha256 = 10;
+}
+
+// Separate hub-sr-admission-v1 stream; this body cannot be consumed as retention
+// or an ordinary funded LedgerAcknowledgement.
+message HubRecoveryAdmission {
+  string backend_id = 1;
+  string hub_id = 2;
+  string boot_id = 3;
+  string session_id = 4;
+  string region_id = 5;
+  bytes payload = 6;
+  bytes payload_sha256 = 7;
 }

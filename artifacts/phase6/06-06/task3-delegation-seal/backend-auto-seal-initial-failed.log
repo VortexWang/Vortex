@@ -1,0 +1,16 @@
+=== RUN   TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay
+2026/11/08 14:23:49 goose: no migrations to run. current version: 8
+2026/11/08 14:23:49 OK   00001_authority.sql (48.58ms)
+2026/11/08 14:23:49 OK   00002_tenant_policy.sql (52.81ms)
+2026/11/08 14:23:49 OK   00003_nodes_ports.sql (61.31ms)
+2026/11/08 14:23:49 OK   00004_entry_group_domains.sql (3.88ms)
+2026/11/08 14:23:49 OK   00005_rules_compile.sql (84.32ms)
+2026/11/08 14:23:49 OK   00006_packages_entitlements.sql (72.91ms)
+2026/11/08 14:23:49 OK   00007_metering_ledger.sql (49.1ms)
+2026/11/08 14:23:49 OK   00008_limits_shares.sql (181.95ms)
+2026/11/08 14:23:49 goose: successfully migrated database to version: 8
+    delegation_seal_transport_test.go:87: seal raced ahead of child mapping <nil> 0
+--- FAIL: TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay (1.84s)
+FAIL
+FAIL	vortex/backend/internal/service	2.534s
+FAIL

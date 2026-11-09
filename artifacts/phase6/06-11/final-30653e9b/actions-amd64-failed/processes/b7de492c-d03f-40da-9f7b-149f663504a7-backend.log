@@ -1,0 +1,2 @@
+backend ready node=127.0.0.1:34407 hub=127.0.0.1:33527
+port operation worker: ERROR: deadlock detected (SQLSTATE 40P01)

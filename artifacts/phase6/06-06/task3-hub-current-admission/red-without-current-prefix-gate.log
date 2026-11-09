@@ -1,0 +1,16 @@
+2026/11/08 22:24:00 goose: no migrations to run. current version: 8
+2026/11/08 22:24:00 OK   00001_authority.sql (10.78ms)
+2026/11/08 22:24:00 OK   00002_tenant_policy.sql (8.58ms)
+2026/11/08 22:24:00 OK   00003_nodes_ports.sql (22.44ms)
+2026/11/08 22:24:00 OK   00004_entry_group_domains.sql (2.4ms)
+2026/11/08 22:24:00 OK   00005_rules_compile.sql (17.56ms)
+2026/11/08 22:24:00 OK   00006_packages_entitlements.sql (16.84ms)
+2026/11/08 22:24:00 OK   00007_metering_ledger.sql (22.47ms)
+2026/11/08 22:24:00 OK   00008_limits_shares.sql (52.12ms)
+2026/11/08 22:24:00 goose: successfully migrated database to version: 8
+--- FAIL: TestHubSameStoreAdmissionRechecksStaleWitnessAndNodeReceipt (1.57s)
+    --- FAIL: TestHubSameStoreAdmissionRechecksStaleWitnessAndNodeReceipt/extra_old_issue (1.57s)
+        hub_same_store_admission_test.go:258: stale proof admitted
+FAIL
+FAIL	vortex/backend/internal/service	2.336s
+FAIL

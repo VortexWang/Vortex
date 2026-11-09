@@ -1,0 +1,28 @@
+{
+  "base_commit": "3a3c35f4ffb36d8e92695a4612b2aa79464668b6",
+  "scope": "candidate authenticated persistent child-close command/receipt; no parent funds release or complete06-06 acceptance",
+  "source": {
+    "agent/issued_credit_closure.go": "e5b4dcd52fb89dfb01256d9e39bf0675f0816398f844ddd0150f524c4adc2ef4",
+    "backend/cmd/vortex-backend/main.go": "b81d6cd9278d38e8690ae615bcfa46c1e4fef2f52f0d51896a87646efbc13e19",
+    "backend/db/migrations/00008_limits_shares.sql": "1322f93097a00704ad51bfd13b0a47a4b566c63dbfeb5dbeffd6e95483ee56f0",
+    "backend/db/query/credit_close.sql": "8dbca9432c0e088f6d5ce237bacc1789340299d7c36d7bf433a85d12c4fde8cb",
+    "backend/db/generated/models.go": "4e6ff84668c165e6e78147f712d34ed14d3fb52837ca6a2a4200b14e4cfee53c",
+    "backend/db/generated/credit_close.sql.go": "be9af1240316aa23429eba24a0333b69b5d8bca43cb9d9bd918a27d222b606c8",
+    "backend/internal/control/adapter.go": "0c8b266eebe02306ce74b45c682b30726eb4fb6382999c2c580fbadc8b1353b2",
+    "backend/internal/control/credit_close.go": "50b0eb709f2d34c0dbe0ce3775d092f740552adff0120290a178867fb02e50fe",
+    "backend/internal/service/credit_close.go": "bb15228f5e62ecb776812f8d4b9a96eb27517ca0c3391592054ff08006dc361e",
+    "backend/internal/service/credit_close_test.go": "f18fe3bc3f6c8429dd2c4b0412b7b86090f0b8e28ea32f874e708af88b07f595",
+    "backend/internal/service/credit_close_transport_test.go": "2bfcc08121228c51c142e63729ce5649d16c77bdf92b609562f6cd44c8d7fe1b",
+    "backend/internal/worker/credit_close.go": "9d3e08271dd0736f89a96c7851208cd01ae71bd44f8d58aa1b930ef0187c7b36",
+    "contracts/protobuf/v1/lifecycle.md": "f583bda6c8e942bd5eb15dc0b0b3d9f68c0f0feb94b657388f8ee6644d02ac9b"
+  },
+  "evidence": {
+    "README.md": "7e30eeacf78e4e51e36274f9207e67290648cac8fa5a7d0bb393b48ca73cae3e",
+    "focused-native.log": "31ef57709f08384750aea39c0fe19f674f24c92eb566269f541e2c5a709aa32b",
+    "full-backend-native-race.log": "7c2a39ba6c42250d74b708ac1330b10dd68a96c3993e2dde6daa286f91c6332e",
+    "full-root-native-race.log": "7fdf80c04a4648d8c192bbddbabbbfe98c2e326414867c371fafae0138f76753",
+    "generation.json": "9067f383b475387245fb8f3d6a1b6de38a655fac1a6f051aa4347997426ba3d0",
+    "linux-race-build.log": "7b1196a1d5c648ce0fa8a4d6acfed2473576baa9a1dedf677226e7d237399b86",
+    "transport-native.log": "7f253b90eb45d5f8c4d35c6e62c10b1b138b49776743a3a96737c30cddf76a04"
+  }
+}

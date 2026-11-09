@@ -1,0 +1,8 @@
+ Container vortex-phase6-tracer-backend-test-run-8c9ca465a82b Creating 
+ Container vortex-phase6-tracer-backend-test-run-8c9ca465a82b Created 
+=== RUN   TestCloudflareControlledCRUD
+2026/11/07 02:52:51 goose: no migrations to run. current version: 4
+    cloudflare_integration_test.go:144: real Cloudflare create/read/update/delete passed; TTL=60; proxied=false; policy/token identity bound; encrypted storage and exact-name cleanup verified
+--- PASS: TestCloudflareControlledCRUD (4.63s)
+PASS
+ok  	vortex/backend/internal/control	4.638s

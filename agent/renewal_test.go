@@ -172,3 +172,62 @@ func TestRenewalCadenceAndCapabilityBounds(t *testing.T) {
 		t.Fatal("silent renewal downgrade/upgrade")
 	}
 }
+
+// With no replies, retries must visit the complete immutable journal rather
+// than repeatedly sending its first page or monopolizing one control-loop turn.
+func TestRenewalSenderYieldsAndRotatesUnansweredJournal(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	n, err := New(controlTestNodeID, s, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &ControlClient{Node: n}
+	for i := 0; i < 9; i++ {
+		id := func(n int) string { return fmt.Sprintf("550e8400-e29b-41d4-a716-%012d", 9500+n) }
+		r := &controlv1.RenewalRequest{RequestId: id(i), NodeId: n.NodeID, BootId: n.BootID, DelegationId: id(20 + i), SourceId: id(40 + i), RuleId: fmt.Sprint("rule-", i), RuleRevision: 1, PathGeneration: 1, FencingGeneration: 1, SignerEpoch: 1, BillingSnapshotId: id(60 + i), RequestedRawBytes: 256, RequestedTtlSeconds: 60}
+		r.RequestSha256, err = contracts.RenewalDigest(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = c.PersistRenewal(ctx, regionalHubID, r); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var seq uint64
+	after := ""
+	stream := &capturedUsageStream{}
+	for turn, want := range []int{4, 4, 1, 4} {
+		before := len(stream.sent)
+		if err = c.sendPendingRenewals(ctx, stream, regionalHubID, &seq, &after); err != nil {
+			t.Fatal(err)
+		}
+		if len(stream.sent)-before != want {
+			t.Fatal("control turn did not yield", turn, len(stream.sent)-before, want)
+		}
+	}
+	seen := map[string]bool{}
+	for i, m := range stream.sent[:9] {
+		r := m.GetRenewalRequest()
+		if r == nil || seen[r.RequestId] || m.Sequence != uint64(i+1) {
+			t.Fatal("journal skipped/duplicated before wrapping", m)
+		}
+		seen[r.RequestId] = true
+	}
+	if stream.sent[9].GetRenewalRequest().RequestId != stream.sent[0].GetRenewalRequest().RequestId {
+		t.Fatal("unanswered intent not retried")
+	}
+	pending, err := s.PendingRenewalIntents(ctx, regionalHubID, n.NodeID, n.BootID, "")
+	if err != nil || len(pending) != 9 {
+		t.Fatal("sending changed durable intent", len(pending), err)
+	}
+	for _, intent := range pending {
+		if intent.State != "pending" || intent.Result != nil {
+			t.Fatal("send fabricated authority", intent)
+		}
+	}
+}

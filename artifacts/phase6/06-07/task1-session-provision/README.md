@@ -1,0 +1,5 @@
+# 06-07 trusted local initial session provisioning
+
+Based on e41cf7d1; Phase6 remains9/11. Adds trusted local `vortex-backend issue-session` with persisted actor and ordinary tenant UUID, or platform actor with no tenant. PostgreSQL supplies current role/state; no role flag or public actor-ID login is exposed. The existing token Issue transaction commits audit and hash-only credentials before one JSON response to the selected private output stream. Suspended actors, wrong/missing scope and audit failure produce no credentials. Operator output must remain private.
+
+Native and Linux arm64 CLI/auth/repository race pass. Existing actual backend/Agent/Hub process regression passes. Backend Linuxamd64/arm64 cross-builds pass; hashes in builds.json. Initial undefined-function compilation is retained and is not semantic RED. No SQL/schema/dependency changed; two27-output sqlc and38-module license gate are inherited from e41cf7d1. Development evidence only, no clean-source/Actions pairing or nativeamd64 execution claim. Remaining lists/mutations/OpenAPI candidate and final06-07 acceptance are incomplete.

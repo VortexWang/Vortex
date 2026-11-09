@@ -1,0 +1,20 @@
+ Container vortex-phase6-tracer-backend-test-run-826a3224aa7b Creating 
+ Container vortex-phase6-tracer-backend-test-run-826a3224aa7b Created 
+2026/11/08 07:35:14 OK   00001_authority.sql (6.08ms)
+2026/11/08 07:35:14 OK   00002_tenant_policy.sql (6.09ms)
+2026/11/08 07:35:14 OK   00003_nodes_ports.sql (10.41ms)
+2026/11/08 07:35:14 OK   00004_entry_group_domains.sql (1.15ms)
+2026/11/08 07:35:14 OK   00005_rules_compile.sql (11.08ms)
+2026/11/08 07:35:14 OK   00006_packages_entitlements.sql (9.85ms)
+2026/11/08 07:35:14 OK   00007_metering_ledger.sql (12.51ms)
+2026/11/08 07:35:14 OK   00008_limits_shares.sql (20.93ms)
+2026/11/08 07:35:14 goose: successfully migrated database to version: 8
+ok  	vortex/backend/internal/service	74.962s
+ok  	vortex/backend/internal/control	1.386s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.008s
+ok  	vortex/agent	73.782s
+ok  	vortex/agent/store	72.348s
+ok  	vortex/hub	15.415s
+ok  	vortex/contracts	1.022s
+ok  	vortex/cmd/vortex-node	2.566s

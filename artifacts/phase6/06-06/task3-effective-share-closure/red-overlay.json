@@ -1,0 +1,7 @@
+{
+  "expected_red": true,
+  "exit_code": 1,
+  "source_sha256_before": "08c543873bd3fb6fb7ecbeb28525de5dd34fdcbfbf2edf2afb8d8049e63ec94e",
+  "source_sha256_after": "08c543873bd3fb6fb7ecbeb28525de5dd34fdcbfbf2edf2afb8d8049e63ec94e",
+  "target": "Old epoch closure wrongly substituted for effective issuer closure"
+}

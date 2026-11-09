@@ -1,0 +1,38 @@
+=== RUN   TestRuntimeFundingSchedulerRequiresCASAndKeepsOneFiniteParentAcrossRetries
+2026/11/08 15:48:48 goose: no migrations to run. current version: 8
+2026/11/08 15:48:48 OK   00001_authority.sql (13.57ms)
+2026/11/08 15:48:48 OK   00002_tenant_policy.sql (9.82ms)
+2026/11/08 15:48:48 OK   00003_nodes_ports.sql (19.45ms)
+2026/11/08 15:48:48 OK   00004_entry_group_domains.sql (3.43ms)
+2026/11/08 15:48:48 OK   00005_rules_compile.sql (21.85ms)
+2026/11/08 15:48:48 OK   00006_packages_entitlements.sql (18.79ms)
+2026/11/08 15:48:48 OK   00007_metering_ledger.sql (25.6ms)
+2026/11/08 15:48:48 OK   00008_limits_shares.sql (41.79ms)
+2026/11/08 15:48:48 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeFundingSchedulerRequiresCASAndKeepsOneFiniteParentAcrossRetries (1.09s)
+=== RUN   TestRuntimeFundingSchedulerRecognizesExplicitAllocationWithoutRefill
+2026/11/08 15:48:49 goose: no migrations to run. current version: 8
+2026/11/08 15:48:49 OK   00001_authority.sql (8.51ms)
+2026/11/08 15:48:49 OK   00002_tenant_policy.sql (9.41ms)
+2026/11/08 15:48:49 OK   00003_nodes_ports.sql (18.22ms)
+2026/11/08 15:48:49 OK   00004_entry_group_domains.sql (2.54ms)
+2026/11/08 15:48:49 OK   00005_rules_compile.sql (17.55ms)
+2026/11/08 15:48:49 OK   00006_packages_entitlements.sql (19.61ms)
+2026/11/08 15:48:49 OK   00007_metering_ledger.sql (23.7ms)
+2026/11/08 15:48:49 OK   00008_limits_shares.sql (34.73ms)
+2026/11/08 15:48:49 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeFundingSchedulerRecognizesExplicitAllocationWithoutRefill (0.80s)
+=== RUN   TestRuntimeRefillRequiresCompleteParentFinalAndOneAuditedSuccessor
+2026/11/08 15:48:50 goose: no migrations to run. current version: 8
+2026/11/08 15:48:50 OK   00001_authority.sql (8.66ms)
+2026/11/08 15:48:50 OK   00002_tenant_policy.sql (9.34ms)
+2026/11/08 15:48:50 OK   00003_nodes_ports.sql (27.64ms)
+2026/11/08 15:48:50 OK   00004_entry_group_domains.sql (2.75ms)
+2026/11/08 15:48:50 OK   00005_rules_compile.sql (19.19ms)
+2026/11/08 15:48:50 OK   00006_packages_entitlements.sql (45.07ms)
+2026/11/08 15:48:50 OK   00007_metering_ledger.sql (23.4ms)
+2026/11/08 15:48:50 OK   00008_limits_shares.sql (32.96ms)
+2026/11/08 15:48:50 goose: successfully migrated database to version: 8
+--- PASS: TestRuntimeRefillRequiresCompleteParentFinalAndOneAuditedSuccessor (1.23s)
+PASS
+ok  	vortex/backend/internal/service	4.939s

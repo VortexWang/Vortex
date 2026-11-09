@@ -1,0 +1,61 @@
+{
+  "commit": "f285137bdebc2c541327922fbdc4ed41516cfe69",
+  "result": 0,
+  "producer": "docker",
+  "through_plan": "06-03",
+  "external_checks": {
+    "cloudflare": {
+      "commit": "f285137bdebc2c541327922fbdc4ed41516cfe69",
+      "exit_code": 0,
+      "status": "passed",
+      "policy_sha256": "fb4f26a53f1df357767586d01da7be83cc36b6656b522fbfd0831e9ce7836cfb",
+      "scope_evidence": "reviewed_creation_policy"
+    },
+    "rule_contract": {
+      "commit": "f285137bdebc2c541327922fbdc4ed41516cfe69",
+      "candidate_validation": "passed",
+      "freeze_status": "pending_owner_approval"
+    }
+  },
+  "acceptance_complete": false,
+  "source_clean": true,
+  "checksums": {
+    "commit.txt": "477863ffd685e8c2b8376e059fab7b210d3454048096e357dc28a60b2e429f51",
+    "openapi.log": "b43e734a41562abdfb2b8d8a979fcacf0f88a73b06186cf31eab37b032ff2c98",
+    "dependencies.log": "c8c849bc0476949d046036594451a6389c5301dfb270a84653606721e658717c",
+    "tracer.log": "3bcf43bb97d4ba709314ee5d777df0427e7e9df172e8772dbbf3a3d7351a53ae",
+    "runner.log": "3696d7566ddbb74899b35427535cb3b58521b4953bbf7dbae0212121948804b3",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "df785577a96edde1421072374b4420093172ed5cdcd0d6b6c331594dffd307d0",
+    "compose.yml": "032acb0356b4b7f84152ac9a92eb3da205fc76e08e7bc69f62f829d828fddfe2",
+    "docker-version.txt": "ed342474cbba3f029cdc502bd718ca98db996b40d531c55a390182bd440dd5fa",
+    "docker-info.json": "1d18209f17667c36aef9ea130106f2c1bc99de7543915741d0e79f3cc67dab62",
+    "images.json": "ce73366bc5583cd30d7a8fd269726aa90108b8f4ab8393c1f15af9129377dff6",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "valkey-version.txt": "d1bb8ec75cc710d8e904e24f10fcfb978e3e1a4d75c6612422a352475faea31a",
+    "build-metadata.txt": "d618b2ec9c47af21e3ec343a10ef9d3b5e92a0ce570f9c56bc50eff339aeed76",
+    "processes.json": "f22dba6947e1b6bbd5046e5bd2c0755544f1593375308d46e38f1507745b2122",
+    "processes/d222e68d-e7f4-4276-923a-4fae3ab68785-result.json": "ee17f4bbb5ed25074e955ae4fe54a7189749c3495b188148e22a45815f948a72",
+    "processes/d222e68d-e7f4-4276-923a-4fae3ab68785-backend.log": "bdf08230f35ef3bc4d8ff653b0ae0022419019851a9ce636d6161ade8283b3d9",
+    "processes/d222e68d-e7f4-4276-923a-4fae3ab68785-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/d222e68d-e7f4-4276-923a-4fae3ab68785-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/e7f22356-94d2-48ae-9407-d54e1229f6d5-result.json": "dec08966f567653bd996688ee1f45944143ea566622dd9024155ebaa19bd3955",
+    "processes/e7f22356-94d2-48ae-9407-d54e1229f6d5-backend.log": "178ca7eaa3984888ed5ac2f1e5e9ef28b27cadf25caa4911011dcd2470b7a072",
+    "processes/e7f22356-94d2-48ae-9407-d54e1229f6d5-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/e7f22356-94d2-48ae-9407-d54e1229f6d5-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cloudflare.log": "a6baf5fe39163ef9e75042b36a5b1cc79023d09c0c5a3918ac436b4d33afcd63",
+    "cloudflare.json": "520975d60800111b340de955872cafd86803604c1a80777266823a8323d022ec",
+    "rule-contract.log": "b6611f5784fe18171ddf55d8483b16351c3a13157f2e6e6c7c431508de568cb0",
+    "rule-contract.json": "8c962edfe36a0ff0c6abb934f88fd456ba814fd136da874c2fe17751309260d4",
+    "rule-components.log": "9e73ffa028640027588c9b767a2eb20bf15341acef6dc285c656732bcae07157",
+    "rule-builds.log": "19df758c990042d74a2fc5cf678cd6df0579ecbc16b855af6efaa0bce40d2a98",
+    "rule-freeze-database.log": "9cc021acd1823be3f7f5bbae41119894547c25b4a1fdf7a675ae3845527994b5",
+    "rule-freeze-public-api.log": "43c63da6ebe61a268e150f702343ec1206176fde9e18f93d6c6111ad3079b641",
+    "rule-freeze-control.v1.log": "3e0e2d63268d0a4572d78209092fe79a51be2983b402988c0771c36979f468f7",
+    "rule-freeze-runtime-config.log": "9777d45e84a18683033c2d395e85c969ee2ff71e973c75177f5e6e50ec8dbfd4"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "run_url": null
+}

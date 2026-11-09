@@ -1,0 +1,32 @@
+{
+  "base_sha": "10cd5b9ef6a3a6f6ef22fe22d3af42b7cdf2f1b7",
+  "scope": "06-07 serving/DNS adapters and durable production consumer; incomplete plan",
+  "passed": [
+    "final-service-native-race.log",
+    "full-backend-native-race.log",
+    "full-backend-linux-race.log",
+    "final-linux-race.log",
+    "final-api-native-race.log",
+    "sqlc-generation.json",
+    "final-builds.json"
+  ],
+  "failed_retained": {
+    "volatile-snapshot-red.log": "prior-source semantic RED: retry recomputed changing health snapshot",
+    "focused-native-race.log": "new revocation fixture used unsupported disabled state; corrected to existing suspended"
+  },
+  "source_identity": "full-source-before.json equals full-source-after.json for344 files",
+  "evidence_sha256": {
+    "final-service-native-race.log": "3f9e3ca511d6e4b9d467a0eab3573391d5b861c3eeaff039c59290696fc82406",
+    "volatile-snapshot-red.log": "fd139e2cb7cb4807908473adfac3da08d6f7e1ae191056e87b245b0bf2b2d395",
+    "sqlc-generation.json": "8c1592c75cc6c5ce5e9a60d29dfc88864b9f072579bfa2f6c55a3e9fa26b6c29",
+    "full-backend-native-race.log": "3a98ffec5e7759a5d3b4725fd71be149a952e8032ed52f07da6b83954c3a3737",
+    "README.md": "355cfcaa6d5ba5ba49c1324a54b3fccfdb1fd9295572c2a45b4ca17d6e6472ef",
+    "full-backend-linux-race.log": "d550ceb8f43827d930aa747ef118421586194daec8ebc7d4614bf83f91c6f838",
+    "full-source-after.json": "5feb9ba98be64f315a53b31c9d0410b4acc8feddec08d965c5fe510f09e41c35",
+    "final-linux-race.log": "0802dbe643beb323bb0d1e801bc8fa6d0fcc4a28dd40b688f3ac3abcf53becb0",
+    "focused-native-race.log": "7833d95c4a7f9f8acf4e90cf872537b92b3b550f4ba85caa15e1370301f79a55",
+    "final-api-native-race.log": "6052109a543e6744e41056f3b4b2a9196589b5d1da561885be439fbe6466b695",
+    "final-builds.json": "86536efb002d1552532871f675c538c3556de7515e248f96158df1e98fff00ff",
+    "full-source-before.json": "5feb9ba98be64f315a53b31c9d0410b4acc8feddec08d965c5fe510f09e41c35"
+  }
+}

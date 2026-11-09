@@ -1,0 +1,24 @@
+{
+  "ServerVersion": "29.8.2",
+  "OSType": "linux",
+  "Architecture": "aarch64",
+  "NCPU": 10,
+  "MemTotal": 8392671232,
+  "OperatingSystem": "OrbStack",
+  "KernelVersion": "7.2.12-orbstack-00394-gbecdd6130068",
+  "compose": "{\"version\":\"v5.5.0\"}",
+  "images": [
+    {
+      "service": "postgres",
+      "configured_image": "postgres:18.6-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8",
+      "image_id": "sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8",
+      "state": "running"
+    },
+    {
+      "service": "valkey",
+      "configured_image": "valkey/valkey:9.1.3@sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7",
+      "image_id": "sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7",
+      "state": "running"
+    }
+  ]
+}

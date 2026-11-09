@@ -1,0 +1,12 @@
+=== RUN   TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt
+=== RUN   TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt/before
+=== RUN   TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt/after
+--- PASS: TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt (1.20s)
+    --- PASS: TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt/before (0.64s)
+    --- PASS: TestRecoveryAdmissionSIGKILLKeepsFiniteFULLBarrierAndOriginalDebt/after (0.56s)
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives
+=== RUN   TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row
+--- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives (0.50s)
+    --- PASS: TestRecoveryAdmissionScopeClockPrefixAndClosedEpochNegatives/rehashed-row (0.50s)
+PASS
+ok  	vortex/agent/store	3.154s

@@ -1,0 +1,31 @@
+{
+  "base_sha": "9ecaaa03ae2cc96cf3cb5f038f3e720ae74a81c0",
+  "utc": "2026-11-08T09:54:26.063620+00:00",
+  "evidence_scope": "development working tree; local primitive only; not clean-source or Actions",
+  "source_sha256": {
+    "contracts/node_boot_recovery.go": "3b8c2220255d43a812d1e5fd59aef49363f2f5d671df8a6ab7494cb4e137f01e",
+    "contracts/node_boot_recovery_test.go": "e9df9bfd80f733aac34eab709a9f2b4a90f110880bde3045d98ba218dd6b52f5",
+    "agent/store/node_boot_share_recovery.go": "e8cd039c54f919f53ad9f468d30c48b5186e98ac1aa8b38a8722086223cb76ed",
+    "agent/store/node_boot_share_recovery_test.go": "3d0b3d30655fe55ae5d91df8344dd17308b1f128c587c095004f2e21e7901711",
+    "agent/store/store.go": "c1c2ed899272e90d6c55bae04c8238321c001d7ef306413ed17ac50a12837093",
+    "contracts/protobuf/v1/lifecycle.md": "5227b009f674b88ec7c474b89f1f9b677d4f33cd46a422cf423d4731c181e6f3"
+  },
+  "evidence_sha256": {
+    "README.md": "8c7512bc8973351eb4b238dc808d419769f7c2802bd412eddfbb8dc526063bad",
+    "final-focused-corruption-native.log": "7a70f1d86fe017ceef925cea2e33e85c0f828fd6955f0f015874ce446c1f0ef0",
+    "final-store-native-race.log": "2a06931184faeac9b25db948a04fc952957daa8c1ebb1e60a2ff82242d8f1863",
+    "focused-complete-native.log": "cd8295fd828ef7f7b99b8e4f0c15a02fcab30c93c49e9086b2874a3655e1f3fa",
+    "focused-native.log": "5de451cc59bcfd445b12a3294707dad017ccd511dc6377e2a110227678b1dbbb",
+    "focused-receipt-canonical-native.log": "f48effa0df6a10533bb55f9ccac146f776ec0d48ca3e1900e13ac4d043b68d53",
+    "linux-components-integration-build.log": "1ce2ab5111861c4d8661dc3696808128030b0952e2ab649df240e5558655f716",
+    "linux-final-receipt-build.log": "aacd0f590cf37b6bf9f4c564819031d888ccf4df7cf836b0723599f951eac70a",
+    "root-components-native-race.log": "8e3e24d6a75e00d6eb70d6f16e7c5412e172e76bf2bf05d230b398dc0618e13f"
+  },
+  "results": {
+    "root_components_native_race_before_receipt_reconstruction": 0,
+    "final_store_native_race": 0,
+    "final_native_focused_corruption_contract": 0,
+    "linux_root_components_backend_focused_integration_and_node_hub_dual_arch_builds": 0,
+    "linux_final_focused_and_node_dual_arch_builds": 0
+  }
+}

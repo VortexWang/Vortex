@@ -1,0 +1,8 @@
+{
+  "base_sha": "aa3b4d4700659110f951372253a8eead2a2755a5",
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "go": "go version go1.27.3 darwin/arm64",
+  "linux": "Docker arm64; no native amd64 execution",
+  "database": "native/Linux hub_admission candidate8 DBs reused; no DDL change",
+  "evidence": "development checkout; no clean-source or Actions pairing"
+}

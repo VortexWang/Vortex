@@ -1,0 +1,12 @@
+{
+  "backend/db/migrations/00009_domain_events.sql": "b12f63ec2243c1396deca042397331e09b9855e3faf57026fad70c0ca3ffc3ba",
+  "backend/db/generated/models.go": "b822ceb0ab5524dd4e27308c76dd3845dd463bec0978bdbd891ae44314a9d87d",
+  "backend/db/generated/port_operations.sql.go": "6339467e4616175208a7bae94a8b00f3fdff62f90b261e8f7ab0d2d4d50fcfe1",
+  "backend/db/query/port_operations.sql": "28e525eacdf0588d5c10e497947c9da4b00ac67ab0810236057b4a179203290c",
+  "backend/internal/service/port.go": "837a7e6cc584ac9e64cc5d9190a16144295abe19e5526ef85ec8840978213f35",
+  "backend/internal/service/port_operation.go": "b78d77f2d2114a67f1637b4638dfae3ce6ae4ba9fd27c0553211eeb3f6160af4",
+  "backend/internal/service/port_operation_test.go": "d325f1a5ca961a32f0855f24989b989fa4a3d50c28ae6f0eac408625bcdefa22",
+  "backend/internal/service/port_operation_migration_test.go": "6b228559253479c08247acc2300a52498367a23d7b12cdc2db8485bdaac05342",
+  "backend/internal/worker/port_operation.go": "df536cf77e569017b19d972480863b69d6d5093d1fbdc28c952ad884fca1eeee",
+  "backend/cmd/vortex-backend/main.go": "2cd0aadb76fb3931186421c67090aadae6b10761f9d1534806b46668d42618f4"
+}

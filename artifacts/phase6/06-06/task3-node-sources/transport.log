@@ -1,0 +1,27 @@
+=== RUN   TestNodeSourceProvisionAuditRollbackReceiptsAndFundedHold
+2026/11/08 12:49:55 goose: no migrations to run. current version: 8
+2026/11/08 12:49:55 OK   00001_authority.sql (20.47ms)
+2026/11/08 12:49:55 OK   00002_tenant_policy.sql (15.43ms)
+2026/11/08 12:49:55 OK   00003_nodes_ports.sql (17.47ms)
+2026/11/08 12:49:55 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/08 12:49:55 OK   00005_rules_compile.sql (16.94ms)
+2026/11/08 12:49:55 OK   00006_packages_entitlements.sql (15.97ms)
+2026/11/08 12:49:55 OK   00007_metering_ledger.sql (22.03ms)
+2026/11/08 12:49:55 OK   00008_limits_shares.sql (23.96ms)
+2026/11/08 12:49:55 goose: successfully migrated database to version: 8
+--- PASS: TestNodeSourceProvisionAuditRollbackReceiptsAndFundedHold (0.95s)
+=== RUN   TestNodeSourceProvisionActualMTLSWorkerLostReceiptAndExplicitBackend
+2026/11/08 12:49:56 goose: no migrations to run. current version: 8
+2026/11/08 12:49:56 OK   00001_authority.sql (8.64ms)
+2026/11/08 12:49:56 OK   00002_tenant_policy.sql (7.29ms)
+2026/11/08 12:49:56 OK   00003_nodes_ports.sql (17.55ms)
+2026/11/08 12:49:56 OK   00004_entry_group_domains.sql (2.21ms)
+2026/11/08 12:49:56 OK   00005_rules_compile.sql (18.15ms)
+2026/11/08 12:49:56 OK   00006_packages_entitlements.sql (22.68ms)
+2026/11/08 12:49:56 OK   00007_metering_ledger.sql (23.59ms)
+2026/11/08 12:49:56 OK   00008_limits_shares.sql (31.65ms)
+2026/11/08 12:49:56 goose: successfully migrated database to version: 8
+    node_source_transport_test.go:143: actual direct backend TLS, opt-in capability, atomic FULL roots, lost receipt/replay, PG task completion verified
+--- PASS: TestNodeSourceProvisionActualMTLSWorkerLostReceiptAndExplicitBackend (0.90s)
+PASS
+ok  	vortex/backend/internal/service	3.531s

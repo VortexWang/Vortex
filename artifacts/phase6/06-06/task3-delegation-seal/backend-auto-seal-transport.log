@@ -1,0 +1,16 @@
+=== RUN   TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay
+2026/11/08 14:27:12 goose: no migrations to run. current version: 8
+2026/11/08 14:27:12 OK   00001_authority.sql (27.65ms)
+2026/11/08 14:27:12 OK   00002_tenant_policy.sql (14.34ms)
+2026/11/08 14:27:12 OK   00003_nodes_ports.sql (33.07ms)
+2026/11/08 14:27:12 OK   00004_entry_group_domains.sql (3.64ms)
+2026/11/08 14:27:12 OK   00005_rules_compile.sql (31.56ms)
+2026/11/08 14:27:12 OK   00006_packages_entitlements.sql (27.9ms)
+2026/11/08 14:27:12 OK   00007_metering_ledger.sql (35.69ms)
+2026/11/08 14:27:12 OK   00008_limits_shares.sql (56.56ms)
+2026/11/08 14:27:12 goose: successfully migrated database to version: 8
+    delegation_seal_transport_test.go:87: first transport ended: rpc error: code = Unknown desc = injected lost FULL seal before PG
+    delegation_seal_transport_test.go:119: actual mTLS automatic expiry seal, issue-before-seal ordering and lost FULL/PG ACK keep issued51 held and return unissued52 exactly once
+--- PASS: TestDelegationSealActualMTLSIssueInventoryBeforeReturnAndLostACKReplay (5.11s)
+PASS
+ok  	vortex/backend/internal/service	6.886s

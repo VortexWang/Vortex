@@ -1,0 +1,7 @@
+{
+  "backend/internal/service/share_cold_recovery.go": "a9094dfe5d4cdf4da6f41e52162e803ecdc2ce2c723a6408b702c9b788114796",
+  "backend/internal/service/share_effective_issuer.go": "da67e6e83a2c1bebb0b85980252e0a00e06abc80feb55ef80ea9df5cef61c8b6",
+  "backend/internal/service/share_handoff.go": "78789d9281a0bcc86522f47e7f0812b938b52c2a1657ddd636907592b5fdb14c",
+  "backend/internal/service/share_renewal_closure.go": "0eef36ec2c38ff2bc6e3a2a429a7c56f9a51097ce99c52bfee01fb6c02795a4b",
+  "backend/internal/service/share_transferred_cold_test.go": "24604e3f784177abaf84370fbc2884d347d0f7821810874e42a0e128e380f918"
+}

@@ -1,0 +1,36 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Historical CR-005/CR-006/CR-007 exact approvals, frozen hashes and unchanged legacy wire/schema passed
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract: two clean generations, historical CR-005/CR-006/CR-007 exact approvals, frozen hashes and unchanged legacy wire/schema passed
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+CR-008 candidate: exact inventory, prior approval protection, unchanged frozen schemas and legacy wire passed; owner approval pending
+Limits contract: two clean generations and exact historical approvals passed; CR-008 remains pending owner approval

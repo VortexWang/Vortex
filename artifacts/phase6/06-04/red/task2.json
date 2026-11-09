@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/entitlement_red_test.py",
+  "exitCode": 1,
+  "output": "test_atomic_redemption (__main__.EntitlementAuthority) ... FAIL\n\n======================================================================\nFAIL: test_atomic_redemption (__main__.EntitlementAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/entitlement_red_test.py\", line 9, in test_atomic_redemption\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestEntitlementAtomicRedemptionContract\n2026/11/07 18:29:13 goose: no migrations to run. current version: 6\n    package_test.go:205: atomic entitlement issuance/redemption service missing\n--- FAIL: TestEntitlementAtomicRedemptionContract (0.06s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.658s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.459s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_atomic_redemption",
+  "targetFile": "tools/phase6/entitlement_red_test.py",
+  "expected": "one atomic redemption and exact replay",
+  "actual": "atomic redemption service interface absent",
+  "semanticAssessment": "Actual Go target compiled and connected to PostgreSQL; planned redemption service assertion failed, without fixture or load errors."
+}

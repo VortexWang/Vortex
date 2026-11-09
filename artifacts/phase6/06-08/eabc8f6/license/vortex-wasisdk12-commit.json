@@ -1,0 +1,101 @@
+{
+  "sha": "77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+  "node_id": "C_kwDOCmIlrdoAKDc3YmE5OGE5OThjYjlmMmE2M2FiM2E1Zjk0YmJhYmQwNjlmNjVmZjA",
+  "commit": {
+    "author": {
+      "name": "Brett Cannon",
+      "email": "brett@python.org",
+      "date": "2021-09-28T04:48:04Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2021-09-28T04:48:04Z"
+    },
+    "message": "Autoconf 2.70 shipped WASI support (#193)",
+    "tree": {
+      "sha": "28ffab4cd43246bdc8d151ac9a466c26584f4a2d",
+      "url": "https://api.github.com/repos/WebAssembly/wasi-sdk/git/trees/28ffab4cd43246bdc8d151ac9a466c26584f4a2d"
+    },
+    "url": "https://api.github.com/repos/WebAssembly/wasi-sdk/git/commits/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJhUp6ECRBK7hj4Ov3rIwAAqrgIABtcMc21d8TNyGycyHB9qPrI\nTNhSvQCXUnPEZMtkHGRV4u0ZBVuMb7WR98q4dXLO2qOtqKEDbTAagd5MtCziBsSO\nd3kwNpHZnf1T06rx6JvLWZVv963KyAaFxdvvYTQX9mMrFbWjNAGnK2mnLJsuiDzA\n9l5yy0Z7iaANC6tddNl7bsb4afIG+3qxvtZvaM/70Dl19Wrzpqjy5WDr7YBG1Bse\n/bvVeSis+82uQi/oyqzhw9dhI9cWZajI2tYt8fXKBfduhNcaWkW0YF2VTtYgrfaE\n/u8a34ZjGEZMlV380LtlbV5pIPk5TFPbHjXCKW3nfLGjK6R+ccU2+9XRHinWsHI=\n=yF8n\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 28ffab4cd43246bdc8d151ac9a466c26584f4a2d\nparent f0d40b6491efc1e2332f55eb22e6292abdce4335\nauthor Brett Cannon <brett@python.org> 1632804484 -0700\ncommitter GitHub <noreply@github.com> 1632804484 -0700\n\nAutoconf 2.70 shipped WASI support (#193)\n\n",
+      "verified_at": "2024-01-16T19:59:59Z"
+    }
+  },
+  "url": "https://api.github.com/repos/WebAssembly/wasi-sdk/commits/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+  "html_url": "https://github.com/WebAssembly/wasi-sdk/commit/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+  "comments_url": "https://api.github.com/repos/WebAssembly/wasi-sdk/commits/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0/comments",
+  "author": {
+    "login": "brettcannon",
+    "id": 54418,
+    "node_id": "MDQ6VXNlcjU0NDE4",
+    "avatar_url": "https://avatars.githubusercontent.com/u/54418?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/brettcannon",
+    "html_url": "https://github.com/brettcannon",
+    "followers_url": "https://api.github.com/users/brettcannon/followers",
+    "following_url": "https://api.github.com/users/brettcannon/following{/other_user}",
+    "gists_url": "https://api.github.com/users/brettcannon/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/brettcannon/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/brettcannon/subscriptions",
+    "organizations_url": "https://api.github.com/users/brettcannon/orgs",
+    "repos_url": "https://api.github.com/users/brettcannon/repos",
+    "events_url": "https://api.github.com/users/brettcannon/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/brettcannon/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": true
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "f0d40b6491efc1e2332f55eb22e6292abdce4335",
+      "url": "https://api.github.com/repos/WebAssembly/wasi-sdk/commits/f0d40b6491efc1e2332f55eb22e6292abdce4335",
+      "html_url": "https://github.com/WebAssembly/wasi-sdk/commit/f0d40b6491efc1e2332f55eb22e6292abdce4335"
+    }
+  ],
+  "stats": {
+    "total": 6,
+    "additions": 3,
+    "deletions": 3
+  },
+  "files": [
+    {
+      "sha": "14ec987ab2c65a1d96d1559118a10b9b736ecae4",
+      "filename": "README.md",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "blob_url": "https://github.com/WebAssembly/wasi-sdk/blob/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0/README.md",
+      "raw_url": "https://github.com/WebAssembly/wasi-sdk/raw/77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0/README.md",
+      "contents_url": "https://api.github.com/repos/WebAssembly/wasi-sdk/contents/README.md?ref=77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+      "patch": "@@ -45,11 +45,11 @@ is not necessary if `WASI_SDK_PATH` is `/opt/wasi-sdk`.\n \n ## Notes for Autoconf\n \n-Upstream autoconf now\n-[recognizes WASI](http://lists.gnu.org/archive/html/config-patches/2019-04/msg00001.html).\n+[Autoconf](https://www.gnu.org/software/autoconf/autoconf.html) 2.70 now\n+[recognizes WASI](https://git.savannah.gnu.org/gitweb/?p=autoconf.git;a=blob;f=build-aux/config.sub;h=19c9553b1825cafb182115513bc628e0ee801bd0;hb=97fbc5c184acc6fa591ad094eae86917f03459fa#l1723).\n \n For convenience when building packages that aren't yet updated, updated\n-config.sub and config.guess files are installed at share/misc/config.\\*\n+config.sub and config.guess files are installed at `share/misc/config.*`\n in the install directory.\n \n ## Notable Limitations"
+    }
+  ]
+}

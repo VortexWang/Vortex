@@ -1,0 +1,16 @@
+2026/11/09 07:29:20 goose: no migrations to run. current version: 9
+2026/11/09 07:29:20 OK   00001_authority.sql (49.53ms)
+2026/11/09 07:29:20 OK   00002_tenant_policy.sql (17.23ms)
+2026/11/09 07:29:20 OK   00003_nodes_ports.sql (35.46ms)
+2026/11/09 07:29:20 OK   00004_entry_group_domains.sql (4.34ms)
+2026/11/09 07:29:20 OK   00005_rules_compile.sql (18.93ms)
+2026/11/09 07:29:20 OK   00006_packages_entitlements.sql (16.23ms)
+2026/11/09 07:29:20 OK   00007_metering_ledger.sql (21.75ms)
+2026/11/09 07:29:20 OK   00008_limits_shares.sql (48.01ms)
+2026/11/09 07:29:20 OK   00009_domain_events.sql (17.82ms)
+2026/11/09 07:29:20 goose: successfully migrated database to version: 9
+--- FAIL: TestPortOperationPrepareFULLProofsUnknownReplayAndNoRelease (0.50s)
+    port_operation_test.go:41: exact durable aggregate port operation missing <nil>
+FAIL
+FAIL	vortex/backend/internal/service	1.271s
+FAIL

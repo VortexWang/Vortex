@@ -1,0 +1,10 @@
+{
+  "compiler_image": "sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae",
+  "source_commit": "d0362cb23d5a6bdba3ddb2e04748ebb55b48cd00",
+  "object": "dlmalloc.o",
+  "recovered_sha256": "d17605462b4573b418b6fbdd59c42cddc1b27a47ab9398330b262e06c69b962e",
+  "rebuilt_sha256": "d0050ee43b48adac1fce4431a5f3a25285db1c5f0d20f0cb5a39fee0a1bb1b05",
+  "exact_match": false,
+  "all_non_producer_sections_match": true,
+  "difference": "producers only: Arch clang 16.0.6 versus Ubuntu clang 16.0.6; CODE/DATA/IMPORT/types/symbols/relocations/features identical"
+}

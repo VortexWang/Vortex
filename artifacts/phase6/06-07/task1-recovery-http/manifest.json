@@ -1,0 +1,39 @@
+{
+  "base_sha": "c17d1196",
+  "scope": "06-07 persisted recovery business status and actor-bound durable advancement; incomplete plan",
+  "passed": [
+    "initial-regressions-native-race.log",
+    "focused-native-corrected-race.log",
+    "affected-native-corrected-race.log",
+    "full-backend-native-race.log",
+    "full-backend-linux-race.log",
+    "sqlc-generation.json",
+    "cross-builds.json"
+  ],
+  "failed_retained": {
+    "focused-native-race.log": "test fixture omitted users identity; corrected fixture only",
+    "affected-native-race.log": "real lock inversion 40P01; corrected tenant-first result transaction"
+  },
+  "superseded": [
+    "affected-linux-race.log"
+  ],
+  "source_identity": {
+    "files": 358,
+    "scope": "snapshot during full suites equals after; not collected before test start"
+  },
+  "evidence_sha256": {
+    "affected-native-race.log": "862ddb504b1e55911574bb76a20952ebe17b44c3a3d8868bcaf4fb3e2f6454e3",
+    "sqlc-generation.json": "2423c4dcf59f21cfbaea0f39db4543118161fdb18780cfae3553fb2bb48bf17d",
+    "source-after-full.json": "c90957b84d204bfa46e468df90d3183316bba18c6be17b46f0a4c1180bd7cad4",
+    "affected-linux-race.log": "9087a61bfa82d48a1bd9c7cd1bd9dd5f2513ca01a97c9e546e6b800a14ebece3",
+    "affected-native-corrected-race.log": "788fd950cf0237909fe6f7c65c1e6c7bc04850ab0b82b92d83f294bd94773d77",
+    "cross-builds.json": "4b67c7af7cd3abbf837cd2007b0e8d7edab882b7b59d9d0b0ec7aa3c638e24a6",
+    "full-backend-native-race.log": "f5cf8a4ada3b1b11a559a198699cd8665cb01fce8ad85013f7f7698140462705",
+    "README.md": "6d169c824fe0e3db7cd027aac3fe72aa807a105dd7262cc15398ac7acf228e6a",
+    "full-backend-linux-race.log": "604a46689f03bb838df4e3a87c28de2352ca9a06d782a36f2db2325af081bcc5",
+    "focused-native-race.log": "99d61de667f7ce9f3054f900733bd548c63a0e274d843085ef6bc1b61b0050ee",
+    "initial-regressions-native-race.log": "2b5be04cabdcecda9eac3a5db765cbd03790d096408f5c32103cde31ed4eb189",
+    "source-during-full.json": "c90957b84d204bfa46e468df90d3183316bba18c6be17b46f0a4c1180bd7cad4",
+    "focused-native-corrected-race.log": "f55a68a33680af9111d2750f43096b7bedbe404d7f7ab0e465e8776a97cc1c47"
+  }
+}

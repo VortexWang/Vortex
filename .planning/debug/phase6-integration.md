@@ -38,3 +38,9 @@ verification: pending
 
 - F-10 deterministic RED: success checkpoint缺少pre-exhaustion通知。补充普通/批量结算成功后的coalesced scope wake；return、cancelled checkpoint、foreign revision不得唤醒。原生相关race三轮52.873s，限两核Linux稳定源码三个场景三轮67.047s。最初Linux在源码编译期间修改，失败保留，不能作为修复后判定；随后固定源码重跑通过。
 - F-11沿用a2097430测试修复，原生五轮21.530s，Linux包含在67.047s。初始化与证明context分离，真实5秒运行和200ms admission不变。最终完整入口/Actions尚待集成。
+
+- 合并发现并用真实mTLS RED/GREEN修复receive侧ACK绕过ControlOnly；known/unknown outbox、hook与未知负债均核验。CLI/客户端拒绝实验需求与direct backend混用。
+- 有限DemandLimit错误计算同ID重放，导致提前结束控制连接；distinct-ID fixture RED后修复，32轮原授权期限测试PASS31.196s。
+- 原到期闭环夹具缺少usage后端确认；记录region真实错误后补实际Hub/backend mTLS，三轮PASS23.873s，不放宽生产路径。
+- 原Phase5恢复夹具未供Phase6新增的原source owner明确后继根；补actual persisted allocation/hash/三根相邻revision/epoch，全部五场景PASS8.702s，保留原R与512unknown断言。
+- CR012候选精确描述符并集105=union(main69,phase6100)，历史CR009篡改测试与forward篡改测试均PASS。完整native修正验证进行中。

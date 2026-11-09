@@ -1,0 +1,18 @@
+=== RUN   TestHubEffectiveEpochActualMTLSIssuesLeaseSealLostReceipts
+2026/11/08 22:39:04 goose: no migrations to run. current version: 8
+2026/11/08 22:39:04 OK   00001_authority.sql (12.28ms)
+2026/11/08 22:39:04 OK   00002_tenant_policy.sql (10.09ms)
+2026/11/08 22:39:04 OK   00003_nodes_ports.sql (18.53ms)
+2026/11/08 22:39:04 OK   00004_entry_group_domains.sql (2.23ms)
+2026/11/08 22:39:04 OK   00005_rules_compile.sql (24.69ms)
+2026/11/08 22:39:04 OK   00006_packages_entitlements.sql (17.74ms)
+2026/11/08 22:39:04 OK   00007_metering_ledger.sql (26.72ms)
+2026/11/08 22:39:04 OK   00008_limits_shares.sql (64.89ms)
+2026/11/08 22:39:04 goose: successfully migrated database to version: 8
+    hub_effective_transport_test.go:64: actual reconnect 0 store: backend heartbeat is not newer than the durable heartbeat
+    hub_effective_transport_test.go:64: actual reconnect 1 store: backend heartbeat is not newer than the durable heartbeat
+    hub_effective_transport_test.go:67: did not traverse both FULL receipt and PG ACK loss
+--- FAIL: TestHubEffectiveEpochActualMTLSIssuesLeaseSealLostReceipts (1.51s)
+FAIL
+FAIL	vortex/backend/internal/service	2.175s
+FAIL

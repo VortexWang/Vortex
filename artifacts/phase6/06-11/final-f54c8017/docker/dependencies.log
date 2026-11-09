@@ -1,0 +1,37 @@
+....{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+OpenAPI lint passed: 45 business operations; explicit rotating refresh exception only
+.................
+----------------------------------------------------------------------
+Ran 21 tests in 3.398s
+
+OK
+sqlc v1.31.1: two clean generations and committed source match byte-for-byte
+all modules verified
+{"status": "passed", "go": "1.27.3", "goose": "v3.29.0", "goose_sum": "h1:dtEnBCT7CqkHIUCdgrXsrmeisaN8gFkRU4Y5OEwif4o=", "sqlc": "v1.31.1", "protoc": "36.2", "protoc_archive_sha256": "9cd98a532c5c5e0c4161314de0225de27e4c8a323917b6ea7b1b714d3ae23466", "compiled_modules": 38, "targets": ["linux/amd64", "linux/arm64", "host"], "scope": "backend production/test and exact sqlc generator linked and embedded licenses; protoc checksum; external services excluded", "generator_closure_status": "passed", "generator": {"status": "passed", "linked_modules": 42, "artifact": {"platform": "darwin-arm64", "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_darwin_arm64.tar.gz", "archive_sha256": "21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e", "binary_sha256": "7e63a8b2166f1103a2ad1d2e5d05d8fe3f13ca65ecf2774a2570b830d32055fd"}, "approved_exceptions": [{"dependency": {"module": "github.com/go-sql-driver/mysql", "version": "v1.9.3", "sum": "h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo="}, "license": "MPL-2.0", "exception": "CR-003"}, {"component": "SQLite WASM and Doug Lea allocator", "module": "github.com/ncruces/go-sqlite3", "version": "v0.32.0", "sum": "h1:hNBUXp88LrfQCsuyXLqWTbTUG35sUuktDsqhhgHvU20=", "license": "MIT-0", "files": {"embed/sqlite3.wasm": "4bd039600eae69059a672ef1c063f4d8ecc94e6367cf742ea903ca412035e0f8", "embed/build.sh": "1c580dcba45d8e0a4fbd4320cd672f46b8680622fc0315de385b829038ea33d6", "embed/init.go": "52c1149430e0e88b16d3183c78397fa6774f7a91013b681f1b7397e71563091b", "sqlite3/main.c": "a10c0911076b5bf58b412cd10d9a1f61d5e182cf6aea95ff70d8eb4d518e5f66", "sqlite3/libc/malloc_sbrk.c": "2b89d53cb9a60fa60a0ac2ea9ad2e6b9fb3d6f37f7725ba7b9b48601e5d7ef2b", "sqlite3/libc/malloc.c": "be7be56b40b4b31417e74e77687f9b96127ea6cae534cf236aee40a4c739508d", "sqlite3/download.sh": "637af52d5157aa47e9395c1e4920d1108fc7f32f3453f8a834c17bf3dc5d35fd"}, "exception": "CR-004"}, {"component": "libpg_query WASM, Bison-generated PostgreSQL parsers", "module": "github.com/wasilibs/go-pgquery", "version": "v0.0.0-20250409022910-10ac41983c07", "sum": "h1:mJdDDPblDfPe7z7go8Dvv1AJQDI3eQ/5xith3q2mFlo=", "license": "GPL-2.0-or-later WITH Bison-exception-2.2", "files": {"internal/wasm/libpg_query.so": "a49afdfd4f711aca1510c17b062036f45dcf07ad5363d16a586f9a9980c1dec5", "internal/wasm/wasm.go": "716f98f4c9de9ccf019693f7431dff45b293bc62f316472e2568fe8b0c3b64fb", "buildtools/wasm/Dockerfile": "e27127702ed7595f93068e3e350b04ba0fd447f28a6020c06b5df6acd66c9ed1", "internal/cparser/src_backend_parser_gram.c": "347dc92a939d312ac6e727f4018583314b181765f532427d2f2d365d552ace5a", "internal/cparser/src_pl_plpgsql_src_pl_gram.c": "9ef438ff195798f682404f5d0446bfee0de0ea20407cf95c26a91e3baa1604fb", "internal/cparser/protobuf-c.c": "4ff2afde88ecd4ea063c808c65a4eec11fba6b5eb8e53a8ee6185867b795a50d", "internal/cparser/xxhash.c": "343f463d6fe389cc4c0647531cf7536246da1dfb9e894aa19b1d69002182e41a", "internal/cparser/src_port_strlcpy.c": "e3acb38c20b1aebf1bd25aa1527dbecc0f857ad29c9596326f297ab4884f0e0b", "internal/cparser/src_port_snprintf.c": "d6c05028cf076d7ca21e07488bc271c93f859f258f2325d1e6a4eea4f43ce75f", "internal/cparser/include/postgres/common/hashfn_unstable.h": "6ff3d8400ea9698bd97ee65b599492f1dcb1c67f2c765a12b469be087a77d01d"}, "exception": "CR-004"}], "license_findings": [], "provenance_gaps": [], "auxiliary_source_status": "reconstructed-and-reviewed", "usage": "development-ci-sql-to-go", "scope": "Exact official sqlc 1.31.1 artifacts, all 42 linked Go modules, supplied embedded WASM sources/assets; not a full distributed image or compiler-toolchain attestation"}, "license_findings": []}

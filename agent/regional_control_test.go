@@ -62,6 +62,22 @@ func TestRegionalStatusRejectsUnauthenticatedOrStaleBounds(t *testing.T) {
 	if validateRegionalStatus(good, e, r, regionalSessionID, "foreign", now) == nil {
 		t.Fatal("accepted different certificate identity")
 	}
+	leaseStatus := proto.Clone(good).(*controlv1.HubStatus)
+	leaseStatus.Capabilities = append(leaseStatus.Capabilities, "runtime-lease-refresh-v1")
+	if validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("legacy client accepted unnegotiated lease capability")
+	}
+	r.LeaseRefresh = true
+	if err := validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now); err != nil {
+		t.Fatal("lease capability incorrectly requires credit renewal", err)
+	}
+	if validateRegionalStatus(good, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("lease client accepted missing capability")
+	}
+	leaseStatus.Capabilities = append(leaseStatus.Capabilities, "renewal-v1")
+	if validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("lease capability accepted out of order")
+	}
 }
 
 func TestRegionalStaleIncarnationCannotMutateAuthority(t *testing.T) {

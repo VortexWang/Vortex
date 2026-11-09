@@ -1,0 +1,6 @@
+=== RUN   TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope
+    renewal_rules_test.go:187: sql: transaction has already been committed or rolled back
+--- FAIL: TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope (23.48s)
+FAIL
+FAIL	vortex/agent	24.215s
+FAIL

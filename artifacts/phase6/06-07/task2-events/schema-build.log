@@ -1,0 +1,12 @@
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant
+=== RUN   TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant
+--- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_grant_cross_tenant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/admin_read_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/operator_mutation_cannot_grant (0.00s)
+    --- PASS: TestRetargetScopePreservesAuthenticatedIdentityAndCannotEscalateAction/owner_mutation_cannot_grant (0.00s)
+PASS
+ok  	vortex/backend/internal/repository	0.516s

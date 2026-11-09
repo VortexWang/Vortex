@@ -1,0 +1,6 @@
+{
+  "expected_red_exit": 1,
+  "source_before_sha256": "4ebe201a15fbd5afdc47fe1763b7a9d0dc0863767bbf42eaeefb4030ad5dd888",
+  "source_after_sha256": "4ebe201a15fbd5afdc47fe1763b7a9d0dc0863767bbf42eaeefb4030ad5dd888",
+  "disconnected_gate": "new-epoch issue handoff equality only; source never edited"
+}

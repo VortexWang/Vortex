@@ -1,0 +1,126 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-4fc37971b888 Creating 
+ Container vortex-phase6-tracer-backend-test-run-4fc37971b888 Created 
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/prepare
+2026/11/09 01:09:13 goose: no migrations to run. current version: 9
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/query_prepared
+2026/11/09 01:09:13 goose: no migrations to run. current version: 9
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/partial_commit
+2026/11/09 01:09:13 goose: no migrations to run. current version: 9
+--- PASS: TestApplySupersededLateObservationCannotQueueCommit (0.38s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/prepare (0.17s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/query_prepared (0.11s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/partial_commit (0.11s)
+=== RUN   TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery
+2026/11/09 01:09:13 goose: no migrations to run. current version: 9
+--- PASS: TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery (0.16s)
+=== RUN   TestApplyPrepareCommitUnknownAndLateReceipt
+2026/11/09 01:09:14 goose: no migrations to run. current version: 9
+--- PASS: TestApplyPrepareCommitUnknownAndLateReceipt (0.14s)
+=== RUN   TestReconcile1000Within60s
+2026/11/09 01:09:14 goose: no migrations to run. current version: 9
+2026/11/09 01:09:14 OK   00001_authority.sql (16.44ms)
+2026/11/09 01:09:14 OK   00002_tenant_policy.sql (10.71ms)
+2026/11/09 01:09:14 OK   00003_nodes_ports.sql (26.32ms)
+2026/11/09 01:09:14 OK   00004_entry_group_domains.sql (3.31ms)
+2026/11/09 01:09:14 OK   00005_rules_compile.sql (21.52ms)
+2026/11/09 01:09:14 OK   00006_packages_entitlements.sql (21.43ms)
+2026/11/09 01:09:14 OK   00007_metering_ledger.sql (24.55ms)
+2026/11/09 01:09:14 OK   00008_limits_shares.sql (60.06ms)
+2026/11/09 01:09:14 OK   00009_domain_events.sql (19.62ms)
+2026/11/09 01:09:14 goose: successfully migrated database to version: 9
+    reconciliation_1000_test.go:200: {
+          "commit": "development",
+          "scope": "real PostgreSQL production backend reconciliation; deterministic node adapter; no Engine/transport performance claim",
+          "started_at": "2026-11-09T01:11:10.35251199Z",
+          "ended_at": "2026-11-09T01:11:31.434812854Z",
+          "elapsed_ns": 21082300572,
+          "elapsed_ms": 21082.300572,
+          "rules": 1000,
+          "resolved": 1000,
+          "members": 2000,
+          "observed": 2000,
+          "inventory_sha256": "f403f63e94e6e9fd9486c9c7d77228b416cf7a31a25e58b3282a575669b97502",
+          "status": "passed"
+        }
+--- PASS: TestReconcile1000Within60s (137.53s)
+=== RUN   TestRestrictionBlocksDispatchButPreservesLateObservation
+2026/11/09 01:11:31 goose: no migrations to run. current version: 9
+--- PASS: TestRestrictionBlocksDispatchButPreservesLateObservation (0.11s)
+=== RUN   TestCompileWorkerMissingSnapshotThenReadyRestart
+2026/11/09 01:11:31 goose: no migrations to run. current version: 9
+    rule_compile_test.go:39: true <nil>
+--- FAIL: TestCompileWorkerMissingSnapshotThenReadyRestart (0.07s)
+=== RUN   TestCompileWorkerAuditRollback
+2026/11/09 01:11:32 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerAuditRollback (0.09s)
+=== RUN   TestCompileWorkerMissingSnapshotPreservesPriorAuthority
+2026/11/09 01:11:32 goose: no migrations to run. current version: 9
+    rule_compile_test.go:188: true <nil>
+--- FAIL: TestCompileWorkerMissingSnapshotPreservesPriorAuthority (0.10s)
+=== RUN   TestCompileWorkerConflictRetainsAuthority
+2026/11/09 01:11:32 goose: no migrations to run. current version: 9
+    rule_compile_test.go:243: worker swallowed rejection persistence failure
+--- FAIL: TestCompileWorkerConflictRetainsAuthority (0.08s)
+=== RUN   TestCompileWorkerConflictPreservesPriorActiveArtifact
+2026/11/09 01:11:32 goose: no migrations to run. current version: 9
+    rule_compile_test.go:317: prior active revision lost <nil> 1 pending
+--- FAIL: TestCompileWorkerConflictPreservesPriorActiveArtifact (0.08s)
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=true
+2026/11/09 01:11:32 goose: no migrations to run. current version: 9
+2026/11/09 01:11:32 OK   00001_authority.sql (6.19ms)
+2026/11/09 01:11:32 OK   00002_tenant_policy.sql (5.52ms)
+2026/11/09 01:11:32 OK   00003_nodes_ports.sql (12.12ms)
+2026/11/09 01:11:32 OK   00004_entry_group_domains.sql (1.52ms)
+2026/11/09 01:11:32 OK   00005_rules_compile.sql (12.51ms)
+2026/11/09 01:11:32 OK   00006_packages_entitlements.sql (11.34ms)
+2026/11/09 01:11:32 OK   00007_metering_ledger.sql (16.14ms)
+2026/11/09 01:11:32 OK   00008_limits_shares.sql (37.74ms)
+2026/11/09 01:11:32 OK   00009_domain_events.sql (14.62ms)
+2026/11/09 01:11:32 goose: successfully migrated database to version: 9
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=false
+2026/11/09 01:11:33 goose: no migrations to run. current version: 9
+2026/11/09 01:11:33 OK   00001_authority.sql (6.77ms)
+2026/11/09 01:11:33 OK   00002_tenant_policy.sql (6.26ms)
+2026/11/09 01:11:33 OK   00003_nodes_ports.sql (15.08ms)
+2026/11/09 01:11:33 OK   00004_entry_group_domains.sql (1.73ms)
+2026/11/09 01:11:33 OK   00005_rules_compile.sql (24.05ms)
+2026/11/09 01:11:33 OK   00006_packages_entitlements.sql (13.51ms)
+2026/11/09 01:11:33 OK   00007_metering_ledger.sql (14.59ms)
+2026/11/09 01:11:33 OK   00008_limits_shares.sql (35.12ms)
+2026/11/09 01:11:33 OK   00009_domain_events.sql (15.15ms)
+2026/11/09 01:11:33 goose: successfully migrated database to version: 9
+--- PASS: TestRulePortActualAgentSocketsUnknownAndQuery (2.63s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=true (1.30s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=false (1.33s)
+FAIL
+FAIL	vortex/backend/internal/service	141.417s
+=== RUN   TestRuleReconciliationDrainsReadyWorkAndCancels
+--- PASS: TestRuleReconciliationDrainsReadyWorkAndCancels (0.00s)
+=== RUN   TestRuleReconciliationIdleAndFailure
+--- PASS: TestRuleReconciliationIdleAndFailure (0.00s)
+PASS
+ok  	vortex/backend/internal/worker	1.014s
+=== RUN   TestWithin60sRejectsPartialAndOverBudget
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/rounded-duration
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/failed
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/partial
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/missing-member
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns
+--- PASS: TestWithin60sRejectsPartialAndOverBudget (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/rounded-duration (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/failed (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/partial (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/missing-member (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns (0.00s)
+PASS
+ok  	vortex/backend/internal/reconciliation	1.007s
+FAIL
+

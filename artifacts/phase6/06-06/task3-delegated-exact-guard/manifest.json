@@ -1,0 +1,16 @@
+{
+  "base_commit": "8008956b408b363f55e37b6ca8e41c5bd1019ae0",
+  "scope": "development generic exact-reconciliation guard for allocated parents; not dedicated child closure or full06-06 acceptance",
+  "source": {
+    "backend/internal/service/usage_reconciliation.go": "2942971df7022a2c52bc61d51fb61d372d71948a11426bd7dc281553222a5bcf",
+    "backend/internal/service/delegation_seal_test.go": "a839a3aee4b7d606ff583301f9f8c01d6aba43c9d5b4c581c4bca933257499fc",
+    "contracts/protobuf/v1/lifecycle.md": "88d414905e253df57cb28d77b189833de315e4599733bb27b781482746f65d58"
+  },
+  "evidence": {
+    "README.md": "dfe2e5d73fa7355769954bd2abf166c84df7eefc60812901aae815c51efefbc3",
+    "backend-all-race.log": "6f80bfe9b718677c0021cc6e952423b07dfb001625e457246bbfeb956c6a9538",
+    "green.log": "4e5784eb463600db9b5e7c551b65b82e8b4c78d65c133fb63567b75aa72b2eca",
+    "linux-race-build.log": "536b8e645bffecb7752f5817a53673d1c22a07ab2ed5a6b684a9d929b02347b0",
+    "red.log": "9a7cf428c060b7e1ea60e90674cc2b687af3d0d27d0e6ac9ba5e69c2f3eb7f95"
+  }
+}

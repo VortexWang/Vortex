@@ -1,0 +1,14 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-4cbcd0405a98 Creating 
+ Container vortex-phase6-tracer-backend-test-run-4cbcd0405a98 Created 
+ok  	vortex/backend/internal/service	169.612s
+ok  	vortex/backend/internal/control	1.406s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.009s
+stat /src/backend/cmd/backend: directory not found
+

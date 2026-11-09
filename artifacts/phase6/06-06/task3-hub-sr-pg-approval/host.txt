@@ -1,0 +1,4 @@
+Darwin pengjianshedeMac-mini.local 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:26 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T8132 arm64
+go version go1.27.3 darwin/arm64
+29.8.2 / 29.8.2
+Docker Compose version v5.5.0

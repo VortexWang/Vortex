@@ -17,70 +17,70 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## TEN Requirements
 
-- [ ] **TEN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (261-261; SHA-256 recorded there).
-- [ ] **TEN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (262-262; SHA-256 recorded there).
-- [ ] **TEN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (263-263; SHA-256 recorded there).
-- [ ] **TEN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (264-264; SHA-256 recorded there).
-- [ ] **TEN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (265-265; SHA-256 recorded there).
-- [ ] **TEN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (276-276; SHA-256 recorded there).
-- [ ] **TEN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (282-282; SHA-256 recorded there).
-- [ ] **TEN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (283-283; SHA-256 recorded there).
-- [ ] **TEN-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (284-284; SHA-256 recorded there).
+- [x] **TEN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (261-261; SHA-256 recorded there).
+- [x] **TEN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (262-262; SHA-256 recorded there).
+- [x] **TEN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (263-263; SHA-256 recorded there).
+- [x] **TEN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (264-264; SHA-256 recorded there).
+- [x] **TEN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (265-265; SHA-256 recorded there).
+- [x] **TEN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (276-276; SHA-256 recorded there).
+- [x] **TEN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (282-282; SHA-256 recorded there).
+- [x] **TEN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (283-283; SHA-256 recorded there).
+- [x] **TEN-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (284-284; SHA-256 recorded there).
 
 ## NOD Requirements
 
-- [ ] **NOD-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (292-292; SHA-256 recorded there).
-- [ ] **NOD-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (293-293; SHA-256 recorded there).
-- [ ] **NOD-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (294-294; SHA-256 recorded there).
-- [ ] **NOD-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (295-295; SHA-256 recorded there).
-- [ ] **NOD-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (296-296; SHA-256 recorded there).
-- [ ] **NOD-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (302-302; SHA-256 recorded there).
-- [ ] **NOD-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (303-303; SHA-256 recorded there).
-- [ ] **NOD-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (304-304; SHA-256 recorded there).
-- [ ] **NOD-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (305-305; SHA-256 recorded there).
-- [ ] **NOD-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (311-311; SHA-256 recorded there).
-- [ ] **NOD-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (312-312; SHA-256 recorded there).
-- [ ] **NOD-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (313-313; SHA-256 recorded there).
-- [ ] **NOD-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (326-326; SHA-256 recorded there).
-- [ ] **NOD-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (327-327; SHA-256 recorded there).
+- [x] **NOD-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (292-292; SHA-256 recorded there).
+- [x] **NOD-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (293-293; SHA-256 recorded there).
+- [x] **NOD-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (294-294; SHA-256 recorded there).
+- [x] **NOD-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (295-295; SHA-256 recorded there).
+- [x] **NOD-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (296-296; SHA-256 recorded there).
+- [x] **NOD-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (302-302; SHA-256 recorded there).
+- [x] **NOD-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (303-303; SHA-256 recorded there).
+- [x] **NOD-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (304-304; SHA-256 recorded there).
+- [x] **NOD-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (305-305; SHA-256 recorded there).
+- [x] **NOD-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (311-311; SHA-256 recorded there).
+- [x] **NOD-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (312-312; SHA-256 recorded there).
+- [x] **NOD-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (313-313; SHA-256 recorded there).
+- [x] **NOD-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (326-326; SHA-256 recorded there).
+- [x] **NOD-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (327-327; SHA-256 recorded there).
 
 ## PRT Requirements
 
-- [ ] **PRT-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (335-335; SHA-256 recorded there).
-- [ ] **PRT-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (336-336; SHA-256 recorded there).
-- [ ] **PRT-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (337-337; SHA-256 recorded there).
-- [ ] **PRT-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (338-338; SHA-256 recorded there).
-- [ ] **PRT-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (339-339; SHA-256 recorded there).
-- [ ] **PRT-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (340-340; SHA-256 recorded there).
-- [ ] **PRT-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (341-341; SHA-256 recorded there).
-- [ ] **PRT-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (347-361; SHA-256 recorded there).
-- [ ] **PRT-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (359-359; SHA-256 recorded there).
-- [ ] **PRT-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (360-360; SHA-256 recorded there).
-- [ ] **PRT-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (361-361; SHA-256 recorded there).
-- [ ] **PRT-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (367-367; SHA-256 recorded there).
-- [ ] **PRT-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (368-368; SHA-256 recorded there).
-- [ ] **PRT-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (369-369; SHA-256 recorded there).
-- [ ] **PRT-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (370-370; SHA-256 recorded there).
-- [ ] **PRT-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (371-371; SHA-256 recorded there).
+- [x] **PRT-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (335-335; SHA-256 recorded there).
+- [x] **PRT-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (336-336; SHA-256 recorded there).
+- [x] **PRT-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (337-337; SHA-256 recorded there).
+- [x] **PRT-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (338-338; SHA-256 recorded there).
+- [x] **PRT-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (339-339; SHA-256 recorded there).
+- [x] **PRT-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (340-340; SHA-256 recorded there).
+- [x] **PRT-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (341-341; SHA-256 recorded there).
+- [x] **PRT-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (347-361; SHA-256 recorded there).
+- [x] **PRT-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (359-359; SHA-256 recorded there).
+- [x] **PRT-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (360-360; SHA-256 recorded there).
+- [x] **PRT-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (361-361; SHA-256 recorded there).
+- [x] **PRT-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (367-367; SHA-256 recorded there).
+- [x] **PRT-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (368-368; SHA-256 recorded there).
+- [x] **PRT-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (369-369; SHA-256 recorded there).
+- [x] **PRT-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (370-370; SHA-256 recorded there).
+- [x] **PRT-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (371-371; SHA-256 recorded there).
 
 ## RUL Requirements
 
-- [ ] **RUL-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (390-390; SHA-256 recorded there).
-- [ ] **RUL-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (391-391; SHA-256 recorded there).
-- [ ] **RUL-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (392-392; SHA-256 recorded there).
-- [ ] **RUL-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (393-393; SHA-256 recorded there).
-- [ ] **RUL-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (394-394; SHA-256 recorded there).
-- [ ] **RUL-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (395-395; SHA-256 recorded there).
-- [ ] **RUL-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (401-401; SHA-256 recorded there).
-- [ ] **RUL-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (402-402; SHA-256 recorded there).
-- [ ] **RUL-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (403-403; SHA-256 recorded there).
-- [ ] **RUL-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (409-409; SHA-256 recorded there).
-- [ ] **RUL-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (410-410; SHA-256 recorded there).
-- [ ] **RUL-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (411-411; SHA-256 recorded there).
-- [ ] **RUL-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (412-412; SHA-256 recorded there).
-- [ ] **RUL-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (432-432; SHA-256 recorded there).
-- [ ] **RUL-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (433-433; SHA-256 recorded there).
-- [ ] **RUL-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (434-434; SHA-256 recorded there).
+- [x] **RUL-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (390-390; SHA-256 recorded there).
+- [x] **RUL-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (391-391; SHA-256 recorded there).
+- [x] **RUL-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (392-392; SHA-256 recorded there).
+- [x] **RUL-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (393-393; SHA-256 recorded there).
+- [x] **RUL-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (394-394; SHA-256 recorded there).
+- [x] **RUL-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (395-395; SHA-256 recorded there).
+- [x] **RUL-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (401-401; SHA-256 recorded there).
+- [x] **RUL-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (402-402; SHA-256 recorded there).
+- [x] **RUL-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (403-403; SHA-256 recorded there).
+- [x] **RUL-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (409-409; SHA-256 recorded there).
+- [x] **RUL-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (410-410; SHA-256 recorded there).
+- [x] **RUL-012**: See exact original requirement in REQUIREMENTS-SOURCE.md (411-411; SHA-256 recorded there).
+- [x] **RUL-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (412-412; SHA-256 recorded there).
+- [x] **RUL-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (432-432; SHA-256 recorded there).
+- [x] **RUL-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (433-433; SHA-256 recorded there).
+- [x] **RUL-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (434-434; SHA-256 recorded there).
 
 ## ENG Requirements
 
@@ -173,54 +173,54 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 
 ## BE Requirements
 
-- [ ] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
-- [ ] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
-- [ ] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
-- [ ] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
-- [ ] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
-- [ ] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
+- [x] **BE-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (646-646; SHA-256 recorded there).
+- [x] **BE-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (647-647; SHA-256 recorded there).
+- [x] **BE-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (648-648; SHA-256 recorded there).
+- [x] **BE-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (649-649; SHA-256 recorded there).
+- [x] **BE-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (650-650; SHA-256 recorded there).
+- [x] **BE-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (651-651; SHA-256 recorded there).
 
 ## PLN Requirements
 
-- [ ] **PLN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (665-665; SHA-256 recorded there).
-- [ ] **PLN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (666-666; SHA-256 recorded there).
-- [ ] **PLN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (667-667; SHA-256 recorded there).
-- [ ] **PLN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (668-668; SHA-256 recorded there).
-- [ ] **PLN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (672-682; SHA-256 recorded there).
-- [ ] **PLN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (683-683; SHA-256 recorded there).
-- [ ] **PLN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (684-684; SHA-256 recorded there).
-- [ ] **PLN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (685-685; SHA-256 recorded there).
+- [x] **PLN-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (665-665; SHA-256 recorded there).
+- [x] **PLN-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (666-666; SHA-256 recorded there).
+- [x] **PLN-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (667-667; SHA-256 recorded there).
+- [x] **PLN-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (668-668; SHA-256 recorded there).
+- [x] **PLN-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (672-682; SHA-256 recorded there).
+- [x] **PLN-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (683-683; SHA-256 recorded there).
+- [x] **PLN-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (684-684; SHA-256 recorded there).
+- [x] **PLN-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (685-685; SHA-256 recorded there).
 
 ## MTR Requirements
 
-- [ ] **MTR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (693-693; SHA-256 recorded there).
-- [ ] **MTR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (694-694; SHA-256 recorded there).
-- [ ] **MTR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (695-695; SHA-256 recorded there).
-- [ ] **MTR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (713-713; SHA-256 recorded there).
-- [ ] **MTR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (714-714; SHA-256 recorded there).
-- [ ] **MTR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (715-715; SHA-256 recorded there).
-- [ ] **MTR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (716-716; SHA-256 recorded there).
-- [ ] **MTR-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (717-717; SHA-256 recorded there).
-- [ ] **MTR-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (718-718; SHA-256 recorded there).
-- [ ] **MTR-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (719-719; SHA-256 recorded there).
-- [ ] **MTR-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (720-720; SHA-256 recorded there).
-- [ ] **MTR-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (721-721; SHA-256 recorded there).
-- [ ] **MTR-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (722-722; SHA-256 recorded there).
-- [ ] **MTR-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (723-723; SHA-256 recorded there).
-- [ ] **MTR-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (724-724; SHA-256 recorded there).
+- [x] **MTR-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (693-693; SHA-256 recorded there).
+- [x] **MTR-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (694-694; SHA-256 recorded there).
+- [x] **MTR-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (695-695; SHA-256 recorded there).
+- [x] **MTR-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (713-713; SHA-256 recorded there).
+- [x] **MTR-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (714-714; SHA-256 recorded there).
+- [x] **MTR-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (715-715; SHA-256 recorded there).
+- [x] **MTR-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (716-716; SHA-256 recorded there).
+- [x] **MTR-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (717-717; SHA-256 recorded there).
+- [x] **MTR-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (718-718; SHA-256 recorded there).
+- [x] **MTR-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (719-719; SHA-256 recorded there).
+- [x] **MTR-011**: See exact original requirement in REQUIREMENTS-SOURCE.md (720-720; SHA-256 recorded there).
+- [x] **MTR-013**: See exact original requirement in REQUIREMENTS-SOURCE.md (721-721; SHA-256 recorded there).
+- [x] **MTR-014**: See exact original requirement in REQUIREMENTS-SOURCE.md (722-722; SHA-256 recorded there).
+- [x] **MTR-015**: See exact original requirement in REQUIREMENTS-SOURCE.md (723-723; SHA-256 recorded there).
+- [x] **MTR-016**: See exact original requirement in REQUIREMENTS-SOURCE.md (724-724; SHA-256 recorded there).
 
 ## LIM Requirements
 
-- [ ] **LIM-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (730-730; SHA-256 recorded there).
-- [ ] **LIM-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (731-731; SHA-256 recorded there).
-- [ ] **LIM-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (732-732; SHA-256 recorded there).
-- [ ] **LIM-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (733-733; SHA-256 recorded there).
-- [ ] **LIM-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (734-734; SHA-256 recorded there).
-- [ ] **LIM-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (735-735; SHA-256 recorded there).
-- [ ] **LIM-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (736-736; SHA-256 recorded there).
-- [ ] **LIM-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (737-737; SHA-256 recorded there).
-- [ ] **LIM-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (738-738; SHA-256 recorded there).
-- [ ] **LIM-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (739-739; SHA-256 recorded there).
+- [x] **LIM-001**: See exact original requirement in REQUIREMENTS-SOURCE.md (730-730; SHA-256 recorded there).
+- [x] **LIM-002**: See exact original requirement in REQUIREMENTS-SOURCE.md (731-731; SHA-256 recorded there).
+- [x] **LIM-003**: See exact original requirement in REQUIREMENTS-SOURCE.md (732-732; SHA-256 recorded there).
+- [x] **LIM-004**: See exact original requirement in REQUIREMENTS-SOURCE.md (733-733; SHA-256 recorded there).
+- [x] **LIM-005**: See exact original requirement in REQUIREMENTS-SOURCE.md (734-734; SHA-256 recorded there).
+- [x] **LIM-006**: See exact original requirement in REQUIREMENTS-SOURCE.md (735-735; SHA-256 recorded there).
+- [x] **LIM-007**: See exact original requirement in REQUIREMENTS-SOURCE.md (736-736; SHA-256 recorded there).
+- [x] **LIM-008**: See exact original requirement in REQUIREMENTS-SOURCE.md (737-737; SHA-256 recorded there).
+- [x] **LIM-009**: See exact original requirement in REQUIREMENTS-SOURCE.md (738-738; SHA-256 recorded there).
+- [x] **LIM-010**: See exact original requirement in REQUIREMENTS-SOURCE.md (739-739; SHA-256 recorded there).
 
 ## FE Requirements
 
@@ -328,10 +328,10 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 - [ ] **SUP-ARTIFACT-001**: §14.5 required delivery artifacts. (Source: §14.5, lines 1001-1003; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-PARAM-001**: Appendix A defaults and adjustable parameter ranges. (Source: Appendix A, lines 1037-1096; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B1-001**: Appendix B.1 relative lease and absolute boundary rules. (Source: Appendix B.1, lines 1102-1108; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
-- [ ] **SUP-B2-001**: Appendix B.2 sources, rounding and unknown-liability rules. (Source: Appendix B.2, lines 1110-1119; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
+- [x] **SUP-B2-001**: Appendix B.2 sources, rounding and unknown-liability rules. (Source: Appendix B.2, lines 1110-1119; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B3-001**: Appendix B.3 share-chain and bootstrap activation safety. (Source: Appendix B.3, lines 1121-1132; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 - [ ] **SUP-B4-001**: Appendix B.4 ledger rotation and continuous signing. (Source: Appendix B.4, lines 1134-1140; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
-- [ ] **SUP-B5-001**: Appendix B.5 immutable billing snapshots and concurrent configurations. (Source: Appendix B.5, lines 1142-1149; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
+- [x] **SUP-B5-001**: Appendix B.5 immutable billing snapshots and concurrent configurations. (Source: Appendix B.5, lines 1142-1149; source-span SHA-256 in REQUIREMENTS-SOURCE.md.)
 
 ## v2 / Out of Scope
 
@@ -356,61 +356,61 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | GEN-005 | Phase 2 | Complete |
 | GEN-006 | Phase 2 | Complete |
 | GEN-007 | Phase 2 | Complete |
-| TEN-001 | Phase 6 | Pending |
-| TEN-002 | Phase 6 | Pending |
-| TEN-003 | Phase 6 | Pending |
-| TEN-004 | Phase 6 | Pending |
-| TEN-005 | Phase 6 | Pending |
-| TEN-006 | Phase 6 | Pending |
-| TEN-007 | Phase 6 | Pending |
-| TEN-008 | Phase 6 | Pending |
-| TEN-009 | Phase 6 | Pending |
-| NOD-001 | Phase 6 | Pending |
-| NOD-002 | Phase 6 | Pending |
-| NOD-003 | Phase 6 | Pending |
-| NOD-004 | Phase 6 | Pending |
-| NOD-005 | Phase 6 | Pending |
-| NOD-006 | Phase 6 | Pending |
-| NOD-007 | Phase 6 | Pending |
-| NOD-008 | Phase 6 | Pending |
-| NOD-009 | Phase 6 | Pending |
-| NOD-010 | Phase 6 | Pending |
-| NOD-011 | Phase 6 | Pending |
-| NOD-012 | Phase 6 | Pending |
-| NOD-013 | Phase 6 | Pending |
-| NOD-014 | Phase 6 | Pending |
-| PRT-001 | Phase 6 | Pending |
-| PRT-002 | Phase 6 | Pending |
-| PRT-003 | Phase 6 | Pending |
-| PRT-004 | Phase 6 | Pending |
-| PRT-005 | Phase 6 | Pending |
-| PRT-006 | Phase 6 | Pending |
-| PRT-007 | Phase 6 | Pending |
-| PRT-016 | Phase 6 | Pending |
-| PRT-008 | Phase 6 | Pending |
-| PRT-009 | Phase 6 | Pending |
-| PRT-010 | Phase 6 | Pending |
-| PRT-011 | Phase 6 | Pending |
-| PRT-012 | Phase 6 | Pending |
-| PRT-013 | Phase 6 | Pending |
-| PRT-014 | Phase 6 | Pending |
-| PRT-015 | Phase 6 | Pending |
-| RUL-001 | Phase 6 | Pending |
-| RUL-002 | Phase 6 | Pending |
-| RUL-003 | Phase 6 | Pending |
-| RUL-004 | Phase 6 | Pending |
-| RUL-005 | Phase 6 | Pending |
-| RUL-006 | Phase 6 | Pending |
-| RUL-007 | Phase 6 | Pending |
-| RUL-008 | Phase 6 | Pending |
-| RUL-009 | Phase 6 | Pending |
-| RUL-010 | Phase 6 | Pending |
-| RUL-011 | Phase 6 | Pending |
-| RUL-012 | Phase 6 | Pending |
-| RUL-013 | Phase 6 | Pending |
-| RUL-014 | Phase 6 | Pending |
-| RUL-015 | Phase 6 | Pending |
-| RUL-016 | Phase 6 | Pending |
+| TEN-001 | Phase 6 | Complete |
+| TEN-002 | Phase 6 | Complete |
+| TEN-003 | Phase 6 | Complete |
+| TEN-004 | Phase 6 | Complete |
+| TEN-005 | Phase 6 | Complete |
+| TEN-006 | Phase 6 | Complete |
+| TEN-007 | Phase 6 | Complete |
+| TEN-008 | Phase 6 | Complete |
+| TEN-009 | Phase 6 | Complete |
+| NOD-001 | Phase 6 | Complete |
+| NOD-002 | Phase 6 | Complete |
+| NOD-003 | Phase 6 | Complete |
+| NOD-004 | Phase 6 | Complete |
+| NOD-005 | Phase 6 | Complete |
+| NOD-006 | Phase 6 | Complete |
+| NOD-007 | Phase 6 | Complete |
+| NOD-008 | Phase 6 | Complete |
+| NOD-009 | Phase 6 | Complete |
+| NOD-010 | Phase 6 | Complete |
+| NOD-011 | Phase 6 | Complete |
+| NOD-012 | Phase 6 | Complete |
+| NOD-013 | Phase 6 | Complete |
+| NOD-014 | Phase 6 | Complete |
+| PRT-001 | Phase 6 | Complete |
+| PRT-002 | Phase 6 | Complete |
+| PRT-003 | Phase 6 | Complete |
+| PRT-004 | Phase 6 | Complete |
+| PRT-005 | Phase 6 | Complete |
+| PRT-006 | Phase 6 | Complete |
+| PRT-007 | Phase 6 | Complete |
+| PRT-016 | Phase 6 | Complete |
+| PRT-008 | Phase 6 | Complete |
+| PRT-009 | Phase 6 | Complete |
+| PRT-010 | Phase 6 | Complete |
+| PRT-011 | Phase 6 | Complete |
+| PRT-012 | Phase 6 | Complete |
+| PRT-013 | Phase 6 | Complete |
+| PRT-014 | Phase 6 | Complete |
+| PRT-015 | Phase 6 | Complete |
+| RUL-001 | Phase 6 | Complete |
+| RUL-002 | Phase 6 | Complete |
+| RUL-003 | Phase 6 | Complete |
+| RUL-004 | Phase 6 | Complete |
+| RUL-005 | Phase 6 | Complete |
+| RUL-006 | Phase 6 | Complete |
+| RUL-007 | Phase 6 | Complete |
+| RUL-008 | Phase 6 | Complete |
+| RUL-009 | Phase 6 | Complete |
+| RUL-010 | Phase 6 | Complete |
+| RUL-011 | Phase 6 | Complete |
+| RUL-012 | Phase 6 | Complete |
+| RUL-013 | Phase 6 | Complete |
+| RUL-014 | Phase 6 | Complete |
+| RUL-015 | Phase 6 | Complete |
+| RUL-016 | Phase 6 | Complete |
 | ENG-001 | Phase 2 | Complete |
 | ENG-002 | Phase 2 | Complete |
 | ENG-003 | Phase 2 | Complete |
@@ -491,45 +491,45 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | HUB-016 | Phase 5 | Pending |
 | HUB-017 | Phase 5 | Pending |
 | HUB-018 | Phase 5 | Pending |
-| BE-001 | Phase 6 | Pending |
-| BE-002 | Phase 6 | Pending |
-| BE-003 | Phase 6 | Pending |
-| BE-004 | Phase 6 | Pending |
-| BE-005 | Phase 6 | Pending |
-| BE-006 | Phase 6 | Pending |
-| PLN-001 | Phase 6 | Pending |
-| PLN-002 | Phase 6 | Pending |
-| PLN-006 | Phase 6 | Pending |
-| PLN-007 | Phase 6 | Pending |
-| PLN-008 | Phase 6 | Pending |
-| PLN-003 | Phase 6 | Pending |
-| PLN-004 | Phase 6 | Pending |
-| PLN-005 | Phase 6 | Pending |
-| MTR-001 | Phase 6 | Pending |
-| MTR-002 | Phase 6 | Pending |
-| MTR-003 | Phase 6 | Pending |
-| MTR-004 | Phase 6 | Pending |
-| MTR-005 | Phase 6 | Pending |
-| MTR-006 | Phase 6 | Pending |
-| MTR-007 | Phase 6 | Pending |
-| MTR-008 | Phase 6 | Pending |
-| MTR-009 | Phase 6 | Pending |
-| MTR-010 | Phase 6 | Pending |
-| MTR-011 | Phase 6 | Pending |
-| MTR-013 | Phase 6 | Pending |
-| MTR-014 | Phase 6 | Pending |
-| MTR-015 | Phase 6 | Pending |
-| MTR-016 | Phase 6 | Pending |
-| LIM-001 | Phase 6 | Pending |
-| LIM-002 | Phase 6 | Pending |
-| LIM-003 | Phase 6 | Pending |
-| LIM-004 | Phase 6 | Pending |
-| LIM-005 | Phase 6 | Pending |
-| LIM-006 | Phase 6 | Pending |
-| LIM-007 | Phase 6 | Pending |
-| LIM-008 | Phase 6 | Pending |
-| LIM-009 | Phase 6 | Pending |
-| LIM-010 | Phase 6 | Pending |
+| BE-001 | Phase 6 | Complete |
+| BE-002 | Phase 6 | Complete |
+| BE-003 | Phase 6 | Complete |
+| BE-004 | Phase 6 | Complete |
+| BE-005 | Phase 6 | Complete |
+| BE-006 | Phase 6 | Complete |
+| PLN-001 | Phase 6 | Complete |
+| PLN-002 | Phase 6 | Complete |
+| PLN-006 | Phase 6 | Complete |
+| PLN-007 | Phase 6 | Complete |
+| PLN-008 | Phase 6 | Complete |
+| PLN-003 | Phase 6 | Complete |
+| PLN-004 | Phase 6 | Complete |
+| PLN-005 | Phase 6 | Complete |
+| MTR-001 | Phase 6 | Complete |
+| MTR-002 | Phase 6 | Complete |
+| MTR-003 | Phase 6 | Complete |
+| MTR-004 | Phase 6 | Complete |
+| MTR-005 | Phase 6 | Complete |
+| MTR-006 | Phase 6 | Complete |
+| MTR-007 | Phase 6 | Complete |
+| MTR-008 | Phase 6 | Complete |
+| MTR-009 | Phase 6 | Complete |
+| MTR-010 | Phase 6 | Complete |
+| MTR-011 | Phase 6 | Complete |
+| MTR-013 | Phase 6 | Complete |
+| MTR-014 | Phase 6 | Complete |
+| MTR-015 | Phase 6 | Complete |
+| MTR-016 | Phase 6 | Complete |
+| LIM-001 | Phase 6 | Complete |
+| LIM-002 | Phase 6 | Complete |
+| LIM-003 | Phase 6 | Complete |
+| LIM-004 | Phase 6 | Complete |
+| LIM-005 | Phase 6 | Complete |
+| LIM-006 | Phase 6 | Complete |
+| LIM-007 | Phase 6 | Complete |
+| LIM-008 | Phase 6 | Complete |
+| LIM-009 | Phase 6 | Complete |
+| LIM-010 | Phase 6 | Complete |
 | FE-001 | Phase 7 | Pending |
 | FE-002 | Phase 7 | Pending |
 | FE-003 | Phase 7 | Pending |
@@ -622,10 +622,10 @@ V1.11 is a reference for product scope and requirement identifiers, not a frozen
 | SUP-ARTIFACT-001 | Phase 8 | Pending |
 | SUP-PARAM-001 | Phase 1 | Pending |
 | SUP-B1-001 | Phase 5 | Pending |
-| SUP-B2-001 | Phase 6 | Pending |
+| SUP-B2-001 | Phase 6 | Complete |
 | SUP-B3-001 | Phase 5 | Pending |
 | SUP-B4-001 | Phase 5 | Pending |
-| SUP-B5-001 | Phase 6 | Pending |
+| SUP-B5-001 | Phase 6 | Complete |
 
 **Coverage:**
 - Original numbered requirements: 257 (250 table records + 7 outside-table blocks)

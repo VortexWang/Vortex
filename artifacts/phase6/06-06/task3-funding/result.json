@@ -1,0 +1,27 @@
+{
+  "status": "passed_partial_task3_development",
+  "base_commit": "857bb828ac5f53fe607f454bbd436775dd724a51",
+  "implemented": [
+    "immutable ordinary-current-policy Hub allocation and source-funded parent reservation in the same audit/task/Outbox transaction",
+    "revalidation of prepared compiler input, current grant/member/boot, both enforced aggregate kinds, signer, source expiry, billing policy and rule caps",
+    "canonical lifecycle backend_allocation JSON with three finite distinct source roots; delegated credit source ID equals parent reservation ID and traces the original traffic source through its immutable reservation",
+    "Hub FULL transaction atomically installs roots and delegation; injected write failure rolls everything back",
+    "actual randomly generated Hub child grant IDs registered from authenticated FULL issuer journal; sum of issued child bytes cannot exceed funded raw parent",
+    "Agent known/unknown wire resolves child IDs to original parent; child usage validates its own byte partition; accounting and source remainder aggregate on parent",
+    "nonce replay, immutable child receipt and usage tuple replay; failed audit rolls back funds, child mapping and usage projection",
+    "parent final/return denied absent complete delegation/children closure; unknown parent remainder stays frozen",
+    "fractional coefficient 1/1000: two one-byte children keep one parent hold, zero charge and remainder 2, without child ceil reservation"
+  ],
+  "validation": [
+    "full backend service/control/worker race passed",
+    "Agent/store and relevant Hub race passed",
+    "Docker backend usage/funding and Agent/store race passed",
+    "final Docker funding/negative regression passed and Linux arm64 backend compiled",
+    "sqlc v1.31.1 generated twice into clean directories, 17 files identical to repository"
+  ],
+  "limits": [
+    "service producer/consumer boundary verified; production Hub allocation transport, Node anchor provisioning and automatic runtime delivery remain to implement",
+    "partial Task3, no 06-06 completion, no CR-008 approval",
+    "dirty development checkout, not clean committed-source Docker or same-SHA Actions pairing"
+  ]
+}

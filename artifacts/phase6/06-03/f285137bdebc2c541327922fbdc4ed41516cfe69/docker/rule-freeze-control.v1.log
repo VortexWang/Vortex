@@ -1,0 +1,9 @@
+{
+  "valid": false,
+  "errors": [
+    "vortex.control.v1: frozen contract must have a valid SemVer version and status frozen",
+    "vortex.control.v1: frozen version does not match its approved review record",
+    "vortex.control.v1: approved review hash is missing or stale",
+    "vortex.control.v1: companion hash is missing or stale: contracts/protobuf/v1/lifecycle.md"
+  ]
+}

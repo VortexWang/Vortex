@@ -1,0 +1,20 @@
+{
+  "source_sha": "fc63d57406f9f0e3eebe99ad276f95b004add710",
+  "producer_exit": 0,
+  "host": "Linux arm64 OrbStack Docker",
+  "local_producer_passed": true,
+  "final_phase_acceptance": "pending 06-11",
+  "actions": "not_run",
+  "amd64": "cross_compile_only",
+  "arm64": "native_container_normal_and_race",
+  "proposal_sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4",
+  "approved_freeze_contracts": [
+    "vortex.database",
+    "vortex.public-api",
+    "vortex.control.v1",
+    "vortex.runtime-config"
+  ],
+  "all_contract_freeze": "pre-existing VLink hash mismatch remains outside CR-005",
+  "prior_local_attempt": "first fc63 runtime passed; external policy precondition failed because executor selected example policy. Correct private configured policy used for full final rerun; no code change.",
+  "retained_existing_evidence": "Sibling docker directory predates this write and has same source/result but different run IDs/checksums; preserved intact."
+}

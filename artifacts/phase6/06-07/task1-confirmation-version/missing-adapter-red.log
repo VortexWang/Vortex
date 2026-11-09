@@ -1,0 +1,6 @@
+2026/11/09 06:32:55 goose: no migrations to run. current version: 9
+--- FAIL: TestPackageConfirmationVersionCASIsTransactionalAndReplayKeepsOriginalIdentity (0.12s)
+    package_confirmation_version_test.go:28: transaction-bound versioned package confirmation adapter missing
+FAIL
+FAIL	vortex/backend/internal/service	0.780s
+FAIL
