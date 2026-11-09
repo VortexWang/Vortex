@@ -33,3 +33,7 @@ reserveEarlyData 在锁外读取 Opening；OPEN_OK 可能在 MarkLocalData 前�
 新增确定性状态交错测试，修复前失败，修复后完整 VLink race 通过 6.839 秒。原 overflow、FIN、负向状态测试均保留。
 
 F-02 修复保留生产200ms上限：短写结算测试改为4轮、每轮4个并发写者，使每轮最坏 in-flight=128 字节符合块大小；仍验证16笔17字节实际提交、块周转、wire用量与关闭后逐来源守恒。原确定性排队超时、取消不增权、group独立结算与未知负债测试保留。四项 race 连续10轮通过10.441秒。这不是提升生产存储性能或保证过载流量成功。
+
+## F-07 / high / 已修复：部分入队后 early-data 失败提前归还载荷所有权
+
+WriteDataFrames 第一个帧可能已由 TLS writer 使用，第二个帧在早期字节上限处等待 OPEN_OK 超时；旧代码直接返回，调用方可以 Release pooled payload，writer却仍在读原内存。确定性 net.Pipe 无读端测试先失败，修复后用既有 stopDataWrite 关闭并等待 writerStopped 再返回，完整VLink race通过。错误仍保守关闭，不把未确认写入当未执行。

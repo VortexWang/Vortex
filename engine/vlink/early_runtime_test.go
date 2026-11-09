@@ -110,3 +110,33 @@ func TestEarlyDataBookkeepingLosesToOpenOKWithoutDroppingAuthority(t *testing.T)
 		t.Fatal(err)
 	}
 }
+
+func TestBatchedEarlyDataFailureJoinsWriterBeforeReturningPayload(t *testing.T) {
+	left, right := net.Pipe()
+	defer right.Close()
+	client, err := newMuxLink(left, MuxConfig{LocalClient: true, MaxPendingOpenBytes: 1, StreamWindow: 8, AggregateWindow: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(io.EOF)
+	id, err := client.dispatch.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = client.windows.AddStream(id, 8); err != nil {
+		t.Fatal(err)
+	}
+	stream := client.newStream(id, StreamTCP)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	// No peer reader: the first frame's TLS writer retains its caller payload.
+	// The second frame waits for OPEN_OK at the early-data bound, then fails.
+	if err = stream.WriteDataFrames(ctx, []Frame{{Type: FrameData, Payload: []byte("a")}, {Type: FrameData, Payload: []byte("b")}}); err == nil {
+		t.Fatal("early-data wait unexpectedly succeeded")
+	}
+	select {
+	case <-client.writerStopped:
+	default:
+		t.Fatal("returned caller payload while writer still owned an earlier frame")
+	}
+}

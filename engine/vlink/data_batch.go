@@ -59,7 +59,9 @@ func (s *MuxStream) WriteDataFrames(ctx context.Context, frames []Frame) error {
 	var pending [4]frameWrite
 	for i, frame := range frames {
 		if err := s.reserveEarlyData(ctx, len(frame.Payload)); err != nil {
-			return err
+			// Earlier frames may already be owned by the TLS writer. Join it
+			// before the caller can Release or reuse those payloads.
+			return s.stopDataWrite(err)
 		}
 		started := time.Now()
 		if err := s.link.windows.Acquire(ctx, s.ID, uint32(len(frame.Payload))); err != nil {
