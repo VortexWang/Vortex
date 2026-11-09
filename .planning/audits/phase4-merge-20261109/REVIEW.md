@@ -16,7 +16,7 @@ Darwin 和 Linux 完整 Engine race 均通过。原 64 MiB integrity、伪造 OP
 
 policy-cutover 的40秒激活超时实际日志为 Node bind address already in use，且与刚启动 Hub 端口完全相同。regionalPort 分配随机端口后立刻关闭，后续同夹具可再次分配到同一端口。修复应阻止活动夹具内重复地址，不扩大激活超时。
 
-## F-04 / medium / 精确批准待准备
+## F-04 / medium / 已获批准并修复
 
 旧 VLink encoding 实际字节与旧批准摘要不一致。保留批准历史，准备精确治理提案；不视为 CR-010 批准范围。
 
@@ -45,3 +45,7 @@ F-07 同类路径补齐：WriteData 也可能在同批第一帧入队后因第�
 授权入口原本并行执行Agent/Store/Hub及真实进程构建/测试，双核Actions产生排队等待、FULL/fsync竞争；有界200ms正确拒绝不能被解释为必须成功的正确性断言。入口加 go test -p 1，保留全部测试、race与生产时限，不采用重试掩盖。
 
 Linux真实4MiB tmpfs完整authorization_check入口已通过：Agent287.455秒、Store102.395秒、真实进程100.311秒，vet和Engine也通过。本次为运行中工作树快照（报告SHA2ce76d77，但含当时未提交入口变更），不作clean-source或最终SHA配对证据。先前首调用因未挂载worktree Git元数据退出128，修正只读元数据挂载后运行成功。
+
+F-04：用户明确批准 CR-011（推荐）。精确候选 SHA-256 0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e 已写入；旧Draft批准原记录保留。catalog1.1.0、encoding.sha256、CHANGELOG、63条现有VLink需求review metadata同步；wire0x0100和实现字节不变。全catalog冻结、映射/SemVer及两次Protobuf生成均通过。批准仅关闭当前治理缺口，不重批历史验收。
+
+Linux Docker comparison已通过64MiB完整性/半关闭和中继故障片段；其最终比对因运行期间HEAD从31830266变为b85ca3a0而正确拒绝跨SHA，保留失败，最终验收将使用固定干净提交。

@@ -63,11 +63,12 @@
     {
       "id": "vortex.vlink.v1",
       "path": "contracts/vlink/v1/encoding.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "frozen",
       "sources": [
         "ENG-010..023",
-        "Appendix A"
+        "Appendix A",
+        "CR-011 exact owner approval: existing detailed VLink v1 specification reconciled; wire 0x0100 unchanged"
       ]
     },
     {

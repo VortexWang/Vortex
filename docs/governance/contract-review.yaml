@@ -50,9 +50,10 @@
     {
       "id": "vortex.vlink.v1",
       "path": "contracts/vlink/v1/encoding.md",
-      "version": "1.0.0",
-      "sha256": "dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52",
-      "decision": "approved"
+      "version": "1.1.0",
+      "sha256": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e",
+      "decision": "approved",
+      "change_request": "CR-011"
     },
     {
       "id": "vortex.authorization.v1",
@@ -208,6 +209,28 @@
           }
         ]
       }
+    },
+    {
+      "contract_id": "vortex.vlink.v1",
+      "change_request": "CR-011",
+      "from": "1.0.0",
+      "version": "1.1.0",
+      "contract_sha256": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e",
+      "proposal": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.md",
+      "proposal_sha256": "d53f94e7ca46df4522890a64fc1d5bb6c4f85642dc847a1313115353a7820d95",
+      "proposal_json_sha256": "a29cc7103a2f195ea41741487b47f3a8f9d41792258de8916221eaa85617dd4f",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-09T11:04:51.435005+00:00",
+      "approval_text": "批准 CR-011（推荐）",
+      "previous_approved_record": {
+        "id": "vortex.vlink.v1",
+        "path": "contracts/vlink/v1/encoding.md",
+        "version": "1.0.0",
+        "sha256": "dbf1607d306720a73053848fff1ca92e1d66716957a0410f83c7c1552a112b52",
+        "decision": "approved"
+      },
+      "decision": "approved",
+      "wire_protocol_version": "0x0100 unchanged"
     }
   ]
 }
