@@ -278,6 +278,22 @@ type fundingBlockRange struct {
 }
 
 func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool, bounds *fundingBlockRange) (result string, resultErr error) {
+	if fundingBlock && bounds != nil && bounds.admit {
+		var id string
+		err := s.enqueueFundingOperation(ctx, 1, func(tx *runtimeTransaction) error {
+			var err error
+			id, err = s.reserveRuntimeUsageDirect(ctx, r, scope, fundingBlock, bounds, tx)
+			return err
+		})
+		if err != nil {
+			return "", err
+		}
+		return id, nil
+	}
+	return s.reserveRuntimeUsageDirect(ctx, r, scope, fundingBlock, bounds, nil)
+}
+
+func (s *Store) reserveRuntimeUsageDirect(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool, bounds *fundingBlockRange, tx *runtimeTransaction) (result string, resultErr error) {
 	started := time.Now()
 	stage := "validate"
 	defer func() {
@@ -292,11 +308,15 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		return "", ErrAuthorityTimeUncertain
 	}
 	stage = "begin-transaction"
-	tx, err := s.beginRuntimeTx(ctx, nil)
-	if err != nil {
-		return "", err
+	ownsTransaction := tx == nil
+	var err error
+	if ownsTransaction {
+		tx, err = s.beginRuntimeTx(ctx, nil)
+		if err != nil {
+			return "", err
+		}
+		defer tx.Rollback()
 	}
-	defer tx.Rollback()
 	stage = "read-session"
 	var boot, flow, source, state, grantID, runtimeID, shareID, firstGrant, firstRuntime, firstShare string
 	if err := tx.QueryRowContext(ctx, `SELECT boot_id,flow_key,source_id,state,grant_id,runtime_lease_id,share_lease_id,initial_grant_id,initial_runtime_lease_id,initial_share_lease_id FROM runtime_sessions WHERE node_id=? AND session_id=?`, scope.NodeID, scope.SessionID).Scan(&boot, &flow, &source, &state, &grantID, &runtimeID, &shareID, &firstGrant, &firstRuntime, &firstShare); err != nil {
@@ -391,8 +411,10 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 			return "", err
 		}
 		stage = "commit"
-		if err := tx.Commit(); err != nil {
-			return "", err
+		if ownsTransaction {
+			if err := tx.Commit(); err != nil {
+				return "", err
+			}
 		}
 		return id, nil
 	}
@@ -401,7 +423,7 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 	}
 	if bounds != nil {
 		for _, tail := range bounds.idle {
-			if tail.NodeID != r.NodeID || tail.BootID != r.BootID || tail.FlowKey != r.FlowKey || tail.RuleID != r.RuleID || tail.SnapshotID != r.SnapshotID || tail.Direction == r.Direction || tail.BatchID == r.BatchID {
+			if tail.NodeID != r.NodeID || tail.BootID != r.BootID || tail.FlowKey != r.FlowKey || tail.RuleID != r.RuleID || tail.SnapshotID != r.SnapshotID || tail.BatchID == r.BatchID {
 				return "", ErrUsageBatchConflict
 			}
 			var session string
@@ -483,8 +505,10 @@ func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, sco
 		}
 	}
 	stage = "commit"
-	if err := tx.Commit(); err != nil {
-		return "", err
+	if ownsTransaction {
+		if err := tx.Commit(); err != nil {
+			return "", err
+		}
 	}
 	return id, nil
 }

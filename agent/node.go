@@ -34,6 +34,9 @@ type Node struct {
 	demandMu            sync.Mutex
 	demandSubscriptions map[*demandSubscription]struct{}
 	demandWaiters       chan struct{}
+	demandWrites        map[*waitingDemandWrite]struct{}
+	usageMu             sync.Mutex
+	usageSubscriptions  map[chan struct{}]struct{}
 }
 
 func New(nodeID string, s *store.Store, e Engine) (*Node, error) {

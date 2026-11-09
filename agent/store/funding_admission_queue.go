@@ -1,0 +1,174 @@
+package store
+
+import (
+	"context"
+	"errors"
+	"log/slog"
+	"sync"
+	"time"
+)
+
+type fundingAdmissionRequest struct {
+	ctx    context.Context
+	size   int
+	run    func(*runtimeTransaction) error
+	result chan error
+}
+
+// The Store owns the single writer across all runtime sessions. Group only
+// transaction commits here; every block retains its own authority/rate checks
+// and the caller retains exclusive ownership until its result is known.
+type fundingAdmissionQueue struct {
+	mu      sync.Mutex
+	pending []*fundingAdmissionRequest
+	count   int
+	running bool
+}
+
+func (s *Store) enqueueFundingAdmissions(ctx context.Context, writes []RuntimeBlockAdmission) error {
+	return s.enqueueFundingOperation(ctx, len(writes), func(tx *runtimeTransaction) error {
+		for _, write := range writes {
+			if err := admitRuntimeFundingBlockWriteTx(ctx, tx, write.Block, write.Scope, write.Bytes); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (s *Store) enqueueFundingOperation(ctx context.Context, size int, run func(*runtimeTransaction) error) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	q := &s.fundingAdmissions
+	q.mu.Lock()
+	if q.count >= 64 {
+		q.mu.Unlock()
+		return ErrAuthorizationDenied
+	}
+	r := &fundingAdmissionRequest{ctx: ctx, size: size, run: run, result: make(chan error, 1)}
+	q.pending = append(q.pending, r)
+	q.count++
+	if !q.running {
+		q.running = true
+		go s.drainFundingAdmissions()
+	}
+	q.mu.Unlock()
+	// A cancellation cannot abandon a transaction whose commit might have won.
+	// The caller must classify the actual result before issuing any capability.
+	return <-r.result
+}
+
+func (s *Store) drainFundingAdmissions() {
+	timer := time.NewTimer(time.Millisecond)
+	<-timer.C
+	q := &s.fundingAdmissions
+	for {
+		q.mu.Lock()
+		if len(q.pending) == 0 {
+			q.running = false
+			q.mu.Unlock()
+			return
+		}
+		count, size := 0, 0
+		for _, r := range q.pending {
+			if size+r.size > 64 {
+				break
+			}
+			size += r.size
+			count++
+		}
+		group := append([]*fundingAdmissionRequest(nil), q.pending[:count]...)
+		q.pending = q.pending[count:]
+		q.mu.Unlock()
+		errs := s.commitFundingAdmissionRequests(group)
+		q.mu.Lock()
+		q.count -= count
+		q.mu.Unlock()
+		for i, r := range group {
+			r.result <- errs[i]
+		}
+	}
+}
+
+func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest) (results []error) {
+	started := time.Now()
+	defer func() {
+		if elapsed := time.Since(started); elapsed >= 100*time.Millisecond {
+			slog.Warn("funding admission group slow", "members", len(group), "elapsed", elapsed, "results", results)
+		}
+	}()
+	results = make([]error, len(group))
+	failAll := func(err error) []error {
+		for i := range results {
+			results[i] = err
+		}
+		return results
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var callbacks sync.WaitGroup
+	var stops []func() bool
+	defer func() {
+		for _, stop := range stops {
+			if stop() {
+				callbacks.Done()
+			}
+		}
+		callbacks.Wait()
+	}()
+	for _, r := range group {
+		if err := r.ctx.Err(); err != nil {
+			return failAll(err)
+		}
+		callbacks.Add(1)
+		stops = append(stops, context.AfterFunc(r.ctx, func() { cancel(); callbacks.Done() }))
+	}
+	checkMembers := func() error {
+		// AfterFunc propagates cancellation asynchronously. Check each original
+		// context synchronously after acquiring the writer and before commit.
+		for _, r := range group {
+			if err := r.ctx.Err(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	tx, err := s.beginRuntimeTx(ctx, nil)
+	if err != nil {
+		return failAll(err)
+	}
+	defer tx.Rollback()
+	tx.authorityReads = make(map[[2]string]authorityRead)
+	if err := checkMembers(); err != nil {
+		return failAll(err)
+	}
+	for i, r := range group {
+		if _, err := tx.ExecContext(ctx, "SAVEPOINT funding_member"); err != nil {
+			return failAll(err)
+		}
+		err := r.run(tx)
+		if err != nil {
+			var limited *RateLimited
+			if !errors.Is(err, ErrAuthorizationDenied) && !errors.Is(err, ErrAuthorityTimeUncertain) && !errors.As(err, &limited) {
+				return failAll(err)
+			}
+			// A definitive denial affects only its own request. Roll back every
+			// mutation from that request before considering the next caller.
+			if _, rollbackErr := tx.ExecContext(ctx, "ROLLBACK TO funding_member"); rollbackErr != nil {
+				return failAll(rollbackErr)
+			}
+			results[i] = err
+		}
+		if _, err := tx.ExecContext(ctx, "RELEASE funding_member"); err != nil {
+			return failAll(err)
+		}
+	}
+	if err := checkMembers(); err != nil {
+		return failAll(err)
+	}
+	if err := tx.Commit(); err != nil {
+		return failAll(err)
+	}
+	return results
+}

@@ -23,6 +23,7 @@ type Store struct {
 	owner             string
 	runtimeStatements map[string]*sql.Stmt
 	runtimeQueue      runtimeTransactionQueue
+	fundingAdmissions fundingAdmissionQueue
 	checkpoints       checkpointQueue
 	rateClock         atomic.Pointer[runtimeRateClock]
 }
@@ -1134,47 +1135,7 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 		return err
 	}
 	defer tx.Rollback()
-	var snapshot string
-	var compactDigest []byte
-	err = tx.QueryRowContext(ctx, `SELECT snapshot_id,payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&snapshot, &compactDigest)
-	if err == nil {
-		if s.owner != "hub" || initialState != "ledgered" || batch.UnknownUpper != 0 || snapshot != batch.SnapshotID || !bytes.Equal(compactDigest, digest) {
-			return ErrUsageBatchConflict
-		}
-		return tx.Commit()
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	var previous UsageBatch
-	var upper, created string
-	err = tx.QueryRowContext(ctx, `SELECT boot_id, snapshot_id, payload, payload_sha256, unknown_upper_bound, state, created_at FROM usage_batches WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).
-		Scan(&previous.BootID, &previous.SnapshotID, &previous.Payload, &previous.Digest, &upper, &previous.State, &created)
-	if err == nil {
-		previous.NodeID, previous.BatchID = batch.NodeID, batch.BatchID
-		previous.UnknownUpper, err = strconv.ParseUint(upper, 10, 64)
-		if err != nil {
-			return fmt.Errorf("store: invalid usage liability: %w", err)
-		}
-		if previous.SnapshotID != batch.SnapshotID || previous.UnknownUpper != batch.UnknownUpper || !bytes.Equal(previous.Payload, batch.Payload) || !bytes.Equal(previous.Digest, digest) {
-			return ErrUsageBatchConflict
-		}
-		if initialState == "ledgered" && previous.State != "ledgered" {
-			if _, err := tx.ExecContext(ctx, `UPDATE usage_batches SET state='ledgered', updated_at=? WHERE node_id=? AND batch_id=?`, time.Now().UTC().Format(time.RFC3339Nano), batch.NodeID, batch.BatchID); err != nil {
-				return err
-			}
-		}
-		return tx.Commit()
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	if err := rejectUnknownIdentityTx(ctx, tx, batch.NodeID, batch.BatchID); err != nil {
-		return err
-	}
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	_, err = tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, batch.NodeID, batch.BatchID, batch.BootID, batch.SnapshotID, batch.Payload, digest, strconv.FormatUint(batch.UnknownUpper, 10), initialState, now, now)
-	if err != nil {
+	if err := s.putUsageBatchTx(ctx, tx, batch, digest, initialState); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -1183,7 +1144,17 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 // PendingUsageOutbox includes locally acknowledged batches: local autonomy ACK
 // permits metering to continue, but does not discharge the Hub handoff liability.
 func (s *Store) PendingUsageOutbox(ctx context.Context, nodeID string) ([]UsageBatch, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND state IN ('pending','locally_acked') ORDER BY created_at,batch_id`, nodeID)
+	return s.pendingUsageOutbox(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND state IN ('pending','locally_acked') ORDER BY created_at,batch_id`, nodeID)
+}
+
+// PendingUsageOutboxPage bounds one control-loop turn. A connection-local
+// cursor wraps after exhaustion; neither dispatch nor cursor movement is ACK.
+func (s *Store) PendingUsageOutboxPage(ctx context.Context, nodeID, after string) ([]UsageBatch, error) {
+	return s.pendingUsageOutbox(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND batch_id>? AND state IN ('pending','locally_acked') ORDER BY batch_id LIMIT 32`, nodeID, after)
+}
+
+func (s *Store) pendingUsageOutbox(ctx context.Context, query string, args ...any) ([]UsageBatch, error) {
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -1218,7 +1189,7 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 	if nodeID == "" || len(batchIDs) == 0 {
 		return fmt.Errorf("store: usage acknowledgement identity is required")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -1326,7 +1297,17 @@ func (s *Store) RecordReceipt(ctx context.Context, messageID string, sequence ui
 }
 
 func (s *Store) NextControlSequence(ctx context.Context) (uint64, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
+	return s.NextControlSequenceRange(ctx, 1)
+}
+
+// NextControlSequenceRange durably reserves a bounded range and returns its
+// first sequence. Unsent suffixes are never reused after a disconnect or crash.
+// Callers must serialize sends; the wire requires monotonicity, not contiguity.
+func (s *Store) NextControlSequenceRange(ctx context.Context, count uint64) (uint64, error) {
+	if count == 0 || count > 32 {
+		return 0, fmt.Errorf("store: invalid control sequence range")
+	}
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -1336,18 +1317,18 @@ func (s *Store) NextControlSequence(ctx context.Context) (uint64, error) {
 	if err != nil && err != sql.ErrNoRows {
 		return 0, err
 	}
-	if current >= uint64(1<<63-1) {
+	if current > uint64(1<<63-1)-count {
 		return 0, fmt.Errorf("store: control sequence exhausted")
 	}
-	current++
-	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current), time.Now().UTC().Format(time.RFC3339Nano))
+	first := current + 1
+	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current+count), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
 		return 0, err
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return current, nil
+	return first, nil
 }
 
 func (s *Store) PersistControlAck(ctx context.Context, messageID string, sequence, appliedVersion uint64, heartbeat time.Time) error {

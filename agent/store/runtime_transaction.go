@@ -35,6 +35,16 @@ type runtimeTransaction struct {
 	conn     *sql.Conn
 	release  func()
 	released sync.Once
+	// Enabled only by funding admission, which never changes authority rows.
+	// Balances, session IDs, time checks and rate remain live in this transaction.
+	authorityReads   map[[2]string]authorityRead
+	authorityLineage map[[3]string]bool
+	demandSamples    *[]demandConsumptionSample
+}
+
+type authorityRead struct {
+	record AuthorizationRecord
+	state  string
 }
 
 func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
@@ -115,7 +125,11 @@ func (tx *runtimeTransaction) report(operation string, err error) {
 	})
 }
 func (tx *runtimeTransaction) Commit() error {
+	started := time.Now()
 	err := tx.Tx.Commit()
+	if elapsed := time.Since(started); elapsed >= 25*time.Millisecond {
+		slog.Warn("runtime SQLite commit slow", "operation", runtimeOperation(tx.caller), "commit_elapsed", elapsed, "work_elapsed", started.Sub(tx.started), "error", err)
+	}
 	tx.finish()
 	tx.report("commit", err)
 	return err

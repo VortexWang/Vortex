@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase6 actual merge committed; complete native/Linux regressions passed; CR012 approved and frozen; final same-SHA Docker/Actions and main integration in progress"
-last_updated: "2026-11-09T13:15:26.824396+00:00"
+stopped_at: "Phase6 integration candidate on audit branch; CR012 approved/frozen; real concurrent funding regression still blocks main merge"
+last_updated: "2026-11-09T23:34:00+00:00"
 last_activity: 2026-11-09
-last_activity_desc: "fb3a9786整合的完整原生root/backend和干净Linux root/Engine/backend race通过；原工作区未改。CR012精确批准与冻结已通过，继续同SHA最终验收及主线整合。"
+last_activity_desc: "CR012精确批准与冻结通过；Agent/Store/Hub开发快照完整native race通过。真实Linux并发续额仍超200ms失败，PR1保持草稿，尚未合并主线；独立用户Phase7工作区未改。"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -241,5 +241,5 @@ Phase6最终关闭：实现`65a5335894732b7d632e870acc3d8283be224cd3`本机Docke
 
 用户要求先收敛F10/F11并整合Phase6。独立audit worktree合入Phase6；原工作区未提交修改保留。
 F10耐久消费唤醒、F11独立5秒运行预算、接收侧ACK保持ControlOnly隔离、实验/生产角色混用拒绝、有限需求重放计数、真实usage确认和funded恢复夹具后继根均有回归覆盖。
-第一次merged完整root/backend运行失败；失败原始证据保留，不能写为通过。修复后的完整native与Linux验证仍待收取。
-CR012为control1.8精确并集候选；CR010/011与Phase6原批准不代替新组合批准。候选验证通过不代表frozen。Phase7未开始。
+第一次merged完整root/backend运行失败；失败原始证据保留，不能写为通过。后续开发快照完整native组件race已通过，真实Linux并发续额仍失败；最终同SHA Docker/Actions双架构配对未通过，不能合并。
+CR012已获用户批准并精确冻结control1.8并集（69/100/105）；历史CR009批准保护通过。用户原工作区的独立Phase7开发保持原样，本audit工作区不推进Phase7。

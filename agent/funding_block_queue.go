@@ -45,7 +45,25 @@ func (s *fundingBlockSession) Reserve(ctx context.Context, direction accounting.
 		s.queueMu.Unlock()
 		return nil, accounting.ErrDenied
 	}
+	direct := s.queueCount == 0 && !s.queueRunning
 	s.queueCount++
+	if direct {
+		s.queueMu.Unlock()
+		defer func() { s.queueMu.Lock(); s.queueCount--; s.queueMu.Unlock() }()
+		// Store now groups independent sessions. An uncontended session needs
+		// no extra worker, timer or result handoff before entering that queue.
+		batch, err := s.reserveDirect(ctx, direction, n)
+		if ctx.Err() != nil && batch != nil {
+			slog.Warn("funding admission committed after caller deadline", "elapsed", time.Since(r.enqueued), "direction", direction, "error", ctx.Err())
+			cleanup, stop := context.WithTimeout(context.Background(), 2*time.Second)
+			defer stop()
+			if returnErr := batch.Return(cleanup); returnErr != nil {
+				return nil, errors.Join(ctx.Err(), returnErr)
+			}
+			return nil, ctx.Err()
+		}
+		return batch, err
+	}
 	s.queue = append(s.queue, r)
 	if !s.queueRunning {
 		s.queueRunning = true
@@ -146,7 +164,7 @@ func (s *fundingBlockSession) admitQueuedExisting(pending []*fundingAdmissionReq
 		return 1, true
 	}
 	block := s.blocks[first.direction]
-	if block == nil || block.poisoned {
+	if block == nil || block.poisoned || block.checkpointDone != nil {
 		return 0, false
 	}
 	available := block.reservation.Reserved - block.inFlight

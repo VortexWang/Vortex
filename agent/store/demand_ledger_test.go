@@ -2,9 +2,53 @@ package store
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 )
+
+func TestCheckpointDemandSamplesPreserveSecondBoundsAndSaturation(t *testing.T) {
+	s, _, _ := runtimeStore(t)
+	ctx := context.Background()
+	tx, err := s.beginRuntimeTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	samples := []demandConsumptionSample{}
+	tx.demandSamples = &samples
+	at := time.Unix(1800000000, 0)
+	for _, used := range []uint64{100, 200, math.MaxUint64} {
+		if err := recordDemandConsumptionTx(ctx, tx, "node", "grant", used, at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(samples) != 1 || samples[0].used != math.MaxInt64 {
+		t.Fatalf("samples: %+v", samples)
+	}
+	if err := recordDemandConsumptionTx(ctx, tx, "node", "grant", 1, at.Add(-time.Second)); err == nil {
+		t.Fatal("accepted backward sample")
+	}
+	if err := recordDemandConsumptionTx(ctx, tx, "node", "grant", 7, at.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if len(samples) != 2 {
+		t.Fatal("combined distinct seconds")
+	}
+	tx.demandSamples = nil
+	for _, sample := range samples {
+		if err := recordDemandConsumptionTx(ctx, tx, sample.node, sample.grant, sample.used, sample.at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	var rows int
+	if err := s.db.QueryRow("SELECT COUNT(*) FROM demand_consumption").Scan(&rows); err != nil || rows != 2 {
+		t.Fatalf("durable seconds: %d %v", rows, err)
+	}
+}
 
 func TestDemandLedgerUsesOnlyScopedCommittedConsumption(t *testing.T) {
 	s, use, _ := runtimeStore(t)

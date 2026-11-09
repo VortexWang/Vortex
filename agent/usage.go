@@ -85,7 +85,12 @@ func (n *Node) recoverUsageReservations(ctx context.Context) error {
 }
 
 // SettleUsage commits resolution and outbox payload in one SQLite transaction.
-func (n *Node) SettleUsage(ctx context.Context, record engineaccounting.UsageRecord) error {
+func (n *Node) SettleUsage(ctx context.Context, record engineaccounting.UsageRecord) (resultErr error) {
+	defer func() {
+		if resultErr == nil && record.Resolution != engineaccounting.Returned {
+			n.wakeUsage()
+		}
+	}()
 	if n == nil || n.Store == nil || record.Reserved <= 0 || record.Used < 0 || record.Used > record.Reserved {
 		return fmt.Errorf("agent: invalid Engine usage settlement")
 	}
@@ -185,7 +190,12 @@ func (n *Node) PersistUsage(ctx context.Context, record engineaccounting.UsageRe
 
 // PersistUsageBatch is the Engine-to-Agent durability boundary. The batch is
 // committed locally before it can be sent to a Hub or acknowledged in autonomy.
-func (n *Node) PersistUsageBatch(ctx context.Context, batch *controlv1.UsageBatch, unknownUpperBound uint64) error {
+func (n *Node) PersistUsageBatch(ctx context.Context, batch *controlv1.UsageBatch, unknownUpperBound uint64) (resultErr error) {
+	defer func() {
+		if resultErr == nil {
+			n.wakeUsage()
+		}
+	}()
 	if n == nil || n.Store == nil || batch == nil || batch.GetBatchId() == "" || batch.GetBillingSnapshotId() == "" {
 		return fmt.Errorf("agent: usage batch identity and billing snapshot are required")
 	}

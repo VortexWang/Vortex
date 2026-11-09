@@ -73,6 +73,7 @@ func (g *authorizationGate) use(earliest, latest time.Time, trusted, existing bo
 // A coalesced planning wakeup is never authority. Notify only after durable
 // consumption, so the control loop can renew at its waterline before denial.
 func (g *authorizationGate) notifyConsumption() {
+	g.node.wakeUsage()
 	g.node.wakeDemand(RuntimeScope{RuleID: g.config.RuleID, RuleRevision: g.config.RuleRevision, PathGeneration: g.config.PathGeneration})
 }
 

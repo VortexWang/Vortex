@@ -42,6 +42,7 @@ type sessionFundingBlock struct {
 	poisoned       bool
 	idleTimer      *time.Timer
 	idleGeneration uint64
+	checkpointDone chan struct{}
 }
 type fundingBlockSession struct {
 	mu                fundingContextMutex
@@ -82,7 +83,7 @@ func (s *fundingBlockSession) reserveDirect(ctx context.Context, direction accou
 				batch, wait, err = s.reserve(attemptCtx, direction, n)
 			}
 			return attemptResult{batch, wait}, err
-		})
+		}, uint64(n))
 		batch, wait := result.batch, result.wait
 		if wait != nil {
 			select {
@@ -107,10 +108,17 @@ func (s *fundingBlockSession) reserveDirect(ctx context.Context, direction accou
 	}
 }
 func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.Direction, n int64) (*accounting.Batch, <-chan struct{}, error) {
+	lockStarted := time.Now()
 	if err := s.mu.LockContext(ctx); err != nil {
+		slog.Warn("funding session lock deadline", "wait", time.Since(lockStarted), "error", err)
 		return nil, nil, err
 	}
-	defer s.mu.Unlock()
+	defer func() {
+		if elapsed := time.Since(lockStarted); elapsed >= 100*time.Millisecond {
+			slog.Warn("funding session locked attempt slow", "elapsed", elapsed, "direction", direction)
+		}
+		s.mu.Unlock()
+	}()
 	if s.closed || s.inner.gate.isFaulted() || n <= 0 || uint64(n) > s.size {
 		return nil, nil, accounting.ErrDenied
 	}
@@ -122,15 +130,18 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		return nil, nil, err
 	}
 	b := s.blocks[direction]
+	if b != nil && b.checkpointDone != nil {
+		return nil, b.checkpointDone, nil
+	}
 	existing := b != nil
+	var replacement *sessionFundingBlock
 	if b != nil && b.reservation.Reserved-b.inFlight < uint64(n) {
 		if b.inFlight > 0 {
 			return nil, s.changed, nil
 		}
-		if err := s.release(ctx, b); err != nil {
-			return nil, nil, s.fail(err)
-		}
-		delete(s.blocks, direction)
+		// Return this proven-idle tail and fund its replacement together. A
+		// rollover must not queue two writer round trips for every live stream.
+		replacement = b
 		b = nil
 		existing = false
 	}
@@ -152,7 +163,25 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		// Keep both directions funded when free credit can cover this write.
 		// Only retry with proven-idle tails after a definitive rolled-back denial.
-		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), nil)
+		var replaced []store.UsageReservation
+		if replacement != nil {
+			replaced = []store.UsageReservation{replacement.reservation}
+		}
+		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced)
+		if replacement != nil {
+			if errors.Is(err, store.ErrAuthorizationDenied) {
+				// Its return rolled back with the denied replacement. Release
+				// only this known-idle tail before considering other funding.
+				if e := s.release(ctx, replacement); e != nil {
+					return nil, nil, s.fail(e)
+				}
+				delete(s.blocks, direction)
+				return nil, nil, errRefreshFundingBlock
+			}
+			if err == nil {
+				s.stopIdle(replacement)
+			}
+		}
 		if errors.Is(err, store.ErrAuthorizationDenied) && len(idle) > 0 {
 			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), idle)
 		} else if err == nil {
@@ -262,7 +291,7 @@ func (s *fundingBlockSession) release(ctx context.Context, b *sessionFundingBloc
 	return s.inner.gate.node.Store.SettleUsageReservation(ctx, b.reservation, "returned", 0, nil, 0)
 }
 func (s *fundingBlockSession) resolveDirect(ctx context.Context, direction accounting.Direction, b *sessionFundingBlock, out accounting.Outcome) error {
-	s.mu.Lock()
+	s.lockCheckpointBlocks([]*sessionFundingBlock{b})
 	defer s.mu.Unlock()
 	defer s.signal()
 	b.inFlight -= uint64(out.Reserved)

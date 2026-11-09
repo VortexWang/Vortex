@@ -28,33 +28,44 @@ func (s *Store) RecordUsageOrigin(ctx context.Context, node, batch, boot string,
 		return e
 	}
 	defer tx.Rollback()
-	var original []byte
-	e = tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM usage_batches WHERE node_id=? AND batch_id=? UNION ALL SELECT payload_sha256 FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`, node, batch, node, batch).Scan(&original)
-	if e != nil {
+	if _, _, e := recordUsageOriginTx(ctx, tx, node, batch, boot, seq, digest[:]); e != nil {
 		return e
 	}
-	if !bytes.Equal(original, digest[:]) {
-		return ErrUsageBatchConflict
+	return tx.Commit()
+}
+
+// recordUsageOriginTx returns the first authenticated provenance, including
+// exact retries from a later report boot. Its caller commits the same transaction
+// as the usage payload before exposing either fact to an acknowledgement path.
+func recordUsageOriginTx(ctx context.Context, tx storeTransaction, node, batch, boot string, seq uint64, digest []byte) (string, uint64, error) {
+	var original []byte
+	e := tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM usage_batches WHERE node_id=? AND batch_id=? UNION ALL SELECT payload_sha256 FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`, node, batch, node, batch).Scan(&original)
+	if e != nil {
+		return "", 0, e
+	}
+	if !bytes.Equal(original, digest) {
+		return "", 0, ErrUsageBatchConflict
 	}
 	var oldBoot string
+	var oldSequence uint64
 	var oldDigest []byte
-	e = tx.QueryRowContext(ctx, `SELECT report_boot_id,payload_sha256 FROM usage_origin_envelopes WHERE node_id=? AND batch_id=?`, node, batch).Scan(&oldBoot, &oldDigest)
+	e = tx.QueryRowContext(ctx, `SELECT report_boot_id,sequence,payload_sha256 FROM usage_origin_envelopes WHERE node_id=? AND batch_id=?`, node, batch).Scan(&oldBoot, &oldSequence, &oldDigest)
 	if e == nil {
-		if oldBoot == "" || !bytes.Equal(oldDigest, digest[:]) {
-			return ErrUsageBatchConflict
+		if oldBoot == "" || oldSequence == 0 || oldSequence > math.MaxInt64 || !bytes.Equal(oldDigest, digest) {
+			return "", 0, ErrUsageBatchConflict
 		}
 		// An unknown report can survive another Agent reboot after its receipt
 		// was lost. Reuse the first captured identity for identical payloads;
 		// the retry's current boot and sequence never overwrite that provenance.
-		return tx.Commit()
+		return oldBoot, oldSequence, nil
 	}
 	if !errors.Is(e, sql.ErrNoRows) {
-		return e
+		return "", 0, e
 	}
-	if _, e = tx.ExecContext(ctx, `INSERT INTO usage_origin_envelopes(node_id,batch_id,report_boot_id,sequence,payload_sha256) VALUES(?,?,?,?,?)`, node, batch, boot, seq, digest[:]); e != nil {
-		return e
+	if _, e = tx.ExecContext(ctx, `INSERT INTO usage_origin_envelopes(node_id,batch_id,report_boot_id,sequence,payload_sha256) VALUES(?,?,?,?,?)`, node, batch, boot, seq, digest); e != nil {
+		return "", 0, e
 	}
-	return tx.Commit()
+	return boot, seq, nil
 }
 func (s *Store) UsageOrigin(ctx context.Context, node, batch string) (string, uint64, error) {
 	var boot string

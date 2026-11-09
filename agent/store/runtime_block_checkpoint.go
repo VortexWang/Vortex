@@ -117,11 +117,22 @@ func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeB
 		return err
 	}
 	defer tx.Rollback()
+	// Only planning-rate samples are combined. Every usage payload and exact
+	// residual remains independently persisted in this same FULL transaction.
+	tx.authorityReads = make(map[[2]string]authorityRead)
+	samples := []demandConsumptionSample{}
+	tx.demandSamples = &samples
 	if err := checkMembers(); err != nil {
 		return err
 	}
 	for _, entry := range entries {
 		if err := checkpointRuntimeFundingBlockTx(ctx, tx, entry.Block, entry.CheckpointID, entry.Used, entry.Payload); err != nil {
+			return err
+		}
+	}
+	tx.demandSamples = nil
+	for _, sample := range samples {
+		if err := recordDemandConsumptionTx(ctx, tx, sample.node, sample.grant, sample.used, sample.at); err != nil {
 			return err
 		}
 	}

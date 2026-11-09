@@ -268,6 +268,34 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	}
 
 	var initialSendErr error
+	var usageSendClosed bool
+	var usageCursor usageDeliveryCursor
+	var usageWake <-chan struct{}
+	if !c.ControlOnly {
+		var release func()
+		usageWake, release, err = c.Node.subscribeUsage()
+		if err != nil {
+			return err
+		}
+		defer release()
+	}
+	usageContinue := make(chan struct{}, 1)
+	sendUsagePage := func() error {
+		more, err := c.sendUsageDeliveryPage(ctx, stream, &lastNodeSequence, &usageCursor)
+		if err == nil && more {
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+		}
+		return err
+	}
+	// A burst of committed rows shares one delivery turn/sequence reservation.
+	// Durable rows, not wake count, determine delivery; 10s replay remains backup.
+	usageWakeTimer := time.NewTimer(time.Hour)
+	usageWakeTimer.Stop()
+	defer usageWakeTimer.Stop()
+	var usageWakeDue <-chan time.Time
 	var replayGuard controlReplayGuard
 	// Only this loop sends messages; gRPC permits one concurrent receiver, but
 	// not multiple senders. Periodic outbox delivery shares sequence ordering
@@ -279,12 +307,62 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	incoming := make(chan received, maxControlMessageIDs+1)
 	receiverDone := make(chan struct{})
 	defer func() { cancel(); conn.Close(); <-receiverDone }()
+	// Reading transport independently lets the durable receiver coalesce only
+	// already-arrived adjacent ordinary ACKs. Sparse tails never wait to fill.
+	wire := make(chan received, 32)
+	transportDone := make(chan struct{})
+	defer func() { cancel(); conn.Close(); <-transportDone }()
 	go func() {
-		defer close(receiverDone)
+		defer close(transportDone)
 		for {
 			message, err := stream.Recv()
+			select {
+			case wire <- received{message, err}:
+			case <-ctx.Done():
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	go func() {
+		defer close(receiverDone)
+		var next *received
+		for {
+			var response received
+			if next != nil {
+				response, next = *next, nil
+			} else {
+				select {
+				case response = <-wire:
+				case <-ctx.Done():
+					return
+				}
+			}
+			message, err := response.message, response.err
+			messages := []*controlv1.ControlMessage{message}
 			if err == nil && regional == nil {
-				err = replayGuard.accept(message.GetSequence(), message.GetMessageId())
+				if _, ordinary := message.GetBody().(*controlv1.ControlMessage_UsageAck); ordinary {
+				collect:
+					for len(messages) < 32 {
+						select {
+						case candidate := <-wire:
+							if _, ack := candidate.message.GetBody().(*controlv1.ControlMessage_UsageAck); candidate.err != nil || !ack {
+								next = &candidate
+								break collect
+							}
+							messages = append(messages, candidate.message)
+						default:
+							break collect
+						}
+					}
+				}
+				for _, envelope := range messages {
+					if err = replayGuard.accept(envelope.GetSequence(), envelope.GetMessageId()); err != nil {
+						break
+					}
+				}
 				if err == nil {
 					var handled bool
 					err = c.withSession(ctx, incarnation, func() error {
@@ -292,6 +370,10 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 							if err := tlsConfig.VerifyConnection(*state); err != nil {
 								return err
 							}
+						}
+						if _, ordinary := message.GetBody().(*controlv1.ControlMessage_UsageAck); ordinary {
+							handled = true
+							return c.applyOrdinaryUsageAcknowledgements(ctx, messages)
 						}
 						var ackErr error
 						handled, ackErr = c.applyUsageAcknowledgement(ctx, message)
@@ -326,7 +408,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 			return err
 		}
-		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+		initialSendErr = sendUsagePage()
 		if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
 			return initialSendErr
 		}
@@ -380,6 +462,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	ticker := time.NewTicker(usageInterval)
 	defer ticker.Stop()
 	if errors.Is(initialSendErr, io.EOF) {
+		usageSendClosed = true
+		usageWake = nil
 		ticker.Stop()
 	}
 	lastHeartbeat := time.Now()
@@ -478,19 +562,44 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				demandTicks = nil
 			}
 			continue
+		case <-usageWake:
+			usageCursor.resume()
+			if usageWakeDue == nil && !usageSendClosed {
+				usageWakeTimer.Reset(50 * time.Millisecond)
+				usageWakeDue = usageWakeTimer.C
+			}
+			continue
+		case <-usageWakeDue:
+			usageWakeDue = nil
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+			continue
 		case <-ticker.C:
-			if c.ControlOnly {
+			if usageCursor.knownDone && usageCursor.unknownDone {
+				usageCursor.reset()
+			}
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+			continue
+		case <-usageContinue:
+			if c.ControlOnly || usageSendClosed {
 				continue
 			}
 			if regional != nil && !negotiated {
 				continue
 			}
-			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+			if err := sendUsagePage(); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				// Send EOF can race the peer's final successful ACK. Drain
 				// receive messages before completing this control connection.
+				usageSendClosed = true
+				usageWake = nil
 				ticker.Stop()
 			}
 			continue
@@ -565,7 +674,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 						return err
 					}
-					if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+					if err := sendUsagePage(); err != nil {
 						return err
 					}
 				} else {
@@ -881,12 +990,27 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	}, records, payload.Revocations)
 }
 
-func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64) error {
-	batches, err := c.Node.Store.PendingUsageOutbox(ctx, c.Node.NodeID)
+func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64, cursors ...*string) error {
+	var local string
+	cursor := &local
+	if len(cursors) > 0 {
+		cursor = cursors[0]
+	}
+	batches, err := c.Node.Store.PendingUsageOutboxPage(ctx, c.Node.NodeID, *cursor)
 	if err != nil {
 		return fmt.Errorf("agent: read durable usage outbox: %w", err)
 	}
-	for _, record := range batches {
+	if len(batches) == 0 {
+		*cursor = "" // Revisit every unacknowledged row on the next turn.
+	}
+	var firstSequence uint64
+	if len(batches) != 0 {
+		firstSequence, err = c.Node.Store.NextControlSequenceRange(ctx, uint64(len(batches)))
+		if err != nil {
+			return fmt.Errorf("agent: allocate usage sequences: %w", err)
+		}
+	}
+	for index, record := range batches {
 		// The frozen ordinary UsageBatch has no unknown-liability field.
 		// Preserve these rows for a typed handoff rather than reporting their
 		// reserved upper bound as actual consumption on the old wire path.
@@ -894,6 +1018,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 			if err := c.migrateUnknownUsage(ctx, record); err != nil {
 				return err
 			}
+			*cursor = record.BatchID
 			continue
 		}
 		batch := new(controlv1.UsageBatch)
@@ -903,10 +1028,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 		if batch.GetBatchId() != record.BatchID || batch.GetBillingSnapshotId() != record.SnapshotID {
 			return fmt.Errorf("agent: durable usage batch metadata mismatch")
 		}
-		sequence, err := c.Node.Store.NextControlSequence(ctx)
-		if err != nil {
-			return fmt.Errorf("agent: allocate usage sequence: %w", err)
-		}
+		sequence := firstSequence + uint64(index)
 		if err := stream.Send(&controlv1.NodeMessage{
 			NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence,
 			Body: &controlv1.NodeMessage_UsageBatch{UsageBatch: batch},
@@ -914,6 +1036,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 			return fmt.Errorf("agent: send durable usage batch %s: %w", record.BatchID, err)
 		}
 		*lastSequence = sequence
+		*cursor = record.BatchID
 	}
 	unknown, err := c.Node.Store.PendingUnknownUsage(ctx, c.Node.NodeID)
 	if err != nil {
@@ -1120,22 +1243,7 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *controlv1.ControlMessage) (bool, error) {
 	switch body := message.GetBody().(type) {
 	case *controlv1.ControlMessage_UsageAck:
-		if c.ControlOnly {
-			return true, fmt.Errorf("agent: usage acknowledgement on configuration-only channel")
-		}
-		if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
-			return true, fmt.Errorf("agent: usage acknowledgement has no batch IDs")
-		}
-		if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
-			return true, err
-		}
-		// Notify only after durable validation. In particular an ordinary
-		// ACK must never expose unknown batches as acknowledged to a hook.
-		if c.AcknowledgeUsage != nil {
-			if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
-				return true, err
-			}
-		}
+		return true, c.applyOrdinaryUsageAcknowledgements(ctx, []*controlv1.ControlMessage{message})
 	case *controlv1.ControlMessage_UnknownUsageAck:
 		if c.ControlOnly {
 			return true, fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")

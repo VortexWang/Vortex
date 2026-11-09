@@ -354,6 +354,13 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	writeJSON("traffic.json", map[string]any{"streams": streamCount, "network": network, "round_trips": len(samples), "round_trip_ms": map[string]float64{"p50": percentile(50), "p95": percentile(95), "p99": percentile(99)}, "traffic_elapsed_ns": elapsed.Nanoseconds(), "bidirectional_payload_bytes": expectedBytes, "bidirectional_payload_mbps": float64(expectedBytes) * 8 / elapsed.Seconds() / 1e6, "timing_scope": "request-response traffic; excludes later ACK drain", "performance_qualified": false})
 
 	wait(func() bool {
+		// Poll the pending predicate without repeatedly decoding thousands of
+		// immutable payloads while the independent processes drain their ACKs.
+		// Once drained, still verify every durable payload and its exact total.
+		var pending bool
+		if err := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM usage_batches WHERE state!='hub_acked')").Scan(&pending); err != nil || pending {
+			return false
+		}
 		rows, err := db.QueryContext(ctx, "SELECT payload,state FROM usage_batches")
 		if err != nil {
 			return false

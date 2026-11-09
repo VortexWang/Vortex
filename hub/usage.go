@@ -52,32 +52,26 @@ func (r *UsageRelay) AcceptEnvelope(ctx context.Context, m *controlv1.NodeMessag
 		if e != nil {
 			return e
 		}
-		if e = r.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, SnapshotID: known.BillingSnapshotId, Payload: payload}); e != nil {
+		boot, seq, e := r.Store.PersistUsageLedgerWithOrigin(ctx, store.UsageBatch{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, SnapshotID: known.BillingSnapshotId, Payload: payload}, m.BootId, m.Sequence)
+		if e != nil {
 			return e
 		}
 		digest := sha256.Sum256(payload)
-		b = store.HubUsage{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, Kind: "known", Payload: payload, Digest: digest[:]}
+		b = store.HubUsage{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, Kind: "known", Payload: payload, Digest: digest[:], ReportBootID: boot, Sequence: seq}
 	} else if unknown := m.GetUnknownUsageBatch(); unknown != nil {
 		payload, e := contracts.EncodeUnknownUsage(unknown)
 		if e != nil {
 			return e
 		}
-		if e = r.Store.PersistUnknownUsage(ctx, m.NodeId, payload); e != nil {
+		boot, seq, e := r.Store.PersistUnknownUsageWithOrigin(ctx, m.NodeId, m.BootId, m.Sequence, payload)
+		if e != nil {
 			return e
 		}
 		digest := sha256.Sum256(payload)
-		b = store.HubUsage{NodeID: m.NodeId, BootID: unknown.OriginBootId, BatchID: unknown.BatchId, Kind: "unknown", Payload: payload, Digest: digest[:]}
+		b = store.HubUsage{NodeID: m.NodeId, BootID: unknown.OriginBootId, BatchID: unknown.BatchId, Kind: "unknown", Payload: payload, Digest: digest[:], ReportBootID: boot, Sequence: seq}
 	} else {
 		return store.ErrUsageOriginMissing
 	}
-	if e := r.Store.RecordUsageOrigin(ctx, b.NodeID, b.BatchID, m.BootId, m.Sequence, b.Payload); e != nil {
-		return e
-	}
-	boot, seq, e := r.Store.UsageOrigin(ctx, b.NodeID, b.BatchID)
-	if e != nil {
-		return e
-	}
-	b.ReportBootID, b.Sequence = boot, seq
 	return r.ackBoundary(ctx, b)
 }
 

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -17,7 +18,12 @@ import (
 
 func fundingSession(t *testing.T) (*Node, accounting.Session) {
 	t.Helper()
-	s, err := store.Open(filepath.Join(t.TempDir(), "agent.db"), "agent")
+	return fundingSessionPath(t, filepath.Join(t.TempDir(), "agent.db"))
+}
+
+func fundingSessionPath(t *testing.T, path string) (*Node, accounting.Session) {
+	t.Helper()
+	s, err := store.Open(path, "agent")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -645,5 +651,80 @@ func TestFundingBlockUnknownPrecedesQueuedKnownCheckpoint(t *testing.T) {
 	}
 	if _, err := s.Reserve(ctx, accounting.RightToLeft, 1); err == nil {
 		t.Fatal("frozen session admitted")
+	}
+}
+
+// A FULL checkpoint may wait on storage. It must retain its bound without
+// holding the shared allocator mutex or allowing another child to use a stale
+// residual. No callback acknowledges success until the writer really commits.
+func TestFundingBlockCheckpointReleasesAllocatorWithBoundRetained(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "agent.db")
+	n, session := fundingSessionPath(t, path)
+	s := session.(*fundingBlockSession)
+	ctx := context.Background()
+	batch, err := s.Reserve(ctx, accounting.LeftToRight, 32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer writer.Close()
+	conn, err := writer.Conn(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	if _, err := conn.ExecContext(ctx, "BEGIN IMMEDIATE"); err != nil {
+		t.Fatal(err)
+	}
+	defer conn.ExecContext(ctx, "ROLLBACK")
+	done := make(chan error, 1)
+	go func() { done <- batch.Commit(ctx, 32) }()
+	deadline := time.Now().Add(time.Second)
+	for {
+		lockCtx, stop := context.WithTimeout(ctx, 20*time.Millisecond)
+		err := s.mu.LockContext(lockCtx)
+		stop()
+		if err != nil {
+			t.Fatalf("checkpoint monopolized allocator: %v", err)
+		}
+		block := s.blocks[accounting.LeftToRight]
+		pending := block != nil && block.checkpointDone != nil
+		if pending && (block.inFlight != 32 || block.reservation.Reserved != 128) {
+			t.Fatal("checkpoint released its durable upper bound")
+		}
+		s.mu.Unlock()
+		if pending {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("checkpoint did not start")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	select {
+	case err := <-done:
+		t.Fatalf("early checkpoint acknowledgment: %v", err)
+	default:
+	}
+	waitCtx, stop := context.WithTimeout(ctx, 20*time.Millisecond)
+	other, err := s.Reserve(waitCtx, accounting.LeftToRight, 1)
+	stop()
+	if err == nil || other != nil {
+		t.Fatal("issued child against uncommitted residual")
+	}
+	if _, err := conn.ExecContext(ctx, "ROLLBACK"); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if balance := fundingBalance(t, n); balance.Committed != 32 || balance.Reserved != 0 || balance.Unknown != 0 || balance.Remaining != 4096-32 {
+		t.Fatalf("checkpoint conservation: %+v", balance)
 	}
 }
