@@ -49,3 +49,9 @@ Linux真实4MiB tmpfs完整authorization_check入口已通过：Agent287.455秒�
 F-04：用户明确批准 CR-011（推荐）。精确候选 SHA-256 0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e 已写入；旧Draft批准原记录保留。catalog1.1.0、encoding.sha256、CHANGELOG、63条现有VLink需求review metadata同步；wire0x0100和实现字节不变。全catalog冻结、映射/SemVer及两次Protobuf生成均通过。批准仅关闭当前治理缺口，不重批历史验收。
 
 Linux Docker comparison已通过64MiB完整性/半关闭和中继故障片段；其最终比对因运行期间HEAD从31830266变为b85ca3a0而正确拒绝跨SHA，保留失败，最终验收将使用固定干净提交。
+
+## F-09 / medium / 已修复：目标服务与转发节点同时退出
+
+最终干净168be8a5 Docker模式检查中，pool通过，mux的qualification被unknown用量断言正确拒绝。唯一unknown为1200字节UDP，destination日志在清理窗口明确记录向target写入ECONNREFUSED。清理原本对所有Compose服务同时stop，目标服务可能先于转发节点退出。改为只先stop五个转发节点，收取退出状态与记账日志后再down目标服务；不修改未知负债或验收断言。原失败证据保留，下一提交重新验证。
+
+F-09 修复后实际Docker mux workload通过：309264条记账事件全部已提交，左右各3910425492字节与target相等，无unknown或UDP丢失。该工作树测试只用于修复验证，最终提交另行运行。
