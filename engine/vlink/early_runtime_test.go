@@ -87,3 +87,26 @@ func TestEarlyLocalFINIsBufferedUntilAuthorization(t *testing.T) {
 		t.Fatalf("lost pending FIN: %+v", s)
 	}
 }
+
+// reserveEarlyData snapshots Opening before MarkLocalData takes the lock.
+// OPEN_OK may win that gap; rejecting stale bookkeeping must not delete the
+// now-authorized stream or turn a valid DATA write into a reset.
+func TestEarlyDataBookkeepingLosesToOpenOKWithoutDroppingAuthority(t *testing.T) {
+	table := NewStreamTable(true, 8)
+	id, err := table.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = table.Apply(Frame{Type: FrameOpenOK, StreamID: id}); err != nil {
+		t.Fatal(err)
+	}
+	if err = table.MarkLocalData(id, 4); err == nil {
+		t.Fatal("stale early accounting succeeded")
+	}
+	if state, ok := table.Snapshot(id); !ok || !state.OpenOK || state.Lifecycle != StreamOpen {
+		t.Fatalf("OPEN_OK stream removed by racing bookkeeping: %+v %t", state, ok)
+	}
+	if _, err = table.Apply(Frame{Type: FrameData, StreamID: id, Payload: []byte("reply")}); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -25,3 +25,9 @@ policy-cutover 的40秒激活超时实际日志为 Node bind address already in 
 query audit-uat 拒绝历史 Phase 5 passed_with_scope。未改写历史状态；直接审阅现有 UAT/VERIFICATION 和真实 CI 失败。此处不修改外部 GSD 安装。
 
 F-03 修复：regionalPort 在当前活动测试范围登记已选地址并在 cleanup 释放，避免重复选择。完整 SharePolicyProcess 两轮真实进程 race 通过，54.706 秒；未增加等待超时。
+
+## F-06 / high / 已修复：早期 DATA 与 OPEN_OK 竞争删除合法流
+
+reserveEarlyData 在锁外读取 Opening；OPEN_OK 可能在 MarkLocalData 前完成。旧 MarkLocalData 会因状态不再 Opening 删除该已授权流，随后原本用于竞争恢复的 Snapshot 失效。拒绝过时早期记账应保留新状态；仅真正超出 pending-open 字节上限仍删除流。
+
+新增确定性状态交错测试，修复前失败，修复后完整 VLink race 通过 6.839 秒。原 overflow、FIN、负向状态测试均保留。
