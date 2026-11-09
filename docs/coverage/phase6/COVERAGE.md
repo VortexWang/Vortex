@@ -105,7 +105,7 @@ No Phase 4 performance, Phase 7 backup/recovery, or Phase 8 scale claim is made.
 | LIM-008 | 06-06 | pending producer in 06-06 | pending |
 | LIM-009 | 06-06 | pending producer in 06-06 | pending |
 | LIM-010 | 06-06 | pending producer in 06-06 | pending |
-| BE-005 | 06-07 | pending producer in 06-07 | pending |
+| BE-005 | 06-07 | [REST-SSE.md](REST-SSE.md); task1-public-contract/task2-events/task2-unified-acceptance | implemented candidate; exact CR-009 approval and final pairing pending |
 | TEN-001 | 06-08 | tracer.log | implemented scope; evidence required |
 | TEN-002 | 06-08 | tracer.log | pending domain ownership coverage |
 | TEN-003 | 06-08 | tracer.log | implemented scope; evidence required |

@@ -12,10 +12,16 @@
   "evidence_sha256": {
     "semver.log": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af",
     "lint.log": "72f13c1e4f80e7e40a89a9842e07b8f58086589be20bdef0f3a8d0c79d8fe850",
-    "README.md": "aad7e9451ff6974457d56457d232215f7c6cf96d3c07804df63e5892a80a972f",
+    "exact-candidate-corrected.log": "f90d3a46ca69342fc72105114df4d6941684a0ad3b3602c21d7866bcbc6de58b",
+    "exact-candidate-negatives.log": "fe947634c492f062fc9972d5c463a3fe1a55970ddcb606407ef7790ac47f9df3",
+    "README.md": "00a219519645b341653eef032fd25e7a3b04b8bf62b5bf2d7fb0ec8d1dbbed95",
     "map.log": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af",
     "lint-negatives.log": "bbc4b304dd3ce5c10681c54ff59b1fcd6203209ea24fa83cf5e9d0badc334daf",
+    "exact-candidate.log": "d5073d164b93a07d5dcb07fa6be31abc10700c9a2c598beb81fedaf512f8900e",
     "http-native-race.log": "6fcce4868fdd0fa89edc850776eb3356b57e1b8dbba65d49a1334243b3f419e6",
     "http-linux-race.log": "d2c8f1ab41b00f6d92dcdf6a0cbe263e610e848a820907a28bc58aa8d75b81d5"
+  },
+  "failed_retained": {
+    "exact-candidate.log": "checker parsed Git quoted Chinese paths; corrected to NUL-separated paths"
   }
 }
