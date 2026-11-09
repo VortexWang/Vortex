@@ -32,6 +32,10 @@ trap finish EXIT
     git diff --stat HEAD
   fi
 } > "$out/host.txt"
-go test -count=1 -race ./contracts ./agent/... ./hub ./test/phase5 > "$out/agent-hub-race.log" 2>&1
+# These suites include real FULL/fsync and the fixed 200ms admission bound.
+# Competing race packages (plus process-test builds) on a two-core runner turn
+# resource contention into unrelated correctness failures. Preserve deadlines
+# and all cases; run the package workloads sequentially.
+go test -p 1 -count=1 -race ./contracts ./agent/... ./hub ./test/phase5 > "$out/agent-hub-race.log" 2>&1
 go vet ./agent/... ./hub ./test/phase5 ./cmd/vortex-node > "$out/vet.log" 2>&1
 (cd engine && go test -count=1 -race ./accounting ./runtime/...) > "$out/engine-race.log" 2>&1
