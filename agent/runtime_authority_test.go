@@ -290,6 +290,11 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			}
 			agentDB := filepath.Join(dir, "agent.db")
 			fullDiskRoot := os.Getenv("VORTEX_TEST_FULL_DISK_DIR")
+			// The bounded fault filesystem is for the short failure scenario.
+			// Long-lived workload ledgers must not fill it before deliberate injection.
+			if renewalRounds > 0 || continuous {
+				fullDiskRoot = ""
+			}
 			if fullDiskRoot != "" {
 				diskDir, err := os.MkdirTemp(fullDiskRoot, "node-")
 				if err != nil {
@@ -457,7 +462,7 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 			ln := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, AuthorizationUpdate: func(id, boot string) (*controlv1.AuthorizationUpdate, error) {
 				return issuer.Issue(ctx, delegation.ID, id, boot, issueID, params.initialGrant, initialTTL)
 			}}, serverTLS)
-			if err := (&ControlClient{Node: node, TLS: clientTLS}).Connect(ctx, ln.Addr().String()); err != nil {
+			if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true}).Connect(ctx, ln.Addr().String()); err != nil {
 				t.Fatal(err)
 			}
 			waitUntil := func(at time.Time) {

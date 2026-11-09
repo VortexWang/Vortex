@@ -65,3 +65,9 @@
 用户明确回复“批准 CR-010”。同名 JSON SHA-256 `1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa`、提案及全部规范/生成物摘要逐项匹配。规范字节未变；catalog、需求映射、changelog 与治理记录已记录批准。原提案与候选报告保留原字节作为审阅快照。
 
 批准后 `tools/phase5/contracts_check.sh`（CONTRACT_BASE=00704144）通过，包含两次独立生成、冻结/映射/SemVer 和契约测试。日志：`artifacts/merge-phase4-main/contract-freeze-approved.log`；批准记录：`approval-CR-010.json`。先创建两父合并提交，再运行 clean-source Docker 验证并推送；最终结果另记 SUMMARY。
+
+## 干净回归暴露的测试夹具整合（批准后）
+
+首个两父合并 `fc28d1b8` 的完整 Docker 入口未通过；原始失败报告与日志保留为 `post-approval-first-docker-*`。全局 4 MiB 磁盘满变量把新增长期/持续续领的 WAL 也放在小分区，负载先于注入耗尽磁盘；此外首次未启用实验需求速率时钟的传输可能遇到宽保守时间区间。修复仅在 `agent/runtime_authority_test.go`：长期/持续负载使用普通临时目录，短程案例仍执行原真实磁盘满注入与拒绝未记录流量断言；首次实验控制连接显式启用既有需求模式。规范、生成物及运行代码不变。修复后先重新验证全部受影响场景，再提交并重新跑干净入口。
+
+受影响五个场景在启用真实 4 MiB tmpfs 的 Linux 下全部通过，181.757 秒；见 `post-approval-disk-scoping-regression.log.gz`。
