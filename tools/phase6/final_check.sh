@@ -37,6 +37,12 @@ git status --porcelain=v1 > "$out/host-source-status-before.txt"
 export PYTHONDONTWRITEBYTECODE=1
 result=0
 (
+ # Fail before the long runtime suites if host tooling or approved contracts
+ # are unavailable. Ruby is the existing host-only structural lint dependency.
+ (ruby --version; python3 --version; go version) > "$out/host-tooling.txt" 2>&1
+ python3 tools/phase6/rest_contract_check.py > "$out/exact-freeze.log" 2>&1 || exit $?
+ ruby tools/phase6/openapi_validate.rb contracts/openapi/v1/openapi.yaml > "$out/openapi.log" 2>&1 || exit $?
+ sh tools/phase6/dependency_lock_check.sh > "$out/dependencies.log" 2>&1 || exit $?
  docker compose -f "$compose" up -d --wait postgres valkey
  docker compose -f "$compose" config > "$out/compose.yml"
  docker version > "$out/docker-version.txt"
