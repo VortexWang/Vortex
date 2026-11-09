@@ -1,0 +1,17 @@
+{
+  "commit": "382aab9f4283dfbd24c0fc38c8a2282b257a2a1d",
+  "status": "pass",
+  "scope": "dedicated Ubuntu native race/vet and finite SQLite admission contention; not formal performance or D04 lock",
+  "files": {
+    "admission.log": "bbf826b8e58e00e3be8543fa18c3c5abecdafd9d246119835359a8f0a08d8b20",
+    "agent-hub.log": "20acc5f0cb974a06fd0fbaeb42b6b169e4b27d7a8578e896b4f528f37d717334",
+    "commit": "c619de0d27b734b84a7d6664885def4f40e321839f9acf4950a1059278ad4252",
+    "engine.log": "54f6b7696ca0c05c5347aa7d076fa97be450cea2bbc7e5846344289cd42b2a1b",
+    "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "git-status": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host": "05535c54e986c26a9532d782690a59b6d7237dba78b7cbebabfc727ccd6aa2c4",
+    "run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stage": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

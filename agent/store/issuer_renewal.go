@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -61,17 +60,13 @@ func (s *Store) RenewHubAuthorization(ctx context.Context, issuer string, reques
 		return nil, err
 	}
 	r := IssueRequest{ID: request.RequestId, HubID: issuer, DelegationID: request.DelegationId, NodeID: request.NodeId, BootID: request.BootId, RawBytes: request.RequestedRawBytes, TTL: time.Duration(request.RequestedTtlSeconds) * time.Second, RenewalPayload: raw}
-	encodedRequest, err := json.Marshal(r)
-	if err != nil {
-		return nil, err
-	}
 	if _, err := tx.ExecContext(ctx, `SAVEPOINT renewal_attempt`); err != nil {
 		return nil, err
 	}
 	issue := IssuedAuthorization{}
 	err = checkIssuerTime(now)
 	if err == nil {
-		issue, err = s.issueHubAuthorizationTx(ctx, tx, r, now, request, encodedRequest)
+		issue, err = s.issueHubAuthorizationTx(ctx, tx, r, now)
 	}
 	result := &controlv1.RenewalResult{RequestId: request.RequestId, RequestSha256: append([]byte(nil), request.RequestSha256...), Code: "ok"}
 	if err != nil {

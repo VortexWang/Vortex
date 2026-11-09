@@ -25,6 +25,10 @@ func (n *Node) newRuntimeAuthorityGate(scope RuntimeScope, clock AuthorizationCl
 	return &runtimeAuthorityGate{node: n, scope: scope, clock: clock}
 }
 func (g *runtimeAuthorityGate) Open(ctx context.Context, flow engineaccounting.Flow) (engineaccounting.Session, error) {
+	return withAuthorityWait(ctx, g.node, g.scope, func(waitCtx context.Context) (engineaccounting.Session, error) { return g.openOnce(waitCtx, flow) })
+}
+
+func (g *runtimeAuthorityGate) openOnce(ctx context.Context, flow engineaccounting.Flow) (engineaccounting.Session, error) {
 	var fence uint64
 	if e, ok := g.node.Engine.(*RuntimeEngine); ok && e.activationRequired.Load() {
 		fence = e.activeFence.Load()

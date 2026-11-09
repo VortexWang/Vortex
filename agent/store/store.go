@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -18,8 +19,12 @@ import (
 // Store is the durable local authority for an Agent or Hub. Each role opens
 // its own file; WAL files are never shared between processes.
 type Store struct {
-	db    *sql.DB
-	owner string
+	db                *sql.DB
+	owner             string
+	runtimeStatements map[string]*sql.Stmt
+	runtimeQueue      runtimeTransactionQueue
+	checkpoints       checkpointQueue
+	rateClock         atomic.Pointer[runtimeRateClock]
 }
 
 type Info struct {
@@ -146,6 +151,15 @@ func Open(path, owner string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	s.runtimeStatements = make(map[string]*sql.Stmt, len(runtimeQueries))
+	for _, query := range runtimeQueries {
+		stmt, err := db.Prepare(query)
+		if err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("store: prepare runtime SQL: %w", err)
+		}
+		s.runtimeStatements[query] = stmt
+	}
 	return s, nil
 }
 
@@ -262,6 +276,51 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, session_id TEXT NOT NULL,
+ direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,batch_id) REFERENCES usage_reservations(node_id,batch_id)
+);
+CREATE TABLE IF NOT EXISTS runtime_funding_requests (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, minimum_bytes TEXT NOT NULL,
+ preferred_bytes TEXT NOT NULL, allocated_bytes TEXT NOT NULL, idle_digest TEXT NOT NULL,
+ PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,batch_id) REFERENCES runtime_funding_blocks(node_id,batch_id)
+);
+CREATE TABLE IF NOT EXISTS runtime_block_checkpoints (
+ node_id TEXT NOT NULL, batch_id TEXT NOT NULL, block_id TEXT NOT NULL,
+ prior_reserved TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
+ FOREIGN KEY(node_id,block_id) REFERENCES runtime_funding_blocks(node_id,batch_id)
+);
+CREATE TABLE IF NOT EXISTS demand_idle_observations (
+ scope BLOB PRIMARY KEY NOT NULL, node_id TEXT NOT NULL, rule_id TEXT NOT NULL,
+ since_latest TEXT NOT NULL, observed_latest TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS grant_settlement_proofs (
+ node_id TEXT NOT NULL, grant_id TEXT NOT NULL, payload BLOB NOT NULL,
+ payload_sha256 BLOB NOT NULL, PRIMARY KEY(node_id,grant_id),
+ FOREIGN KEY(node_id,grant_id) REFERENCES authorization_records(node_id,authorization_id)
+);
+CREATE TABLE IF NOT EXISTS sealed_grants (
+ node_id TEXT NOT NULL, grant_id TEXT NOT NULL, scope BLOB NOT NULL,
+ PRIMARY KEY(node_id,grant_id),
+ FOREIGN KEY(node_id,grant_id) REFERENCES authorization_records(node_id,authorization_id)
+);
+CREATE TABLE IF NOT EXISTS demand_retry (
+ scope BLOB PRIMARY KEY NOT NULL, reason TEXT NOT NULL,
+ failures INTEGER NOT NULL, denied_at TEXT NOT NULL, retry_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS demand_consumption (
+ scope BLOB NOT NULL, slot INTEGER NOT NULL CHECK(slot>=0 AND slot<60),
+ second INTEGER NOT NULL, bytes TEXT NOT NULL, PRIMARY KEY(scope,slot)
+);
+CREATE TABLE IF NOT EXISTS authorization_demands (
+ request_id TEXT PRIMARY KEY NOT NULL, scope BLOB NOT NULL, request BLOB NOT NULL,
+ state TEXT NOT NULL CHECK(state IN ('pending','applied','denied')), grant_id TEXT NOT NULL DEFAULT '',
+ denial_reason TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS one_pending_authorization_demand
+ ON authorization_demands(scope) WHERE state='pending';
 CREATE TABLE IF NOT EXISTS authorization_updates (
   node_id TEXT NOT NULL,
   update_id TEXT NOT NULL,
@@ -351,6 +410,10 @@ CREATE TABLE IF NOT EXISTS runtime_sessions (
  initial_share_lease_id TEXT NOT NULL DEFAULT '',
  state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
 );
+CREATE TABLE IF NOT EXISTS runtime_rate_clock_epochs (
+ node_id TEXT NOT NULL, source_id TEXT NOT NULL, epoch TEXT NOT NULL,
+ PRIMARY KEY(node_id,source_id)
+);
 CREATE TABLE IF NOT EXISTS runtime_rate_buckets (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, boot_id TEXT NOT NULL,
  tokens INTEGER NOT NULL, last_tick INTEGER NOT NULL, PRIMARY KEY(node_id,source_id)
@@ -363,6 +426,10 @@ CREATE TABLE IF NOT EXISTS issuer_delegations (
  source_id TEXT NOT NULL, signer_epoch TEXT NOT NULL,
  payload BLOB NOT NULL, payload_sha256 BLOB NOT NULL,
  remaining_bytes TEXT NOT NULL, state TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS issuer_demand_denials (
+ request_id TEXT PRIMARY KEY NOT NULL, request BLOB NOT NULL,
+ reason TEXT NOT NULL CHECK(reason IN ('invalid_scope','insufficient_funds','expired'))
 );
 CREATE TABLE IF NOT EXISTS issuer_issues (
  issue_id TEXT PRIMARY KEY NOT NULL, delegation_id TEXT NOT NULL,
@@ -453,7 +520,25 @@ INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'known',node_id || '/' || batch_id,payload,payload_sha256 FROM usage_batches u WHERE state='ledgered' AND unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='known' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
 INSERT OR IGNORE INTO hub_ledger(kind,record_id,payload,payload_sha256)
  SELECT 'unknown',node_id || '/' || batch_id,payload,payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM hub_ledger l WHERE l.kind='unknown' AND l.record_id=u.node_id || '/' || u.batch_id) ORDER BY rowid;
-INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
+CREATE TRIGGER IF NOT EXISTS idle_reset_runtime_sessions_insert AFTER INSERT ON runtime_sessions BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id IN (NEW.grant_id,NEW.initial_grant_id));
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_runtime_sessions_update AFTER UPDATE ON runtime_sessions BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id IN (NEW.grant_id,NEW.initial_grant_id));
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_usage_holds_insert AFTER INSERT ON authorization_usage_holds BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id=NEW.authorization_id);
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_usage_holds_update AFTER UPDATE ON authorization_usage_holds BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=NEW.node_id AND rule_id IN (SELECT rule_id FROM authorization_records WHERE node_id=NEW.node_id AND authorization_id=NEW.authorization_id);
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_demands_insert AFTER INSERT ON authorization_demands BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=json_extract(NEW.scope,'$.NodeID') AND rule_id=json_extract(NEW.scope,'$.RuleID');
+END;
+CREATE TRIGGER IF NOT EXISTS idle_reset_authorization_demands_update AFTER UPDATE ON authorization_demands BEGIN
+ DELETE FROM demand_idle_observations WHERE node_id=json_extract(NEW.scope,'$.NodeID') AND rule_id=json_extract(NEW.scope,'$.RuleID');
+END;
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '19')
   ON CONFLICT(key) DO NOTHING;
 `)
 	if err != nil {
@@ -495,7 +580,16 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '14')
 	if err := s.migrateRecoveryMode(); err != nil {
 		return err
 	}
-	return s.migratePolicyTransitions()
+	if err := s.migratePolicyTransitions(); err != nil {
+		return err
+	}
+	if err := s.migrateDemandDenialState(); err != nil {
+		return err
+	}
+	// Version 20 combines the Phase 4 block/demand schema and Phase 5 renewal,
+	// retention, credential, recovery and policy migrations. Publish only last.
+	_, err = s.db.Exec(`UPDATE schema_meta SET value='20' WHERE key='schema_version' AND CAST(value AS INTEGER)<20`)
+	return err
 }
 
 // PersistUsageOutbox stores exact serialized usage bytes and the conservative
@@ -577,13 +671,20 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 	if resolution == "committed" && (used > reservation.Reserved || len(payload) == 0 || unknownUpper != 0) || resolution == "unknown" && (used != reservation.Reserved || unknownUpper != reservation.Reserved || len(payload) == 0) || resolution == "returned" && (used != 0 || unknownUpper != 0 || len(payload) != 0) {
 		return fmt.Errorf("store: inconsistent usage settlement")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err := settleUsageReservationTx(ctx, tx, reservation, resolution, used, payload, unknownUpper, typed); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func settleUsageReservationTx(ctx context.Context, tx storeTransaction, reservation UsageReservation, resolution string, used uint64, payload []byte, unknownUpper uint64, typed *UnknownUsageRecord) error {
 	var bootID, snapshotID, flowKey, ruleID, direction, reservedText, state, usedText string
-	err = tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
+	err := tx.QueryRowContext(ctx, `SELECT boot_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes FROM usage_reservations WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).
 		Scan(&bootID, &snapshotID, &flowKey, &ruleID, &direction, &reservedText, &state, &usedText)
 	if err != nil {
 		return err
@@ -617,7 +718,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 				if !bytes.Equal(previousPayload, payload) {
 					return ErrUsageBatchConflict
 				}
-				return tx.Commit()
+				return nil
 			}
 			var storedPayload []byte
 			var storedUpper string
@@ -631,7 +732,7 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 				return ErrUsageBatchConflict
 			}
 		}
-		return tx.Commit()
+		return nil
 	}
 	var holdReserved, holdState string
 	holdErr := tx.QueryRowContext(ctx, `SELECT reserved_bytes,state FROM authorization_usage_holds WHERE node_id=? AND batch_id=?`, reservation.NodeID, reservation.BatchID).Scan(&holdReserved, &holdState)
@@ -697,7 +798,12 @@ func (s *Store) settleUsageReservation(ctx context.Context, reservation UsageRes
 	if _, err := tx.ExecContext(ctx, `UPDATE usage_reservations SET state=?,used_bytes=?,updated_at=? WHERE node_id=? AND batch_id=? AND state='reserved'`, resolution, strconv.FormatUint(used, 10), time.Now().UTC().Format(time.RFC3339Nano), reservation.NodeID, reservation.BatchID); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if resolution == "committed" && used > 0 && durableAuthorizationID != "" {
+		if err := recordDemandConsumptionTx(ctx, tx, reservation.NodeID, durableAuthorizationID, used, time.Now()); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // UnresolvedUsageReservations returns reservations from earlier boots. The
@@ -745,6 +851,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	if err == nil {
 		if !bytes.Equal(previousDigest, digest[:]) || previousIssuer != update.IssuerID {
 			return ErrAuthorizationUpdateConflict
+		}
+		if err := resolveDemandUpdateTx(ctx, tx, update.UpdateID, records); err != nil {
+			return err
 		}
 		return tx.Commit()
 	}
@@ -889,6 +998,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		return err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_updates SET issuer_id=? WHERE node_id=? AND update_id=?`, update.IssuerID, update.NodeID, update.UpdateID); err != nil {
+		return err
+	}
+	if err := resolveDemandUpdateTx(ctx, tx, update.UpdateID, records); err != nil {
 		return err
 	}
 	return tx.Commit()

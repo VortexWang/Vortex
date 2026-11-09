@@ -99,6 +99,26 @@ func TestSourceCreditRejectsUngatedCombinations(t *testing.T) {
 	}
 }
 
+func TestRuntimeAuthorityRequiresPinnedEvidenceAndExcludesDiagnosticMode(t *testing.T) {
+	cfg := Config{Version: 1, NodeID: "00000000-0000-0000-0000-000000000002", Role: RoleRelay,
+		Certificate: "c", PrivateKey: "k", TrustBundle: "ca", Listen: "127.0.0.1:1",
+		Peer: "127.0.0.1:2", PeerNodeID: "00000000-0000-0000-0000-000000000001",
+		NextHopNodeID: "00000000-0000-0000-0000-000000000003", RuleID: "rule-1",
+		RuleRevision: 1, PathGeneration: 1, RuntimeAuthority: true, EvidenceFile: "events.jsonl"}
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("valid pinned runtime authority rejected: %v", err)
+	}
+	cfg.QualificationOnly = true
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Fatalf("diagnostic and runtime authority modes should conflict, got %v", err)
+	}
+	cfg.QualificationOnly = false
+	cfg.EvidenceFile = ""
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "requires evidence") {
+		t.Fatalf("runtime authority without evidence should fail closed, got %v", err)
+	}
+}
+
 func TestSourceCreditBookPinsExecutionAndBillingBindings(t *testing.T) {
 	var c Config
 	if err := json.Unmarshal([]byte(validJSON()), &c); err != nil {

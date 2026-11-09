@@ -295,7 +295,11 @@ func startMuxResponder(ctx context.Context, server *MuxLink) {
 }
 
 func runMuxTransfer(tb testing.TB, payload []byte, reverse bool, clientTLS, serverTLS *tls.Config, clientSigner, serverSigner crypto.Signer, clientID, serverID NodeID, peerVerifier PeerVerifier) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// Mux throughput is intentionally measured by the benchmark output. Keep
+	// the correctness deadline generous enough for slower diagnostic hosts so a
+	// low throughput result is reported instead of becoming a false protocol
+	// failure at a fixed 30-second boundary.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	client, server := benchmarkMuxPairForDirection(tb, ctx, reverse, clientTLS, serverTLS, clientSigner, serverSigner, clientID, serverID, peerVerifier)
 	defer client.Close(ErrProtocol)

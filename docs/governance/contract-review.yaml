@@ -22,8 +22,8 @@
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.3.0",
-      "sha256": "4a2458c511e9d5d9db0d567280445f6648d6482484ab19984a7c1a3289a05571",
+      "version": "1.7.0",
+      "sha256": "3e8ae1400df5672c981cf74bcd052d2b20d79f68db2ae8d9d4d0e5b6f338159a",
       "decision": "approved",
       "artifacts": [
         {
@@ -32,7 +32,7 @@
         },
         {
           "path": "contracts/protobuf/v1/lifecycle.md",
-          "sha256": "65874c4e00fa78159105e3a080e1898d923b67c0903556f99d10a516a09cd9c6"
+          "sha256": "153a52801c0bfe235fa82bebabc21374a12a8f67a2a5de88adbd6b13244397b0"
         },
         {
           "path": "contracts/protobuf/v1/identity-profile.json",
@@ -148,6 +148,66 @@
       "reviewer": "user-approved-in-session",
       "approved_at": "2026-11-06T02:21:16.718444+00:00",
       "decision": "approved"
+    },
+    {
+      "change_request": "CR-010",
+      "contract_id": "vortex.control.v1",
+      "from": "1.3.0",
+      "version": "1.7.0",
+      "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+      "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+      "proposal_json": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.json",
+      "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa",
+      "contract_sha256": "3e8ae1400df5672c981cf74bcd052d2b20d79f68db2ae8d9d4d0e5b6f338159a",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-09T09:46:14.898715+00:00",
+      "decision": "approved",
+      "approval_text": "批准 CR-010",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "153a52801c0bfe235fa82bebabc21374a12a8f67a2a5de88adbd6b13244397b0"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        }
+      ],
+      "generated_artifacts": [
+        {
+          "path": "contracts/protobuf/v1/vortex.pb.go",
+          "sha256": "6db3ec30022bbf2acb25e9c2ca4053d1e9e74f46abaca0d82ea9b74e134adb9e"
+        },
+        {
+          "path": "contracts/protobuf/v1/vortex_grpc.pb.go",
+          "sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+        }
+      ],
+      "previous_approved_record": {
+        "id": "vortex.control.v1",
+        "path": "contracts/protobuf/v1/vortex.proto",
+        "version": "1.3.0",
+        "sha256": "4a2458c511e9d5d9db0d567280445f6648d6482484ab19984a7c1a3289a05571",
+        "decision": "approved",
+        "artifacts": [
+          {
+            "path": "contracts/protobuf/v1/lifecycle.schema.json",
+            "sha256": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a"
+          },
+          {
+            "path": "contracts/protobuf/v1/lifecycle.md",
+            "sha256": "65874c4e00fa78159105e3a080e1898d923b67c0903556f99d10a516a09cd9c6"
+          },
+          {
+            "path": "contracts/protobuf/v1/identity-profile.json",
+            "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+          }
+        ]
+      }
     }
   ]
 }

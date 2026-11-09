@@ -19,6 +19,7 @@ import (
 	"syscall"
 	"time"
 	coreaccounting "vortex/engine/accounting"
+	enginerelay "vortex/engine/relay"
 
 	runtimeaccounting "vortex/engine/runtime/accounting"
 	"vortex/engine/runtime/config"
@@ -32,6 +33,9 @@ func main() {
 	configPath := flag.String("config", "", "runtime JSON configuration")
 	role := flag.String("role", "", "optional role override")
 	cpuProfile := flag.String("cpu-profile", "", "optional diagnostic CPU profile file")
+	issuerDelay := flag.Duration("test-issuer-delay", 0, "explicit source-only process-local qualification issuer response delay")
+	renewalOnly := flag.Bool("test-issuer-renewal-only", false, "skip injected delay on first finite grant only")
+	renewalOutcome := flag.String("test-issuer-renewal-outcome", "accepted", "test-only renewal response: accepted, rejected, unknown")
 	flag.Parse()
 	if *cpuProfile != "" {
 		file, err := os.Create(*cpuProfile)
@@ -56,6 +60,15 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	if *renewalOnly && *issuerDelay == 0 {
+		fatal("renewal-only requires test-issuer-delay")
+	}
+	if *renewalOutcome != "accepted" && (*renewalOutcome != "unknown" && *renewalOutcome != "rejected" || !*renewalOnly || *issuerDelay == 0) {
+		fatal("diagnostic renewal outcome requires unknown/rejected, renewal-only and delay")
+	}
+	if *issuerDelay != 0 && (cfg.Role != config.RoleSource || cfg.SourceCredit == nil || cfg.EvidenceFile == "") {
+		fatal("test issuer delay requires source credit and evidence output")
+	}
 	initialConfig := cfg
 	cfg = cfg.Effective()
 	supervisor, err := link.New(cfg)
@@ -117,7 +130,42 @@ func main() {
 			fatal(creditErr.Error())
 		}
 		sourceGate = credit
+		var stopIssuer func()
+		if *issuerDelay != 0 {
+			constructor := runtimeaccounting.NewDelayedCreditGate
+			if *renewalOnly {
+				constructor = runtimeaccounting.NewDelayedRenewalCreditGate
+			}
+			delayed, err := constructor(ctx, *cfg.SourceCredit, *issuerDelay)
+			if *renewalOutcome != "accepted" {
+				if delayed != nil {
+					delayed.Close()
+				}
+				delayed, err = runtimeaccounting.NewFaultedRenewalCreditGate(ctx, *cfg.SourceCredit, *issuerDelay, runtimeaccounting.GrantOutcome(*renewalOutcome))
+			}
+			if err != nil {
+				fatal(err.Error())
+			}
+			credit, sourceGate, stopIssuer = delayed.Credit, delayed, delayed.Close
+			slog.Info("qualification delayed issuer", "delay", *issuerDelay, "renewal_only", *renewalOnly, "wait_limit", "200ms", "scope", "process-local")
+		}
+		var stopTimeline func() creditTimeline
+		if cfg.SourceCredit.Observe {
+			stopTimeline = startCreditTimeline(credit.State, time.Second, 3600)
+		}
 		defer func() {
+			if stopIssuer != nil {
+				stopIssuer()
+			}
+			if stopTimeline != nil {
+				data, err := json.Marshal(stopTimeline())
+				if err == nil {
+					err = os.WriteFile(cfg.EvidenceFile+".credit-timeline.json", append(data, '\n'), 0600)
+				}
+				if err != nil {
+					fatal(fmt.Sprintf("write credit timeline: %v", err))
+				}
+			}
 			data, err := json.MarshalIndent(credit.State(), "", "  ")
 			if err == nil {
 				err = os.WriteFile(cfg.EvidenceFile+".credit.json", append(data, '\n'), 0600)
@@ -362,12 +410,13 @@ func resetStream(stream *vlink.MuxStream) {
 
 func accountingEventLimit(evidenceFile, configured string) (int, error) {
 	const defaultLimit = 1000000
+	const qualificationLimit = 50000000
 	if evidenceFile == "" || configured == "" {
 		return defaultLimit, nil
 	}
 	parsed, err := strconv.Atoi(configured)
-	if err != nil || parsed < 1 || parsed > 10000000 {
-		return 0, errors.New("VORTEX_QUALIFICATION_EVENT_LIMIT must be between 1 and 10000000")
+	if err != nil || parsed < 1 || parsed > qualificationLimit {
+		return 0, errors.New("VORTEX_QUALIFICATION_EVENT_LIMIT must be between 1 and 50000000")
 	}
 	return parsed, nil
 }
@@ -407,11 +456,7 @@ func serveSource(ctx context.Context, cfg config.Config, supervisor *link.Superv
 				if supervisor.Transport != nil {
 					defer resetStream(stream)
 				}
-				if err := stream.WaitOpen(ctx); err != nil {
-					return err
-				}
-				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey(), "mode", cfg.TransportMode)
-				return relay.BridgeConnWithGateObserver(ctx, stream, local, gate, func() {
+				return relay.BridgeOpeningConn(ctx, stream, local, gate, func() {
 					if supervisor.Transport != nil && cfg.TransportMode == vlink.ModeAuto {
 						if supervisor.Routes != nil {
 							supervisor.Routes.Observe(flowConfig.PathGeneration, time.Since(openedAt))
@@ -460,11 +505,8 @@ func serveUDPSource(ctx context.Context, cfg config.Config, supervisor *link.Sup
 	}
 	defer packet.Close()
 	if udp, ok := packet.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-			return err
-		}
-		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-			return err
+		if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+			slog.Warn("udp source socket buffer tuning unavailable", "err", err)
 		}
 	}
 	go func() { <-ctx.Done(); _ = packet.Close(); supervisor.Close() }()
@@ -663,13 +705,8 @@ func dialTarget(_ context.Context, network uint8, target vlink.LocalTarget) (net
 		return nil, err
 	}
 	if udp, ok := conn.(*net.UDPConn); ok {
-		if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-			_ = conn.Close()
-			return nil, err
-		}
-		if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-			_ = conn.Close()
-			return nil, err
+		if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+			slog.Warn("udp target socket buffer tuning unavailable", "err", err)
 		}
 	}
 	return conn, nil

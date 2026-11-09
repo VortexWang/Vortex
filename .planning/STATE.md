@@ -37,7 +37,7 @@ Last activity: 2026-11-07 — 11 plans / 11 dependency waves / 25 tasks; 96 requ
 
 Progress: Phase 6 [░░░░░░░░░░] 0/11 plans executed. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
-Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
+Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 P4-Q1..Q5 and D-04 subsequently closed on the qualification branch (final audit 04-45, measured source 0c2ba71). This merge candidate does not transfer those historical performance results to its new code; X5/X6 production scopes remain separate.
 
 ## Performance Metrics
 
@@ -82,7 +82,7 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 
 ### Pending Todos
 
-- Phase 4 implementation gap plans are executed. Keep NFR-003/005/006/007/039/040/044 and D-04 open until eligible native qualification and complete authority evidence exist; durable production authorization/accounting remains a later Agent/Hub integration concern. This is carried forward while Phase 5 proceeds.
+- Phase 4 branch stage acceptance and D-04 lock are recorded in 04-45 / 04-D04-LOCK.json. Local merge regressions passed; CR-010 exact migration was approved; main integration is being finalized; preserve all X5/X6 handoff boundaries and historical evidence SHAs.
 
 ### Blockers/Concerns
 
@@ -102,6 +102,23 @@ Phase 5 remains closed within its runtime/protocol-adapter/static-destination sc
 | 261103-l7e | Project restart governance clarified; Phase 1 complete for M0 entry | 2026-11-03 | 62f4687 | complete | [261103-l7e-project-restart-governance](./quick/261103-l7e-project-restart-governance/) |
 | 261103-lt9 | Restart governance aligned; M0 TCP relay tracer implemented | 2026-11-03 | a9b79f1 | complete | [261103-lt9-align-restart-governance-and-enter-m0-im](./quick/261103-lt9-align-restart-governance-and-enter-m0-im/) |
 | 261105-9j7 | Native host preflight and formal qualification runbook | 2026-11-05 | pending | complete | [20261105-native-host-preflight](./quick/20261105-native-host-preflight/) |
+
+## Phase 4 merge candidate — 2026-11-09
+
+Worktree `/tmp/vortex-merge-phase4-main`, branch `codex/merge-phase4-main`.
+Base main synchronized at `00704144`; source `2cb3ab53`. Original Phase 6
+worktree and its uncommitted changes are untouched. Phase 6 implementation is
+not imported by this merge. CR-010 exact field-100 migration was approved on 2026-11-09;
+source branch approval of field 16/15 does not approve these new bytes.
+Local Darwin/Linux regressions and four independent process cases passed;
+see quick 261109-n63/EVIDENCE.md and artifacts/merge-phase4-main/report.json.
+Candidate Actions and full Phase 5 clean-source release entry are not run.
+Approved hashes are frozen and contract checks passed. Two-parent merge,
+clean-source Docker verification and main push are being finalized.
+
+The following historical qualification notes describe earlier snapshots. Their
+open findings are superseded within the Phase 4 Engine/tracer boundary by
+04-CLOSURE / 04-45; production persistence remains owned by X5/X6.
 
 ## Session Continuity
 

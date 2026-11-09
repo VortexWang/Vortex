@@ -1,5 +1,93 @@
 # Phase 4 剩余资格化核对（2026-11-05）
 
+## Owner-confirmed final decision — 2026-11-07
+
+The project owner replied **“确认”** to the concrete D-04 table after the full
+matrix and center-profile formal qualification. D-04 is now **locked for the
+Phase 4 Engine/process-local adapter**, and P4-Q1..Q5 are accepted within that
+stage boundary. The machine-readable decision is [04-D04-LOCK.json](04-D04-LOCK.json).
+
+| Parameter | Confirmed value |
+| --- | --- |
+| Initial block per direction | 256 KiB |
+| Maximum adaptive block per direction | 4 MiB |
+| Demand floor | 8 MiB |
+| Committed-consumption observation window | 60 s |
+| Target horizon and explicit cap | 30 s; 375000000 bytes maximum |
+| Renewal waterline | 30% |
+| Reservation wait limit | 200 ms |
+
+The 81-trial matrix, independent raw audits and separate center-profile formal
+run support this decision; see [04-45-FINAL-ACCEPTANCE-AUDIT.md](04-45-FINAL-ACCEPTANCE-AUDIT.md).
+The nine failed 600 ms availability trials remain failed. Production Agent/Hub
+parameters require Phase 5 requalification; PostgreSQL authority remains Phase
+6. No production default or grant-return protocol change is implied.
+
+The earlier pending/unlocked statements below are historical observations,
+superseded by this explicit owner decision. Their measured sources, failures,
+and hashes remain unchanged.
+
+
+## Current evidence reconciliation — 2026-11-07
+
+The full native dynamic matrix completed 27 combinations x 3 repeats on clean
+`2543fb745d942ddf710c02d502a3675b9b3c7fe9`. Independent raw workload,
+flow/source accounting, consumption formula and 65-second idle audits pass for
+all 81 trials. Summary SHA256:
+`135a289cdf96d46c4b3668befa45e87c289403c669541fe7fb5b1932abc4566a`.
+
+Clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` completed the separate
+256 KiB / 30 s / 50% formal candidate: 300 s warmup, three 300 s trials,
+independent TLS, 16 streams and actual 100 Mbps UDP. The gate passes; SHA256:
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+The 30% center candidate completed a separate formal run (see follow-up below); it does not inherit the 50% result. Nine 600 ms renewal pressure trials failed availability
+and remain raw failures. The 200 ms reservation deadline is unchanged.
+
+The current comparative review is [04-44-D04-PARAMETER-REVIEW.md](04-44-D04-PARAMETER-REVIEW.md).
+`locked=false` and `gaps_found` remain. Formal performance acceptance, D-04
+parameter lock and persistent authority are retained as user-required debts;
+production Agent/Hub/PostgreSQL authority remains owned by Phase 5/6.
+Historical results below retain their original source and measurement scope.
+
+## Current scope — 2026-11-06
+
+当前关闭条件与归属以 [04-CLOSURE.md](04-CLOSURE.md) 为准。
+Phase 4 实现范围已关闭，P4-Q1..Q5 资格缺口保留；持久化与生产后端
+移交 Phase 5/6，不作为 M2 阻塞。本文件以下为历史证据，不重新激活越界任务。
+
+## Prior result: Plan 04-12
+
+## Current Q2/Q3 evidence — 2026-11-06
+
+The final branch SHA `fdaea8f` now has a single auditable Q2/Q3 evidence
+bundle. The Docker comparison and recovery runs cover the configured forged
+OPEN, bypass, integrity, generation, drain, primary/active failure and spare
+restart cases. Docker snapshot and finite TCP/UDP credit runs cover immutable
+snapshot affinity, exact source conservation, exhaustion denial and no held or
+unknown leakage. Targeted Engine race tests pass for identity, policy, share,
+snapshot, grant, renewal, route and bounded UDP behavior. See
+`04-39-Q2-Q3-COVERAGE-EVIDENCE.md` for output paths and scope.
+
+These results close the finite current-configuration checklist only. They do
+not establish exhaustive security coverage, production Agent/Hub persistence,
+or full NFR-039/NFR-040/NFR-044 acceptance; those boundaries remain explicit.
+
+See [04-12-EVIDENCE.md](04-12-EVIDENCE.md) for the authoritative current status:
+21 D-04 static trials complete; 91e409e pool/mux latency gate passes; finite
+runtime safety probes and native race pass. Production D-04 lock, complete
+NFR-006 coverage, durable authority and final same-build formal performance
+remain open. The older matrix and incremental notes below retain their
+historical context and do not override this reconciliation.
+
+The runtime bridge early-data slice is now covered on the current branch by an
+authenticated delayed-authorization test. Before remote authorization, the
+bounded TCP prefix remains unavailable to the remote stream; after authorization
+the exact payload reaches the target and both accounting gates settle. UDP
+continues to require OPEN/OPEN_OK. This updates the implementation boundary,
+not the controlled-RTT or formal NFR-007 qualification status.
+
+## Historical matrix
+
 04-11 added a reproducible 27-case D-04 matrix and fail-closed qualification
 gate. It records candidate coverage without promoting any parameter or
 combining Docker, Actions and native results across SHAs.
@@ -11,7 +99,7 @@ combining Docker, Actions and native results across SHAs.
 | NFR-003 三中继吞吐 | `baa0a02` 原生 16 streams / 60 秒，TCP 1086–1200 Mbps；同负载独立 TLS 比例 82.64%，均超过当前 400 Mbps / 70% 目标；cba1bef 另有显式模式短诊断 | source 真实授权 Gate、D-04 续申及完整门控仍未接线，不能声称正式门控性能 | 未提供各转发节点独享资源和独立链路资格证据；缺预热 60 秒、正式 300 秒 × 3 的同条件 runtime/TLS 组 | 诊断目标已达到；正式资格未通过 |
 | NFR-005 UDP 公平性 | `baa0a02` 原生三次实际约 100 Mbps、1,200 bytes、TCP 满载，丢包 0.048004% / 0.010241% / 0.004480%，丢弃分类和计量相符 | 仍需在真实授权门控及耗尽/续申压力下验证 TCP/UDP 行为 | Actions scale 实际 24.21 Mbps；资格化不能以 requested rate 替代 actual rate；正式运行需原始发送/接收/重复/乱序和各层丢弃证据 | 有限混合负载通过；正式资格未通过 |
 | NFR-006 完整性/顺序/许可 | 64 MiB 确定性文件 SHA-256、一条配置路径的多跳 OPEN、六类伪造请求、两个旁路端点；d0c1cb2 八组真实进程切换/恢复三宿主通过 | 攻击矩阵仍为有限集；缺针对当前配置的系统化绕过/身份/修订/路径组合覆盖及其完整清单，不能声称“所有伪造请求”已证明；恢复不等于权威账本恢复 | 与当前最终授权配置在同一 SHA 复核完整性/故障场景；该功能项不应只因没有独享硬件而搁置 | 有限行为通过；覆盖未完整 |
-| NFR-007 pool/mux 首字节（跨 Phase 3） | cba1bef 分模式、50 个原始样本，原生 pool 1.0703 ms / mux 1.3188 ms；链路复用已证实 | source 在 WaitOpen 后才桥接客户端 TCP，relay 在 downstream.WaitOpen 后才接通桥；存在依赖 OPEN_OK 的数据等待，不能以低 RTT 的数值通过证明无额外往返。须设计有界早期 DATA，并保持授权前不向目标写入；UDP 仍必须 OPEN_OK 后发送 | 当前各段 RTT 是独立 TLS 用户态 echo 诊断，不足以验证 VLink 额外等待；需受控逐段 RTT 扫描、时间线或抓包、复用/新建链路分别记录；pool/mux 分开，计费等待例外单列 | 实现与测量均有缺口 |
+| NFR-007 pool/mux 首字节（跨 Phase 3） | cba1bef 分模式、50 个原始样本，原生 pool 1.0703 ms / mux 1.3188 ms；当前分支另有延迟授权 early-DATA runtime 回归；链路复用已证实 | 有界 TCP early DATA 在授权前保留于 OPEN 缓冲，授权后精确交付；UDP 仍必须 OPEN_OK 后发送。仍不能以低 RTT 数值证明无额外往返 | 当前各段 RTT 是独立 TLS 用户态 echo 诊断，不足以验证 VLink 额外等待；需受控逐段 RTT 扫描、时间线或抓包、复用/新建链路分别记录；pool/mux 分开，计费等待例外单列 | 实现切片通过；正式测量未通过 |
 | NFR-039 政策 T / 保护带 | c8c2a37 has finite immutable snapshots. Worktree policy adapter tests conservative interval, exact-T switch, <=10s pause/recovery and hard cutoff under injected clock | Not wired into relay; trusted clock-health input, dynamic pre-issue provider, 200ms one-shot issuer request and real policy/runtime/share lease path remain absent | No runtime clock source or process topology evidence for the adapter; full q=T−60 / ttl=300 and <=12s evidence must be run after safe wiring. Finite unit cases do not qualify NFR-039 | Partial Engine unit behavior only; full requirement not passed |
 | NFR-040 share CAS / 排空 | `d7ca856` share Manager + injectable runtime ShareGate tests prepared/active coexistence, 50→60→40 occupancy max, old lease drain, fencing/idempotency and boot rejection; Docker check passes | ShareGate is not wired to relay config; durable Agent/Hub CAS, delayed/lost receipt reconciliation, renewal protocol and rate-share enforcement remain absent. Path generation drain is not share CAS | Native runtime / Actions aggregate terminal result remains pending; no production topology qualification | Finite injected Engine adapter passes; full NFR not passed |
 | NFR-044 快照与路径系数 | c8c2a37 runtime `CreditBook` 在原生/Docker/Actions 验证 1→2 快照选择、固定旧会话、不同系数、迟到授权隔离、预留资金和零泄漏 | 仍缺完整 Event/Flow 来源绑定、跨路径 1→3 守恒、跨政策 T、grant/batch/final 篡改及完整按来源守恒闭环。当前 UDP 切路终止是用户已选策略，按该策略验证旧 UDP 未结算负债，不新增“必须保留旧 UDP”要求 | 持久化权威账本是后续阶段，不要求 Engine 连数据库 | 有限 runtime slice 通过；完整 NFR 未通过 |
@@ -55,3 +143,33 @@ combining Docker, Actions and native results across SHAs.
 授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
 ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
 04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。
+
+## Center candidate formal follow-up — 2026-11-07
+
+Clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` also completed a separate
+256 KiB / 30 s / 30% candidate run in
+`/root/Vortex-phase4-final-0c2ba71/artifacts/phase4/formal-provisional-256k-30s-30pct`.
+The 300-second warmup and three 300-second trials use semantic digest
+`84a3e5c9e6efe6b8496ba6cd1a33fe92ecf9d5cad3c4e0182a14e6a03fec2de6`.
+Trial TCP throughput was 628.675400 / 631.912733 / 636.537656 Mbps; actual
+UDP rates were 99.998368 / 99.998112 / 99.997408 Mbps with zero loss. Each
+trial conserved and settled source credit. Independent TLS mixed TCP measured
+568.820579 Mbps; the runtime/TLS ratio was 1.119048221. The machine gate
+returned `pass`, runner exit was 0, and socket maxima restored to 212992 each.
+
+The gate SHA256 is
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+(The 30% and 50% gate files contain the same verdict fields and therefore have
+the same hash; they do not identify a workload.) The 30% comparison SHA256 is
+`9a427d3e8fc5e1ada784c82218ceafbd550f563570e5ef9f4e0f3a6e2557d81f`;
+trial-1 host SHA256 is
+`dffe1deb3456fb01f5d665163b2d24bf3ee2f2b3147efd794a964a3a25bfb206`.
+
+The center candidate now has its own formal-duration evidence. The comparison
+supports recommending 256 KiB initial / 4 MiB maximum block, 8 MiB demand
+floor, 30 s horizon with explicit 375000000-byte cap, 30% renewal waterline,
+and unchanged 200 ms reservation wait for this Engine/in-process adapter.
+This is a measured recommendation, not a production parameter approval.
+The user-required formal qualification and D-04 lock debts remain retained;
+`locked=false` / `gaps_found` are unchanged. Production persistence authority
+and requalification remain Phase 5/6 handoffs.

@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "scope": "build only; no native amd64 execution claim",
+  "records": [
+    {
+      "binary": "vortex-node",
+      "goos": "linux",
+      "goarch": "amd64",
+      "sha256": "4e0e3ae13f5b81efda7a7448c3682783d59a630ba4141e2b1ea3d718f1fbfb3f"
+    },
+    {
+      "binary": "vortex-test-hub",
+      "goos": "linux",
+      "goarch": "amd64",
+      "sha256": "316690440395b6ab802521d2f3fdc3bdd036d8df16be90a152db698b8c9af0b1"
+    },
+    {
+      "binary": "vortex-relay",
+      "goos": "linux",
+      "goarch": "amd64",
+      "sha256": "b9b57c0b2eab16dd4506f16124e9eb8bdc1677b95933b49c6d3c2c1e1d01be13"
+    },
+    {
+      "binary": "vortex-node",
+      "goos": "linux",
+      "goarch": "arm64",
+      "sha256": "36e70826d3056dea4d5e2d5c32d03965bbeaaafc65619a93f29e61aad6bada25"
+    },
+    {
+      "binary": "vortex-test-hub",
+      "goos": "linux",
+      "goarch": "arm64",
+      "sha256": "7d443457218764e130420f080d109cac0ef1a62fad06cf42b2f88347d3dacc82"
+    },
+    {
+      "binary": "vortex-relay",
+      "goos": "linux",
+      "goarch": "arm64",
+      "sha256": "34f86fd52440a01cedaa7d0a6cabc32e7032036cf76c16ef18241ae1f819821b"
+    }
+  ]
+}

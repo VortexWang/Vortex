@@ -110,15 +110,67 @@ func (b *CreditBook) Select(id string, revision uint64) error {
 	return nil
 }
 func (b *CreditBook) Open(ctx context.Context, f core.Flow) (core.Session, error) {
+	session, _, _, err := b.openCurrent(ctx, f)
+	return session, err
+}
+
+func (b *CreditBook) openCurrent(ctx context.Context, f core.Flow) (core.Session, string, Binding, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	// Admission and selection serialize here; returned sessions permanently own
-	// their original gate, even while later flows use a different snapshot.
-	// Billing identity always comes from the locally pinned snapshot, never from
-	// the flow key or an Engine caller-provided label.
-	f.RuleID = b.cfg.Snapshots[b.cfg.Active].Binding.RuleID
-	return b.gates[b.cfg.Active].Open(ctx, f)
+	id := b.cfg.Active
+	f.RuleID = b.cfg.Snapshots[id].Binding.RuleID
+	session, err := b.gates[id].Open(ctx, f)
+	return session, id, b.cfg.Snapshots[id].Binding, err
 }
+
+// openPolicy keeps a live flow on its original path and execution point while
+// changing only the policy snapshot. Ambiguous or missing authority denies.
+func (b *CreditBook) openPolicy(ctx context.Context, f core.Flow, original Binding, policy uint64) (core.Session, string, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	id, err := b.policySnapshotLocked(original, policy)
+	if err != nil {
+		return nil, "", err
+	}
+	f.RuleID = b.cfg.Snapshots[id].Binding.RuleID
+	session, err := b.gates[id].Open(ctx, f)
+	return session, id, err
+}
+func (b *CreditBook) policySnapshotLocked(original Binding, policy uint64) (string, error) {
+	id := ""
+	for candidate, version := range b.cfg.Snapshots {
+		binding := version.Binding
+		if binding.RuleID == original.RuleID && binding.ExecutionNode == original.ExecutionNode && binding.PathGeneration == original.PathGeneration && binding.PolicyRevision == policy {
+			if id != "" {
+				return "", core.ErrSnapshotMismatch
+			}
+			id = candidate
+		}
+	}
+	if id == "" {
+		return "", core.ErrSnapshotMismatch
+	}
+	return id, nil
+}
+
+func (b *CreditBook) selectPolicy(policy, revision uint64) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	binding := b.cfg.Snapshots[b.cfg.Active].Binding
+	if binding.PolicyRevision == policy {
+		return nil
+	}
+	id, err := b.policySnapshotLocked(binding, policy)
+	if err != nil {
+		return err
+	}
+	if revision <= b.cfg.SelectionRevision {
+		return core.ErrSnapshotMismatch
+	}
+	b.cfg.Active, b.cfg.SelectionRevision = id, revision
+	return nil
+}
+
 func (b *CreditBook) State() BookState {
 	b.mu.Lock()
 	defer b.mu.Unlock()

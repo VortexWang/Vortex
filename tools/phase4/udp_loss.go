@@ -48,12 +48,15 @@ func main() {
 	payload := make([]byte, size)
 	start := time.Now()
 	interval := time.Duration(float64(time.Second) * float64(size*8) / 100_000_000)
+	const batchSize = 8
 	for i := 0; i < *count; i++ {
 		binary.BigEndian.PutUint64(payload, uint64(i))
 		if _, err := client.Write(payload); err != nil {
 			panic(err)
 		}
-		time.Sleep(interval)
+		if (i+1)%batchSize == 0 || i+1 == *count {
+			time.Sleep(interval * time.Duration(batchSize))
+		}
 	}
 	got := <-received
 	lost := *count - got

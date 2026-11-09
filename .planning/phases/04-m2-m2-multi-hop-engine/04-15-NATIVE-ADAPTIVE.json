@@ -1,0 +1,33 @@
+{
+  "commit": "4e2780de8a51d311e785656533ca5576936b7f83",
+  "status": "pass",
+  "scope": "dedicated Ubuntu native adaptive TCP/UDP renewal and funded route attacks repeated three times; full Node/Agent/Hub/Engine race and vet; not throughput qualification or D04 lock",
+  "remote_directory": "/root/VORTEX-phase4-durable-4e2780d/artifacts/phase4/durable-4e2780d",
+  "local_directory": "artifacts/phase4/durable-4e2780d",
+  "ledger_scope": "Final targeted repetition snapshots; all three repetitions recorded in runtime.log",
+  "files": {
+    "agent-hub.log": "3154f10c0399e203b5b560b7b7802fdef629a0d65ffa7854327a28172f35049d",
+    "commit": "60181644869bd06ae1f8fa27b513819fb561ed6ad014256788c80b6d1b1830fb",
+    "engine.log": "cfa508b2ee252a709cf4094119f9dc188cb9e1a9cab3094bc72ceb525dc97155",
+    "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "git-status": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host": "de86b1615478eb4fbf3a0c6e90e1c6836fc3154fee7540ba5c559386b45c334a",
+    "ledgers/runtime-1-agent.sqlite.gz": "212d5d2184c1b8c017e1be81f554fbc85288650299711d267d195aad29fbb597",
+    "ledgers/runtime-1-hub.sqlite.gz": "a88b4da20f314ca59552dc25723384386a4cc62922cc7da174136daf239f1887",
+    "ledgers/runtime-1-ledgers.json": "73368b76e38c5a932bc311019b3d0ba2f3ad383003f4b2aa4f644b2d804c1a01",
+    "ledgers/runtime-2-agent.sqlite.gz": "7da487fce92769d292f883fc08a2c1552b6cab7e0185045754c9463cf687f8b1",
+    "ledgers/runtime-2-hub.sqlite.gz": "263f3374970983c64b2990b2951806675bc9629677eca856990ec6148b26a419",
+    "ledgers/runtime-2-ledgers.json": "e9fdcc807e73b35bac9047efd0698aa800053930d4ab4434f8f134f8eab7ec79",
+    "ledgers/runtime-handoff-1-agent.sqlite.gz": "212d5d2184c1b8c017e1be81f554fbc85288650299711d267d195aad29fbb597",
+    "ledgers/runtime-handoff-1-backend.sqlite.gz": "02b228e3287efcba9f452b6f7d8b16bcfa249af918f4e140802f6065f2a09097",
+    "ledgers/runtime-handoff-1-hub.sqlite.gz": "a88b4da20f314ca59552dc25723384386a4cc62922cc7da174136daf239f1887",
+    "ledgers/runtime-handoff-1-ledgers.json": "5ce663c1998c9f49033d48dde9b3728123590ec605677f69aeb8777bf644be7d",
+    "ledgers/runtime-handoff-2-agent.sqlite.gz": "7da487fce92769d292f883fc08a2c1552b6cab7e0185045754c9463cf687f8b1",
+    "ledgers/runtime-handoff-2-backend.sqlite.gz": "fcaff2c263e73de86f9c1e489b1217a28a8401ebd67238c4d6e16cd03f9cdcdc",
+    "ledgers/runtime-handoff-2-hub.sqlite.gz": "263f3374970983c64b2990b2951806675bc9629677eca856990ec6148b26a419",
+    "ledgers/runtime-handoff-2-ledgers.json": "e4e17f9a819ba2af2960204b28b5baa30012623ea35ffc7cb96c7887935f703c",
+    "runtime.log": "6012a23ee1142c93c919e4083900e513b5f6390cb0d4c246e8f581790ec6b22a",
+    "stage": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

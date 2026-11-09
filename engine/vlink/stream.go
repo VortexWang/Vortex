@@ -193,11 +193,26 @@ func (t *StreamTable) Apply(frame Frame) (Frame, error) {
 // AcceptRemote marks that local OPEN authorization has succeeded and OPEN_OK
 // may now be sent. Buffered TCP bytes remain bounded until the caller drains.
 func (t *StreamTable) AcceptRemote(id uint32) error {
+	return t.acceptRemote(id, nil)
+}
+
+// acceptRemote publishes pending frames before allowing new DATA to bypass
+// the opening queue. enqueue must be nonblocking and must not reenter t.
+func (t *StreamTable) acceptRemote(id uint32, enqueue func(Frame) error) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	stream := t.streams[id]
 	if stream == nil || stream.InitiatedLocal || stream.Lifecycle != StreamOpening {
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
+	}
+	if enqueue != nil {
+		for _, frame := range stream.pendingFrames {
+			if err := enqueue(frame); err != nil {
+				return err
+			}
+		}
+		stream.pendingFrames = nil
+		stream.PendingOpenBytes = 0
 	}
 	stream.OpenOK = true
 	if stream.RemoteFIN {
@@ -239,10 +254,13 @@ func (t *StreamTable) MarkLocalFIN(id uint32) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	stream := t.streams[id]
-	if stream == nil || stream.Network != StreamTCP || stream.LocalFIN || stream.Lifecycle == StreamOpening || stream.Lifecycle == StreamReset {
+	if stream == nil || stream.Network != StreamTCP || stream.LocalFIN || stream.Lifecycle == StreamReset || stream.Lifecycle == StreamOpening && !stream.InitiatedLocal {
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}
 	stream.LocalFIN = true
+	if stream.Lifecycle == StreamOpening {
+		return nil
+	}
 	if stream.RemoteFIN {
 		stream.Lifecycle = StreamClosed
 		delete(t.streams, id)

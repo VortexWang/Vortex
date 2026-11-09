@@ -159,7 +159,7 @@ func (s *Supervisor) handshake(ctx context.Context, conn *tls.Conn, client bool,
 			return identity.Check(state.PeerCertificates[0])
 		}
 		return nil
-	}, LocalClient: client, StreamWindow: 8 * 1024 * 1024, AggregateWindow: 64 * 1024 * 1024, MaxWindow: 128 * 1024 * 1024, UDPWindowReserve: 16 * 1024 * 1024, StreamQueueFrames: 512, UDPQueueFrames: 8192, UDPQueueBytes: 16 << 20})
+	}, LocalClient: client, MaxPendingOpenBytes: 64 * 1024, StreamWindow: 8 * 1024 * 1024, AggregateWindow: 64 * 1024 * 1024, MaxWindow: 128 * 1024 * 1024, UDPWindowReserve: 16 * 1024 * 1024, StreamQueueFrames: 512, UDPQueueFrames: 8192, UDPQueueBytes: 16 << 20})
 	if err != nil {
 		return nil, vlink.NodeID{}, err
 	}

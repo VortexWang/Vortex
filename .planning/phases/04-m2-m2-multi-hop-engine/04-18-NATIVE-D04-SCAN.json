@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "status": "measured-candidates-require-review",
+  "locked": false,
+  "measured_commit": "d46ca8e793a9b7f79c5e65ca011401bdbd76bdde",
+  "clean": true,
+  "trials": 21,
+  "duration_seconds_per_phase": 15,
+  "tcp_streams": 16,
+  "udp_target_mbps": 100,
+  "warmup_qualification": false,
+  "scope": "Five-process source/three-relay/destination fixture with synchronous process-local finite credit; not durable Hub allocator throughput. Target seconds convert a fixed 100 Mbps reference to a grant size, not a rolling demand policy.",
+  "exit_code": 0,
+  "restore_exit_code": 0,
+  "socket_buffers": {
+    "run_max": 67108864,
+    "defaults": 212992,
+    "restored_max": 212992
+  },
+  "cases": [
+    {
+      "case": {
+        "block_bytes": 262144,
+        "grant_target_bytes": 375000000,
+        "grant_target_seconds": 30,
+        "id": "baseline",
+        "waterline_percent": 30
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1026.4283250677602,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.95968,
+      "short_flow_median_of_medians_ms": 1.29268,
+      "peak_held_bytes_max": 131800960
+    },
+    {
+      "case": {
+        "block_bytes": 65536,
+        "grant_target_bytes": 375000000,
+        "grant_target_seconds": 30,
+        "id": "block_bytes-65536",
+        "waterline_percent": 30
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1022.5924511466037,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.9648,
+      "short_flow_median_of_medians_ms": 1.3081095,
+      "peak_held_bytes_max": 133174424
+    },
+    {
+      "case": {
+        "block_bytes": 1048576,
+        "grant_target_bytes": 375000000,
+        "grant_target_seconds": 30,
+        "id": "block_bytes-1048576",
+        "waterline_percent": 30
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1025.5384874241645,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.9584,
+      "short_flow_median_of_medians_ms": 1.2942675,
+      "peak_held_bytes_max": 135478752
+    },
+    {
+      "case": {
+        "block_bytes": 262144,
+        "grant_target_bytes": 125000000,
+        "grant_target_seconds": 10,
+        "id": "grant_target_seconds-10",
+        "waterline_percent": 30
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1024.99636811714,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.96672,
+      "short_flow_median_of_medians_ms": 1.2970549999999998,
+      "peak_held_bytes_max": 131868464
+    },
+    {
+      "case": {
+        "block_bytes": 262144,
+        "grant_target_bytes": 750000000,
+        "grant_target_seconds": 60,
+        "id": "grant_target_seconds-60",
+        "waterline_percent": 30
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1026.7843944041915,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.9616,
+      "short_flow_median_of_medians_ms": 1.3136125,
+      "peak_held_bytes_max": 133550472
+    },
+    {
+      "case": {
+        "block_bytes": 262144,
+        "grant_target_bytes": 375000000,
+        "grant_target_seconds": 30,
+        "id": "waterline_percent-20",
+        "waterline_percent": 20
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1024.4961617892707,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.968,
+      "short_flow_median_of_medians_ms": 1.3036135,
+      "peak_held_bytes_max": 132571760
+    },
+    {
+      "case": {
+        "block_bytes": 262144,
+        "grant_target_bytes": 375000000,
+        "grant_target_seconds": 30,
+        "id": "waterline_percent-50",
+        "waterline_percent": 50
+      },
+      "trials": 3,
+      "mixed_tcp_median_mbps": 1022.4681234462987,
+      "udp_loss_max": 0.0,
+      "udp_offered_min_mbps": 99.968,
+      "short_flow_median_of_medians_ms": 1.3461569999999998,
+      "peak_held_bytes_max": 135301392
+    }
+  ],
+  "limits": [
+    "15-second trials do not meet 300-second formal performance qualification.",
+    "No independent TLS comparison at this SHA in this scan.",
+    "No persistent session-block policy implemented/measured.",
+    "No full fault/delay/idle-return campaign; D-04 remains unlocked."
+  ],
+  "diagnostic_failure": {
+    "path": "/root/VORTEX-phase4-accounting/artifacts/phase4/d04-scan-d46ca8e/baseline/trial-1",
+    "rmem_max": 212992,
+    "rcvbuf_errors": 3874,
+    "udp_loss": 0.024801060158895796,
+    "result": "accounting mismatch; rejected, excluded from 21 trials"
+  },
+  "remote_full_evidence": "/root/VORTEX-phase4-accounting/artifacts/phase4/d04-scan-buffered-d46ca8e",
+  "local_evidence": "artifacts/phase4/d04-scan-buffered-d46ca8e",
+  "artifacts": {
+    "reports.tar.gz": "422969355cb36b0c5e922ceb80d56ef3f7d5012288926f72c27a0d8dec065822",
+    "diagnostics.tar.gz": "c002131ca7a9923c4e77769401f97df21e0fbf04c2fea2b2d93fbc8a50470400",
+    "summary.json": "b33db5f6fc0eabd8c741899b27db49f64f8a5cfe41e101eb16200217ceac5e87",
+    "raw-artifact-sha256.json": "0f3b8272fa15dcfa593c11d16b2131886d4248b5f82ee64cc5535c20d9d8d453",
+    "restore.log": "e0200b5e625b13cb4cf3e14bb32826d90a0511ea596355ffb5b3251eab3e41ff"
+  }
+}

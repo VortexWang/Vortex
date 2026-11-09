@@ -71,7 +71,7 @@ func (s *Store) migratePolicyTransitions() error {
 	}
 	return tx.Commit()
 }
-func persistPolicyTransitionsTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate) error {
+func persistPolicyTransitionsTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate) error {
 	if len(u.PolicyTransitions) > 64 {
 		return ErrAuthorizationDenied
 	}
@@ -175,7 +175,7 @@ func persistPolicyTransitionsTx(ctx context.Context, tx *sql.Tx, u Authorization
 
 // policySnapshotTx selects only for new sessions. Established sessions use
 // their original immutable snapshot and cannot merge into future-period funds.
-func policySnapshotTx(ctx context.Context, tx *sql.Tx, scope AuthorizationUse) (string, error) {
+func policySnapshotTx(ctx context.Context, tx storeTransaction, scope AuthorizationUse) (string, error) {
 	rows, err := tx.QueryContext(ctx, `SELECT payload,payload_sha256 FROM policy_transitions WHERE node_id=? AND boot_id=? AND rule_id=? AND path_generation=? AND (unixepoch(effective_at)>=unixepoch(?) OR rowid=(SELECT rowid FROM policy_transitions WHERE node_id=? AND boot_id=? AND rule_id=? AND path_generation=? AND unixepoch(effective_at)<unixepoch(?) ORDER BY rowid DESC LIMIT 1)) ORDER BY rowid LIMIT 66`, scope.NodeID, scope.BootID, scope.RuleID, policyUint(scope.PathGeneration), scope.Earliest.UTC().Format(time.RFC3339Nano), scope.NodeID, scope.BootID, scope.RuleID, policyUint(scope.PathGeneration), scope.Earliest.UTC().Format(time.RFC3339Nano))
 	if err != nil {
 		return "", err
@@ -233,7 +233,7 @@ func policySnapshotTx(ctx context.Context, tx *sql.Tx, scope AuthorizationUse) (
 
 func policyUint(n uint64) string { return strconv.FormatUint(n, 10) }
 
-func policyAuthorityIDsTx(ctx context.Context, tx *sql.Tx, scope AuthorizationUse) (map[string]string, error) {
+func policyAuthorityIDsTx(ctx context.Context, tx storeTransaction, scope AuthorizationUse) (map[string]string, error) {
 	ids := map[string]string{}
 	rows, err := tx.QueryContext(ctx, `SELECT payload,payload_sha256 FROM policy_transitions WHERE node_id=? AND boot_id=? AND rule_id=? AND path_generation=? AND json_extract(CAST(payload AS TEXT),'$.new_snapshot.snapshot_id')=? ORDER BY rowid DESC LIMIT 1`, scope.NodeID, scope.BootID, scope.RuleID, policyUint(scope.PathGeneration), scope.BillingSnapshotID)
 	if err != nil {

@@ -97,7 +97,7 @@ func TestUpgradePreflightReadsExistingSchemaWithoutMigrating(t *testing.T) {
 	if err = runCommand(context.Background(), []string{"upgrade-preflight", "--db", path}, &out, &diagnostics); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"read_only":true`) || !strings.Contains(out.String(), `"schema":16`) {
+	if !strings.Contains(out.String(), `"read_only":true`) || !strings.Contains(out.String(), `"schema":20`) {
 		t.Fatal(out.String())
 	}
 	missing := filepath.Join(root, "absent.db")

@@ -7,6 +7,9 @@ qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 bin=${VORTEX_RELAY_BIN:-$root/artifacts/phase4/vortex-relay}
 export BACKEND="$mode" QUALIFICATION_DIR="$qual"
 target_pid=
+idle_seconds=${PHASE4_IDLE_SECONDS:-0}
+case "$idle_seconds" in ''|*[!0-9]*) echo 'PHASE4_IDLE_SECONDS must be an integer in 0..120' >&2; exit 2 ;; esac
+if [ "$idle_seconds" -gt 120 ]; then echo 'PHASE4_IDLE_SECONDS exceeds 120' >&2; exit 2; fi
 mkdir -p "$root/artifacts/phase4" "$qual"
 rm -f "$qual/topology-ready"
 
@@ -89,6 +92,9 @@ with open(sys.argv[1], "w", encoding="utf-8") as output:
     json.dump(stats, output, sort_keys=True)
     output.write("\n")
 PY
+if [ "${D04_SHORT_SAMPLES:-0}" != 0 ]; then
+  "$root/tools/phase4/driver.sh" latency.py --samples "$D04_SHORT_SAMPLES" --output "$qual/short-flow-latency.json"
+fi
 "$root/tools/phase4/driver.sh" smoke_workload.py "$qual"
 capture_container_udp start
 "$root/tools/phase4/driver.sh" mixed_workload.py \
@@ -97,6 +103,16 @@ capture_container_udp start
   --udp-mbps "${MIXED_UDP_MBPS:-100}" \
   --output "$qual/mixed-workload.json"
 capture_container_udp final
+if [ "$idle_seconds" -gt 0 ]; then
+  python3 - "$qual/idle-window.json" "$idle_seconds" <<'PY'
+import json, sys, time
+from pathlib import Path
+start = time.monotonic_ns()
+time.sleep(int(sys.argv[2]))
+Path(sys.argv[1]).write_text(json.dumps(dict(requested_seconds=int(sys.argv[2]),
+    elapsed_nanoseconds=time.monotonic_ns()-start, scope='post-workload idle; processes remain running'))+'\n')
+PY
+fi
 python3 - "$qual/target-final.json" <<'PY'
 import json, sys, urllib.request
 with urllib.request.urlopen("http://127.0.0.1:18083/stats", timeout=3) as response:

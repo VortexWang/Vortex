@@ -96,3 +96,25 @@ func (e *RuntimeEngine) Err() error {
 func (e *RuntimeEngine) BeginDrain()                     { e.runtime.BeginDrain() }
 func (e *RuntimeEngine) Drain(ctx context.Context) error { return e.runtime.Drain(ctx) }
 func (e *RuntimeEngine) Stats() relay.Stats              { return e.runtime.Stats() }
+
+// EnableExperimentalFundingBlocks selects the durable block allocator for this
+// Node's configured runtime, before Start. Scope comes from the loaded Engine
+// configuration, never from an independent caller-supplied authority identity.
+// It grants no credit; authenticated persisted authority is still mandatory.
+func (n *Node) EnableExperimentalFundingBlocks(blockBytes uint64) error {
+	if n == nil {
+		return fmt.Errorf("agent: node is required")
+	}
+	e, ok := n.Engine.(*RuntimeEngine)
+	if !ok || e == nil {
+		return fmt.Errorf("agent: funding blocks require a runtime engine")
+	}
+	gate, err := n.NewExperimentalFundingBlockGate(e.scope, n.TrustedTime, blockBytes)
+	if err != nil {
+		return err
+	}
+	if err := e.SetAccountingGate(gate); err != nil {
+		return err
+	}
+	return n.Store.EnableMonotonicRuntimeRate(n.BootID)
+}

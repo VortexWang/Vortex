@@ -61,3 +61,38 @@ BackendMessage.authority_restrictions is distinct from certificate revocation. O
 BackendMessage.epoch_handoff_request is the typed input to existing Hub Recover/HandoffHub. Require matching authenticated Hub, from_epoch=current open epoch, to_epoch=from_epoch+1 without overflow, current backend heartbeat bound and required_restriction_revision already durably applied. Missing or delayed restriction revision holds the request; never default it to empty revocations. Same handoff ID and identical request replays original S/R result, changed request rejects. Compute S and original unissued R locally in one FULL transaction, close old signer, transfer R once and capture recovery barrier. Backend request contains no arbitrary R amount to mint. Handoff and status revisions are independently persisted; certificate-revocation revision must not substitute for authority restriction revision.
 
 Ledger payload is a replayed immutable observation, not a new allocation request. The phase-5 backend fixture commits the exact Hub/sequence/kind/record ID/bytes/hash before echoing ACK, preserving uniqueness and requiring contiguous confirmation. It does not derive funds, signer authority or financial settlement from arbitrary ledger payload. `issue` payload is the original authorization envelope; `known` is the existing deterministic UsageBatch protobuf and `unknown` is UnknownUsageBatch protobuf; `handoff` is the existing {Request,Result} record from agent/store/handoff.go at the recorded baseline. No payload is reinterpreted as BackendAllocation or EpochHandoffRequest. Any new semantic interpretation/record encoding requires another reviewed schema/version rather than extending an opaque NodeEvent.
+
+
+## 1.7.0 Phase 4 merge: isolated experimental demand transport
+
+Publication of this extension requires the exact merge proposal approval. Main
+1.3.0 lifecycle fields retain their numbers and meanings. NodeMessage field 100
+is CreditDemand; ControlMessage field 100 is CreditDemandDenied. Fields 16/15
+from the divergent Phase 4 experimental branch are not demand fields in this
+lineage, and must never be reinterpreted or automatically downgraded to.
+
+The demand path is disabled by default. A Node must explicitly enable
+EnableCreditDemand (CLI: --credit-demand-config) and connect using the legacy
+non-regional fixture path to a separately opted-in DemandIssuer. It cannot be
+combined with regional lifecycle/renewal negotiation. Scope remains bound to
+mutually authenticated Hub, Node, boot, delegation, source, snapshot and rule.
+The request grants no rights. Requests use immutable IDs, 1..MaxInt64 raw bytes
+and integral TTL 1..300 seconds. Success remains the existing durably funded
+AuthorizationUpdate correlated by update_id. A typed denial is accepted only
+for the matching pending request and authenticated issuer; it creates no credit
+and refunds no unknown liability. Both terminal outcomes survive exact replay.
+
+Stop old experimental fixtures and deploy both migrated ends together using
+separate endpoints and state directories. Unknown tag 100 on old peers fails
+closed; old demand tag 16 is a lifecycle message, and old denial tag 15 is a
+HubStatus, which the non-regional demand path rejects. No old-wire translation
+or automatic fallback is supplied. Existing grants and unknown usage must be
+settled by their original ledger identity, never erased during fixture changes.
+
+The catalog version 1.7.0 avoids reusing versions 1.4.0..1.6.0 already approved
+on the separate Phase 6 development lineage. This main integration includes
+only the 1.3.0 baseline plus this extension; it does not import or advertise
+Phase 6 feature capabilities. LifecycleHello still advertises its implemented
+1.3.0 status-v1/renewal-v1 subset. A later Phase 6 merge must union those exact
+approved extensions and rerun compatibility and governance review; version
+ordering alone is never evidence that a capability has been implemented.

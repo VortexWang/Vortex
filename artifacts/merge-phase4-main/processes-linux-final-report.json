@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "verified_tests": [],
+  "commit": "",
+  "dirty": null,
+  "scope": "independent-node-and-test-hub-tcp-udp-functional",
+  "backend": "local-protocol-fixture",
+  "performance_qualified": false,
+  "certificate_renewal_exercised": false,
+  "binary_sha256": {}
+}

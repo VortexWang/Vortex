@@ -41,7 +41,18 @@ func main() {
 	recoveryBackendName := flag.String("test-recovery-backend-name", "", "test backend certificate identity")
 	policyFixture := flag.String("test-policy-transition", "", "test-only funded future delegation and approved transition JSON")
 	refreshPath := flag.String("test-authorization-refresh", "", "test-only exact approved AuthorizationUpdate JSON delivered on heartbeat")
+	fixturePath := flag.String("authority-fixture", "", "explicit protocol-backend delegation fixture JSON")
+	backendDB := flag.String("fixture-backend-db", "", "separate durable protocol-backend ledger; requires authority-fixture")
 	flag.Parse()
+	if (*fixturePath == "") != (*backendDB == "") {
+		panic("authority-fixture and fixture-backend-db must be supplied together")
+	}
+	if *fixturePath != "" && (*hubID != "" || *delegationPath != "" || *recoveryRequest != "" || *policyFixture != "" || *refreshPath != "" || *reportPath != "" || *dropRenewal || *holdRenewal || *stall || *stallAfter) {
+		panic("experimental authority-fixture cannot be combined with lifecycle fixtures")
+	}
+	if *fixturePath != "" && *backendDB == *dbPath {
+		panic("fixture backend requires a separate database")
+	}
 	s, err := store.Open(*dbPath, "hub")
 	if err != nil {
 		panic(err)
@@ -172,6 +183,46 @@ func main() {
 			panic("test recovery requires backend and exact TLS identity")
 		}
 		go runTestRecovery(ctx, s, *hubID, *recoveryRequest, *recoveryBackend, *recoveryBackendName, cert, pool)
+	}
+	if *fixturePath != "" {
+		fixture, err := loadAuthorityFixture(*fixturePath)
+		if err != nil {
+			panic(err)
+		}
+		leaf, err := x509.ParseCertificate(cert.Certificate[0])
+		if err != nil {
+			panic(err)
+		}
+		if leaf.Subject.CommonName != fixture.Delegation.HubID || len(leaf.DNSNames) != 1 || leaf.DNSNames[0] != fixture.Delegation.HubID {
+			panic("fixture Hub identity must match TLS certificate")
+		}
+		hubInfo, err := os.Stat(*dbPath)
+		if err != nil {
+			panic(err)
+		}
+		if backendInfo, err := os.Stat(*backendDB); err == nil {
+			if os.SameFile(hubInfo, backendInfo) {
+				panic("fixture backend aliases Hub database")
+			}
+		} else if !os.IsNotExist(err) {
+			panic(err)
+		}
+		backend, err := store.Open(*backendDB, "hub")
+		if err != nil {
+			panic(err)
+		}
+		defer backend.Close()
+		configured := configureAuthorityFixture(ctx, s, backend, fixture)
+		configured.ConfigUpdate = server.ConfigUpdate
+		server = configured
+		// The explicit backend fixture has no revocation stream. Replay accounting
+		// only; do not refresh the heartbeat or reopen the signing epoch.
+		if err := server.Usage.ReplayPending(ctx); err != nil {
+			if ctx.Err() != nil {
+				return
+			}
+			panic(err)
+		}
 	}
 	if err := server.ServeGRPC(ctx, ln, config); err != nil && ctx.Err() == nil {
 		panic(err)

@@ -15,6 +15,17 @@ orbctl start
 DOCKER_CONTEXT=orbstack BACKEND=docker make phase4-runtime-mixed
 ```
 
+Use the Docker backend for the complete benchmark on macOS:
+
+```sh
+DOCKER_CONTEXT=orbstack BACKEND=docker make phase4-m2-benchmark
+```
+
+The native backend remains useful for host diagnostics, but Darwin does not
+expose the Linux UDP receive-buffer counters used to classify every loss in the
+strict accounting gate. A native Darwin run with unexplained socket loss is
+therefore expected to fail closed rather than being treated as qualification.
+
 The mixed check starts source → relay-1 → relay-2 → relay-3 → destination,
 plus a fixture echo target. It verifies a TCP half-close payload and UDP payload,
 then runs four TCP flows for five seconds as a contention baseline, followed by
@@ -32,7 +43,7 @@ Increasing `MIXED_DURATION_SECONDS` can exhaust that bound; an exhausted or
 unresolved accounting run must fail.
 
 Long-duration qualification can set `VORTEX_QUALIFICATION_EVENT_LIMIT` for the
-fixture only (maximum 10,000,000 events per execution process). The default
+fixture only (maximum 50,000,000 events per execution process). The default
 remains 1,000,000, and the selected value is included in host/semantic evidence.
 The override is ignored by runtime configs without an evidence file.
 Events are retained in bounded 4,096-entry chunks to avoid large contiguous
@@ -61,6 +72,10 @@ not the separate Agent runtime configuration contract.
 The mode summary keeps fresh client-connect-to-first-byte separate from the
 userspace segment echo RTT sum. Their subtraction is diagnostic; this alone
 does not qualify NFR-007 or prove that OPEN confirmation adds no network RTT.
+Each latency probe also records a bounded monotonic event timeline per sample
+(connect, send, first byte, complete echo, and close). `latency_gate.py` requires
+that timeline to align with the raw first-byte samples and fail-closes on
+missing, non-finite, or out-of-order events.
 
 Evidence files:
 
@@ -220,3 +235,82 @@ billing-snapshot switching or lock D-04. Existing
 qualification fixtures set `qualification_only` explicitly and use the bounded
 in-process evidence Gate; ordinary source configs require a positive funded
 `source_credit` or active `source_credit_book` snapshot.
+
+### Experimental durable Agent block mode
+
+The Agent binary accepts `--experimental-funding-block-bytes N` together with
+`--engine-config`. Zero (the default) keeps per-write accounting; explicit
+positive values are bounded at 4 MiB. Candidate scan sizes remain 65536, 262144
+and 1048576 bytes, not approved production defaults. The gate derives its scope
+from the loaded Engine configuration and cannot be replaced after runtime start.
+Use `--credit-demand-config` for the existing explicit control 1.3.0 adaptive
+policy. Neither option creates credit: persisted, authenticated grant/runtime/
+share authority remains mandatory, and node recovery precedes traffic startup.
+
+This exposes the durable allocator for independent-process workloads. Existing
+`d04_run.py` still measures the process-local issuer and does not automatically
+use this option; it cannot qualify durable Hub performance. The durable
+candidate entrypoint is `make phase4-d04-durable-scan` (or
+`python3 tools/phase4/d04_durable_scan.py`): it runs the 3 x 3 x 3 matrix,
+executes both TCP and UDP for every case, preserves each test log, and checks
+source conservation, pending/unknown/held settlement, issuer occupancy and
+idle-tail reclamation. Its final manifest always keeps `locked=false`; a pass
+is evidence for D-04 review, not an automatic production-default change.
+
+The protocol-test Hub now accepts paired `--authority-fixture FILE` and
+`--fixture-backend-db FILE` options. The JSON object has `delegation` (explicit
+`store.HubDelegation` fields), `initial_request_id`, `initial_bytes`, and
+`ttl_seconds`. All identities, budgets, rates and absolute time boundaries are
+operator-supplied test inputs. `Delegation.BootID` must be empty; the first
+mTLS-authenticated node heartbeat binds it durably. A different boot cannot reuse
+that delegation. The Hub certificate CN and sole DNS SAN must match its HubID.
+The backend database must be a separate file, including through filesystem aliases.
+
+This fixture uses local wall time as explicitly test-only trusted time. Its fixed
+BackendHeartbeat/AutonomyDeadline still apply; it does not simulate an always-
+online backend or extend authority deadlines. Reconnect replays the initial issue
+identity and cannot replenish the budget. Continuous backend-liveness simulation,
+process orchestration, workload metrics and native qualification remain to be
+implemented. Do not use these options as production backend integration evidence.
+
+Run `VORTEX_PROCESS_EVIDENCE_DIR=/absolute/fresh/path sh tools/phase4/durable-process.sh`
+to build both binaries and execute the two-process TCP functional check. The
+harness supplies mTLS fixtures, finite durable delegation and 16 sequential
+1500-byte exchanges; it waits for the exact 48000-byte bidirectional total and
+ACKs before stopping traffic, then compares every persisted batch across Agent,
+Hub and protocol-backend ledgers. Logs, configs, databases and private test keys
+are retained under the evidence directory; treat it as private test material.
+The report records SHA, dirty state, binary hashes and explicit non-qualification.
+Source and echo target run in the test driver. This is not a five-process topology,
+16 concurrent streams, UDP throughput, sustained-load or certificate-renewal test.
+
+The process entry now runs TCP and UDP separately, checking UDP datagram
+boundaries and exact 48000-byte totals per protocol. After both writers stop,
+it additionally audits Agent source conservation and reconciles Agent initial
+credit against Hub durable issuance. The report requires explicit PASS markers
+for both tests, so a skipped/missing protocol cannot produce success. This adds
+UDP functional coverage only; offered-rate/loss performance is still unmeasured.
+
+The entry additionally exercises 16 concurrent TCP streams with explicit
+256 KiB blocks and an 8 MiB initial/target grant. Its fixed 16 exchanges per
+stream are functional coverage, not a duration-based performance trial.
+`workload.json` records each case's actual configuration; `traffic.json` records
+request/response duration, byte throughput and round-trip percentiles. These
+percentiles are not issuer-wait latency. The report requires all three cases.
+
+### Configured-route stale OPEN matrix
+
+Run `ATTACK_DIR=/absolute/fresh/path tools/phase4/attack.sh` for the standalone
+native five-process matrix. It enables bounded runtime authority, generates
+revision/generation 2, then checks valid nonzero old-version OPENs for TCP and
+UDP. The output covers 16 named OPEN cases plus UDP link loss; it is not a full
+identity-handshake/security qualification. The directory must not exist.
+
+The expanded `attack_gate.py` deliberately rejects the previous 12-case report.
+`qualification.sh` and `comparison.sh` now default to version 2. When overriding
+configuration, generate both the original qualification run and
+its comparison with `PHASE4_POLICY_VERSION=2`; preserve that value across warmup
+and all trials so their semantics match. The generator still defaults to 1 for
+existing non-attack fixtures. A full attack probe against version 1 fails with
+an explanatory error because decrementing it would test invalid zero fields
+locally, not stale authorization at the receiving runtime.

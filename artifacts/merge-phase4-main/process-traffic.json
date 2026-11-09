@@ -1,0 +1,126 @@
+{
+  "processes-active": {
+    "process-2596989194": {
+      "bidirectional_payload_bytes": 48000,
+      "bidirectional_payload_mbps": 0.9180495359590715,
+      "network": 2,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 29.388166,
+        "p95": 30.857959,
+        "p99": 30.857959
+      },
+      "round_trips": 16,
+      "streams": 1,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 418278083
+    },
+    "process-2877744642": {
+      "bidirectional_payload_bytes": 12288000,
+      "bidirectional_payload_mbps": 39.594548982868304,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 8.036042,
+        "p95": 18.185375,
+        "p99": 26.129666
+      },
+      "round_trips": 4096,
+      "streams": 16,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 2482766000
+    },
+    "process-3719202455": {
+      "bidirectional_payload_bytes": 48000,
+      "bidirectional_payload_mbps": 0.9073147824083714,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 29.330542,
+        "p95": 31.638834,
+        "p99": 31.638834
+      },
+      "round_trips": 16,
+      "streams": 1,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 423226875
+    },
+    "process-576986644": {
+      "bidirectional_payload_bytes": 768000,
+      "bidirectional_payload_mbps": 53.33070985127841,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 6.61375,
+        "p95": 10.522625,
+        "p99": 13.067583
+      },
+      "round_trips": 256,
+      "streams": 16,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 115205667
+    }
+  },
+  "processes-linux-mounted": {
+    "process-1014853718": {
+      "bidirectional_payload_bytes": 48000,
+      "bidirectional_payload_mbps": 0.8315576149522618,
+      "network": 2,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 29.848735,
+        "p95": 36.689998,
+        "p99": 36.689998
+      },
+      "round_trips": 16,
+      "streams": 1,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 461783998
+    },
+    "process-3461924360": {
+      "bidirectional_payload_bytes": 768000,
+      "bidirectional_payload_mbps": 17.685467263473274,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 20.552122,
+        "p95": 31.223929,
+        "p99": 37.445407
+      },
+      "round_trips": 256,
+      "streams": 16,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 347403883
+    },
+    "process-2050909082": {
+      "bidirectional_payload_bytes": 12288000,
+      "bidirectional_payload_mbps": 14.392814562320526,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 26.724433,
+        "p95": 38.70206,
+        "p99": 44.871247
+      },
+      "round_trips": 4096,
+      "streams": 16,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 6830074797
+    },
+    "process-312755408": {
+      "bidirectional_payload_bytes": 48000,
+      "bidirectional_payload_mbps": 0.75363396705537,
+      "network": 1,
+      "performance_qualified": false,
+      "round_trip_ms": {
+        "p50": 33.035035,
+        "p95": 36.275043,
+        "p99": 36.275043
+      },
+      "round_trips": 16,
+      "streams": 1,
+      "timing_scope": "request-response traffic; excludes later ACK drain",
+      "traffic_elapsed_ns": 509531174
+    }
+  }
+}

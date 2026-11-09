@@ -1,0 +1,12 @@
+{
+  "first": {
+    "contracts/protobuf/v1/vortex.pb.go": "6db3ec30022bbf2acb25e9c2ca4053d1e9e74f46abaca0d82ea9b74e134adb9e",
+    "contracts/protobuf/v1/vortex_grpc.pb.go": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+  },
+  "second": {
+    "contracts/protobuf/v1/vortex.pb.go": "6db3ec30022bbf2acb25e9c2ca4053d1e9e74f46abaca0d82ea9b74e134adb9e",
+    "contracts/protobuf/v1/vortex_grpc.pb.go": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+  },
+  "status": "passed",
+  "scope": "two independent generation passes and working-tree byte equality"
+}

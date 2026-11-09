@@ -53,7 +53,7 @@ if [ "$BENCH_EXIT" -ne 0 ]; then
 	exit "$BENCH_EXIT"
 fi
 metric() {
-	awk -v benchmark="$1" -v unit="$2" '$1 ~ benchmark { for (i = 1; i <= NF; i++) if ($i == unit) { print $(i-1); break } }' "$RAW" | sort -n | awk '{ values[NR] = $1 } END { if (!NR) exit 1; if (NR % 2) print values[(NR + 1) / 2]; else printf "%.3f\n", (values[NR / 2] + values[NR / 2 + 1]) / 2 }'
+	awk -v benchmark="$1" -v unit="$2" '$1 ~ /^Benchmark/ { active = ($1 ~ benchmark) } active { for (i = 1; i <= NF; i++) if ($i == unit) { print $(i-1); active = 0; break } }' "$RAW" | sort -n | awk '{ values[NR] = $1 } END { if (!NR) exit 1; if (NR % 2) print values[(NR + 1) / 2]; else printf "%.3f\n", (values[NR / 2] + values[NR / 2 + 1]) / 2 }'
 }
 FORWARD_MB=$(metric '^BenchmarkVLinkTCPThroughput/vlink-tracer/forward-' 'MB/s')
 REVERSE_MB=$(metric '^BenchmarkVLinkTCPThroughput/vlink-tracer/reverse-' 'MB/s')

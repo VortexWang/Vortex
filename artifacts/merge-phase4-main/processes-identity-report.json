@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "verified_tests": [
+    "TestDurableAuthorityProcessesConcurrentTCP"
+  ],
+  "commit": "00704144c17f69dfb0a1cb2f8b1005e5c97e1ad9",
+  "dirty": true,
+  "scope": "independent-node-and-test-hub-tcp-udp-functional",
+  "backend": "local-protocol-fixture",
+  "performance_qualified": false,
+  "certificate_renewal_exercised": false,
+  "binary_sha256": {
+    "vortex-test-hub": "6e772fe2bf62e098747abd2fa1431ceb30201761688386f381a27a83a7d7125f",
+    "vortex-node": "1fe9163c1ce316514d44860289ebc0b5d09a8137bdc4b1df38610683b05d8a5a"
+  }
+}

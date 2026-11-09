@@ -1,0 +1,972 @@
+{
+  "raw_directory": "artifacts/phase4/unknown-f9d99ec/waterline-30",
+  "trial_exit": 1,
+  "files": {
+    "events-source.jsonl.credit.json": {
+      "sha256": "dbabf61ae38ce3e4f930317d649c25450e6ddae072e5dff98ade52d3ac3312c0",
+      "data": {
+        "dynamic_target_bytes": 8388608,
+        "waits": {
+          "attempts": 249,
+          "shortfalls": 16,
+          "waits": 16,
+          "wait_succeeded": 0,
+          "timed_out": 0,
+          "cancelled": 0,
+          "final_failures": 16
+        },
+        "observations": {
+          "reservations": 233,
+          "block_allocations": 127,
+          "peak_sessions": 17,
+          "peak_held_bytes": 4702392,
+          "issuer_calls": 0,
+          "issuer_nanoseconds_log2_buckets": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "snapshot_id": "phase4-formal/source/path-2/policy-2",
+        "pending_grant_bytes": 0,
+        "unknown_grant_bytes": 6029360,
+        "grant_records": 2,
+        "budget_bytes": 1099511627776,
+        "unissued_bytes": 1099497209808,
+        "available_bytes": 6840,
+        "held_bytes": 0,
+        "used_bytes": 8381768,
+        "unknown_bytes": 0,
+        "grants": 1,
+        "denials": 16,
+        "sessions": 0
+      }
+    },
+    "events-source.jsonl.credit-timeline.json": {
+      "sha256": "205e4689d124a6f3a7621ed3c4ba2ee15cef3c9a34310f102ea8317982fc2795",
+      "projection": "allocator histograms omitted; hash covers full original",
+      "data": {
+        "interval_nanoseconds": 1000000000,
+        "dropped_periodic_samples": 0,
+        "samples": [
+          {
+            "elapsed_nanoseconds": 4296,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 1000765455,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 2000951070,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 3000164271,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 4000075173,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 5000069007,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 6000093864,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 7000120987,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 8000066585,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 9000177836,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 10000116597,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 11000150111,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 12000179494,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 13000123098,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 14000075364,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 15000094539,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 16000114564,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 17000162594,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 18000118834,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 19001123641,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 20000308016,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 20933604803,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 249,
+                "shortfalls": 16,
+                "waits": 16,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 16
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 6029360,
+              "grant_records": 2,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099497209808,
+              "available_bytes": 6840,
+              "held_bytes": 0,
+              "used_bytes": 8381768,
+              "unknown_bytes": 0,
+              "grants": 1,
+              "denials": 16,
+              "sessions": 0
+            }
+          }
+        ]
+      }
+    },
+    "semantic-manifest.json": {
+      "sha256": "e19e2edcb5b7e862b904e6e2073507022c23f8c3f3567aa99c5bf68fdee7c777",
+      "data": {
+        "roles": {
+          "destination": {
+            "execution_point": true,
+            "hop_index": 3,
+            "next_hop_node_id": "",
+            "node_id": "00000000-0000-0000-0000-000000000005",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000004",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "destination",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "echo-target:18081",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-1": {
+            "execution_point": false,
+            "hop_index": 0,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+            "node_id": "00000000-0000-0000-0000-000000000002",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000001",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-2": {
+            "execution_point": false,
+            "hop_index": 1,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+            "node_id": "00000000-0000-0000-0000-000000000003",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000002",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-3": {
+            "execution_point": false,
+            "hop_index": 2,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+            "node_id": "00000000-0000-0000-0000-000000000004",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000003",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "source": {
+            "execution_point": true,
+            "hop_index": 0,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+            "node_id": "00000000-0000-0000-0000-000000000001",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000002",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "source",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "source_credit": {
+              "budget_bytes": 1099511627776,
+              "grant_target_bytes": 375000000,
+              "initial_block_bytes": 262144,
+              "max_block_bytes": 4194304,
+              "observe": true,
+              "renew_percent": 30,
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "target_seconds": 30
+            },
+            "target_service": "",
+            "tcp_service": true,
+            "transport_mode": "mux",
+            "udp_service": true,
+            "version": 1
+          }
+        },
+        "runtime_environment": {
+          "CPU_PROFILE": "default",
+          "GOGC": "default",
+          "GOMAXPROCS": "default",
+          "PHASE4_IDLE_SECONDS": "default",
+          "PHASE4_TEST_ISSUER_DELAY": "40ms",
+          "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+          "PHASE4_TEST_ISSUER_RENEWAL_OUTCOME": "unknown",
+          "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+        },
+        "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+        "udp_socket_limits": {
+          "rmem_default": 212992,
+          "rmem_max": 67108864,
+          "wmem_default": 212992,
+          "wmem_max": 67108864
+        },
+        "workload": {
+          "duration_seconds": 15,
+          "tcp_streams": 16,
+          "udp_mbps": 100,
+          "udp_payload_bytes": 1200
+        }
+      }
+    },
+    "mixed-workload.json": {
+      "sha256": "98ed2d7cb12c978270a994aa3b73363b9d07b72a88988792af4c818b8df78948",
+      "data": {
+        "baseline": {
+          "connections": 16,
+          "duration_seconds": 0.058645411001634784,
+          "errors": [],
+          "first_byte_latency_ms": [
+            7.989345001988113,
+            8.290743993711658,
+            9.39743900380563,
+            10.67235998925753,
+            14.006116995005868,
+            13.824287001625635,
+            14.679486994282342,
+            16.58415299607441,
+            15.591709001455456,
+            14.327132987091318,
+            16.559572002734058,
+            15.764872005092911,
+            17.35047200054396,
+            21.535284991841763,
+            21.91916899755597,
+            22.62993500335142
+          ],
+          "received_bytes": 2024672,
+          "sent_bytes": 6356992,
+          "throughput_mbps": 276.1917040627183
+        },
+        "driver": {
+          "cpu_count": 12,
+          "machine": "x86_64",
+          "release": "7.0.0-42-generic",
+          "system": "Linux"
+        },
+        "duration_seconds_per_phase": 15,
+        "host": "127.0.0.1",
+        "kernel_udp_driver_delta": {
+          "IgnoredMulti": 1,
+          "InCsumErrors": 0,
+          "InDatagrams": 156190,
+          "InErrors": 0,
+          "MemErrors": 0,
+          "NoPorts": 0,
+          "OutDatagrams": 156190,
+          "RcvbufErrors": 0,
+          "SndbufErrors": 0
+        },
+        "mixed": {
+          "errors": [],
+          "tcp": {
+            "connections": 16,
+            "duration_seconds": 0.004084041996975429,
+            "errors": [
+              "TCP send: [Errno 32] Broken pipe",
+              "TCP send: [Errno 32] Broken pipe",
+              "TCP send: [Errno 32] Broken pipe",
+              "TCP send: [Errno 32] Broken pipe",
+              "TCP send: [Errno 32] Broken pipe",
+              "TCP recv: [Errno 104] Connection reset by peer"
+            ],
+            "first_byte_latency_ms": [],
+            "received_bytes": 0,
+            "sent_bytes": 589824,
+            "throughput_mbps": 0
+          },
+          "udp_bytes_received": 0,
+          "udp_loss": 1,
+          "udp_payload_mbps": 0,
+          "udp_received": 0,
+          "udp_sent": 156190,
+          "udp_socket_receive_buffer_bytes": 8388608,
+          "udp_unique_received": 0
+        },
+        "schema": 1,
+        "target_baseline": {
+          "tcp_bytes_received": 6356992,
+          "tcp_bytes_sent": 6356992,
+          "udp_bytes_received": 0,
+          "udp_bytes_sent": 0,
+          "udp_datagrams_received": 0,
+          "udp_datagrams_sent": 0
+        },
+        "target_mixed": {
+          "tcp_bytes_received": 0,
+          "tcp_bytes_sent": 0,
+          "udp_bytes_received": 0,
+          "udp_bytes_sent": 0,
+          "udp_datagrams_received": 0,
+          "udp_datagrams_sent": 0
+        },
+        "target_total": {
+          "tcp_bytes_received": 6356992,
+          "tcp_bytes_sent": 6356992,
+          "udp_bytes_received": 0,
+          "udp_bytes_sent": 0,
+          "udp_datagrams_received": 0,
+          "udp_datagrams_sent": 0
+        },
+        "tcp_retention": 0,
+        "tcp_streams": 16,
+        "udp_target_mbps": 100
+      }
+    }
+  }
+}

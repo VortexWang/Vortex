@@ -1,5 +1,132 @@
 # D-04 参数评审（2026-11-04）
 
+## Owner-confirmed final decision — 2026-11-07
+
+The project owner replied **“确认”** to the concrete D-04 table after the full
+matrix and center-profile formal qualification. D-04 is now **locked for the
+Phase 4 Engine/process-local adapter**, and P4-Q1..Q5 are accepted within that
+stage boundary. The machine-readable decision is [04-D04-LOCK.json](04-D04-LOCK.json).
+
+| Parameter | Confirmed value |
+| --- | --- |
+| Initial block per direction | 256 KiB |
+| Maximum adaptive block per direction | 4 MiB |
+| Demand floor | 8 MiB |
+| Committed-consumption observation window | 60 s |
+| Target horizon and explicit cap | 30 s; 375000000 bytes maximum |
+| Renewal waterline | 30% |
+| Reservation wait limit | 200 ms |
+
+The 81-trial matrix, independent raw audits and separate center-profile formal
+run support this decision; see [04-45-FINAL-ACCEPTANCE-AUDIT.md](04-45-FINAL-ACCEPTANCE-AUDIT.md).
+The nine failed 600 ms availability trials remain failed. Production Agent/Hub
+parameters require Phase 5 requalification; PostgreSQL authority remains Phase
+6. No production default or grant-return protocol change is implied.
+
+The earlier pending/unlocked statements below are historical observations,
+superseded by this explicit owner decision. Their measured sources, failures,
+and hashes remain unchanged.
+
+
+补充量化评审：[04-24-D04-TRADEOFF-REVIEW.md](04-24-D04-TRADEOFF-REVIEW.md)。
+
+## Current evidence reconciliation — 2026-11-07
+
+The full native dynamic matrix completed 27 combinations x 3 repeats on clean
+`2543fb745d942ddf710c02d502a3675b9b3c7fe9`. Independent raw workload,
+flow/source accounting, consumption formula and 65-second idle audits pass for
+all 81 trials. Summary SHA256:
+`135a289cdf96d46c4b3668befa45e87c289403c669541fe7fb5b1932abc4566a`.
+
+Clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` completed the separate
+256 KiB / 30 s / 50% formal candidate: 300 s warmup, three 300 s trials,
+independent TLS, 16 streams and actual 100 Mbps UDP. The gate passes; SHA256:
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+The 30% center candidate completed a separate formal run (see follow-up below); it does not inherit the 50% result. Nine 600 ms renewal pressure trials failed availability
+and remain raw failures. The 200 ms reservation deadline is unchanged.
+
+The current comparative review is [04-44-D04-PARAMETER-REVIEW.md](04-44-D04-PARAMETER-REVIEW.md).
+`locked=false` and `gaps_found` remain. Formal performance acceptance, D-04
+parameter lock and persistent authority are retained as user-required debts;
+production Agent/Hub/PostgreSQL authority remains owned by Phase 5/6.
+Historical results below retain their original source and measurement scope.
+
+## Current stage boundary — 2026-11-06 owner decision
+
+M2 参数关闭按 [04-CLOSURE.md](04-CLOSURE.md) 的 P4-Q4 执行：允许有限、
+可审计的进程内 issuer，必须标明指标适用边界。下方 durable 实现和其
+尚缺验收移交 Phase 5，不再作为 M2 参数评审前提。生产参数需在实际
+Agent/Hub 集成时复验；本次未锁定任何候选值。
+
+## Historical cross-phase reconciliation — 2026-11-06
+
+Status: **not locked; durable implementation integrated, full qualification open**.
+The historical rows below describe earlier slices and must not be read as the
+current implementation inventory.
+
+| Requirement | Current implementation/evidence | Remaining acceptance |
+| --- | --- | --- |
+| Immutable authority isolation | DemandScope, exact scoped ledger read, Agent/Hub SQLite and TLS issuer binding | Full cross-tenant/multi-hop hostile matrix and product startup wiring |
+| Cold start / dynamic target / renewal waterline | Explicit candidate parameters; 60-slot durable committed-consumption ring; scoped valid balance; opt-in startup wiring; one actual metered TCP and UDP control 1.3.0 demand→durable issue→install→same-stream renewal cycle | Sustained durable-issuer workload, controlled candidate scan; no defaults locked |
+| Coalescing / delayed responses | Persisted UUID, atomic success/refusal, replay after restart, source conservation and refusal backoff tests | Delayed/lost response injection during sustained native TCP/UDP workload |
+| Missing-authority wait | One 200 ms context covers initial attempt and retries; 128-waiter bound; scope-bound control wakeups | End-to-end native load tail latency, including cancellation and queue pressure |
+| Native correctness | Clean 382aab9: ten SQLite contention repetitions, Agent/Hub/Engine race and vet PASS on dedicated Ubuntu | Does not establish performance of the durable allocator |
+| Session block strategy | Earlier process-local block candidate sweep exists; durable gate reserves per write | Implement/measure bounded durable session-block strategy or explicitly review a different strategy; do not claim the old scan covers it |
+| Idle shrink/reclaim | No complete grant-return proof path | Persist idle lifecycle, stop/fence grant use, settle all holds, transfer exact unused proof, deduplicate issuer credit and preserve unknown liability |
+| Parameter decision | 256 KiB -> 4 MiB, 8 MiB floor, 30 s target, 30% waterline remain candidates | Review measured throughput, latency and tied-up funding together before locking |
+
+The c6a0761 formal performance pass remains valid only for that old implementation.
+It must not be relabelled as performance of 382aab9's durable settlement path.
+See 04-14-NATIVE-REGRESSION.json for the newer finite native regression hashes.
+
+### Idle proof boundary
+
+Hub HandoffHub transfers only unissued delegation remainder. It does not return
+Agent-held credits. Control 1.3.0 CreditDemandDenied proves only that one request
+issued no rights; it cannot be used as an unused-credit receipt. Expiry, closed
+transport, usage ACK and a local zero-session observation are individually
+insufficient proof for reclaim. A proper return path must fence further use,
+retain unresolved reservations/unknown upper bounds, reconcile the exact grant,
+and atomically record a one-time return at the issuer before reallocation.
+This is a substantive remaining implementation requirement, not a documentation
+exception or something covered by the native green test suite.
+
+## 04-12 measured review
+
+### Clean current adapter scan — 2026-11-06
+
+The follow-up dynamic-target scan on `e862ffe` supersedes the fixed-ceiling
+measurement below for the current candidate evidence. All 21 trials now pass
+`target_seconds` into the runtime allocator and record the timeline from the
+8 MiB floor through the 10/30/60-second ceilings. Full ranges and the retained
+fail-closed transient are in `04-41-D04-DYNAMIC-TARGET-EVIDENCE.md`.
+
+The selector-cleanup fix on `ae858f5` enabled the executable scan to complete
+all seven one-factor cases with three repetitions (21 trials). Each trial used
+16 TCP streams plus actual roughly 100 Mbps UDP for 5 seconds per phase; all
+source ledgers conserved and settled with zero unknown bytes and zero UDP loss.
+Mixed TCP ranges were 2,735.23–3,135.58 Mbps and short-flow medians were
+0.4468–0.4839 ms. The complete table and raw-output paths are in
+`04-38-D04-CANDIDATE-SCAN-EVIDENCE.md`.
+
+The scan is valid only for the bounded process-local issuer on the recorded
+Darwin host. It has no remote issuer merge measurement, durable funding
+occupancy, or idle return proof. A separate 15-second attempt failed closed
+with 41.35% UDP loss and TCP resets. Keep all candidates unlocked and do not
+promote this scan to formal performance qualification.
+
+The candidate inventory has now been executed as seven one-factor cases x
+three repetitions on d1ee7d2. All 21 source ledgers reconcile; all UDP runs have
+zero loss. TCP medians span 1030.47–1034.22 Mbps and short-flow medians span
+1.665–1.694 ms. This small spread does not establish a winner. Keep the proposed
+256 KiB initial block / 4 MiB ceiling / 30-second adaptive target / 30% waterline
+as **unlocked** candidates. The sweep used a fixed 100 Mbps grant-rate reference,
+not a production adaptive issuer. Delayed/lost issuance, drain/idle policy and
+durable funding observations still need integration evidence. Full table and
+raw evidence identifiers: [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
+
+The prior reviews below are historical.
+
 状态：评审已完成；**候选保留，未批准锁定**。代码审查基线 `6bfe97624cf807824d8df91fa7519b5a108e2d04`，与 `d0c1cb2` 相比仅阶段文档改变。本文是当前项目评审，不将 V1.11 升格为冻结验收依据，不增加新的历史材料门禁。
 
 ## 04-11 gate update — 2026-11-05
@@ -78,3 +205,79 @@ Gate/块管理”的状态。当前标准混合负载脚本仍未开启该 Gate�
 授权目标与正式性能门控仍缺。故原有“不支持 UDP / 没有任何 grant
 ID”的描述仅适用于此前切片；不扩大 NFR/D-04 验收结论。详见
 04-06-GRANT-UDP-EVIDENCE.md。Phase 4 仍 executing。
+
+## Durable per-write accounting baseline — 2026-11-06
+
+A clean native run of the real Agent Store reserve/settle path at commit
+`d46ca8e793a9b7f79c5e65ca011401bdbd76bdde` measured approximately 6 ms per
+operation across three payload sizes, with median accounting capacity rising
+from 0.18 MB/s at 1,200 bytes to 10.14 MB/s at 65,536 bytes. SQLite WAL/FULL,
+source conservation and pending outbox cardinality were checked for every
+sample. Full command, five-sample ranges, host details and hashes are in
+`04-17-NATIVE-ACCOUNTING.json` and `artifacts/phase4/durable-accounting-d46ca8e/`.
+
+This isolates durable per-write cost only. It does not compare authorization
+block policies, include transport or Hub issuance, or establish user-visible
+throughput. Keep the existing D-04 candidates unlocked until the planned
+five-process authorized TCP/UDP scan compares durable bounded blocks and
+per-write accounting while recording latency and held-funding costs.
+
+## Seven-case native diagnostic comparison — 2026-11-06
+
+`04-18-NATIVE-D04-SCAN.json` adds 21 successful 15-second trials at clean
+`d46ca8e`. All seven one-factor cases have zero UDP loss and conserved/settled
+source credit; mixed TCP medians span only 1022.47–1026.78 Mbps. This narrow
+spread gives no basis to declare a winning production configuration. Each
+trial's formal performance status remains not-qualified.
+
+The scan covers actual five-process forwarding with the process-local finite
+allocator. It does not measure the persistent Hub scheduler or a durable
+session-block strategy, and fixed-reference target-size conversion is distinct
+from dynamic consumption-based renewal. Keep all D-04 defaults unlocked.
+Sustained durable-authority traffic, lost/delayed control responses under load,
+funding occupancy, idle-return proof and formal same-SHA qualification remain
+required. The unbuffered failed baseline remains visible in the diagnostic
+archive; temporary buffer maxima were restored after the successful scan.
+
+## Native durable renewal update — 23a9ea3
+
+Three clean native race trials now each complete 32 TCP and 32 UDP adaptive
+renewals with real mTLS, durable Agent/Hub issuance and a protocol-backend usage
+fixture. Snapshot audits verify all 68 batches per transport and exact source
+conservation, with no pending requests or open sessions. Full Agent/Hub native
+race and vet also pass; see 04-19-NATIVE-LONG-RENEWAL.json.
+
+This establishes the controlled multi-cycle integration slice after reducing
+exhausted-grant planning queries. It does not qualify throughput/latency at
+production load or implement a durable block allocator. Keep parameter lock,
+complete hostile coverage, sustained mixed load and idle return open.
+
+## Center candidate formal follow-up — 2026-11-07
+
+Clean `0c2ba71c0653ca1c806dc3df1db93d847544011b` also completed a separate
+256 KiB / 30 s / 30% candidate run in
+`/root/Vortex-phase4-final-0c2ba71/artifacts/phase4/formal-provisional-256k-30s-30pct`.
+The 300-second warmup and three 300-second trials use semantic digest
+`84a3e5c9e6efe6b8496ba6cd1a33fe92ecf9d5cad3c4e0182a14e6a03fec2de6`.
+Trial TCP throughput was 628.675400 / 631.912733 / 636.537656 Mbps; actual
+UDP rates were 99.998368 / 99.998112 / 99.997408 Mbps with zero loss. Each
+trial conserved and settled source credit. Independent TLS mixed TCP measured
+568.820579 Mbps; the runtime/TLS ratio was 1.119048221. The machine gate
+returned `pass`, runner exit was 0, and socket maxima restored to 212992 each.
+
+The gate SHA256 is
+`5be4202a989dcb005011abe0f03e0184610519f2cf2b35c861829f7c6204baef`.
+(The 30% and 50% gate files contain the same verdict fields and therefore have
+the same hash; they do not identify a workload.) The 30% comparison SHA256 is
+`9a427d3e8fc5e1ada784c82218ceafbd550f563570e5ef9f4e0f3a6e2557d81f`;
+trial-1 host SHA256 is
+`dffe1deb3456fb01f5d665163b2d24bf3ee2f2b3147efd794a964a3a25bfb206`.
+
+The center candidate now has its own formal-duration evidence. The comparison
+supports recommending 256 KiB initial / 4 MiB maximum block, 8 MiB demand
+floor, 30 s horizon with explicit 375000000-byte cap, 30% renewal waterline,
+and unchanged 200 ms reservation wait for this Engine/in-process adapter.
+This is a measured recommendation, not a production parameter approval.
+The user-required formal qualification and D-04 lock debts remain retained;
+`locked=false` / `gaps_found` are unchanged. Production persistence authority
+and requalification remain Phase 5/6 handoffs.

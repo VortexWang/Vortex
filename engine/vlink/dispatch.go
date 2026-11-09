@@ -185,16 +185,19 @@ type MuxLink struct {
 }
 
 type MuxStream struct {
-	link        *MuxLink
-	ID          uint32
-	Network     StreamNetwork
-	receive     chan Frame
-	done        chan struct{}
-	closeOnce   sync.Once
-	writeClosed atomic.Bool
-	udpQueued   atomic.Int64
-	resourceMu  sync.Mutex
-	resource    io.Closer
+	link          *MuxLink
+	ID            uint32
+	Network       StreamNetwork
+	receive       chan Frame
+	done          chan struct{}
+	closeOnce     sync.Once
+	writeMu       sync.Mutex
+	writeClosed   atomic.Bool
+	authorized    chan struct{}
+	authorizeOnce sync.Once
+	udpQueued     atomic.Int64
+	resourceMu    sync.Mutex
+	resource      io.Closer
 }
 
 type RemoteOpenAuthorizer func(context.Context, NodeID, OpenRequest) (io.Closer, error)
@@ -217,6 +220,9 @@ func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloCon
 func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if conn == nil {
 		return nil, errors.New("vlink: mux connection is required")
+	}
+	if config.MaxPendingOpenBytes < 1 {
+		config.MaxPendingOpenBytes = 1
 	}
 	if config.StreamWindow == 0 {
 		config.StreamWindow = 64 * 1024
@@ -366,26 +372,17 @@ func (m *MuxLink) AuthorizeRemote(ctx context.Context, id uint32, authorize Remo
 }
 
 func (m *MuxLink) acceptRemote(ctx context.Context, id uint32) error {
-	if err := m.dispatch.streams.AcceptRemote(id); err != nil {
+	stream := m.getStream(id)
+	if stream == nil {
+		return ErrUnknownStream
+	}
+	if err := m.dispatch.streams.acceptRemote(id, stream.enqueue); err != nil {
+		m.reset(id, 8)
 		return err
 	}
 	if err := m.write(ctx, Frame{Type: FrameOpenOK, StreamID: id}); err != nil {
 		m.Close(err)
 		return err
-	}
-	frames, err := m.dispatch.streams.DrainPendingOpenFrames(id)
-	if err != nil {
-		return err
-	}
-	stream := m.getStream(id)
-	if stream == nil {
-		return ErrUnknownStream
-	}
-	for _, frame := range frames {
-		if err := stream.enqueue(frame); err != nil {
-			m.reset(id, 8)
-			return err
-		}
 	}
 	return nil
 }
@@ -611,7 +608,7 @@ func (m *MuxLink) newStream(id uint32, network StreamNetwork) *MuxStream {
 	if network == StreamUDP && m.config.UDPQueueFrames > 0 {
 		queueFrames = m.config.UDPQueueFrames
 	}
-	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, queueFrames), done: make(chan struct{})}
+	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, queueFrames), done: make(chan struct{}), authorized: make(chan struct{})}
 	m.mu.Lock()
 	select {
 	case <-m.done:
@@ -703,7 +700,7 @@ func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
 }
 
 // WaitOpen blocks until the remote side authorizes this locally opened stream.
-// DATA and DGRAM must not be written before OPEN_OK has been consumed.
+// UDP waits for OPEN_OK. TCP may write only its bounded early prefix.
 func (s *MuxStream) WaitOpen(ctx context.Context) error {
 	frame, err := s.Receive(ctx)
 	if err != nil {
@@ -727,6 +724,11 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 	if s.Network != StreamTCP || len(payload) == 0 {
 		return ErrProtocol
 	}
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	if s.writeClosed.Load() {
+		return ErrStreamState
+	}
 	for len(payload) > 0 {
 		groupSize := len(payload)
 		if groupSize > 4*MaxTLSRecordPayload {
@@ -746,7 +748,7 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			// A TCP sender may pipeline a bounded prefix while OPEN is in
 			// flight. The peer buffers that prefix until authorization; the
 			// local check prevents an unbounded pre-authorization queue.
-			if err := s.reserveEarlyData(size); err != nil {
+			if err := s.reserveEarlyData(ctx, size); err != nil {
 				resetCtx, cancel := context.WithTimeout(ctx, time.Second)
 				_ = s.Reset(resetCtx, 8)
 				cancel()
@@ -783,23 +785,50 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 	return nil
 }
 
-func (s *MuxStream) reserveEarlyData(bytes int) error {
-	snapshot, open := s.link.dispatch.streams.Snapshot(s.ID)
-	if !open {
-		return ErrStreamState
-	}
-	if snapshot.Lifecycle != StreamOpening {
-		return nil
-	}
-	if err := s.link.dispatch.streams.MarkLocalData(s.ID, bytes); err != nil {
-		// OPEN_OK may have raced the snapshot. Re-check before rejecting a
-		// legitimate post-authorization write.
-		if current, stillOpen := s.link.dispatch.streams.Snapshot(s.ID); stillOpen && current.OpenOK {
+func (s *MuxStream) waitAuthorized(ctx context.Context) error {
+	for {
+		snapshot, open := s.link.dispatch.streams.Snapshot(s.ID)
+		if !open {
+			return ErrStreamState
+		}
+		if snapshot.OpenOK {
 			return nil
 		}
-		return err
+		select {
+		case <-s.authorized:
+		case <-s.done:
+			return ErrStreamState
+		case <-s.link.done:
+			return s.link.Err()
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
-	return nil
+}
+
+func (s *MuxStream) reserveEarlyData(ctx context.Context, bytes int) error {
+	for {
+		snapshot, open := s.link.dispatch.streams.Snapshot(s.ID)
+		if !open {
+			return ErrStreamState
+		}
+		if snapshot.Lifecycle != StreamOpening {
+			return nil
+		}
+		if bytes > s.link.config.MaxPendingOpenBytes-snapshot.LocalOpenBytes {
+			if err := s.waitAuthorized(ctx); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := s.link.dispatch.streams.MarkLocalData(s.ID, bytes); err != nil {
+			if current, stillOpen := s.link.dispatch.streams.Snapshot(s.ID); stillOpen && current.OpenOK {
+				return nil
+			}
+			return err
+		}
+		return nil
+	}
 }
 func (s *MuxStream) WriteDgram(ctx context.Context, payload []byte) (bool, error) {
 	if s.Network != StreamUDP || len(payload) == 0 || len(payload) > MaxPayloadSize {
@@ -863,6 +892,8 @@ func (s *MuxStream) CloseWrite(ctx context.Context) error {
 	if s.Network != StreamTCP {
 		return ErrProtocol
 	}
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
 	if !s.writeClosed.CompareAndSwap(false, true) {
 		return nil
 	}
@@ -961,6 +992,9 @@ func (m *MuxLink) writeWindows(ctx context.Context, streamID, streamDelta, aggre
 }
 
 func (s *MuxStream) enqueue(frame Frame) error {
+	if frame.Type == FrameOpenOK {
+		s.authorizeOnce.Do(func() { close(s.authorized) })
+	}
 	if frame.Type == FrameDgram {
 		limit := s.link.config.UDPQueueBytes
 		if limit <= 0 {

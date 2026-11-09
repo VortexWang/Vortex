@@ -59,8 +59,19 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	renewRetry := flags.Duration("renew-retry", time.Minute, "retry delay after a failed certificate renewal")
 	adminSocket := flags.String("admin-socket", "", "private local management socket (default: private per-database Unix path)")
 	drainTimeout := flags.Duration("drain-timeout", 30*time.Second, "bounded graceful drain before forced shutdown")
+	fundingBlockBytes := flags.Uint64("experimental-funding-block-bytes", 0, "experimental durable funding block size")
+	demandConfig := flags.String("credit-demand-config", "", "explicit migrated experimental demand configuration")
+	diagnosticsDir := flags.String("diagnostics-dir", "", "fresh local diagnostic profile directory")
 	if err := flags.Parse(args); err != nil {
 		return err
+	}
+	stopDiagnostics, err := startDiagnostics(*diagnosticsDir)
+	if err != nil {
+		return err
+	}
+	defer stopDiagnostics()
+	if *demandConfig != "" && (*hubAddr == "" || *hubName == "" || *controlConfig != "") {
+		return errors.New("credit-demand-config requires explicit legacy fixture hub and hub-name")
 	}
 	if flags.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
@@ -98,6 +109,19 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	n, err := agent.New(*nodeID, s, engine)
 	if err != nil {
 		return err
+	}
+	if *fundingBlockBytes != 0 {
+		if err := n.EnableExperimentalFundingBlocks(*fundingBlockBytes); err != nil {
+			return err
+		}
+	}
+	var adaptiveDemands []agent.AdaptiveDemandConfig
+	var demandInterval time.Duration
+	if *demandConfig != "" {
+		adaptiveDemands, demandInterval, err = loadDemandConfig(*demandConfig, n.NodeID, n.BootID, *hubName)
+		if err != nil {
+			return err
+		}
 	}
 	executable, err := os.Executable()
 	if err != nil {
@@ -315,7 +339,7 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 		reconciler.Apply = runtimeApply
 	}
 
-	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler}
+	client := &agent.ControlClient{Node: n, TLSProvider: credentialManager.TLSConfig, CredentialRevocations: revocations, Reconciler: reconciler, EnableCreditDemand: *demandConfig != "", AdaptiveDemands: adaptiveDemands, DemandInterval: demandInterval}
 	n.SetHubModeObserver(func() string {
 		status := client.CurrentHubStatus()
 		if status == nil {
@@ -332,7 +356,14 @@ func runNode(parent context.Context, args []string, output, diagnostics io.Write
 	workers.Add(2)
 	defer func() { cancel(); workers.Wait() }()
 	runErr := make(chan error, 2)
-	go func() { defer workers.Done(); runErr <- client.RunRegion(ctx, regional) }()
+	go func() {
+		defer workers.Done()
+		if *demandConfig != "" {
+			runErr <- client.Run(ctx, *hubAddr)
+		} else {
+			runErr <- client.RunRegion(ctx, regional)
+		}
+	}()
 	if scheduler != nil {
 		workers.Add(1)
 		go func() {

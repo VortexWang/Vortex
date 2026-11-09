@@ -390,7 +390,7 @@ func TestIssuerRenewalMigrationPreservesLegacyResult(t *testing.T) {
 		t.Fatalf("legacy replay changed: %v", err)
 	}
 	var version string
-	if err := migrated.db.QueryRow(`SELECT value FROM schema_meta WHERE key='schema_version'`).Scan(&version); err != nil || version != "16" {
+	if err := migrated.db.QueryRow(`SELECT value FROM schema_meta WHERE key='schema_version'`).Scan(&version); err != nil || version != "20" {
 		t.Fatalf("migration marker: %q %v", version, err)
 	}
 	b, err := migrated.AuditHubDelegation(ctx, d.ID)

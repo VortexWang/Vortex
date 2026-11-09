@@ -10,6 +10,22 @@ import (
 	"vortex/engine/vlink"
 )
 
+func TestAgentPolicyRejectsUngatedForwardingRoles(t *testing.T) {
+	for _, role := range []config.Role{config.RoleSource, config.RoleRelay, config.RoleDestination} {
+		for _, execution := range []bool{false, true} {
+			cfg := config.Config{NodeID: "00000000-0000-0000-0000-000000000001", Role: role, ExecutionPoint: execution, RuleID: "rule", RuleRevision: 1, PathGeneration: 1, Target: "127.0.0.1:9"}
+			for _, diagnostic := range []bool{false, true} {
+				cfg.QualificationOnly = diagnostic
+				_, err := AgentPolicy(cfg)
+				allowed := role == config.RoleDestination && execution
+				if (err == nil) != allowed {
+					t.Fatalf("role=%s execution=%t diagnostic=%t err=%v", role, execution, diagnostic, err)
+				}
+			}
+		}
+	}
+}
+
 func TestStaticPolicyRequiresExplicitQualificationAuthorization(t *testing.T) {
 	local, peer, next := "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003"
 	cfg := config.Config{NodeID: local, Role: config.RoleRelay, PeerNodeID: peer, NextHopNodeID: next, RuleID: "rule", RuleRevision: 1, PathGeneration: 1}
@@ -39,5 +55,14 @@ func TestStaticPolicyRequiresExplicitQualificationAuthorization(t *testing.T) {
 	}
 	if _, err := policy.Authorize(context.Background(), peerID, request); err != nil {
 		t.Fatalf("explicit qualification fixture was rejected: %v", err)
+	}
+	cfg.QualificationOnly = false
+	cfg.RuntimeAuthority = true
+	policy, err = StaticPolicy(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := policy.Authorize(context.Background(), peerID, request); err != nil {
+		t.Fatalf("explicit pinned runtime authority was rejected: %v", err)
 	}
 }

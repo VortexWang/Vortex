@@ -304,18 +304,18 @@ func (s *Store) signerEpochOpen(ctx context.Context) (bool, error) {
 	return value == "true", nil
 }
 
-func stateValue(ctx context.Context, tx *sql.Tx, key string) (string, error) {
+func stateValue(ctx context.Context, tx storeTransaction, key string) (string, error) {
 	var value string
 	err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key=?`, key).Scan(&value)
 	return value, err
 }
 
-func putState(ctx context.Context, tx *sql.Tx, key, value string, at time.Time) error {
+func putState(ctx context.Context, tx storeTransaction, key, value string, at time.Time) error {
 	_, err := tx.ExecContext(ctx, `INSERT INTO agent_state(key,value,updated_at) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at`, key, value, at.UTC().Format(time.RFC3339Nano))
 	return err
 }
 
-func writeAutonomyTransition(ctx context.Context, tx *sql.Tx, from, to string, at, heartbeat, deadline time.Time) error {
+func writeAutonomyTransition(ctx context.Context, tx storeTransaction, from, to string, at, heartbeat, deadline time.Time) error {
 	_, err := tx.ExecContext(ctx, `INSERT INTO autonomy_transitions(from_mode,to_mode,occurred_at,backend_heartbeat,hard_deadline) VALUES(?,?,?,?,?)`, from, to, at.UTC().Format(time.RFC3339Nano), heartbeat.UTC().Format(time.RFC3339Nano), deadline.UTC().Format(time.RFC3339Nano))
 	return err
 }
@@ -327,7 +327,7 @@ func modeOrOnline(mode string) string {
 	return mode
 }
 
-func deadlineFromTx(ctx context.Context, tx *sql.Tx) time.Time {
+func deadlineFromTx(ctx context.Context, tx storeTransaction) time.Time {
 	value, err := stateValue(ctx, tx, "autonomy_deadline")
 	if err != nil {
 		return time.Time{}
@@ -339,7 +339,7 @@ func deadlineFromTx(ctx context.Context, tx *sql.Tx) time.Time {
 // persistAuthorizationHeartbeat applies the authenticated payload's backend
 // evidence in the same transaction as grants/revocations. Re-delivery of an
 // unchanged heartbeat cannot move its deadline or reopen a closed signer.
-func persistAuthorizationHeartbeat(ctx context.Context, tx *sql.Tx, heartbeat, deadline time.Time) error {
+func persistAuthorizationHeartbeat(ctx context.Context, tx storeTransaction, heartbeat, deadline time.Time) error {
 	if heartbeat.IsZero() || !deadline.After(heartbeat) || deadline.After(heartbeat.Add(12*time.Hour)) {
 		return ErrAuthorityTimeUncertain
 	}

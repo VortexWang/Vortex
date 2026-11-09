@@ -89,7 +89,9 @@ type authorizationSession struct {
 
 func (s *authorizationSession) Reserve(ctx context.Context, direction engineaccounting.Direction, n int64) (*engineaccounting.Batch, error) {
 	for {
-		batch, err := s.reserveOnce(ctx, direction, n)
+		batch, err := withAuthorityWait(ctx, s.gate.node, RuntimeScope{RuleID: s.gate.config.RuleID, RuleRevision: s.gate.config.RuleRevision, PathGeneration: s.gate.config.PathGeneration}, func(waitCtx context.Context) (*engineaccounting.Batch, error) {
+			return s.reserveOnce(waitCtx, direction, n)
+		})
 		var limited *store.RateLimited
 		if !errors.As(err, &limited) {
 			return batch, err

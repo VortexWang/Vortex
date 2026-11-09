@@ -3,8 +3,15 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
+# Version 2 admits a valid nonzero stale-version attack probe.
+export PHASE4_POLICY_VERSION="${PHASE4_POLICY_VERSION:-2}"
 qual=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
-export BACKEND="$mode" QUALIFICATION_DIR="$qual"
+export BACKEND="$mode" QUALIFICATION_DIR="$qual" PHASE4_FORMAL="${PHASE4_FORMAL:-0}"
+
+if [ "$PHASE4_FORMAL" = 1 ] && [ -z "${PHASE4_TRIAL_ID:-}" ]; then
+  echo "PHASE4_TRIAL_ID is required before starting formal workload" >&2
+  exit 2
+fi
 
 "$root/tools/phase4/topology-smoke.sh"
 
@@ -73,7 +80,10 @@ if count < 4 or dict(totals) != expected:
 
 tcp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/1")}
 udp_flows = {k: dict(v) for k, v in flows.items() if k.endswith("/2")}
-if len(tcp_flows) != 1 + 2 * workload["tcp_streams"] or len(udp_flows) != 2:
+short_flow_count = int(os.getenv("D04_SHORT_SAMPLES", "0"))
+if short_flow_count:
+    short_flow_count += 5  # latency.py warmup connections
+if len(tcp_flows) != 1 + 2 * workload["tcp_streams"] + short_flow_count or len(udp_flows) != 2:
     raise SystemExit("unexpected or colliding per-flow accounting identities")
 for key, flow in tcp_flows.items():
     if flow.get("left_to_right", 0) != flow.get("right_to_left", 0):
@@ -112,8 +122,39 @@ lost = workload["mixed"]["udp_sent"] - workload["mixed"]["udp_unique_received"]
 classified = sum(drop_counts.values())
 if lost != classified:
     raise SystemExit(f"UDP loss is not fully classified: lost={lost} classified={classified}")
+formal = os.getenv("PHASE4_FORMAL") == "1"
+trial_id = os.getenv("PHASE4_TRIAL_ID", "")
+if formal and not trial_id:
+    raise SystemExit("PHASE4_TRIAL_ID is required for formal workload evidence")
+host = json.loads(Path(out_dir, "host.json").read_text())
+authorization_mode = host.get("authorization_mode")
+duration = float(workload.get("duration_seconds_per_phase", 0))
+udp_offered_mbps = (workload["mixed"].get("udp_sent", 0) * 1200 * 8 /
+                    max(duration, 0.001) / 1_000_000)
+credit_path = Path(out_dir, "events-source.jsonl.credit.json")
+credit = json.loads(credit_path.read_text()) if credit_path.exists() else {}
+credit_conserved = bool(credit) and credit.get("budget_bytes") == sum(credit.get(key, 0) for key in
+    ("unissued_bytes", "pending_grant_bytes", "unknown_grant_bytes", "available_bytes", "held_bytes", "used_bytes", "unknown_bytes"))
+credit_settled = (credit_conserved and credit.get("sessions") == 0 and credit.get("pending_grant_bytes") == 0 and
+                  credit.get("unknown_grant_bytes") == 0 and credit.get("unknown_bytes") == 0 and credit.get("denials") == 0)
+formal_metrics = (formal and authorization_mode == "runtime-authority" and credit_settled and duration >= 300 and
+                  int(workload.get("tcp_streams", 0)) >= 16 and
+                  float(workload.get("udp_target_mbps", 0)) >= 100 and
+                  udp_offered_mbps >= 99 and
+                  float(workload["mixed"]["tcp"].get("throughput_mbps", 0)) >= 400 and
+                  not workload["mixed"].get("errors") and workload["mixed"].get("udp_loss", 1) <= 0.001)
 report = {
-    "schema": 1, "runtime_correctness": "pass", "performance_qualification": "not-qualified",
+    "schema": 1, "runtime_correctness": "pass",
+    "performance_qualification": "pass" if formal_metrics else "not-qualified",
+    "authorization_mode": authorization_mode,
+    "trial_id": trial_id,
+    "commit": host.get("commit"),
+    "dirty": host.get("dirty", True),
+    "semantic_manifest_sha256": host.get("semantic_manifest_sha256"),
+    "qualification_metrics": {"duration_seconds": duration, "tcp_streams": workload.get("tcp_streams"),
+        "mixed_tcp_mbps": workload["mixed"]["tcp"].get("throughput_mbps"),
+        "udp_offered_mbps": udp_offered_mbps, "udp_loss": workload["mixed"].get("udp_loss"),
+        "source_credit_conserved": credit_conserved, "source_credit_settled": credit_settled},
     "accounting": dict(totals), "classified_drops": dict(drop_counts),
     "returned_reservations": dict(returned),
     "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
@@ -149,4 +190,5 @@ if test "$events" -lt 1; then
   echo "qualification blocked: accounting evidence is missing" >&2
   exit 1
 fi
-printf 'qualification=tcp-udp-mixed-runtime-and-accounting-pass\nperformance_qualification=not-qualified\nevent_files=%s\n' "$events" >"$qual/qualification.txt"
+performance=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["performance_qualification"])' "$qual/report.json")
+printf 'qualification=tcp-udp-mixed-runtime-and-accounting-pass\nperformance_qualification=%s\nevent_files=%s\n' "$performance" "$events" >"$qual/qualification.txt"

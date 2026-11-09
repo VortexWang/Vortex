@@ -10,6 +10,7 @@ import (
 	"time"
 
 	engineaccounting "vortex/engine/accounting"
+	enginerelay "vortex/engine/relay"
 	"vortex/engine/vlink"
 )
 
@@ -125,9 +126,11 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 			if err != nil {
 				return nil, err
 			}
-			if err := downstream.WaitOpen(ctx); err != nil {
-				_ = downstream.Reset(ctx, 8)
-				return nil, err
+			if stream.Network == vlink.StreamUDP {
+				if err := downstream.WaitOpen(ctx); err != nil {
+					_ = downstream.Reset(ctx, 8)
+					return nil, err
+				}
 			}
 			transferred = true
 			return &streamResource{stream: downstream, release: release, udp: udpContext}, nil
@@ -179,11 +182,11 @@ func (s *Service) serveStream(ctx context.Context, link *vlink.MuxLink, stream *
 		if stream.Network == vlink.StreamUDP && typed.udp != nil {
 			bridgeCtx = typed.udp
 		}
-		if err := BridgeStreamsObserved(bridgeCtx, stream, typed.stream, observe); err != nil && ctx.Err() == nil {
+		if err := bridgeStreamsObserved(bridgeCtx, stream, typed.stream, observe, stream.Network == vlink.StreamTCP); err != nil && ctx.Err() == nil {
 			slog.Error("relay stream bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	case *connResource:
-		if err := bridgeConnWithSession(ctx, stream, typed.conn, typed.session, nil); err != nil && ctx.Err() == nil {
+		if err := bridgeConnWithSession(ctx, stream, typed.conn, typed.session, nil, false); err != nil && ctx.Err() == nil {
 			slog.Error("relay target bridge failed", "stream_id", stream.ID, "err", err)
 		}
 	default:
@@ -196,6 +199,10 @@ func BridgeStreams(ctx context.Context, left, right *vlink.MuxStream) error {
 }
 
 func BridgeStreamsObserved(ctx context.Context, left, right *vlink.MuxStream, onFirstTargetByte func()) error {
+	return bridgeStreamsObserved(ctx, left, right, onFirstTargetByte, false)
+}
+
+func bridgeStreamsObserved(ctx context.Context, left, right *vlink.MuxStream, onFirstTargetByte func(), awaitRight bool) error {
 	if left == nil || right == nil {
 		return errors.New("relay: both streams are required")
 	}
@@ -203,7 +210,15 @@ func BridgeStreamsObserved(ctx context.Context, left, right *vlink.MuxStream, on
 	defer cancel()
 	errs := make(chan error, 2)
 	go func() { errs <- forwardStream(bridgeCtx, left, right, nil) }()
-	go func() { errs <- forwardStream(bridgeCtx, right, left, onFirstTargetByte) }()
+	go func() {
+		if awaitRight {
+			if err := right.WaitOpen(bridgeCtx); err != nil {
+				errs <- err
+				return
+			}
+		}
+		errs <- forwardStream(bridgeCtx, right, left, onFirstTargetByte)
+	}()
 	first := <-errs
 	if first != nil {
 		cancel()
@@ -347,6 +362,19 @@ func BridgeConnWithGate(ctx context.Context, stream *vlink.MuxStream, conn net.C
 }
 
 func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate, onFirstTargetByte func()) error {
+	return bridgeConnWithGateObserver(ctx, stream, conn, gate, onFirstTargetByte, false)
+}
+
+// BridgeOpeningConn starts a funded TCP prefix while remote OPEN is in flight.
+// The read direction owns OPEN_OK consumption; UDP never uses this entry point.
+func BridgeOpeningConn(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate, onFirstTargetByte func()) error {
+	if stream == nil || stream.Network != vlink.StreamTCP {
+		return vlink.ErrProtocol
+	}
+	return bridgeConnWithGateObserver(ctx, stream, conn, gate, onFirstTargetByte, true)
+}
+
+func bridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, gate engineaccounting.Gate, onFirstTargetByte func(), awaitOpen bool) error {
 	if stream == nil || conn == nil {
 		return errors.New("relay: stream and connection are required")
 	}
@@ -360,10 +388,10 @@ func BridgeConnWithGateObserver(ctx context.Context, stream *vlink.MuxStream, co
 	if err != nil {
 		return err
 	}
-	return bridgeConnWithSession(ctx, stream, conn, session, onFirstTargetByte)
+	return bridgeConnWithSession(ctx, stream, conn, session, onFirstTargetByte, awaitOpen)
 }
 
-func bridgeConnWithSession(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, session engineaccounting.Session, onFirstTargetByte func()) error {
+func bridgeConnWithSession(ctx context.Context, stream *vlink.MuxStream, conn net.Conn, session engineaccounting.Session, onFirstTargetByte func(), awaitOpen bool) error {
 	if session == nil {
 		conn.Close()
 		return engineaccounting.ErrDenied
@@ -374,11 +402,8 @@ func bridgeConnWithSession(ctx context.Context, stream *vlink.MuxStream, conn ne
 	defer cancel()
 	if stream.Network == vlink.StreamUDP {
 		if udp, ok := conn.(*net.UDPConn); ok {
-			if err := udp.SetReadBuffer(32 * 1024 * 1024); err != nil {
-				return err
-			}
-			if err := udp.SetWriteBuffer(32 * 1024 * 1024); err != nil {
-				return err
+			if err := enginerelay.TuneUDPBuffers(udp); err != nil {
+				slog.Warn("udp relay socket buffer tuning unavailable", "err", err)
 			}
 		}
 		if err := conn.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {
@@ -391,6 +416,13 @@ func bridgeConnWithSession(ctx context.Context, stream *vlink.MuxStream, conn ne
 	go func() {
 		defer wg.Done()
 		if stream.Network == vlink.StreamTCP {
+			if awaitOpen {
+				if err := stream.WaitOpen(bridgeCtx); err != nil {
+					errCh <- err
+					return
+				}
+				slog.Info("vlink source OPEN authorized", "flow_key", stream.FlowKey())
+			}
 			errCh <- bridgeTCPToConn(bridgeCtx, stream, conn, session, onFirstTargetByte)
 			return
 		}

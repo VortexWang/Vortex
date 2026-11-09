@@ -40,7 +40,7 @@ func upgradePreflight(ctx context.Context, args []string, out, diagnostics io.Wr
 	if err != nil {
 		return err
 	}
-	if schema != 16 {
+	if schema != 20 {
 		return errors.New("upgrade: schema requires separate migration review")
 	}
 	return json.NewEncoder(out).Encode(map[string]any{"schema": schema, "read_only": true, "automatic_rollback": true})

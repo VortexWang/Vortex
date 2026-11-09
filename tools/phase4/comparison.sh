@@ -4,8 +4,11 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 mode=${BACKEND:-native}
+# Version 2 admits a valid nonzero stale-version attack probe.
+export PHASE4_POLICY_VERSION="${PHASE4_POLICY_VERSION:-2}"
 runtime=${QUALIFICATION_DIR:-$root/artifacts/phase4/qualification/$mode}
 out=${COMPARISON_DIR:-$root/artifacts/phase4/comparison/$mode}
+[ "$PHASE4_POLICY_VERSION" = 2 ] || { echo "comparison attack matrix requires PHASE4_POLICY_VERSION=2 for qualification and comparison" >&2; exit 2; }
 mkdir -p "$out" "$root/artifacts/phase4"
 out=$(CDPATH= cd -- "$out" && pwd)
 rm -f "$out"/fault-ready "$out"/fault-injected "$out"/forged-open.json "$out"/middle-hop-fault.json "$out"/comparison.json "$out"/rtt-*.json
@@ -50,6 +53,8 @@ if [ "$mode" = native ]; then
 else
   QUALIFICATION_DIR="$out" docker compose -f "$root/test/qualification/compose.yaml" exec -T source /usr/local/bin/phase4-probe --config /config/source.json --output "$out/forged-open.json"
 fi
+python3 "$root/tools/phase4/attack_gate.py" --report "$out/forged-open.json" --output "$out/attack-gate.json"
+
 
 for name in relay-2 destination; do
   if [ "$name" = relay-2 ]; then hop=1; port=19443; docker_port=9443; else hop=3; port=19445; docker_port=9445; fi

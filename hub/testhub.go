@@ -34,6 +34,15 @@ type Message struct {
 
 // TestServer is intentionally a protocol-test service, not the Phase 6 backend.
 type TestServer struct {
+	DemandIssuer *Issuer // explicit opt-in for demand protocol fixtures
+	DemandLimit  int     // optional finite test bound
+	// DropDemandResponse injects a disconnect after durable resolution but
+	// before any response is sent. Only for protocol recovery tests.
+	DropDemandResponse bool
+	// BeforeDemandResponse is a test-only delivery barrier after durable issue.
+	// It does not run inside the issuer transaction and cannot grant authority.
+	BeforeDemandResponse func(context.Context) error
+
 	// StallReadiness is a test-only fault: no response until stream cancellation.
 	StallReadiness      bool
 	StallAfterReadiness bool
@@ -149,9 +158,10 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return err
 		}
 	}
-	if s.HubID == "" && s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage {
+	if s.HubID == "" && s.ConfigUpdate == nil && s.AuthorizationUpdate == nil && !s.AcceptUsage && s.DemandIssuer == nil {
 		return nil
 	}
+	demandsReceived := 0
 	usageReceived := 0
 	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
@@ -226,7 +236,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		if err := stream.Send(&controlv1.ControlMessage{MessageId: messageID, Sequence: controlSequence, Body: &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: authorization}}); err != nil {
 			return err
 		}
-		if s.ConfigUpdate == nil && !s.AcceptUsage {
+		if s.ConfigUpdate == nil && !s.AcceptUsage && s.DemandIssuer == nil {
 			return nil
 		}
 	}
@@ -325,6 +335,40 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := s.Store.PersistRecoveryEvent(ctx, first.GetNodeId(), body.Event.EventId, body.Event.Payload); err != nil {
 				return err
 			}
+		case *controlv1.NodeMessage_CreditDemand:
+			if s.DemandIssuer == nil || hello != nil {
+				return fmt.Errorf("test hub: demand protocol disabled")
+			}
+			authorization, denied, err := s.DemandIssuer.ResolveDemand(ctx, first.GetNodeId(), first.GetBootId(), body.CreditDemand)
+			if err != nil {
+				return err
+			}
+			if s.BeforeDemandResponse != nil {
+				if err := s.BeforeDemandResponse(ctx); err != nil {
+					return err
+				}
+			}
+			if s.DropDemandResponse {
+				return fmt.Errorf("test hub: injected loss after durable demand resolution")
+			}
+			id, err := testHubMessageID()
+			if err != nil {
+				return err
+			}
+			controlSequence++
+			response := &controlv1.ControlMessage{MessageId: id, Sequence: controlSequence}
+			if authorization != nil {
+				response.Body = &controlv1.ControlMessage_AuthorizationUpdate{AuthorizationUpdate: authorization}
+			} else {
+				response.Body = &controlv1.ControlMessage_CreditDemandDenied{CreditDemandDenied: denied}
+			}
+			if err := stream.Send(response); err != nil {
+				return err
+			}
+			demandsReceived++
+			if s.DemandLimit > 0 && demandsReceived >= s.DemandLimit {
+				return nil
+			}
 		case *controlv1.NodeMessage_UnknownUsageBatch:
 			payload, err := contracts.EncodeUnknownUsage(body.UnknownUsageBatch)
 			if err != nil {
@@ -351,7 +395,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[body.UnknownUsageBatch.GetBatchId()] = true
 				usageReceived++
 			}
-			if hello == nil && s.UsageBatchLimit <= usageReceived && update == nil {
+			if hello == nil && s.UsageBatchLimit > 0 && s.UsageBatchLimit <= usageReceived && update == nil {
 				return nil
 			}
 		case *controlv1.NodeMessage_UsageBatch:
@@ -383,7 +427,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				usageSeen[batch.GetBatchId()] = true
 				usageReceived++
 			}
-			if hello == nil && s.UsageBatchLimit <= usageReceived && update == nil {
+			if hello == nil && s.UsageBatchLimit > 0 && s.UsageBatchLimit <= usageReceived && update == nil {
 				return nil
 			}
 		case *controlv1.NodeMessage_ApplyResult:
@@ -400,7 +444,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := s.Store.AppendEvent(ctx, "apply-"+hex.EncodeToString(update.GetTransactionId()), "control-apply-result", payload); err != nil {
 				return err
 			}
-			if hello == nil {
+			if hello == nil && s.DemandIssuer == nil {
 				return nil
 			}
 			update = nil

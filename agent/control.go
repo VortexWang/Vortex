@@ -26,6 +26,9 @@ import (
 )
 
 type ControlClient struct {
+	AdaptiveDemands           []AdaptiveDemandConfig
+	EnableCreditDemand        bool // explicit opt-in for migrated experimental demand peers
+	DemandInterval            time.Duration
 	regionalAttempts          atomic.Uint64
 	regionalReady             atomic.Uint64
 	regionalReadinessTimeouts atomic.Uint64
@@ -95,10 +98,21 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 	return c.connect(ctx, HubEndpoint{Address: address}, nil)
 }
 
-func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) error {
+func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) (resultErr error) {
 	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
+	}
+	if c.EnableCreditDemand {
+		if regional != nil {
+			return fmt.Errorf("agent: experimental demand cannot use regional lifecycle")
+		}
+		// Local monotonic time controls rate refill only. Every write still checks
+		// authenticated conservative lease bounds. Reconnect keeps the same epoch;
+		// switching from wall bounds retains tokens and earns no downtime credit.
+		if err := c.Node.Store.EnableMonotonicRuntimeRate(c.Node.BootID); err != nil {
+			return err
+		}
 	}
 	ctx, cancel, incarnation := c.beginSession(ctx)
 	defer cancel()
@@ -107,6 +121,13 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		defer c.sessionMu.Unlock()
 		if c.sessionID == incarnation {
 			c.currentStatus = nil
+		}
+	}()
+	type receiveFailure struct{ err error }
+	var failure atomic.Pointer[receiveFailure]
+	defer func() {
+		if f := failure.Load(); f != nil && resultErr != nil {
+			resultErr = f.err
 		}
 	}()
 	var readiness *time.Timer
@@ -224,20 +245,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		lastNodeSequence = sequence
 	}
 
-	if regional == nil {
-		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
-			return err
-		}
-	}
 	var initialSendErr error
-	if regional == nil {
-		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
-	}
-	if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
-		return initialSendErr
-	}
-	lastControlSequence := uint64(0)
-	seenControlIDs := make(map[string]struct{})
+	var replayGuard controlReplayGuard
 	// Only this loop sends messages; gRPC permits one concurrent receiver, but
 	// not multiple senders. Periodic outbox delivery shares sequence ordering
 	// with config responses and never races an authorization update.
@@ -245,16 +254,45 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		message *controlv1.ControlMessage
 		err     error
 	}
-	incoming := make(chan received)
+	incoming := make(chan received, maxControlMessageIDs+1)
 	receiverDone := make(chan struct{})
 	defer func() { cancel(); conn.Close(); <-receiverDone }()
 	go func() {
 		defer close(receiverDone)
 		for {
 			message, err := stream.Recv()
+			if err == nil && regional == nil {
+				err = replayGuard.accept(message.GetSequence(), message.GetMessageId())
+				if err == nil {
+					var handled bool
+					err = c.withSession(ctx, incarnation, func() error {
+						if state := authenticatedTLS.Load(); state != nil {
+							if err := tlsConfig.VerifyConnection(*state); err != nil {
+								return err
+							}
+						}
+						var ackErr error
+						handled, ackErr = c.applyUsageAcknowledgement(ctx, message)
+						return ackErr
+					})
+					if handled && err == nil {
+						continue
+					}
+				}
+			}
+			if err != nil && !errors.Is(err, io.EOF) {
+				failure.CompareAndSwap(nil, &receiveFailure{err})
+				cancel()
+			}
 			select {
 			case incoming <- received{message, err}:
 			case <-ctx.Done():
+				return
+			default:
+				failure.CompareAndSwap(nil, &receiveFailure{fmt.Errorf("agent: control receive backlog limit reached")})
+				// A bounded control backlog must fail/reconnect, not deadlock
+				// the bidirectional stream while a bulk send awaits peer reads.
+				cancel()
 				return
 			}
 			if err != nil {
@@ -262,6 +300,51 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 		}
 	}()
+	if regional == nil {
+		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
+			return err
+		}
+		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+		if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
+			return initialSendErr
+		}
+	}
+	var demandCursor string
+	var demandTicks <-chan time.Time
+	var demandWake <-chan struct{}
+	var lastDemandWake time.Time
+	if c.EnableCreditDemand && regional == nil {
+		// Register only scopes bound to this authenticated Hub. A different
+		// connection must not consume another Hub's wakeups.
+		issuer, _ := issuerIdentity.Load().(string)
+		var scopes []AdaptiveDemandConfig
+		for _, config := range c.AdaptiveDemands {
+			if config.Scope.HubID == issuer {
+				scopes = append(scopes, config)
+			}
+		}
+		var release func()
+		demandWake, release, err = c.Node.subscribeDemands(scopes)
+		if err != nil {
+			return err
+		}
+		defer release()
+
+		interval := c.DemandInterval
+		if interval == 0 {
+			interval = time.Second
+		}
+		if interval < 100*time.Millisecond {
+			return fmt.Errorf("agent: demand polling interval below bound")
+		}
+		demandTicker := time.NewTicker(interval)
+		defer demandTicker.Stop()
+		demandTicks = demandTicker.C
+		issuer, _ = issuerIdentity.Load().(string)
+		if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
+			return err
+		}
+	}
 	usageInterval := c.UsageInterval
 	if usageInterval <= 0 {
 		usageInterval = 10 * time.Second
@@ -335,6 +418,29 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				return err
 			}
 			continue
+		case <-demandWake:
+			if time.Since(lastDemandWake) < 25*time.Millisecond {
+				continue
+			}
+			lastDemandWake = time.Now()
+			demandCursor = ""
+			issuer, _ := issuerIdentity.Load().(string)
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+				demandWake = nil
+			}
+			continue
+		case <-demandTicks:
+			issuer, _ := issuerIdentity.Load().(string)
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+				demandTicks = nil
+			}
+			continue
 		case <-ticker.C:
 			if regional != nil && !negotiated {
 				continue
@@ -364,17 +470,11 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if regional != nil && message.GetSequence() > math.MaxInt64 {
 			return fmt.Errorf("agent: control sequence overflow")
 		}
-		if message.GetSequence() == 0 || message.GetSequence() <= lastControlSequence || !canonicalUUID(message.GetMessageId()) {
-			return fmt.Errorf("agent: invalid control message identity or sequence")
+		if regional != nil {
+			if err := replayGuard.accept(message.GetSequence(), message.GetMessageId()); err != nil {
+				return err
+			}
 		}
-		if _, duplicate := seenControlIDs[message.GetMessageId()]; duplicate {
-			return fmt.Errorf("agent: duplicate control message id")
-		}
-		if len(seenControlIDs) >= 4096 {
-			return fmt.Errorf("agent: control replay tracking exhausted")
-		}
-		seenControlIDs[message.GetMessageId()] = struct{}{}
-		lastControlSequence = message.GetSequence()
 		if err := func() error {
 			c.sessionMu.Lock()
 			defer c.sessionMu.Unlock()
@@ -473,6 +573,14 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 
+			case *controlv1.ControlMessage_CreditDemandDenied:
+				if !c.EnableCreditDemand || regional != nil {
+					return fmt.Errorf("agent: unnegotiated experimental demand denial")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if err := c.applyDemandDenial(ctx, issuer, body.CreditDemandDenied); err != nil {
+					return err
+				}
 			case *controlv1.ControlMessage_RenewalResult:
 				if regional == nil || regional.Renewal == nil || !negotiated {
 					return fmt.Errorf("agent: unnegotiated renewal result")
@@ -820,4 +928,36 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 		*last = sequence
 	}
 	return nil
+}
+
+// ACK processing is receive-side work: bulk outbound flow control must never
+// prevent durable acknowledgement. The receiver validates wire replay first.
+func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *controlv1.ControlMessage) (bool, error) {
+	switch body := message.GetBody().(type) {
+	case *controlv1.ControlMessage_UsageAck:
+		if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
+			return true, fmt.Errorf("agent: usage acknowledgement has no batch IDs")
+		}
+		if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
+			return true, err
+		}
+		// Notify only after durable validation. In particular an ordinary
+		// ACK must never expose unknown batches as acknowledged to a hook.
+		if c.AcknowledgeUsage != nil {
+			if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
+				return true, err
+			}
+		}
+	case *controlv1.ControlMessage_UnknownUsageAck:
+		if body.UnknownUsageAck == nil {
+			return true, fmt.Errorf("agent: missing unknown usage acknowledgement")
+		}
+		if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
+			return true, err
+		}
+
+	default:
+		return false, nil
+	}
+	return true, nil
 }

@@ -119,7 +119,7 @@ func (s *Store) InstallShareSourceAnchor(ctx context.Context, nodeID, backendID 
 	return tx.Commit()
 }
 
-func readShareTx(ctx context.Context, tx *sql.Tx, node, id string, revision uint64) (ShareReference, error) {
+func readShareTx(ctx context.Context, tx storeTransaction, node, id string, revision uint64) (ShareReference, error) {
 	var r ShareReference
 	var raw, digest []byte
 	if err := tx.QueryRowContext(ctx, `SELECT payload,payload_sha256 FROM share_references WHERE node_id=? AND share_id=? AND revision=?`, node, id, strconv.FormatUint(revision, 10)).Scan(&raw, &digest); err != nil {
@@ -132,7 +132,7 @@ func readShareTx(ctx context.Context, tx *sql.Tx, node, id string, revision uint
 	return r, ValidateShareReference(r)
 }
 
-func shareHeadTx(ctx context.Context, tx *sql.Tx, node, id string) (uint64, error) {
+func shareHeadTx(ctx context.Context, tx storeTransaction, node, id string) (uint64, error) {
 	var text string
 	if err := tx.QueryRowContext(ctx, `SELECT revision FROM share_reference_heads WHERE node_id=? AND share_id=?`, node, id).Scan(&text); err != nil {
 		return 0, err
@@ -143,7 +143,7 @@ func shareHeadTx(ctx context.Context, tx *sql.Tx, node, id string) (uint64, erro
 // checkShareChainTx validates every parent and a separately provisioned root.
 // New admission also checks current revisions; existing sessions may drain
 // against retained immutable revisions inside their original time boundary.
-func checkShareChainTx(ctx context.Context, tx *sql.Tx, node, issuer string, leaf ShareReference, current bool) error {
+func checkShareChainTx(ctx context.Context, tx storeTransaction, node, issuer string, leaf ShareReference, current bool) error {
 	r := leaf
 	seen := map[string]bool{}
 	for depth := 0; depth < 32; depth++ {
@@ -193,7 +193,7 @@ func checkShareChainTx(ctx context.Context, tx *sql.Tx, node, issuer string, lea
 	return fmt.Errorf("%w: share chain depth exceeded", ErrAuthorizationDenied)
 }
 
-func persistShareReferencesTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate) error {
+func persistShareReferencesTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate) error {
 	if u.ShareReferences == nil {
 		return nil
 	}
@@ -278,7 +278,7 @@ func persistShareReferencesTx(ctx context.Context, tx *sql.Tx, u AuthorizationUp
 	return nil
 }
 
-func checkAuthorizationShareTx(ctx context.Context, tx *sql.Tx, node string, a AuthorizationRecord, current bool) error {
+func checkAuthorizationShareTx(ctx context.Context, tx storeTransaction, node string, a AuthorizationRecord, current bool) error {
 	if a.ShareReferenceID == "" && a.DelegationID == "" {
 		return nil
 	} // explicitly legacy records only

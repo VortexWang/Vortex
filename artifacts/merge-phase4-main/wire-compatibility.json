@@ -1,0 +1,261 @@
+{
+  "status": "passed",
+  "records": [
+    {
+      "baseline": "00704144",
+      "message": "NodeMessage",
+      "fields": {
+        "node_id": [
+          "string",
+          1
+        ],
+        "boot_id": [
+          "string",
+          2
+        ],
+        "sequence": [
+          "uint64",
+          3
+        ],
+        "heartbeat": [
+          "Heartbeat",
+          10
+        ],
+        "usage_batch": [
+          "UsageBatch",
+          11
+        ],
+        "apply_result": [
+          "ApplyResult",
+          12
+        ],
+        "event": [
+          "NodeEvent",
+          13
+        ],
+        "register": [
+          "RegisterRequest",
+          14
+        ],
+        "unknown_usage_batch": [
+          "UnknownUsageBatch",
+          15
+        ],
+        "lifecycle_hello": [
+          "LifecycleHello",
+          16
+        ],
+        "node_report": [
+          "NodeReport",
+          17
+        ],
+        "renewal_request": [
+          "RenewalRequest",
+          18
+        ]
+      },
+      "candidate_demand_tag": 100,
+      "status": "preserved"
+    },
+    {
+      "baseline": "00704144",
+      "message": "ControlMessage",
+      "fields": {
+        "message_id": [
+          "string",
+          1
+        ],
+        "sequence": [
+          "uint64",
+          2
+        ],
+        "config_update": [
+          "RuntimeConfigUpdate",
+          10
+        ],
+        "usage_ack": [
+          "UsageAcknowledgement",
+          11
+        ],
+        "authorization_update": [
+          "AuthorizationUpdate",
+          12
+        ],
+        "error": [
+          "ControlError",
+          13
+        ],
+        "unknown_usage_ack": [
+          "UnknownUsageAcknowledgement",
+          14
+        ],
+        "hub_status": [
+          "HubStatus",
+          15
+        ],
+        "renewal_result": [
+          "RenewalResult",
+          16
+        ],
+        "credential_revocations": [
+          "CredentialRevocations",
+          17
+        ]
+      },
+      "candidate_demand_tag": 100,
+      "status": "preserved"
+    },
+    {
+      "baseline": "codex/phase6-backend",
+      "message": "NodeMessage",
+      "fields": {
+        "node_id": [
+          "string",
+          1
+        ],
+        "boot_id": [
+          "string",
+          2
+        ],
+        "sequence": [
+          "uint64",
+          3
+        ],
+        "heartbeat": [
+          "Heartbeat",
+          10
+        ],
+        "usage_batch": [
+          "UsageBatch",
+          11
+        ],
+        "apply_result": [
+          "ApplyResult",
+          12
+        ],
+        "event": [
+          "NodeEvent",
+          13
+        ],
+        "register": [
+          "RegisterRequest",
+          14
+        ],
+        "unknown_usage_batch": [
+          "UnknownUsageBatch",
+          15
+        ],
+        "lifecycle_hello": [
+          "LifecycleHello",
+          16
+        ],
+        "node_report": [
+          "NodeReport",
+          17
+        ],
+        "renewal_request": [
+          "RenewalRequest",
+          18
+        ],
+        "rule_receipt": [
+          "RuleReceipt",
+          19
+        ],
+        "share_receipt": [
+          "ShareReceipt",
+          20
+        ],
+        "source_provision_receipt": [
+          "SourceProvisionReceipt",
+          21
+        ],
+        "credit_close_receipt": [
+          "CreditCloseReceipt",
+          22
+        ],
+        "node_boot_recovery_receipt": [
+          "NodeBootRecoveryReceipt",
+          23
+        ],
+        "recovery_credit_fence_receipt": [
+          "RecoveryCreditFenceReceipt",
+          24
+        ]
+      },
+      "candidate_demand_tag": 100,
+      "status": "no overlapping tag collision; Phase 6 extensions not imported"
+    },
+    {
+      "baseline": "codex/phase6-backend",
+      "message": "ControlMessage",
+      "fields": {
+        "message_id": [
+          "string",
+          1
+        ],
+        "sequence": [
+          "uint64",
+          2
+        ],
+        "config_update": [
+          "RuntimeConfigUpdate",
+          10
+        ],
+        "usage_ack": [
+          "UsageAcknowledgement",
+          11
+        ],
+        "authorization_update": [
+          "AuthorizationUpdate",
+          12
+        ],
+        "error": [
+          "ControlError",
+          13
+        ],
+        "unknown_usage_ack": [
+          "UnknownUsageAcknowledgement",
+          14
+        ],
+        "hub_status": [
+          "HubStatus",
+          15
+        ],
+        "renewal_result": [
+          "RenewalResult",
+          16
+        ],
+        "credential_revocations": [
+          "CredentialRevocations",
+          17
+        ],
+        "rule_command": [
+          "RuleCommand",
+          18
+        ],
+        "share_command": [
+          "ShareCommand",
+          19
+        ],
+        "source_provision_command": [
+          "SourceProvisionCommand",
+          20
+        ],
+        "credit_close_command": [
+          "CreditCloseCommand",
+          21
+        ],
+        "node_boot_recovery_command": [
+          "NodeBootRecoveryCommand",
+          22
+        ],
+        "recovery_credit_fence_command": [
+          "RecoveryCreditFenceCommand",
+          23
+        ]
+      },
+      "candidate_demand_tag": 100,
+      "status": "no overlapping tag collision; Phase 6 extensions not imported"
+    }
+  ]
+}

@@ -23,7 +23,7 @@ type EpochHandoff struct {
 	RecordSHA256   string `json:"record_sha256"`
 }
 
-func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate, h EpochHandoff) error {
+func persistEpochHandoffTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate, h EpochHandoff) error {
 	hash, e := hex.DecodeString(h.RecordSHA256)
 	if u.IssuerID == "" || !validIssuerUUID(h.TransferID) || h.ParentID == "" || h.SourceID == "" || h.From == 0 || h.From == math.MaxUint64 || h.To != h.From+1 || h.To != u.SignerEpoch || h.Remaining > math.MaxInt64 || h.SealedSequence < 0 || e != nil || len(hash) != 32 {
 		return ErrAuthorityHandoffRequired
@@ -65,7 +65,7 @@ func persistEpochHandoffTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdat
 	return e
 }
 
-func sourceEpochTx(ctx context.Context, tx *sql.Tx, node, source string, root uint64) (uint64, error) {
+func sourceEpochTx(ctx context.Context, tx storeTransaction, node, source string, root uint64) (uint64, error) {
 	rows, e := tx.QueryContext(ctx, `SELECT from_epoch,to_epoch FROM authorization_handoffs WHERE node_id=? AND source_id=? ORDER BY length(to_epoch),to_epoch`, node, source)
 	if e != nil {
 		return 0, e
@@ -93,7 +93,7 @@ func sourceEpochTx(ctx context.Context, tx *sql.Tx, node, source string, root ui
 	return current, rows.Err()
 }
 
-func spendHandoffBudgetTx(ctx context.Context, tx *sql.Tx, node string, r AuthorizationRecord) error {
+func spendHandoffBudgetTx(ctx context.Context, tx storeTransaction, node string, r AuthorizationRecord) error {
 	var rootEpoch, rootState string
 	if e := tx.QueryRowContext(ctx, `SELECT a.signer_epoch,a.state FROM authorization_source_owners o JOIN authorization_records a ON a.node_id=o.node_id AND a.authorization_id=o.authorization_id WHERE o.node_id=? AND o.source_id=?`, node, r.SourceID).Scan(&rootEpoch, &rootState); e != nil {
 		return e
@@ -130,7 +130,7 @@ func spendHandoffBudgetTx(ctx context.Context, tx *sql.Tx, node string, r Author
 	return e
 }
 
-func resumeHandoffHeartbeatTx(ctx context.Context, tx *sql.Tx, u AuthorizationUpdate) error {
+func resumeHandoffHeartbeatTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate) error {
 	oldText, e := stateValue(ctx, tx, "backend_heartbeat")
 	if e != nil {
 		return e
@@ -153,7 +153,7 @@ func resumeHandoffHeartbeatTx(ctx context.Context, tx *sql.Tx, u AuthorizationUp
 
 // attachEpochHandoffTx emits the immutable attestation from the same store
 // that transferred the unissued balance, never from a node-supplied request.
-func attachEpochHandoffTx(ctx context.Context, tx *sql.Tx, d HubDelegation, result *IssuedAuthorization) error {
+func attachEpochHandoffTx(ctx context.Context, tx storeTransaction, d HubDelegation, result *IssuedAuthorization) error {
 	var h EpochHandoff
 	var remaining, from string
 	var hash []byte

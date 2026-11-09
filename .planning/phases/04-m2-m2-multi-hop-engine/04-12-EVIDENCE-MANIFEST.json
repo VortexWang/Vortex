@@ -1,0 +1,51 @@
+{
+  "archive": {
+    "path": "/tmp/phase4-closure-evidence.tar.gz",
+    "sha256": "867b97e088fa0435ab622795a548afeba8b132b0cf34236ceb935d6e99c819aa"
+  },
+  "files": {
+    "artifacts/phase4/closure-91e409e/checks/phase4-closure-runtime-exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "artifacts/phase4/closure-91e409e/checks/phase4-closure-runtime.log": "499156f7b2c638c5c6c88484232b4f9fa7175efa9aba2459fc79c6ddf31dc993",
+    "artifacts/phase4/closure-91e409e/checks/phase4-early-native-exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "artifacts/phase4/closure-91e409e/checks/phase4-early-native.log": "06dce7a2b437c3b9426cb61e34ebf0848869999c09fec82284ac14445e06703f",
+    "artifacts/phase4/closure-91e409e/checks/restored-qdisc.txt": "c778b61f0c14b7c7f8ae0938722ed07d4eb8872579ffa07591f4825f81bc9198",
+    "artifacts/phase4/closure-91e409e/checks/restored-sysctl.txt": "e0200b5e625b13cb4cf3e14bb32826d90a0511ea596355ffb5b3251eab3e41ff",
+    "artifacts/phase4/closure-91e409e/latency-qualification.json": "1c8099e4289ba6622c6609b8ce20903edab673f428e9a56fbb70e6754779190c",
+    "artifacts/phase4/d04-d1ee7d2/checksums.sha256": "6291b3404bee362e9be46403b025e13b36fbcdccefa8e15034a55a0823ceb0c8",
+    "artifacts/phase4/d04-d1ee7d2/summary.json": "478eea9a0a4d6e31ac54e54614ccb580ed28858611df11fa875f3a08f8a7fd59",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/comparison.json": "d2dec74a5acd538525312ca11a46ad59a2c7626d0c3f7b9f4b259ae01eecdc1a",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/rtt-destination.json": "0ed4fe64aa74568c0c035a7b7293f9f9b1bf9412296650145b0a091cfd6bcf49",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/rtt-relay-1.json": "cf4819150139140fd1b8cd8a5327eb7a2f54d0f2c6bf886fe8d6679546872877",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/rtt-relay-2.json": "1338dc0c0aa6f45f86938e188d99f330dceb2cb4329d63e5a3ee4514b5a49021",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/rtt-relay-3.json": "480f5baf1baa4b534dc975b816cf20f7726c7b4da87d54ea80739a9e802d2521",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/rtt-source.json": "412dd493e026853fcb4b2f48488e0a9eb242c3e17183f5914eabb8e7254d93f7",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/runtime-host.json": "7b2f281e1653e8de05230613742912631548c7d30230c9ab3ddeebe5325d705d",
+    "artifacts/phase4/modes-91e409e-delay/auto/comparison/runtime-latency.json": "c40a7f073455bffd80a1293320eee2a1b0227bf3e2aff695591781ac115c93cd",
+    "artifacts/phase4/modes-91e409e-delay/exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "artifacts/phase4/modes-91e409e-delay/filters-test.txt": "0dacf0b88cc8ce7398c7967ebd0c002851342b34af0dd43c23bed398656248ff",
+    "artifacts/phase4/modes-91e409e-delay/harness.sh": "706ebed6f6ee3e6dd5252f8936230702bdaf7d7099f7ec3ef5eabcc97b671345",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/comparison.json": "d0c5245c5c860491e25e3bd58dc5b355097efa643378e4a04979cc1a49f00c37",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/rtt-destination.json": "5c26af80b90e538c58e563829aca9e5be462a00913d507447ede4a8d64b92a5b",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/rtt-relay-1.json": "bbce8bd43ce2a1bc41680d5fa7d8294de63c0782b374bf637ffa1e32f984decd",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/rtt-relay-2.json": "96c49ae23a8ebd7d6f09451f251761f0e3841a200c8746bb2a46e02e05c53c7f",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/rtt-relay-3.json": "4aca2aa1411cf14640e93632c466a29e95b5be9b67ffe971c13e7fabfa80c167",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/rtt-source.json": "ffce9f8f63ffe186e18d2c37d76390a75db1b7e491b00be67821e66c05f3bf81",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/runtime-host.json": "893e4427a93959360a628bd31ed190f92cf205a2a6578b741322efa699991a38",
+    "artifacts/phase4/modes-91e409e-delay/mux/comparison/runtime-latency.json": "96709bd6a84f5d9e559b34661ad551eebb54499686b9555088aed615a852d3c7",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/comparison.json": "cd9483f1c38459de4be6dd8a9da8f8ea1214ffa98bf35fd0a53c4bddd6b4a27c",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/rtt-destination.json": "2d1dd70470a4f6c0d288b0f4b00bb69377b945bb7cad2acb5e96dfcba1a3de90",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/rtt-relay-1.json": "d8dd1597789359b464e467997f3a7fe5009fff1f087abed33ebcc76bf5ae991b",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/rtt-relay-2.json": "bcf5b7b1fe73bf6cb9a08e400df7774489ea84eb8f40caf57b871652cc5f4aeb",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/rtt-relay-3.json": "b7734ae5171b3bae98d2971a7a0414909c5f6a5ed6890a63812a4a61333d9b64",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/rtt-source.json": "f98cc54e16b82a87c98237eb2200cdeb3da7d916be4fc3afe369d41197806af2",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/runtime-host.json": "9ab6d136b738447a3ac0793c6872f63fd8c3302266ff4ddd3919bd6e850c3e37",
+    "artifacts/phase4/modes-91e409e-delay/pool/comparison/runtime-latency.json": "b1103cb946c97ba8949721cdecf311308bc57eeb3211560a799629eea05dd37d",
+    "artifacts/phase4/modes-91e409e-delay/qdisc-before.txt": "c778b61f0c14b7c7f8ae0938722ed07d4eb8872579ffa07591f4825f81bc9198",
+    "artifacts/phase4/modes-91e409e-delay/qdisc-test.txt": "e193ce5b0ba3f404c5862690a6b60b43c7ae0e0927d49a40c0e01ceead317c1c"
+  },
+  "measured_commits": {
+    "d04": "d1ee7d2",
+    "latency_and_runtime": "91e409e"
+  },
+  "schema": 1
+}

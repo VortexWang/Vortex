@@ -27,6 +27,11 @@ func controlTLS(t *testing.T, clientID string) (*tls.Config, *tls.Config, *x509.
 
 func controlTLSWithHub(t *testing.T, clientID, hubID string) (*tls.Config, *tls.Config, *x509.CertPool) {
 	t.Helper()
+	return controlTLSForHub(t, clientID, hubID)
+}
+
+func controlTLSForHub(t *testing.T, clientID, hubID string) (*tls.Config, *tls.Config, *x509.CertPool) {
+	t.Helper()
 	now := time.Now().UTC()
 	ca, caDER, err := identity.NewCA(now)
 	if err != nil {

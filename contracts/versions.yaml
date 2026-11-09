@@ -32,14 +32,15 @@
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.3.0",
+      "version": "1.7.0",
       "status": "frozen",
       "sources": [
         "§3.4",
         "§7",
         "§9",
         "AGT-001..012",
-        "HUB-001..018"
+        "HUB-001..018",
+        "Phase 4 merge field-100 migration CR-010; exact owner approval recorded"
       ],
       "artifacts": [
         "contracts/protobuf/v1/lifecycle.schema.json",

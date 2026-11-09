@@ -294,3 +294,40 @@ func TestRuntimeRenewalDuplexConcurrencyReservesOncePerBatch(t *testing.T) {
 		t.Fatalf("duplicate or lost debit: %+v %v", b, err)
 	}
 }
+
+func TestRuntimeRenewalFallsBackFromExhaustedNewestGrant(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := renewedRuntimeRecords(t, s, a.Use)
+	for i := range records {
+		if records[i].Kind == "credit_grant" {
+			records[i].AmountBytes = 1024
+		}
+	}
+	if err := installRuntimeRenewal(s, records); err != nil {
+		t.Fatal(err)
+	}
+	use := a.Use
+	use.Earliest, use.Latest = use.Earliest.Add(2*time.Second), use.Latest.Add(2*time.Second)
+	// Exhaust the new grant through the reservation path, leaving its hold
+	// unresolved. Selection must continue to the still-funded original grant.
+	if id, err := s.ReserveRuntimeUsage(ctx, runtimeReservation("exhaust-new", 1024), use); err != nil || id != "renewed-grant" {
+		t.Fatalf("new grant: %q %v", id, err)
+	}
+	use.Earliest, use.Latest = use.Earliest.Add(time.Second), use.Latest.Add(time.Second)
+	if id, err := s.ReserveRuntimeUsage(ctx, runtimeReservation("fallback", 100), use); err != nil || id != "grant" {
+		t.Fatalf("fallback: %q %v", id, err)
+	}
+	g, r, sh := runtimeSessionIDs(t, s)
+	if g != "grant" || r != "renewed-runtime" || sh != "renewed-share" {
+		t.Fatalf("wrong mixed selection %s %s %s", g, r, sh)
+	}
+	b, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || b.Initial != (1<<20)+1024 || b.Reserved != 1124 || b.Remaining != (1<<20)-100 || b.Unknown != 0 || b.Committed != 0 {
+		t.Fatalf("conservation: %+v %v", b, err)
+	}
+}

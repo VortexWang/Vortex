@@ -1,0 +1,3203 @@
+{
+  "raw_directory": "artifacts/phase4/idle-1ffc1f0/waterline-30",
+  "files": {
+    "report.json": {
+      "sha256": "6f6009e463b118e2909bef2be60004a5d2eb96b96725ef221654e73ab1a8e24c",
+      "data": {
+        "accounting": {
+          "left_to_right": 4453683380,
+          "right_to_left": 4453683380
+        },
+        "authorization_mode": "runtime-authority",
+        "classified_drops": {
+          "kernel_rcvbuf_driver_scope": 0,
+          "oversized": 0,
+          "queue_full": 0,
+          "receive_queue_full": 0,
+          "source_capacity": 0,
+          "source_queue_full": 0,
+          "window_full": 0
+        },
+        "commit": "1ffc1f0a2b7c5af5b6deaa644b799ea32653a9bb",
+        "d_04": {
+          "status": "pending-review"
+        },
+        "dirty": false,
+        "end_to_end_received_bytes": 4453683380,
+        "kernel_counter_scope": "driver and dedicated fixture container network namespaces; diagnostic attribution only, not per-flow qualification",
+        "nfr_003": {
+          "mixed_tcp_mbps": 996.6409013605437,
+          "reason": "TCP-only is a contention baseline, not an independent same-path minimum TLS baseline; host eligibility must be reviewed",
+          "status": "not-qualified",
+          "tcp_only_retention": 0.7812961406773989
+        },
+        "nfr_005": {
+          "loss_threshold_met": true,
+          "reason": "Short diagnostic run; host and duration qualification remain open",
+          "status": "not-qualified",
+          "udp_loss": 0
+        },
+        "nfr_006": {
+          "reason": "mixed workload does not establish routing fault/forged OPEN coverage",
+          "status": "not-qualified"
+        },
+        "nfr_007": {
+          "reason": "independent path latency baseline is missing",
+          "status": "not-qualified"
+        },
+        "performance_qualification": "not-qualified",
+        "qualification_metrics": {
+          "duration_seconds": 15,
+          "mixed_tcp_mbps": 996.6409013605437,
+          "source_credit_conserved": true,
+          "source_credit_settled": true,
+          "tcp_streams": 16,
+          "udp_loss": 0,
+          "udp_offered_mbps": 99.95776
+        },
+        "returned_reservations": {},
+        "runtime_correctness": "pass",
+        "schema": 1,
+        "semantic_manifest_sha256": "975582a6f6fd14ae805a9fb176194e2e37190e5875a1ecde7fa72626bded1391",
+        "trial_id": "dynamic40-waterline-30"
+      }
+    },
+    "events-source.jsonl.credit.json": {
+      "sha256": "9611972e3df377dd07499c1095f9849f7fe229a2ce46ae17e0e40dd33bb04720",
+      "data": {
+        "dynamic_target_bytes": 8388608,
+        "waits": {
+          "attempts": 588441,
+          "shortfalls": 175,
+          "waits": 175,
+          "wait_succeeded": 175,
+          "timed_out": 0,
+          "cancelled": 0,
+          "final_failures": 0
+        },
+        "observations": {
+          "reservations": 588441,
+          "block_allocations": 4732,
+          "peak_sessions": 18,
+          "peak_held_bytes": 128577048,
+          "issuer_calls": 0,
+          "issuer_nanoseconds_log2_buckets": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "snapshot_id": "phase4-formal/source/path-2/policy-2",
+        "pending_grant_bytes": 0,
+        "unknown_grant_bytes": 0,
+        "grant_records": 49,
+        "budget_bytes": 1099511627776,
+        "unissued_bytes": 1090365551576,
+        "available_bytes": 238709440,
+        "held_bytes": 0,
+        "used_bytes": 8907366760,
+        "unknown_bytes": 0,
+        "grants": 49,
+        "denials": 0,
+        "sessions": 0
+      }
+    },
+    "idle-window.json": {
+      "sha256": "24a4f7c764f6cadf29db746d283ac328c6c7b6251c1666b2f86f88851f38f3f5",
+      "data": {
+        "requested_seconds": 65,
+        "elapsed_nanoseconds": 65000184713,
+        "scope": "post-workload idle; processes remain running"
+      }
+    },
+    "semantic-manifest.json": {
+      "sha256": "01f10fc3322ad328a03ca9030846bee3a7f4882c1d5174616299fc4ab50f8468",
+      "data": {
+        "roles": {
+          "destination": {
+            "execution_point": true,
+            "hop_index": 3,
+            "next_hop_node_id": "",
+            "node_id": "00000000-0000-0000-0000-000000000005",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000004",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "destination",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "echo-target:18081",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-1": {
+            "execution_point": false,
+            "hop_index": 0,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000003",
+            "node_id": "00000000-0000-0000-0000-000000000002",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000001",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-2": {
+            "execution_point": false,
+            "hop_index": 1,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000004",
+            "node_id": "00000000-0000-0000-0000-000000000003",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000002",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "relay-3": {
+            "execution_point": false,
+            "hop_index": 2,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000005",
+            "node_id": "00000000-0000-0000-0000-000000000004",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000003",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "relay",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "target_service": "",
+            "tcp_service": false,
+            "transport_mode": "mux",
+            "udp_service": false,
+            "version": 1
+          },
+          "source": {
+            "execution_point": true,
+            "hop_index": 0,
+            "next_hop_node_id": "00000000-0000-0000-0000-000000000002",
+            "node_id": "00000000-0000-0000-0000-000000000001",
+            "path_generation": 2,
+            "peer_node_id": "00000000-0000-0000-0000-000000000002",
+            "pool_max_links": 4,
+            "pool_min_links": 1,
+            "role": "source",
+            "rule_id": "qualification-rule",
+            "rule_revision": 2,
+            "runtime_authority": true,
+            "source_credit": {
+              "budget_bytes": 1099511627776,
+              "grant_target_bytes": 375000000,
+              "initial_block_bytes": 262144,
+              "max_block_bytes": 4194304,
+              "observe": true,
+              "renew_percent": 30,
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "target_seconds": 30
+            },
+            "target_service": "",
+            "tcp_service": true,
+            "transport_mode": "mux",
+            "udp_service": true,
+            "version": 1
+          }
+        },
+        "runtime_environment": {
+          "CPU_PROFILE": "default",
+          "GOGC": "default",
+          "GOMAXPROCS": "default",
+          "PHASE4_IDLE_SECONDS": "65",
+          "PHASE4_TEST_ISSUER_DELAY": "40ms",
+          "PHASE4_TEST_ISSUER_RENEWAL_ONLY": "1",
+          "VORTEX_QUALIFICATION_EVENT_LIMIT": "default"
+        },
+        "runtime_source_sha256": "56d2650fdcd66be0bdd140cbc655a10620256f0f33b4530930f8958258d02789",
+        "udp_socket_limits": {
+          "rmem_default": 212992,
+          "rmem_max": 67108864,
+          "wmem_default": 212992,
+          "wmem_max": 67108864
+        },
+        "workload": {
+          "duration_seconds": 15,
+          "tcp_streams": 16,
+          "udp_mbps": 100,
+          "udp_payload_bytes": 1200
+        }
+      }
+    },
+    "events-source.jsonl.credit-timeline.json": {
+      "sha256": "98f1c5a20dd8ed14430776cf1bc20c71adcb159918a9ffe2bed259fac1cee282",
+      "projection": "allocator histograms omitted; raw hash covers original full file",
+      "data": {
+        "interval_nanoseconds": 1000000000,
+        "dropped_periodic_samples": 0,
+        "samples": [
+          {
+            "elapsed_nanoseconds": 4863,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 1000209701,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 2000381243,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 3000474206,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 0,
+                "shortfalls": 0,
+                "waits": 0,
+                "wait_succeeded": 0,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 0,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099511627776,
+              "available_bytes": 0,
+              "held_bytes": 0,
+              "used_bytes": 0,
+              "unknown_bytes": 0,
+              "grants": 0,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 4001113714,
+            "state": {
+              "dynamic_target_bytes": 20927299,
+              "waits": {
+                "attempts": 1054,
+                "shortfalls": 106,
+                "waits": 106,
+                "wait_succeeded": 106,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 12602069,
+              "unknown_grant_bytes": 0,
+              "grant_records": 6,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1099456447839,
+              "available_bytes": 2726,
+              "held_bytes": 720544,
+              "used_bytes": 41854598,
+              "unknown_bytes": 0,
+              "grants": 5,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 5000247564,
+            "state": {
+              "dynamic_target_bytes": 180191108,
+              "waits": {
+                "attempts": 11565,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 16,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1098935316937,
+              "available_bytes": 162053617,
+              "held_bytes": 53875006,
+              "used_bytes": 360382216,
+              "unknown_bytes": 0,
+              "grants": 16,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 6000148455,
+            "state": {
+              "dynamic_target_bytes": 339312564,
+              "waits": {
+                "attempts": 22422,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 18,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1098559295575,
+              "available_bytes": 194142051,
+              "held_bytes": 79565022,
+              "used_bytes": 678625128,
+              "unknown_bytes": 0,
+              "grants": 18,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 7000167450,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 33181,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 19,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1098294551546,
+              "available_bytes": 165284800,
+              "held_bytes": 54972923,
+              "used_bytes": 996818507,
+              "unknown_bytes": 0,
+              "grants": 19,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 8000142299,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 43853,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 264241152,
+              "unknown_grant_bytes": 0,
+              "grant_records": 21,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1097766069242,
+              "available_bytes": 77204416,
+              "held_bytes": 84382606,
+              "used_bytes": 1319730360,
+              "unknown_bytes": 0,
+              "grants": 20,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 9000132572,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 54532,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 22,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1097501828090,
+              "available_bytes": 303696832,
+              "held_bytes": 64754366,
+              "used_bytes": 1641348488,
+              "unknown_bytes": 0,
+              "grants": 22,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 10000244628,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 65045,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 23,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1097237586938,
+              "available_bytes": 249170880,
+              "held_bytes": 62921246,
+              "used_bytes": 1961948712,
+              "unknown_bytes": 0,
+              "grants": 23,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 11000251650,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 75515,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 24,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1096973345786,
+              "available_bytes": 173673408,
+              "held_bytes": 78598987,
+              "used_bytes": 2286009595,
+              "unknown_bytes": 0,
+              "grants": 24,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 12000852260,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 86185,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 25,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1096709104634,
+              "available_bytes": 144313280,
+              "held_bytes": 52155174,
+              "used_bytes": 2606054688,
+              "unknown_bytes": 0,
+              "grants": 25,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 13000348666,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 96827,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 27,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1096180622330,
+              "available_bytes": 328862656,
+              "held_bytes": 76059363,
+              "used_bytes": 2926083427,
+              "unknown_bytes": 0,
+              "grants": 27,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 14000499718,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 107184,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 28,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1095916381178,
+              "available_bytes": 278531008,
+              "held_bytes": 70423054,
+              "used_bytes": 3246292536,
+              "unknown_bytes": 0,
+              "grants": 28,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 15000179001,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 117907,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 29,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1095652140026,
+              "available_bytes": 232393664,
+              "held_bytes": 60674694,
+              "used_bytes": 3566419392,
+              "unknown_bytes": 0,
+              "grants": 29,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 16001927583,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 128747,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 30,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1095387898874,
+              "available_bytes": 152701888,
+              "held_bytes": 83400334,
+              "used_bytes": 3887626680,
+              "unknown_bytes": 0,
+              "grants": 30,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 17000190070,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 139338,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 31,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1095123657722,
+              "available_bytes": 119147456,
+              "held_bytes": 57577902,
+              "used_bytes": 4211244696,
+              "unknown_bytes": 0,
+              "grants": 31,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 18000383471,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 150068,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 33,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1094595175418,
+              "available_bytes": 320474048,
+              "held_bytes": 65001030,
+              "used_bytes": 4530977280,
+              "unknown_bytes": 0,
+              "grants": 33,
+              "denials": 0,
+              "sessions": 17
+            }
+          },
+          {
+            "elapsed_nanoseconds": 19000127695,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 163466,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 34,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1094330934266,
+              "available_bytes": 322902942,
+              "held_bytes": 20030893,
+              "used_bytes": 4837759675,
+              "unknown_bytes": 0,
+              "grants": 34,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 20003019404,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 192100,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 35,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1094064927704,
+              "available_bytes": 228199360,
+              "held_bytes": 107706168,
+              "used_bytes": 5110794544,
+              "unknown_bytes": 0,
+              "grants": 35,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 21000573154,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 220678,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 36,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1093800686552,
+              "available_bytes": 203033536,
+              "held_bytes": 121886984,
+              "used_bytes": 5386020704,
+              "unknown_bytes": 0,
+              "grants": 36,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 22000271159,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 249391,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 37,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1093536445400,
+              "available_bytes": 282725312,
+              "held_bytes": 32053248,
+              "used_bytes": 5660403816,
+              "unknown_bytes": 0,
+              "grants": 37,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 23000751485,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 278034,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 38,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1093272204248,
+              "available_bytes": 274336704,
+              "held_bytes": 30287240,
+              "used_bytes": 5934799584,
+              "unknown_bytes": 0,
+              "grants": 38,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 24000496359,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 306795,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 39,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1093007963096,
+              "available_bytes": 244976576,
+              "held_bytes": 45093728,
+              "used_bytes": 6213594376,
+              "unknown_bytes": 0,
+              "grants": 39,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 25000563526,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 335302,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 40,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1092743721944,
+              "available_bytes": 215616448,
+              "held_bytes": 66170136,
+              "used_bytes": 6486119248,
+              "unknown_bytes": 0,
+              "grants": 40,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 26002324685,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 364130,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 41,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1092479480792,
+              "available_bytes": 186256320,
+              "held_bytes": 84717632,
+              "used_bytes": 6761173032,
+              "unknown_bytes": 0,
+              "grants": 41,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 27001133682,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 392918,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 42,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1092215239640,
+              "available_bytes": 156896192,
+              "held_bytes": 104843634,
+              "used_bytes": 7034648310,
+              "unknown_bytes": 0,
+              "grants": 42,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 28000371525,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 421624,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 43,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1091950998488,
+              "available_bytes": 131730368,
+              "held_bytes": 118090456,
+              "used_bytes": 7310808464,
+              "unknown_bytes": 0,
+              "grants": 43,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 29000132082,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 450217,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 44,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1091686757336,
+              "available_bytes": 161090496,
+              "held_bytes": 76987592,
+              "used_bytes": 7586792352,
+              "unknown_bytes": 0,
+              "grants": 44,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 30000260525,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 478546,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 45,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1091422516184,
+              "available_bytes": 203033536,
+              "held_bytes": 25997197,
+              "used_bytes": 7860080859,
+              "unknown_bytes": 0,
+              "grants": 45,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 31000140787,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 507162,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 46,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1091158275032,
+              "available_bytes": 173673408,
+              "held_bytes": 46626685,
+              "used_bytes": 8133052651,
+              "unknown_bytes": 0,
+              "grants": 46,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 32001051301,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 535878,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 47,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090894033880,
+              "available_bytes": 144313280,
+              "held_bytes": 67506813,
+              "used_bytes": 8405773803,
+              "unknown_bytes": 0,
+              "grants": 47,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 33000292396,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 564612,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 48,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090629792728,
+              "available_bytes": 114953152,
+              "held_bytes": 85694320,
+              "used_bytes": 8681187576,
+              "unknown_bytes": 0,
+              "grants": 48,
+              "denials": 0,
+              "sessions": 18
+            }
+          },
+          {
+            "elapsed_nanoseconds": 34000218099,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 35000273245,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 36000462853,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 37000650737,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 38000832582,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 39001007977,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 40001201877,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 41000377042,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 42000563690,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 43000753773,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 44000925264,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 45001117306,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 46000281698,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 47000444944,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 48000624034,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 49000817579,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 50001010051,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 51001199968,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 52000353426,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 53000537841,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 54000717468,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 55000929374,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 56001130462,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 57000316175,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 58000491148,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 59000666015,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 60000853310,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 61001036196,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 62000234495,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 63000383648,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 2
+            }
+          },
+          {
+            "elapsed_nanoseconds": 64000154846,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 65000351681,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 66000533802,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 67000717263,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 68000925273,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 69001081777,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 70000270128,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 71000416518,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 72000659715,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 73000920309,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 74001084967,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 75000266393,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 76000429671,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 77000613156,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 78000794636,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 79001011890,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 80001205270,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 81000372661,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 82000554923,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 83000738461,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 84000915399,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 85001111498,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 86000279425,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 87000435435,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 88000627748,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 89000809578,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 90001048118,
+            "state": {
+              "dynamic_target_bytes": 375000000,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 91000248870,
+            "state": {
+              "dynamic_target_bytes": 250861223,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 92000406969,
+            "state": {
+              "dynamic_target_bytes": 113134780,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 93000586968,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 236587968,
+              "held_bytes": 2121472,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 1
+            }
+          },
+          {
+            "elapsed_nanoseconds": 94000950858,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 95001146653,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 96000322121,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 97000493867,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 98000688991,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 99000907963,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 100001105103,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 101000257949,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          },
+          {
+            "elapsed_nanoseconds": 101036733396,
+            "state": {
+              "dynamic_target_bytes": 8388608,
+              "waits": {
+                "attempts": 588441,
+                "shortfalls": 175,
+                "waits": 175,
+                "wait_succeeded": 175,
+                "timed_out": 0,
+                "cancelled": 0,
+                "final_failures": 0
+              },
+              "snapshot_id": "phase4-formal/source/path-2/policy-2",
+              "pending_grant_bytes": 0,
+              "unknown_grant_bytes": 0,
+              "grant_records": 49,
+              "budget_bytes": 1099511627776,
+              "unissued_bytes": 1090365551576,
+              "available_bytes": 238709440,
+              "held_bytes": 0,
+              "used_bytes": 8907366760,
+              "unknown_bytes": 0,
+              "grants": 49,
+              "denials": 0,
+              "sessions": 0
+            }
+          }
+        ]
+      }
+    }
+  }
+}

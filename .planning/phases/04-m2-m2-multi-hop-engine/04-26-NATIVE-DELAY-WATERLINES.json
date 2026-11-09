@@ -1,0 +1,143 @@
+{
+  "scope": "40ms delayed process-local issuer, three diagnostic trials; not parameter lock",
+  "remote": "/root/VORTEX-phase4-accounting/artifacts/phase4/delay-scan-5239ba5",
+  "socket_max_during": 67108864,
+  "socket_max_restored": 212992,
+  "results": [
+    {
+      "waterline": 20,
+      "commit": "5239ba54fe5e2a05f4718f87aa304bc7e8b8baa5",
+      "dirty": false,
+      "runtime_correctness": "pass",
+      "performance_qualification": "not-qualified",
+      "metrics": {
+        "duration_seconds": 15,
+        "mixed_tcp_mbps": 999.4983747419255,
+        "source_credit_conserved": true,
+        "source_credit_settled": true,
+        "tcp_streams": 16,
+        "udp_loss": 0,
+        "udp_offered_mbps": 99.97056
+      },
+      "credit": {
+        "waits": {
+          "attempts": 590890,
+          "shortfalls": 1,
+          "waits": 1,
+          "wait_succeeded": 1,
+          "timed_out": 0,
+          "cancelled": 0,
+          "final_failures": 0
+        },
+        "snapshot_id": "phase4-formal/source/path-2/policy-2",
+        "pending_grant_bytes": 0,
+        "unknown_grant_bytes": 0,
+        "grant_records": 30,
+        "budget_bytes": 1099511627776,
+        "unissued_bytes": 1090372093248,
+        "available_bytes": 191618520,
+        "held_bytes": 0,
+        "used_bytes": 8947916008,
+        "unknown_bytes": 0,
+        "grants": 30,
+        "denials": 0,
+        "sessions": 0
+      },
+      "sha256": {
+        "report.json": "724965bb28d0bbab33f8cf733a67db36f6974309730cc6afb3ab24d781460fb1",
+        "events-source.jsonl.credit.json": "5b55ae2e38c63e3316f7d5d80546ec08a2f6990237398a5a49f148f78269f587",
+        "mixed-workload.json": "b014ade991052fa54d2bcd1b95509648bd5086310a94bef526fd8942e4c75758"
+      }
+    },
+    {
+      "waterline": 30,
+      "commit": "5239ba54fe5e2a05f4718f87aa304bc7e8b8baa5",
+      "dirty": false,
+      "runtime_correctness": "pass",
+      "performance_qualification": "not-qualified",
+      "metrics": {
+        "duration_seconds": 15,
+        "mixed_tcp_mbps": 1000.0478660513083,
+        "source_credit_conserved": true,
+        "source_credit_settled": true,
+        "tcp_streams": 16,
+        "udp_loss": 0,
+        "udp_offered_mbps": 99.96416
+      },
+      "credit": {
+        "waits": {
+          "attempts": 591972,
+          "shortfalls": 1,
+          "waits": 1,
+          "wait_succeeded": 1,
+          "timed_out": 0,
+          "cancelled": 0,
+          "final_failures": 0
+        },
+        "snapshot_id": "phase4-formal/source/path-2/policy-2",
+        "pending_grant_bytes": 0,
+        "unknown_grant_bytes": 0,
+        "grant_records": 35,
+        "budget_bytes": 1099511627776,
+        "unissued_bytes": 1090153346064,
+        "available_bytes": 421661896,
+        "held_bytes": 0,
+        "used_bytes": 8936619816,
+        "unknown_bytes": 0,
+        "grants": 35,
+        "denials": 0,
+        "sessions": 0
+      },
+      "sha256": {
+        "report.json": "cefb2ac140d1cc37191f7d68b3769e9d3bc759c4406c31bcf9e3f933c4ce3db4",
+        "events-source.jsonl.credit.json": "dbbc86a9c2bedee5ad57f9a56a689dba4042a5cb5cdc4896fee3df79e0787662",
+        "mixed-workload.json": "9442201dac6782926c374dcc653e22edba62c3c44d88d3f12b94f5c306ca6452"
+      }
+    },
+    {
+      "waterline": 50,
+      "commit": "5239ba54fe5e2a05f4718f87aa304bc7e8b8baa5",
+      "dirty": false,
+      "runtime_correctness": "pass",
+      "performance_qualification": "not-qualified",
+      "metrics": {
+        "duration_seconds": 15,
+        "mixed_tcp_mbps": 1001.4904124663512,
+        "source_credit_conserved": true,
+        "source_credit_settled": true,
+        "tcp_streams": 16,
+        "udp_loss": 0,
+        "udp_offered_mbps": 99.95904
+      },
+      "credit": {
+        "waits": {
+          "attempts": 591928,
+          "shortfalls": 1,
+          "waits": 1,
+          "wait_succeeded": 1,
+          "timed_out": 0,
+          "cancelled": 0,
+          "final_failures": 0
+        },
+        "snapshot_id": "phase4-formal/source/path-2/policy-2",
+        "pending_grant_bytes": 0,
+        "unknown_grant_bytes": 0,
+        "grant_records": 49,
+        "budget_bytes": 1099511627776,
+        "unissued_bytes": 1090074833936,
+        "available_bytes": 468080584,
+        "held_bytes": 0,
+        "used_bytes": 8968713256,
+        "unknown_bytes": 0,
+        "grants": 49,
+        "denials": 0,
+        "sessions": 0
+      },
+      "sha256": {
+        "report.json": "0df350f635cdb5650d5bf59dad28311d230bd4b3dd802b8e1d1ef4033a2f8c01",
+        "events-source.jsonl.credit.json": "7611fd3236f7553361b9e82dd130c46be50febb79c706aadddcc785bb1c9ff46",
+        "mixed-workload.json": "20ed9ec3da5747f9e67821c887629313b61e5122e5e6a5f8a6e0e856c22c5b1a"
+      }
+    }
+  ]
+}

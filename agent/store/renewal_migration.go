@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS share_reference_heads (
 	if _, err := tx.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS renewal_trigger_once ON renewal_requests(node_id,trigger_authorization_id) WHERE trigger_authorization_id<>''`); err != nil {
 		return err
 	}
-	if _, err := tx.Exec(`UPDATE schema_meta SET value='16' WHERE key='schema_version'`); err != nil {
+	if _, err := tx.Exec(`UPDATE schema_meta SET value='16' WHERE key='schema_version' AND CAST(value AS INTEGER)<16`); err != nil {
 		return err
 	}
 	return tx.Commit()

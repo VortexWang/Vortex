@@ -147,3 +147,23 @@ func TestCreditBookSelectionNeverReleasesUnknownLiability(t *testing.T) {
 		t.Fatalf("snapshot change released unknown grant: %d", got)
 	}
 }
+
+func TestPolicyLookupRejectsMissingOrAmbiguousPathAuthority(t *testing.T) {
+	cfg := bookFixture(t, 512<<10)
+	book, err := NewCreditBook(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	binding := cfg.Snapshots["old"].Binding
+	if _, _, err := book.openPolicy(context.Background(), core.Flow{Key: "missing"}, binding, 2); err == nil {
+		t.Fatal("missing policy authority accepted")
+	}
+	if _, _, err := book.openPolicy(context.Background(), core.Flow{Key: "ambiguous"}, binding, 1); err == nil {
+		t.Fatal("ambiguous policy authority accepted")
+	}
+	for _, state := range book.State().Snapshots {
+		if state.Credit.Sessions != 0 || state.Credit.Used != 0 {
+			t.Fatal("failed lookup consumed authority")
+		}
+	}
+}

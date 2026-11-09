@@ -162,7 +162,7 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 // issuerModeTx evaluates the fixed backend boundary in the same transaction
 // that spends the delegation. General online signing closes at loss; only
 // installed, node-bound delegations can still issue in restricted autonomy.
-func issuerModeTx(ctx context.Context, tx *sql.Tx, now IssuerTime) (time.Time, time.Time, error) {
+func issuerModeTx(ctx context.Context, tx storeTransaction, now IssuerTime) (time.Time, time.Time, error) {
 	if err := checkIssuerTime(now); err != nil {
 		return time.Time{}, time.Time{}, err
 	}
@@ -206,6 +206,22 @@ func issuerModeTx(ctx context.Context, tx *sql.Tx, now IssuerTime) (time.Time, t
 // payload in one FULL transaction. Lost responses only replay the same payload;
 // expiry, disconnection and process restart do not return any reserved bytes.
 func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return IssuedAuthorization{}, err
+	}
+	defer tx.Rollback()
+	result, err := s.issueHubAuthorizationTx(ctx, tx, r, now)
+	if err != nil {
+		return IssuedAuthorization{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return IssuedAuthorization{}, err
+	}
+	return result, nil
+}
+
+func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx storeTransaction, r IssueRequest, now IssuerTime) (IssuedAuthorization, error) {
 	var result IssuedAuthorization
 	if s.owner != "hub" {
 		return result, ErrAuthorizationDenied
@@ -231,25 +247,17 @@ func (s *Store) IssueHubAuthorization(ctx context.Context, r IssueRequest, now I
 	if err != nil {
 		return result, err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return result, err
+	var deniedRequest []byte
+	deniedErr := tx.QueryRowContext(ctx, `SELECT request FROM issuer_demand_denials WHERE request_id=?`, r.ID).Scan(&deniedRequest)
+	if deniedErr == nil {
+		if !bytes.Equal(deniedRequest, request) {
+			return result, ErrAuthorizationUpdateConflict
+		}
+		return result, ErrDemandDefinitivelyDenied
 	}
-	defer tx.Rollback()
-	result, err = s.issueHubAuthorizationTx(ctx, tx, r, now, renewal, request)
-	if err != nil {
-		return IssuedAuthorization{}, err
+	if !errors.Is(deniedErr, sql.ErrNoRows) {
+		return result, deniedErr
 	}
-	if err := tx.Commit(); err != nil {
-		return IssuedAuthorization{}, err
-	}
-	return result, nil
-}
-
-// The caller owns commit/rollback so renewal outcomes and budget changes can
-// share exactly one durable transaction.
-func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r IssueRequest, now IssuerTime, renewal *controlv1.RenewalRequest, request []byte) (IssuedAuthorization, error) {
-	var result IssuedAuthorization
 	var terminal []byte
 	terminalErr := tx.QueryRowContext(ctx, `SELECT result FROM issuer_renewals WHERE request_id=?`, r.ID).Scan(&terminal)
 	if terminalErr == nil {
@@ -259,7 +267,7 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 		return result, terminalErr
 	}
 	var priorRequest []byte
-	err := tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256,renewal_result FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest, &result.RenewalResult)
+	err = tx.QueryRowContext(ctx, `SELECT request,payload,payload_sha256,renewal_result FROM issuer_issues WHERE issue_id=?`, r.ID).Scan(&priorRequest, &result.Payload, &result.Digest, &result.RenewalResult)
 	if err == nil {
 		if !bytes.Equal(priorRequest, request) {
 			return IssuedAuthorization{}, ErrAuthorizationUpdateConflict
@@ -348,7 +356,7 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx *sql.Tx, r Issue
 		return result, err
 	}
 	if r.RawBytes > remaining {
-		return result, ErrIssuerQuotaExhausted
+		return result, errors.Join(ErrDemandInsufficientFunds, ErrIssuerQuotaExhausted)
 	}
 	start := now.Latest
 	if d.ValidFrom.After(start) {

@@ -1,0 +1,58 @@
+{
+  "status": "pass",
+  "scope": "independent rate, UDP sequence, per-flow/target/source and final funded conservation recomputation",
+  "trials": [
+    {
+      "trial": "warmup300",
+      "status": "pass",
+      "bytes_by_direction": {
+        "left_to_right": 61275603444,
+        "right_to_left": 61275603444
+      },
+      "flow_counts": {
+        "tcp": 33,
+        "udp": 2
+      },
+      "source_used": 122551206888
+    },
+    {
+      "trial": "trial-1",
+      "status": "pass",
+      "bytes_by_direction": {
+        "left_to_right": 61251159716,
+        "right_to_left": 61251159716
+      },
+      "flow_counts": {
+        "tcp": 33,
+        "udp": 2
+      },
+      "source_used": 122502319432
+    },
+    {
+      "trial": "trial-2",
+      "status": "pass",
+      "bytes_by_direction": {
+        "left_to_right": 61380780324,
+        "right_to_left": 61380780324
+      },
+      "flow_counts": {
+        "tcp": 33,
+        "udp": 2
+      },
+      "source_used": 122761560648
+    },
+    {
+      "trial": "trial-3",
+      "status": "pass",
+      "bytes_by_direction": {
+        "left_to_right": 61489674756,
+        "right_to_left": 61489674756
+      },
+      "flow_counts": {
+        "tcp": 33,
+        "udp": 2
+      },
+      "source_used": 122979349512
+    }
+  ]
+}

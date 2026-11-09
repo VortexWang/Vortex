@@ -1029,6 +1029,15 @@
           "vortex.runtime-config": "1.1.0"
         },
         "status": "mapped; runtime implementation/evidence pending"
+      },
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
       }
     },
     {
@@ -1038,7 +1047,16 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+      }
     },
     {
       "id": "AGT-007",
@@ -1092,7 +1110,16 @@
         "vortex.runtime-config"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release.",
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+      }
     },
     {
       "id": "AGT-010",
@@ -1121,7 +1148,16 @@
         "vortex.control.v1"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release.",
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+      }
     },
     {
       "id": "HUB-002",
@@ -1142,7 +1178,16 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release."
+      "review_note": "Control 1.2.0: typed unresolved usage and digest-bound durable ACK; no liability release.",
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+      }
     },
     {
       "id": "HUB-004",
@@ -1243,7 +1288,16 @@
         "vortex.database"
       ],
       "source": "V1.11 REQUIREMENTS.md; exact source anchor retained in REQUIREMENTS-SOURCE.md",
-      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities."
+      "review_note": "Authorization 1.1.0: authenticated issuer S/R handoff attestation, bounded successor grants, unchanged path generation and retained old liabilities.",
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+      }
     },
     {
       "id": "HUB-013",
@@ -2434,6 +2488,15 @@
           "vortex.runtime-config": "1.1.0"
         },
         "status": "mapped; runtime implementation/evidence pending"
+      },
+      "phase4_merge_review": {
+        "version": "1.7.0",
+        "status": "approved",
+        "proposal": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+        "scope": "isolated opt-in field-100 demand, immutable funded outcome, preserved unknown liabilities; lifecycle tags unchanged",
+        "approved_at": "2026-11-09T09:46:14.898715+00:00",
+        "proposal_sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf",
+        "proposal_json_sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
       }
     },
     {

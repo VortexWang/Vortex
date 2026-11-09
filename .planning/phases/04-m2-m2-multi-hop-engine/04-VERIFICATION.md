@@ -1,12 +1,129 @@
 ---
 phase: 04-m2-m2-multi-hop-engine
-verified: 2026-11-05
-status: gaps_found
-score: runtime gap slices verified; formal qualification and durable authority remain unqualified
-behavior_unverified: 5
+verified: 2026-11-07
+status: passed
+score: P4-Q1..Q5 passed; owner-confirmed D-04 lock; production durability transferred to Phase 5/6
+behavior_unverified: 0
 ---
 
 # Phase 4 Verification — current qualification review
+
+## Authoritative final audit — 2026-11-07
+
+See [04-45-FINAL-ACCEPTANCE-AUDIT.md](04-45-FINAL-ACCEPTANCE-AUDIT.md) for
+requirement-by-requirement evidence. Q1, Q2, Q3 and Q5 meet the current Phase 4
+Engine/tracer boundary. Q1 uses clean 0c2ba71, the corrected minimum-host
+baseline, explicit 300 s warmup, 3 x 300 s trials and independent TLS. Same-SHA
+local Docker and Actions regression are separately retained. The matrix passed
+81 raw audits; the center-profile formal accounting was also independently
+recomputed from rates, UDP sequences, flow identities and target/source totals.
+
+Q4 technical evidence and the concrete 256 KiB / 30 s / 30% parameter
+proposal are accepted: the owner replied “确认” to the full table on 2026-11-07.
+`04-D04-LOCK.json` records initial/max block, floor, horizon/cap, waterline and
+wait bound. P4-Q1..Q5 now pass. No Phase 4 requirement remains open under
+04-CLOSURE's effective boundary. Production persistence, production parameter
+requalification and whole-system acceptance remain Phase 5/6/8 work.
+
+## Historical verification increments
+
+All dated records below retain their original source and result. Earlier
+`gaps_found`, unqualified or unlocked statements describe their own past slices
+and are superseded for current Phase 4 status by the final audit and confirmed
+lock above. No historical failed test is relabeled as passing.
+
+## Bounded early TCP DATA increment — 2026-11-06
+
+The runtime bridge now has an authenticated delayed-authorization regression
+at `engine/runtime/relay/bridge_test.go`:
+`TestBridgeOpeningConnBuffersTCPUntilRemoteAuthorization`. It sends a bounded
+TCP prefix while OPEN is pending, verifies the remote stream exposes no DATA
+before authorization, then authorizes the stream and verifies exact delivery to
+the target with zero held, unknown, or open-session accounting on both sides.
+The low-level VLink tests continue to enforce strict UDP OPEN/OPEN_OK gating.
+
+This closes the finite implementation/evidence slice for authorized early TCP
+DATA. It does not provide the controlled pool/mux RTT timeline, dedicated-host
+resource evidence, or formal NFR-007 qualification; those remain open.
+
+## Clean Docker runtime-authority evidence — 2026-11-06
+
+The clean `e5bcb03f146ff2dba0400e4a03e43efcadc8027d` build passed the bounded
+Docker runtime-authority mixed workload and the same-SHA comparison. Runtime
+accounting reconciled exactly in both directions, source credit was conserved
+and settled, and the finite forged-OPEN, bypass, 64 MiB integrity and relay-2
+failure checks passed. The independent TLS comparison is retained with the
+runtime-authority semantic manifest; its same-load TCP ratio was `0.5946`,
+below the `0.70` diagnostic threshold. Details and output directories are in
+`04-37-CLEAN-DOCKER-RUNTIME-EVIDENCE.md`.
+
+This remains a five-second, four-stream Docker run on an OrbStack development
+VM. It is not the dedicated Ubuntu host, 60-second warmup, repeated 300-second
+trial set, or resource-isolated evidence required by P4-Q1. Therefore the
+formal performance status remains `not-qualified`; no NFR-003/NFR-005 result
+is promoted. The finite attack results improve the enumerated NFR-006 evidence
+but do not claim exhaustive coverage.
+
+The source authority is still an in-process qualification adapter. No Agent or
+Edge Hub durable receipt, SQLite WAL recovery, PostgreSQL authority, or
+persistent balance claim is made. D-04 remains `pending-review` and its
+parameters remain unlocked.
+
+## Current transport-mode regression — 2026-11-06
+
+The final-code Docker mode sweep passed explicit `pool`, `mux`, and adaptive
+`auto` on one clean SHA. It observed bounded link reuse, pool/mux selection and
+finite fault/integrity coverage; the result is recorded in
+`04-40-Q5-MODE-EVIDENCE.md`. This preserves Q5's Engine regression evidence,
+but the native Linux controlled-RTT gate remains open and NFR-007 is not
+promoted.
+
+## Formal qualification gate audit — 2026-11-06
+
+The actual qualification gate and direct host preflight both fail closed for
+the current environment. The reasons and exact report paths are recorded in
+`04-42-FORMAL-GATE-BOUNDARY.md`; no Docker diagnostic is promoted to P4-Q1.
+
+## Rejected renewal increment — 2026-11-06
+
+The delayed process-local issuer now has a regression for a definitive renewal
+rejection. It preserves the budget invariant, returns the pending amount to
+`unissued`, leaves `unknown_grant` at zero, and records a final failure rather
+than a timeout. This closes the adapter's rejected-versus-unknown distinction
+for the tested finite case only. It does not qualify remote issuance,
+persistent authority, formal performance, or D-04 locking; see
+`04-35-REJECTED-RENEWAL-EVIDENCE.md`.
+
+The complementary delayed-accepted case also passes: a caller timeout leaves
+the exact pending request occupied until its late accepted reply arrives, then
+the grant settles once and can be consumed. This is finite adapter recovery
+evidence only; it does not qualify a remote issuer or durable authority. See
+`04-36-LATE-ACCEPTED-RENEWAL-EVIDENCE.md`.
+
+The same commit passed `DOCKER_CONTEXT=orbstack make phase4-m2-check`, including
+the VLink integration and UDP bounded-resource regressions. The result remains
+runtime regression evidence and does not change the formal qualification status.
+
+## Prior reconciliation — Plan 04-12
+
+The latest closure evidence is [04-12-EVIDENCE.md](04-12-EVIDENCE.md).
+The review text below this section is historical and retains its original SHA.
+
+- `fe2a4ba` passed the existing formal performance gate; this is not a performance
+  measurement of the later runtime corrections.
+- `d1ee7d2` completed 21 real static D-04 trials, with source conservation and no
+  UDP loss. Production parameter lock is still open.
+- `91e409e` corrects live share expiry, policy snapshot transition and the actual
+  early TCP data path. Native pool/mux additional first-byte medians are
+  2.1215/2.1623 ms; the raw-data latency gate passes.
+- Native Engine race/vet, source TCP/UDP credit, snapshot checks and local Docker
+  pass. Finite integrity/bypass/forged-OPEN probes also pass on this runtime.
+- Full NFR-006 coverage, persisted NFR-039/040/044 integration and a formal
+  performance qualification of the final integrated runtime remain open.
+
+Overall status remains **gaps_found**. No full Phase 4 acceptance is claimed.
+
+## Historical reviews
 
 Review source: `5bd384a` (Plans 04-08 through 04-11 code and evidence successor). Phase 4 stays **executing** because formal qualification and durable authority gaps remain. V1.11 is reference only. No old restart documents are required to continue implementation.
 
@@ -27,7 +144,7 @@ The previous verification referenced early five-second trials and missing mode/f
 
 - **NFR-003/005:** baa0a02 native scale trials reached 1086–1200 Mbps TCP and <0.1% UDP loss at approximately 100 Mbps actual offered UDP. The one same-load independent TLS comparison reached 82.64%. These diagnostic numeric targets were met. Formal per-node resource/link, 60-second warmup / 300-second three-trial evidence and actual authorization gating are absent. Actions scale offered only 24.21 Mbps, separately recorded.
 - **NFR-006:** integrity, forged OPEN, bypass and process-recovery tests pass for their enumerated finite cases. Full attack/path/configuration coverage has not been demonstrated. Dedicated hardware is not the blocker for closing these functional gaps.
-- **NFR-007:** pool/mux samples now exist, but runtime TCP waits for OPEN_OK before bridging, including downstream relay confirmation. Controlled RTT/timeline evidence and bounded authorized early-DATA behavior are missing. Small loopback medians do not prove no extra network round trip.
+- **NFR-007:** the current runtime bridge now has finite delayed-authorization evidence for bounded authorized TCP early DATA, while UDP remains OPEN/OPEN_OK gated. Controlled pool/mux RTT timelines, dedicated-host resource evidence, and formal NFR-007 qualification remain open; small loopback medians do not prove no extra network round trip.
 - **NFR-039/040/044:** c8c2a37 verifies funded immutable snapshot selection, old-session affinity, new-session admission, coefficient binding, late-grant isolation, and zero held/session leakage. It still does not establish policy-boundary leases, share-CAS/drain, or full per-source conservation. In-process injected authority remains non-authoritative; Engine must not connect to a database.
 - **D-04:** parameter review is complete in 04-06-D04-REVIEW.md. Keep 256 KiB→4 MiB / 8 MiB minimum / 30-second target / 30% waterline as unapproved candidates; no adaptive grant/block/renewal experiment has yet run. VLink windows are distinct parameters.
 
@@ -39,7 +156,7 @@ Actions [41838307562](https://github.com/VortexWang/Vortex/actions/runs/41838307
 
 ## Next execution slice
 
-Continue with NFR-039/040/044 runtime integration, NFR-006 attack cases, and safe early TCP DATA / controlled RTT for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
+Continue with NFR-039/040/044 runtime integration, NFR-006 attack cases, and controlled pool/mux RTT evidence for NFR-007. Run D-04 parameter comparisons before proposing lock values. Formal performance qualification follows on an eligible topology. See the matrix for exact ordering and evidence requirements.
 
 No Phase 4 completion or Phase 5 start is recorded. Correctness work continues without waiting for old governance documents or exclusive performance hardware.
 
@@ -176,3 +293,24 @@ Plans 04-08 through 04-11 executed on clean commits `9385d42`, `ccb3065`,
 The verification route is therefore **not** Phase 5. Correctness slices are
 implemented, while formal performance qualification and durable authority must
 be completed before Phase 4 can transition.
+
+## 2026-11-05 optimization closure branch
+
+Branch `gsd/phase-4-optimization-closure` added bounded UDP socket-buffer
+fallback shared by source, relay, and destination paths. Hosts that reject the
+preferred 32 MiB request now try 8 MiB, 4 MiB, 1 MiB, and 256 KiB before
+retaining the operating-system default; tuning failure is warning-level because
+it is a throughput optimization and does not invalidate a usable socket.
+
+The regression was reproduced on native Darwin: the prior fixed 32 MiB request
+returned `ENOBUFS` at the destination and the UDP smoke timed out. After the
+fallback and a dedicated UDP reader in the echo fixture, the UDP smoke and
+Docker runtime accounting completed. OrbStack Docker produced zero classified
+UDP loss, exact left/right accounting, successful 64 MiB mux forward/reverse
+benchmarks, and zero loopback UDP loss. The mux benchmark now uses a generous
+correctness deadline so low diagnostic throughput is measured instead of
+turning into a fixed 30-second false failure.
+
+Native Darwin still cannot classify all host UDP receive losses under the
+100 Mbps three-relay workload; its strict accounting run remains fail-closed.
+No NFR or D-04 qualification is promoted from either host.

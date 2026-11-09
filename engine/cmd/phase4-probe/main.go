@@ -38,6 +38,9 @@ func main() {
 		// test the receiving runtime policy using the real authenticated identity.
 		cfg.NextHopNodeID = ""
 	}
+	if !*staleOnly && *bypassPeer == "" && (cfg.RuleRevision < 2 || cfg.PathGeneration < 2) {
+		check(fmt.Errorf("stale OPEN matrix requires rule revision and generation >= 2; generate with PHASE4_POLICY_VERSION=2"))
+	}
 	s, err := link.New(cfg)
 	check(err)
 	defer s.Close()
@@ -52,6 +55,8 @@ func main() {
 		mutate func(*vlink.OpenRequest)
 	}{
 		{"unknown-rule", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleID[0] ^= 255 }},
+		{"stale-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision-- }},
+		{"stale-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration-- }},
 		{"future-revision", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.RuleRevision++ }},
 		{"future-generation", vlink.OpenStaleRevision, func(r *vlink.OpenRequest) { r.PathGeneration++ }},
 		{"skipped-hop", vlink.OpenNoRoute, func(r *vlink.OpenRequest) { r.HopIndex++ }},
@@ -95,25 +100,30 @@ func main() {
 			results["direct-bypass"] = map[string]any{"status": "pass", "code": vlink.OpenUnauthorized}
 			return nil
 		}
-		for _, test := range tests {
-			request := base
-			test.mutate(&request)
-			stream, err := mux.Open(ctx, request)
-			if err != nil {
-				return err
+		for _, network := range []uint8{1, 2} {
+			for _, test := range tests {
+				request := base
+				request.Network = network
+				name := fmt.Sprintf("%s/%s", map[uint8]string{1: "tcp", 2: "udp"}[network], test.name)
+				test.mutate(&request)
+				stream, err := mux.Open(ctx, request)
+				if err != nil {
+					return err
+				}
+				frame, err := stream.Receive(ctx)
+				if err != nil {
+					return err
+				}
+				if frame.Type != vlink.FrameOpenErr || len(frame.Payload) != 18 {
+					return fmt.Errorf("%s accepted or missing rejection", name)
+				}
+				code := vlink.OpenErrorCode(binary.BigEndian.Uint16(frame.Payload))
+				if code != test.code || string(frame.Payload[2:]) == string(make([]byte, 16)) {
+					return fmt.Errorf("%s wrong rejection code/correlation", name)
+				}
+				results[name] = map[string]any{"status": "pass", "code": code, "correlation_id": fmt.Sprintf("%x", frame.Payload[2:])}
+				frame.Release()
 			}
-			frame, err := stream.Receive(ctx)
-			if err != nil {
-				return err
-			}
-			if frame.Type != vlink.FrameOpenErr || len(frame.Payload) != 18 {
-				return fmt.Errorf("%s accepted or missing rejection", test.name)
-			}
-			code := vlink.OpenErrorCode(binary.BigEndian.Uint16(frame.Payload))
-			if code != test.code || string(frame.Payload[2:]) == string(make([]byte, 16)) {
-				return fmt.Errorf("%s wrong rejection code/correlation", test.name)
-			}
-			results[test.name] = map[string]any{"status": "pass", "code": code, "correlation_id": fmt.Sprintf("%x", frame.Payload[2:])}
 		}
 		// Closing a live link must terminate an authorized UDP stream, without
 		// retaining the previous session for transparent replay.

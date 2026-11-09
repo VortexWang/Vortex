@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "status": "review-ready-pending-CR-010",
+  "base": "00704144c17f69dfb0a1cb2f8b1005e5c97e1ad9",
+  "source": "2cb3ab5326a4339ec4c4e9e2917073ba869fa5bb",
+  "origin_main": "7b0363c96c9f3196dc48ce2aec39936caeffc4e4",
+  "source_identity_sha256": "6ccac5ff3c0dbd0139519bacf45238d246bd1a12fd5c1946f153c6ac699f3ee3",
+  "clean_commit_evidence": false,
+  "environment": {
+    "native_go": "go1.27.3 darwin/arm64",
+    "docker_server": "29.8.2 arm64",
+    "linux_go_image": "golang@sha256:e519d3b0a5b285e5aa53ab9eef02bc6bbb9cb04608389b743a136a9ce75f0d1e",
+    "linux_arch": "arm64"
+  },
+  "checks": [
+    {
+      "check": "native-root-race",
+      "status": "passed-before-final-fixture-changes",
+      "evidence": "root-complete-final-race.log.gz",
+      "scope": "go test -race ./... -count=1; Darwin arm64; final demand opt-in monotonic switch covered by Linux full Agent and process tests",
+      "evidence_sha256": "d306c74db7203ec671c7830fc4831b01e1d8380b72a76252abf835c04cb1bdad"
+    },
+    {
+      "check": "native-engine-race",
+      "status": "passed",
+      "evidence": "engine-race.log.gz",
+      "scope": "Engine module go test -race ./... -count=1",
+      "evidence_sha256": "3ce2520a6afd1b330b30f0d3180aca274f2e948034ceb4a84ab5e9ef1a2765e8"
+    },
+    {
+      "check": "linux-components-race",
+      "status": "mixed-original-run",
+      "evidence": "linux-final-race.jsonl.gz",
+      "scope": "Store, identity, upgrade, Hub, contracts, CLIs and test/phase5 passed individually; Agent long-lived cases failed before monotonic opt-in fix",
+      "evidence_sha256": "ea445aba99ef60beaf7e32557bd05d5037aff6896c23ca8af800cb970ebd2980"
+    },
+    {
+      "check": "linux-agent-and-engine-race",
+      "status": "passed",
+      "evidence": "linux-agent-engine-final.jsonl.gz",
+      "scope": "Final full Agent race (284.521s), then full Engine module race; supersedes failed Linux Agent run. Later fixture-only integration is separately exercised",
+      "evidence_sha256": "3806e067b9af3674c9550e15c6ec6f34f32ddd82504c922205896cc56e2ef43d"
+    },
+    {
+      "check": "linux-long-lived-regression",
+      "status": "passed",
+      "evidence": "linux-long-fixed.log.gz",
+      "scope": "LongLivedDurableAdaptiveRenewal, ContinuousDurableAdaptiveRenewal, FundingBlockContinuousTraffic (151.198s)",
+      "evidence_sha256": "28d320f633082d4dfc6584597bd8262567499e4dbfa18e00cdd701d3afafc2c7"
+    },
+    {
+      "check": "native-final-boundaries",
+      "status": "passed",
+      "evidence": "final-boundary-corrected-race.log.gz",
+      "scope": "Migration, negative wire/capability boundaries, runtime rate/monotonic clocks and issuer migration",
+      "evidence_sha256": "b9d48839bd8515c93653e5baaaeaf0474771c09d386d57e0e97b41578d97eb8b"
+    },
+    {
+      "check": "native-final-fixture-race",
+      "status": "passed",
+      "evidence": "fixture-final-race.log.gz",
+      "scope": "go test -race ./hub ./cmd/vortex-test-hub ./cmd/vortex-node ./contracts/... -count=1",
+      "evidence_sha256": "482452b78d1cfdf69fe4d7345ea0b7f9d041657d79ea48795d98a7fc948babff"
+    },
+    {
+      "check": "native-final-vet",
+      "status": "passed",
+      "evidence": "fixture-final-vet.log.gz",
+      "scope": "go vet ./agent/... ./hub/... ./cmd/...",
+      "evidence_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "check": "linux-full-disk",
+      "status": "passed",
+      "evidence": "linux-full-disk.log.gz",
+      "scope": "Real 4 MiB tmpfs disk-full upgrade and handoff atomicity fixtures",
+      "evidence_sha256": "c80e5fde7464a70b6fbbe874dbad99800e9d792c5b9bf53993d2b7e187cd9b72"
+    },
+    {
+      "check": "qualification-python",
+      "status": "passed",
+      "evidence": "qualification-python.log.gz",
+      "scope": "37 Python qualification/attack/audit tests",
+      "evidence_sha256": "60699aac2228bee795686df806f20466dfb974d0e63e94986230bb898cbde10c"
+    },
+    {
+      "check": "docker-topology",
+      "status": "passed-functional-only",
+      "evidence": "docker-topology.log.gz",
+      "scope": "Three-relay smoke topology; no formal throughput qualification",
+      "evidence_sha256": "fac614d6d2c347d936462d7c5981aa79c531557f9b88fcac2f92c6d5b54dffec"
+    },
+    {
+      "check": "linux-vlink",
+      "status": "passed",
+      "evidence": "vlink-linux.log.gz",
+      "scope": "Linux VLink script exited 0",
+      "evidence_sha256": "a6b4aaddc9687f8df51f5b5103e57fb5adbdf8a781aece0ff3bcc0068944ce74"
+    },
+    {
+      "check": "darwin-independent-processes",
+      "status": "passed",
+      "evidence": "processes-active-report.json",
+      "scope": "Four separate Node/test-Hub process cases, TCP/UDP/concurrency/automatic replenishment; real process boundaries and source conservation",
+      "evidence_sha256": "4f67154e1397ddb07ff67bfa51b1d2662666aa756a862ae64ff7a8d97f550827"
+    },
+    {
+      "check": "linux-independent-processes",
+      "status": "passed",
+      "evidence": "processes-linux-mounted-report.json",
+      "scope": "Same four process cases on Linux arm64 Docker; 56.269s package",
+      "evidence_sha256": "cf61df1ea73b9124b2736a51755f1649b87f56664d73b90124fe28720d64bc3b"
+    },
+    {
+      "check": "cross-build",
+      "status": "passed-build-only",
+      "evidence": "cross-build.json",
+      "scope": "Node, test-Hub, relay on linux amd64 and arm64; no native amd64 execution claim",
+      "evidence_sha256": "e43b3b9d77c6e736dd1e56a57008d815e3b1ea0d30a9c3f678d314c1bdeb25be"
+    },
+    {
+      "check": "two-independent-protobuf-generations",
+      "status": "passed",
+      "evidence": "generation-final.json",
+      "scope": "protoc 36.2, protoc-gen-go 1.36.12, protoc-gen-go-grpc 1.6.2; both outputs equal worktree",
+      "evidence_sha256": "1354fd29fc1861e76e0a630fba31592b0b17b696a0d5a03468bbc6a5e0c1f440"
+    },
+    {
+      "check": "published-wire-tags",
+      "status": "passed",
+      "evidence": "wire-compatibility.json",
+      "scope": "Main fields unchanged; proposed tag 100 does not collide with Phase 6 branch fields",
+      "evidence_sha256": "e7e1a6e122a8256a7cad7278a985cd68621d56aa9bb823ffd08f708b803042dc"
+    },
+    {
+      "check": "semver-and-changelog",
+      "status": "passed",
+      "evidence": "contract-change.json",
+      "scope": "Compatible extension 1.3.0 to candidate 1.7.0",
+      "evidence_sha256": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af"
+    },
+    {
+      "check": "requirements-map",
+      "status": "passed",
+      "evidence": "requirements-map-final.json",
+      "scope": "Affected requirement mappings reviewed as candidate",
+      "evidence_sha256": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af"
+    },
+    {
+      "check": "authorization-contract-freeze",
+      "status": "passed",
+      "evidence": "authorization-frozen.json",
+      "scope": "Original approved bytes retained",
+      "evidence_sha256": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af"
+    },
+    {
+      "check": "runtime-contract-freeze",
+      "status": "passed",
+      "evidence": "runtime-frozen.json",
+      "scope": "Original approved bytes retained",
+      "evidence_sha256": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af"
+    },
+    {
+      "check": "control-contract-freeze",
+      "status": "expected-failure-pending-owner-approval",
+      "evidence": "contract-freeze-pending.json",
+      "scope": "Candidate status, version/hash and changed lifecycle companion are intentionally not frozen",
+      "evidence_sha256": "3e0e2d63268d0a4572d78209092fe79a51be2983b402988c0771c36979f468f7"
+    },
+    {
+      "check": "candidate-github-actions",
+      "status": "not-run",
+      "evidence": null,
+      "scope": "No candidate Actions evidence; prior branch runs do not substitute"
+    },
+    {
+      "check": "full-phase5-release-entry",
+      "status": "not-run",
+      "evidence": null,
+      "scope": "Uncommitted candidate and pending contract freeze do not meet clean-source prerequisites"
+    }
+  ],
+  "retained_failures": {
+    "root-race.log.gz": "Initial TLS helper/schema/continuous integration failures; repaired and retested",
+    "root-components-final-race.log.gz": "Continuous test and schema-16 preflight mismatch; repaired",
+    "continuous-focused.log.gz": "Slow authority query and over-specific pending-batch assertion; optimized and corrected without weakening conservation",
+    "migration-focused.log.gz": "Expected stable rejection assertion corrected to observed precise lifecycle rejection",
+    "linux-final-race.jsonl.gz": "Long-lived non-block rate refill stalled under conservative interval width; opt-in monotonic refill fixed; full Agent rerun passed",
+    "final-agent-and-process-race.log.gz": "Only legacy tag negative test expected a different stable lifecycle error; exact assertion corrected and focused race passed",
+    "processes-corrected-report.json": "Old rule-1 rejected by required UUID config schema; fixed fixture, added preflight validation",
+    "processes-uuid-report.json": "Legacy static TLS validation alias mismatched managed Node UUID SAN; set exact expected UUID",
+    "processes-identity-report.json": "Test Hub closed nonregional demand stream after config ACK; keep stream only for explicitly configured demand issuer",
+    "processes-linux-final-report.json": "First container attempt lacked host worktree Git metadata mount; corrected read-only mount and reran"
+  },
+  "limitations": [
+    "Rolling working-tree verification, not same-commit local Docker/Actions pairing.",
+    "Historical Phase 4 D-04 evidence stays bound to its measured Engine/tracer source, not this merge.",
+    "Protocol backend fixture is not the Phase 6 production PostgreSQL backend.",
+    "No complete model verification, dedicated-host throughput/stability qualification or certificate renewal claim.",
+    "No Phase 6 implementation or dirty files imported; original workspace preserved."
+  ],
+  "next_gate": "Exact owner approval of CR-010, then freeze approved hashes, verify governance and create a two-parent merge before pushing main."
+}

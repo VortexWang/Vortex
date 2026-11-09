@@ -64,6 +64,7 @@ Only after preflight passes, use one clean SHA and preserve all raw evidence:
 
 ```bash
 make phase4-d04-scan
+make phase4-d04-durable-scan D04_DURABLE_OUTPUT=artifacts/phase4/d04-durable-scan
 BACKEND=native make phase4-runtime-mixed
 BACKEND=native make phase4-runtime-comparison
 make phase4-qualification-gate \
@@ -74,7 +75,34 @@ make phase4-qualification-gate \
   QUALIFICATION_WARMUP_SECONDS=60
 ```
 
-The existing short workload remains diagnostic. Formal NFR qualification still
-requires the runtime-authority workload, 60-second warmup, three 300-second
-trials, independent TLS comparison, complete accounting evidence and the same
-clean commit across all artifacts.
+The existing short workload remains diagnostic. Set `PHASE4_FORMAL=1` for
+each runtime and comparison command to use pinned runtime authorization on each
+route node plus a finite source-credit authority on source, instead of
+qualification-only mode. Use the configured event limit needed by
+the 300-second runs (up to the fixture's hard cap), and preserve each trial in
+its own output directory. Formal qualification requires 16 TCP streams, at
+least 400 Mbps mixed TCP, at least 99 Mbps of paced UDP offered load, at most
+0.1% UDP loss, a same-load runtime/TLS ratio of at least 70%, 60-second warmup,
+three 300-second trials, complete accounting evidence and the same clean commit
+and semantic workload across runtime and TLS artifacts.
+
+Example invocation for each trial:
+
+```bash
+PHASE4_FORMAL=1 PHASE4_TRIAL_ID=trial-1 VORTEX_QUALIFICATION_EVENT_LIMIT=50000000 \
+MIXED_DURATION_SECONDS=300 MIXED_TCP_STREAMS=16 MIXED_UDP_MBPS=100 \
+BACKEND=native QUALIFICATION_DIR=artifacts/phase4/formal/trial-1 \
+tools/phase4/qualification.sh
+```
+
+Repeat with unique trial IDs and output directories for trials 2 and 3. Run the
+independent comparison with `PHASE4_FORMAL=1`,
+`PHASE4_TRIAL_ID=comparison`, `MIXED_DURATION_SECONDS=300`, and the final
+runtime directory on the same clean commit. Run a separate 60-second formal
+warmup into its own directory. The gate requires the warmup report and exactly
+three runtime trial reports, then checks their IDs, metrics, commit and
+semantic-manifest identity; it rejects dirty evidence. A passing NFR-003/005
+performance gate does not close the separate Phase 4 gaps or approve D-04.
+
+Supply `RUNTIME_TRIAL_REPORTS="trial-1/report.json trial-2/report.json trial-3/report.json"`
+and `WARMUP_REPORT=warmup/report.json` to `make phase4-qualification-gate`.
