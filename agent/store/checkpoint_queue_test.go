@@ -2,9 +2,23 @@ package store
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 )
+
+// Delay propagation to the coordinator without delaying the member's own Err.
+// The group must observe cancellation before mutating, even if AfterFunc has
+// not yet been scheduled on a busy runner.
+type delayedCheckpointCancellation struct {
+	context.Context
+	allow <-chan struct{}
+}
+
+func (c delayedCheckpointCancellation) Value(any) any { return nil }
+func (c delayedCheckpointCancellation) AfterFunc(f func()) func() bool {
+	return context.AfterFunc(c.Context, func() { <-c.allow; f() })
+}
 
 func TestCrossRequestCheckpointsRollbackAndReplay(t *testing.T) {
 	s, scope, _ := runtimeStore(t)
@@ -72,7 +86,7 @@ func TestCheckpointQueueOverflowAndCanceledMember(t *testing.T) {
 // Exercise cancellation after the coordinator has combined independent callers
 // and is waiting for the runtime transaction slot, rather than before enqueue.
 func TestCheckpointCoordinatorInterruptedWhileWaiting(t *testing.T) {
-	for _, action := range []string{"cancel-member", "close-store"} {
+	for _, action := range []string{"cancel-member", "delayed-cancel-member", "close-store"} {
 		t.Run(action, func(t *testing.T) {
 			s, scope, path := runtimeStore(t)
 			ctx := context.Background()
@@ -81,6 +95,14 @@ func TestCheckpointCoordinatorInterruptedWhileWaiting(t *testing.T) {
 			}
 			memberCtx, cancel := context.WithCancel(ctx)
 			defer cancel()
+			var requestMemberCtx context.Context = memberCtx
+			allow := make(chan struct{})
+			var allowOnce sync.Once
+			allowPropagation := func() { allowOnce.Do(func() { close(allow) }) }
+			defer allowPropagation()
+			if action == "delayed-cancel-member" {
+				requestMemberCtx = delayedCheckpointCancellation{Context: memberCtx, allow: allow}
+			}
 			var requests []*checkpointRequest
 			for i, direction := range []string{"egress", "ingress"} {
 				a, err := s.OpenRuntimeSession(ctx, scope, "session-"+direction, "flow-"+direction)
@@ -94,7 +116,7 @@ func TestCheckpointCoordinatorInterruptedWhileWaiting(t *testing.T) {
 				}
 				requestCtx := ctx
 				if i == 1 {
-					requestCtx = memberCtx
+					requestCtx = requestMemberCtx
 				}
 				requests = append(requests, &checkpointRequest{ctx: requestCtx, entries: []RuntimeBlockCheckpoint{{Block: block, CheckpointID: "child-" + direction, Used: 100, Payload: []byte(direction)}}, result: make(chan error, 1)})
 			}
@@ -127,7 +149,19 @@ func TestCheckpointCoordinatorInterruptedWhileWaiting(t *testing.T) {
 				default:
 				}
 			}
-			if action == "cancel-member" {
+			if action == "delayed-cancel-member" {
+				// A FIFO follower runs only after the combined transaction releases
+				// its slot. Keep asynchronous cancellation delayed until then.
+				go func() {
+					unlock, err := s.runtimeQueue.acquire(ctx)
+					if err == nil {
+						unlock()
+					}
+					allowPropagation()
+				}()
+				waitRuntimeQueue(t, &s.runtimeQueue, 2)
+			}
+			if action == "cancel-member" || action == "delayed-cancel-member" {
 				cancel()
 			} else if err := s.Close(); err != nil {
 				t.Fatal(err)

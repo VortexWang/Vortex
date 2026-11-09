@@ -102,5 +102,15 @@ func (s *Store) commitCheckpointRequests(group []*checkpointRequest) error {
 			entries = append(entries, entry)
 		}
 	}
-	return s.commitRuntimeCheckpoints(ctx, entries)
+	return s.commitRuntimeCheckpoints(ctx, entries, func() error {
+		// AfterFunc wakes a blocked transaction, but its callback is asynchronous.
+		// Recheck the original contexts at the mutation/commit boundaries so a
+		// canceled member cannot be acknowledged while that callback is queued.
+		for _, r := range group {
+			if err := r.ctx.Err(); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

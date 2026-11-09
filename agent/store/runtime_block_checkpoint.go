@@ -111,16 +111,22 @@ func (s *Store) CheckpointRuntimeFundingBlocks(ctx context.Context, entries []Ru
 	return s.enqueueCheckpoints(ctx, entries)
 }
 
-func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeBlockCheckpoint) error {
+func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeBlockCheckpoint, checkMembers func() error) error {
 	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err := checkMembers(); err != nil {
+		return err
+	}
 	for _, entry := range entries {
 		if err := checkpointRuntimeFundingBlockTx(ctx, tx, entry.Block, entry.CheckpointID, entry.Used, entry.Payload); err != nil {
 			return err
 		}
+	}
+	if err := checkMembers(); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

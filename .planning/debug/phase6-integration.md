@@ -46,3 +46,6 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - CR012候选精确描述符并集105=union(main69,phase6100)，历史CR009篡改测试与forward篡改测试均PASS。完整native修正root及backend race均PASS；service569.990s。Linux干净fb3a9786启用真实4MiB满盘夹具，root/Engine全量race通过（Agent253.534/Store258.953/Phase5 process112.495s），隔离Linux后端全量race通过（service550.929s），源码前后干净。15项完整证据及哈希见validation-manifest.json。原用户工作区HEAD/tracked diff再次一致；最终status新增外部未跟踪Phase7目录，未由本轮创建或修改，保持原样。
 
 - 用户明确批准CR-012，精确proposal ecc3cbbdbfcb6e0cbb4144b44fdfe70c163f7edbf722fe4bdc04d37d7dd1f547。仅control catalog候选改冻结、追加精确批准记录及current governance摘要，候选规范和历史批准字节未改。原CR009快照门禁、全局冻结、两基线并集和批准后负向检查通过。
+
+- 779029b2最终Actions暴露checkpoint等待期间AfterFunc延迟的取消竞态：dispatch42623942243在cancel-member错误返回成功。新增delayed-cancel-member以FIFO follower延迟传播，确定性RED0.653s；取得事务后及提交前同步校验原member contexts，native race20轮38.400s通过，原committed/reserved/unknown/outbox及reopen/replay守恒断言保留。CR012精确门禁仍通过，规范/提案/批准字节未变。
+- PR42623892470同时在多包并行wave1中出现持续授权及恢复RST，保留FAIL。将wave1/wave2/full gate所有root多包入口统一-p1，与既有authorization策略一致；job预算60分钟覆盖累积串行全套，不改变测试内200ms/5秒deadline。779029b2的最终证据不能替代修正后新提交配对。

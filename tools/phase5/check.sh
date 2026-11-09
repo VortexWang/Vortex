@@ -32,7 +32,7 @@ finish() {
 }
 trap finish EXIT
 sh tools/phase5/contracts_check.sh > "$out/contracts.log" 2>&1
-go test -count=1 ./... > "$out/root-test.log" 2>&1
+go test -p 1 -count=1 ./... > "$out/root-test.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestRegionalProcessFailover$' > "$out/regional-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestSchedulerProcessRenewal$' > "$out/renewal-process.log" 2>&1
 go test -count=1 -v ./test/phase5 -run '^TestIdentityProcessRotation$' > "$out/identity-process.log" 2>&1

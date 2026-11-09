@@ -9,7 +9,7 @@ mkdir -p "$out"
   printf 'go: '; go version
   printf 'arch: '; uname -m
 } > "$out/host.txt"
-go test ./agent/... ./hub ./test/phase5 ./cmd/vortex-node > "$out/go-test.log"
+go test -p 1 ./agent/... ./hub ./test/phase5 ./cmd/vortex-node > "$out/go-test.log"
 go vet ./agent/... ./hub ./test/phase5 ./cmd/vortex-node > "$out/go-vet.log"
 (cd "$root/engine" && go test ./apply ./runtime/...) > "$out/engine-runtime-test.log"
 printf '{"schema":1,"status":"passed","commit":"%s","tests":"go test ./agent/... ./hub ./test/phase5 ./cmd/vortex-node","vet":"go vet ./agent/... ./hub ./test/phase5 ./cmd/vortex-node","scope":"registration-mtls-reconcile-upgrade"}\n' "$(git -C "$root" rev-parse HEAD)" > "$out/report.json"
