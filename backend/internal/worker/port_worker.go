@@ -30,15 +30,16 @@ func (w PortWorker) Once(ctx context.Context) (bool, error) {
 	if w.Adapter == nil {
 		return false, errors.New("port adapter required")
 	}
+	// Expiry changes task uncertainty only; commit it before any tenant wait.
+	if err := generated.New(w.Pool).ExpirePortReleaseLeases(ctx); err != nil {
+		return false, err
+	}
 	tx, err := w.Pool.Begin(ctx)
 	if err != nil {
 		return false, err
 	}
 	defer tx.Rollback(ctx)
 	q := generated.New(tx)
-	if err = q.ExpirePortReleaseLeases(ctx); err != nil {
-		return false, err
-	}
 	token := pgtype.Text{String: uuid.NewString(), Valid: true}
 	t, err := q.LeasePortRelease(ctx, token)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -46,6 +47,27 @@ func (w PortWorker) Once(ctx context.Context) (bool, error) {
 	}
 	if err != nil {
 		return false, err
+	}
+	// Both operation events and activation checks can wait on the tenant.
+	// Release the task-only lease first, then recheck it in tenant -> task order.
+	if err = tx.Commit(ctx); err != nil {
+		return true, err
+	}
+	tx, err = w.Pool.Begin(ctx)
+	if err != nil {
+		return true, err
+	}
+	defer tx.Rollback(ctx)
+	q = generated.New(tx)
+	if _, err = q.LockTenant(ctx, t.TenantID); err != nil {
+		return true, err
+	}
+	locked, err := q.LockTask(ctx, generated.LockTaskParams{TenantID: t.TenantID, OperationID: t.OperationID})
+	if err != nil {
+		return true, err
+	}
+	if locked.LeaseToken != token || locked.State != "leased" || !locked.LeaseUntil.Valid || !locked.LeaseUntil.Time.After(time.Now()) {
+		return false, tx.Commit(ctx)
 	}
 	b, err := q.PortReleaseBinding(ctx, generated.PortReleaseBindingParams{TenantID: t.TenantID, ReleaseTaskID: pgtype.Text{String: t.ID, Valid: true}})
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -66,7 +88,7 @@ func (w PortWorker) Once(ctx context.Context) (bool, error) {
 	if err != nil {
 		return true, err
 	}
-	c, node, boot, err := service.RuleCommand(ctx, q, t.TenantID, b.PrepareTaskID)
+	c, node, boot, err := service.RuleObservationCommand(ctx, q, t.TenantID, b.PrepareTaskID)
 	if err != nil {
 		return true, err
 	}
@@ -79,8 +101,12 @@ func (w PortWorker) Once(ctx context.Context) (bool, error) {
 		return true, err
 	}
 	proof := service.PortProof{AllocationID: b.AllocationID, NodeID: node, BootID: boot, TaskID: t.ID, LeaseToken: token.String, Kind: "release", Revision: op.TargetRevision, Generation: b.Generation}
-	if _, err = q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: t.TenantID, OperationID: t.ID, LeaseToken: token}); err != nil {
+	count, err := q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: t.TenantID, OperationID: t.ID, LeaseToken: token})
+	if err != nil {
 		return true, err
+	}
+	if count != 1 {
+		return false, tx.Rollback(ctx)
 	}
 	if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: t.TenantID, ID: t.ID, State: "running"}); err != nil {
 		return true, err

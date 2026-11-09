@@ -73,6 +73,10 @@ func (s *Tracer) Mutate(ctx context.Context, scope TenantScope, m Mutation) (gen
 		return zero, err
 	}
 	defer tx.Rollback(ctx)
+	// Tenant precedes resource/task locks, including event-trigger FK checks.
+	if _, err = generated.New(tx).LockTenant(ctx, scope.TenantID()); err != nil {
+		return zero, err
+	}
 	// Bound both concurrent retries and same-resource mutations before the first insert.
 	if _, err = tx.Exec(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", scope.TenantID()+"/key/"+m.IdempotencyKey); err != nil {
 		return zero, err
@@ -142,6 +146,9 @@ func (s *Tracer) Reconcile(ctx context.Context, tenant, id string, r Receipt) er
 	}
 	defer tx.Rollback(ctx)
 	q := generated.New(tx)
+	if _, err = q.LockTenant(ctx, tenant); err != nil {
+		return err
+	}
 	if _, err = q.LockTask(ctx, generated.LockTaskParams{TenantID: tenant, OperationID: id}); err != nil {
 		return err
 	}

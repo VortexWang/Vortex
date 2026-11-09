@@ -22,21 +22,49 @@ type Worker struct {
 }
 
 func (w *Worker) Once(ctx context.Context) (bool, error) {
+	// Discover at most100 expired attempts with the frozen query, then roll
+	// its temporary changes back before waiting on tenants. Each actual expiry
+	// and operation event commits together below; a crash leaves it discoverable.
+	scan, err := w.Pool.Begin(ctx)
+	if err != nil {
+		return false, err
+	}
+	expired, err := generated.New(scan).ExpireLeases(ctx)
+	rollbackErr := scan.Rollback(ctx)
+	if err != nil {
+		return false, err
+	}
+	if rollbackErr != nil {
+		return false, rollbackErr
+	}
+	for _, task := range expired {
+		err = pgx.BeginTxFunc(ctx, w.Pool, pgx.TxOptions{}, func(tx pgx.Tx) error {
+			q := generated.New(tx)
+			if _, e := q.LockTenant(ctx, task.TenantID); e != nil {
+				return e
+			}
+			current, e := q.LockTask(ctx, generated.LockTaskParams{TenantID: task.TenantID, OperationID: task.OperationID})
+			if e != nil {
+				return e
+			}
+			if (current.State != "leased" && current.State != "running") || current.LeaseToken != task.LeaseToken || !current.LeaseUntil.Valid || current.LeaseUntil.Time.After(time.Now()) {
+				return nil
+			}
+			if e = q.ReconcileTask(ctx, generated.ReconcileTaskParams{TenantID: task.TenantID, OperationID: task.OperationID, State: "unknown"}); e != nil {
+				return e
+			}
+			return q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: task.OperationID, State: "unknown"})
+		})
+		if err != nil {
+			return false, err
+		}
+	}
 	tx, err := w.Pool.Begin(ctx)
 	if err != nil {
 		return false, err
 	}
 	defer tx.Rollback(ctx)
 	q := generated.New(tx)
-	expired, err := q.ExpireLeases(ctx)
-	if err != nil {
-		return false, err
-	}
-	for _, task := range expired {
-		if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: task.OperationID, State: "unknown"}); err != nil {
-			return false, err
-		}
-	}
 	token := pgtype.Text{String: uuid.NewString(), Valid: true}
 	task, err := q.LeaseTask(ctx, token)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -45,17 +73,9 @@ func (w *Worker) Once(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	op, err := q.GetOperation(ctx, generated.GetOperationParams{TenantID: task.TenantID, ID: task.OperationID})
-	if err != nil {
-		return false, err
-	}
-	if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: op.ID, State: "leased"}); err != nil {
-		return false, err
-	}
-	// Commit also flushes transaction-local safe domain events and assigns
-	// tenant sequence numbers; failed commits expose neither state nor event.
+	// Commit the task-only lease before any event-producing operation write.
 	if err = tx.Commit(ctx); err != nil {
-		return false, err
+		return true, err
 	}
 	tx, err = w.Pool.Begin(ctx)
 	if err != nil {
@@ -63,9 +83,29 @@ func (w *Worker) Once(ctx context.Context) (bool, error) {
 	}
 	defer tx.Rollback(ctx)
 	q = generated.New(tx)
-	count, err := q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: task.TenantID, OperationID: op.ID, LeaseToken: token})
-	if err != nil || count != 1 {
+	if _, err = q.LockTenant(ctx, task.TenantID); err != nil {
 		return true, err
+	}
+	locked, err := q.LockTask(ctx, generated.LockTaskParams{TenantID: task.TenantID, OperationID: task.OperationID})
+	if err != nil {
+		return true, err
+	}
+	if locked.LeaseToken != token || locked.State != "leased" || !locked.LeaseUntil.Valid || !locked.LeaseUntil.Time.After(time.Now()) {
+		return false, tx.Commit(ctx)
+	}
+	op, err := q.GetOperation(ctx, generated.GetOperationParams{TenantID: task.TenantID, ID: task.OperationID})
+	if err != nil {
+		return true, err
+	}
+	if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: op.ID, State: "leased"}); err != nil {
+		return true, err
+	}
+	count, err := q.MarkRunning(ctx, generated.MarkRunningParams{TenantID: task.TenantID, OperationID: op.ID, LeaseToken: token})
+	if err != nil {
+		return true, err
+	}
+	if count != 1 {
+		return false, tx.Rollback(ctx)
 	}
 	if err = q.UpdateOperationState(ctx, generated.UpdateOperationStateParams{TenantID: task.TenantID, ID: op.ID, State: "running"}); err != nil {
 		return true, err
@@ -89,6 +129,9 @@ func (w *Worker) Once(ctx context.Context) (bool, error) {
 	}
 	defer tx.Rollback(persist)
 	q = generated.New(tx)
+	if _, err = q.LockTenant(persist, task.TenantID); err != nil {
+		return true, err
+	}
 	locked, lockErr := q.LockTask(persist, generated.LockTaskParams{TenantID: task.TenantID, OperationID: op.ID})
 	if lockErr != nil {
 		return true, lockErr

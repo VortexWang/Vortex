@@ -21,6 +21,9 @@ func (s PortService) ReconcilePortOperation(ctx context.Context, tenant, operati
 	worked := false
 	e := pgx.BeginTxFunc(ctx, s.Pool, pgx.TxOptions{}, func(tx pgx.Tx) error {
 		q := generated.New(tx)
+		if _, e := q.LockTenant(ctx, tenant); e != nil {
+			return e
+		}
 		b, e := q.GetPortOperationBinding(ctx, generated.GetPortOperationBindingParams{TenantID: tenant, OperationID: operation})
 		if e != nil {
 			return e

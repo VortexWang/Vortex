@@ -60,7 +60,8 @@ def runtime(folder,source):
   for name in ['TestTracerDesiredStateReceipt','TestTracerRealProcesses']:
    assert ('vortex/backend/internal/service',name) in passes, 'real control-plane process proof missing'
   assert ('vortex/backend/internal/worker','TestRuleReconciliationDrainsReadyWorkAndCancels') in passes
-  assert ('vortex/backend/internal/service','TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock') in passes
+  for name in ['TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock','TestWorkerEventWaitDoesNotHoldBusinessLocks','TestExpiredControlEventFailureKeepsAttemptRecoverable']:
+   assert ('vortex/backend/internal/service',name) in passes
   tests['reconciliation_'+mode+'_ms']=qualification(folder/f'reconciliation-{mode}.json',source)
   for family in ['root','engine']:
    events=go_events(folder/f'{family}-{mode}.jsonl');packages={e['Package'] for e in events if e.get('Action')=='pass' and 'Test' not in e}
