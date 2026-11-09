@@ -1,0 +1,24 @@
+{
+  "reasons": [],
+  "required_cases": [
+    "tcp/duplicate-visited",
+    "tcp/future-generation",
+    "tcp/future-revision",
+    "tcp/skipped-hop",
+    "tcp/stale-generation",
+    "tcp/stale-revision",
+    "tcp/unknown-rule",
+    "tcp/visited-local-loop",
+    "udp/duplicate-visited",
+    "udp/future-generation",
+    "udp/future-revision",
+    "udp/skipped-hop",
+    "udp/stale-generation",
+    "udp/stale-revision",
+    "udp/unknown-rule",
+    "udp/visited-local-loop"
+  ],
+  "schema": 1,
+  "scope": "sixteen configured-route TCP/UDP forged OPEN cases plus UDP link loss; excludes identity handshake and durable authority matrices",
+  "status": "pass"
+}

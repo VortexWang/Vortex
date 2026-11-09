@@ -19,6 +19,15 @@ func (s *MuxStream) ReceiveBatch(ctx context.Context, frames []Frame) (int, erro
 	frames[0] = first
 	n := 1
 	for n < len(frames) {
+		if s.tcpReceive != nil {
+			frame, ok := s.tcpReceive.pop()
+			if !ok {
+				return n, nil
+			}
+			frames[n] = frame
+			n++
+			continue
+		}
 		select {
 		case frame := <-s.receive:
 			frames[n] = frame

@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "fault": "relay-2 process terminated",
+  "established_tcp": "terminated",
+  "udp": "no forwarding",
+  "new_tcp": "no forwarding",
+  "automatic_replay": false,
+  "scope": "single failure, configured route; no alternate authorized path configured"
+}

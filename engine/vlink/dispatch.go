@@ -189,6 +189,7 @@ type MuxStream struct {
 	ID            uint32
 	Network       StreamNetwork
 	receive       chan Frame
+	tcpReceive    *tcpReceiveQueue
 	done          chan struct{}
 	closeOnce     sync.Once
 	writeMu       sync.Mutex
@@ -581,6 +582,7 @@ func (m *MuxLink) readLoop() {
 					}
 					continue
 				}
+				slog.Warn("vlink stream receive rejected", "stream_id", frame.StreamID, "frame_type", frame.Type, "cause", err)
 				m.reset(frame.StreamID, 8)
 				continue
 			}
@@ -608,7 +610,12 @@ func (m *MuxLink) newStream(id uint32, network StreamNetwork) *MuxStream {
 	if network == StreamUDP && m.config.UDPQueueFrames > 0 {
 		queueFrames = m.config.UDPQueueFrames
 	}
-	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, queueFrames), done: make(chan struct{}), authorized: make(chan struct{})}
+	stream := &MuxStream{link: m, ID: id, Network: network, done: make(chan struct{}), authorized: make(chan struct{})}
+	if network == StreamTCP {
+		stream.tcpReceive = newTCPReceiveQueue(m.config.StreamWindow, queueFrames)
+	} else {
+		stream.receive = make(chan Frame, queueFrames)
+	}
 	m.mu.Lock()
 	select {
 	case <-m.done:
@@ -677,6 +684,25 @@ func (s *MuxStream) TakeResource() io.Closer {
 	return resource
 }
 func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
+	if s.tcpReceive != nil {
+		for {
+			if frame, ok := s.tcpReceive.pop(); ok {
+				return frame, nil
+			}
+			select {
+			case <-s.tcpReceive.ready:
+			case <-s.done:
+				if frame, ok := s.tcpReceive.pop(); ok {
+					return frame, nil
+				}
+				return Frame{}, ErrStreamState
+			case <-ctx.Done():
+				return Frame{}, ctx.Err()
+			case <-s.link.done:
+				return Frame{}, s.link.Err()
+			}
+		}
+	}
 	select {
 	case frame := <-s.receive:
 		return s.dequeued(frame), nil
@@ -992,6 +1018,12 @@ func (m *MuxLink) writeWindows(ctx context.Context, streamID, streamDelta, aggre
 }
 
 func (s *MuxStream) enqueue(frame Frame) error {
+	if s.tcpReceive != nil {
+		if frame.Type == FrameOpenOK {
+			s.authorizeOnce.Do(func() { close(s.authorized) })
+		}
+		return s.tcpReceive.push(frame)
+	}
 	if frame.Type == FrameOpenOK {
 		s.authorizeOnce.Do(func() { close(s.authorized) })
 	}
