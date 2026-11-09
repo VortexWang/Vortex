@@ -55,13 +55,15 @@ if test "$result" -eq 0; then
   if test -n "${PHASE6_CLOUDFLARE_ENV_FILE:-}"; then
    test "$(stat -f '%Lp' "$PHASE6_CLOUDFLARE_ENV_FILE" 2>/dev/null || stat -c '%a' "$PHASE6_CLOUDFLARE_ENV_FILE")" = 600 || exit 1
    set -a
-   . "$PHASE6_CLOUDFLARE_ENV_FILE"
+   . "$PHASE6_CLOUDFLARE_ENV_FILE" || exit 1
    set +a
   fi
   export PHASE6_DATABASE_URL="postgres://vortex:phase6-local-test-only@127.0.0.1:$PHASE6_PG_PORT/vortex?sslmode=disable"
   code=0
   sh tools/phase6/cloudflare_integration.sh || code=$?
-  python3 - "$out" <<'PY'
+  # This subshell is an operand of &&/||, which disables implicit errexit.
+  # Propagate the guard failure explicitly instead of exiting with CRUD's code.
+  python3 - "$out" <<'PY' || exit $?
 import hashlib,os,pathlib,sys
 folder=pathlib.Path(sys.argv[1]);policy=os.getenv('CLOUDFLARE_TOKEN_POLICY_FILE')
 if policy:(folder/'cloudflare-policy-sha256.txt').write_text(hashlib.sha256(pathlib.Path(policy).read_bytes()).hexdigest()+'\n')
