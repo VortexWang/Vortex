@@ -48,31 +48,34 @@ func (w RuleWorker) deliverOnce(ctx context.Context) (bool, error) {
 	if e != nil {
 		return false, e
 	}
-	// Commit the task-only lease before waiting for current tenant authority.
-	// A concurrent tenant mutation may need this task: holding it while waiting
-	// for the tenant row would invert tenant -> head/deployment -> task.
-	if e = tx.Commit(ctx); e != nil {
-		return true, e
-	}
-	tx, e = w.Pool.Begin(ctx)
-	if e != nil {
-		return true, e
-	}
-	defer tx.Rollback(ctx)
-	q = generated.New(tx)
-	if _, e = q.LockTenant(ctx, task.TenantID); e != nil {
-		return true, e
-	}
-	locked, e := q.LockTask(ctx, generated.LockTaskParams{TenantID: task.TenantID, OperationID: task.OperationID})
-	if e != nil {
-		return true, e
-	}
-	if locked.LeaseToken != token || locked.State != "leased" || !locked.LeaseUntil.Valid || !locked.LeaseUntil.Time.After(time.Now()) {
-		return false, tx.Commit(ctx)
-	}
 	b, e := q.RuleDelivery(ctx, generated.RuleDeliveryParams{TenantID: task.TenantID, TaskID: task.ID})
 	if e != nil {
 		return true, e
+	}
+	if b.Phase == "prepare" || b.Phase == "commit" {
+		// Commit the task-only lease before waiting for current tenant authority.
+		// A tenant mutation may need this task: holding it while waiting would
+		// invert tenant -> head/deployment -> task. Query/abort authorize no new
+		// activation and acquire no tenant row here, so retain their one lease tx.
+		if e = tx.Commit(ctx); e != nil {
+			return true, e
+		}
+		tx, e = w.Pool.Begin(ctx)
+		if e != nil {
+			return true, e
+		}
+		defer tx.Rollback(ctx)
+		q = generated.New(tx)
+		if _, e = q.LockTenant(ctx, task.TenantID); e != nil {
+			return true, e
+		}
+		locked, err := q.LockTask(ctx, generated.LockTaskParams{TenantID: task.TenantID, OperationID: task.OperationID})
+		if err != nil {
+			return true, err
+		}
+		if locked.LeaseToken != token || locked.State != "leased" || !locked.LeaseUntil.Valid || !locked.LeaseUntil.Time.After(time.Now()) {
+			return false, tx.Commit(ctx)
+		}
 	}
 	// Only immutable identity is needed here. Holding a deployment lock after
 	// leasing a task would invert the head -> deployment -> task receipt order.
