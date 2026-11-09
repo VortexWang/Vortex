@@ -50,6 +50,72 @@ func fundingBalance(t *testing.T, n *Node) store.AuthorizationBalance {
 	}
 	return b
 }
+
+// The control consumer must be notified by durable consumption while credit
+// still exists, rather than waiting for a later failed write to start renewal.
+func TestFundingBlockDurableConsumptionWakesDemand(t *testing.T) {
+	for _, outcome := range []string{"committed", "returned", "cancelled"} {
+		t.Run(outcome, func(t *testing.T) {
+			n, s := fundingSession(t)
+			scope := store.DemandScope{NodeID: n.NodeID, BootID: n.BootID, RuleID: "rule-1", RuleRevision: 2, PathGeneration: 4}
+			wake, release, err := n.subscribeDemands([]AdaptiveDemandConfig{{Scope: scope}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer release()
+			other := scope
+			other.RuleRevision++
+			foreign, stopForeign, err := n.subscribeDemands([]AdaptiveDemandConfig{{Scope: other}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer stopForeign()
+			b, err := s.Reserve(context.Background(), accounting.LeftToRight, 32)
+			if err != nil {
+				t.Fatal(err)
+			}
+			select {
+			case <-wake:
+				t.Fatal("reservation alone woke demand")
+			default:
+			}
+			switch outcome {
+			case "committed":
+				if err := b.Commit(context.Background(), 17); err != nil {
+					t.Fatal(err)
+				}
+			case "returned":
+				if err := b.Return(context.Background()); err != nil {
+					t.Fatal(err)
+				}
+			case "cancelled":
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+				if err := b.Commit(ctx, 17); err == nil {
+					t.Fatal("cancelled checkpoint committed")
+				}
+			}
+			select {
+			case <-wake:
+				if outcome != "committed" {
+					t.Fatal("non-committed usage woke demand")
+				}
+			default:
+				if outcome == "committed" {
+					t.Fatal("durable consumption did not wake demand before exhaustion")
+				}
+			}
+			select {
+			case <-foreign:
+				t.Fatal("foreign revision woke demand")
+			default:
+			}
+			if outcome == "committed" && fundingBalance(t, n).Committed != 17 {
+				t.Fatal("notification preceded durable checkpoint")
+			}
+		})
+	}
+}
 func TestFundingBlockGateConcurrentShortWritesAndClose(t *testing.T) {
 	n, s := fundingSession(t)
 	ctx := context.Background()

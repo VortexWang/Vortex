@@ -292,6 +292,7 @@ func (s *fundingBlockSession) resolveDirect(ctx context.Context, direction accou
 			return s.fail(err)
 		}
 		b.reservation.Reserved -= uint64(out.Used)
+		s.inner.gate.notifyConsumption()
 	}
 	if b.reservation.Reserved == 0 {
 		delete(s.blocks, direction)

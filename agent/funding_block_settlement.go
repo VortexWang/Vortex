@@ -124,6 +124,7 @@ func (s *fundingBlockSession) commitSettlementGroup(group []*fundingSettlementRe
 	if err := s.inner.gate.node.Store.CheckpointRuntimeFundingBlocks(ctx, entries); err != nil {
 		return err
 	}
+	s.inner.gate.notifyConsumption()
 	for block, residual := range residuals {
 		block.reservation = residual
 	}
