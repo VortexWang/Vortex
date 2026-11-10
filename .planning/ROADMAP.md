@@ -240,6 +240,261 @@
 5. PostgreSQL 基础备份与 WAL 恢复演练、Hub/Agent 恢复对账、RPO/RTO 和密钥恢复资料完成并可审阅。
 
 **Plans**: TBD
+**Wave 1**
+- [ ] 07-01-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 07-02-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 07-03-PLAN.md
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 07-04-PLAN.md
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 07-05-PLAN.md
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 07-06-PLAN.md
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 07-07-PLAN.md
+
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 07-08-PLAN.md
+
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 07-09-PLAN.md
+
+**Wave 10** *(blocked on Wave 9 completion)*
+- [ ] 07-10-PLAN.md
+
+**Wave 11** *(blocked on Wave 10 completion)*
+- [ ] 07-11-PLAN.md
+
+**Wave 12** *(blocked on Wave 11 completion)*
+- [ ] 07-12-PLAN.md
+
+**Wave 13** *(blocked on Wave 12 completion)*
+- [ ] 07-13-PLAN.md
+
+**Wave 14** *(blocked on Wave 13 completion)*
+- [ ] 07-14-PLAN.md
+
+**Wave 15** *(blocked on Wave 14 completion)*
+- [ ] 07-15-PLAN.md
+
+**Wave 16** *(blocked on Wave 15 completion)*
+- [ ] 07-16-PLAN.md
+
+**Wave 17** *(blocked on Wave 16 completion)*
+- [ ] 07-17-PLAN.md
+
+**Wave 18** *(blocked on Wave 17 completion)*
+- [ ] 07-18-PLAN.md
+
+**Wave 19** *(blocked on Wave 18 completion)*
+- [ ] 07-19-PLAN.md
+
+**Wave 20** *(blocked on Wave 19 completion)*
+- [ ] 07-20-PLAN.md
+
+**Wave 21** *(blocked on Wave 20 completion)*
+- [ ] 07-21-PLAN.md
+
+**Wave 22** *(blocked on Wave 21 completion)*
+- [ ] 07-22-PLAN.md
+
+**Wave 23** *(blocked on Wave 22 completion)*
+- [ ] 07-23-PLAN.md
+
+**Wave 24** *(blocked on Wave 23 completion)*
+- [ ] 07-24-PLAN.md
+
+**Wave 25** *(blocked on Wave 24 completion)*
+- [ ] 07-25-PLAN.md
+
+**Wave 26** *(blocked on Wave 25 completion)*
+- [ ] 07-26-PLAN.md
+
+**Wave 27** *(blocked on Wave 26 completion)*
+- [ ] 07-27-PLAN.md
+
+**Wave 28** *(blocked on Wave 27 completion)*
+- [ ] 07-28-PLAN.md
+
+**Wave 29** *(blocked on Wave 28 completion)*
+- [ ] 07-29-PLAN.md
+
+**Wave 30** *(blocked on Wave 29 completion)*
+- [ ] 07-30-PLAN.md
+
+**Wave 31** *(blocked on Wave 30 completion)*
+- [ ] 07-31-PLAN.md
+
+**Wave 32** *(blocked on Wave 31 completion)*
+- [ ] 07-32-PLAN.md
+
+**Wave 33** *(blocked on Wave 32 completion)*
+- [ ] 07-33-PLAN.md
+
+**Wave 34** *(blocked on Wave 33 completion)*
+- [ ] 07-34-PLAN.md
+
+**Wave 35** *(blocked on Wave 34 completion)*
+- [ ] 07-35-PLAN.md
+
+**Wave 36** *(blocked on Wave 35 completion)*
+- [ ] 07-36-PLAN.md
+
+**Wave 37** *(blocked on Wave 36 completion)*
+- [ ] 07-37-PLAN.md
+
+**Wave 38** *(blocked on Wave 37 completion)*
+- [ ] 07-38-PLAN.md
+
+**Wave 39** *(blocked on Wave 38 completion)*
+- [ ] 07-39-PLAN.md
+
+**Wave 40** *(blocked on Wave 39 completion)*
+- [ ] 07-40-PLAN.md
+
+**Wave 41** *(blocked on Wave 40 completion)*
+- [ ] 07-41-PLAN.md
+
+**Wave 42** *(blocked on Wave 41 completion)*
+- [ ] 07-42-PLAN.md
+
+**Wave 43** *(blocked on Wave 42 completion)*
+- [ ] 07-43-PLAN.md
+
+**Wave 44** *(blocked on Wave 43 completion)*
+- [ ] 07-44-PLAN.md
+
+**Wave 45** *(blocked on Wave 44 completion)*
+- [ ] 07-45-PLAN.md
+
+**Wave 46** *(blocked on Wave 45 completion)*
+- [ ] 07-46-PLAN.md
+
+**Wave 47** *(blocked on Wave 46 completion)*
+- [ ] 07-47-PLAN.md
+
+**Wave 48** *(blocked on Wave 47 completion)*
+- [ ] 07-48-PLAN.md
+
+**Wave 49** *(blocked on Wave 48 completion)*
+- [ ] 07-49-PLAN.md
+
+**Wave 50** *(blocked on Wave 49 completion)*
+- [ ] 07-50-PLAN.md
+
+**Wave 51** *(blocked on Wave 50 completion)*
+- [ ] 07-51-PLAN.md
+
+**Wave 52** *(blocked on Wave 51 completion)*
+- [ ] 07-52-PLAN.md
+
+**Wave 53** *(blocked on Wave 52 completion)*
+- [ ] 07-53-PLAN.md
+
+**Wave 54** *(blocked on Wave 53 completion)*
+- [ ] 07-54-PLAN.md
+
+**Wave 55** *(blocked on Wave 54 completion)*
+- [ ] 07-55-PLAN.md
+
+**Wave 56** *(blocked on Wave 55 completion)*
+- [ ] 07-56-PLAN.md
+
+**Wave 57** *(blocked on Wave 56 completion)*
+- [ ] 07-57-PLAN.md
+
+**Wave 58** *(blocked on Wave 57 completion)*
+- [ ] 07-58-PLAN.md
+
+**Wave 59** *(blocked on Wave 58 completion)*
+- [ ] 07-59-PLAN.md
+
+**Wave 60** *(blocked on Wave 59 completion)*
+- [ ] 07-60-PLAN.md
+
+**Wave 61** *(blocked on Wave 60 completion)*
+- [ ] 07-61-PLAN.md
+
+**Wave 62** *(blocked on Wave 61 completion)*
+- [ ] 07-62-PLAN.md
+
+**Wave 63** *(blocked on Wave 62 completion)*
+- [ ] 07-63-PLAN.md
+
+**Wave 64** *(blocked on Wave 63 completion)*
+- [ ] 07-64-PLAN.md
+
+**Wave 65** *(blocked on Wave 64 completion)*
+- [ ] 07-65-PLAN.md
+
+**Wave 66** *(blocked on Wave 65 completion)*
+- [ ] 07-66-PLAN.md
+
+**Wave 67** *(blocked on Wave 66 completion)*
+- [ ] 07-67-PLAN.md
+
+**Wave 68** *(blocked on Wave 67 completion)*
+- [ ] 07-68-PLAN.md
+
+**Wave 69** *(blocked on Wave 68 completion)*
+- [ ] 07-69-PLAN.md
+
+**Wave 70** *(blocked on Wave 69 completion)*
+- [ ] 07-70-PLAN.md
+
+**Wave 71** *(blocked on Wave 70 completion)*
+- [ ] 07-71-PLAN.md
+
+**Wave 72** *(blocked on Wave 71 completion)*
+- [ ] 07-72-PLAN.md
+
+**Wave 73** *(blocked on Wave 72 completion)*
+- [ ] 07-73-PLAN.md
+
+**Wave 74** *(blocked on Wave 73 completion)*
+- [ ] 07-74-PLAN.md
+
+**Wave 75** *(blocked on Wave 74 completion)*
+- [ ] 07-75-PLAN.md
+
+**Wave 76** *(blocked on Wave 75 completion)*
+- [ ] 07-76-PLAN.md
+
+**Wave 77** *(blocked on Wave 76 completion)*
+- [ ] 07-77-PLAN.md
+
+**Wave 78** *(blocked on Wave 77 completion)*
+- [ ] 07-78-PLAN.md
+
+**Wave 79** *(blocked on Wave 78 completion)*
+- [ ] 07-79-PLAN.md
+
+**Wave 80** *(blocked on Wave 79 completion)*
+- [ ] 07-80-PLAN.md
+
+**Wave 81** *(blocked on Wave 80 completion)*
+- [ ] 07-81-PLAN.md
+
+**Wave 82** *(blocked on Wave 81 completion)*
+- [ ] 07-82-PLAN.md
+
+**Wave 83** *(blocked on Wave 82 completion)*
+- [ ] 07-83-PLAN.md
+
+**Wave 84** *(blocked on Wave 83 completion)*
+- [ ] 07-84-PLAN.md
+
+**Cross-cutting constraints:**
+- 当前角色/显式租户与可信执行证据强制，未知状态不被当作成功或释放。
+- 本片case有真实成功及拒绝断言，未安装/未运行/缺环境不算通过。
 
 ### Phase 8: M6 全量验收与发布交付 (M6 Full Acceptance)
 
@@ -268,5 +523,5 @@
 | 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
 | 6. M4 Backend | 11/11 | Complete | 2026-11-09 |
-| 7. M5 Frontend and operations | 0/TBD | Not started | - |
+| 7. M5 Frontend and operations | 0/84 | Planned     | - |
 | 8. M6 Full acceptance | 0/TBD | Not started | - |
