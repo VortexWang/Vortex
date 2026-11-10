@@ -1166,7 +1166,23 @@ func saveLedgerFiles(t *testing.T, label string, files map[string]string) {
 	}
 	checksums := map[string]string{}
 	for name, path := range files {
-		raw, err := os.ReadFile(path)
+		// Close is not a checkpoint guarantee when another reader retains WAL.
+		// Export a transactionally consistent standalone database, including every
+		// committed WAL page, rather than copying only the live main file.
+		reader, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
+		if err != nil {
+			t.Fatal(err)
+		}
+		snapshot := filepath.Join(t.TempDir(), "ledger.sqlite")
+		_, err = reader.Exec("VACUUM INTO ?", snapshot)
+		closeErr := reader.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if closeErr != nil {
+			t.Fatal(closeErr)
+		}
+		raw, err := os.ReadFile(snapshot)
 		if err != nil {
 			t.Fatal(err)
 		}
