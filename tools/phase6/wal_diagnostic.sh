@@ -9,14 +9,14 @@ git rev-parse HEAD HEAD^{tree} > "$out/source.txt"
 volume=$(docker volume create)
 docker volume inspect "$volume" > "$out/volume.json"
 code=0
-docker run --rm --cap-add SYS_PTRACE --security-opt seccomp=unconfined -v "$root:/src:ro" -v "$out:/output" -v "$volume:/runtime" -w /src -e GOTOOLCHAIN=local -e GOFLAGS=-p=1 -e GOMAXPROCS=2 golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048 sh -c '
+docker run --rm --cap-add SYS_PTRACE --security-opt seccomp=unconfined -v "$root:/src:ro" -v "$out:/output" -v "$volume:/runtime" -w /src -e VORTEX_DIAGNOSTIC_OWNER="$(id -u):$(id -g)" -e GOTOOLCHAIN=local -e GOFLAGS=-p=1 -e GOMAXPROCS=2 golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048 sh -c '
  set -eu
  git config --global --add safe.directory /src
  apt-get update >/output/apt.log 2>&1
  apt-get install -y --no-install-recommends strace >>/output/apt.log 2>&1
  dpkg-query -W strace >/output/strace-version.txt
  mkdir -p /runtime/bin /runtime/tmp /runtime/evidence
- finish() { code=$?; trap - EXIT; cp -a /runtime/evidence/. /output/; exit "$code"; }
+ finish() { code=$?; trap - EXIT; cp -a /runtime/evidence/. /output/; chown -R "$VORTEX_DIAGNOSTIC_OWNER" /output; exit "$code"; }
  trap finish EXIT
  export TMPDIR=/runtime/tmp
  for mode in normal race; do

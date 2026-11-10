@@ -135,15 +135,13 @@ func (tx *runtimeTransaction) report(operation string, err error) {
 	})
 }
 func (tx *runtimeTransaction) Commit() error {
-	var beforeBusy, beforeFrames, beforeCheckpointed int
-	beforeErr := tx.Tx.QueryRowContext(context.Background(), "PRAGMA wal_checkpoint(NOOP)").Scan(&beforeBusy, &beforeFrames, &beforeCheckpointed)
 	started := time.Now()
 	err := tx.Tx.Commit()
 	commitElapsed := time.Since(started)
 	var afterBusy, afterFrames, afterCheckpointed int
 	afterErr := tx.conn.QueryRowContext(context.Background(), "PRAGMA wal_checkpoint(NOOP)").Scan(&afterBusy, &afterFrames, &afterCheckpointed)
 	if commitElapsed >= 20*time.Millisecond {
-		slog.Warn("diagnostic WAL commit", "operation", runtimeOperation(tx.caller), "elapsed", commitElapsed, "before_frames", beforeFrames, "before_checkpointed", beforeCheckpointed, "before_error", beforeErr, "after_frames", afterFrames, "after_checkpointed", afterCheckpointed, "after_error", afterErr)
+		slog.Warn("diagnostic WAL commit", "operation", runtimeOperation(tx.caller), "elapsed", commitElapsed, "after_frames", afterFrames, "after_checkpointed", afterCheckpointed, "after_error", afterErr)
 	}
 	if elapsed := time.Since(started); elapsed >= 25*time.Millisecond {
 		slog.Warn("runtime SQLite commit slow", "operation", runtimeOperation(tx.caller), "commit_elapsed", elapsed, "work_elapsed", started.Sub(tx.started), "error", err)
