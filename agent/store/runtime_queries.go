@@ -4,6 +4,17 @@ package store
 // Unlisted SQL uses the ordinary transaction path. Keeping the original SQL
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
+	`SAVEPOINT funding_member`,
+	`ROLLBACK TO funding_member`,
+	`RELEASE funding_member`,
+	`SAVEPOINT funding_choice`,
+	`ROLLBACK TO funding_choice`,
+	`RELEASE funding_choice`,
+	`SELECT tenant_id FROM node_share_bindings WHERE node_id=? AND rule_id=?`,
+	`SELECT payload FROM node_share_heads WHERE tenant_id=? AND node_id=? AND kind=?`,
+	`SELECT tokens,last_tick,boot_id FROM node_share_buckets WHERE tenant_id=? AND node_id=?`,
+	`INSERT INTO node_share_buckets(tenant_id,node_id,boot_id,tokens,last_tick) VALUES(?,?,?,?,?) ON CONFLICT(tenant_id,node_id) DO UPDATE SET tokens=excluded.tokens,last_tick=excluded.last_tick`,
+	`SELECT count(*) FROM runtime_sessions r LEFT JOIN authorization_records a ON a.node_id=r.node_id AND a.authorization_id=r.grant_id LEFT JOIN node_share_bindings b ON b.node_id=r.node_id AND b.rule_id=a.rule_id WHERE r.node_id=? AND r.state='open' AND (b.tenant_id=? OR b.tenant_id IS NULL)`,
 	knownUsageInsertSmall,
 	knownUsageInsertLarge,
 	knownReceiptInsertSmall,

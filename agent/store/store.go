@@ -434,6 +434,7 @@ CREATE TABLE IF NOT EXISTS runtime_sessions (
  initial_share_lease_id TEXT NOT NULL DEFAULT '',
  state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
 );
+CREATE INDEX IF NOT EXISTS runtime_sessions_open_source ON runtime_sessions(node_id,source_id) WHERE state='open';
 CREATE TABLE IF NOT EXISTS runtime_rate_clock_epochs (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, epoch TEXT NOT NULL,
  PRIMARY KEY(node_id,source_id)
