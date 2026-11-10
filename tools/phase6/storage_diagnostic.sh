@@ -11,6 +11,8 @@ git diff --name-only 9dd03bc219917606d4e766b629d4df37b0a87e03 HEAD > "$out/diagn
 findmnt --json > "$out/host-mounts.json"
 docker info --format '{{json .}}' > "$out/docker-info.json"
 docker run --rm -v "$root:/src:ro" -v "$out:/evidence" -v phase6-diag-mod:/go/pkg/mod -v phase6-diag-build:/root/.cache/go-build -w /src -e GOTOOLCHAIN=local -e GOFLAGS=-p=1 -e GOMAXPROCS=2 "$image" sh -c '
+ set -eu
+ git config --global --add safe.directory /src
  go build -race -o /evidence/bin/vortex-node ./cmd/vortex-node &&
  go build -race -o /evidence/bin/vortex-test-hub ./cmd/vortex-test-hub
 ' > "$out/build.log" 2>&1
@@ -36,6 +38,7 @@ for location in docker-root temporary-disk; do
  code=0
  docker run --rm -v "$root:/src:ro" -v "$out:/evidence" -v "$volume:/runtime" -v phase6-diag-mod:/go/pkg/mod -v phase6-diag-build:/root/.cache/go-build -w /src -e GOTOOLCHAIN=local -e GOFLAGS=-p=1 -e GOMAXPROCS=2 "$image" sh -c '
   set -eu
+  git config --global --add safe.directory /src
   mkdir -p /runtime/tmp /runtime/evidence
   observer=
   finish() {
