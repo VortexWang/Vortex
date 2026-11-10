@@ -1,6 +1,6 @@
 # Phase 1–7 整合状态
 
-已验候选feed5819：本机完整Docker（含真实Cloudflare）、精确Phase5恢复/部署及Phase6原生arm64通过；amd64在Agent确认后的重启补交阶段超出原60s。PR2保持未合并。当前正验证固定绑定身份SQL与需求账本编译复用，保留失败原始产物。
+当前未放行：8b235102本机后端普通/race各502项通过，Node/Hub普通测试出现动态规则夹具Prepare端口占用竞态。Linux已确定性复现并修复夹具端口交接，竞争场景GREEN及原完整用例race3通过；需新候选同SHA完整验收。PR2保持未合并，历史失败原始证据保留。
 
 Phase 1–6 的开发历史及 Phase 7 规划分支已全部被 main `6e474c3067c33333d194d3b203bbc6229bebf01e` 包含；完整 SHA 与祖先核对见 branch-inventory.json。PR #1 于2026-11-10合入097c313e；后续主线合入Phase7规划。不能因此推导该组合验收通过。
 
@@ -31,3 +31,5 @@ afc0ac17本机Docker完整验收通过；精确Phase5首轮因FULL提交753ms超
 检查点子记录与首次来源集合修复的组合Linux完整Store/Hub race通过（323.596s/22.100s），持续TCP/UDP通过，四个真实进程race通过（53.651s）。首次进程调用缺少二进制目录而跳过四例，原始日志保留且不计通过；修正调用后四例逐项通过。修复后完整同SHA验收待开始，PR #2仍未合并。开发证据见artifacts/phase6-integration/checkpoint-origin-batching/。
 
 固定绑定身份SQL（2/8/16/32四种固定形状）与需求账本事务内预编译复用通过完整Linux Store/Hub race（337.793s/25.996s），持续TCP/UDP和四个真实进程race通过（78.422s，并发续额31.91s）。跨节点同批次ID、特殊字符、每个形状边界、缺失/冲突回执负向通过；200ms/60s/5s不变。新候选完整同SHA验收待运行，仍不标记合并完成。
+
+8b235102的测试端口竞态在实际续租前的37规则准备阶段出现，未执行本轮修改的需求账本路径。原Linux竞争注入复现Prepare持久化EADDRINUSE；夹具现保留同Engine范围的候选socket，直到转发真实Prepare才释放。竞争GREEN及原完整用例race3（56.913s）通过；不更改生产代码、37条规则、续租/资金断言或预算。原始日志见artifacts/phase6-integration/renewal-port-handoff/，新完整验收尚未通过。
