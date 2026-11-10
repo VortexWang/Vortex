@@ -9,7 +9,7 @@
 - [x] **Phase 1: 工程基线与安全契约 (Engineering Foundation)** - 完成 M0 所需 Go 工具链、契约、安全模型与双宿主冒烟基线；其他依赖按首次使用阶段闭合。
 - [x] **Phase 2: M0 引擎数据面 (M0 Engine Dataplane)** - 独立 Engine 实现直接 TCP/UDP 转发、门控、计量和性能基线。 (completed 2026-11-04)
 - [x] **Phase 3: M1 VLink 引擎链路 (M1 VLink Engine)** - 实现加密隧道、连接复用、建链方向和段许可。功能验证完成；专用原生主机 NFR 资格化待补证。
-- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现范围已关闭；正式性能资格化、D-04 锁定和持久化权威缺口保留为后续验收债务。
+- [x] **Phase 4: M2 多跳与引擎完备 (M2 Multi-Hop Engine)** - 实现与 P4-Q1..Q5 阶段资格验收已关闭，D-04 已由所有者锁定；生产持久化交由 Phase 5/6，当前组合回归仍须独立验收。
 - [x] **Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)** - 交付节点运行时、授权、自治账本和安全恢复交接。 *(completed 2026-11-06 within runtime/protocol-adapter scope)*
 - [x] **Phase 6: M4 后端业务闭环 (M4 Backend)** - 交付租户、资源、规则、套餐、计量结算及权威账本。
 - [ ] **Phase 7: M5 前端与运营能力 (M5 Frontend and Operations)** - 交付中文管理体验、DNS、审计、通知与恢复运维。
@@ -105,12 +105,12 @@
 - [x] 04-03 — Five-process Docker/native topology
 - [x] 04-04 — Mixed TCP/UDP workload and evidence gate
 - [x] 04-05 — Native/Actions qualification and report
-- [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (execution record recovered; formal qualification gaps remain open for Phase 4 verification)
+- [x] 04-06 — Runtime UDP, mixed-load qualification and accounting reconciliation (execution record recovered; later qualification closure is recorded in 04-45)
 - [x] 04-07 — Fail-closed source authorization (G-04-01 closed; production accounting remains out of scope)
-- [x] 04-08 — Wire policy-time and snapshot accounting (runtime slice; full NFR-039/NFR-044 remain open)
+- [x] 04-08 — Wire policy-time and snapshot accounting (Engine/tracer slice accepted by P4-Q3; production durability belongs to Phase 5/6)
 - [x] 04-09 — Wire share CAS and lease drain (G-04-040; process-local runtime slice, durable authority remains open)
-- [x] 04-10 — Early TCP DATA and finite attack matrix (G-04-006/G-04-007; timeline qualification remains open)
-- [x] 04-11 — D-04 parameter scan and formal qualification gate (G-04-003/G-04-005/G-D04; candidates remain unlocked and formal gate not-qualified)
+- [x] 04-10 — Early TCP DATA and finite attack matrix (G-04-006/G-04-007; finite current matrix accepted by P4-Q2)
+- [x] 04-11 — D-04 parameter scan and formal qualification gate (G-04-003/G-04-005/G-D04; final P4-Q1/Q4 gate passed and D-04 owner lock recorded in 04-45)
 
 ### Phase 5: M3 节点 Agent 与 Edge Hub (M3 Agent and Hub)
 

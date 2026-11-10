@@ -1,0 +1,28 @@
+{
+  "scope": "development diagnostics only; final clean same-SHA Docker/Actions acceptance pending",
+  "baseline_commit": "feed581926812accc8bc6fee29708d3b433ef4b1",
+  "changes": "fixed prepared bound identity sets; per-transaction prepared demand ledger; original budgets and durable validation retained",
+  "diagnostic_process": {
+    "status": "passed",
+    "elapsed_seconds": 31.19,
+    "instrumentation": "temporary Go overlay injects CPU profiling only; not shipped; not a formal performance qualification"
+  },
+  "files": {
+    "failed-database-query-comparison.log.gz": "70b9e38d438996387759df511f2c333ed3d252db7a50316dd7f6c04e3c2b1cbc",
+    "native-targeted.log.gz": "289eb8146b050e5e05a6a2c1ed3adf5968424377784251f9012bd4fadc9895d9",
+    "native-targeted-race.log.gz": "7715bf599fe34e3289ae50c224c4a310990fdb4e8eb4fb6410f15455f546e025",
+    "profile-process.log.gz": "af0aca86ed20b5e0f6fbd985c8676557a82f5b6eef9c58cef4d6f765c8da417c",
+    "linux-store-hub-race.log.gz": "74e8bff00676b2077355d694ac9ab27ed1ffed91f1bd97c7225b9d00b9f6a6bc",
+    "exact-contract.log.gz": "1b43872d944c5763a66d8fe2d10a1e21688928f0fb9f6054f859e036c9e35f0f",
+    "native-shape-node-receipts-race.log.gz": "755e05ad15cb5cc8d197f340b1c9c32e8df09bf6da7da68ce34b2ea28b415d85",
+    "linux-process-race.log.gz": "9aaac1dd1fc10649623537753d961bd4e7f0af1f96c909004b5b1d6b088b67c6"
+  },
+  "linux_verification": {
+    "store_race_seconds": 337.793,
+    "hub_race_seconds": 25.996,
+    "agent_continuous_and_four_process_race_seconds": 78.422,
+    "concurrent_renewal_seconds": 31.91,
+    "required_real_process_cases_passed": 4,
+    "skips": 0
+  }
+}

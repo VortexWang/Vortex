@@ -14,16 +14,14 @@ import (
 
 // The input contains at most 32 bound identities. Reads still compare every
 // immutable payload; batching changes SQL round trips, never receipt meaning.
-const knownUsageSetQuery = `WITH wanted AS (SELECT json_extract(value,'$[0]') AS node_id,json_extract(value,'$[1]') AS batch_id FROM json_each(?))
-SELECT 0,t.node_id,t.batch_id,t.snapshot_id,NULL,t.payload_sha256,'0','',NULL,NULL FROM settled_usage_tombstones t JOIN wanted w ON w.node_id=t.node_id AND w.batch_id=t.batch_id
+var knownUsageSetQueries = usageIdentityQueries(`SELECT 0,t.node_id,t.batch_id,t.snapshot_id,NULL,t.payload_sha256,'0','',NULL,NULL FROM settled_usage_tombstones t JOIN wanted w ON w.node_id=t.node_id AND w.batch_id=t.batch_id
 UNION ALL SELECT 1,u.node_id,u.batch_id,u.snapshot_id,u.payload,u.payload_sha256,u.unknown_upper_bound,u.state,r.kind,r.payload_sha256 FROM usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id LEFT JOIN usage_backend_receipts r ON r.node_id=u.node_id AND r.batch_id=u.batch_id
-UNION ALL SELECT 2,u.node_id,u.batch_id,'',NULL,NULL,'0','',NULL,NULL FROM unknown_usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id`
+UNION ALL SELECT 2,u.node_id,u.batch_id,'',NULL,NULL,'0','',NULL,NULL FROM unknown_usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id`)
 
 const usageSetLedgeredQuery = `UPDATE usage_batches SET state='ledgered',updated_at=? WHERE (node_id,batch_id) IN (SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?))`
 
-const usageGroupConfirmedQuery = `WITH wanted AS (SELECT json_extract(value,'$[0]') AS node_id,json_extract(value,'$[1]') AS batch_id FROM json_each(?))
-SELECT 0,r.node_id,r.batch_id,r.kind,r.payload_sha256 FROM usage_backend_receipts r JOIN wanted w ON w.node_id=r.node_id AND w.batch_id=r.batch_id
-UNION ALL SELECT 1,t.node_id,t.batch_id,'known',t.payload_sha256 FROM settled_usage_tombstones t JOIN wanted w ON w.node_id=t.node_id AND w.batch_id=t.batch_id`
+var usageGroupConfirmedQueries = usageIdentityQueries(`SELECT 0,r.node_id,r.batch_id,r.kind,r.payload_sha256 FROM usage_backend_receipts r JOIN wanted w ON w.node_id=r.node_id AND w.batch_id=r.batch_id
+UNION ALL SELECT 1,t.node_id,t.batch_id,'known',t.payload_sha256 FROM settled_usage_tombstones t JOIN wanted w ON w.node_id=t.node_id AND w.batch_id=t.batch_id`)
 
 // Four fixed, prepared shapes avoid compiling a new multi-row statement on
 // every replay. Empty slots bind NULL; actual payloads remain bound blobs.
@@ -54,11 +52,8 @@ func (s *Store) PendingKnownUsageGroup(ctx context.Context, batches []HubUsage) 
 		}
 		return batches, nil
 	}
-	keys, err := usageGroupKeys(batches)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := s.runtimeStatements[usageGroupConfirmedQuery].QueryContext(ctx, string(keys))
+	lookupQuery, lookupArgs := bindUsageIdentities(usageGroupConfirmedQueries, batches)
+	rows, err := s.runtimeStatements[lookupQuery].QueryContext(ctx, lookupArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -121,11 +116,8 @@ func usageGroupKeys(batches []HubUsage) ([]byte, error) {
 }
 
 func readKnownUsageSet(ctx context.Context, tx storeTransaction, batches []HubUsage) (map[[2]string]knownUsageEvidence, error) {
-	keys, err := usageGroupKeys(batches)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := tx.QueryContext(ctx, knownUsageSetQuery, string(keys))
+	lookupQuery, lookupArgs := bindUsageIdentities(knownUsageSetQueries, batches)
+	rows, err := tx.QueryContext(ctx, lookupQuery, lookupArgs...)
 	if err != nil {
 		return nil, err
 	}

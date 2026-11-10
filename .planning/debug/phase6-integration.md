@@ -2,15 +2,15 @@
 status: verifying
 trigger: 用户要求先收敛F-10/F-11，再整合Phase6到主线
 created: 2026-11-09
-updated: 2026-11-10
+updated: 2026-11-11
 workflow: gsd-debug
 execution: inline
 ---
 
 ## Current Focus
 
-hypothesis: 当前候选已完成业务流量、Agent ACK与后端补交，但arm64最终资金审计超出60秒；逐条检查点插入和Hub首次来源查询仍占用单写连接。
-next_action: 验证有界检查点插入与首次来源集合读写，保留逐来源守恒、FULL提交、200ms/60s/5s预算；提交后完成同SHA Docker/双架构Actions配对再推进main。
+hypothesis: feed5819本机和arm64通过，amd64在60秒重启补交阶段失败；CPU采样显示Hub重复JSON身份解析及Node需求账本未复用SQL编译增加SQLite/race工作。
+next_action: 验证固定绑定身份表与事务内需求账本SQL复用的性能和安全边界；保留FULL、来源/回执/unknown、200ms/60s/5s预算，再执行新候选同SHA完整验收。
 
 ## Symptoms
 
@@ -209,3 +209,9 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - Hub original-envelope set validation: native new provenance/replay/sequence-collision/ABORT/IGNORE/compacted-payload guards passed normal and race (Store19.827s/Hub2.411s). Compact identity/checkpoint Linux full Store race PASS293.919s, extra guards PASS62.254s, continuous TCP/UDP and all four real process race PASS67.747s (concurrent33.77s). Final combined Store/Hub race and process gate in progress; these are development checks, not final same-SHA acceptance. Resumed existing gsd-debug inline; no new phase scope or contract changes.
 
 - Final combined verification PASS: complete Linux Store race323.596s/Hub22.100s; continuous TCP/UDP PASS16.806s. That first process invocation omitted VORTEX_PROCESS_BIN_DIR and skipped four process cases; retained and explicitly excluded from success. Corrected invocation builds both independent binaries with -race and runs all four real processes PASS53.651s (ConcurrentRenewal34.68s; traffic20.728s/AgentACK27.741s/backend receipts31.583s). Current exact CR012 gate PASS. Compressed raw development logs and classification retained in artifacts/phase6-integration/checkpoint-origin-batching/. Full clean-source same-SHA acceptance next; no approval/budget/accounting relaxation.
+
+- Candidatefeed5819 full clean local Docker PASS (backend502/root1150/Engine301 each normal/race, faults, generators and real Cloudflare CRUD); exact Phase5 run42840129658 PASS and PR42840068225 PASS. Exact Phase6 run42840122425 arm64 PASS but amd64 FAIL ConcurrentRenewal60s (traffic41.886s/AgentACK53.210s/restart55.334s); PR merge-ref run42840068227 arm64 PASS, amd64 FAIL same replay stage (traffic39.534s/AgentACK50.200s/restart52.304s). Not a passing pair; PR2 remains unmerged. Complete original zipped artifacts retained /private/tmp/vortex-feed5819-actions-{amd64,arm64}.zip and /private/tmp/vortex-feed5819-pr-actions-amd64.zip. Actual failed DB query plans use intended identity indexes, excluding accidental full table scans. Independent unshipped Node/Hub CPU-profile overlay running before choosing further repair.
+
+- Follow-up profiling completed: Node21.18s CPU, Hub11.40s CPU; concurrent process PASS37.20s (diagnostic overlay only). Actual failed DB prepared32-identity lookup experiment: known1.508s→0.931s, receipts0.811s→0.500s, origins1.199s→0.882s over300 queries by replacing repeated JSON extraction with bound VALUES. Implemented four fixed2/8/16/32 shapes, deduplicating only lookup identities and retaining payload order, original evidence priority and all exact comparisons. ReadDemandLedger now uses existing FIFO/runtime prepared transactions with per-transaction immutable authority reads; balances/time remain fresh. Native targeted normal/race and cross-node/quoted-key/all-shape-boundary/missing-or-conflicting-receipt guards passed. Linux diagnostic profile and complete relevant race next; no final acceptance claimed.
+
+- Bound-identity final development verification PASS: complete Linux Store race337.793s/Hub25.996s; continuous TCP/UDP including finite attack negatives and all four independent-process race cases PASS78.422s, ConcurrentRenewal31.91s (traffic18.732s/AgentACK25.085s/backend receipts28.933s). No process skip, race report or deadline change. Exact approved CR012 gate PASS; compressed raw logs classified under artifacts/phase6-integration/bound-identity-lookups/. Synchronised roadmap current Phase4 closure with final04-45, retaining historical reports and production/Phase7 boundaries. Preparing clean same-SHA final acceptance.

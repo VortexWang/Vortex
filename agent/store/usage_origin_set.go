@@ -11,9 +11,8 @@ import (
 // Capture the first authenticated envelope together with the original durable
 // payload, in the caller's FULL transaction. Preserve known-before-unknown lookup
 // order and never infer provenance for a compacted/missing payload.
-const usageOriginSetQuery = `WITH wanted AS (SELECT json_extract(value,'$[0]') AS node_id,json_extract(value,'$[1]') AS batch_id FROM json_each(?))
-SELECT 0,u.node_id,u.batch_id,u.payload_sha256,o.report_boot_id,o.sequence,o.payload_sha256 FROM usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id
-UNION ALL SELECT 1,u.node_id,u.batch_id,u.payload_sha256,o.report_boot_id,o.sequence,o.payload_sha256 FROM unknown_usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id`
+var usageOriginSetQueries = usageIdentityQueries(`SELECT 0,u.node_id,u.batch_id,u.payload_sha256,o.report_boot_id,o.sequence,o.payload_sha256 FROM usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id
+UNION ALL SELECT 1,u.node_id,u.batch_id,u.payload_sha256,o.report_boot_id,o.sequence,o.payload_sha256 FROM unknown_usage_batches u JOIN wanted w ON w.node_id=u.node_id AND w.batch_id=u.batch_id LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id`)
 
 var usageOriginInsertSmall = usageGroupInsertSQL("usage_origin_envelopes", "node_id,batch_id,report_boot_id,sequence,payload_sha256", 5, 8)
 var usageOriginInsertLarge = usageGroupInsertSQL("usage_origin_envelopes", "node_id,batch_id,report_boot_id,sequence,payload_sha256", 5, 32)
@@ -27,11 +26,8 @@ func recordKnownUsageOriginsTx(ctx context.Context, tx storeTransaction, batches
 			return ErrUsageOriginMissing
 		}
 	}
-	keys, err := usageGroupKeys(batches)
-	if err != nil {
-		return err
-	}
-	rows, err := tx.QueryContext(ctx, usageOriginSetQuery, string(keys))
+	lookupQuery, lookupArgs := bindUsageIdentities(usageOriginSetQueries, batches)
+	rows, err := tx.QueryContext(ctx, lookupQuery, lookupArgs...)
 	if err != nil {
 		return err
 	}

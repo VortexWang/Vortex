@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase1–7 integration: checkpoint/origin batching full Linux race and real processes passed; clean same-SHA Docker and dual-architecture Actions pending"
-last_updated: "2026-11-10T04:18:00+00:00"
-last_activity: 2026-11-10
-last_activity_desc: "PR2回归修复：完整Store/Hub race和四个真实进程通过；预算及批准契约不变，完整同SHA验收待完成。Phase7仅规划。"
+stopped_at: "Phase1–7 integration: feed5819 Docker and arm64 passed, amd64 60s replay failed; bound-identity SQL full Linux race and four real processes passed; new clean same-SHA acceptance pending"
+last_updated: "2026-11-10T16:21:41.801984+00:00"
+last_activity: 2026-11-11
+last_activity_desc: "feed5819本机Docker/Actions arm64通过、amd64重启补交60s失败；固定绑定身份SQL与需求账本事务内编译复用验证中，Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
