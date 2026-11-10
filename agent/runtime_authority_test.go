@@ -958,6 +958,22 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				case <-ctx.Done():
 					t.Fatal(ctx.Err())
 				}
+				// Consumption can durably prepare the next demand before the Hub
+				// closes this finite response stream. Replay its original identity
+				// without an adaptive producer, then require the queue to be empty.
+				requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(requests) > 0 {
+					for _, request := range requests {
+						expectedIssued += request.RawBytes
+					}
+					replayHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: len(requests)}, serverTLS)
+					if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true}).Connect(ctx, replayHub.Addr().String()); err != nil {
+						t.Fatal(err)
+					}
+				}
 				if requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, ""); err != nil || len(requests) != 0 {
 					t.Fatalf("continuous demand left pending requests: %+v %v", requests, err)
 				}
