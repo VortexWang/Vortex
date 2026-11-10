@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase6 integration candidate; CR012 approved/frozen; durable retry yielding and delayed issuer publication fixes await complete same-SHA verification"
-last_updated: "2026-11-10T04:18:00+00:00"
-last_activity: 2026-11-10
-last_activity_desc: "a093本机完整Docker含Cloudflare通过，Actions持续授权/进程仍FAIL；fd修复WAL快照审计但持续授权仍FAIL。交付SQL预编译后安全race三轮及四真实进程race59.107s通过，新候选同SHA最终验收待完成；PR1未合并。"
+stopped_at: "Phase1–7 integration:8b235102 Docker failed fixture port race; deterministic Linux RED/GREEN and original fixture race3 passed; fresh same-SHA full acceptance required"
+last_updated: "2026-11-10T16:47:12.398247+00:00"
+last_activity: 2026-11-11
+last_activity_desc: "固定绑定身份优化完成；8b235102完整验收发现测试端口提前释放竞态，夹具真实Prepare端口交接修复通过Linux竞争GREEN/race3；新完整同SHA验收待完成，Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-11-09)
 
 ## Current Position
 
-Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — 待主线整合验证完成后规划
+Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — 84份规划完成，实施未开始；主线整合验收待完成
 Current Plan: Not started
-Total Plans in Phase: TBD
-Status: Phase6 branch complete11/11; merged-source regression/contract validation in progress before Phase7.
+Total Plans in Phase: 84
+Status: Phase1–6 implementation histories and Phase7 planning merged into main; PR2 fixes and integrated runtime acceptance remain pending. See .planning/audits/phase1-7-integration/STATUS.md.
 Last activity: 2026-11-09 — same implementation65a53358 Docker and native dual Actions42572674719 passed; exact CR-009 approval retained.
 
 以下执行记录为历史，不代表当前未完成状态。当前判定以06-VERIFICATION.md及本节为准。
@@ -76,7 +76,7 @@ Installed-credit effective refill now closes the genuine finalization gap: origi
 
 Runtime recovery delivery now scans authenticated Node/boot issued paths in pages of32 after the finite local S/R barrier, sends every recovery page before later bootstrap/leases, and preserves FULL outbox bytes with deterministic per-path IDs for new payloads. Historical IDs replay unchanged; never-issued scopes do not transfer unknown local families and original transferred partitions cannot bootstrap again. A genuine older-path RED now passes only for fully validated no-grant/no-policy handoffs while keeping global path/fencing admission floors; ordinary stale heartbeat/grant and wrong-family cases remain denied. Actual production RuntimeServer/Agent RunRegion and independently pinned Hub/backend mTLS now persist epoch8, receive real PG usage ACK, reconnect without hidden retries and retain original credit, then complete inherited final/refill assertions. Tests caught future fixture time, incomplete three-family installation and missing online UsageBackend/fixed heartbeat clock; all failed evidence is retained. Final complete native backend race(service320.227), Linux arm64 backend race(service333.509), native/Linux root component race,33-path32+1 paging,FULL failure,concurrency,reopen/legacy replay and six Node/Backend/Hub dual-architecture builds pass. No SQL/protobuf/dependency/approved snapshot changes; no clean-source/Actions claim. Evidence: artifacts/phase6/06-06/task3-runtime-recovery-updates/. Remaining: seal/child-close before first recovery delivery, older-path revocation-only ordering, transferred-credit automatic renewal, actual Engine/pending deployment convergence and complete06-06 producer/fault/clean-source checks before concreteCR-008 review. Phase6 stays8/11; no06-06 SUMMARY or CR-008 approval.
 
-Progress: Phase 6 [███████████] 11/11 plans complete; Phase 7 ready to discuss/plan. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
+Progress: Phase 6 [███████████] 11/11 plans complete; Phase 7 planning complete (84 plans / 168 tasks); implementation not started; integrated acceptance pending. Order: 06-01 → 06-08 → 06-09 → 06-02 → 06-10 → 06-03 → 06-04 → 06-05 → 06-06 → 06-07 → 06-11.
 
 Phase 5 remains closed within its runtime/protocol-adapter/static-destination scope on deb8b08 with same-SHA Docker/Actions 42224211933. Phase 4 qualification/D-04 and later-phase acceptance remain separate; Phase 6 planning does not mark those debts passed.
 

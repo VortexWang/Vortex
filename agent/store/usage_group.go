@@ -31,35 +31,49 @@ func (s *Store) PersistKnownUsageGroup(ctx context.Context, batches []HubUsage, 
 		return nil, ErrUsageBatchConflict
 	}
 	result := append([]HubUsage(nil), batches...)
-	tx, err := s.beginRuntimeTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
+	decoded := make([]UsageBatch, len(result))
 	for i, b := range result {
 		digest := sha256.Sum256(b.Payload)
 		if b.Kind != "known" || b.NodeID == "" || b.BootID == "" || b.BatchID == "" || len(b.Payload) == 0 || len(b.Payload) > 1<<20 || !bytes.Equal(digest[:], b.Digest) {
 			return nil, ErrUsageBatchConflict
 		}
-		// Decode the immutable snapshot from the original wire payload.
 		batch, err := decodeKnownHubUsage(b)
 		if err != nil {
 			return nil, err
 		}
-		if err := s.putUsageBatchTx(ctx, tx, batch, digest[:], "ledgered"); err != nil {
-			if errors.Is(err, ErrUsageBatchConflict) {
-				_ = tx.Rollback()
-				if evidenceErr := s.RecordUsageDispute(ctx, b.NodeID, b.BatchID, b.Payload); evidenceErr != nil {
-					return nil, fmt.Errorf("store: retain usage conflict: %w", evidenceErr)
-				}
+		decoded[i] = batch
+	}
+	tx, err := s.beginRuntimeTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	conflictIndex := 0
+	if len(result) == 1 {
+		err = s.putUsageBatchTx(ctx, tx, decoded[0], result[0].Digest, "ledgered")
+	} else {
+		conflictIndex, err = persistKnownUsageSet(ctx, tx, result, decoded)
+	}
+	if err != nil {
+		if errors.Is(err, ErrUsageBatchConflict) {
+			_ = tx.Rollback()
+			b := result[conflictIndex]
+			if evidenceErr := s.RecordUsageDispute(ctx, b.NodeID, b.BatchID, b.Payload); evidenceErr != nil {
+				return nil, fmt.Errorf("store: retain usage conflict: %w", evidenceErr)
 			}
+		}
+		return nil, err
+	}
+	if withOrigin && len(result) > 1 {
+		if err := recordKnownUsageOriginsTx(ctx, tx, result); err != nil {
 			return nil, err
 		}
-		if withOrigin {
+	} else if withOrigin {
+		for i, b := range result {
 			if b.ReportBootID == "" || b.Sequence == 0 || b.Sequence > math.MaxInt64 {
 				return nil, ErrUsageOriginMissing
 			}
-			result[i].ReportBootID, result[i].Sequence, err = recordUsageOriginTx(ctx, tx, b.NodeID, b.BatchID, b.ReportBootID, b.Sequence, digest[:])
+			result[i].ReportBootID, result[i].Sequence, err = recordUsageOriginTx(ctx, tx, b.NodeID, b.BatchID, b.ReportBootID, b.Sequence, b.Digest)
 			if err != nil {
 				return nil, err
 			}
@@ -82,6 +96,16 @@ func (s *Store) ConfirmBackendUsageGroup(ctx context.Context, batches []HubUsage
 		return err
 	}
 	defer tx.Rollback()
+	allKnown := true
+	for _, b := range batches {
+		allKnown = allKnown && b.Kind == "known"
+	}
+	if allKnown && len(batches) > 1 {
+		if err := confirmKnownUsageSet(ctx, tx, batches); err != nil {
+			return err
+		}
+		return tx.Commit()
+	}
 	for _, b := range batches {
 		if err := confirmBackendUsageTx(ctx, tx, b, b.Digest); err != nil {
 			return err

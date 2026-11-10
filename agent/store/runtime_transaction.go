@@ -40,6 +40,7 @@ type runtimeTransaction struct {
 	authorityReads   map[[2]string]authorityRead
 	authorityLineage map[[3]string]bool
 	demandSamples    *[]demandConsumptionSample
+	checkpointRows   *[]runtimeCheckpointRow
 }
 
 type authorityRead struct {

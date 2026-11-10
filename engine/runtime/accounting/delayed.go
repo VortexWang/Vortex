@@ -205,7 +205,16 @@ func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64)
 	if requestErr != nil {
 		return nil, requestErr
 	}
-	if changed == nil {
+	// A grant may arrive after the failed reserve but before request() checks
+	// the waterline. Recheck even when another renewal is now pending: other
+	// consumers may have lowered the balance while leaving enough for this write.
+	// Only the real gate can authorize; the original deadline still applies.
+	b, err = s.inner.reserve(attempt, d, n, false)
+	if err == nil {
+		_, _ = s.gate.request()
+		return b, nil
+	}
+	if !errors.Is(err, core.ErrDenied) || changed == nil {
 		return nil, err
 	}
 	waited = true

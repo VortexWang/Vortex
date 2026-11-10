@@ -64,12 +64,23 @@ result=0
  docker compose -f "$compose" images --format json > "$out/images.json"
  docker compose -f "$compose" exec -T postgres psql -U vortex -c 'SELECT version();' > "$out/postgres-version.txt"
  docker compose -f "$compose" exec -T valkey valkey-cli INFO server > "$out/valkey-version.txt"
+ # SQLite WAL runs on a fresh Docker-local durable volume, not on the host
+ # artifact bind mount (which may cross a VM filesystem-sharing boundary).
+ # Export closed process databases and raw logs even when a required test fails.
+ runtime_volume=$(docker volume create --label "vortex.phase6.commit=$PHASE6_EXPECTED_SHA") || exit $?
+ docker volume inspect "$runtime_volume" > "$out/runtime-volume.json" || exit $?
  # Linux bind mounts retain the container's root owner, including private
  # 0600 reports. Return artifacts to the invoking user even when a test fails;
  # retain file modes and the original test failure for validation/upload.
- docker compose -f "$compose" run --rm -e PHASE6_EVIDENCE_DIR=/evidence -e GOFLAGS=-p=1 -e GOMAXPROCS=2 backend-test sh -c '
+ docker compose -f "$compose" run --rm --volume "$runtime_volume:/runtime" -e GOFLAGS=-p=1 -e GOMAXPROCS=2 backend-test sh -c '
+  mkdir -p /runtime/evidence /runtime/tmp || exit $?
+  export PHASE6_EVIDENCE_DIR=/runtime/evidence
+  export PHASE6_PROCESS_EVIDENCE_DIR=/runtime/evidence/processes
+  export TMPDIR=/runtime/tmp
+  { cat /proc/self/mountinfo; df -T /runtime /tmp /evidence; } > /runtime/evidence/storage-layout.txt || exit $?
   code=0
   sh tools/phase6/final_container_check.sh || code=$?
+  cp -a /runtime/evidence/. /evidence/ || exit $?
   chown -R "$1" /evidence || exit $?
   exit "$code"
  ' phase6-evidence "$(id -u):$(id -g)"

@@ -43,14 +43,28 @@ func (r *UsageRelay) AcceptKnownEnvelopes(ctx context.Context, messages []*contr
 }
 
 func (r *UsageRelay) forwardGroup(ctx context.Context, batches []store.HubUsage) error {
-	var pending []store.HubUsage
+	allKnown := true
 	for _, b := range batches {
-		confirmed, err := r.Store.BackendUsageConfirmed(ctx, b)
+		allKnown = allKnown && b.Kind == "known"
+	}
+	var pending []store.HubUsage
+	if allKnown {
+		var err error
+		pending, err = r.Store.PendingKnownUsageGroup(ctx, batches)
 		if err != nil {
 			return err
 		}
-		if !confirmed {
-			pending = append(pending, b)
+	} else {
+		// The ordinary online ACK boundary also sends typed unknown reports
+		// through this helper. Retain their original receipt validation path.
+		for _, b := range batches {
+			confirmed, err := r.Store.BackendUsageConfirmed(ctx, b)
+			if err != nil {
+				return err
+			}
+			if !confirmed {
+				pending = append(pending, b)
+			}
 		}
 	}
 	if len(pending) == 0 {

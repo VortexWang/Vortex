@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -154,7 +155,13 @@ func Open(path, owner string) (*Store, error) {
 		return nil, err
 	}
 	s.runtimeStatements = make(map[string]*sql.Stmt, len(runtimeQueries))
-	for _, query := range runtimeQueries {
+	queries := append([]string(nil), runtimeQueries[:]...)
+	if owner == "agent" {
+		for _, insert := range runtimeCheckpointInserts {
+			queries = append(queries, insert.queries[:]...)
+		}
+	}
+	for _, query := range queries {
 		stmt, err := db.Prepare(query)
 		if err != nil {
 			_ = db.Close()
@@ -433,6 +440,7 @@ CREATE TABLE IF NOT EXISTS runtime_sessions (
  initial_share_lease_id TEXT NOT NULL DEFAULT '',
  state TEXT NOT NULL, PRIMARY KEY(node_id,session_id), UNIQUE(node_id,boot_id,flow_key)
 );
+CREATE INDEX IF NOT EXISTS runtime_sessions_open_source ON runtime_sessions(node_id,source_id) WHERE state='open';
 CREATE TABLE IF NOT EXISTS runtime_rate_clock_epochs (
  node_id TEXT NOT NULL, source_id TEXT NOT NULL, epoch TEXT NOT NULL,
  PRIMARY KEY(node_id,source_id)
@@ -1210,35 +1218,85 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 	return tx.Commit()
 }
 
+// Keep SQL work bounded per chunk while retaining the caller's single transaction.
+// No row is acknowledged until every chunk has validated and the transaction commits.
+const usageAcknowledgementRows = `SELECT batch_id,state,unknown_upper_bound FROM usage_batches WHERE node_id=? AND batch_id IN (SELECT value FROM json_each(?))`
+const usageAcknowledgementUpdate = `UPDATE usage_batches SET state=?,updated_at=? WHERE node_id=? AND batch_id IN (SELECT value FROM json_each(?))`
+
 func transitionUsageBatchesTx(ctx context.Context, tx storeTransaction, nodeID string, batchIDs []string, target string) error {
 	seen := make(map[string]struct{}, len(batchIDs))
-	for _, batchID := range batchIDs {
-		if batchID == "" {
+	ids := make([]string, 0, len(batchIDs))
+	for _, id := range batchIDs {
+		if id == "" {
 			return fmt.Errorf("store: empty usage batch id")
 		}
-		if _, duplicate := seen[batchID]; duplicate {
-			continue
+		if _, duplicate := seen[id]; !duplicate {
+			seen[id] = struct{}{}
+			ids = append(ids, id)
 		}
-		seen[batchID] = struct{}{}
-		var state, upper string
-		if err := tx.QueryRowContext(ctx, `SELECT state,unknown_upper_bound FROM usage_batches WHERE node_id=? AND batch_id=?`, nodeID, batchID).Scan(&state, &upper); err != nil {
-			return err
-		}
-		unknown, err := strconv.ParseUint(upper, 10, 64)
+	}
+	for start := 0; start < len(ids); start += 64 {
+		chunk := ids[start:min(start+64, len(ids))]
+		raw, err := json.Marshal(chunk)
 		if err != nil {
 			return err
 		}
-		if target == "hub_acked" && unknown != 0 {
-			return fmt.Errorf("store: ordinary usage acknowledgement cannot acknowledge unknown liability")
+		rows, err := tx.QueryContext(ctx, usageAcknowledgementRows, nodeID, string(raw))
+		if err != nil {
+			return err
 		}
-		if state == "hub_acked" && target == "hub_acked" || state == "locally_acked" && target == "locally_acked" {
+		var changes []string
+		found := 0
+		for rows.Next() {
+			var id, state, upper string
+			if err := rows.Scan(&id, &state, &upper); err != nil {
+				rows.Close()
+				return err
+			}
+			found++
+			unknown, err := strconv.ParseUint(upper, 10, 64)
+			if err != nil {
+				rows.Close()
+				return err
+			}
+			if target == "hub_acked" && unknown != 0 {
+				rows.Close()
+				return fmt.Errorf("store: ordinary usage acknowledgement cannot acknowledge unknown liability")
+			}
+			if state == "hub_acked" && target == "hub_acked" || state == "locally_acked" && target == "locally_acked" {
+				continue
+			}
+			if state != "pending" && !(target == "hub_acked" && state == "locally_acked") {
+				rows.Close()
+				return fmt.Errorf("store: invalid usage acknowledgement transition %s to %s", state, target)
+			}
+			changes = append(changes, id)
+		}
+		err = rows.Err()
+		rows.Close()
+		if err != nil {
+			return err
+		}
+		if found != len(chunk) {
+			return sql.ErrNoRows
+		}
+		if len(changes) == 0 {
 			continue
 		}
-		if state != "pending" && !(target == "hub_acked" && state == "locally_acked") {
-			return fmt.Errorf("store: invalid usage acknowledgement transition %s to %s", state, target)
-		}
-		if _, err := tx.ExecContext(ctx, `UPDATE usage_batches SET state=?,updated_at=? WHERE node_id=? AND batch_id=?`, target, time.Now().UTC().Format(time.RFC3339Nano), nodeID, batchID); err != nil {
+		raw, err = json.Marshal(changes)
+		if err != nil {
 			return err
+		}
+		result, err := tx.ExecContext(ctx, usageAcknowledgementUpdate, target, time.Now().UTC().Format(time.RFC3339Nano), nodeID, string(raw))
+		if err != nil {
+			return err
+		}
+		n, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if n != int64(len(changes)) {
+			return fmt.Errorf("store: incomplete usage acknowledgement")
 		}
 	}
 	return nil

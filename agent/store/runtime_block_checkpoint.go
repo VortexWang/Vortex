@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"strconv"
@@ -29,6 +28,8 @@ func (s *Store) CheckpointRuntimeFundingBlock(ctx context.Context, block UsageRe
 	return tx.Commit()
 }
 
+const checkpointParentQuery = `SELECT u.boot_id=? AND u.snapshot_id=? AND u.flow_key=? AND u.rule_id=? AND u.direction=? AND h.authorization_id=? AND u.reserved_bytes=? AND h.reserved_bytes=u.reserved_bytes AND u.state='reserved' AND h.state='reserved',h.authorization_id,h.source_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id WHERE b.node_id=? AND b.batch_id=?`
+
 func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, block UsageReservation, checkpointID string, used uint64, payload []byte) error {
 	child := block
 	child.BatchID, child.Reserved = checkpointID, used
@@ -46,14 +47,17 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
-	var boot, snapshot, flow, rule, direction, reserved, state, auth, source, held, holdState string
-	err = tx.QueryRowContext(ctx, `SELECT u.boot_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,u.state,h.authorization_id,h.source_id,h.reserved_bytes,h.state FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id WHERE b.node_id=? AND b.batch_id=?`, block.NodeID, block.BatchID).Scan(&boot, &snapshot, &flow, &rule, &direction, &reserved, &state, &auth, &source, &held, &holdState)
+	var valid bool
+	var auth, source string
+	reserved := strconv.FormatUint(block.Reserved, 10)
+	err = tx.QueryRowContext(ctx, checkpointParentQuery, block.BootID, block.SnapshotID, block.FlowKey, block.RuleID, block.Direction, block.AuthorizationID, reserved, block.NodeID, block.BatchID).Scan(&valid, &auth, &source)
 	if err != nil {
 		return err
 	}
-	if boot != block.BootID || snapshot != block.SnapshotID || flow != block.FlowKey || rule != block.RuleID || direction != block.Direction || auth != block.AuthorizationID || reserved != strconv.FormatUint(block.Reserved, 10) || held != reserved || state != "reserved" || holdState != "reserved" {
+	if !valid {
 		return ErrUsageBatchConflict
 	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	amount := strconv.FormatUint(used, 10)
 	// The parent was validated above and this child does not yet exist. Write
@@ -63,11 +67,16 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	if err := rejectUnknownIdentityTx(ctx, tx, block.NodeID, checkpointID); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`, block.NodeID, boot, checkpointID, snapshot, flow, rule, direction, amount, "committed", amount, now); err != nil {
-		return err
+	row := runtimeCheckpointRow{block: block, id: checkpointID, amount: amount, source: source, prior: reserved, now: now, payload: payload}
+	staged := false
+	if rt, ok := tx.(*runtimeTransaction); ok && rt.checkpointRows != nil {
+		*rt.checkpointRows = append(*rt.checkpointRows, row)
+		staged = true
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_usage_holds(node_id,batch_id,authorization_id,source_id,reserved_bytes,state) VALUES(?,?,?,?,?,?)`, block.NodeID, checkpointID, auth, source, amount, "committed"); err != nil {
-		return err
+	if !staged {
+		if err := insertRuntimeCheckpointChild(ctx, tx, row); err != nil {
+			return err
+		}
 	}
 	residual := strconv.FormatUint(block.Reserved-used, 10)
 	residualState := "reserved"
@@ -80,12 +89,10 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	if _, err := tx.ExecContext(ctx, `UPDATE authorization_usage_holds SET reserved_bytes=?,state=? WHERE node_id=? AND batch_id=?`, residual, residualState, block.NodeID, block.BatchID); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_block_checkpoints(node_id,batch_id,block_id,prior_reserved) VALUES(?,?,?,?)`, block.NodeID, checkpointID, block.BatchID, reserved); err != nil {
-		return err
-	}
-	digest := sha256.Sum256(payload)
-	if _, err := tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, block.NodeID, checkpointID, boot, snapshot, payload, digest[:], "0", "pending", now, now); err != nil {
-		return err
+	if !staged {
+		if err := insertRuntimeCheckpointEvidence(ctx, tx, row); err != nil {
+			return err
+		}
 	}
 	return recordDemandConsumptionTx(ctx, tx, block.NodeID, auth, used, time.Now())
 }
@@ -131,6 +138,10 @@ func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeB
 	tx.authorityReads = make(map[[2]string]authorityRead)
 	samples := []demandConsumptionSample{}
 	tx.demandSamples = &samples
+	rows := []runtimeCheckpointRow{}
+	if len(entries) > 1 {
+		tx.checkpointRows = &rows
+	}
 	if err := checkMembers(); err != nil {
 		return err
 	}
@@ -138,6 +149,10 @@ func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeB
 		if err := checkpointRuntimeFundingBlockTx(ctx, tx, entry.Block, entry.CheckpointID, entry.Used, entry.Payload); err != nil {
 			return err
 		}
+	}
+	tx.checkpointRows = nil
+	if err := insertRuntimeCheckpointRows(ctx, tx, rows); err != nil {
+		return err
 	}
 	tx.demandSamples = nil
 	for _, sample := range samples {

@@ -1,0 +1,18 @@
+{
+  "scope": "test fixture socket ownership; real Engine Prepare and37-rule renewal/accounting coverage retained",
+  "failed_candidate": "8b2351025047788fedacd1af9d555df19ab40e31",
+  "docker_result": "failed; backend502 normal/race passed; one root fixture Prepare invalid_config; complete raw external evidence retained",
+  "linux_red": "deterministic competitor in released-port setup window reproduces real EADDRINUSE persisted reason",
+  "native_probe": "Darwin did not reproduce same bind-family conflict; diagnostic only, not Linux evidence",
+  "linux_green": "same competitor cannot claim held wildcard socket during authority/configuration setup; real Prepare and full renewal assertions pass with race18.38s",
+  "linux_original_fixture_race": "three complete original cases pass56.913s (18.96/18.40/18.53)",
+  "production_changes": false,
+  "budget_changes": false,
+  "files": {
+    "docker-original-failure.json": "6bb662bab7a4216e6ba25906a728eefb5f2f18018d76c9c72a59734e30fc4845",
+    "fixture-linux-race.log.gz": "45c68440523254733c9dab58056a435674b81d0bf601cce64d02920e6e4cb9a2",
+    "green-linux.log.gz": "6690689eca8d2bef74ab8e8c071cf54b73215f78adb5b0875fb801aba6132fe2",
+    "red.log.gz": "465c00946c707d7e361a8b8dbcc8ec219b7fb2f0a42ffd2310ace2c29adc6236",
+    "red-linux.log.gz": "346d009a7b7c476fe6b5592d34374a59677d11acbb5114e1d5729339b5003996"
+  }
+}

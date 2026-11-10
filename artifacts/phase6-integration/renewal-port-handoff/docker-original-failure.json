@@ -1,0 +1,39 @@
+[
+  {
+    "Time": "2026-11-10T16:38:42.873617006Z",
+    "Action": "run",
+    "Package": "vortex/agent",
+    "Test": "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope"
+  },
+  {
+    "Time": "2026-11-10T16:38:42.873620048Z",
+    "Action": "output",
+    "Package": "vortex/agent",
+    "Test": "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope",
+    "Output": "=== RUN   TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope\n",
+    "OutputType": "frame"
+  },
+  {
+    "Time": "2026-11-10T16:38:43.492042272Z",
+    "Action": "output",
+    "Package": "vortex/agent",
+    "Test": "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope",
+    "Output": "    renewal_rules_test.go:102: real Prepare phase:\"prepare\"  transaction_id:\"renewal-rule-021\"  task_key:\"prepare-rule-21\"  target_revision:1  idempotency_key:\"prepare-rule-21\"  artifact_sha256:\"}\\xcf?7\u0436\u038co\\xa0\\xeb\\x10Lc\\x1b\\xba\\xd7{\\xd9 \\x06\\xd7>ffT\\x1b\u060bU]8\"  fencing_generation:1  state:\"failed\"  error_code:\"invalid_config\"\n",
+    "OutputType": "error"
+  },
+  {
+    "Time": "2026-11-10T16:38:43.500218876Z",
+    "Action": "output",
+    "Package": "vortex/agent",
+    "Test": "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope",
+    "Output": "--- FAIL: TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope (0.63s)\n",
+    "OutputType": "frame"
+  },
+  {
+    "Time": "2026-11-10T16:38:43.500261376Z",
+    "Action": "fail",
+    "Package": "vortex/agent",
+    "Test": "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope",
+    "Elapsed": 0.63
+  }
+]

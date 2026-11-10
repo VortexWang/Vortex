@@ -223,6 +223,119 @@ func TestDelayedIssuerLateAcceptedRenewalSettlesOnce(t *testing.T) {
 	conserved(t, g.Credit)
 }
 
+func TestDelayedIssuerGrantBetweenDenialAndRequestIsReusable(t *testing.T) {
+	for _, mode := range []string{"open", "closed", "cancelled", "renewal-pending"} {
+		t.Run(mode, func(t *testing.T) { delayedGrantBetweenDenialAndRequest(t, mode) })
+	}
+}
+
+func delayedGrantBetweenDenialAndRequest(t *testing.T, mode string) {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	g, err := NewDelayedCreditGate(context.Background(), CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g.Close()
+	inner, err := g.Credit.Open(ctx, core.Flow{Key: "publish-between-denial-and-request"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := &delayedSession{gate: g, inner: inner.(*creditSession)}
+	defer s.Close()
+	id, amount, err := g.Credit.BeginRenewal(ctx, "initial")
+	if err != nil || amount != 128 {
+		t.Fatalf("initial request: amount=%d err=%v", amount, err)
+	}
+	// Hold request() at the issuer mutex until Reserve has observed no credit.
+	// Then publish the real matching grant before allowing request() to proceed.
+	g.mu.Lock()
+	locked := true
+	defer func() {
+		if locked {
+			g.mu.Unlock()
+		}
+	}()
+	type result struct {
+		batch *core.Batch
+		err   error
+	}
+	done := make(chan result, 1)
+	go func() {
+		b, err := s.Reserve(ctx, core.LeftToRight, 1)
+		done <- result{b, err}
+	}()
+	deadline := time.Now().Add(time.Second)
+	for len(g.waiters) == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("reservation never reached the missing-credit path")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if err := g.Credit.ApplyGrant(ctx, GrantReply{RequestID: id, SnapshotID: "s", GrantID: "initial-grant", Amount: amount, Outcome: GrantAccepted}); err != nil {
+		t.Fatal(err)
+	}
+	// Another consumer can use part of the new grant before request() gets
+	// the issuer lock, leaving usable credit while triggering a new renewal.
+	var priorUsed, pending int64
+	records := uint64(1)
+	if mode == "renewal-pending" {
+		other, err := g.Credit.Open(ctx, core.Flow{Key: "other-consumer"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer other.Close()
+		for range 90 {
+			b, err := other.Reserve(ctx, core.LeftToRight, 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := b.Commit(ctx, 1); err != nil {
+				t.Fatal(err)
+			}
+		}
+		priorUsed, pending = 90, 90
+		records = 2
+	}
+	if mode == "closed" {
+		if err := s.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if mode == "cancelled" {
+		cancel()
+	}
+	g.mu.Unlock()
+	locked = false
+	r := <-done
+	if mode == "closed" || mode == "cancelled" {
+		expected := core.ErrDenied
+		if mode == "cancelled" {
+			expected = context.Canceled
+		}
+		if r.batch != nil || !errors.Is(r.err, expected) {
+			t.Fatalf("stale permission escaped: batch=%v err=%v", r.batch, r.err)
+		}
+		if state := g.Credit.State(); state.Used != 0 || state.Grants != 1 || state.PendingGrant != 0 {
+			t.Fatal(state)
+		}
+		conserved(t, g.Credit)
+		return
+	}
+	if r.err != nil {
+		t.Fatalf("grant published between denial and request was missed: %v", r.err)
+	}
+	if err := r.batch.Commit(ctx, 1); err != nil {
+		t.Fatal(err)
+	}
+	state := g.Credit.State()
+	if state.Used != priorUsed+1 || state.Grants != 1 || state.GrantRecords != records || state.PendingGrant != pending || state.UnknownGrant != 0 {
+		t.Fatalf("published grant was duplicated or lost: %+v", state)
+	}
+	conserved(t, g.Credit)
+}
+
 func TestDelayedIssuerCallerCancellationKeepsRequest(t *testing.T) {
 	g := delayedFixture(t, 40*time.Millisecond)
 	ctx := context.Background()

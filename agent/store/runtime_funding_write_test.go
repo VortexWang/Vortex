@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 )
 
 func TestRuntimeFundingWriteReclaimsBothTailsAtomically(t *testing.T) {
@@ -77,5 +79,87 @@ func TestRuntimeFundingWriteReclaimsBothTailsAtomically(t *testing.T) {
 	}
 	if err = s.AdmitRuntimeFundingBlockWrite(ctx, left, a.Use, 1); err == nil {
 		t.Fatal("returned tail retained capability")
+	}
+}
+
+func TestFundingWriteRefreshesTrustedTimeInsideTransaction(t *testing.T) {
+	for _, mode := range []string{"active", "expired", "untrusted", "revoked"} {
+		t.Run(mode, func(t *testing.T) {
+			s, scope, _ := runtimeStore(t)
+			ctx := context.Background()
+			session, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+			if err != nil {
+				t.Fatal(err)
+			}
+			stale := session.Use
+			stale.Earliest = scope.Earliest.Add(-2 * time.Second)
+			stale.Latest = stale.Earliest
+			fresh := scope.Earliest
+			if mode == "expired" {
+				fresh = fresh.Add(10 * time.Minute)
+			}
+			if mode == "revoked" {
+				if err := s.PersistAuthorizationUpdate(ctx, AuthorizationUpdate{NodeID: "node", BootID: "boot", UpdateID: "revoke", Payload: []byte("revoke"), IssuerID: "hub-one", SignerEpoch: 1, PathGeneration: 1, FencingGenerationFloor: 1}, nil, []string{"grant"}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			var called bool
+			clock := func() (time.Time, time.Time, bool) {
+				called = true
+				if s.db.Stats().InUse != 1 {
+					t.Error("clock sampled before transaction owned connection")
+				}
+				return fresh, fresh, mode != "untrusted"
+			}
+			result, err := s.ReserveAndAdmitRuntimeFundingWrite(ctx, runtimeReservation("fresh", 128), stale, 100, nil, nil, []string{"fragment"}, clock)
+			if !called {
+				t.Fatal("clock not sampled")
+			}
+			if mode == "active" {
+				if err != nil || result.Block.Reserved != 128 {
+					t.Fatalf("fresh conservative authority not admitted: %+v %v", result, err)
+				}
+			} else {
+				if err == nil || result.Block.BatchID != "" || len(result.Children) != 0 {
+					t.Fatalf("invalid refreshed authority admitted: %+v %v", result, err)
+				}
+				balance, e := s.AuditAuthorizationSource(ctx, "node", "funding")
+				if e != nil || balance.Reserved != 0 || balance.Remaining != balance.Initial {
+					t.Fatalf("failed refresh mutated funding: %+v %v", balance, e)
+				}
+			}
+		})
+	}
+}
+
+func TestFundingWriteInsufficientUpperBoundDoesNotTryPartialDebits(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	session, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Leave exactly 692 bytes, less than the indivisible 1500-byte write.
+	r := runtimeReservation("spent", (1<<20)-692)
+	id, err := s.ReserveRuntimeFundingBlock(ctx, r, session.Use)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.AuthorizationID = id
+	if err = s.CheckpointRuntimeFundingBlock(ctx, r, "completed", r.Reserved, []byte("known")); err != nil {
+		t.Fatal(err)
+	}
+	// Any speculative partial debit would hit this trigger. The upper bound
+	// must return a definitive denial before mutating the ledger at all.
+	if _, err = s.db.Exec(`CREATE TRIGGER reject_speculative_debit BEFORE UPDATE ON authorization_balances BEGIN SELECT RAISE(ABORT,'speculative debit'); END`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.ReserveAndAdmitRuntimeFundingWrite(ctx, runtimeReservation("next", 2048), session.Use, 1500, nil, nil, []string{"child"})
+	if !errors.Is(err, ErrAuthorizationDenied) || got.Block.BatchID != "" || len(got.Children) != 0 {
+		t.Fatalf("impossible write attempted mutation: %+v %v", got, err)
+	}
+	balance, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || balance.Remaining != 692 || balance.Reserved != 0 {
+		t.Fatalf("conservation: %+v %v", balance, err)
 	}
 }

@@ -345,6 +345,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 		}
 	}
 	elapsed := time.Since(trafficStarted)
+	t.Logf("business traffic completed after %s", elapsed)
 	var samples []time.Duration
 	for _, streamSamples := range latencies {
 		samples = append(samples, streamSamples...)
@@ -354,38 +355,13 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	writeJSON("traffic.json", map[string]any{"streams": streamCount, "network": network, "round_trips": len(samples), "round_trip_ms": map[string]float64{"p50": percentile(50), "p95": percentile(95), "p99": percentile(99)}, "traffic_elapsed_ns": elapsed.Nanoseconds(), "bidirectional_payload_bytes": expectedBytes, "bidirectional_payload_mbps": float64(expectedBytes) * 8 / elapsed.Seconds() / 1e6, "timing_scope": "request-response traffic; excludes later ACK drain", "performance_qualified": false})
 
 	wait(func() bool {
-		// Poll the pending predicate without repeatedly decoding thousands of
-		// immutable payloads while the independent processes drain their ACKs.
-		// Once drained, still verify every durable payload and its exact total.
-		var pending bool
-		if err := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM usage_batches WHERE state!='hub_acked')").Scan(&pending); err != nil || pending {
-			return false
-		}
-		rows, err := db.QueryContext(ctx, "SELECT payload,state FROM usage_batches")
-		if err != nil {
-			return false
-		}
-		defer rows.Close()
-		var total uint64
-		for rows.Next() {
-			var payload []byte
-			var state string
-			if rows.Scan(&payload, &state) != nil || state != "hub_acked" {
-				return false
-			}
-			var batch controlv1.UsageBatch
-			if proto.Unmarshal(payload, &batch) != nil {
-				return false
-			}
-			for _, delta := range batch.Deltas {
-				total += delta.Bytes
-			}
-		}
-		return rows.Err() == nil && total == expectedBytes
+		complete, err := processAgentUsageComplete(ctx, db, expectedBytes)
+		return err == nil && complete
 	})
 	for _, stream := range streams {
 		_ = stream.Reset(ctx, 0)
 	}
+	t.Logf("all Agent usage acknowledged after %s since traffic start", time.Since(trafficStarted))
 	stopNode()
 	stopHub()
 	// A fixed fixture heartbeat intentionally enters autonomy after 30 seconds.
@@ -393,24 +369,27 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	// with the same databases to exercise durable accounting replay explicitly.
 	stopRecoveredHub := start("vortex-test-hub", "--listen", hubAddr, "--db", hubDB, "--tls-cert", hubCredentials+"/runtime-cert.pem", "--tls-key", hubCredentials+"/runtime-key.pem", "--tls-ca", hubCredentials+"/trust-ca.pem", "--authority-fixture", fixture, "--fixture-backend-db", backendDB, "--test-config-update", configUpdate)
 	defer stopRecoveredHub()
+	t.Logf("restarted Hub replay beginning after %s since traffic start", time.Since(trafficStarted))
 	hubObservation, err := sql.Open("sqlite", "file:"+hubDB+"?mode=ro")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer hubObservation.Close()
+	var receiptTarget int64
+	if err := hubObservation.QueryRowContext(ctx, `SELECT COUNT(*) FROM usage_batches`).Scan(&receiptTarget); err != nil {
+		t.Fatal(err)
+	}
 	wait(func() bool {
 		connection, err := net.DialTimeout("tcp", hubAddr, 100*time.Millisecond)
 		if err != nil {
 			return false
 		}
 		connection.Close()
-		// An existence check has the same zero-pending condition, but stops at
-		// the first missing receipt while the recovered process drains the rest.
-		var pending bool
-		err = hubObservation.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id))`).Scan(&pending)
-		return err == nil && !pending
+		drained, err := processBackendReceiptsDrained(ctx, hubObservation, receiptTarget)
+		return err == nil && drained
 	})
 	stopRecoveredHub()
+	t.Logf("all backend receipts confirmed after %s since traffic start", time.Since(trafficStarted))
 	db.Close()
 	// Writers have stopped: audit durable source funds as well as usage rows.
 	agentAudit, err := store.Open(agentDB, "agent")
@@ -452,4 +431,55 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	}
 	assertFragmentLedgers(t, []string{agentDB, hubDB, backendDB}, expectedBytes)
 	saveLedgerFiles(t, fmt.Sprintf("process-network-%d", network), map[string]string{"agent": agentDB, "hub": hubDB, "backend": backendDB})
+}
+
+// A count can only prove that replay is still incomplete. Once enough receipts
+// exist, retain the original per-identity absence check: unrelated receipts can
+// never stand in for a missing batch. This avoids rescanning the acknowledged
+// prefix every polling tick while the real recovered process is still writing.
+func processBackendReceiptsDrained(ctx context.Context, db *sql.DB, target int64) (bool, error) {
+	var count int64
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM usage_backend_receipts`).Scan(&count); err != nil {
+		return false, err
+	}
+	if count < target {
+		return false, nil
+	}
+	var pending bool
+	err := db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id))`).Scan(&pending)
+	return err == nil && !pending, err
+}
+
+// Use the existing delivery index while ACKs are outstanding. The complete
+// payload scan still rejects every non-hub_acked state (including unexpected
+// states), invalid payload and incorrect byte total before declaring success.
+func processAgentUsageComplete(ctx context.Context, db *sql.DB, expectedBytes uint64) (bool, error) {
+	var pending bool
+	if err := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM usage_batches WHERE state IN ('pending','locally_acked'))").Scan(&pending); err != nil || pending {
+		return false, err
+	}
+	rows, err := db.QueryContext(ctx, "SELECT payload,state FROM usage_batches")
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	var total uint64
+	for rows.Next() {
+		var payload []byte
+		var state string
+		if err := rows.Scan(&payload, &state); err != nil {
+			return false, err
+		}
+		if state != "hub_acked" {
+			return false, nil
+		}
+		var batch controlv1.UsageBatch
+		if err := proto.Unmarshal(payload, &batch); err != nil {
+			return false, err
+		}
+		for _, delta := range batch.Deltas {
+			total += delta.Bytes
+		}
+	}
+	return rows.Err() == nil && total == expectedBytes, rows.Err()
 }

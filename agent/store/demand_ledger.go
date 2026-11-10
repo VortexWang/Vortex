@@ -104,11 +104,14 @@ func (s *Store) ReadDemandLedger(ctx context.Context, scope DemandScope, now Iss
 	if sampleTime.IsZero() || sampleTime.Unix() < 0 {
 		return result, ErrAuthorityTimeUncertain
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return result, err
 	}
 	defer tx.Rollback()
+	// Reuse compiled SQL and immutable authority rows only inside this read
+	// transaction. Balances and time checks are still read afresh on every call.
+	tx.authorityReads = make(map[[2]string]authorityRead)
 	rows, err := tx.QueryContext(ctx, `SELECT a.authorization_id,b.remaining_bytes FROM authorization_records a LEFT JOIN authorization_balances b ON b.node_id=a.node_id AND b.authorization_id=a.authorization_id WHERE a.node_id=? AND a.source_id=? AND a.kind='credit_grant' AND a.state='active'`, scope.NodeID, scope.SourceID)
 	if err != nil {
 		return result, err

@@ -17,6 +17,24 @@ import (
 	"vortex/hub"
 )
 
+// Keep each candidate socket reserved through authority/configuration writes.
+// Release it only at the real Engine Prepare call, where that Engine takes
+// ownership. Probing and closing before setup lets another socket claim it.
+type renewalPortApplier struct {
+	*RuntimeApplier
+	ports map[[16]byte]net.Listener
+}
+
+func (a *renewalPortApplier) PrepareRuleArtifact(id [16]byte, generation uint64, raw []byte) error {
+	if listener := a.ports[id]; listener != nil {
+		delete(a.ports, id)
+		if err := listener.Close(); err != nil {
+			return err
+		}
+	}
+	return a.RuntimeApplier.PrepareRuleArtifact(id, generation, raw)
+}
+
 func TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope(t *testing.T) {
 	ctx := context.Background()
 	node, applier, _, base := newRuleRuntimeFixture(t)
@@ -32,7 +50,8 @@ func TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope(t *testing.T) 
 	}
 	issuer := &hub.Issuer{Store: hs, HubID: regionalHubID, Clock: clock}
 	client := &ControlClient{Node: node}
-	reconcile := &Reconciler{Store: node.Store, Apply: applier}
+	preparer := &renewalPortApplier{RuntimeApplier: applier, ports: make(map[[16]byte]net.Listener)}
+	reconcile := &Reconciler{Store: node.Store, Apply: preparer}
 	commands := []*controlv1.RuleCommand{}
 	originalGrants := map[string]string{}
 	for i := 0; i < 37; i++ {
@@ -42,12 +61,12 @@ func TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope(t *testing.T) 
 		a.Intent.Rule.Enabled = i != 35
 		a.Intent.Rule.Port = 0
 		a.BillingSnapshotID = id(i*100 + 1)
-		l, err := net.Listen("tcp", "127.0.0.1:0")
+		l, err := net.Listen("tcp", ":0")
 		if err != nil {
 			t.Fatal(err)
 		}
+		t.Cleanup(func() { l.Close() })
 		a.Intent.Rule.Port = int32(l.Addr().(*net.TCPAddr).Port)
-		l.Close()
 		now := time.Now().UTC()
 		d := store.HubDelegation{ID: id(i*100 + 2), HubID: regionalHubID, NodeID: node.NodeID, BootID: node.BootID, SourceID: id(i*100 + 3), RuntimeSourceID: id(i*100 + 4), ShareSourceID: id(i*100 + 5), BillingSnapshotID: a.BillingSnapshotID, RuleID: a.RuleID, RuleRevision: 1, PathGeneration: 1, FencingFloor: 1, SignerEpoch: 1, RawBytes: 1024, RateBPS: 1000000, Connections: 4, ValidFrom: now, ExpiresAt: now.Add(time.Hour), HardDeadline: now.Add(time.Hour), BackendHeartbeat: now, AutonomyDeadline: now.Add(time.Hour)}
 		for j, source := range []string{d.SourceID, d.RuntimeSourceID, d.ShareSourceID} {
@@ -98,8 +117,12 @@ func TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope(t *testing.T) 
 		raw, _ := json.Marshal(a)
 		digest := sha256.Sum256(raw)
 		command := &controlv1.RuleCommand{Phase: "prepare", TaskKey: fmt.Sprint("prepare-rule-", i), TransactionId: []byte(fmt.Sprintf("renewal-rule-%03d", i)), TargetRevision: 1, IdempotencyKey: fmt.Sprint("prepare-rule-", i), ArtifactSha256: digest[:], FencingGeneration: 1, Payload: raw}
+		var transactionID [16]byte
+		copy(transactionID[:], command.TransactionId)
+		preparer.ports[transactionID] = l
 		if out := reconcile.ApplyRuleCommand(ctx, node.NodeID, command); out.State != "prepared" {
-			t.Fatal("real Prepare", out)
+			record, recordErr := node.Store.GetConfigResult(ctx, fmt.Sprintf("%x", command.TransactionId))
+			t.Fatal("real Prepare", out, "durable reason", record.Reason, recordErr)
 		}
 		commands = append(commands, command)
 	}

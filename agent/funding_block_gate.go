@@ -182,7 +182,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 					return nil, nil, s.fail(err)
 				}
 			}
-			funding, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingWrite(ctx, r, use, uint64(n), replaced, idle, ids)
+			funding, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingWrite(ctx, r, use, uint64(n), replaced, idle, ids, s.inner.gate.config.Clock)
 		}
 		if errors.Is(err, store.ErrAuthorizationDenied) {
 			for otherDirection, other := range s.blocks {
