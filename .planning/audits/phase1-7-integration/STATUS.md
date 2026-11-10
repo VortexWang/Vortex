@@ -1,6 +1,6 @@
 # Phase 1–7 整合状态
 
-当前未放行：dd1beabd完整本机Docker/真实Cloudflare、Phase5完整恢复部署、Phase6原生arm64及PR1–5检查通过；amd64 PR触及原200ms，精确候选触及原60s最终资金审计。全部正式运行已结束，PR2保持未合并。详见 FINAL-ACCEPTANCE.md；等待可用专用Ubuntu24.04 amd64环境继续收敛。
+当前未放行：dd1beabd完整本机Docker/真实Cloudflare、Phase5完整恢复部署、Phase6原生arm64及PR1–5检查通过；amd64 PR触及原200ms，精确候选触及原60s最终资金审计。全部正式运行已结束，PR2保持未合并。后续无跟踪磁盘诊断42870346935确认runner仅有一块虚拟根盘、无独立数据盘，原候选race仍触及60s；不是完整验收。详见 FINAL-ACCEPTANCE.md；等待可用专用Ubuntu24.04 amd64环境继续收敛。
 
 Phase 1–6 的开发历史及 Phase 7 规划分支已全部被 main `6e474c3067c33333d194d3b203bbc6229bebf01e` 包含；完整 SHA 与祖先核对见 branch-inventory.json。PR #1 于2026-11-10合入097c313e；后续主线合入Phase7规划。不能因此推导该组合验收通过。
 

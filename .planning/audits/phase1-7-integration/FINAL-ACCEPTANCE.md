@@ -22,3 +22,5 @@ Phase 1–6 开发分支及 Phase 7 规划已被主线包含，六条源分支�
 在失败DB副本上用现有OpenReader比较，只省约0.5秒打开开销；完整逐行审计仍保留，尚不能证明60秒收敛，因此没有提交该推测性修改。仓库自托管runner数量为0；已请求可用专用Ubuntu24.04 amd64环境，等待配置位置。后续继续收敛200ms/60s，维持FULL、5秒恢复预算、未知负债及全部精确审计。
 
 本机原始目录：`/private/tmp/vortex-final-dd1beabd-evidence.wiGKtGmt`。Actions原始zip、SHA256、运行ID、压缩日志及完整判定：`artifacts/phase6-integration/dd1beabd-acceptance/final.json`。用户原工作区、未跟踪quick计划、stash和源分支保留。
+
+后续独立磁盘诊断 `4a42224c` / Actions42870346935 使用干净的原产品候选dd1beabd（相同tree），没有syscall跟踪、生产插桩或预算调整。runner只有一块150GiB虚拟根盘，`/mnt`与Docker卷均属`/dev/root`，所以未伪造独立数据盘对照，也未对相同设备重复运行。普通目标测试通过；race中前三个真实进程通过，并发续额在原60秒等待重启后的后端回执时失败：业务39.448秒、Agent ACK49.165秒、Hub重启51.260秒。工作流成功仅表示诊断导出成功，不能记为验收通过。原zip、40个留存文件哈希、挂载/设备信息及完整压缩日志见 `artifacts/phase6-integration/dd1beabd-disk-diagnosis/analysis.json`。此结果排除了通过改换该runner临时目录获得独立磁盘的方案；200ms真实fsync长尾和60秒余量仍未收敛，PR2继续不合并。

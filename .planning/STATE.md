@@ -7,9 +7,9 @@ current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_blocked
 stopped_at: "dd1beabd Docker/Phase5/arm64 passed; amd64 PR200ms FULL-commit failure and exact60s final-audit failure; PR2 remains unmerged"
-last_updated: "2026-11-10T17:50:48.200074+00:00"
+last_updated: "2026-11-10T18:08:14+00:00"
 last_activity: 2026-11-11
-last_activity_desc: "同SHA本机完整Docker/Cloudflare、Phase5恢复部署、arm64通过；amd64两项门禁失败；已完成WAL syscall诊断并请求专用Ubuntu24.04 amd64环境；Phase7仅规划。"
+last_activity_desc: "已完成无跟踪磁盘诊断42870346935：托管amd64仅单虚拟根盘，无独立数据盘；原候选race仍触及60s，PR2保持未合并；等待专用Ubuntu24.04 amd64环境。Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -33,7 +33,7 @@ Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — 84份规�
 Current Plan: Not started
 Total Plans in Phase: 84
 Status: Phase1–6 histories and Phase7 planning are in main. PR2 is not merged: dd1beabd Docker/Phase5/arm64 pass, amd64200ms and60s gates fail. See .planning/audits/phase1-7-integration/FINAL-ACCEPTANCE.md.
-Last activity: 2026-11-09 — same implementation65a53358 Docker and native dual Actions42572674719 passed; exact CR-009 approval retained.
+Last activity: 2026-11-11 — Exact candidate dd1beabd remains unaccepted; independent untraced disk diagnosis confirms one virtual root disk and a 60s race failure. Prior Docker/Phase5/arm64 passes remain scoped to their original runs; PR2 is unmerged. See FINAL-ACCEPTANCE.md.
 
 以下执行记录为历史，不代表当前未完成状态。当前判定以06-VERIFICATION.md及本节为准。
 
