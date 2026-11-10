@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase1–7 integration: development histories and Phase7 planning are in main; PR2 runtime regressions and same-SHA acceptance pending"
+stopped_at: "Phase1–7 integration: checkpoint/origin batching full Linux race and real processes passed; clean same-SHA Docker and dual-architecture Actions pending"
 last_updated: "2026-11-10T04:18:00+00:00"
 last_activity: 2026-11-10
-last_activity_desc: "核对Phase1–6与Phase7规划分支均已纳入main；隔离候选合入最新主线。Phase7为84项计划、实施未开始；PR2与200ms持续授权回归及同SHA验收仍待完成。"
+last_activity_desc: "PR2回归修复：完整Store/Hub race和四个真实进程通过；预算及批准契约不变，完整同SHA验收待完成。Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5

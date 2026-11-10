@@ -64,8 +64,12 @@ func (s *Store) PersistKnownUsageGroup(ctx context.Context, batches []HubUsage, 
 		}
 		return nil, err
 	}
-	for i, b := range result {
-		if withOrigin {
+	if withOrigin && len(result) > 1 {
+		if err := recordKnownUsageOriginsTx(ctx, tx, result); err != nil {
+			return nil, err
+		}
+	} else if withOrigin {
+		for i, b := range result {
 			if b.ReportBootID == "" || b.Sequence == 0 || b.Sequence > math.MaxInt64 {
 				return nil, ErrUsageOriginMissing
 			}

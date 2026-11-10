@@ -19,14 +19,19 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	return s.AdmitRuntimeFundingBlockBatch(ctx, []RuntimeBlockAdmission{{Block: block, Scope: scope, Bytes: n}})
 }
 
+// Evaluate the original identity comparisons inside SQLite; return only the
+// authority IDs needed below, avoiding 19 per-column driver conversions. The
+// same joined row and current transaction govern every check.
+const fundingBlockAdmissionQuery = `SELECT u.boot_id=? AND u.snapshot_id=? AND u.flow_key=? AND u.rule_id=? AND u.direction=? AND u.reserved_bytes=? AND h.authorization_id=? AND h.reserved_bytes=u.reserved_bytes AND u.state='reserved' AND h.state='reserved' AND b.session_id=? AND s.boot_id=u.boot_id AND s.flow_key=u.flow_key AND s.state='open',h.authorization_id,s.source_id,s.grant_id,s.runtime_lease_id,s.share_lease_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id JOIN runtime_sessions s ON s.node_id=b.node_id AND s.session_id=b.session_id WHERE b.node_id=? AND b.batch_id=?`
+
 func admitRuntimeFundingBlockWriteTx(ctx context.Context, tx storeTransaction, block UsageReservation, scope AuthorizationUse, n uint64) error {
-	var boot, snapshot, flow, rule, direction, reserved, state, auth, held, holdState string
-	var session, sessionBoot, sessionFlow, source, sessionState, grant, runtime, share string
-	err := tx.QueryRowContext(ctx, `SELECT u.boot_id,u.snapshot_id,u.flow_key,u.rule_id,u.direction,u.reserved_bytes,u.state,h.authorization_id,h.reserved_bytes,h.state,b.session_id,s.boot_id,s.flow_key,s.source_id,s.state,s.grant_id,s.runtime_lease_id,s.share_lease_id FROM runtime_funding_blocks b JOIN usage_reservations u ON u.node_id=b.node_id AND u.batch_id=b.batch_id JOIN authorization_usage_holds h ON h.node_id=u.node_id AND h.batch_id=u.batch_id JOIN runtime_sessions s ON s.node_id=b.node_id AND s.session_id=b.session_id WHERE b.node_id=? AND b.batch_id=?`, block.NodeID, block.BatchID).Scan(&boot, &snapshot, &flow, &rule, &direction, &reserved, &state, &auth, &held, &holdState, &session, &sessionBoot, &sessionFlow, &source, &sessionState, &grant, &runtime, &share)
+	var valid bool
+	var auth, source, grant, runtime, share string
+	err := tx.QueryRowContext(ctx, fundingBlockAdmissionQuery, block.BootID, block.SnapshotID, block.FlowKey, block.RuleID, block.Direction, strconv.FormatUint(block.Reserved, 10), block.AuthorizationID, scope.SessionID, block.NodeID, block.BatchID).Scan(&valid, &auth, &source, &grant, &runtime, &share)
 	if err != nil {
 		return err
 	}
-	if boot != block.BootID || snapshot != block.SnapshotID || flow != block.FlowKey || rule != block.RuleID || direction != block.Direction || reserved != strconv.FormatUint(block.Reserved, 10) || auth != block.AuthorizationID || held != reserved || state != "reserved" || holdState != "reserved" || session != scope.SessionID || sessionBoot != block.BootID || sessionFlow != block.FlowKey || sessionState != "open" {
+	if !valid {
 		return ErrAuthorizationDenied
 	}
 	// Read current IDs from the durable session, never trust caller-supplied

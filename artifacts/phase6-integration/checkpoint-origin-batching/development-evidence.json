@@ -1,0 +1,21 @@
+{
+  "scope": "development checks; not exact committed-source paired acceptance",
+  "checksums_uncompressed": {
+    "store-hub-full-race.log": "136c7f5869ab2421b9b02d10f565658c563fda9669d04766231e4d62667027e4",
+    "continuous-and-skipped-process-first.log": "62740ca25d20389ed5b4bfa16526445693ee8cd907ede928069154782a92c01c",
+    "real-process-race.log": "79d9eb0e165f1e85dcd2a32b59fb4a90ee2c1cc027039d2cd24dafe903a6b4e6",
+    "origin-guards-race.log": "31528bccda74b19f5ace2a0764307a1b7cc14421d4ecf057bcc52a9fe9ee4497",
+    "contract.log": "b737091fc1d22c4277ba48c41b6469b22932f62f1f5b05f397c4fc9c57e5745d"
+  },
+  "store_race_seconds": 323.596,
+  "hub_race_seconds": 22.1,
+  "real_process_race_seconds": 53.651,
+  "required_process_cases": 4,
+  "first_process_invocation": "four process tests skipped because VORTEX_PROCESS_BIN_DIR was omitted; excluded from passing evidence; corrected invocation built both binaries with -race and passed all four",
+  "process_artifacts": "/private/tmp/vortex-origin-checkpoint-process.lNoMfh",
+  "budgets_unchanged": [
+    "200ms authorization",
+    "60s process",
+    "5s recovery"
+  ]
+}

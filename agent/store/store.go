@@ -155,7 +155,13 @@ func Open(path, owner string) (*Store, error) {
 		return nil, err
 	}
 	s.runtimeStatements = make(map[string]*sql.Stmt, len(runtimeQueries))
-	for _, query := range runtimeQueries {
+	queries := append([]string(nil), runtimeQueries[:]...)
+	if owner == "agent" {
+		for _, insert := range runtimeCheckpointInserts {
+			queries = append(queries, insert.queries[:]...)
+		}
+	}
+	for _, query := range queries {
 		stmt, err := db.Prepare(query)
 		if err != nil {
 			_ = db.Close()

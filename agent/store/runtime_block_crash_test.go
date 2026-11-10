@@ -42,15 +42,19 @@ func TestRuntimeBlockCheckpointCrashWorker(t *testing.T) {
 			}
 		}
 	} else {
-		tx, err := s.db.BeginTx(ctx, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-		// Kill after both children's mutations, but before their shared commit.
-		for _, e := range entries {
-			if err := checkpointRuntimeFundingBlockTx(ctx, tx, e.Block, e.CheckpointID, e.Used, e.Payload); err != nil {
-				t.Fatal(err)
+		// Exercise the production group path, including staged child inserts.
+		// The second member check runs after all mutations, before FULL commit.
+		checks := 0
+		if err := s.commitRuntimeCheckpoints(ctx, entries, func() error {
+			checks++
+			if checks == 2 {
+				os.Stdout.WriteString("kill-ready\n")
+				var input [1]byte
+				os.Stdin.Read(input[:])
 			}
+			return nil
+		}); err != nil {
+			t.Fatal(err)
 		}
 	}
 	os.Stdout.WriteString("kill-ready\n")
