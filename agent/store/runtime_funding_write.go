@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // RuntimeFundingWrite commits either one block or a complete set of per-grant
@@ -19,9 +20,9 @@ type RuntimeFundingWrite struct {
 // ReserveAndAdmitRuntimeFundingWrite keeps definitive allocation fallbacks in
 // one writer turn. The caller exclusively owns the session and proves every
 // supplied tail has no in-flight writer. No partial capability escapes.
-func (s *Store) ReserveAndAdmitRuntimeFundingWrite(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, replacement, opposite []UsageReservation, ids []string) (RuntimeFundingWrite, error) {
+func (s *Store) ReserveAndAdmitRuntimeFundingWrite(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, replacement, opposite []UsageReservation, ids []string, clocks ...func() (time.Time, time.Time, bool)) (RuntimeFundingWrite, error) {
 	var result RuntimeFundingWrite
-	if s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 || len(replacement) > 1 || len(opposite) > 1 || len(ids) == 0 || len(ids) > 64 {
+	if len(clocks) > 1 || len(clocks) == 1 && clocks[0] == nil || s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 || len(replacement) > 1 || len(opposite) > 1 || len(ids) == 0 || len(ids) > 64 {
 		return result, ErrAuthorizationDenied
 	}
 	seen := map[string]bool{r.BatchID: true}
@@ -38,6 +39,13 @@ func (s *Store) ReserveAndAdmitRuntimeFundingWrite(ctx context.Context, r UsageR
 		}
 	}
 	err := s.enqueueFundingOperation(ctx, len(ids), func(tx *runtimeTransaction) error {
+		// Read the same authenticated clock after acquiring the connection.
+		// A grant installed while this request queued must be checked against
+		// current conservative bounds, not the pre-queue not_before snapshot.
+		// The context deadline and all identity/lineage checks still apply.
+		if len(clocks) == 1 {
+			scope.Earliest, scope.Latest, scope.TrustedTime = clocks[0]()
+		}
 		tryBlock := func(tails []UsageReservation) error {
 			encoded, _ := json.Marshal(tails)
 			bounds := &fundingBlockRange{minimum: minimum, preferred: r.Reserved, idle: tails, idleDigest: fmt.Sprintf("%x", sha256.Sum256(encoded)), admit: true}
