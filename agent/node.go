@@ -32,6 +32,7 @@ type Node struct {
 	Store               *store.Store
 	Engine              Engine
 	demandMu            sync.Mutex
+	authorityChanged    chan struct{}
 	demandSubscriptions map[*demandSubscription]struct{}
 	demandWaiters       chan struct{}
 	demandWrites        map[*waitingDemandWrite]struct{}

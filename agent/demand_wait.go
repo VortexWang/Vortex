@@ -59,6 +59,27 @@ func (n *Node) wakeDemand(scope RuntimeScope) bool {
 	return found
 }
 
+// Capture before a transactional attempt so a commit during that attempt cannot
+// be missed. This is only a retry hint; every waiter rechecks durable authority.
+func (n *Node) authorityChanges() <-chan struct{} {
+	n.demandMu.Lock()
+	defer n.demandMu.Unlock()
+	if n.authorityChanged == nil {
+		n.authorityChanged = make(chan struct{})
+	}
+	return n.authorityChanged
+}
+
+// Called only after authorization persistence and authenticated clock observation.
+func (n *Node) notifyAuthorityChanged() {
+	n.demandMu.Lock()
+	defer n.demandMu.Unlock()
+	if n.authorityChanged != nil {
+		close(n.authorityChanged)
+	}
+	n.authorityChanged = make(chan struct{})
+}
+
 // Retry only a missing durable authorization, only while an opt-in control
 // consumer for this exact runtime scope exists. The same deadline covers the
 // first transactional attempt and every retry; it is never reset after denial.
@@ -70,6 +91,7 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 	}
 	waitCtx, cancel := context.WithTimeout(ctx, missingAuthorityWait)
 	defer cancel()
+	changed := n.authorityChanges()
 	value, err := attempt(waitCtx)
 	if !errors.Is(err, store.ErrAuthorizationDenied) || waitCtx.Err() != nil {
 		return value, err
@@ -100,21 +122,28 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 		return value, err
 	}
 
-	timer := time.NewTicker(10 * time.Millisecond)
+	// Start a fresh interval after each completed denial. A ticker can stay
+	// ready throughout a slow SQLite attempt and immediately queue another,
+	// starving the control transaction that would install the missing grant.
+	timer := time.NewTimer(25 * time.Millisecond)
 	defer timer.Stop()
 	for {
 		select {
 		case <-waitCtx.Done():
 			var zero T
 			return zero, waitCtx.Err()
+		case <-changed:
 		case <-timer.C:
-			value, err = attempt(waitCtx)
-			if !errors.Is(err, store.ErrAuthorizationDenied) {
-				return value, err
-			}
-			if !n.wakeDemand(scope) {
-				return value, err
-			}
 		}
+		timer.Stop()
+		changed = n.authorityChanges()
+		value, err = attempt(waitCtx)
+		if !errors.Is(err, store.ErrAuthorizationDenied) {
+			return value, err
+		}
+		if !n.wakeDemand(scope) {
+			return value, err
+		}
+		timer.Reset(25 * time.Millisecond)
 	}
 }

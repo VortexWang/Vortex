@@ -885,6 +885,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
 					return err
 				}
+				c.Node.notifyAuthorityChanged()
 				delete(demandDelivery.sent, payload.UpdateID)
 				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
 					return err
