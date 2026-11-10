@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -128,5 +129,37 @@ func TestFundingWriteRefreshesTrustedTimeInsideTransaction(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestFundingWriteInsufficientUpperBoundDoesNotTryPartialDebits(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	session, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Leave exactly 692 bytes, less than the indivisible 1500-byte write.
+	r := runtimeReservation("spent", (1<<20)-692)
+	id, err := s.ReserveRuntimeFundingBlock(ctx, r, session.Use)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.AuthorizationID = id
+	if err = s.CheckpointRuntimeFundingBlock(ctx, r, "completed", r.Reserved, []byte("known")); err != nil {
+		t.Fatal(err)
+	}
+	// Any speculative partial debit would hit this trigger. The upper bound
+	// must return a definitive denial before mutating the ledger at all.
+	if _, err = s.db.Exec(`CREATE TRIGGER reject_speculative_debit BEFORE UPDATE ON authorization_balances BEGIN SELECT RAISE(ABORT,'speculative debit'); END`); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.ReserveAndAdmitRuntimeFundingWrite(ctx, runtimeReservation("next", 2048), session.Use, 1500, nil, nil, []string{"child"})
+	if !errors.Is(err, ErrAuthorizationDenied) || got.Block.BatchID != "" || len(got.Children) != 0 {
+		t.Fatalf("impossible write attempted mutation: %+v %v", got, err)
+	}
+	balance, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || balance.Remaining != 692 || balance.Reserved != 0 {
+		t.Fatalf("conservation: %+v %v", balance, err)
 	}
 }
