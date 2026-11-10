@@ -56,6 +56,16 @@ func TestLedgerEvidenceIncludesCommittedWALWithReaderOpen(t *testing.T) {
 	if err = os.WriteFile(snapshot, raw, 0600); err != nil {
 		t.Fatal(err)
 	}
+	format, err := sql.Open("sqlite", "file:"+snapshot+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var journal string
+	err = format.QueryRow("PRAGMA journal_mode").Scan(&journal)
+	closeErr := format.Close()
+	if err != nil || journal != "wal" || closeErr != nil {
+		t.Fatal("snapshot WAL format", journal, err, closeErr)
+	}
 	db, err := sql.Open("sqlite", "file:"+snapshot+"?mode=ro&immutable=1")
 	if err != nil {
 		t.Fatal(err)

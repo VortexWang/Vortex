@@ -1174,6 +1174,11 @@ func saveLedgerFiles(t *testing.T, label string, files map[string]string) {
 			t.Fatal(err)
 		}
 		snapshot := filepath.Join(t.TempDir(), "ledger.sqlite")
+		var sourceMode string
+		if err := reader.QueryRow("PRAGMA journal_mode").Scan(&sourceMode); err != nil || sourceMode != "wal" {
+			reader.Close()
+			t.Fatalf("source ledger journal mode: %s %v", sourceMode, err)
+		}
 		_, err = reader.Exec("VACUUM INTO ?", snapshot)
 		closeErr := reader.Close()
 		if err != nil {
@@ -1181,6 +1186,25 @@ func saveLedgerFiles(t *testing.T, label string, files map[string]string) {
 		}
 		if closeErr != nil {
 			t.Fatal(closeErr)
+		}
+		// VACUUM INTO defaults to DELETE even when the source uses WAL. Keep
+		// the exported ledger's expected format without changing the source.
+		// All data pages are already in this independent file; no data writes
+		// occur after selecting WAL, so the snapshot needs no sidecar to read.
+		exported, err := sql.Open("sqlite", "file:"+snapshot+"?mode=rw")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var exportMode string
+		err = exported.QueryRow("PRAGMA journal_mode=WAL").Scan(&exportMode)
+		closeErr = exported.Close()
+		if err != nil || exportMode != "wal" || closeErr != nil {
+			t.Fatalf("export ledger journal mode: %s %v %v", exportMode, err, closeErr)
+		}
+		if info, err := os.Stat(snapshot + "-wal"); err == nil && info.Size() != 0 {
+			t.Fatal("exported ledger depends on WAL sidecar")
+		} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+			t.Fatal(err)
 		}
 		raw, err := os.ReadFile(snapshot)
 		if err != nil {
