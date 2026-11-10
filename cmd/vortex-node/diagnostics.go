@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"sync"
+	"time"
 )
 
 // Local opt-in only; no network profiler endpoint. A fresh directory prevents
@@ -25,11 +27,26 @@ func startDiagnostics(dir string) (func(), error) {
 		cpu.Close()
 		return nil, err
 	}
-	runtime.SetBlockProfileRate(1)
-	previous := runtime.SetMutexProfileFraction(1)
+	// This isolated diagnostic branch samples CPU before the original process
+	// deadline can kill the child. It never changes forwarding or test budgets.
+	cpuOnly := os.Getenv("VORTEX_DIAGNOSTIC_CPU_ONLY") == "1"
+	rate := 1
+	if cpuOnly {
+		rate = 0
+	}
+	runtime.SetBlockProfileRate(rate)
+	previous := runtime.SetMutexProfileFraction(rate)
+	var once sync.Once
+	stopCPU := func() { once.Do(func() { pprof.StopCPUProfile(); _ = cpu.Close() }) }
+	var timer *time.Timer
+	if cpuOnly {
+		timer = time.AfterFunc(20*time.Second, stopCPU)
+	}
 	return func() {
-		pprof.StopCPUProfile()
-		_ = cpu.Close()
+		if timer != nil {
+			timer.Stop()
+		}
+		stopCPU()
 		runtime.SetBlockProfileRate(0)
 		runtime.SetMutexProfileFraction(previous)
 		for _, name := range []string{"block", "mutex"} {

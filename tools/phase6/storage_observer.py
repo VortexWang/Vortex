@@ -33,7 +33,7 @@ else:
                 continue
             try:
                 exe = (path / 'exe').resolve().name
-                if exe not in ['vortex-node', 'vortex-test-hub', 'agent.test']:
+                if exe not in ['vortex-node', 'vortex-node-real', 'vortex-test-hub', 'agent.test']:
                     continue
                 stat = (path / 'stat').read_text().split(') ', 1)[1].split()
                 io = dict(line.split(':', 1) for line in (path / 'io').read_text().splitlines())

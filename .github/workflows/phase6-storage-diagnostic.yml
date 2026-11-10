@@ -18,6 +18,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Compare durable storage without changing runtime budgets
+        env:
+          PHASE6_DIAGNOSTIC_CPU_ONLY: '1'
         run: sh tools/phase6/storage_diagnostic.sh "$RUNNER_TEMP/storage-diagnostic"
       - name: Retain diagnostic results including failures
         if: always()
