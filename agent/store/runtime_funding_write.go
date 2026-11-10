@@ -54,7 +54,13 @@ func (s *Store) ReserveAndAdmitRuntimeFundingWrite(ctx context.Context, r UsageR
 			return err
 		}
 		reset := func() error { _, err := tx.ExecContext(ctx, "ROLLBACK TO funding_choice"); return err }
-		err := tryBlock(all)
+		err := tryBlock(replacement)
+		if errors.Is(err, ErrAuthorizationDenied) && len(opposite) > 0 {
+			if e := reset(); e != nil {
+				return e
+			}
+			err = tryBlock(all)
+		}
 		if errors.Is(err, ErrAuthorizationDenied) {
 			if e := reset(); e != nil {
 				return e

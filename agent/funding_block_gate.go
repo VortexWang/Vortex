@@ -165,9 +165,16 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		if replacement != nil {
 			replaced = []store.UsageReservation{replacement.reservation}
 		}
-		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced)
-		funding := store.RuntimeFundingWrite{Block: funded, Reclaimed: replaced}
-		if errors.Is(err, store.ErrAuthorizationDenied) {
+		var funded store.UsageReservation
+		var funding store.RuntimeFundingWrite
+		// A block that holds only one complete write rolls over on every
+		// request. Keep its allocation/reclamation choices in one writer turn.
+		compact := s.size/uint64(n) < 2
+		if !compact {
+			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced)
+			funding = store.RuntimeFundingWrite{Block: funded, Reclaimed: replaced}
+		}
+		if compact || errors.Is(err, store.ErrAuthorizationDenied) {
 			ids := make([]string, min(uint64(n), 64))
 			for i := range ids {
 				ids[i], err = authorizationBatchID()
@@ -195,6 +202,10 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 				}
 			}
 		}
+		// A committed funding hold has already reduced spendable credit.
+		// Wake only planning now; no consumption sample or outbox row is made.
+		config := s.inner.gate.config
+		s.inner.gate.node.wakeDemand(RuntimeScope{RuleID: config.RuleID, RuleRevision: config.RuleRevision, PathGeneration: config.PathGeneration})
 		if len(funding.Children) > 0 {
 			batch, err := s.fragmentBatch(direction, n, funding.Children)
 			return batch, nil, err

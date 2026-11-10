@@ -82,8 +82,11 @@ func TestFundingBlockDurableConsumptionWakesDemand(t *testing.T) {
 			}
 			select {
 			case <-wake:
-				t.Fatal("reservation alone woke demand")
 			default:
+				t.Fatal("committed funding debit did not wake planning")
+			}
+			if fundingBalance(t, n).Committed != 0 {
+				t.Fatal("funding notification fabricated consumption")
 			}
 			switch outcome {
 			case "committed":
