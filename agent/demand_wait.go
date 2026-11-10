@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 	"vortex/agent/store"
 )
@@ -89,10 +90,26 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 		var zero T
 		return zero, err
 	}
+	started := time.Now()
+	var attempts int
+	var lastDuration time.Duration
+	var lastErr error
 	waitCtx, cancel := context.WithTimeout(ctx, missingAuthorityWait)
 	defer cancel()
+	defer func() {
+		if errors.Is(waitCtx.Err(), context.DeadlineExceeded) {
+			slog.Warn("authority wait deadline", "attempts", attempts, "last_attempt", lastDuration, "last_error", lastErr, "elapsed", time.Since(started))
+		}
+	}()
+	run := func() (T, error) {
+		at := time.Now()
+		value, err := attempt(waitCtx)
+		attempts++
+		lastDuration, lastErr = time.Since(at), err
+		return value, err
+	}
 	changed := n.authorityChanges()
-	value, err := attempt(waitCtx)
+	value, err := run()
 	if !errors.Is(err, store.ErrAuthorizationDenied) || waitCtx.Err() != nil {
 		return value, err
 	}
@@ -137,7 +154,7 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 		}
 		timer.Stop()
 		changed = n.authorityChanges()
-		value, err = attempt(waitCtx)
+		value, err = run()
 		if !errors.Is(err, store.ErrAuthorizationDenied) {
 			return value, err
 		}
