@@ -269,7 +269,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 
 	var initialSendErr error
 	var usageSendClosed bool
-	var usageCursor usageDeliveryCursor
+	usageWindow := &usageDeliveryWindow{limit: store.UsageDeliveryPageSize}
+	usageCursor := usageDeliveryCursor{window: usageWindow}
 	var usageWake <-chan struct{}
 	if !c.ControlOnly {
 		var release func()
@@ -280,6 +281,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		defer release()
 	}
 	usageContinue := make(chan struct{}, 1)
+	confirmUsageDelivery := func(messages []*controlv1.ControlMessage) {
+		freed := false
+		for _, m := range messages {
+			if ack := m.GetUsageAck(); ack != nil {
+				freed = usageWindow.confirm(false, ack.BatchIds...) || freed
+			}
+			if ack := m.GetUnknownUsageAck(); ack != nil {
+				freed = usageWindow.confirm(true, ack.BatchId) || freed
+			}
+		}
+		if freed && usageWindow.ready() {
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+		}
+	}
 	sendUsagePage := func() error {
 		more, err := c.sendUsageDeliveryPage(ctx, stream, &lastNodeSequence, &usageCursor)
 		if err == nil && more {
@@ -380,6 +398,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 						return ackErr
 					})
 					if handled && err == nil {
+						confirmUsageDelivery(messages)
 						continue
 					}
 				}
@@ -577,9 +596,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-ticker.C:
-			if usageCursor.knownDone && usageCursor.unknownDone {
-				usageCursor.reset()
-			}
+			usageCursor.reset()
 			select {
 			case usageContinue <- struct{}{}:
 			default:
@@ -911,6 +928,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 						return err
 					}
 				}
+				confirmUsageDelivery([]*controlv1.ControlMessage{message})
 			case *controlv1.ControlMessage_UnknownUsageAck:
 				if c.ControlOnly {
 					return fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
@@ -921,6 +939,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
 					return err
 				}
+				confirmUsageDelivery([]*controlv1.ControlMessage{message})
 			case *controlv1.ControlMessage_Error:
 				if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
 					return fmt.Errorf("agent: malformed control error")

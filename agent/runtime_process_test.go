@@ -404,9 +404,11 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 			return false
 		}
 		connection.Close()
-		var pending int
-		err = hubObservation.QueryRowContext(ctx, `SELECT COUNT(*) FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id)`).Scan(&pending)
-		return err == nil && pending == 0
+		// An existence check has the same zero-pending condition, but stops at
+		// the first missing receipt while the recovered process drains the rest.
+		var pending bool
+		err = hubObservation.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id))`).Scan(&pending)
+		return err == nil && !pending
 	})
 	stopRecoveredHub()
 	db.Close()

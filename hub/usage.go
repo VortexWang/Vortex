@@ -91,6 +91,10 @@ func (r *UsageRelay) AcceptUnknown(ctx context.Context, node string, b *controlv
 }
 
 func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
+	return r.ackBoundaryGroup(ctx, []store.HubUsage{b})
+}
+
+func (r *UsageRelay) ackBoundaryGroup(ctx context.Context, batches []store.HubUsage) error {
 	if r.Clock == nil {
 		return fmt.Errorf("hub: trusted accounting clock missing")
 	}
@@ -102,6 +106,13 @@ func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
 	if err != nil {
 		return err
 	}
+	// Reading status can wait behind a newer authenticated backend heartbeat.
+	// Compare that durable heartbeat to a fresh trusted observation, rather than
+	// the sample taken before waiting for the database. No deadline is extended.
+	now = r.Clock()
+	if !now.Trusted || now.Earliest.IsZero() || now.Latest.Before(now.Earliest) {
+		return store.ErrAuthorityTimeUncertain
+	}
 	if now.Earliest.Before(mode.BackendHeartbeat) {
 		return store.ErrAuthorityTimeUncertain
 	}
@@ -110,7 +121,7 @@ func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
 		// but grant issuance remains independently stopped at its hard boundary.
 		return nil
 	}
-	return r.forward(ctx, b)
+	return r.forwardGroup(ctx, batches)
 }
 
 func (r *UsageRelay) forward(ctx context.Context, b store.HubUsage) error {
@@ -139,10 +150,22 @@ func (r *UsageRelay) ReplayPending(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	for _, b := range batches {
-		if err := r.forward(ctx, b); err != nil {
+	for i := 0; i < len(batches); {
+		if batches[i].Kind == "known" {
+			end := i + 1
+			for end < len(batches) && end-i < 32 && batches[end].Kind == "known" {
+				end++
+			}
+			if err := r.forwardGroup(ctx, batches[i:end]); err != nil {
+				return err
+			}
+			i = end
+			continue
+		}
+		if err := r.forward(ctx, batches[i]); err != nil {
 			return err
 		}
+		i++
 	}
 	return nil
 }

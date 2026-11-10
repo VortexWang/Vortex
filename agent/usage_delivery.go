@@ -16,16 +16,24 @@ type usageDeliveryCursor struct {
 	knownAfter, unknownAfter int64
 	knownDone, unknownDone   bool
 	nextUnknown              bool
+	window                   *usageDeliveryWindow
 }
 
 func (d *usageDeliveryCursor) resume() { d.knownDone, d.unknownDone = false, false }
-func (d *usageDeliveryCursor) reset()  { *d = usageDeliveryCursor{} }
+func (d *usageDeliveryCursor) reset() {
+	window := d.window
+	window.reset()
+	*d = usageDeliveryCursor{window: window}
+}
 
 // Each turn sends at most 32 records, alternating known and typed unknown
 // pages. Only a successful send advances its cursor; dispatch never changes
 // durable ACK or unknown-liability state. The caller schedules another turn
 // only when more is true, a new-row hint arrives, or the replay timer fires.
 func (c *ControlClient) sendUsageDeliveryPage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64, cursor *usageDeliveryCursor) (bool, error) {
+	if !cursor.window.ready() {
+		return false, nil
+	}
 	for turn := 0; turn < 2; turn++ {
 		unknown := cursor.nextUnknown
 		cursor.nextUnknown = !unknown
@@ -41,6 +49,11 @@ func (c *ControlClient) sendUsageDeliveryPage(ctx context.Context, stream contro
 				cursor.unknownDone = true
 				continue
 			}
+			exhausted := len(page) < store.UsageDeliveryPageSize
+			if slots := cursor.window.remaining(); len(page) > slots {
+				page = page[:slots]
+				exhausted = false
+			}
 			first, err := c.Node.Store.NextControlSequenceRange(ctx, uint64(len(page)))
 			if err != nil {
 				return false, err
@@ -51,12 +64,16 @@ func (c *ControlClient) sendUsageDeliveryPage(ctx context.Context, stream contro
 					return false, err
 				}
 				seq := first + uint64(i)
+				if !cursor.window.claim(true, batch.BatchId) {
+					return false, fmt.Errorf("agent: usage delivery window exhausted")
+				}
 				if err := stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: seq, Body: &controlv1.NodeMessage_UnknownUsageBatch{UnknownUsageBatch: batch}}); err != nil {
+					cursor.window.confirm(true, batch.BatchId)
 					return false, err
 				}
 				*lastSequence, cursor.unknownAfter = seq, item.Position
 			}
-			cursor.unknownDone = len(page) < store.UsageDeliveryPageSize
+			cursor.unknownDone = exhausted
 		} else {
 			if cursor.knownDone {
 				continue
@@ -68,6 +85,11 @@ func (c *ControlClient) sendUsageDeliveryPage(ctx context.Context, stream contro
 			if len(page) == 0 {
 				cursor.knownDone = true
 				continue
+			}
+			exhausted := len(page) < store.UsageDeliveryPageSize
+			if slots := cursor.window.remaining(); len(page) > slots {
+				page = page[:slots]
+				exhausted = false
 			}
 			first, err := c.Node.Store.NextControlSequenceRange(ctx, uint64(len(page)))
 			if err != nil {
@@ -92,16 +114,20 @@ func (c *ControlClient) sendUsageDeliveryPage(ctx context.Context, stream contro
 					return false, fmt.Errorf("agent: durable usage batch metadata mismatch")
 				}
 				seq := first + uint64(i)
+				if !cursor.window.claim(false, batch.BatchId) {
+					return false, fmt.Errorf("agent: usage delivery window exhausted")
+				}
 				if err := stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: seq, Body: &controlv1.NodeMessage_UsageBatch{UsageBatch: batch}}); err != nil {
+					cursor.window.confirm(false, batch.BatchId)
 					return false, err
 				}
 				*lastSequence, cursor.knownAfter = seq, item.Position
 			}
-			cursor.knownDone = len(page) < store.UsageDeliveryPageSize
+			cursor.knownDone = exhausted
 		}
-		return !cursor.knownDone || !cursor.unknownDone, nil
+		return (!cursor.knownDone || !cursor.unknownDone) && cursor.window.ready(), nil
 	}
-	return !cursor.knownDone || !cursor.unknownDone, nil
+	return (!cursor.knownDone || !cursor.unknownDone) && cursor.window.ready(), nil
 }
 
 // Every control owner receives its own coalesced hint. A configuration-only

@@ -223,36 +223,20 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 	if e = refresh(); e != nil {
 		return e
 	}
-	type incoming struct {
-		m *controlv1.NodeMessage
-		e error
-	}
-	received := make(chan incoming, 1)
-	go func() {
-		for {
-			m, e := stream.Recv()
-			select {
-			case received <- incoming{m, e}:
-			case <-ctx.Done():
-				return
-			}
-			if e != nil {
-				return
-			}
-		}
-	}()
+	inbox := newNodeInbox(ctx, stream.Recv)
 	last := helloMessage.Sequence
+	validate := func(m *controlv1.NodeMessage) error {
+		if m.NodeId != node || m.BootId != first.BootId || m.Sequence <= last || len(m.ProtoReflect().GetUnknown()) != 0 {
+			return errors.New("Node runtime envelope mismatch")
+		}
+		last = m.Sequence
+		return nil
+	}
 	for {
-		var next incoming
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case next = <-received:
+		m, e := inbox.receive()
+		if e != nil {
+			return e
 		}
-		if next.e != nil {
-			return next.e
-		}
-		m := next.m
 		if m.NodeId != node || m.BootId != first.BootId || m.Sequence <= last || len(m.ProtoReflect().GetUnknown()) != 0 {
 			return errors.New("Node runtime envelope mismatch")
 		}
@@ -287,7 +271,22 @@ func (s *RuntimeServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMe
 			if e = send(&controlv1.ControlMessage{Body: &controlv1.ControlMessage_RenewalResult{RenewalResult: result}}); e != nil {
 				return e
 			}
-		case *controlv1.NodeMessage_UsageBatch, *controlv1.NodeMessage_UnknownUsageBatch:
+		case *controlv1.NodeMessage_UsageBatch:
+			group, err := inbox.known(m, validate)
+			if err != nil {
+				return err
+			}
+			if err := s.Usage.AcceptKnownEnvelopes(ctx, group); err != nil {
+				return err
+			}
+			ids := make([]string, 0, len(group))
+			for _, item := range group {
+				ids = append(ids, item.GetUsageBatch().BatchId)
+			}
+			if err := send(&controlv1.ControlMessage{Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: ids}}}); err != nil {
+				return err
+			}
+		case *controlv1.NodeMessage_UnknownUsageBatch:
 			if e = s.Usage.AcceptEnvelope(ctx, m); e != nil {
 				return e
 			}

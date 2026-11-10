@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"strconv"
@@ -55,10 +56,17 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	amount := strconv.FormatUint(used, 10)
-	if _, err := tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, block.NodeID, boot, checkpointID, snapshot, flow, rule, direction, amount, "reserved", now); err != nil {
+	// The parent was validated above and this child does not yet exist. Write
+	// its final confirmed outcome directly, instead of reading back and updating
+	// the just-inserted reservation through the general settlement path. Every
+	// row below, including the reduced parent liability, commits atomically.
+	if err := rejectUnknownIdentityTx(ctx, tx, block.NodeID, checkpointID); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_usage_holds(node_id,batch_id,authorization_id,source_id,reserved_bytes,state) VALUES(?,?,?,?,?,?)`, block.NodeID, checkpointID, auth, source, amount, "reserved"); err != nil {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`, block.NodeID, boot, checkpointID, snapshot, flow, rule, direction, amount, "committed", amount, now); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_usage_holds(node_id,batch_id,authorization_id,source_id,reserved_bytes,state) VALUES(?,?,?,?,?,?)`, block.NodeID, checkpointID, auth, source, amount, "committed"); err != nil {
 		return err
 	}
 	residual := strconv.FormatUint(block.Reserved-used, 10)
@@ -75,10 +83,11 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	if _, err := tx.ExecContext(ctx, `INSERT INTO runtime_block_checkpoints(node_id,batch_id,block_id,prior_reserved) VALUES(?,?,?,?)`, block.NodeID, checkpointID, block.BatchID, reserved); err != nil {
 		return err
 	}
-	if err := settleUsageReservationTx(ctx, tx, child, "committed", used, payload, 0, nil); err != nil {
+	digest := sha256.Sum256(payload)
+	if _, err := tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, block.NodeID, checkpointID, boot, snapshot, payload, digest[:], "0", "pending", now, now); err != nil {
 		return err
 	}
-	return nil
+	return recordDemandConsumptionTx(ctx, tx, block.NodeID, auth, used, time.Now())
 }
 
 // RuntimeBlockCheckpoint preserves each child's independent outbox identity.
@@ -111,8 +120,8 @@ func (s *Store) CheckpointRuntimeFundingBlocks(ctx context.Context, entries []Ru
 	return s.enqueueCheckpoints(ctx, entries)
 }
 
-func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeBlockCheckpoint, checkMembers func() error) error {
-	tx, err := s.beginRuntimeTx(ctx, nil)
+func (s *Store) commitRuntimeCheckpoints(ctx context.Context, entries []RuntimeBlockCheckpoint, checkMembers func() error, preowned ...func()) error {
+	tx, err := s.beginRuntimeTx(ctx, nil, preowned...)
 	if err != nil {
 		return err
 	}

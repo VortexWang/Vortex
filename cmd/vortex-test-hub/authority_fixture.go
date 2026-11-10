@@ -80,6 +80,21 @@ func configureAuthorityFixture(ctx context.Context, s, backend *store.Store, c a
 
 type fixtureUsageBackend struct{ store *store.Store }
 
+func (b *fixtureUsageBackend) AcceptUsageGroup(ctx context.Context, batches []store.HubUsage) ([][]byte, error) {
+	if b == nil || b.store == nil {
+		return nil, fmt.Errorf("fixture backend store missing")
+	}
+	committed, err := b.store.PersistKnownUsageGroup(ctx, batches, false)
+	if err != nil {
+		return nil, err
+	}
+	digests := make([][]byte, len(committed))
+	for i, batch := range committed {
+		digests[i] = batch.Digest
+	}
+	return digests, nil
+}
+
 func (b *fixtureUsageBackend) AcceptUsage(ctx context.Context, u store.HubUsage) ([]byte, error) {
 	if b == nil || b.store == nil {
 		return nil, fmt.Errorf("fixture backend store missing")

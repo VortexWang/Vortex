@@ -268,5 +268,9 @@ func testAuthenticatedEpochHandoff(t *testing.T, older bool) {
 	if err = hs.Close(); err != nil {
 		t.Fatal(err)
 	}
-	saveLedgerFiles(t, "epoch", map[string]string{"agent": filepath.Join(dir, "agent.db"), "hub": filepath.Join(dir, "hub.db")})
+	label := "epoch"
+	if older {
+		label = "epoch-older-path"
+	}
+	saveLedgerFiles(t, label, map[string]string{"agent": filepath.Join(dir, "agent.db"), "hub": filepath.Join(dir, "hub.db")})
 }

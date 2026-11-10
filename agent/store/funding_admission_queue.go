@@ -37,10 +37,13 @@ func (s *Store) enqueueFundingAdmissions(ctx context.Context, writes []RuntimeBl
 }
 
 func (s *Store) enqueueFundingOperation(ctx context.Context, size int, run func(*runtimeTransaction) error) error {
+	return s.enqueueBatchedOperation(ctx, size, run, &s.fundingAdmissions)
+}
+
+func (s *Store) enqueueBatchedOperation(ctx context.Context, size int, run func(*runtimeTransaction) error, q *fundingAdmissionQueue) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	q := &s.fundingAdmissions
 	q.mu.Lock()
 	if q.count >= 64 {
 		q.mu.Unlock()
@@ -51,7 +54,7 @@ func (s *Store) enqueueFundingOperation(ctx context.Context, size int, run func(
 	q.count++
 	if !q.running {
 		q.running = true
-		go s.drainFundingAdmissions()
+		go s.drainBatchedOperations(q)
 	}
 	q.mu.Unlock()
 	// A cancellation cannot abandon a transaction whose commit might have won.
@@ -59,10 +62,11 @@ func (s *Store) enqueueFundingOperation(ctx context.Context, size int, run func(
 	return <-r.result
 }
 
-func (s *Store) drainFundingAdmissions() {
+func (s *Store) drainFundingAdmissions() { s.drainBatchedOperations(&s.fundingAdmissions) }
+
+func (s *Store) drainBatchedOperations(q *fundingAdmissionQueue) {
 	timer := time.NewTimer(time.Millisecond)
 	<-timer.C
-	q := &s.fundingAdmissions
 	for {
 		q.mu.Lock()
 		if len(q.pending) == 0 {
@@ -70,6 +74,20 @@ func (s *Store) drainFundingAdmissions() {
 			q.mu.Unlock()
 			return
 		}
+		first := q.pending[0]
+		q.mu.Unlock()
+		// Leave requests attached while waiting. New arrivals can join this
+		// commit once the writer is ours instead of queuing a second sync.
+		release, err := s.runtimeQueue.acquire(first.ctx)
+		if err != nil {
+			q.mu.Lock()
+			q.pending = q.pending[1:]
+			q.count--
+			q.mu.Unlock()
+			first.result <- err
+			continue
+		}
+		q.mu.Lock()
 		count, size := 0, 0
 		for _, r := range q.pending {
 			if size+r.size > 64 {
@@ -81,7 +99,7 @@ func (s *Store) drainFundingAdmissions() {
 		group := append([]*fundingAdmissionRequest(nil), q.pending[:count]...)
 		q.pending = q.pending[count:]
 		q.mu.Unlock()
-		errs := s.commitFundingAdmissionRequests(group)
+		errs := s.commitFundingAdmissionRequests(group, release)
 		q.mu.Lock()
 		q.count -= count
 		q.mu.Unlock()
@@ -91,7 +109,12 @@ func (s *Store) drainFundingAdmissions() {
 	}
 }
 
-func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest) (results []error) {
+func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest, preowned ...func()) (results []error) {
+	if len(preowned) > 0 {
+		// Also release when member validation fails before BeginTx. Runtime
+		// queue releases are idempotent, so tx.finish may safely call it too.
+		defer preowned[0]()
+	}
 	started := time.Now()
 	defer func() {
 		if elapsed := time.Since(started); elapsed >= 100*time.Millisecond {
@@ -134,7 +157,7 @@ func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest)
 		}
 		return nil
 	}
-	tx, err := s.beginRuntimeTx(ctx, nil)
+	tx, err := s.beginRuntimeTx(ctx, nil, preowned...)
 	if err != nil {
 		return failAll(err)
 	}

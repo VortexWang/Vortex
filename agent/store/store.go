@@ -24,6 +24,7 @@ type Store struct {
 	runtimeStatements map[string]*sql.Stmt
 	runtimeQueue      runtimeTransactionQueue
 	fundingAdmissions fundingAdmissionQueue
+	deliveryCommits   fundingAdmissionQueue
 	checkpoints       checkpointQueue
 	rateClock         atomic.Pointer[runtimeRateClock]
 }
@@ -296,6 +297,8 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE INDEX IF NOT EXISTS usage_delivery_pending ON usage_batches(node_id)
+ WHERE state IN ('pending','locally_acked');
 CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, session_id TEXT NOT NULL,
  direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
@@ -483,6 +486,8 @@ CREATE TABLE IF NOT EXISTS unknown_usage_conflicts (
  payload_sha256 BLOB NOT NULL, created_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id,payload_sha256)
 );
+CREATE INDEX IF NOT EXISTS unknown_delivery_pending ON unknown_usage_batches(node_id)
+ WHERE transport_state='pending';
 CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, kind TEXT NOT NULL,
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
@@ -1189,11 +1194,23 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 	if nodeID == "" || len(batchIDs) == 0 {
 		return fmt.Errorf("store: usage acknowledgement identity is required")
 	}
+	if s.owner == "agent" && len(batchIDs) <= 64 {
+		return s.enqueueBatchedOperation(ctx, len(batchIDs), func(tx *runtimeTransaction) error {
+			return transitionUsageBatchesTx(ctx, tx, nodeID, batchIDs, target)
+		}, &s.deliveryCommits)
+	}
 	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err := transitionUsageBatchesTx(ctx, tx, nodeID, batchIDs, target); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func transitionUsageBatchesTx(ctx context.Context, tx storeTransaction, nodeID string, batchIDs []string, target string) error {
 	seen := make(map[string]struct{}, len(batchIDs))
 	for _, batchID := range batchIDs {
 		if batchID == "" {
@@ -1224,7 +1241,7 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 			return err
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (s *Store) ensureColumn(table, name, declaration string) error {
@@ -1307,13 +1324,36 @@ func (s *Store) NextControlSequenceRange(ctx context.Context, count uint64) (uin
 	if count == 0 || count > 32 {
 		return 0, fmt.Errorf("store: invalid control sequence range")
 	}
+	if s.owner == "agent" {
+		var first uint64
+		err := s.enqueueBatchedOperation(ctx, 1, func(tx *runtimeTransaction) error {
+			var err error
+			first, err = nextControlSequenceRangeTx(ctx, tx, count)
+			return err
+		}, &s.deliveryCommits)
+		if err != nil {
+			return 0, err
+		}
+		return first, nil
+	}
 	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
 	defer tx.Rollback()
+	first, err := nextControlSequenceRangeTx(ctx, tx, count)
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return first, nil
+}
+
+func nextControlSequenceRangeTx(ctx context.Context, tx storeTransaction, count uint64) (uint64, error) {
 	var current uint64
-	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = 'control_sequence'`).Scan(&current)
+	err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = 'control_sequence'`).Scan(&current)
 	if err != nil && err != sql.ErrNoRows {
 		return 0, err
 	}
@@ -1323,9 +1363,6 @@ func (s *Store) NextControlSequenceRange(ctx context.Context, count uint64) (uin
 	first := current + 1
 	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current+count), time.Now().UTC().Format(time.RFC3339Nano))
 	if err != nil {
-		return 0, err
-	}
-	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 	return first, nil

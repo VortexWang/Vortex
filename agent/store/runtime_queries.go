@@ -4,6 +4,20 @@ package store
 // Unlisted SQL uses the ordinary transaction path. Keeping the original SQL
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
+	`SELECT COUNT(*) FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`,
+	`INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+	`SELECT MAX(second) FROM demand_consumption WHERE scope=?`,
+	`SELECT second,bytes FROM demand_consumption WHERE scope=? AND slot=?`,
+	`INSERT INTO demand_consumption(scope,slot,second,bytes) VALUES(?,?,?,?) ON CONFLICT(scope,slot) DO UPDATE SET second=excluded.second,bytes=excluded.bytes`,
+	`SELECT snapshot_id,payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`,
+	`SELECT boot_id, snapshot_id, payload, payload_sha256, unknown_upper_bound, state, created_at FROM usage_batches WHERE node_id=? AND batch_id=?`,
+	`SELECT payload_sha256 FROM usage_batches WHERE node_id=? AND batch_id=? UNION ALL SELECT payload_sha256 FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`,
+	`SELECT report_boot_id,sequence,payload_sha256 FROM usage_origin_envelopes WHERE node_id=? AND batch_id=?`,
+	`INSERT INTO usage_origin_envelopes(node_id,batch_id,report_boot_id,sequence,payload_sha256) VALUES(?,?,?,?,?)`,
+	`SELECT payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`,
+	`SELECT payload,payload_sha256 FROM usage_batches WHERE node_id=? AND batch_id=?`,
+	`INSERT INTO usage_backend_receipts(node_id,batch_id,kind,payload_sha256,confirmed_at) VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING`,
+	`SELECT kind,payload_sha256 FROM usage_backend_receipts WHERE node_id=? AND batch_id=?`,
 	authorizationRecordQuery,
 	`SELECT epoch FROM runtime_rate_clock_epochs WHERE node_id=? AND source_id=?`,
 	`INSERT INTO runtime_rate_clock_epochs(node_id,source_id,epoch) VALUES(?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET epoch=excluded.epoch`,

@@ -48,24 +48,35 @@ func (s *Store) ConfirmBackendUsage(ctx context.Context, batch HubUsage, acknowl
 	if err != nil || confirmed {
 		return err
 	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err := confirmBackendUsageTx(ctx, tx, batch, acknowledgedDigest); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func confirmBackendUsageTx(ctx context.Context, tx storeTransaction, batch HubUsage, acknowledgedDigest []byte) error {
+	digest := sha256.Sum256(batch.Payload)
+	if !bytes.Equal(digest[:], batch.Digest) || !bytes.Equal(digest[:], acknowledgedDigest) {
+		return ErrUsageBatchConflict
+	}
 	table := "usage_batches"
 	if batch.Kind == "unknown" {
 		table = "unknown_usage_batches"
 	} else if batch.Kind != "known" {
 		return ErrUsageBatchConflict
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
 	var compactDigest []byte
 	compactErr := tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&compactDigest)
 	if compactErr == nil {
 		if batch.Kind != "known" || !bytes.Equal(compactDigest, digest[:]) {
 			return ErrUsageBatchConflict
 		}
-		return tx.Commit()
+		return nil
 	}
 	if !errors.Is(compactErr, sql.ErrNoRows) {
 		return compactErr
@@ -87,15 +98,15 @@ func (s *Store) ConfirmBackendUsage(ctx context.Context, batch HubUsage, acknowl
 	if kind != batch.Kind || !bytes.Equal(storedDigest, digest[:]) {
 		return ErrUsageBatchConflict
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (s *Store) PendingBackendUsage(ctx context.Context) ([]HubUsage, error) {
 	if s.owner != "hub" {
 		return nil, ErrUsageBatchConflict
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT u.node_id,u.boot_id,u.batch_id,'known',u.payload,u.payload_sha256 FROM usage_batches u WHERE u.state='ledgered' AND u.unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id)
-UNION ALL SELECT u.node_id,u.origin_boot_id,u.batch_id,'unknown',u.payload,u.payload_sha256 FROM unknown_usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id) ORDER BY 1,3`)
+	rows, err := s.db.QueryContext(ctx, `SELECT u.node_id,u.boot_id,u.batch_id,'known',u.payload,u.payload_sha256,COALESCE(o.report_boot_id,''),COALESCE(o.sequence,'0') FROM usage_batches u LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id WHERE u.state='ledgered' AND u.unknown_upper_bound='0' AND NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id)
+UNION ALL SELECT u.node_id,u.origin_boot_id,u.batch_id,'unknown',u.payload,u.payload_sha256,COALESCE(o.report_boot_id,''),COALESCE(o.sequence,'0') FROM unknown_usage_batches u LEFT JOIN usage_origin_envelopes o ON o.node_id=u.node_id AND o.batch_id=u.batch_id WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id) ORDER BY 1,3`)
 	if err != nil {
 		return nil, err
 	}
@@ -103,15 +114,16 @@ UNION ALL SELECT u.node_id,u.origin_boot_id,u.batch_id,'unknown',u.payload,u.pay
 	var result []HubUsage
 	for rows.Next() {
 		var b HubUsage
-		if err := rows.Scan(&b.NodeID, &b.BootID, &b.BatchID, &b.Kind, &b.Payload, &b.Digest); err != nil {
+		if err := rows.Scan(&b.NodeID, &b.BootID, &b.BatchID, &b.Kind, &b.Payload, &b.Digest, &b.ReportBootID, &b.Sequence); err != nil {
 			return nil, err
 		}
 		digest := sha256.Sum256(b.Payload)
 		if !bytes.Equal(digest[:], b.Digest) {
 			return nil, fmt.Errorf("hub usage: corrupt durable payload")
 		}
-		// Query after closing these rows: SQLite intentionally uses one writer
-		// connection. Missing historic metadata remains explicit pending state.
+		// The left join reads provenance in the same snapshot without an
+		// individual SQL round trip for every retained report. Missing historical
+		// provenance remains explicit empty/zero pending reconciliation.
 		result = append(result, b)
 	}
 	if err = rows.Err(); err != nil {
@@ -119,13 +131,6 @@ UNION ALL SELECT u.node_id,u.origin_boot_id,u.batch_id,'unknown',u.payload,u.pay
 	}
 	if err = rows.Close(); err != nil {
 		return nil, err
-	}
-	for i := range result {
-		boot, seq, e := s.UsageOrigin(ctx, result[i].NodeID, result[i].BatchID)
-		if e != nil && !errors.Is(e, ErrUsageOriginMissing) {
-			return nil, e
-		}
-		result[i].ReportBootID, result[i].Sequence = boot, seq
 	}
 	return result, nil
 }

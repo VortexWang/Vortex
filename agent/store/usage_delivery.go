@@ -9,6 +9,10 @@ import (
 
 const UsageDeliveryPageSize = 32
 
+const unknownUsageDeliveryQuery = `SELECT rowid,batch_id,payload,payload_sha256,legacy_before_image,transport_state,liability_state FROM unknown_usage_batches WHERE node_id=? AND rowid>? AND transport_state='pending' ORDER BY rowid LIMIT 32`
+
+const knownUsageDeliveryQuery = `SELECT rowid,node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND rowid>? AND state IN ('pending','locally_acked') ORDER BY rowid LIMIT 32`
+
 // Delivery positions are connection-local scan hints. These append-only tables
 // retain their rows for replay/audit, so new inserts follow earlier positions
 // even when their random batch IDs sort before an earlier delivered batch.
@@ -24,7 +28,7 @@ type UnknownUsageDeliveryRecord struct {
 }
 
 func (s *Store) KnownUsageDeliveryPage(ctx context.Context, node string, after int64) ([]UsageDeliveryRecord, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT rowid,node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND rowid>? AND state IN ('pending','locally_acked') ORDER BY rowid LIMIT 32`, node, after)
+	rows, err := s.db.QueryContext(ctx, knownUsageDeliveryQuery, node, after)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +53,7 @@ func (s *Store) KnownUsageDeliveryPage(ctx context.Context, node string, after i
 }
 
 func (s *Store) UnknownUsageDeliveryPage(ctx context.Context, node string, after int64) ([]UnknownUsageDeliveryRecord, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT rowid,batch_id,payload,payload_sha256,legacy_before_image,transport_state,liability_state FROM unknown_usage_batches WHERE node_id=? AND rowid>? AND transport_state='pending' ORDER BY rowid LIMIT 32`, node, after)
+	rows, err := s.db.QueryContext(ctx, unknownUsageDeliveryQuery, node, after)
 	if err != nil {
 		return nil, err
 	}

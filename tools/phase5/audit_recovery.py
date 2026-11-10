@@ -71,6 +71,17 @@ def audit(out):
         assert db.execute("select count(*) from authorization_records where state='active'").fetchone()[0] == 0
     inspect(snapshot(out, 'epoch', 'agent'), epoch)
     inspect(snapshot(out, 'epoch', 'hub'), lambda db: None)
+    def older_path(db):
+        # The distinct newer-path scenario must not overwrite the ordinary
+        # handoff snapshot or relax its assertions above.
+        assert db.execute("select unknown_upper_bound,liability_state from unknown_usage_batches where batch_id='held-old'").fetchone() == ('512', 'unresolved')
+        assert db.execute("select count(*) from authorization_records where path_generation='4' and state='revoked'").fetchone()[0] == 6
+        assert db.execute("select count(*) from authorization_records where path_generation='5' and signer_epoch='2' and state='active'").fetchone()[0] == 3
+        assert db.execute("select count(*) from authorization_records").fetchone()[0] == 9
+        for key, want in (('authorization_path_generation', '5'), ('authorization_fencing_floor', '10'), ('authorization_signer_epoch', '2')):
+            assert db.execute('select value from agent_state where key=?', (key,)).fetchone() == (want,)
+    inspect(snapshot(out, 'epoch-older-path', 'agent'), older_path)
+    inspect(snapshot(out, 'epoch-older-path', 'hub'), lambda db: None)
     def recovered_hub(db):
         assert db.execute("select count(*) from durable_events where kind='node-boot-recovery'").fetchone()[0] >= 1
         assert db.execute("select unknown_upper_bound,liability_state from unknown_usage_batches where batch_id='interrupted-write'").fetchone() == ('512', 'unresolved')
@@ -82,13 +93,14 @@ def audit(out):
              'TestNewExecutorCannotForgeOldAbortProof',
              'TestRuntimeSIGKILLFreshBootReprepareAndRecoverDebt',
              'TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor',
+             'TestAuthenticatedOlderPathPureRevocationKeepsCurrentPathAndUnknownDebt',
              'TestActivationTransitionsRejectLateAndConcurrentResults',
              'TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer',
              'TestRuntimeFencingAdvanceBlocksNewAdmissionButRetainsSession')
     for name in names:
         assert f'--- PASS: {name} ' in log, name
         assert f'--- SKIP: {name}' not in log, name
-    return {'schema': 1, 'status': 'passed', 'snapshots': 5, 'fault_cases': len(names), 'backend': 'protocol-test-only'}
+    return {'schema': 1, 'status': 'passed', 'snapshots': 7, 'fault_cases': len(names), 'backend': 'protocol-test-only'}
 
 
 if __name__ == '__main__':

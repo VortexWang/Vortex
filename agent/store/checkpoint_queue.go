@@ -51,6 +51,18 @@ func (s *Store) drainCheckpoints() {
 			q.mu.Unlock()
 			return
 		}
+		first := q.pending[0]
+		q.mu.Unlock()
+		release, err := s.runtimeQueue.acquire(first.ctx)
+		if err != nil {
+			q.mu.Lock()
+			q.pending = q.pending[1:]
+			q.count--
+			q.mu.Unlock()
+			first.result <- err
+			continue
+		}
+		q.mu.Lock()
 		count, size := 0, 0
 		for _, r := range q.pending {
 			if size+len(r.entries) > 64 {
@@ -62,7 +74,7 @@ func (s *Store) drainCheckpoints() {
 		group := append([]*checkpointRequest(nil), q.pending[:count]...)
 		q.pending = q.pending[count:]
 		q.mu.Unlock()
-		err := s.commitCheckpointRequests(group)
+		err = s.commitCheckpointRequests(group, release)
 		q.mu.Lock()
 		q.count -= count
 		q.mu.Unlock()
@@ -72,7 +84,10 @@ func (s *Store) drainCheckpoints() {
 	}
 }
 
-func (s *Store) commitCheckpointRequests(group []*checkpointRequest) error {
+func (s *Store) commitCheckpointRequests(group []*checkpointRequest, preowned ...func()) error {
+	if len(preowned) > 0 {
+		defer preowned[0]()
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	var callbacks sync.WaitGroup
@@ -112,5 +127,5 @@ func (s *Store) commitCheckpointRequests(group []*checkpointRequest) error {
 			}
 		}
 		return nil
-	})
+	}, preowned...)
 }

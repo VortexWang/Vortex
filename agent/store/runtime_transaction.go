@@ -47,12 +47,21 @@ type authorityRead struct {
 	state  string
 }
 
-func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
+// A preowned slot is supplied only by a batch worker which collected its
+// members after obtaining writer ownership. Its idempotent release transfers
+// to the transaction, including every failure/automatic rollback path.
+func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions, preowned ...func()) (*runtimeTransaction, error) {
 	started := time.Now()
 	caller, _, _, _ := runtime.Caller(1)
-	release, err := s.runtimeQueue.acquire(ctx)
-	if err != nil {
-		return nil, err
+	var release func()
+	var err error
+	if len(preowned) > 0 {
+		release = preowned[0]
+	} else {
+		release, err = s.runtimeQueue.acquire(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
