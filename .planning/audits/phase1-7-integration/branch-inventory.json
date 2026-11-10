@@ -1,0 +1,39 @@
+{
+  "main": "6e474c3067c33333d194d3b203bbc6229bebf01e",
+  "candidate_at_inventory": "264f708dc904b8009303f0c59ff43f2ac1331b09",
+  "branches": [
+    {
+      "ref": "codex/merge-phase4-main",
+      "sha": "a102bb31d45711acfade8eab9ac4ca7bc3016a78",
+      "in_main": true
+    },
+    {
+      "ref": "gsd/phase-4-optimization-closure",
+      "sha": "91c8a6ed803a4ef2363257bc85fcd3b20e568ef1",
+      "in_main": true
+    },
+    {
+      "ref": "phase4-formal-fix",
+      "sha": "8dfaf24cb73f2507b33d568e0907eda06238cc38",
+      "in_main": true
+    },
+    {
+      "ref": "phase4-runtime-authority-qualification",
+      "sha": "2cb3ab5326a4339ec4c4e9e2917073ba869fa5bb",
+      "in_main": true
+    },
+    {
+      "ref": "codex/phase6-backend",
+      "sha": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "in_main": true
+    },
+    {
+      "ref": "codex/phase7-frontend-operations-research",
+      "sha": "e5d0b7587a46e4f7851fd76b66119c846dff034f",
+      "in_main": true
+    }
+  ],
+  "phase7_plan_count": 84,
+  "phase7_scope": "planning only",
+  "integration_acceptance": "pending: Phase5 continuous TCP/UDP200ms fails on bf2b78c0"
+}

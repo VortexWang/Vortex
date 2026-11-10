@@ -99,7 +99,7 @@
 4. 两阶段配置应用具有幂等 Prepare/Commit/Abort，失败和丢失回执不产生双活代次、重复资源释放或未授权会话。
 5. TCP 满载下 UDP 公平性和 NFR-005 丢包指标、NFR-006 校验/绕行判据通过；D-04 预扣与水位参数经 M2 压测和正式评审确认。
 
-**Plans**: 11/11 executed; implementation closed by owner decision on 2026-11-05. `04-VERIFICATION.md` remains `gaps_found`; formal performance qualification, D-04 approval and durable authority are carried forward and are not represented as passed.
+**Historical implementation summary (2026-11-05)**: 11/11 executed. The later 2026-11-07 `04-VERIFICATION.md` and `04-45-FINAL-ACCEPTANCE-AUDIT.md` record P4-Q1..Q5 passed and owner-confirmed D-04 lock within the Engine/tracer boundary; production durability belongs to Phase 5/6. Current combined-source acceptance remains pending.
 - [x] 04-01 — Startable runtime config and accounting adapter
 - [x] 04-02 — Supervised VLink relay and stream bridge
 - [x] 04-03 — Five-process Docker/native topology
@@ -239,7 +239,7 @@
 4. TLS/mTLS、秘密存储、目标地址过滤、速率限制、管理审计及数据保留要求具备可执行配置和回归测试。
 5. PostgreSQL 基础备份与 WAL 恢复演练、Hub/Agent 恢复对账、RPO/RTO 和密钥恢复资料完成并可审阅。
 
-**Plans**: TBD
+**Plans**: 84 planned / 168 tasks / 84 ordered waves; 0 executed. See 07-PLANNING-REPORT.md and 07-PLAN-FINAL-CHECK.md. Planning review is not runtime acceptance.
 **Wave 1**
 - [ ] 07-01-PLAN.md
 
@@ -520,7 +520,7 @@
 | 1. Engineering foundation | 5/5 | Complete    | 2026-11-03 |
 | 2. M0 Engine dataplane | 6/6 | Complete    | 2026-11-04 |
 | 3. M1 VLink engine links | 6/6 | Complete (functional; native NFR evidence pending) | 2026-11-04 |
-| 4. M2 Multi-hop engine | 11/11 plans executed | Implementation closed; qualification debt carried forward | 2026-11-05 |
+| 4. M2 Multi-hop engine | 11/11 implementation plans; final qualification review retained | P4-Q1..Q5 passed within Engine/tracer scope; integrated acceptance pending | 2026-11-07 |
 | 5. M3 Agent and Edge Hub | 14/14 | Complete within runtime/protocol-adapter scope | 2026-11-06 |
 | 6. M4 Backend | 11/11 | Complete | 2026-11-09 |
 | 7. M5 Frontend and operations | 0/84 | Planned     | - |
