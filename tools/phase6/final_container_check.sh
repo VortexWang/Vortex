@@ -18,7 +18,8 @@ for mode in normal race; do
  flags=
  test "$mode" != race || flags=-race
  export VORTEX_PROCESS_BIN_DIR="$out/process-$mode/bin"
- mkdir -p "$VORTEX_PROCESS_BIN_DIR"
+ export VORTEX_PROCESS_EVIDENCE_DIR="$out/process-$mode/evidence"
+ mkdir -p "$VORTEX_PROCESS_BIN_DIR" "$VORTEX_PROCESS_EVIDENCE_DIR"
  go build $flags -o "$VORTEX_PROCESS_BIN_DIR/vortex-node" ./cmd/vortex-node
  go build $flags -o "$VORTEX_PROCESS_BIN_DIR/vortex-test-hub" ./cmd/vortex-test-hub
  go test $flags -json ./contracts ./agent/... ./hub ./cmd/vortex-node -p 1 -count=1 -skip '^TestRuntimeDurableD04Candidate$' > "$out/root-$mode.jsonl" 2>&1

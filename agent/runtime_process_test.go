@@ -428,9 +428,19 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	}
 	defer hubAudit.Close()
 	delegated, err := hubAudit.AuditHubDelegation(ctx, d.ID)
-	if err != nil || delegated.Initial != d.RawBytes || delegated.Issued != source.Initial || delegated.Initial != delegated.Remaining+delegated.Issued {
+	if err != nil || delegated.Initial != d.RawBytes || delegated.Initial != delegated.Remaining+delegated.Issued {
 		t.Fatalf("Hub/Agent funding reconciliation %+v agent=%+v err=%v", delegated, source, err)
 	}
+	agentObservation, err := sql.Open("sqlite", "file:"+agentDB+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer agentObservation.Close()
+	inventory, err := auditProcessFunding(ctx, agentObservation, hubObservation, d)
+	if err != nil || inventory.Installed != source.Initial || inventory.Uninstalled > d.RawBytes-inventory.Installed || delegated.Issued != inventory.Installed+inventory.Uninstalled {
+		t.Fatalf("exact issued/installed/pending reconciliation hub=%+v agent=%+v inventory=%+v err=%v", delegated, source, inventory, err)
+	}
+	writeJSON("funding-inventory.json", inventory)
 	if expectedBytes > initial && source.Initial <= initial {
 		t.Fatalf("workload did not obtain additional durable funding: initial=%d funded=%d", initial, source.Initial)
 	}
