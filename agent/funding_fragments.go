@@ -36,6 +36,10 @@ func (s *fundingBlockSession) reserveFragments(ctx context.Context, direction ac
 	if err != nil {
 		return nil, s.admissionError(err)
 	}
+	return s.fragmentBatch(direction, n, children)
+}
+
+func (s *fundingBlockSession) fragmentBatch(direction accounting.Direction, n int64, children []store.UsageReservation) (*accounting.Batch, error) {
 	s.fragmentWrites++
 	return accounting.NewBatch(n, func(ctx context.Context, out accounting.Outcome) error {
 		s.mu.Lock()

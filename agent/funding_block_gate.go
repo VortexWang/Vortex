@@ -119,7 +119,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		s.mu.Unlock()
 	}()
-	if s.closed || s.inner.gate.isFaulted() || n <= 0 || uint64(n) > s.size {
+	if s.closed || s.inner.gate.isFaulted() || s.fragmentWrites >= 64 || n <= 0 || uint64(n) > s.size {
 		return nil, nil, accounting.ErrDenied
 	}
 	dir, err := usageDirection(direction)
@@ -154,11 +154,9 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		}
 		r := store.UsageReservation{NodeID: s.inner.gate.node.NodeID, BootID: s.inner.gate.node.BootID, BatchID: id, FlowKey: s.inner.flowKey, RuleID: use.RuleID, SnapshotID: use.BillingSnapshotID, Direction: dir, Reserved: s.size}
 		var idle []store.UsageReservation
-		var idleDirection accounting.Direction
 		for otherDirection, other := range s.blocks {
 			if otherDirection != direction && other.inFlight == 0 && !other.poisoned {
 				idle = append(idle, other.reservation)
-				idleDirection = otherDirection
 			}
 		}
 		// Keep both directions funded when free credit can cover this write.
@@ -168,58 +166,40 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 			replaced = []store.UsageReservation{replacement.reservation}
 		}
 		funded, err := s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced)
-		if replacement != nil {
-			if errors.Is(err, store.ErrAuthorizationDenied) {
-				// Its return rolled back with the denied replacement. Release
-				// only this known-idle tail before considering other funding.
-				if e := s.release(ctx, replacement); e != nil {
-					return nil, nil, s.fail(e)
+		funding := store.RuntimeFundingWrite{Block: funded, Reclaimed: replaced}
+		if errors.Is(err, store.ErrAuthorizationDenied) {
+			ids := make([]string, min(uint64(n), 64))
+			for i := range ids {
+				ids[i], err = authorizationBatchID()
+				if err != nil {
+					return nil, nil, s.fail(err)
 				}
-				delete(s.blocks, direction)
-				return nil, nil, errRefreshFundingBlock
 			}
-			if err == nil {
-				s.stopIdle(replacement)
-			}
-		}
-		if errors.Is(err, store.ErrAuthorizationDenied) && len(idle) > 0 {
-			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), idle)
-		} else if err == nil {
-			idle = nil // No opposite tail was returned by the successful transaction.
+			funding, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingWrite(ctx, r, use, uint64(n), replaced, idle, ids)
 		}
 		if errors.Is(err, store.ErrAuthorizationDenied) {
-			// A UDP response can arrive before the outbound write's commit
-			// callback takes the mutex. Wait for that known in-flight bound
-			// to resolve before deciding that idle-tail reclamation is impossible.
 			for otherDirection, other := range s.blocks {
 				if otherDirection != direction && other.inFlight > 0 && !other.poisoned {
 					return nil, s.changed, nil
 				}
 			}
 		}
-		if errors.Is(err, store.ErrAuthorizationDenied) {
-			// The failed transaction rolled back idle returns. Release only
-			// proven-idle tails before collecting ordinary per-grant fragments.
-			for _, tail := range idle {
-				old := s.blocks[idleDirection]
-				if old == nil || old.reservation != tail {
-					return nil, nil, s.fail(store.ErrUsageBatchConflict)
-				}
-				if e := s.release(ctx, old); e != nil {
-					return nil, nil, s.fail(e)
-				}
-				delete(s.blocks, idleDirection)
-			}
-			batch, e := s.reserveFragments(ctx, direction, n)
-			return batch, nil, e
-		}
 		if err != nil {
 			return nil, nil, s.admissionError(err)
 		}
-		if len(idle) > 0 {
-			s.stopIdle(s.blocks[idleDirection])
-			delete(s.blocks, idleDirection)
+		for _, tail := range funding.Reclaimed {
+			for oldDirection, old := range s.blocks {
+				if old.reservation == tail {
+					s.stopIdle(old)
+					delete(s.blocks, oldDirection)
+				}
+			}
 		}
+		if len(funding.Children) > 0 {
+			batch, err := s.fragmentBatch(direction, n, funding.Children)
+			return batch, nil, err
+		}
+		funded = funding.Block
 		b = &sessionFundingBlock{reservation: funded}
 		s.blocks[direction] = b
 		s.armIdle(direction, b)
