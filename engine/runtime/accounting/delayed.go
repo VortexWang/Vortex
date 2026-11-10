@@ -205,18 +205,24 @@ func (s *delayedSession) Reserve(ctx context.Context, d core.Direction, n int64)
 	if requestErr != nil {
 		return nil, requestErr
 	}
-	if changed != nil {
-		waited = true
-		select {
-		case <-attempt.Done():
-			return nil, attempt.Err()
-		case <-changed:
-		}
-	}
 	// A grant may arrive after the failed reserve but before request() checks
-	// the waterline. No new request (and therefore no channel) is needed then.
-	// Re-enter the real gate under the original deadline; the notification or
-	// absence of a request is never itself permission to write.
+	// the waterline. Recheck even when another renewal is now pending: other
+	// consumers may have lowered the balance while leaving enough for this write.
+	// Only the real gate can authorize; the original deadline still applies.
+	b, err = s.inner.reserve(attempt, d, n, false)
+	if err == nil {
+		_, _ = s.gate.request()
+		return b, nil
+	}
+	if !errors.Is(err, core.ErrDenied) || changed == nil {
+		return nil, err
+	}
+	waited = true
+	select {
+	case <-attempt.Done():
+		return nil, attempt.Err()
+	case <-changed:
+	}
 	b, err = s.inner.reserve(attempt, d, n, false)
 	if err == nil {
 		_, _ = s.gate.request()

@@ -224,7 +224,7 @@ func TestDelayedIssuerLateAcceptedRenewalSettlesOnce(t *testing.T) {
 }
 
 func TestDelayedIssuerGrantBetweenDenialAndRequestIsReusable(t *testing.T) {
-	for _, mode := range []string{"open", "closed", "cancelled"} {
+	for _, mode := range []string{"open", "closed", "cancelled", "renewal-pending"} {
 		t.Run(mode, func(t *testing.T) { delayedGrantBetweenDenialAndRequest(t, mode) })
 	}
 }
@@ -233,7 +233,7 @@ func delayedGrantBetweenDenialAndRequest(t *testing.T, mode string) {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	g, err := NewDelayedCreditGate(context.Background(), CreditConfig{SnapshotID: "s", Budget: 128, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, time.Second)
+	g, err := NewDelayedCreditGate(context.Background(), CreditConfig{SnapshotID: "s", Budget: 256, InitialBlock: 1, MaxBlock: 1, GrantTarget: 128, RenewPercent: 30}, time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,6 +276,28 @@ func delayedGrantBetweenDenialAndRequest(t *testing.T, mode string) {
 	if err := g.Credit.ApplyGrant(ctx, GrantReply{RequestID: id, SnapshotID: "s", GrantID: "initial-grant", Amount: amount, Outcome: GrantAccepted}); err != nil {
 		t.Fatal(err)
 	}
+	// Another consumer can use part of the new grant before request() gets
+	// the issuer lock, leaving usable credit while triggering a new renewal.
+	var priorUsed, pending int64
+	records := uint64(1)
+	if mode == "renewal-pending" {
+		other, err := g.Credit.Open(ctx, core.Flow{Key: "other-consumer"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer other.Close()
+		for range 90 {
+			b, err := other.Reserve(ctx, core.LeftToRight, 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := b.Commit(ctx, 1); err != nil {
+				t.Fatal(err)
+			}
+		}
+		priorUsed, pending = 90, 90
+		records = 2
+	}
 	if mode == "closed" {
 		if err := s.Close(); err != nil {
 			t.Fatal(err)
@@ -287,7 +309,7 @@ func delayedGrantBetweenDenialAndRequest(t *testing.T, mode string) {
 	g.mu.Unlock()
 	locked = false
 	r := <-done
-	if mode != "open" {
+	if mode == "closed" || mode == "cancelled" {
 		expected := core.ErrDenied
 		if mode == "cancelled" {
 			expected = context.Canceled
@@ -308,7 +330,7 @@ func delayedGrantBetweenDenialAndRequest(t *testing.T, mode string) {
 		t.Fatal(err)
 	}
 	state := g.Credit.State()
-	if state.Used != 1 || state.Grants != 1 || state.GrantRecords != 1 || state.PendingGrant != 0 || state.UnknownGrant != 0 {
+	if state.Used != priorUsed+1 || state.Grants != 1 || state.GrantRecords != records || state.PendingGrant != pending || state.UnknownGrant != 0 {
 		t.Fatalf("published grant was duplicated or lost: %+v", state)
 	}
 	conserved(t, g.Credit)
