@@ -4,6 +4,9 @@ package store
 // Unlisted SQL uses the ordinary transaction path. Keeping the original SQL
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
+	backendUsageConfirmedQuery,
+	backendReceiptEvidenceQuery,
+	`INSERT INTO usage_backend_receipts(node_id,batch_id,kind,payload_sha256,confirmed_at) VALUES(?,?,?,?,?)`,
 	`SELECT COUNT(*) FROM unknown_usage_batches WHERE node_id=? AND batch_id=?`,
 	`INSERT INTO usage_reservations(node_id,boot_id,batch_id,snapshot_id,flow_key,rule_id,direction,reserved_bytes,state,used_bytes,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
 	`SELECT MAX(second) FROM demand_consumption WHERE scope=?`,

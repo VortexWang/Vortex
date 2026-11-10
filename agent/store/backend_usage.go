@@ -19,14 +19,19 @@ type HubUsage struct {
 	Payload, Digest               []byte
 }
 
+const backendUsageConfirmedQuery = `SELECT kind,payload_sha256 FROM usage_backend_receipts WHERE node_id=? AND batch_id=?
+UNION ALL SELECT 'known',payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`
+
+const backendReceiptEvidenceQuery = `SELECT 'compact',payload_sha256,NULL,NULL,NULL FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?
+UNION ALL SELECT 'live',u.payload_sha256,u.payload,r.kind,r.payload_sha256 FROM usage_batches u LEFT JOIN usage_backend_receipts r ON r.node_id=u.node_id AND r.batch_id=u.batch_id WHERE u.node_id=? AND u.batch_id=?`
+
 func (s *Store) BackendUsageConfirmed(ctx context.Context, batch HubUsage) (bool, error) {
 	if s.owner != "hub" {
 		return false, ErrUsageBatchConflict
 	}
 	var kind string
 	var digest []byte
-	err := s.db.QueryRowContext(ctx, `SELECT kind,payload_sha256 FROM usage_backend_receipts WHERE node_id=? AND batch_id=?
-UNION ALL SELECT 'known',payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID, batch.NodeID, batch.BatchID).Scan(&kind, &digest)
+	err := s.runtimeStatements[backendUsageConfirmedQuery].QueryRowContext(ctx, batch.NodeID, batch.BatchID, batch.NodeID, batch.BatchID).Scan(&kind, &digest)
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
@@ -69,6 +74,44 @@ func confirmBackendUsageTx(ctx context.Context, tx storeTransaction, batch HubUs
 		table = "unknown_usage_batches"
 	} else if batch.Kind != "known" {
 		return ErrUsageBatchConflict
+	}
+	if batch.Kind == "known" {
+		// Read the immutable usage, tombstone and any prior receipt in one
+		// snapshot. Preserve exact replay/conflict checks before inserting.
+		var evidence string
+		var storedDigest, payload, receiptDigest []byte
+		var receiptKind sql.NullString
+		err := tx.QueryRowContext(ctx, backendReceiptEvidenceQuery, batch.NodeID, batch.BatchID, batch.NodeID, batch.BatchID).Scan(&evidence, &storedDigest, &payload, &receiptKind, &receiptDigest)
+		if err != nil {
+			return err
+		}
+		if !bytes.Equal(storedDigest, digest[:]) {
+			return ErrUsageBatchConflict
+		}
+		if evidence == "compact" {
+			return nil
+		}
+		if !bytes.Equal(payload, batch.Payload) {
+			return ErrUsageBatchConflict
+		}
+		if receiptKind.Valid {
+			if receiptKind.String != batch.Kind || !bytes.Equal(receiptDigest, digest[:]) {
+				return ErrUsageBatchConflict
+			}
+			return nil
+		}
+		inserted, err := tx.ExecContext(ctx, `INSERT INTO usage_backend_receipts(node_id,batch_id,kind,payload_sha256,confirmed_at) VALUES(?,?,?,?,?)`, batch.NodeID, batch.BatchID, batch.Kind, digest[:], time.Now().UTC().Format(time.RFC3339Nano))
+		if err != nil {
+			return err
+		}
+		count, err := inserted.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if count != 1 {
+			return ErrUsageBatchConflict
+		}
+		return nil
 	}
 	var compactDigest []byte
 	compactErr := tx.QueryRowContext(ctx, `SELECT payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&compactDigest)

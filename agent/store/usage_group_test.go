@@ -83,6 +83,16 @@ func TestKnownUsageGroupFULLRollbackReplayAndReceiptBoundary(t *testing.T) {
 	if _, err := s.db.Exec(`DROP TRIGGER fail_group_receipt`); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := s.db.Exec(`CREATE TRIGGER ignore_group_receipt BEFORE INSERT ON usage_backend_receipts WHEN NEW.batch_id='batch-08' BEGIN SELECT RAISE(IGNORE); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ConfirmBackendUsageGroup(ctx, replayed); err == nil {
+		t.Fatal("silently ignored receipt acknowledged")
+	}
+	count("usage_backend_receipts", 0)
+	if _, err := s.db.Exec(`DROP TRIGGER ignore_group_receipt`); err != nil {
+		t.Fatal(err)
+	}
 	if err := s.ConfirmBackendUsageGroup(ctx, replayed); err != nil {
 		t.Fatal(err)
 	}
