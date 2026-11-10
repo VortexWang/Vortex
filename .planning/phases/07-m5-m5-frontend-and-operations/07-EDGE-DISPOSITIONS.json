@@ -1,0 +1,1388 @@
+{
+  "input": {
+    "items": [
+      {
+        "requirement_id": "FE-001",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-001",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-002",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-002",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-003",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-003",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-004",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-004",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-005",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-005",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-006",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-006",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-007",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-007",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-008",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-008",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-009",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-009",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-010",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-010",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-011",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-011",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "FE-012",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "FE-012",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-001",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-001",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-002",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-002",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-003",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-003",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-003",
+        "category": "concurrency",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "If interrupted or run in parallel, what is guaranteed?"
+      },
+      {
+        "requirement_id": "SEC-004",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-004",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-005",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-005",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-011",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-011",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-012",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-012",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-013",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-013",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-006",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-006",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-007",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-007",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-008",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-008",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-009",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-009",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SEC-010",
+        "category": "empty",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "What is the result for empty, single-element, or null input?"
+      },
+      {
+        "requirement_id": "SEC-010",
+        "category": "encoding",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+      },
+      {
+        "requirement_id": "SUP-PAGES-001",
+        "category": "unclassified",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "unclassified — review manually"
+      },
+      {
+        "requirement_id": "SUP-RECOVERY-001",
+        "category": "unclassified",
+        "status": "unresolved",
+        "verification": null,
+        "resolution": null,
+        "reason": null,
+        "probe": "unclassified — review manually"
+      }
+    ],
+    "coverage": {
+      "applicable": 53,
+      "resolved": 0,
+      "unresolved": 53,
+      "unclassified": 2,
+      "byVerification": {
+        "explicit": 0,
+        "backstop": 0
+      }
+    }
+  },
+  "items": [
+    {
+      "requirement_id": "FE-001",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "中文页面空/单项/null以空态或未知表达，缺失数量不填零。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-01",
+      "plan": 7,
+      "original_plan": 2,
+      "plans": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "requirement_id": "FE-001",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "中文/emoji/组合字符按Unicode code point校验显示长度，UTF-8非法输入拒绝；金额和版本不按本地化文本计算。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-02",
+      "plan": 7,
+      "original_plan": 2,
+      "plans": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "requirement_id": "FE-002",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空列表仍有当前授权的列表创建按钮，无常驻创建表单；一项时结构保持。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-03",
+      "plan": 19,
+      "original_plan": 6,
+      "plans": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "requirement_id": "FE-002",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "名称Unicode文本不改变创建入口/路由语义，API/UI采用相同code point长度限制。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-04",
+      "plan": 19,
+      "original_plan": 6,
+      "plans": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "requirement_id": "FE-003",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺入口地址显示—且保留名称第一、入口第二列，空列表列标题仍存在。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-05",
+      "plan": 35,
+      "original_plan": 11,
+      "plans": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "requirement_id": "FE-003",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "中文/emoji名称与IPv6入口不改变列序，完整值可访问且安全转义。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-06",
+      "plan": 35,
+      "original_plan": 11,
+      "plans": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "requirement_id": "FE-004",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺节点证据显示unknown/部分与原确认时间，不推断applied/可用/停止。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-07",
+      "plan": 35,
+      "original_plan": 11,
+      "plans": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "requirement_id": "FE-004",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "版本按批准opaque字符串逐字比较，状态/限制机读码canonical，中文只用于展示。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-08",
+      "plan": 35,
+      "original_plan": 11,
+      "plans": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "requirement_id": "FE-005",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无有效候选/段许可时禁提交并说明原因，入口或出口空值拒绝，不选择首个未授权组。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-09",
+      "plan": 38,
+      "original_plan": 12,
+      "plans": [
+        36,
+        37,
+        38
+      ]
+    },
+    {
+      "requirement_id": "FE-005",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "组/许可ID作为opaque canonical值传输，中文名不作为授权身份；畸形ID拒绝。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-10",
+      "plan": 38,
+      "original_plan": 12,
+      "plans": [
+        36,
+        37,
+        38
+      ]
+    },
+    {
+      "requirement_id": "FE-006",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "未测/null/失败延迟显示—，stale保留真实确认值和时间，不填0或估算。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-11",
+      "plan": 43,
+      "original_plan": 14,
+      "plans": [
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "requirement_id": "FE-006",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "延迟原始值为批准整数单位并范围校验，中文/本地数字只在展示层，不改变实测值。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-12",
+      "plan": 43,
+      "original_plan": 14,
+      "plans": [
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "requirement_id": "FE-007",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "会话水位/影响未知明确unknown，危险提交阻断，不把null损失或会话数当0。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-13",
+      "plan": 40,
+      "original_plan": 13,
+      "plans": [
+        39,
+        40
+      ]
+    },
+    {
+      "requirement_id": "FE-007",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "预览/版本/水位ID按opaque canonical值绑定，精确会话数不通过浮点或本地化文本重算。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-14",
+      "plan": 40,
+      "original_plan": 13,
+      "plans": [
+        39,
+        40
+      ]
+    },
+    {
+      "requirement_id": "FE-008",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空/未知错误码有中文安全兜底原因、建议和request_id，不暴露内部原文或空弹窗。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-15",
+      "plan": 63,
+      "original_plan": 22,
+      "plans": [
+        61,
+        62,
+        63
+      ]
+    },
+    {
+      "requirement_id": "FE-008",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "错误码ASCII canonical映射中文，字段/段引用安全转义，emoji输入不破坏错误定位。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-16",
+      "plan": 63,
+      "original_plan": 22,
+      "plans": [
+        61,
+        62,
+        63
+      ]
+    },
+    {
+      "requirement_id": "FE-009",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "损失未知时危险提交阻断；只有权威完整预览确认无损失才显示无损失，空弹窗不代确认。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-17",
+      "plan": 30,
+      "original_plan": 10,
+      "plans": [
+        29,
+        30
+      ]
+    },
+    {
+      "requirement_id": "FE-009",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "损失金额/数量使用后端十进制字符串，不因locale/Unicode数字被重新解释。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-18",
+      "plan": 30,
+      "original_plan": 10,
+      "plans": [
+        29,
+        30
+      ]
+    },
+    {
+      "requirement_id": "FE-010",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空通知列表显示空态；未读统计缺失显示未知，不能凭空清零，单条关键通知始终可见。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-19",
+      "plan": 60,
+      "original_plan": 21,
+      "plans": [
+        59,
+        60
+      ]
+    },
+    {
+      "requirement_id": "FE-010",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "事件/周期/对象身份用后端opaque ID，中文通知文本不参与归并键或恢复判定。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-20",
+      "plan": 60,
+      "original_plan": 21,
+      "plans": [
+        59,
+        60
+      ]
+    },
+    {
+      "requirement_id": "FE-011",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无真实样本/统计水位则时效未通过，界面保留确认值标stale，不把空采样算P95=0。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-21",
+      "plan": 53,
+      "original_plan": 18,
+      "plans": [
+        51,
+        52,
+        53
+      ]
+    },
+    {
+      "requirement_id": "FE-011",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "UTC/RFC3339时间和整数纳秒计算保持精确，本地日期格式只展示，时钟误差写证据。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-22",
+      "plan": 53,
+      "original_plan": 18,
+      "plans": [
+        51,
+        52,
+        53
+      ]
+    },
+    {
+      "requirement_id": "FE-012",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "区域列表/阶段缺失不推断正常；已有降级持续到权威阶段恢复，不能因空响应撤横幅。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-23",
+      "plan": 45,
+      "original_plan": 15,
+      "plans": [
+        44,
+        45
+      ]
+    },
+    {
+      "requirement_id": "FE-012",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "区域ID和机读模式canonical，翻译/中文区域名称不改变规则禁写范围。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-24",
+      "plan": 45,
+      "original_plan": 15,
+      "plans": [
+        44,
+        45
+      ]
+    },
+    {
+      "requirement_id": "SEC-001",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无证书/空链/缺身份拒绝握手与运行，注册凭据不能补运行身份缺口。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-25",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-001",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "X509 DER和身份字节严格解析，node/role/boot不Unicode归一化；畸形证书拒绝。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-26",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-002",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空/缺失吊销更新不是清空吊销集，仅完整可信版本可更新；缺状态不允许新连接绕过。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-27",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-002",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "吊销对象与版本保持canonical身份字节，Unicode别名或畸形身份不能绕过匹配。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-28",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-003",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺principal/tenant/resource scope拒绝；tenant越权404，平台越权403且审计。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-29",
+      "plan": 19,
+      "original_plan": 6,
+      "plans": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "requirement_id": "SEC-003",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "固定角色canonical ASCII和opaque tenant/resource ID严格校验，中文显示名不成为授权依据。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-30",
+      "plan": 19,
+      "original_plan": 6,
+      "plans": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "requirement_id": "SEC-003",
+      "category": "concurrency",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "角色撤销与并发请求/后台任务重核以当前PG权限线性化，旧授权不能跨越撤销后继续新操作；原已确认权利不凭撤销释放。",
+      "reason": null,
+      "probe": "If interrupted or run in parallel, what is guaranteed?",
+      "id": "E-07-31",
+      "plan": 19,
+      "original_plan": 6,
+      "plans": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "requirement_id": "SEC-004",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺加密key/版本或空密文拒绝敏感读写，不回退明文或空秘密成功。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-32",
+      "plan": 71,
+      "original_plan": 25,
+      "plans": [
+        70,
+        71
+      ]
+    },
+    {
+      "requirement_id": "SEC-004",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "密文/摘要按字节保真与key version关联，不trim/归一化；乱码/错误key不产生安全投影。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-33",
+      "plan": 71,
+      "original_plan": 25,
+      "plans": [
+        70,
+        71
+      ]
+    },
+    {
+      "requirement_id": "SEC-005",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空密码/TOTP/challenge/恢复码拒绝，未完成绑定的平台身份只能受限安全页。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-34",
+      "plan": 12,
+      "original_plan": 3,
+      "plans": [
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "requirement_id": "SEC-005",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "密码UTF-8字节不静默trim/归一化；TOTP固定ASCII位数，恢复码canonical ASCII严格解析。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-35",
+      "plan": 12,
+      "original_plan": 3,
+      "plans": [
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "requirement_id": "SEC-011",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "空DNS答案/缺策略/目标不完整拒绝target_unreachable；不回退未经策略检查的dial。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-36",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-011",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "A-label ASCII主机、IPv4-mapped IPv6 Unmap、畸形/zone拒绝，所有A/AAAA结果逐一验证且仅数值拨号。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-37",
+      "plan": 69,
+      "original_plan": 24,
+      "plans": [
+        67,
+        68,
+        69
+      ]
+    },
+    {
+      "requirement_id": "SEC-012",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "中间CA密文/key/链缺失拒绝签发，根不回退到在线PG或备份。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-38",
+      "plan": 71,
+      "original_plan": 25,
+      "plans": [
+        70,
+        71
+      ]
+    },
+    {
+      "requirement_id": "SEC-012",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "CA/签名/key材料字节严格保真，受保护文件格式版本校验，文本locale不改变签名输入。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-39",
+      "plan": 71,
+      "original_plan": 25,
+      "plans": [
+        70,
+        71
+      ]
+    },
+    {
+      "requirement_id": "SEC-013",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无到期且完整扫描时实际删除0是有效；缺hold/依赖查询或未执行扫描不算成功。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-40",
+      "plan": 73,
+      "original_plan": 26,
+      "plans": [
+        72,
+        73
+      ]
+    },
+    {
+      "requirement_id": "SEC-013",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "保留边界UTC整数时刻计算，类别canonical机读码，中文名不改变30/90/365策略。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-41",
+      "plan": 73,
+      "original_plan": 26,
+      "plans": [
+        72,
+        73
+      ]
+    },
+    {
+      "requirement_id": "SEC-006",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺终态/核清/hold依赖证据一律保留，不把空关联查询当已结清或可删除。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-42",
+      "plan": 73,
+      "original_plan": 26,
+      "plans": [
+        72,
+        73
+      ]
+    },
+    {
+      "requirement_id": "SEC-006",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "业务ID/batch/hash逐字节匹配，编码/Unicode差异不自动合并争议证据。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-43",
+      "plan": 73,
+      "original_plan": 26,
+      "plans": [
+        72,
+        73
+      ]
+    },
+    {
+      "requirement_id": "SEC-007",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无base/WAL/manifest或断档备份健康失败；空目录和未运行命令不能算可恢复。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-44",
+      "plan": 76,
+      "original_plan": 28,
+      "plans": [
+        75,
+        76
+      ]
+    },
+    {
+      "requirement_id": "SEC-007",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "WAL文件名/cluster/timeline/LSN canonical校验，ASCII hex和hash逐字节比较，畸形文件名拒绝。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-45",
+      "plan": 76,
+      "original_plan": 28,
+      "plans": [
+        75,
+        76
+      ]
+    },
+    {
+      "requirement_id": "SEC-008",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺解密身份/恢复凭据拒绝恢复；空key文件不能按无加密备份继续。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-46",
+      "plan": 76,
+      "original_plan": 28,
+      "plans": [
+        75,
+        76
+      ]
+    },
+    {
+      "requirement_id": "SEC-008",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "recipient/密文/key字节不trim或Unicode归一化，错误key/坏编码必须失败。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-47",
+      "plan": 76,
+      "original_plan": 28,
+      "plans": [
+        75,
+        76
+      ]
+    },
+    {
+      "requirement_id": "SEC-009",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "无故障时点/业务水位/真实样本则RPO/RTO未通过，不按0或脚本退出成功。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-48",
+      "plan": 84,
+      "original_plan": 35,
+      "plans": [
+        84
+      ]
+    },
+    {
+      "requirement_id": "SEC-009",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "计量整数单调时间/UTC和明确时钟误差，中文日期只展示，不用浮点截断达标。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-49",
+      "plan": 84,
+      "original_plan": 35,
+      "plans": [
+        84
+      ]
+    },
+    {
+      "requirement_id": "SEC-010",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "缺任一issuer/source核清证据继续F，空余额/空查询不授权新发。",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?",
+      "id": "E-07-50",
+      "plan": 81,
+      "original_plan": 33,
+      "plans": [
+        81
+      ]
+    },
+    {
+      "requirement_id": "SEC-010",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "逐来源金额十进制精确、source/委托/批次canonical身份；编码差异不跨源合并或抵销。",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?",
+      "id": "E-07-51",
+      "plan": 81,
+      "original_plan": 33,
+      "plans": [
+        81
+      ]
+    },
+    {
+      "requirement_id": "SUP-PAGES-001",
+      "category": "unclassified",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "分类器未能从补充要求摘要推导taxonomy，显式flagged assumption；完整页面/六步仍按源文计划和验证。",
+      "probe": "unclassified — review manually",
+      "id": "E-07-52",
+      "plan": 84,
+      "original_plan": 35,
+      "plans": [
+        84
+      ]
+    },
+    {
+      "requirement_id": "SUP-RECOVERY-001",
+      "category": "unclassified",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "分类器未能从补充要求摘要推导taxonomy，显式flagged assumption；完整页面/六步仍按源文计划和验证。",
+      "probe": "unclassified — review manually",
+      "id": "E-07-53",
+      "plan": 84,
+      "original_plan": 35,
+      "plans": [
+        84
+      ]
+    }
+  ],
+  "coverage": {
+    "applicable": 53,
+    "resolved": 51,
+    "unresolved": 2,
+    "unclassified": 2,
+    "byVerification": {
+      "explicit": 51,
+      "backstop": 0
+    }
+  }
+}

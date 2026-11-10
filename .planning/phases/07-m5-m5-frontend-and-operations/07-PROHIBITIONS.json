@@ -1,0 +1,97 @@
+{
+  "items": [
+    {
+      "plan": 35,
+      "requirement_id": "FE-004",
+      "category": "transparency",
+      "statement": "不得将受理、断流或超时呈现为节点已执行、业务可用或已经停止。",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "spec-less auto recall：未连机械descriptor，保持flagged-unverified。",
+      "original_plan": 11,
+      "plans": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    {
+      "plan": 53,
+      "requirement_id": "SEC-010",
+      "category": "safety",
+      "statement": "不得把未知负债计为已消费、跨来源抵销，或用备份旧余额恢复新授权。",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "资金安全价值边界；未连机械descriptor，保持flagged-unverified。",
+      "original_plan": 18,
+      "plans": [
+        51,
+        52,
+        53
+      ]
+    },
+    {
+      "plan": 78,
+      "requirement_id": "SUP-RECOVERY-001",
+      "category": "safety",
+      "statement": "恢复网页、连接恢复或旧PG状态不得制造新generation、可信批准、FULL成功或延长原自治截止。",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "权威与原截止价值边界；未连机械descriptor，保持flagged-unverified。",
+      "original_plan": 30,
+      "plans": [
+        78
+      ]
+    },
+    {
+      "plan": 81,
+      "requirement_id": "SUP-RECOVERY-001",
+      "category": "safety",
+      "statement": "不得以Hub消费账本重建兑换/套餐事实，或因一个租户核清而放开其他租户。",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": "租户和业务事实权威边界；未连机械descriptor，保持flagged-unverified。",
+      "original_plan": 33,
+      "plans": [
+        81
+      ]
+    }
+  ],
+  "projection": [
+    {
+      "statement": "不得将受理、断流或超时呈现为节点已执行、业务可用或已经停止。",
+      "status": "unresolved",
+      "reason": "spec-less auto recall：未连机械descriptor，保持flagged-unverified。"
+    },
+    {
+      "statement": "不得把未知负债计为已消费、跨来源抵销，或用备份旧余额恢复新授权。",
+      "status": "unresolved",
+      "reason": "资金安全价值边界；未连机械descriptor，保持flagged-unverified。"
+    },
+    {
+      "statement": "恢复网页、连接恢复或旧PG状态不得制造新generation、可信批准、FULL成功或延长原自治截止。",
+      "status": "unresolved",
+      "reason": "权威与原截止价值边界；未连机械descriptor，保持flagged-unverified。"
+    },
+    {
+      "statement": "不得以Hub消费账本重建兑换/套餐事实，或因一个租户核清而放开其他租户。",
+      "status": "unresolved",
+      "reason": "租户和业务事实权威边界；未连机械descriptor，保持flagged-unverified。"
+    }
+  ],
+  "coverage": {
+    "applicable": 4,
+    "resolved": 0,
+    "unresolved": 4,
+    "byVerification": {
+      "test": 0,
+      "judgment": 0
+    }
+  }
+}
