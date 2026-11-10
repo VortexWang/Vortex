@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_verification
-stopped_at: "Phase6 integration candidate on audit branch; CR012 approved/frozen; real concurrent funding regression still blocks main merge"
-last_updated: "2026-11-09T23:34:00+00:00"
-last_activity: 2026-11-09
-last_activity_desc: "CR012精确批准与冻结通过；Agent/Store/Hub开发快照完整native race通过。真实Linux并发续额仍超200ms失败，PR1保持草稿，尚未合并主线；独立用户Phase7工作区未改。"
+stopped_at: "Phase6 integration candidate; CR012 approved/frozen; atomic fragment fix awaiting complete same-SHA Docker and Actions verification"
+last_updated: "2026-11-10T01:00:00+00:00"
+last_activity: 2026-11-10
+last_activity_desc: "四真实进程race及完整native组件race通过；74c809f5 Phase5持续小额授权仍FAIL。新增有界碎片原子收集及Linux三轮回归通过，最终同SHA验收待完成；PR1未合并，用户Phase7工作区未改。"
 progress:
   total_phases: 6
   completed_phases: 5
