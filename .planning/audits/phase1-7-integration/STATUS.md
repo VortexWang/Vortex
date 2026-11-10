@@ -15,3 +15,5 @@ Phase 1–6 的开发历史及 Phase 7 规划分支已全部被 main `6e474c3067
 后续修复将最多32条已知用量的身份/回执校验和写入合并，保留逐条摘要/快照/unknown隔离、来源、FULL提交后ACK和受影响行数检查；单条使用原路径。安全race三轮、四个真实进程race和连续TCP/UDP三轮通过。最新开发测试中并发续额完整38.39s，重启补交约3.05s；不替代新候选同SHA验收。Phase7仍仅规划，不宣称实施完成。
 
 GSD通用ship对实施阶段要求passed及SECURITY threats_open=0；Phase7是规划整合，不把缺少实施VERIFICATION/SECURITY改写为通过。Phase5的历史passed_with_scope也不改写为passed。整合候选采用本报告和真实回归门禁跟踪，不宣布Phase7实施完成。
+
+最新候选03054658本机Docker完整验收（包括真实Cloudflare CRUD）及精确Phase5恢复/部署42779834790通过；双架构Phase6运行42779828827失败。amd64单次FULL提交254ms超过原200ms，arm64在原60s重启补交阶段到期，失败原始产物保留。当前仅修正最终测试的存储布局：运行中的SQLite/WAL与TMPDIR移入新建Docker本地持久卷，结束后导出全部原始证据并保持失败退出码；增加真实挂载证据和语义校验。测试边界及生产代码不变，新布局的完整验收尚未运行，不标记整合完成。

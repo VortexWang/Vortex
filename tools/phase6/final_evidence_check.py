@@ -13,13 +13,26 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 HOST_FILES=['commit.txt','host-source-identity.txt','host-source-status-before.txt','host-source-status-after.txt','compose.yml','docker-version.txt','docker-info.json','images.json','postgres-version.txt','valkey-version.txt','runner.log','cloudflare.log']
+HOST_FILES += ['runtime-volume.json']
 CONTAINER_FILES=['source-identity.txt','source-status-before.txt','source-status-after.txt','host.txt','sqlc-install.log','sqlc-diff.log','sqlc-output-count.txt','native-build-metadata.txt','race-build-metadata.txt','cross-build-metadata.txt','migrate.log','backend-normal.jsonl','backend-race.jsonl','completion.txt','reconciliation-normal.json','reconciliation-race.json','root-selection.json','root-normal.jsonl','root-race.jsonl','engine-normal.jsonl','engine-race.jsonl','ledger-fault.log','share-fault.log','protobuf-install.log','protobuf-diff.log','exact-freeze.log','openapi.log','dependencies.log','historical-vlink-freeze.log','historical-vlink-freeze.exit','final-completion.txt']
+CONTAINER_FILES += ['storage-layout.txt']
 
 PROCESS_TESTS={'TestDurableAuthorityProcesses'+name for name in ['TCP','UDP','ConcurrentTCP','ConcurrentRenewal']}
 ROOT_SELECTION=dict(schema=1, excluded_tests={'TestRuntimeDurableD04Candidate':'Phase4 parameterized performance qualification; tools/phase4/d04_durable_scan.py'}, process_tests='required in normal and race with separately built node/test-hub binaries')
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def load(path):return json.loads(path.read_text())
+def storage_layout(folder,source):
+ volumes=load(folder/'runtime-volume.json')
+ assert len(volumes)==1
+ volume=volumes[0]
+ assert volume['Driver']=='local' and volume['Scope']=='local' and not volume.get('Options'), 'non-local runtime volume'
+ assert volume['Labels']['vortex.phase6.commit']==source, 'runtime volume source mismatch'
+ mounts=[line for line in (folder/'storage-layout.txt').read_text().splitlines() if len(line.split())>5 and line.split()[4]=='/runtime']
+ assert len(mounts)==1, 'missing runtime mount'
+ fields,filesystem=mounts[0].split(' - ',1)
+ assert 'rw' in fields.split()[5].split(',') and filesystem.split()[0] in ['ext4','xfs','btrfs','zfs'], 'runtime WAL must use a local durable filesystem'
+
 def go_events(path):
  events=[json.loads(line) for line in path.read_text().splitlines() if line.strip()]
  assert events and not any(e.get('Action')=='fail' or (e.get('Action')=='skip' and 'Test' in e) for e in events), 'failed/skipped test: '+path.name
@@ -48,6 +61,7 @@ def qualification(path,source):
 
 def runtime(folder,source):
  for name in HOST_FILES+CONTAINER_FILES:assert (folder/name).is_file(), 'missing '+name
+ storage_layout(folder,source)
  assert load(folder/'root-selection.json')==ROOT_SELECTION, 'root test scope drift'
  assert (folder/'commit.txt').read_text()==source+'\n'
  for name in ['host-source-identity.txt','source-identity.txt']:

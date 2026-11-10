@@ -30,6 +30,8 @@ class FinalEvidence(unittest.TestCase):
   for name in gate.HOST_FILES+gate.CONTAINER_FILES:
    if not (folder/name).exists():(folder/name).write_text('')
   (folder/'commit.txt').write_text(source+'\n')
+  (folder/'runtime-volume.json').write_text(json.dumps([dict(Driver='local',Scope='local',Options=None,Labels={'vortex.phase6.commit':source})]))
+  (folder/'storage-layout.txt').write_text('20 1 8:1 /docker/volumes/runtime/_data /runtime rw,relatime - ext4 /dev/sda1 rw\n')
   (folder/'root-selection.json').write_text(json.dumps(gate.ROOT_SELECTION))
   (folder/'host-source-identity.txt').write_text(source+'\n'+'b'*40+'\n')
   (folder/'exact-freeze.log').write_text('owner approval=approved')
@@ -57,9 +59,16 @@ class FinalEvidence(unittest.TestCase):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp);base=root/'base';source=self.fixture(base)
    self.assertTrue(gate.host(base,source)['acceptance_complete'])
-   for variant in ['checksum','skip','partial','slow','missing','dirty','source','no_cloudflare','missing_lock_proof','missing_process','scope_drift']:
+   for variant in ['checksum','skip','partial','slow','missing','dirty','source','no_cloudflare','missing_lock_proof','missing_process','scope_drift','runtime_tmpfs','runtime_network','runtime_source']:
     with self.subTest(variant=variant):
      target=root/variant;shutil.copytree(base,target)
+     if variant=='runtime_tmpfs':
+      p=target/'storage-layout.txt';p.write_text(p.read_text().replace('ext4','tmpfs'))
+     if variant in ['runtime_network','runtime_source']:
+      p=target/'runtime-volume.json';value=json.loads(p.read_text())
+      if variant=='runtime_network':value[0]['Options']={'type':'nfs','device':':/share'}
+      else:value[0]['Labels']['vortex.phase6.commit']='b'*40
+      p.write_text(json.dumps(value))
      if variant=='scope_drift':
       p=target/'root-selection.json';value=json.loads(p.read_text());value['excluded_tests']['TestRuntimeFundingBlockContinuousTraffic']='optional';p.write_text(json.dumps(value))
      if variant=='missing_process':
