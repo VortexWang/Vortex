@@ -1,0 +1,5 @@
+--- FAIL: TestFundedHandoffRequiresExplicitRootSuccessors (0.38s)
+    funded_handoff_test.go:14: funded ownership moved without explicit backend root successors
+FAIL
+FAIL	vortex/agent/store	1.090s
+FAIL

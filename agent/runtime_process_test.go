@@ -354,6 +354,13 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	writeJSON("traffic.json", map[string]any{"streams": streamCount, "network": network, "round_trips": len(samples), "round_trip_ms": map[string]float64{"p50": percentile(50), "p95": percentile(95), "p99": percentile(99)}, "traffic_elapsed_ns": elapsed.Nanoseconds(), "bidirectional_payload_bytes": expectedBytes, "bidirectional_payload_mbps": float64(expectedBytes) * 8 / elapsed.Seconds() / 1e6, "timing_scope": "request-response traffic; excludes later ACK drain", "performance_qualified": false})
 
 	wait(func() bool {
+		// Poll the pending predicate without repeatedly decoding thousands of
+		// immutable payloads while the independent processes drain their ACKs.
+		// Once drained, still verify every durable payload and its exact total.
+		var pending bool
+		if err := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM usage_batches WHERE state!='hub_acked')").Scan(&pending); err != nil || pending {
+			return false
+		}
 		rows, err := db.QueryContext(ctx, "SELECT payload,state FROM usage_batches")
 		if err != nil {
 			return false
@@ -397,9 +404,11 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 			return false
 		}
 		connection.Close()
-		var pending int
-		err = hubObservation.QueryRowContext(ctx, `SELECT COUNT(*) FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id)`).Scan(&pending)
-		return err == nil && pending == 0
+		// An existence check has the same zero-pending condition, but stops at
+		// the first missing receipt while the recovered process drains the rest.
+		var pending bool
+		err = hubObservation.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM usage_batches u WHERE NOT EXISTS (SELECT 1 FROM usage_backend_receipts r WHERE r.node_id=u.node_id AND r.batch_id=u.batch_id))`).Scan(&pending)
+		return err == nil && !pending
 	})
 	stopRecoveredHub()
 	db.Close()
@@ -419,9 +428,19 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	}
 	defer hubAudit.Close()
 	delegated, err := hubAudit.AuditHubDelegation(ctx, d.ID)
-	if err != nil || delegated.Initial != d.RawBytes || delegated.Issued != source.Initial || delegated.Initial != delegated.Remaining+delegated.Issued {
+	if err != nil || delegated.Initial != d.RawBytes || delegated.Initial != delegated.Remaining+delegated.Issued {
 		t.Fatalf("Hub/Agent funding reconciliation %+v agent=%+v err=%v", delegated, source, err)
 	}
+	agentObservation, err := sql.Open("sqlite", "file:"+agentDB+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer agentObservation.Close()
+	inventory, err := auditProcessFunding(ctx, agentObservation, hubObservation, d)
+	if err != nil || inventory.Installed != source.Initial || inventory.Uninstalled > d.RawBytes-inventory.Installed || delegated.Issued != inventory.Installed+inventory.Uninstalled {
+		t.Fatalf("exact issued/installed/pending reconciliation hub=%+v agent=%+v inventory=%+v err=%v", delegated, source, inventory, err)
+	}
+	writeJSON("funding-inventory.json", inventory)
 	if expectedBytes > initial && source.Initial <= initial {
 		t.Fatalf("workload did not obtain additional durable funding: initial=%d funded=%d", initial, source.Initial)
 	}

@@ -1,0 +1,10 @@
+{
+  "command": "LEDGER_RED_TARGET=^TestUsageBatchIdempotencyAuthoritySchema$ python3 tools/phase6/ledger_red_test.py",
+  "exitCode": 1,
+  "output": "test_source_ledger_authority (__main__.LedgerAuthority) ... FAIL\n\n======================================================================\nFAIL: test_source_ledger_authority (__main__.LedgerAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/ledger_red_test.py\", line 10, in test_source_ledger_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestUsageBatchIdempotencyAuthoritySchema\n2026/11/08 07:53:23 goose: no migrations to run. current version: 7\n    metering_test.go:13: immutable usage tuple/digest authority missing\n--- FAIL: TestUsageBatchIdempotencyAuthoritySchema (0.03s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.648s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.507s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_source_ledger_authority",
+  "targetFile": "backend/internal/service/metering_test.go",
+  "expected": "immutable usage tuple/digest authority exists",
+  "actual": "usage_batches missing from actual PostgreSQL",
+  "semanticAssessment": "Actual migrated PostgreSQL available; target executed and failed on planned usage authority assertion, no fixture/compile failures."
+}

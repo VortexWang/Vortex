@@ -39,6 +39,42 @@ func (r *UsageRelay) AcceptKnown(ctx context.Context, node, boot string, b *cont
 	return r.ackBoundary(ctx, store.HubUsage{NodeID: node, BootID: boot, BatchID: b.BatchId, Kind: "known", Payload: payload, Digest: digest[:]})
 }
 
+// AcceptEnvelope persists the actual authenticated report sequence. Existing
+// AcceptKnown/AcceptUnknown callers without provenance stay compatible locally;
+// the production backend refuses sequence-zero legacy facts rather than invent it.
+func (r *UsageRelay) AcceptEnvelope(ctx context.Context, m *controlv1.NodeMessage) error {
+	if r == nil || r.Store == nil || m == nil || m.NodeId == "" || m.BootId == "" || m.Sequence == 0 {
+		return store.ErrUsageOriginMissing
+	}
+	var b store.HubUsage
+	if known := m.GetUsageBatch(); known != nil {
+		payload, e := proto.MarshalOptions{Deterministic: true}.Marshal(known)
+		if e != nil {
+			return e
+		}
+		boot, seq, e := r.Store.PersistUsageLedgerWithOrigin(ctx, store.UsageBatch{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, SnapshotID: known.BillingSnapshotId, Payload: payload}, m.BootId, m.Sequence)
+		if e != nil {
+			return e
+		}
+		digest := sha256.Sum256(payload)
+		b = store.HubUsage{NodeID: m.NodeId, BootID: m.BootId, BatchID: known.BatchId, Kind: "known", Payload: payload, Digest: digest[:], ReportBootID: boot, Sequence: seq}
+	} else if unknown := m.GetUnknownUsageBatch(); unknown != nil {
+		payload, e := contracts.EncodeUnknownUsage(unknown)
+		if e != nil {
+			return e
+		}
+		boot, seq, e := r.Store.PersistUnknownUsageWithOrigin(ctx, m.NodeId, m.BootId, m.Sequence, payload)
+		if e != nil {
+			return e
+		}
+		digest := sha256.Sum256(payload)
+		b = store.HubUsage{NodeID: m.NodeId, BootID: unknown.OriginBootId, BatchID: unknown.BatchId, Kind: "unknown", Payload: payload, Digest: digest[:], ReportBootID: boot, Sequence: seq}
+	} else {
+		return store.ErrUsageOriginMissing
+	}
+	return r.ackBoundary(ctx, b)
+}
+
 func (r *UsageRelay) AcceptUnknown(ctx context.Context, node string, b *controlv1.UnknownUsageBatch) error {
 	if r == nil || r.Store == nil {
 		return fmt.Errorf("hub: missing durable usage store")
@@ -55,6 +91,10 @@ func (r *UsageRelay) AcceptUnknown(ctx context.Context, node string, b *controlv
 }
 
 func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
+	return r.ackBoundaryGroup(ctx, []store.HubUsage{b})
+}
+
+func (r *UsageRelay) ackBoundaryGroup(ctx context.Context, batches []store.HubUsage) error {
 	if r.Clock == nil {
 		return fmt.Errorf("hub: trusted accounting clock missing")
 	}
@@ -66,6 +106,13 @@ func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
 	if err != nil {
 		return err
 	}
+	// Reading status can wait behind a newer authenticated backend heartbeat.
+	// Compare that durable heartbeat to a fresh trusted observation, rather than
+	// the sample taken before waiting for the database. No deadline is extended.
+	now = r.Clock()
+	if !now.Trusted || now.Earliest.IsZero() || now.Latest.Before(now.Earliest) {
+		return store.ErrAuthorityTimeUncertain
+	}
 	if now.Earliest.Before(mode.BackendHeartbeat) {
 		return store.ErrAuthorityTimeUncertain
 	}
@@ -74,7 +121,7 @@ func (r *UsageRelay) ackBoundary(ctx context.Context, b store.HubUsage) error {
 		// but grant issuance remains independently stopped at its hard boundary.
 		return nil
 	}
-	return r.forward(ctx, b)
+	return r.forwardGroup(ctx, batches)
 }
 
 func (r *UsageRelay) forward(ctx context.Context, b store.HubUsage) error {
@@ -103,10 +150,22 @@ func (r *UsageRelay) ReplayPending(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	for _, b := range batches {
-		if err := r.forward(ctx, b); err != nil {
+	for i := 0; i < len(batches); {
+		if batches[i].Kind == "known" {
+			end := i + 1
+			for end < len(batches) && end-i < 32 && batches[end].Kind == "known" {
+				end++
+			}
+			if err := r.forwardGroup(ctx, batches[i:end]); err != nil {
+				return err
+			}
+			i = end
+			continue
+		}
+		if err := r.forward(ctx, batches[i]); err != nil {
 			return err
 		}
+		i++
 	}
 	return nil
 }

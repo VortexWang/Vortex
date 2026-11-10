@@ -1,0 +1,261 @@
+{
+  "auto": {
+    "commit": "168be8a5fa71b43b7532656631430976f788ccc3",
+    "diagnostic_difference_ms": 0.855145,
+    "dirty": false,
+    "faults": "finite integrity/forged OPEN/bypass/middle-hop failure passed",
+    "link_reuse_streams": {
+      "8272f453efd7f06cc4dd2e4eb7662fdd": 57
+    },
+    "median_ms": 1.015957,
+    "observed_max_pool_links": {
+      "relay-1": 1,
+      "relay-2": 1,
+      "relay-3": 1,
+      "source": 1
+    },
+    "observed_tcp_modes": {
+      "relay-1": [
+        "mux",
+        "pool"
+      ],
+      "relay-2": [
+        "mux",
+        "pool"
+      ],
+      "relay-3": [
+        "mux",
+        "pool"
+      ],
+      "source": [
+        "mux",
+        "pool"
+      ]
+    },
+    "samples_ms": [
+      1.010531,
+      0.967768,
+      0.987719,
+      1.011214,
+      0.967173,
+      0.957512,
+      1.031714,
+      0.958273,
+      1.026572,
+      1.058055,
+      0.889947,
+      1.017002,
+      1.016886,
+      1.070031,
+      1.035751,
+      0.990754,
+      0.919695,
+      1.05504,
+      0.951584,
+      1.010347,
+      1.772601,
+      1.028429,
+      1.024819,
+      1.01497,
+      1.814293,
+      1.058535,
+      1.021824,
+      1.073673,
+      1.015028,
+      1.010156,
+      0.93319,
+      1.098461,
+      1.154974,
+      0.951724,
+      0.973167,
+      0.987467,
+      1.065786,
+      1.085856,
+      0.95578,
+      0.997957,
+      1.057643,
+      1.119857,
+      0.991364,
+      1.010072,
+      1.068169,
+      1.075926,
+      0.967833,
+      1.078239,
+      0.959586,
+      2.619937
+    ],
+    "scope": "explicit bounded runtime mode, actual TCP connect to first-byte; not NFR qualification",
+    "segment_median_sum_ms": 0.160812,
+    "workload_tcp_pool_max": 4
+  },
+  "mux": {
+    "commit": "168be8a5fa71b43b7532656631430976f788ccc3",
+    "diagnostic_difference_ms": 0.7811985,
+    "dirty": false,
+    "faults": "finite integrity/forged OPEN/bypass/middle-hop failure passed",
+    "link_reuse_streams": {
+      "963af197f5a3a0cfda71e59afcc44d58": 57
+    },
+    "median_ms": 0.935956,
+    "observed_max_pool_links": {
+      "relay-1": 1,
+      "relay-2": 1,
+      "relay-3": 1,
+      "source": 1
+    },
+    "observed_tcp_modes": {
+      "relay-1": [
+        "mux"
+      ],
+      "relay-2": [
+        "mux"
+      ],
+      "relay-3": [
+        "mux"
+      ],
+      "source": [
+        "mux"
+      ]
+    },
+    "samples_ms": [
+      1.001421,
+      0.961245,
+      0.922451,
+      0.982847,
+      0.912936,
+      0.901749,
+      0.92219,
+      0.874489,
+      0.912206,
+      0.886777,
+      0.892206,
+      0.90862,
+      0.945031,
+      0.984498,
+      0.904439,
+      0.914763,
+      0.917029,
+      1.04103,
+      0.85566,
+      0.969568,
+      1.406595,
+      0.959708,
+      1.002893,
+      0.933968,
+      1.578025,
+      0.963452,
+      0.900518,
+      1.0148,
+      0.908173,
+      1.033899,
+      0.920839,
+      0.886562,
+      0.988004,
+      0.996984,
+      0.933488,
+      0.934969,
+      0.977693,
+      1.020899,
+      0.955901,
+      0.897915,
+      0.931584,
+      0.89549,
+      0.91576,
+      0.936943,
+      1.090836,
+      0.902772,
+      0.986197,
+      1.023704,
+      1.055842,
+      2.093072
+    ],
+    "scope": "explicit bounded runtime mode, actual TCP connect to first-byte; not NFR qualification",
+    "segment_median_sum_ms": 0.1547575,
+    "workload_tcp_pool_max": 1
+  },
+  "pool": {
+    "commit": "168be8a5fa71b43b7532656631430976f788ccc3",
+    "diagnostic_difference_ms": 0.7795749999999999,
+    "dirty": false,
+    "faults": "finite integrity/forged OPEN/bypass/middle-hop failure passed",
+    "link_reuse_streams": {
+      "1e57f106cbea97aa7b48f79b9a56e622": 57
+    },
+    "median_ms": 0.9358605,
+    "observed_max_pool_links": {
+      "relay-1": 1,
+      "relay-2": 1,
+      "relay-3": 1,
+      "source": 1
+    },
+    "observed_tcp_modes": {
+      "relay-1": [
+        "pool"
+      ],
+      "relay-2": [
+        "pool"
+      ],
+      "relay-3": [
+        "pool"
+      ],
+      "source": [
+        "pool"
+      ]
+    },
+    "samples_ms": [
+      0.92828,
+      0.963613,
+      0.864019,
+      0.899626,
+      0.932512,
+      0.845856,
+      0.953828,
+      0.929642,
+      0.887597,
+      0.910617,
+      0.863652,
+      0.916181,
+      0.900888,
+      0.970813,
+      0.962972,
+      0.895891,
+      0.947088,
+      0.96078,
+      0.939366,
+      0.899588,
+      1.20796,
+      1.039026,
+      0.973298,
+      0.949912,
+      1.148031,
+      0.955411,
+      0.934108,
+      0.876231,
+      0.849285,
+      0.964409,
+      0.96178,
+      0.912917,
+      0.909571,
+      0.944715,
+      0.969652,
+      0.920998,
+      0.904658,
+      0.977334,
+      0.860228,
+      0.917098,
+      0.898424,
+      0.996963,
+      0.937613,
+      0.976362,
+      1.046378,
+      1.000739,
+      0.906446,
+      0.973514,
+      0.867033,
+      1.945848
+    ],
+    "scope": "explicit bounded runtime mode, actual TCP connect to first-byte; not NFR qualification",
+    "segment_median_sum_ms": 0.15628550000000002,
+    "workload_tcp_pool_max": 4
+  }
+}

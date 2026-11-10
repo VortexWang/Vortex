@@ -1,0 +1,47 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-e9516b24bc9d Creating 
+ Container vortex-phase6-tracer-backend-test-run-e9516b24bc9d Created 
+=== RUN   TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained
+2026/11/08 09:28:23 goose: no migrations to run. current version: 8
+2026/11/08 09:28:23 OK   00001_authority.sql (12.15ms)
+2026/11/08 09:28:23 OK   00002_tenant_policy.sql (8.1ms)
+2026/11/08 09:28:23 OK   00003_nodes_ports.sql (17.33ms)
+2026/11/08 09:28:23 OK   00004_entry_group_domains.sql (1.7ms)
+2026/11/08 09:28:23 OK   00005_rules_compile.sql (15.38ms)
+2026/11/08 09:28:23 OK   00006_packages_entitlements.sql (14.25ms)
+2026/11/08 09:28:23 OK   00007_metering_ledger.sql (22.65ms)
+2026/11/08 09:28:23 OK   00008_limits_shares.sql (34.21ms)
+2026/11/08 09:28:23 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryExpiryProofAuditRollbackAndUnknownFundsRetained (1.06s)
+=== RUN   TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries
+2026/11/08 09:28:24 goose: no migrations to run. current version: 8
+2026/11/08 09:28:24 OK   00001_authority.sql (8.41ms)
+2026/11/08 09:28:24 OK   00002_tenant_policy.sql (6.34ms)
+2026/11/08 09:28:24 OK   00003_nodes_ports.sql (14.54ms)
+2026/11/08 09:28:24 OK   00004_entry_group_domains.sql (1.72ms)
+2026/11/08 09:28:24 OK   00005_rules_compile.sql (14.1ms)
+2026/11/08 09:28:24 OK   00006_packages_entitlements.sql (13.24ms)
+2026/11/08 09:28:24 OK   00007_metering_ledger.sql (17.28ms)
+2026/11/08 09:28:24 OK   00008_limits_shares.sql (30.41ms)
+2026/11/08 09:28:24 goose: successfully migrated database to version: 8
+--- PASS: TestHubColdRecoveryConcurrentTargetsAndAllTenantHardBoundaries (0.36s)
+=== RUN   TestHubColdRecoveryActualMTLSFreshStoreAndOldBootDenial
+2026/11/08 09:28:25 goose: no migrations to run. current version: 8
+2026/11/08 09:28:25 OK   00001_authority.sql (7.3ms)
+2026/11/08 09:28:25 OK   00002_tenant_policy.sql (6.55ms)
+2026/11/08 09:28:25 OK   00003_nodes_ports.sql (16.23ms)
+2026/11/08 09:28:25 OK   00004_entry_group_domains.sql (2.06ms)
+2026/11/08 09:28:25 OK   00005_rules_compile.sql (13.59ms)
+2026/11/08 09:28:25 OK   00006_packages_entitlements.sql (13.32ms)
+2026/11/08 09:28:25 OK   00007_metering_ledger.sql (18.12ms)
+2026/11/08 09:28:25 OK   00008_limits_shares.sql (31.98ms)
+2026/11/08 09:28:25 goose: successfully migrated database to version: 8
+    hub_cold_recovery_transport_test.go:103: TLS1.3 fresh-store new boot accepted only after immutable cold recovery; old boot denied; no credit or runtime authority created
+--- PASS: TestHubColdRecoveryActualMTLSFreshStoreAndOldBootDenial (1.33s)
+PASS
+ok  	vortex/backend/internal/service	3.768s

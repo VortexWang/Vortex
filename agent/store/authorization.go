@@ -52,6 +52,16 @@ func (s *Store) CheckStoredAuthorization(ctx context.Context, use AuthorizationU
 // readAuthorizationTx also reads expired records as immutable lineage evidence.
 // It does not grant permission to use them.
 func readAuthorizationTx(ctx context.Context, tx storeTransaction, nodeID, authorizationID string) (AuthorizationRecord, string, error) {
+	if err := ctx.Err(); err != nil {
+		return AuthorizationRecord{}, "", err
+	}
+	runtimeTx, _ := tx.(*runtimeTransaction)
+	key := [2]string{nodeID, authorizationID}
+	if runtimeTx != nil && runtimeTx.authorityReads != nil {
+		if prior, ok := runtimeTx.authorityReads[key]; ok {
+			return prior.record, prior.state, nil
+		}
+	}
 	var record AuthorizationRecord
 	var state, ruleRevision, pathGeneration, signerEpoch, amount, rate, connections, shareRevision string
 	err := tx.QueryRowContext(ctx, authorizationRecordQuery, nodeID, authorizationID).Scan(
@@ -79,6 +89,9 @@ func readAuthorizationTx(ctx context.Context, tx storeTransaction, nodeID, autho
 		if err != nil {
 			return AuthorizationRecord{}, "", ErrAuthorizationDenied
 		}
+	}
+	if runtimeTx != nil && runtimeTx.authorityReads != nil {
+		runtimeTx.authorityReads[key] = authorityRead{record: record, state: state}
 	}
 	return record, state, nil
 }
@@ -110,13 +123,27 @@ func checkReadAuthorizationTx(ctx context.Context, tx storeTransaction, use Auth
 	if state != "active" || record.BootID != use.BootID || record.Kind != use.Kind || record.RuleID != use.RuleID || record.RuleRevision != use.RuleRevision || record.PathGeneration != use.PathGeneration || (record.Kind == "credit_grant" || record.BillingSnapshotID != "") && record.BillingSnapshotID != use.BillingSnapshotID {
 		return AuthorizationRecord{}, ErrAuthorizationDenied
 	}
-	if record.Kind == "credit_grant" {
-		if err := checkSourceLineageTx(ctx, tx, use.NodeID, record); err != nil {
+	// Funding groups never mutate authority/source/share rows. Reuse only
+	// their successful relational proof inside this transaction; conservative
+	// time, session identity, rate and balances are still checked per write.
+	rt, _ := tx.(*runtimeTransaction)
+	proofKey := [3]string{use.NodeID, record.AuthorizationID, strconv.FormatBool(!use.ExistingSession)}
+	proved := rt != nil && rt.authorityReads != nil && rt.authorityLineage[proofKey]
+	if !proved {
+		if record.Kind == "credit_grant" {
+			if err := checkSourceLineageTx(ctx, tx, use.NodeID, record); err != nil {
+				return AuthorizationRecord{}, err
+			}
+		}
+		if err := checkAuthorizationShareTx(ctx, tx, use.NodeID, record, !use.ExistingSession); err != nil {
 			return AuthorizationRecord{}, err
 		}
-	}
-	if err := checkAuthorizationShareTx(ctx, tx, use.NodeID, record, !use.ExistingSession); err != nil {
-		return AuthorizationRecord{}, err
+		if rt != nil && rt.authorityReads != nil {
+			if rt.authorityLineage == nil {
+				rt.authorityLineage = make(map[[3]string]bool)
+			}
+			rt.authorityLineage[proofKey] = true
+		}
 	}
 
 	notBefore, e1 := time.Parse(time.RFC3339Nano, record.NotBefore)

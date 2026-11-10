@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts
+2026/11/08 16:04:42 goose: no migrations to run. current version: 8
+2026/11/08 16:04:42 OK   00001_authority.sql (20.13ms)
+2026/11/08 16:04:42 OK   00002_tenant_policy.sql (10.03ms)
+2026/11/08 16:04:42 OK   00003_nodes_ports.sql (17.79ms)
+2026/11/08 16:04:42 OK   00004_entry_group_domains.sql (2.09ms)
+2026/11/08 16:04:42 OK   00005_rules_compile.sql (17.5ms)
+2026/11/08 16:04:42 OK   00006_packages_entitlements.sql (16.5ms)
+2026/11/08 16:04:42 OK   00007_metering_ledger.sql (23.34ms)
+2026/11/08 16:04:42 OK   00008_limits_shares.sql (34.31ms)
+2026/11/08 16:04:42 goose: successfully migrated database to version: 8
+    hub_runtime_lease_transport_test.go:175: Hub transport did not reach durable state
+--- FAIL: TestRuntimeLeaseActualMTLS60SecondsAgentInstallAndLostBackendReceipts (6.12s)
+FAIL
+FAIL	vortex/backend/internal/service	6.932s
+FAIL

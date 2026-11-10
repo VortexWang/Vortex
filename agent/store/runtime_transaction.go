@@ -35,14 +35,33 @@ type runtimeTransaction struct {
 	conn     *sql.Conn
 	release  func()
 	released sync.Once
+	// Enabled only by funding admission, which never changes authority rows.
+	// Balances, session IDs, time checks and rate remain live in this transaction.
+	authorityReads   map[[2]string]authorityRead
+	authorityLineage map[[3]string]bool
+	demandSamples    *[]demandConsumptionSample
 }
 
-func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions) (*runtimeTransaction, error) {
+type authorityRead struct {
+	record AuthorizationRecord
+	state  string
+}
+
+// A preowned slot is supplied only by a batch worker which collected its
+// members after obtaining writer ownership. Its idempotent release transfers
+// to the transaction, including every failure/automatic rollback path.
+func (s *Store) beginRuntimeTx(ctx context.Context, opts *sql.TxOptions, preowned ...func()) (*runtimeTransaction, error) {
 	started := time.Now()
 	caller, _, _, _ := runtime.Caller(1)
-	release, err := s.runtimeQueue.acquire(ctx)
-	if err != nil {
-		return nil, err
+	var release func()
+	var err error
+	if len(preowned) > 0 {
+		release = preowned[0]
+	} else {
+		release, err = s.runtimeQueue.acquire(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
@@ -115,7 +134,11 @@ func (tx *runtimeTransaction) report(operation string, err error) {
 	})
 }
 func (tx *runtimeTransaction) Commit() error {
+	started := time.Now()
 	err := tx.Tx.Commit()
+	if elapsed := time.Since(started); elapsed >= 25*time.Millisecond {
+		slog.Warn("runtime SQLite commit slow", "operation", runtimeOperation(tx.caller), "commit_elapsed", elapsed, "work_elapsed", started.Sub(tx.started), "error", err)
+	}
 	tx.finish()
 	tx.report("commit", err)
 	return err

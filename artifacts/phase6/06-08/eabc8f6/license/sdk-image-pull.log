@@ -1,0 +1,19 @@
+ghcr.io/wasilibs/wasix-sdk@sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae: Pulling from wasilibs/wasix-sdk
+a0e8f959b10d: Pulling fs layer
+bfbe77e41a78: Pulling fs layer
+0f4cbc2c8783: Pulling fs layer
+e651b9e28ec2: Pulling fs layer
+33ee364701d0: Pulling fs layer
+a0e8f959b10d: Download complete
+e651b9e28ec2: Download complete
+33ee364701d0: Download complete
+bfbe77e41a78: Download complete
+bfbe77e41a78: Pull complete
+0f4cbc2c8783: Download complete
+e651b9e28ec2: Pull complete
+33ee364701d0: Pull complete
+0f4cbc2c8783: Pull complete
+a0e8f959b10d: Pull complete
+Digest: sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae
+Status: Downloaded newer image for ghcr.io/wasilibs/wasix-sdk@sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae
+ghcr.io/wasilibs/wasix-sdk@sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae

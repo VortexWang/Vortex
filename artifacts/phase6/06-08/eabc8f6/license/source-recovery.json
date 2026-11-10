@@ -1,0 +1,76 @@
+{
+  "status": "partial-source-recovery",
+  "source_commit": "eabc8f6ddd39d7c7621a97332e81613acd5d1c3b",
+  "sdk": {
+    "tag": "ghcr.io/wasilibs/wasix-sdk:sha-fc94d60",
+    "revision": "fc94d603e92e2597fc605261127e9aabcf0a30b1",
+    "arm64_manifest": "sha256:91bbb2135e2a74b67ee92cebb9e899eb32e1e1ed8431b72b3b079bf62a87f1ae",
+    "amd64_manifest": "sha256:45747e5b042a9cae10d737a4643e22aa410d5a8e2c9f11a610a71067ede8378b",
+    "sysroot_layer": "sha256:e651b9e28ec28d7fd702f4fffcec24a599c5a3ec16e869cd71f3992981fb86be",
+    "sysroot_file_count": 1128,
+    "license_or_source_manifest_present": false
+  },
+  "recovered_compiler_rt": {
+    "wasm_debug_sdk": "wasisdk://v12.7g77ba98a998cb/build/compiler-rt",
+    "sdk_commit": "77ba98a998cb9f2a63ab3a5f94bbabd069f65ff0",
+    "llvm_gitlink": "d28af7c654d8db0b68c175db5ce212d74fb5e9bc",
+    "upstream_license": "Apache-2.0 WITH LLVM-exception",
+    "license_url": "https://github.com/llvm/llvm-project/blob/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/LICENSE.TXT",
+    "license_sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+    "object_proof": "runtime-object-recovery.json: 146/146 supplied builtins objects match recovered libc archive",
+    "actual_linked_sources": [
+      "fixtfsi.c",
+      "fixunstfsi.c",
+      "floatsitf.c",
+      "floatunsitf.c",
+      "fp_mode.c",
+      "lshrti3.c",
+      "multi3.c",
+      "ashlti3.c",
+      "multf3.c",
+      "addtf3.c",
+      "subtf3.c",
+      "extenddftf2.c",
+      "comparetf2.c"
+    ]
+  },
+  "attempts": [
+    {
+      "path": "Unauthenticated original Actions run 6268266259 endpoint",
+      "result": "404"
+    },
+    {
+      "path": "gh authenticated original run endpoint",
+      "result": "404"
+    },
+    {
+      "path": "Historical candidate commit check-runs endpoint",
+      "result": "0 check runs"
+    },
+    {
+      "path": "SDK OCI index, arm64 manifest, config, labels and history",
+      "result": "Recovered exact SDK revision and sysroot COPY layer"
+    },
+    {
+      "path": "Download sysroot layer and validate compressed blob sha256",
+      "result": "Recovered 1128 regular files and static archives; no license/git/source manifest"
+    },
+    {
+      "path": "Historical libc source archive d0362cb23d5a6bdba3ddb2e04748ebb55b48cd00",
+      "result": "Candidate licenses/build definitions recovered; not asserted as exact libc source commit"
+    },
+    {
+      "path": "Archive members and module DWARF/debug_str",
+      "result": "146 identical compiler-rt objects and exact SDK/LLVM commit; malloc/free exports use allocator bodies; no evidence that all libc++ archives or installed clang code is linked"
+    },
+    {
+      "path": "Candidate build32.sh and build_cxx_sysroot.yml",
+      "result": "build32 pulls WASIX ABI main without pinning; historical build uses rolling Arch compiler; current archive producer records clang 16.0.6"
+    },
+    {
+      "path": "Host llvm-objdump disassembly",
+      "result": "Host supports wasm section/symbol metadata, but no wasm32 disassembler target"
+    }
+  ],
+  "remaining": "Exact non-builtins libc source revision and generated WASIX ABI source inputs are not yet proven. Need object-equivalent source restoration or original run checkout/source evidence; no unknown-license waiver."
+}

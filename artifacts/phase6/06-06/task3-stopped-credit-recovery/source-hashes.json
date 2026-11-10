@@ -1,0 +1,7 @@
+{
+  "agent/store/epoch_handoff.go": "7b55da53c238ac7284a2f1e8c6c61f08a0915b84d96c97a6388869444e4532f3",
+  "agent/store/store.go": "459f50582fa1efa179038112b995d4e1043cfd2d2af96140008cc7bfd67b26bd",
+  "agent/store/stopped_credit_handoff_test.go": "e98382b3cce56093099c91e6bc1e56ee219e7fb1e1dbeca14324fea45b445a28",
+  "backend/internal/service/runtime_recovery_transport_test.go": "2b144b0846741710e6e8b15bbfbb0e10786dc977b2c0af9dbbf4292315a41cc5",
+  "contracts/protobuf/v1/lifecycle.md": "93eec5e26a76ce9637044be20bb8ea90c1814dab980a889158cf22628f365f4c"
+}

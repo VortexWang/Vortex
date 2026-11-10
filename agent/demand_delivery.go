@@ -9,12 +9,31 @@ import (
 	controlv1 "vortex/contracts/protobuf/v1"
 )
 
-func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1.NodeControl_ConnectClient, issuer string, cursor *string, sequence *uint64) error {
+// Session-local delivery state is only a retransmission throttle. The durable
+// pending row remains authoritative, and a reconnect starts with an empty map.
+type demandDeliveryState struct {
+	cursor string
+	sent   map[string]time.Time
+}
+
+const demandResponseRetry = time.Second
+
+func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1.NodeControl_ConnectClient, issuer string, delivery *demandDeliveryState, sequence *uint64) error {
 	if len(c.AdaptiveDemands) > 64 {
 		return fmt.Errorf("agent: adaptive demand scope limit exceeded")
 	}
 	for _, config := range c.AdaptiveDemands {
 		if config.Scope.HubID != issuer {
+			continue
+		}
+		// An outstanding durable request is already the sole authority for
+		// this scope. Do not rescan balances and open another SQLite read
+		// transaction on every 10ms wake while its response is in flight.
+		pending, err := c.Node.Store.HasPendingDemand(ctx, config.Scope)
+		if err != nil {
+			return err
+		}
+		if pending {
 			continue
 		}
 		if _, _, err := c.Node.PrepareAdaptiveDemand(ctx, config); err != nil {
@@ -26,15 +45,19 @@ func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1
 			return err
 		}
 	}
-	requests, err := c.Node.Store.PendingDemands(ctx, c.Node.NodeID, c.Node.BootID, issuer, *cursor)
+	requests, err := c.Node.Store.PendingDemands(ctx, c.Node.NodeID, c.Node.BootID, issuer, delivery.cursor)
 	if err != nil {
 		return err
 	}
 	if len(requests) == 0 {
-		*cursor = ""
+		delivery.cursor = ""
 		return nil
 	}
 	for _, r := range requests {
+		delivery.cursor = r.ID
+		if sent, ok := delivery.sent[r.ID]; ok && time.Since(sent) < demandResponseRetry {
+			continue
+		}
 		if r.TTL < time.Second || r.TTL > 300*time.Second || r.TTL%time.Second != 0 {
 			return fmt.Errorf("agent: invalid persisted demand TTL")
 		}
@@ -46,7 +69,15 @@ func (c *ControlClient) sendPendingDemands(ctx context.Context, stream controlv1
 			return err
 		}
 		*sequence = next
-		*cursor = r.ID
+		if delivery.sent == nil {
+			delivery.sent = make(map[string]time.Time)
+		}
+		if len(delivery.sent) >= 4096 {
+			if _, exists := delivery.sent[r.ID]; !exists {
+				return fmt.Errorf("agent: demand delivery window limit exceeded")
+			}
+		}
+		delivery.sent[r.ID] = time.Now()
 	}
 	return nil
 }

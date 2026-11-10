@@ -1,0 +1,50 @@
+{
+  "base_sha": "936edcab7ca46846cddd909c95d22fdd43665d2b",
+  "scope": "Live process-local Engine rule renewal observation in32-rule pages and actual33-rule mTLS issue/install/reconnect;unchanged finite budgets and pending holds",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "native_root": "root-native-race.log",
+    "linux_agent": "agent-linux-isolated-race.log;91.255s",
+    "linux_other_root_packages": "root-linux-race.log;individual Store154.110s/Hub20.987s/contracts/CLI pass;whole command FAIL",
+    "native_affected_backend": "backend-native-integration-race.log;45.358s",
+    "linux_affected_backend": "backend-linux-isolated-integration-race.log;36.774s",
+    "actual_mtls": "actual-mtls-reconnect-native.log;final assertion enhancement also in native/Linux complete Agent runs",
+    "builds": "cross-builds.json;six linux builds"
+  },
+  "failed_retained": {
+    "initial-fixture-compile.log": "test field typo",
+    "red-native.log": "genuine original observer lost active Engine rule scopes",
+    "actual-mtls-native.log": "manual partial issue mixed with flat-three whole-partition bootstrap;fixture deadline",
+    "root-linux-race.log": "whole bundle FAIL;existing silent-stream failover context timeout",
+    "backend-linux-integration-race.log": "regional3s watchdog in sealed recovery;isolated replacement passes;cause not proven"
+  },
+  "not_claimed": [
+    "Complete post-S/R Engine/pending deployment convergence",
+    "Same-SHA clean-source Docker/Actions pairing",
+    "Native amd64 execution",
+    "Full backend race rerun in this unit",
+    "06-06 completion or CR-008 approval"
+  ],
+  "evidence_sha256": {
+    "README.md": "8cf27f11896041f430978d5967509f9974ab39454a5e6dadf60be6ed1179402b",
+    "actual-mtls-explicit-topology-native.log": "70c7ee97b027eedd6108e5a62c6c583c5be7f59409523f181f000d1c812f95cf",
+    "actual-mtls-native.log": "8c0a90ddb132de9eae8a6151dc916052c8549c0b91d806ec1697914e55888102",
+    "actual-mtls-reconnect-native.log": "a36815cd31efab8b4d02ae4ce707c6f29944751bcf2287b089e5a95ae95cc3c4",
+    "agent-linux-isolated-race.log": "ecd773288fc6d839dadf3dea481ace669a235dd43150f09e41e9929777b6ea6d",
+    "approved-snapshot-protection.json": "48b95c58fa3242201ee9e14cc9d9e8d6e0c5730be1283acae0d1b62b8d294998",
+    "backend-linux-integration-race.log": "bcf0c3c7664dee1424d9c33aa5535f8cefded3f677dea922c7f9c95aeb46161b",
+    "backend-linux-isolated-integration-race.log": "9097deffade315c40675413ddf213df5795aaced3efb704ed0a729efaf2b13cf",
+    "backend-native-integration-race.log": "1a25fed27807095d3ef7a905a1b3a1434bfc67eb19083a97692b527e74357e56",
+    "cross-builds.json": "d986d7b3ab5f4f22acc9cc5151a959c9182d641005916efb5fcab1fbb2cbcf2f",
+    "environment.json": "50268202b5e8b1ba0f21374df91cbe755aa0a1fbce791ad5e8ef0cbe84b45977",
+    "green-lifecycle-native.log": "8aff1cc199d15c890df45ac1a107ecc4be5a4066036e89284aef23b8d234c640",
+    "green-native.log": "b23864031e2c1e8fc31061821a3c6dc5ecd610eb2cb541632f7e3ce710ec797d",
+    "initial-fixture-compile.log": "7149e96c909b4e814e0c537b4ebd2978c16f224781843147101e6516ee4d622d",
+    "isolated-linux-runs.json": "58e97ba5fa3360ac2865b55b6be6d2ad25fb4634020e26affeadf37a9ff589bf",
+    "linux-resource-observation.txt": "feadb3ec3faf60bdbc72c2a8aacdfdfbca51ef2a5408d69f61fc0079ad5522b1",
+    "red-native.log": "17297dbbdbee8f9ed4476215d001c3088f3e0efc0d1c74e1c419002089b0d55a",
+    "root-linux-race.log": "384b93d249533e45d02e8a3ca7e18356edd73d4823b1a26114e754c768625cec",
+    "root-native-race.log": "125f8f0a73ffd0c53e18a40149df79e17f4248ef396445a0419d2d0d930432c1",
+    "source-hashes.json": "c954d8b04ef2e43161f2bc4d9f042fb7a7eecaf80d9c8924ddbac7c3d8acaab5"
+  }
+}

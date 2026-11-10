@@ -16,15 +16,7 @@ func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageRe
 	if s.owner != "agent" || scope.SessionID == "" || block.NodeID != scope.NodeID || block.BootID != scope.BootID || block.SnapshotID != scope.BillingSnapshotID || block.RuleID != scope.RuleID || n == 0 || n > block.Reserved {
 		return ErrAuthorizationDenied
 	}
-	tx, err := s.beginRuntimeTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	if err := admitRuntimeFundingBlockWriteTx(ctx, tx, block, scope, n); err != nil {
-		return err
-	}
-	return tx.Commit()
+	return s.AdmitRuntimeFundingBlockBatch(ctx, []RuntimeBlockAdmission{{Block: block, Scope: scope, Bytes: n}})
 }
 
 func admitRuntimeFundingBlockWriteTx(ctx context.Context, tx storeTransaction, block UsageReservation, scope AuthorizationUse, n uint64) error {
@@ -136,15 +128,5 @@ func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []Runt
 			grouped = append(grouped, write)
 		}
 	}
-	tx, err := s.beginRuntimeTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	for _, write := range grouped {
-		if err := admitRuntimeFundingBlockWriteTx(ctx, tx, write.Block, write.Scope, write.Bytes); err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
+	return s.enqueueFundingAdmissions(ctx, grouped)
 }

@@ -10,6 +10,7 @@
   "license_policy": "docs/governance/license-policy.yaml",
   "license_policy_sha256": "334582883d6759177ff484a21177a91421ae627e157a58fb1614ead7ecd5fa58",
   "reproducibility": {
+    "openapi_phase6": "No code generator is installed. contracts/openapi/v1/openapi.yaml is the sole source; backend/openapi/v1/openapi.yaml is its byte-identical copy. Ruby standard-library YAML lint and two-copy cmp are mandatory. Phase 7 owns reviewed TypeScript generation.",
     "go": "Use exact module versions and sums from go.sum; run GOTOOLCHAIN=local go mod verify and go version -m.",
     "frontend": "Use pnpm 12.16.1 with the reviewed pnpm lock resolution; generate project lock after approval and run pnpm install --frozen-lockfile.",
     "images": "Use immutable multi-architecture image digests and generate per-platform Syft SBOMs.",

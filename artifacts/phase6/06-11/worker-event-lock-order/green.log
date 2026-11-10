@@ -1,0 +1,9 @@
+time="2026-11-09T11:56:56+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+time="2026-11-09T11:56:56+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+ Container vortex-p6-docker-a209743035fd-postgres-1 Recreate 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Recreate 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Recreated 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Recreated 
+ Container vortex-p6-docker-a209743035fd-valkey-1 Starting 
+ Container vortex-p6-docker-a209743035fd-postgres-1 Starting 
+Error response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint vortex-p6-docker-a209743035fd-valkey-1 (af099e9a8ad018153670dd6ac546462a2f656c2be13f71cfae782d3fd4ba4bbb): Bind for 127.0.0.1:16386 failed: port is already allocated

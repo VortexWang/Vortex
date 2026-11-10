@@ -1,0 +1,45 @@
+....{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+OpenAPI lint passed: 45 business operations; explicit rotating refresh exception only
+.................
+----------------------------------------------------------------------
+Ran 21 tests in 3.213s
+
+OK
+sqlc v1.31.1: two clean generations and committed source match byte-for-byte
+curl: (56) The requested URL returned error: 504
+all modules verified
+Traceback (most recent call last):
+  File "/private/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-phase6-final-uzreaoax/source/tools/phase6/dependency_lock_check.py", line 106, in <module>
+    main()
+  File "/private/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-phase6-final-uzreaoax/source/tools/phase6/dependency_lock_check.py", line 85, in main
+    subprocess.run(["curl", "--fail", "--location", "--silent", "--show-error", download, "-o", str(archive)], check=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 528, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['curl', '--fail', '--location', '--silent', '--show-error', 'https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-osx-aarch_64.zip', '-o', '/tmp/vortex-phase6-lock.OKU8yJ/protoc.zip']' returned non-zero exit status 56.

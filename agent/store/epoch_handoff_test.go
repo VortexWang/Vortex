@@ -107,3 +107,68 @@ func TestEpochHandoffRejectsMutationAndRevocationBeforeTransfer(t *testing.T) {
 		})
 	}
 }
+
+func TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors(t *testing.T) {
+	s, use := fundedStore(t)
+	ctx := context.Background()
+	root, e := s.CheckStoredAuthorization(ctx, use)
+	if e != nil {
+		t.Fatal(e)
+	}
+	next := root
+	next.AuthorizationID = "second-path"
+	next.SourceID = "second-source"
+	next.ParentAuthorizationID = "second-parent"
+	next.PathGeneration = 2
+	if e = s.PersistAuthorizationUpdate(ctx, AuthorizationUpdate{IssuerID: "hub-one", NodeID: use.NodeID, BootID: use.BootID, UpdateID: "path2", Payload: []byte("path2"), SignerEpoch: 1, PathGeneration: 2, FencingGenerationFloor: 2}, []AuthorizationRecord{next}, nil); e != nil {
+		t.Fatal(e)
+	}
+	h := EpochHandoff{TransferID: "550e8400-e29b-41d4-a716-446655440800", ParentID: root.ParentAuthorizationID, SourceID: root.SourceID, From: 1, To: 2, Remaining: 1000, RecordSHA256: strings.Repeat("a", 64)}
+	u := AuthorizationUpdate{IssuerID: "hub-one", NodeID: use.NodeID, BootID: use.BootID, UpdateID: "older-recovery", Payload: []byte("older-recovery"), SignerEpoch: 2, PathGeneration: 1, FencingGenerationFloor: 1, Handoffs: []EpochHandoff{h}}
+	bad := u
+	bad.UpdateID = "wrong-parent"
+	bad.Payload = []byte("wrong-parent")
+	bad.Handoffs = append([]EpochHandoff(nil), u.Handoffs...)
+	bad.Handoffs[0].ParentID = "unrelated"
+	if e = s.PersistAuthorizationUpdate(ctx, bad, nil, nil); e == nil {
+		t.Fatal("unproven older family accepted")
+	}
+	if e = s.PersistAuthorizationUpdate(ctx, u, nil, nil); e != nil {
+		t.Fatal("exact old-path handoff rejected", e)
+	}
+	for _, key := range []string{"authorization_path_generation", "authorization_fencing_floor", "authorization_signer_epoch"} {
+		value, e := s.AgentState(ctx, key)
+		if e != nil || value != "2" {
+			t.Fatal("recovery lowered admission floor", key, value, e)
+		}
+	}
+	// A grant or heartbeat cannot use the narrow no-grant recovery exception.
+	for _, grant := range []bool{false, true} {
+		stale := u
+		stale.UpdateID = "stale-heartbeat"
+		stale.Payload = []byte("stale-heartbeat")
+		stale.Handoffs = nil
+		var records []AuthorizationRecord
+		if grant {
+			stale.UpdateID = "stale-grant"
+			stale.Payload = []byte("stale-grant")
+			r := root
+			r.AuthorizationID = "stale-child"
+			r.SignerEpoch = 2
+			r.AmountBytes = 1
+			records = []AuthorizationRecord{r}
+			stale.Handoffs = u.Handoffs
+		}
+		if e = s.PersistAuthorizationUpdate(ctx, stale, records, nil); !errors.Is(e, ErrAuthorizationGenerationStale) {
+			t.Fatal("ordinary old-path update accepted", grant, e)
+		}
+	}
+	use.ExistingSession = true
+	if _, e = s.CheckStoredAuthorization(ctx, use); e != nil {
+		t.Fatal("old draining credit lost", e)
+	}
+	use.ExistingSession = false
+	if _, e = s.CheckStoredAuthorization(ctx, use); e == nil {
+		t.Fatal("old path admitted new sessions")
+	}
+}

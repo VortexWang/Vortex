@@ -1,0 +1,27 @@
+[
+  {
+    "case": "wrong-sha",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "case": "dirty-source",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "case": "missing-fault",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "case": "skipped-component",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "case": "missing-runtime-pass",
+    "exit": 1,
+    "rejected": true
+  }
+]

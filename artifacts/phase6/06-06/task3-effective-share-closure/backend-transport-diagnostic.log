@@ -1,0 +1,17 @@
+=== RUN   TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay
+2026/11/08 23:29:24 goose: no migrations to run. current version: 8
+2026/11/08 23:29:24 OK   00001_authority.sql (23.65ms)
+2026/11/08 23:29:24 OK   00002_tenant_policy.sql (17.1ms)
+2026/11/08 23:29:24 OK   00003_nodes_ports.sql (39.37ms)
+2026/11/08 23:29:24 OK   00004_entry_group_domains.sql (4.24ms)
+2026/11/08 23:29:24 OK   00005_rules_compile.sql (36.57ms)
+2026/11/08 23:29:24 OK   00006_packages_entitlements.sql (36.43ms)
+2026/11/08 23:29:24 OK   00007_metering_ledger.sql (42.64ms)
+2026/11/08 23:29:24 OK   00008_limits_shares.sql (128.89ms)
+2026/11/08 23:29:24 goose: successfully migrated database to version: 8
+    share_effective_transport_test.go:57: first disconnect store: backend heartbeat is not newer than the durable heartbeat
+    share_effective_transport_test.go:59: did not reach FULL closure store: backend heartbeat is not newer than the durable heartbeat
+--- FAIL: TestRecoveredShareClosureActualMTLSFULLLossAndPGAckReplay (1.50s)
+FAIL
+FAIL	vortex/backend/internal/service	2.274s
+FAIL

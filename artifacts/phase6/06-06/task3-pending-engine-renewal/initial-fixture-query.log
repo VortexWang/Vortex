@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR
+2026/11/09 02:40:25 goose: no migrations to run. current version: 8
+2026/11/09 02:40:25 OK   00001_authority.sql (26.12ms)
+2026/11/09 02:40:25 OK   00002_tenant_policy.sql (15.17ms)
+2026/11/09 02:40:25 OK   00003_nodes_ports.sql (36.94ms)
+2026/11/09 02:40:25 OK   00004_entry_group_domains.sql (5.07ms)
+2026/11/09 02:40:25 OK   00005_rules_compile.sql (43.65ms)
+2026/11/09 02:40:25 OK   00006_packages_entitlements.sql (38.91ms)
+2026/11/09 02:40:25 OK   00007_metering_ledger.sql (47.01ms)
+2026/11/09 02:40:25 OK   00008_limits_shares.sql (102.46ms)
+2026/11/09 02:40:25 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:53: ERROR: column "rule_id" does not exist (SQLSTATE 42703)
+--- FAIL: TestRuntimeRecoveryPendingEngineCommitAutomaticallyRenewsAfterSR (1.44s)
+FAIL
+FAIL	vortex/backend/internal/service	2.089s
+FAIL

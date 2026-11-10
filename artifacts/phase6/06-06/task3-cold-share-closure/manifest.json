@@ -1,0 +1,35 @@
+{
+  "base_sha": "3d54de813614f7600354a8a65979b81425abcc19",
+  "utc": "2026-11-08T09:43:54.524199+00:00",
+  "evidence_scope": "development working tree; not clean-source or Actions",
+  "source_sha256": {
+    "backend/db/query/share_closures.sql": "8f6b7b4bcf6a70a26dba650c6698d4ec421b4ec515d3bf775a4d3aabdee3ccec",
+    "backend/db/generated/share_closures.sql.go": "2f35136b430b7c264d7c874feedf133761c8fb318ecfd11c8b118040a82223c1",
+    "backend/internal/service/hub_cold_recovery.go": "a81beb61f8dfcedeb65d8ec306586a692ea3e5a1e2edf06b150d6f4b4f38fd9f",
+    "backend/internal/service/share_renewal_closure.go": "77e3fa81284a09a2bc75044c9aed2762a1095a77839726ede12b0bdb4c85509d",
+    "backend/internal/service/share_cold_recovery.go": "bc1b8e51657cfc07196a2dcba39a0475aeb9867de42858872c4ce0598e5dce29",
+    "backend/internal/service/share_cold_recovery_test.go": "941e2d7873a8553b0caf090f717c47fb9ad4aea25aec21e81789819f71d4175d",
+    "backend/internal/service/share_allocation_test.go": "89e61791832ffbc75fd405bc3685a8e5c0337ce13186f48ec0b97880685c9578",
+    "contracts/protobuf/v1/lifecycle.md": "30384716e69fe7e97d13427e4bb4e9facb521b982bfb9c9df3533c871e0fc20a"
+  },
+  "evidence_sha256": {
+    "README.md": "709ff98fc8c985df12d332cca578bde0e7fa754482aface472f3c87f892ed32f",
+    "disconnected-consumer-red.log": "c9dad46a072ee8c8e0f43896b923ffbcff13fb99626bb433b063c42ff459f715",
+    "focused-fresh-rule-native.log": "595311536c3dce501f5e977d88ab99a6de79e170b5ed9d10ff3b49e0cfc4c73f",
+    "focused-native-corrected.log": "adfd30a376ce94e12da3c904ba973002cebae04ac29f8b7a8905a3b8f44286a5",
+    "focused-native.log": "e445e613ed6cfd189416b70a6792eb3ef698c8220e3450c7c37bcbc97782f496",
+    "focused-new-revision-native.log": "a044715cbd00ac7631078c5d25493656391ddc50e1f7953bbe3ff48f73fc71a4",
+    "focused-recompile-diagnostic.log": "9ce8d01877c4d63768af89b1dada363a36e90f2cac39d36a659a5c015c740631",
+    "focused-refunding-native.log": "8869cc50684a3a3567a2824e0b8147ec55308cfdfbc934be083053dbb7a3f7fc",
+    "full-backend-native-race.log": "b60bdd22f0bb5a652a6dea3f92c5c76dab2ae426befcde8d57611ff9e3b051dc",
+    "generation.json": "1a6e0410580418b94f8ab4ccb1ac7ba417839f3e9552de47745c4222b4498cf8",
+    "linux-race-build.log": "3219d3fb8fc05d291d3f74eba3218799bce31d703ba33242275efade814584b3"
+  },
+  "results": {
+    "consumer_disconnected_red": 1,
+    "final_fresh_rule_funding_sequence_boot_scope_green": 0,
+    "full_backend_native_race": 0,
+    "linux_service_control_worker_clock_race_and_dual_arch_backend_hub_builds": 0,
+    "independent_sqlc_outputs": 21
+  }
+}

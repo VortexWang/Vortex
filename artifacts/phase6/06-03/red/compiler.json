@@ -1,0 +1,10 @@
+{
+  "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/compiler_red_test.py",
+  "exitCode": 1,
+  "output": "test_compiled_artifact_authority (__main__.CompilerAuthority) ... FAIL\n\n======================================================================\nFAIL: test_compiled_artifact_authority (__main__.CompilerAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/compiler_red_test.py\", line 9, in test_compiled_artifact_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestCompileArtifactImmutableSchema\n2026/11/07 11:57:57 goose: no migrations to run. current version: 5\n    compiler_test.go:13: immutable per-node compiled artifact storage missing\n--- FAIL: TestCompileArtifactImmutableSchema (0.02s)\nFAIL\nFAIL\tvortex/backend/internal/compiler\t0.519s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.819s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_compiled_artifact_authority",
+  "targetFile": "tools/phase6/compiler_red_test.py",
+  "expected": "immutable per-node artifact authority exists",
+  "actual": "rule_artifacts absent on actual PostgreSQL at migration5",
+  "semanticAssessment": "The target compiled, connected to actual PostgreSQL and intentionally failed its artifact-storage assertion; no setup or import failure."
+}

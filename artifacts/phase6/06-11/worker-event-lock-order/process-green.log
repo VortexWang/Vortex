@@ -1,0 +1,6 @@
+time="2026-11-09T12:05:23+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+time="2026-11-09T12:05:23+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-a209743035fd\"). Use `external: true` to use an existing volume"
+ Container vortex-p6-docker-a209743035fd-backend-test-run-592a3a0a7467 Creating 
+ Container vortex-p6-docker-a209743035fd-backend-test-run-592a3a0a7467 Created 
+ok  	vortex/backend/internal/service	49.941s
+ok  	vortex/backend/internal/worker	1.013s [no tests to run]

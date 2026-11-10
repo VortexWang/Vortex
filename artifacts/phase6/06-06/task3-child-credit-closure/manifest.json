@@ -1,0 +1,19 @@
+{
+  "base_commit": "1ac9ffffce8be9d0715a92a0ff7900e9b2bfef8f",
+  "scope": "development local Node stop/final boundary; no wire/PG release or full06-06 acceptance",
+  "source": {
+    "agent/store/credit_grant_closure.go": "80bd2d02f80efa08245165902cbddc385af0981e0c706974a2a915f6e74d81d5",
+    "agent/store/credit_grant_closure_test.go": "cac568de465d5ce0d078da426419b461e5f5bc22635ed06b6dcb9e6f496bb380",
+    "agent/store/store.go": "aa638da4a3520b65ad69c48934f92ac257929414c828ef193b8d0ed714339df1",
+    "agent/credit_grant_closure_test.go": "10e51d248e55d9ca18aaf0f77a62ef7b41f5a5c09fed22a7c69075a252f3f416"
+  },
+  "evidence": {
+    "README.md": "326d1c25fdf6abac8306cba8dd271f6803c2b8260c1628ac0352c6b84c2885f3",
+    "focused-native.log": "5902189a6e28dabb7c2fe89799e74e7dc7b37cbcd9b0b2e13e94f77a4040d95b",
+    "full-native-race-wrong-cli-path.log": "1c20e66af6c9e87b09966209a4f5271d45e343347407a5e34a87a2f4a4f25083",
+    "full-native-race.log": "7c7832986771a44f7a1e5d2036b495133d6c57c7af55b4658119cbe4321e7c91",
+    "linux-build-corrected.log": "b2396e28ef6c59806c5ea65a872b51303deac147c598da7b382f081d45e53260",
+    "linux-race-build.log": "3b8b9460403c07ade2eebf148304e9844def2225fb8c524023639a4bee42d66e",
+    "relay-native.log": "8b925fe35611256237e84ed8557637a6b3116bf8cf239540be748f5cc6c2144d"
+  }
+}

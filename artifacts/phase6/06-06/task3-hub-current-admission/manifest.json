@@ -1,0 +1,86 @@
+{
+  "scope": "explicit PG all-tenant current-state S/R admission and old renewal closure/target binding; no local Hub ACK or production admission transport",
+  "base_sha": "1110faf14422219b7fd0c163ada455b9c6aca86c",
+  "created_at": "2026-11-08T14:26:47.255873+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "backend/db/migrations/00008_limits_shares.sql": "661bbe7cd7bacb583aa307436a9ee69183c249f23271794994507d7c94c3ea0d",
+    "backend/db/query/hub_same_store_recovery.sql": "cffaa81a34e9d5f1d2cb18cc8dda9bce27897429bd5d284bf9107562266fe6be",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "1c17fa5901ab231bc4404ee17d730fecade3dbf176012599c0e0a9e1a44ccb53",
+    "backend/db/generated/models.go": "015b6ab975153fc4677fd51df6f9639a9460cd8ca58a4b373b834773d4cbec2f",
+    "backend/internal/service/hub_same_store_prefix.go": "aba066477d49d4095536cb6717880a1efd983d78d900cb2cc7f0ba5367836b2f",
+    "backend/internal/service/hub_same_store_admission.go": "fdad007853f17fed4aa1fd24eb766dca3565876ff893d85a1c1264cf10f0e9f8",
+    "backend/internal/service/hub_same_store_admission_test.go": "80a850b56ffbc7bdeeb70f71b017be244f933e71203563f2fadc78dbe509fff7",
+    "contracts/protobuf/v1/lifecycle.md": "e003c344bb8460388905d9545b59f8756e3849e3cdea57ec1f225334966cad1a"
+  },
+  "evidence": {
+    "backend-linux-race.log": {
+      "result": "pass",
+      "sha256": "b8d21dbbcbad2403a857ef32fd7d524de2a04096deeb060cad2d08f28a642fd3"
+    },
+    "backend-native-race.log": {
+      "result": "pass",
+      "sha256": "de70e2c5b7a8d9f5552cc2deff7fd33d9038b36dedb42d333f92da1ea9a7db12"
+    },
+    "cross-builds.json": {
+      "result": "pass",
+      "sha256": "21bb7da4f8c9b1d8dade8a07e31e4499aab968eb501ac36ac16fba390fa9c9e6"
+    },
+    "environment.json": {
+      "result": "observed",
+      "sha256": "033e3c3a61960d3354c069f4305f3c46f140a91f01860a4051932f21dd87515e"
+    },
+    "focused-complete-native.log": {
+      "result": "failed: test snapshot used tenant_id on tenants(id)",
+      "sha256": "bc2b7ff61df2b04ec4f03ad08b11efb2da1fd6be4c13999913e7531424e08491"
+    },
+    "focused-corrected-native.log": {
+      "result": "pass",
+      "sha256": "ce9113feaaeb8b074bc2855d5f357c16265cd40ef2604aac51500c6ceed7884d"
+    },
+    "focused-linux.log": {
+      "result": "failed: test snapshot used tenant_id on tenants(id)",
+      "sha256": "b9f2306bdcc5c99c406992e0e16bf747435688dbdd85cdc5a6694eecb1147137"
+    },
+    "focused-native.log": {
+      "result": "failed-build: unused test import",
+      "sha256": "80f2d3e7749927e0836f9a0f9444756a895d03dd7a4f8b028484d621713ea6e9"
+    },
+    "generators-repro.json": {
+      "result": "pass",
+      "sha256": "f45acf1dffa7f295ef14d3961a9857f3186bca389da78fb588bd22289711bff1"
+    },
+    "green-current-prefix-gate.log": {
+      "result": "pass",
+      "sha256": "f0090bc608266f562b70446a5141a9f1f6425cd05a547ec8bc0b462fa8aa39e5"
+    },
+    "prefix-refactor-native.log": {
+      "result": "pass",
+      "sha256": "8bc99ddd8ff93192428e4999823d26450d77a67a2d6fed12c8ab85549ff67892"
+    },
+    "red-overlay.json": {
+      "result": "pass",
+      "sha256": "d60495dc05df7f12cf8e4db658eb7203e9e3880d612c7698dcd63457c25f0ba3"
+    },
+    "red-without-current-prefix-gate.log": {
+      "result": "expected-RED: deliberate Go overlay disconnect allowed stale proof",
+      "sha256": "cf8bb58c4f7e257193a9a094eaed3237d684fef8a6290eed22d48638211de696"
+    }
+  },
+  "full_final_source_checks": [
+    "backend-native-race.log",
+    "backend-linux-race.log",
+    "generators-repro.json",
+    "cross-builds.json"
+  ],
+  "not_claimed": [
+    "Hub admission/ACK transport",
+    "local online activation",
+    "effective new-epoch consumers",
+    "repeated PG recovery",
+    "clean-source acceptance",
+    "GitHub Actions",
+    "native amd64 execution",
+    "06-06 completion"
+  ]
+}

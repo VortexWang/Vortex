@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Historical owner-approved CR-005 hashes, unchanged wire/schema, and exact CR-006 candidate hashes passed; owner freeze remains separate
+{
+  "valid": true,
+  "errors": []
+}
+Rule contract: two clean generations, historical CR-005 approval, unchanged legacy wire/schema and exact CR-006 candidate passed; freeze checked separately

@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "id": "CR-012",
+  "status": "candidate-pending-exact-owner-approval",
+  "baselines": {
+    "main": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+    "phase6": "c85ed753c8ea92965346f12f5b4e7ea30e900695"
+  },
+  "change": {
+    "contract_id": "vortex.control.v1",
+    "from": "1.7.0",
+    "version": "1.8.0",
+    "kind": "compatible"
+  },
+  "artifacts": [
+    {
+      "path": "contracts/CHANGELOG.md",
+      "sha256": "e009bb1737abad09ad58035646bb5a56ae252df904639c2bd1724b31c06e0913",
+      "baseline_sha256": {
+        "main": "449cb0ab69b141b6aa7eefc8ea6bb07f7c3f1cd194feee5144f59d104dab36ab",
+        "phase6": "bc4da7a5903125693fd54f52eef54dd8763d2221f1e44638de419350b39470fa"
+      }
+    },
+    {
+      "path": "contracts/authorization/v1/payload.schema.json",
+      "sha256": "3e5ee9e6fc0b8ccf517803ba5713dd1f3324e2dee41c0030f60657f046cd4f8b",
+      "baseline_sha256": {
+        "main": "3e5ee9e6fc0b8ccf517803ba5713dd1f3324e2dee41c0030f60657f046cd4f8b",
+        "phase6": "3e5ee9e6fc0b8ccf517803ba5713dd1f3324e2dee41c0030f60657f046cd4f8b"
+      }
+    },
+    {
+      "path": "contracts/database/schema.sql",
+      "sha256": "3c0ffe948c5171571b7b42d31d870fa7500ff98f477a52deca4ab9476add88c0",
+      "baseline_sha256": {
+        "main": "11fcf4da05152e6646815ba0b7c845d55fe68a0b173e05b97673f928f39ca4d2",
+        "phase6": "3c0ffe948c5171571b7b42d31d870fa7500ff98f477a52deca4ab9476add88c0"
+      }
+    },
+    {
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "sha256": "2b9c61ffa2e45c17a4ea8e1c197de535b3d409a1fb1068e409b0540afef158a5",
+      "baseline_sha256": {
+        "main": "b6f561641510028b7c1c83b8b5d317365981a5b6be3a8aa70d6189eef548c191",
+        "phase6": "2b9c61ffa2e45c17a4ea8e1c197de535b3d409a1fb1068e409b0540afef158a5"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/identity-profile.json",
+      "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070",
+      "baseline_sha256": {
+        "main": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070",
+        "phase6": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.md",
+      "sha256": "0ca6e01d98efc7df6d43bb0b15b9e73c4effe2c05892d9507ed31594eeef3ae6",
+      "baseline_sha256": {
+        "main": "153a52801c0bfe235fa82bebabc21374a12a8f67a2a5de88adbd6b13244397b0",
+        "phase6": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.schema.json",
+      "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338",
+      "baseline_sha256": {
+        "main": "30f613a44a8316e2ac8120d3f6f745499c7699329b7bbc7d30e17ef64eba230a",
+        "phase6": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/share-handoff.schema.json",
+      "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151",
+      "baseline_sha256": {
+        "main": null,
+        "phase6": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.pb.go",
+      "sha256": "45de8cfc68bab24a5e69052857172375d5892f482c82151220edf14dee5466e4",
+      "baseline_sha256": {
+        "main": "6db3ec30022bbf2acb25e9c2ca4053d1e9e74f46abaca0d82ea9b74e134adb9e",
+        "phase6": "91c4926a8c1f103fa312e1b2ac3cff38cdb4ac1f19f18fe19e9eb4886713d17c"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.proto",
+      "sha256": "bcb62435c2c61df953940cd2424f520432e37e8efc10012f0c5f02b845d7866e",
+      "baseline_sha256": {
+        "main": "3e8ae1400df5672c981cf74bcd052d2b20d79f68db2ae8d9d4d0e5b6f338159a",
+        "phase6": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012"
+      }
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex_grpc.pb.go",
+      "sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+      "baseline_sha256": {
+        "main": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+        "phase6": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+      }
+    },
+    {
+      "path": "contracts/requirements-map.yaml",
+      "sha256": "afa6ad25e496e3401b83944232b4ac4fa88c6b1ccf42160b3f016d12de3fab1f",
+      "baseline_sha256": {
+        "main": "5639cb36cc2651f45535cd53631b2b2a6735a6966fa5732e3cf79368a1846b43",
+        "phase6": "f040ecb7600c8ce01ae71ace89c57d7d011192e982d7ecb9dab4fdde5d91daab"
+      }
+    },
+    {
+      "path": "contracts/runtime/config.schema.json",
+      "sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "baseline_sha256": {
+        "main": "2e29ae94f438a2f79b16d7e755bb81875c8b8668dd5b52c15bde819cfe17469f",
+        "phase6": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1"
+      }
+    },
+    {
+      "path": "contracts/versions.yaml",
+      "sha256": "10fdee659cd5f7a8602dd072153f963400d3e8916d13b6f3bce3b110728b3767",
+      "baseline_sha256": {
+        "main": "98c9d0248eabc941131da1d308874a5d9eea02355e23857329189caedd3aa9af",
+        "phase6": "a97a78d422fade9e75178620ee5f46ec92d41247358c790232d68fa5de2b7b27"
+      }
+    },
+    {
+      "path": "contracts/vlink/v1/encoding.md",
+      "sha256": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e",
+      "baseline_sha256": {
+        "main": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e",
+        "phase6": "bf118a61789d37854f7c18dc5676d62bac4b845040944812418419cdacb17a9e"
+      }
+    }
+  ],
+  "historical_records": [
+    {
+      "path": "docs/changes/CR-001-API压测工具替换.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "3000aa5832c456852ce2dacd18bcdb2dab1bc359037a89dcba84ed3939db66c5"
+    },
+    {
+      "path": "docs/changes/CR-005-APPROVAL.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "f7d421b277a64dcabc3afe198a38d55fb023bb4223f1d0ae084d38f7ef4ace33"
+    },
+    {
+      "path": "docs/changes/CR-005-rule-two-phase.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "b02a73a9d3d4d8506cfd79904efa6a5ebc430cd4b06d729a37b518e19d582bb4"
+    },
+    {
+      "path": "docs/changes/CR-005-rule-two-phase.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "8b24f23274adb10f03df1e758ed64690bdaf9959888b3e302a48e165886a92f2"
+    },
+    {
+      "path": "docs/changes/CR-006-APPROVAL.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "86b8e33b04bfd6b7dcb935033405f2a7738c8dd8a0de4b12757cf419d12fc040"
+    },
+    {
+      "path": "docs/changes/CR-006-packages-entitlements.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "60487b773b60f9b1bfee80811e49c17d43b910b7ff19c68025a33c9c5e83b28d"
+    },
+    {
+      "path": "docs/changes/CR-006-packages-entitlements.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "32d23f6d6fed36228a3ea57b6de0a2c9458262c620fe36ecdce3f42f3739cd0d"
+    },
+    {
+      "path": "docs/changes/CR-007-APPROVAL.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "a5ba7ec1f47e54769ac4eba99452afc6a04d2dfbd7470fdf998f90760839f2a0"
+    },
+    {
+      "path": "docs/changes/CR-007-metering-ledger.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5"
+    },
+    {
+      "path": "docs/changes/CR-007-metering-ledger.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "fe6bb070c2ef2580b86db9ec5b4bff0c7aa7db4c082662be0aac3fd65effcbc4"
+    },
+    {
+      "path": "docs/changes/CR-008-APPROVAL.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "17da8ec278e21ba95d8b3fe36b75764cefccf6082b833b3bf3a08722218260c9"
+    },
+    {
+      "path": "docs/changes/CR-008-limits-runtime.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd"
+    },
+    {
+      "path": "docs/changes/CR-008-limits-runtime.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "6458a79e0adb70c6edb72b57c6c39f3880cf518b5dd3582fc3f6312744e13f2f"
+    },
+    {
+      "path": "docs/changes/CR-009-APPROVAL.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "30b78e6f422a304bfe19677ccca2bb0e584fe6b75706ee7ab88892c679bd16e4"
+    },
+    {
+      "path": "docs/changes/CR-009-rest-events.json",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "ed7ca2f0cf68f46d29984b7ddafbc13fc8de4ad171cd3378b0b9dda8e45bdfe0"
+    },
+    {
+      "path": "docs/changes/CR-009-rest-events.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "d334dd7da9021ae7ab7108340a824603a9ce05cc692ef0d094e0c5368338bdaa"
+    },
+    {
+      "path": "docs/governance/proposals/CR-002-NFR-038-recovery.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "a6836e49e48e93278313280435cc186452d37f7694fd8af16f319becd48d1bc9"
+    },
+    {
+      "path": "docs/governance/proposals/CR-003-sqlc-generator-license-exception.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "eb3630cda5f711d0383813c9b3c8b9e09027f6403b1799e92b01a8b6846b6949"
+    },
+    {
+      "path": "docs/governance/proposals/CR-004-sqlc-embedded-license-review.md",
+      "source": "c85ed753c8ea92965346f12f5b4e7ea30e900695",
+      "sha256": "7c77e95a677fd4673c598be3717335201827ccad1f2e32b31f4150dfe64ff23d"
+    },
+    {
+      "path": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.json",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "1f63dabdd16939de49153891248269192650bfb197806e556adf40ddeb931efa"
+    },
+    {
+      "path": "docs/governance/proposals/CR-010-phase4-merge-wire-migration.md",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "920f33908769c53bb527add00bbcc02b7c907559a716fba2c3212f43942872cf"
+    },
+    {
+      "path": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.diff",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "9cbc3f4ce2d650e734c107fecc0c4cf6a56a26d4d1ddecc20fdbb0638a1fd996"
+    },
+    {
+      "path": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.encoding.md",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "0631f2fd4ed7f9d9f028a55a26e57c3a7e404edb7c2f9fcdf77a4e8e3f3c7d2e"
+    },
+    {
+      "path": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.json",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "a29cc7103a2f195ea41741487b47f3a8f9d41792258de8916221eaa85617dd4f"
+    },
+    {
+      "path": "docs/governance/proposals/CR-011-vlink-freeze-reconciliation.md",
+      "source": "729cd8de28c115a2c5aa76b528100a26de4bbf0c",
+      "sha256": "d53f94e7ca46df4522890a64fc1d5bb6c4f85642dc847a1313115353a7820d95"
+    }
+  ],
+  "candidate_review_sha256": "045418a67821df102a796bad007ad8e1a894638197027c96ded78dd29eb9ba21",
+  "acceptance": {
+    "owner_approval": false,
+    "same_sha_pair": "pending; approval required before freeze gates"
+  },
+  "review_files": [
+    {
+      "path": "docs/governance/proposals/CR-012-phase6-integration.md",
+      "sha256": "4cd2c144f14029d1ad528a124b6f844656e956bad0357d47d98b0c46bc6f109b"
+    },
+    {
+      "path": "docs/governance/proposals/CR-012-main.diff",
+      "sha256": "14eeb3e2f60e7f666dbe5d2f95dfde0da9ca46b5580f22b241d0328364b5298d"
+    },
+    {
+      "path": "docs/governance/proposals/CR-012-phase6.diff",
+      "sha256": "2d5940644e44168fb523b164972b95345a6478701372e588ef5a7b640ef2548d"
+    }
+  ]
+}

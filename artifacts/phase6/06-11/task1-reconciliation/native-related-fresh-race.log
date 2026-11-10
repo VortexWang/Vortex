@@ -1,0 +1,80 @@
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/prepare
+2026/11/09 09:11:56 OK   00001_authority.sql (20.66ms)
+2026/11/09 09:11:56 OK   00002_tenant_policy.sql (15.55ms)
+2026/11/09 09:11:56 OK   00003_nodes_ports.sql (27.25ms)
+2026/11/09 09:11:56 OK   00004_entry_group_domains.sql (2.78ms)
+2026/11/09 09:11:56 OK   00005_rules_compile.sql (24.66ms)
+2026/11/09 09:11:56 OK   00006_packages_entitlements.sql (24.84ms)
+2026/11/09 09:11:56 OK   00007_metering_ledger.sql (31.21ms)
+2026/11/09 09:11:56 OK   00008_limits_shares.sql (85.68ms)
+2026/11/09 09:11:56 OK   00009_domain_events.sql (55.85ms)
+2026/11/09 09:11:56 goose: successfully migrated database to version: 9
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/query_prepared
+2026/11/09 09:11:56 goose: no migrations to run. current version: 9
+=== RUN   TestApplySupersededLateObservationCannotQueueCommit/partial_commit
+2026/11/09 09:11:56 goose: no migrations to run. current version: 9
+--- PASS: TestApplySupersededLateObservationCannotQueueCommit (0.81s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/prepare (0.54s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/query_prepared (0.14s)
+    --- PASS: TestApplySupersededLateObservationCannotQueueCommit/partial_commit (0.13s)
+=== RUN   TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery
+2026/11/09 09:11:56 goose: no migrations to run. current version: 9
+--- PASS: TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery (0.12s)
+=== RUN   TestApplyPrepareCommitUnknownAndLateReceipt
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestApplyPrepareCommitUnknownAndLateReceipt (0.14s)
+=== RUN   TestRestrictionBlocksDispatchButPreservesLateObservation
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestRestrictionBlocksDispatchButPreservesLateObservation (0.12s)
+=== RUN   TestCompileWorkerMissingSnapshotThenReadyRestart
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerMissingSnapshotThenReadyRestart (0.10s)
+=== RUN   TestCompileWorkerAuditRollback
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerAuditRollback (0.14s)
+=== RUN   TestCompileWorkerMissingSnapshotPreservesPriorAuthority
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerMissingSnapshotPreservesPriorAuthority (0.12s)
+=== RUN   TestCompileWorkerConflictRetainsAuthority
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerConflictRetainsAuthority (0.20s)
+=== RUN   TestCompileWorkerConflictPreservesPriorActiveArtifact
+2026/11/09 09:11:57 goose: no migrations to run. current version: 9
+--- PASS: TestCompileWorkerConflictPreservesPriorActiveArtifact (0.13s)
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=true
+2026/11/09 09:11:58 goose: no migrations to run. current version: 9
+2026/11/09 09:11:58 OK   00001_authority.sql (8.07ms)
+2026/11/09 09:11:58 OK   00002_tenant_policy.sql (7.61ms)
+2026/11/09 09:11:58 OK   00003_nodes_ports.sql (17.67ms)
+2026/11/09 09:11:58 OK   00004_entry_group_domains.sql (1.96ms)
+2026/11/09 09:11:58 OK   00005_rules_compile.sql (18.07ms)
+2026/11/09 09:11:58 OK   00006_packages_entitlements.sql (17.99ms)
+2026/11/09 09:11:58 OK   00007_metering_ledger.sql (23.64ms)
+2026/11/09 09:11:58 OK   00008_limits_shares.sql (55.75ms)
+2026/11/09 09:11:58 OK   00009_domain_events.sql (25.68ms)
+2026/11/09 09:11:58 goose: successfully migrated database to version: 9
+=== RUN   TestRulePortActualAgentSocketsUnknownAndQuery/auto=false
+2026/11/09 09:11:59 goose: no migrations to run. current version: 9
+2026/11/09 09:11:59 OK   00001_authority.sql (8.1ms)
+2026/11/09 09:11:59 OK   00002_tenant_policy.sql (7.48ms)
+2026/11/09 09:11:59 OK   00003_nodes_ports.sql (16.39ms)
+2026/11/09 09:11:59 OK   00004_entry_group_domains.sql (1.96ms)
+2026/11/09 09:11:59 OK   00005_rules_compile.sql (16.48ms)
+2026/11/09 09:11:59 OK   00006_packages_entitlements.sql (16.37ms)
+2026/11/09 09:11:59 OK   00007_metering_ledger.sql (21.89ms)
+2026/11/09 09:11:59 OK   00008_limits_shares.sql (51.31ms)
+2026/11/09 09:11:59 OK   00009_domain_events.sql (25.4ms)
+2026/11/09 09:11:59 goose: successfully migrated database to version: 9
+--- PASS: TestRulePortActualAgentSocketsUnknownAndQuery (2.15s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=true (1.09s)
+    --- PASS: TestRulePortActualAgentSocketsUnknownAndQuery/auto=false (1.06s)
+PASS
+ok  	vortex/backend/internal/service	6.048s
+=== RUN   TestRuleReconciliationDrainsReadyWorkAndCancels
+--- PASS: TestRuleReconciliationDrainsReadyWorkAndCancels (0.00s)
+=== RUN   TestRuleReconciliationIdleAndFailure
+--- PASS: TestRuleReconciliationIdleAndFailure (0.00s)
+PASS
+ok  	vortex/backend/internal/worker	1.487s

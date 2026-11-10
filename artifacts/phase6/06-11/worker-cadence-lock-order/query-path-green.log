@@ -1,0 +1,31 @@
+=== RUN   TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery
+2026/11/09 11:06:05 goose: no migrations to run. current version: 9
+--- PASS: TestRollbackAuditAtomicSupersedeAndWorkerCrashRecovery (0.28s)
+=== RUN   TestApplyPrepareCommitUnknownAndLateReceipt
+2026/11/09 11:06:05 goose: no migrations to run. current version: 9
+--- PASS: TestApplyPrepareCommitUnknownAndLateReceipt (0.17s)
+=== RUN   TestTracerRealProcesses
+2026/11/09 11:06:08 goose: no migrations to run. current version: 9
+    process_test.go:313: real backend/Agent/Hub processes succeeded operation=6782c7e4-51d1-4954-b226-3184ecc09299 duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (10.16s)
+=== RUN   TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock
+2026/11/09 11:06:15 goose: no migrations to run. current version: 9
+2026/11/09 11:06:15 OK   00001_authority.sql (21.55ms)
+2026/11/09 11:06:15 OK   00002_tenant_policy.sql (14.94ms)
+2026/11/09 11:06:15 OK   00003_nodes_ports.sql (33.07ms)
+2026/11/09 11:06:15 OK   00004_entry_group_domains.sql (3.17ms)
+2026/11/09 11:06:16 OK   00005_rules_compile.sql (32.85ms)
+2026/11/09 11:06:16 OK   00006_packages_entitlements.sql (28.76ms)
+2026/11/09 11:06:16 OK   00007_metering_ledger.sql (43.46ms)
+2026/11/09 11:06:16 OK   00008_limits_shares.sql (84.02ms)
+2026/11/09 11:06:16 OK   00009_domain_events.sql (25.63ms)
+2026/11/09 11:06:16 goose: successfully migrated database to version: 9
+--- PASS: TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock (0.61s)
+PASS
+ok  	vortex/backend/internal/service	13.131s
+=== RUN   TestRuleReconciliationDrainsReadyWorkAndCancels
+--- PASS: TestRuleReconciliationDrainsReadyWorkAndCancels (0.00s)
+=== RUN   TestRuleReconciliationIdleAndFailure
+--- PASS: TestRuleReconciliationIdleAndFailure (0.00s)
+PASS
+ok  	vortex/backend/internal/worker	2.393s

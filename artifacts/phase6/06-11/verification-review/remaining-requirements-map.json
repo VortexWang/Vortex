@@ -1,0 +1,31 @@
+{
+  "source": "65a5335894732b7d632e870acc3d8283be224cd3",
+  "status": "verified_current_pair",
+  "requirements": {
+    "TEN-002": [
+      "TestRuleImmutableRevisionConflictAndTenantScope",
+      "TestNodeGroupOwnershipAndStableMembers",
+      "TestLedgerConservationRebuildSourceIsolationAndAuditRollback",
+      "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields"
+    ],
+    "NOD-012": [
+      "TestNodeSegmentPermitIndependentOfGrants",
+      "TestCompileGrantPermitAndDirection",
+      "TestApplyMultihopForwardAndReverseRealTLS",
+      "TestOpenPolicyStableRejectionClassesAndAuditCorrelation"
+    ],
+    "PRT-004": [
+      "TestPortAtomicFixedMembersAndServing",
+      "TestRulePortActualAgentSocketsUnknownAndQuery",
+      "TestPortIntentAbortDoesNotReleaseWithoutAllNodeProofs"
+    ],
+    "BE-005": [
+      "TestOpenAPIExactlyMatchesRegisteredGinRoutes",
+      "TestSSECommittedEventsReplayScopeAndRESTConvergence"
+    ],
+    "BE-006": [
+      "TestReconcile1000Within60s"
+    ]
+  },
+  "scope_note": "BE-005 backend REST/OpenAPI/SSE; frontend type generation remains Phase7. BE-006 finite1000 gate; NFR-019 full200-node/1000-rule performance remains Phase8."
+}

@@ -1,0 +1,10 @@
+{
+  "command": "LEDGER_RED_TARGET=^TestUnknownRiskBudgetAuthoritySchema$ python3 tools/phase6/ledger_red_test.py",
+  "exitCode": 1,
+  "output": "test_source_ledger_authority (__main__.LedgerAuthority) ... FAIL\n\n======================================================================\nFAIL: test_source_ledger_authority (__main__.LedgerAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/ledger_red_test.py\", line 10, in test_source_ledger_authority\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestUnknownRiskBudgetAuthoritySchema\n2026/11/08 08:00:31 goose: no migrations to run. current version: 7\n    metering_test.go:31: approved funded risk budget authority missing; 72h cannot release unknown\n--- FAIL: TestUnknownRiskBudgetAuthoritySchema (0.03s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.713s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.732s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_source_ledger_authority",
+  "targetFile": "backend/internal/service/metering_test.go",
+  "expected": "funded approved risk budget authority exists",
+  "actual": "real PostgreSQL lacks risk_budget_funding",
+  "semanticAssessment": "PostgreSQL available; actual target behavior assertion failed without compiler/fixture errors."
+}

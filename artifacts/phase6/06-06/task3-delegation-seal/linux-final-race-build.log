@@ -1,0 +1,17 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-6ac56e8feb97 Creating 
+ Container vortex-phase6-tracer-backend-test-run-6ac56e8feb97 Created 
+2026/11/08 06:30:05 goose: no migrations to run. current version: 8
+ok  	vortex/backend/internal/service	63.321s
+ok  	vortex/backend/internal/control	1.406s
+?   	vortex/backend/internal/worker	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.011s
+ok  	vortex/agent/store	10.957s
+ok  	vortex/hub	1.011s [no tests to run]
+ok  	vortex/contracts	1.010s
+ok  	vortex/cmd/vortex-node	1.850s

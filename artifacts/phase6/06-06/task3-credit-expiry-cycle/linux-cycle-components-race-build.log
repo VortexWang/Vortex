@@ -1,0 +1,27 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-7e5e6ee8e5d4 Creating 
+ Container vortex-phase6-tracer-backend-test-run-7e5e6ee8e5d4 Created 
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 08:30:06 goose: no migrations to run. current version: 8
+2026/11/08 08:30:06 OK   00001_authority.sql (12.66ms)
+2026/11/08 08:30:06 OK   00002_tenant_policy.sql (8.2ms)
+2026/11/08 08:30:06 OK   00003_nodes_ports.sql (17.72ms)
+2026/11/08 08:30:06 OK   00004_entry_group_domains.sql (1.63ms)
+2026/11/08 08:30:06 OK   00005_rules_compile.sql (16.53ms)
+2026/11/08 08:30:06 OK   00006_packages_entitlements.sql (15.06ms)
+2026/11/08 08:30:06 OK   00007_metering_ledger.sql (20.57ms)
+2026/11/08 08:30:07 OK   00008_limits_shares.sql (34.53ms)
+2026/11/08 08:30:07 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:224: expiry cycle did not converge context deadline exceeded
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+    runtime_expiry_cycle_transport_test.go:147: runtime cycle transport did not join
+--- FAIL: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (21.14s)
+FAIL
+FAIL	vortex/backend/internal/service	21.152s
+FAIL
+

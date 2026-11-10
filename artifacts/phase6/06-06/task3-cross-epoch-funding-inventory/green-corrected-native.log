@@ -1,0 +1,25 @@
+2026/11/09 00:31:12 goose: no migrations to run. current version: 8
+2026/11/09 00:31:12 OK   00001_authority.sql (13.12ms)
+2026/11/09 00:31:12 OK   00002_tenant_policy.sql (10.02ms)
+2026/11/09 00:31:12 OK   00003_nodes_ports.sql (20.95ms)
+2026/11/09 00:31:12 OK   00004_entry_group_domains.sql (2.49ms)
+2026/11/09 00:31:12 OK   00005_rules_compile.sql (20.05ms)
+2026/11/09 00:31:13 OK   00006_packages_entitlements.sql (18.89ms)
+2026/11/09 00:31:13 OK   00007_metering_ledger.sql (25.17ms)
+2026/11/09 00:31:13 OK   00008_limits_shares.sql (57.88ms)
+2026/11/09 00:31:13 goose: successfully migrated database to version: 8
+--- FAIL: TestRuntimeFundingHistoryDoesNotHideUnknownParentAcrossSignerEpochs (1.01s)
+    runtime_funding_history_epoch_test.go:135: tenant 43d51600-5231-4893-9129-0470294cd4d5: node 006b650e-fa5a-495a-9a73-391cac0203c2 snapshot a53a588a-2014-45bc-b255-1fa5df9b2f7f: share_execution_unknown_occupation_retained
+2026/11/09 00:31:13 goose: no migrations to run. current version: 8
+2026/11/09 00:31:13 OK   00001_authority.sql (7.95ms)
+2026/11/09 00:31:13 OK   00002_tenant_policy.sql (7.64ms)
+2026/11/09 00:31:13 OK   00003_nodes_ports.sql (17.19ms)
+2026/11/09 00:31:13 OK   00004_entry_group_domains.sql (2.16ms)
+2026/11/09 00:31:13 OK   00005_rules_compile.sql (17.55ms)
+2026/11/09 00:31:13 OK   00006_packages_entitlements.sql (17.09ms)
+2026/11/09 00:31:14 OK   00007_metering_ledger.sql (23.5ms)
+2026/11/09 00:31:14 OK   00008_limits_shares.sql (50.53ms)
+2026/11/09 00:31:14 goose: successfully migrated database to version: 8
+FAIL
+FAIL	vortex/backend/internal/service	3.034s
+FAIL

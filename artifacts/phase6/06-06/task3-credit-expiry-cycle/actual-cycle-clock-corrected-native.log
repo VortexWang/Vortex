@@ -1,0 +1,15 @@
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 17:10:40 goose: no migrations to run. current version: 8
+2026/11/08 17:10:40 OK   00001_authority.sql (29.09ms)
+2026/11/08 17:10:40 OK   00002_tenant_policy.sql (26.44ms)
+2026/11/08 17:10:40 OK   00003_nodes_ports.sql (22.18ms)
+2026/11/08 17:10:40 OK   00004_entry_group_domains.sql (3.01ms)
+2026/11/08 17:10:40 OK   00005_rules_compile.sql (19.63ms)
+2026/11/08 17:10:40 OK   00006_packages_entitlements.sql (19.64ms)
+2026/11/08 17:10:40 OK   00007_metering_ledger.sql (25.56ms)
+2026/11/08 17:10:40 OK   00008_limits_shares.sql (39.17ms)
+2026/11/08 17:10:40 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:266: actual role mTLS: child expiry before parent, automatic seal, missing-inventory hold, authenticated child final, original-source settlement, funded successor, direct source provisioning and Agent runtime ready; short child TTL fixture
+--- PASS: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (7.27s)
+PASS
+ok  	vortex/backend/internal/service	8.973s

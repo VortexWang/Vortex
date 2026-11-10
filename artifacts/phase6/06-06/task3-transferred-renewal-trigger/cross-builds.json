@@ -1,0 +1,92 @@
+[
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/node-linux-amd64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "abbf8c204d75f7e4c2f461ec4466d61bb130b3e92892f17eed936b9efa82e883"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/backend-linux-amd64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "d5485b8195d650294e10ebb934e3297bdba5e07fca6a1941328d76cfd9078519"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/hub-linux-amd64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "49e48059550cfdcd454141c4c0254f339b7dc72682722736989aded8506d7e1d"
+  },
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/node-linux-arm64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "8f415a864b3d6551dcc5d83ef4e158b1011f81fe886718eef43e77b75bca8cc6"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/backend-linux-arm64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "6e8347c5be65cec257713cd3470228427773eda3009607dca5352a4e941849e8"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-renewal-trigger-build-lhu4rxz7/hub-linux-arm64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "94f4ea167f79cb49a461c9c58b66d2ef24156008e809fee6d02c38636fdb34ec"
+  }
+]

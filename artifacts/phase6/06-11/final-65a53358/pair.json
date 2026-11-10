@@ -1,0 +1,9 @@
+{
+  "commit": "65a5335894732b7d632e870acc3d8283be224cd3",
+  "status": "passed",
+  "scope": "Phase6 bounded backend reconciliation and runtime/REST/fault same-SHA pair; historical VLink review debt and Phase4/7/8 qualification excluded",
+  "actions_run_ids": {
+    "amd64": "42572674719",
+    "arm64": "42572674719"
+  }
+}

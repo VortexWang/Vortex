@@ -1,0 +1,9 @@
+# vortex/backend/internal/control
+internal/control/adapter.go:359:10: undefined: json
+internal/control/adapter.go:365:28: undefined: io
+# vortex/backend/internal/control [vortex/backend/internal/control.test]
+internal/control/adapter.go:359:10: undefined: json
+internal/control/adapter.go:365:28: undefined: io
+FAIL	vortex/backend/internal/control [build failed]
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

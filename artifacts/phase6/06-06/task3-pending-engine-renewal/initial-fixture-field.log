@@ -1,0 +1,4 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/runtime_pending_engine_test.go:109:21: other.NodeID undefined (type generated.GetNodeIncarnationRow has no field or method NodeID)
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

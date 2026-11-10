@@ -1,0 +1,4 @@
+# vortex/backend/internal/control
+internal/control/hub_funded.go:167:9: non-boolean condition in if statement
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

@@ -1,0 +1,17 @@
+=== RUN   TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock
+2026/11/09 10:58:02 goose: no migrations to run. current version: 9
+2026/11/09 10:58:02 OK   00001_authority.sql (31.9ms)
+2026/11/09 10:58:02 OK   00002_tenant_policy.sql (22.61ms)
+2026/11/09 10:58:02 OK   00003_nodes_ports.sql (48.16ms)
+2026/11/09 10:58:02 OK   00004_entry_group_domains.sql (7.09ms)
+2026/11/09 10:58:02 OK   00005_rules_compile.sql (47.7ms)
+2026/11/09 10:58:02 OK   00006_packages_entitlements.sql (36.98ms)
+2026/11/09 10:58:02 OK   00007_metering_ledger.sql (47.17ms)
+2026/11/09 10:58:02 OK   00008_limits_shares.sql (100.91ms)
+2026/11/09 10:58:02 OK   00009_domain_events.sql (23.58ms)
+2026/11/09 10:58:02 goose: successfully migrated database to version: 9
+    rule_worker_lock_order_test.go:67: authority wait retained a task lock needed by the tenant transaction ERROR: could not obtain lock on row in relation "tasks" (SQLSTATE 55P03)
+--- FAIL: TestRuleWorkerAuthorityWaitDoesNotHoldTaskLock (0.72s)
+FAIL
+FAIL	vortex/backend/internal/service	1.575s
+FAIL

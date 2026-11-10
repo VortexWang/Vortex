@@ -1,0 +1,5 @@
+# vortex/backend/internal/service
+internal/service/node.go:83:8: undefined: err
+internal/service/node.go:84:16: undefined: err
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

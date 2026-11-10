@@ -110,8 +110,11 @@ func (g *DelayedCreditGate) request() (chan struct{}, error) {
 		if outcome == GrantAccepted {
 			reply.GrantID = "grant:" + id
 		}
-		err := g.Credit.ApplyGrant(context.Background(), reply)
+		// Publish grant availability and completion under the same issuer lock.
+		// A fast consumer must not observe credit while request() still returns
+		// the completed initial request instead of starting its renewal.
 		g.mu.Lock()
+		err := g.Credit.ApplyGrant(context.Background(), reply)
 		if err != nil {
 			g.closed = true
 		}

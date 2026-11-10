@@ -1,0 +1,21 @@
+{
+  "base_commit": "606cfdecc77d1ade11cc48207de024ba4111e5b9",
+  "scope": "local installed/never-installed original-issue consumer; no authenticated wire/PG release or full06-06 acceptance",
+  "source": {
+    "agent/store/uninstalled_credit_closure.go": "60cc5f571aaa72e858bfd2db69153e8f73939fa7c459430a37ac5f1be070b885",
+    "agent/store/uninstalled_credit_closure_test.go": "5a90ced494dc5bcc3f2546e63b35d30d8f70a03133d4650837f66f9458abdd32",
+    "agent/store/credit_grant_closure.go": "04f2ac2c42b9c9ff9ba2d3f99b5e7fce99a5805491a4b718a8b1e460a6038855",
+    "agent/store/store.go": "f211aee79ea062274a32618d7c87658fa6d06506f1d3bb567e3ce14bbdd853af",
+    "agent/control.go": "d9144ce43ade8057ae052686299004e6a5e045e3b1460085618bb29209541ca9",
+    "agent/issued_credit_closure.go": "12b669f4ae17eb7cf817da6955dbc043520730b1df6f8ee7edf05c0a6de77c53",
+    "agent/issued_credit_closure_test.go": "9db5528466f5e3145e58d2f36228c2a4ac0a669216e33e4d342af11c51c87e6f"
+  },
+  "evidence": {
+    "README.md": "fcf662e9cab7621c75e2ba97e0a6d66477b561bd2dec1780d668d7d768013e07",
+    "consumer-native.log": "f7ebba8c4c64e95ecff8ab97e79b60eb7cd7b45596f3a75caeee54f5c79439d0",
+    "consumer-unknown-native.log": "2ab0f310ef3befe4a70c2a61f492078cbdbe6c5acdaf3843a6519fd301d3f004",
+    "focused-native.log": "2e6db128632f13eaad7465002a2d3a2f3058c678a727023adc0f98cafbbdca60",
+    "full-native-race.log": "161a2478152c7a881bfb172070481e7ff07f268a8540cfb168e147ef066d1b6c",
+    "linux-race-build.log": "cdc1a49b58a9ee0f883405e62e7813d795150a8a6f752e282cd07f140d5fde5e"
+  }
+}

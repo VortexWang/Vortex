@@ -1,0 +1,87 @@
+{
+  "scope": "internal Node FULL original-credit recovery fence only; not wired to authenticated transport or production admission",
+  "base_sha": "82532d9ccd57b741de70bc447d0dcd34a4cc98e0",
+  "created_at": "2026-11-08T11:48:00.338087+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "agent/store/recovery_credit_fence.go": "f11afcb2a851162ddb57f80b731902057c26df76bbb753ccf5c6765f4c00d4cc",
+    "agent/store/recovery_credit_fence_test.go": "31ee4d16c3823a3d43c1af7b128d9d89ce5851f0fedb3acd7ceb6171ed619860",
+    "agent/store/store.go": "845acdd59ed40b3158888af04f65d490672737ee59ae0f539a784901d82b35e4",
+    "agent/store/epoch_handoff.go": "a5f1d93229164b2a8c3323e4d10cb9fe925f70dfa5a1c8e319c829af59fcb94a",
+    "contracts/protobuf/v1/lifecycle.md": "681f2eb4211a8b92c73284d3cd7629340ce321a9b6c2c5225f719f137a692310"
+  },
+  "evidence": {
+    "backend-native-race.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "962e48682511aa98cb04fafc98f6dbf3de7168d7f02b4dd6e3e2ac8685876bac"
+    },
+    "cross-builds.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "a40bae5fcade64ab27bb003e81536b02c75f65c0de05805535555fa903a0fdee"
+    },
+    "focused-complete-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "dfee155654ceb702e0c4006ac6b588c82042e1b34bae063b97a0f03fe4d8d3c3"
+    },
+    "focused-final-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "3338976ad79854d6ad68dd11bf20ebd897c87af20c89b444a972aead933f6260"
+    },
+    "focused-linux.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "16795fbca4f006fcfe5aa554e81d3eac815355e5115afd55d6fb47232d60712f"
+    },
+    "focused-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "2b74493224630d32f4cc6d8f9e8a42048959afbfe7e38d88a012907f731c6a18"
+    },
+    "focused-race-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "7b4bf1535118beb9847bf180453e16e506080cf51c8cf1ef26d9a6d01e731fbf"
+    },
+    "linux-race.log": {
+      "result": "pass_components_with_parallel_agent_fixture_timeout",
+      "exit_code": 1,
+      "sha256": "37ed5fd94186ebb77e1410a039d6738b10b5cc73a3128b3ec85734e2bb0bdf46"
+    },
+    "regional-isolated-linux.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "5a2e92489d7f33b889b723d264e4a58720cb189af53fce2a84a7c410c8fc2a21"
+    },
+    "root-linux-race-retry.log": {
+      "result": "pass_serial_full_root_retry",
+      "exit_code": 0,
+      "sha256": "d268a1bbacb8b0c3f4df8afb486b59fae8bb8b70fd828b68016bf93e160fbda6"
+    },
+    "root-native-race.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "502e7a115ef46a5525da16520437b72c064feaf50e622043fd827e9785272e12"
+    }
+  },
+  "host_sha256": "c1217755a3261de2fdad8454fe24d20248e9be1e988e257f89943b412433a185",
+  "clean_source_actions_pairing": false,
+  "native_backend_service_seconds": 218.939,
+  "native_agent_seconds": 67.15,
+  "native_store_seconds": 89.951,
+  "linux_retry_agent_seconds": 85.504,
+  "linux_retry_store_seconds": 120.371,
+  "linux_initial_parallel_fixture_failure": "TestRegionalFailoverRetainsUnknownDebt/autonomous context deadline under simultaneous race load; isolated test pass1.979s; serial complete Linux root retry pass",
+  "cross_builds": "backend/hub/node linux amd64+arm64 pass; no native amd64 claim",
+  "next": [
+    "authenticated direct-backend recovery transport",
+    "PG immutable Node receipt producer/consumer",
+    "next-root provisioning and production S/R admission recheck",
+    "effective new-epoch issue/lease/seal",
+    "original pending-rule convergence",
+    "full06-06 clean-source producer and CR-008 proposal"
+  ]
+}

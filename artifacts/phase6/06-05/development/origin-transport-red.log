@@ -1,0 +1,6 @@
+2026/11/08 10:11:48 goose: no migrations to run. current version: 7
+--- FAIL: TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence (0.22s)
+    metering_transport_test.go:213: Agent unknown receipt agent: receive control message: rpc error: code = Unknown desc = store: usage batch identity conflicts with durable payload
+FAIL
+FAIL	vortex/backend/internal/service	0.816s
+FAIL

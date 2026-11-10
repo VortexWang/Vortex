@@ -1,0 +1,8 @@
+ version_id | is_applied 
+------------+------------
+          0 | t
+          1 | t
+          2 | t
+          3 | t
+(4 rows)
+

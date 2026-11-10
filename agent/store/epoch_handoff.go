@@ -23,10 +23,13 @@ type EpochHandoff struct {
 	RecordSHA256   string `json:"record_sha256"`
 }
 
-func persistEpochHandoffTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate, h EpochHandoff) error {
+func persistEpochHandoffTx(ctx context.Context, tx storeTransaction, u AuthorizationUpdate, h EpochHandoff, settlementOnly bool) error {
 	hash, e := hex.DecodeString(h.RecordSHA256)
 	if u.IssuerID == "" || !validIssuerUUID(h.TransferID) || h.ParentID == "" || h.SourceID == "" || h.From == 0 || h.From == math.MaxUint64 || h.To != h.From+1 || h.To != u.SignerEpoch || h.Remaining > math.MaxInt64 || h.SealedSequence < 0 || e != nil || len(hash) != 32 {
 		return ErrAuthorityHandoffRequired
+	}
+	if e := checkRecoveryHandoffFenceTx(ctx, tx, u, h); e != nil {
+		return e
 	}
 	raw, e := json.Marshal(h)
 	if e != nil {
@@ -44,15 +47,38 @@ func persistEpochHandoffTx(ctx context.Context, tx storeTransaction, u Authoriza
 		return e
 	}
 	var rootID string
-	if e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, u.NodeID, h.SourceID).Scan(&rootID); e != nil {
+	e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_source_owners WHERE node_id=? AND source_id=?`, u.NodeID, h.SourceID).Scan(&rootID)
+	if errors.Is(e, sql.ErrNoRows) && h.Remaining == 0 {
+		// Nonfinancial sources still require an original locally known family.
+		e = tx.QueryRowContext(ctx, `SELECT authorization_id FROM authorization_records WHERE node_id=? AND source_id=? AND parent_authorization_id=? AND issuer_id=? AND boot_id=? AND kind IN ('runtime_lease','share_lease') AND state='active' ORDER BY length(signer_epoch),signer_epoch,rowid LIMIT 1`, u.NodeID, h.SourceID, h.ParentID, u.IssuerID, u.BootID).Scan(&rootID)
+	}
+	if e != nil {
 		return ErrAuthorityHandoffRequired
 	}
 	root, state, e := readAuthorizationTx(ctx, tx, u.NodeID, rootID)
 	if e != nil {
 		return e
 	}
-	if state != "active" || root.ParentAuthorizationID != h.ParentID || root.IssuerID != u.IssuerID || root.BootID != u.BootID || root.PathGeneration != u.PathGeneration {
+	if root.ParentAuthorizationID != h.ParentID || root.IssuerID != u.IssuerID || root.BootID != u.BootID || root.PathGeneration != u.PathGeneration {
 		return ErrAuthorityHandoffRequired
+	}
+	if state != "active" {
+		// The independent backend channel may stop an issued child before its
+		// Hub recovery envelope arrives. Retain only the exact fenced history;
+		// never reactivate the root or permit a grant in this transaction.
+		if !settlementOnly || state != "revoked" || root.Kind != "credit_grant" {
+			return ErrAuthorityHandoffRequired
+		}
+		var proven bool
+		if e = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM credit_grant_stops WHERE node_id=? AND authorization_id=? AND boot_id=? AND issuer_id=?) AND EXISTS(SELECT 1 FROM recovery_credit_fences WHERE node_id=? AND source_id=? AND to_epoch=?)`, u.NodeID, root.AuthorizationID, u.BootID, u.IssuerID, u.NodeID, h.SourceID, strconv.FormatUint(h.To, 10)).Scan(&proven); e != nil {
+			return e
+		}
+		// checkRecoveryHandoffFenceTx already compared the complete immutable
+		// manifest/parent/epoch/R/seal tuple. Absence must not authorize this
+		// special case. Source spending still requires an active original root.
+		if !proven {
+			return ErrAuthorityHandoffRequired
+		}
 	}
 	latest, e := sourceEpochTx(ctx, tx, u.NodeID, h.SourceID, root.SignerEpoch)
 	if e != nil {
@@ -180,8 +206,23 @@ func attachEpochHandoffTx(ctx context.Context, tx storeTransaction, d HubDelegat
 	if err = json.Unmarshal(result.Payload, &payload); err != nil {
 		return err
 	}
-	payload["schema_version"] = "1.1.0"
-	payload["epoch_handoffs"] = []EpochHandoff{h}
+	proofs := delegationEpochProofs(d, h)
+	if d.ShareReferences == nil {
+		payload["schema_version"] = "1.1.0"
+	}
+	payload["epoch_handoffs"] = proofs
 	result.Payload, err = json.Marshal(payload)
 	return err
+}
+
+func delegationEpochProofs(d HubDelegation, h EpochHandoff) []EpochHandoff {
+	proofs := []EpochHandoff{h}
+	if d.ShareReferences != nil {
+		for _, source := range []string{d.RuntimeSourceID, d.ShareSourceID} {
+			r := h
+			r.SourceID, r.Remaining = source, 0
+			proofs = append(proofs, r)
+		}
+	}
+	return proofs
 }

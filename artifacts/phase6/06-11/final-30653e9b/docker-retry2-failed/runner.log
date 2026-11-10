@@ -1,0 +1,23 @@
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Recreate 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Recreate 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Recreated 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Recreated 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Starting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Starting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Started 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Started 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Waiting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Waiting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Healthy 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Healthy 
+time="2026-11-09T11:09:10+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gomod\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-30653e9bf552\"). Use `external: true` to use an existing volume"
+time="2026-11-09T11:09:10+08:00" level=warning msg="volume \"vortex-p6-docker-84f9cc86e4aa_phase6-gocache\" already exists but was created for project \"vortex-p6-docker-84f9cc86e4aa\" (expected \"vortex-p6-docker-30653e9bf552\"). Use `external: true` to use an existing volume"
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Running 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Running 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Waiting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Waiting 
+ Container vortex-p6-docker-30653e9bf552-valkey-1 Healthy 
+ Container vortex-p6-docker-30653e9bf552-postgres-1 Healthy 
+ Container vortex-p6-docker-30653e9bf552-backend-test-run-f96e197884ca Creating 
+ Container vortex-p6-docker-30653e9bf552-backend-test-run-f96e197884ca Created 
+

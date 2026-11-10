@@ -1,0 +1,10 @@
+{
+  "command": "TZ=UTC python3 tools/phase6/entitlement_red_test.py",
+  "exitCode": 1,
+  "output": "test_atomic_redemption (__main__.EntitlementAuthority) ... FAIL\n\n======================================================================\nFAIL: test_atomic_redemption (__main__.EntitlementAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/entitlement_red_test.py\", line 9, in test_atomic_redemption\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestEntitlementAtomicRedemptionContract\n2026/11/07 17:21:50 goose: no migrations to run. current version: 6\n    package_test.go:236: redemption replay changed result {f3aac51c-3681-4fe5-9991-91eeeefc5689 3914287d-fa7f-4af0-b92c-7f39cd2717d1 902c4b0e-07a0-4dc4-bd82-657ac370b9a0 092d328c-f4ea-4383-9a7f-e3678b42e5b7 1 2026-11-07 17:21:50.59238 +0000 UTC 2027-02-05 17:21:50.59238 +0000 UTC} {f3aac51c-3681-4fe5-9991-91eeeefc5689 3914287d-fa7f-4af0-b92c-7f39cd2717d1 902c4b0e-07a0-4dc4-bd82-657ac370b9a0 092d328c-f4ea-4383-9a7f-e3678b42e5b7 1 2026-11-07 17:21:50.59238 +0000 UTC 2027-02-05 17:21:50.59238 +0000 UTC} <nil>\n--- FAIL: TestEntitlementAtomicRedemptionContract (0.09s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.558s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.487s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_atomic_redemption",
+  "targetFile": "tools/phase6/entitlement_red_test.py",
+  "expected": "first issuance and exact replay return identical UTC result",
+  "actual": "runtime assertion: replay timestamp location differs despite same instant",
+  "semanticAssessment": "PostgreSQL fixture and code issuance succeed; target fails on exact replay result equality under UTC, matching clean Linux Docker failure."
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "commit": "efdb89dedc75bdbaf43a71e874d77b6dcd1e4272",
+  "producer": "docker",
+  "through_plan": "06-11",
+  "runtime_status": "failed",
+  "exit_code": 1,
+  "validation": null,
+  "error": null,
+  "external_cloudflare": {
+    "exit_code": 78,
+    "status": "not_run"
+  },
+  "acceptance_complete": false,
+  "checksums": {
+    "host-source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host-source-identity.txt": "e7b099ebf883502b8b662b11acf0bc897700562dc24980e6aa54515bc3f78748",
+    "commit.txt": "de82acd1a7a90b69e8946fe8ed89f00ade7bbf64ec7625d610f375c87ff33038",
+    "runner.log": "6698180241d664076ed566da75c58d29444139a8b13bace192027563d64a1616",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "docker-info.json": "57d386fc5be740496de6e039d671b046ab6956a6a692c6431749b725ca75ac71",
+    "images.json": "b0c90587b20779fbb7ce457869fcf8a95d4e41b8bd131a135ad5d9fbc9456e03",
+    "host-source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "valkey-version.txt": "4c61487b0b29a347030fa470309448669d8c79a873b70c85db1a8d7db330be4b",
+    "compose.yml": "ee4dbeeee2a8dd94adb66c31833b8ff0abf52d4658bcf6bb387b3d42c7a01b9d",
+    "docker-version.txt": "ed342474cbba3f029cdc502bd718ca98db996b40d531c55a390182bd440dd5fa"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "repository": null,
+  "runner_arch": null,
+  "execution_arch": null,
+  "runner_image": null,
+  "historical_vlink_scope": "pre-existing Phase3 review mismatch is recorded separately; no approval or global freeze pass granted"
+}

@@ -1,0 +1,27 @@
+{
+  "base_sha": "acf26002c0f8f8294913c200fe470b626c610020",
+  "sha256": {
+    "agent/store/store.go": "fdbf41fc213cd35938eeec0f9af79b996ec01ba00f770dc365f5093440897486",
+    "agent/store/recovery_admission.go": "a70c453df67c67883ec556f85cb119f44b07c572bcf61ac32b010b4cb5691ef0",
+    "agent/store/recovery_admission_test.go": "24317d9f219f07f4d62a4b153aeacdec7e4a0b3dd702c306477af4fadab1e17d",
+    "agent/store/recovery_admission_fault_test.go": "a40b2aac6ea8bf5815de32007f1cf5fd950a2fae42b0811350a40532885c1a97",
+    "hub/backend_client.go": "08c24b9cdeed7c76612f5f3dee44fb1b735f5dacafdee8ffe8f2e305ea819102",
+    "hub/recovery_admission.go": "96b20d4f7e2f4d42910bc6dc88a2d7337aed32013a57ed6cb747afaa613b8f27",
+    "hub/recovery_admission_test.go": "06df9333f8eb3032a86ebff05aafd5fc6dfea72a23a2bd7572714d3a0c34aaca",
+    "backend/cmd/vortex-hub/main.go": "76a620352ebb42ab3366b822ba09e64b1bc275c5d969e8fbe742247adf0ed092",
+    "backend/internal/control/adapter.go": "adee4abf29812df42e9017a9938e79a120df0a90e83b79492ba5e109bcf44c13",
+    "backend/internal/control/hub_recovery_admission.go": "3e48c2756304f6e941b20ca9b7b1c6e2ab1d7d75901d7629f614287bf430d854",
+    "backend/internal/service/hub_recovery_admission.go": "df00fdcc8551bb4023fbf9686fc2cdc061275f0d12d9c89e784324359edf30a8",
+    "backend/internal/service/hub_recovery_admission_test.go": "a83931d87d1d004c3334726522b72caceb2bde53b7e1bebe1824eee5eb4200ae",
+    "backend/internal/service/hub_recovery_admission_transport_test.go": "bfb1444097105fd19ba4f1c4f8ebc997eedf4474cd869db476abb253304313ab",
+    "backend/internal/service/share_handoff.go": "177f923e51ceaea2e3873378c67ed10c35fd08d0f2f110b6ca17996e2c6e85dc",
+    "backend/db/query/hub_allocations.sql": "0c45419a160d13d1d8f785bb001baf15cabfbde8d1532f987710c2eb1e3f0b58",
+    "backend/db/query/hub_same_store_recovery.sql": "5375a0a04ecf45f3bd39cb1f5b3ede4eec44cc5c7b92528bf95f830359540c66",
+    "backend/db/generated/hub_allocations.sql.go": "b7b5beef12143f99ab0fbd1677de6befca757c362a18865d92cb5bdde87f5e75",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "bb7a148fc2a836edcf474ecae453dc1256becbbd7d571f9f0a0599bf8d2c9f24",
+    "contracts/protobuf/v1/vortex.proto": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+    "contracts/protobuf/v1/vortex.pb.go": "91c4926a8c1f103fa312e1b2ac3cff38cdb4ac1f19f18fe19e9eb4886713d17c",
+    "contracts/protobuf/v1/lifecycle.schema.json": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338",
+    "contracts/protobuf/v1/lifecycle.md": "ce3995a722d3339577fba105e651d7fc7e3e00df2d8095e848e85ce44049cb0b"
+  }
+}

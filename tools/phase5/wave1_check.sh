@@ -9,7 +9,7 @@ mkdir -p "$out"
   printf 'arch: '; uname -m
   printf 'sqlite module: '; go list -m modernc.org/sqlite
 } > "$out/host.txt"
-go test ./... > "$out/go-test.log" 2>&1 || { cat "$out/go-test.log"; exit 1; }
+go test -p 1 ./... > "$out/go-test.log" 2>&1 || { cat "$out/go-test.log"; exit 1; }
 go vet ./... > "$out/go-vet.log" 2>&1 || { cat "$out/go-vet.log"; exit 1; }
 protoc -I "$root" --descriptor_set_out="$out/control-v1.pb" --include_imports contracts/protobuf/v1/vortex.proto
 printf '{"schema":1,"status":"passed","commit":"%s","tests":"go test ./...","vet":"go vet ./...","control_descriptor":"%s"}\n' "$(git -C "$root" rev-parse HEAD)" "$out/control-v1.pb" > "$out/report.json"

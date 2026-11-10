@@ -958,6 +958,22 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				case <-ctx.Done():
 					t.Fatal(ctx.Err())
 				}
+				// Consumption can durably prepare the next demand before the Hub
+				// closes this finite response stream. Replay its original identity
+				// without an adaptive producer, then require the queue to be empty.
+				requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, "")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(requests) > 0 {
+					for _, request := range requests {
+						expectedIssued += request.RawBytes
+					}
+					replayHub := startTestControlHub(t, ctx, &hub.TestServer{Store: hs, Usage: usageRelay, AcceptUsage: true, DemandIssuer: issuer, DemandLimit: len(requests)}, serverTLS)
+					if err := (&ControlClient{Node: node, TLS: clientTLS, EnableCreditDemand: true}).Connect(ctx, replayHub.Addr().String()); err != nil {
+						t.Fatal(err)
+					}
+				}
 				if requests, err := s.PendingDemands(ctx, node.NodeID, node.BootID, runtimeHubID, ""); err != nil || len(requests) != 0 {
 					t.Fatalf("continuous demand left pending requests: %+v %v", requests, err)
 				}
@@ -1150,7 +1166,47 @@ func saveLedgerFiles(t *testing.T, label string, files map[string]string) {
 	}
 	checksums := map[string]string{}
 	for name, path := range files {
-		raw, err := os.ReadFile(path)
+		// Close is not a checkpoint guarantee when another reader retains WAL.
+		// Export a transactionally consistent standalone database, including every
+		// committed WAL page, rather than copying only the live main file.
+		reader, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
+		if err != nil {
+			t.Fatal(err)
+		}
+		snapshot := filepath.Join(t.TempDir(), "ledger.sqlite")
+		var sourceMode string
+		if err := reader.QueryRow("PRAGMA journal_mode").Scan(&sourceMode); err != nil || sourceMode != "wal" {
+			reader.Close()
+			t.Fatalf("source ledger journal mode: %s %v", sourceMode, err)
+		}
+		_, err = reader.Exec("VACUUM INTO ?", snapshot)
+		closeErr := reader.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if closeErr != nil {
+			t.Fatal(closeErr)
+		}
+		// VACUUM INTO defaults to DELETE even when the source uses WAL. Keep
+		// the exported ledger's expected format without changing the source.
+		// All data pages are already in this independent file; no data writes
+		// occur after selecting WAL, so the snapshot needs no sidecar to read.
+		exported, err := sql.Open("sqlite", "file:"+snapshot+"?mode=rw")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var exportMode string
+		err = exported.QueryRow("PRAGMA journal_mode=WAL").Scan(&exportMode)
+		closeErr = exported.Close()
+		if err != nil || exportMode != "wal" || closeErr != nil {
+			t.Fatalf("export ledger journal mode: %s %v %v", exportMode, err, closeErr)
+		}
+		if info, err := os.Stat(snapshot + "-wal"); err == nil && info.Size() != 0 {
+			t.Fatal("exported ledger depends on WAL sidecar")
+		} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+			t.Fatal(err)
+		}
+		raw, err := os.ReadFile(snapshot)
 		if err != nil {
 			t.Fatal(err)
 		}

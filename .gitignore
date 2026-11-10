@@ -5,3 +5,5 @@ artifacts/phase4/
 test/netns/fixture/bin/
 __pycache__/
 *.pyc
+tools/phase6/cloudflare.env
+tools/phase6/cloudflare-token-policy.json

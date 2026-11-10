@@ -1,0 +1,67 @@
+[
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fixtfsi.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/fixtfsi.c",
+    "sha256": "98e3b3203d719877ccc978b75060d0e0e981e56283ae9fee4e6213728249ed23"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fixunstfsi.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/fixunstfsi.c",
+    "sha256": "d0a7700ea19349e68893cddd263d30e74ab3af9b50ee4b430f168461aa8a82e1"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/floatsitf.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/floatsitf.c",
+    "sha256": "126e52128913d3d37f023c5ea96e55b15edc05dd8ffac2eae471399613d6ca0f"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/floatunsitf.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/floatunsitf.c",
+    "sha256": "a0cbd7832856130fb8dcb4b6ed26db72b5f8bf37330e0d6255f24d954bfdec8f"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/fp_mode.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/fp_mode.c",
+    "sha256": "34fc2bffb0c62e59adf250cf1c6b00de9ca405b99c5f85d2b664d2063becb32f"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/lshrti3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/lshrti3.c",
+    "sha256": "dc92e7ca3501ad010be6e52b91906ab5fc92238b01b06fdf4398aaba184ea1ad"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/multi3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/multi3.c",
+    "sha256": "b2e133764668e78119f7c76facbb11f0b4b7c0c6b279fb0b97a589da11d1d060"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/ashlti3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/ashlti3.c",
+    "sha256": "a64c6e69e79fc6c02756b0681c0183d4d9197f38389ef2d06ccd112864ea7a71"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/multf3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/multf3.c",
+    "sha256": "f53b16042b09619f6387859ee865291eecbec16c855f5f454beec640dbbc6d40"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/addtf3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/addtf3.c",
+    "sha256": "6b97db1d7b094e38dfc5d6fb80d10b500cb7030608097553e26efa42030ad14b"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/subtf3.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/subtf3.c",
+    "sha256": "5bd836c66e3bddb2c6cfca7ad44fb929a3768dbcd66da488b6fe66fcabe509c4"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/extenddftf2.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/extenddftf2.c",
+    "sha256": "229f6e1f7c95aaa14885de91fe3741db7f702b8594a024417fd4fe4a5eb99669"
+  },
+  {
+    "file": "artifacts/phase6/06-08/eabc8f6/license/compiler-rt-source/comparetf2.c",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/d28af7c654d8db0b68c175db5ce212d74fb5e9bc/compiler-rt/lib/builtins/comparetf2.c",
+    "sha256": "006b60d39d0421d991ae715f520870811a97e49a0394aed2de6cef0d38bc3db2"
+  }
+]

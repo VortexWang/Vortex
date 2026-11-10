@@ -1,0 +1,63 @@
+# Phase 7 API 与恢复依赖（06-07 执行草案）
+
+本文件是前端实现约束草案。06-07 尚未完成，公共 OpenAPI 候选及其准确批准记录仍待完整实现后生成；它不是已冻结的公开契约。当前详情、规则修改、operation 查询和事件接口位于 `/api/v1/tenants/{tenant_id}` 下。
+
+## 身份与读取
+
+普通用户只能访问其唯一 tenant。平台角色显式选择目标 tenant，跨租户读取同事务追加审计；前端路由可见性不构成授权。业务 API 使用 Bearer access；refresh 只用于轮转，不用于业务读取。Node/Hub 客户端证书不替代用户身份。
+
+令牌轮转与登出后，由后端重新读取 PostgreSQL 的角色、账号状态与撤销记录。refresh 重用撤销整个 family。可信本地操作者可用 `vortex-backend issue-session --actor <持久化用户UUID> --tenant <唯一tenant UUID>` 签发初始会话；平台主体省略 tenant。命令从 PostgreSQL 读取当前角色与状态，不接受 role 参数，且仅在审计事务成功后向标准输出写一次会话 JSON。部署操作者使用私密输出通道（例如先设置 umask077，再重定向至私密文件），不要将输出加入日志。此命令是受信任本地管理入口，不是公开的按 actor_id 登录接口；公共用户认证界面的选择不由本命令替代。
+
+列表游标只在同一 principal、tenant、集合、方向与筛选条件下有效。排序字段由数据库固定，不能使用 UI 行号推断页位置。签名错误、作用域错误或过期时，丢弃游标并重新读取第一页；不能尝试解码后自行拼接新游标。Cursor 签名密钥由部署持久化，多实例共享；轮换后允许旧游标失效。
+
+`GET /api/v1/me` 返回当前持久化身份的 id、role、platform 和普通用户的 tenant_id。`GET /api/v1/tenants` 对普通用户仅列出自身租户；平台角色可分页枚举租户，每条读取同事务审计。选定租户后，nodes、node-groups、rules、packages、subscriptions、port-allocations、sources、restrictions 和 operations 使用统一的 items / next_cursor 响应，limit 默认50，范围1..100，未知或重复查询参数返回400。空列表为 []。节点/组每次读取仍检查所有权或当前有效 grant，排序记录不能保留已撤销授权。
+
+业务列表的 created_at 是后端首次登记的不可变排序时间；升级时既有资源使用迁移回填时间，不能当作其历史创建证据。状态与版本变化不改变排序位置，限制投影按 cause + source_id 保持同一公开 id。翻页不是冻结数据库快照：并发提交、授权变化或删除可能改变可见集合，收到状态提示后重新取第一页。端口列表保留 unknown、retained 等占用状态，不把到期解释为已释放。
+
+账本 B/F/L、已计费量、序号、速率及连接占用以十进制字符串读取。前端不能先转 JavaScript Number 再进行精确比较；需要精确计算时使用 BigInt 或十进制库。账本按 source 独立展示，不跨来源净额抵消未知占用。
+
+## 修改与异步执行
+
+规则 PUT 的 If-Match 是强 ETag，例如 `"2"`；创建使用 `"0"`。缺少前置条件返回428，格式错误返回400，版本过时返回412。冲突后先重新读取业务状态，用户确认新的修改内容，再提交新修订；不能静默覆盖。
+
+202 只说明期望状态和 operation 已提交。前端保留 operation_id 与业务资源的关联，查询 operation，同时重取业务详情。desired_revision、active_revision、sync_status 和 occupation_held 是不同事实：pending、unknown 或超时都不证明业务已经停止或资源已经释放。
+
+节点 PATCH 同样要求强 If-Match。body 包含 lifecycle；仅 draining 可带1..86400秒的 drain_seconds，省略使用300秒。返回 node_id、desired_lifecycle、version、operation_id、sync_status=pending，以及新 ETag/operation Location。合法版本下不允许的生命周期跳转返回409，过时版本返回412。普通租户不能管理仅经 grant 可见的平台节点，auditor 不能修改。持久化 lifecycle 是管理期望；不能据202推断节点实际停止或容量已释放。
+
+公开 operation 的 resource_id 和 target_revision 映射到原业务资源与版本；领域任务用于隔离运行配置的内部身份不用于此关联。先读取 operation 再刷新对应资源；SSE 摘要仅提示重取，不能用其任务上下文覆盖业务状态。
+
+平台管理员可 PUT `/api/v1/tenants/{tenant_id}/packages/{package_id}` 编辑全局目录；所选 tenant 是审计和 operation 的上下文，不转移目录所有权。创建 If-Match 为 `"0"`，编辑为当前目录版本；名称1..128个字符，terms 使用既有套餐业务输入。operator、auditor 和租户用户均不能写目录。返回202、确切 operation_id、新 ETag 和 Location；跨租户并发创建同一个目录仍只接受一次。目录版本与审计、任务、Outbox、事件同事务提交。
+
+套餐目录变化不改写既有订阅快照。套餐预览、确认与权益码的 HTTP 适配已实现；恢复管理适配仍在本计划待完成范围内；前端不得用目录当前值替换订阅历史值，也不得在无确认或无最终回执时自行补发额度、清除限制或标记已恢复。
+
+## SSE 与 REST 收敛
+
+事件是 PostgreSQL 已提交状态的提示。操作与限制摘要在原事务内排队，在事务提交阶段为所有受影响租户按固定顺序锁定事件流、分配连续序号；业务、审计或提交失败时，事件也回滚。事件不包含运行配置、VLink、凭据、内部地址或账本释放授权。
+
+浏览器客户端使用可设置 Authorization 和 Last-Event-ID 的 fetch 流读取。每个完整事件保存其不透明签名 ID；只有完整读取后才推进本地游标。游标绑定 principal 与 tenant，不能在用户或租户切换后沿用。允许重复回放，处理必须幂等；事件相同序号在同一身份与作用域内具有稳定 ID。事件游标使用独立的签名域，保留窗口由 PostgreSQL 连续删除边界决定，不在每次发送时重新签发墙钟过期时间。
+
+收到 operation_changed 时重取对应 operation，并刷新关联资源；未知关联时使该 tenant 的业务查询失效。收到 restriction_changed 时刷新限制、受影响规则与业务状态。事件内容不能单独证明执行成功、停止或份额释放。
+
+收到 resync 时保存其新的流位置，重新读取 REST 权威状态，再从新位置重连；旧窗口事件已被删除，不尝试补猜。保留清理至少保留24小时，并在一个事务中推进连续删除边界与删除事件。无 Last-Event-ID 的新连接从可用窗口开始；如果已有窗口缺口，先发 resync 后关闭。
+
+连接结束、超时或网络错误时保留最后完整事件 ID，并重取 REST 状态。HTTP401 时暂停业务流，按认证流程恢复身份后重连；403 时停止当前作用域；400 invalid_cursor 时丢弃事件游标、重新读取 REST 并重新连接。响应头发出后的流失败表现为关闭，不能期待第二个 HTTP 错误 envelope。
+
+每个流有5分钟上限，每次轮询重新验证令牌和当前权限；写入有5秒期限。每个 API 进程最多64个活动流，超限返回429 和 Retry-After。没有事件时心跳只是连接活性。Valkey 不保存回放位置、余额、份额所有权或业务确认。
+
+## 验证边界
+
+当前证据为真实 PostgreSQL、实际 HTTP/TLS、竞态、事务回滚和有限并发回放测试。维护时钟推进仅验证保留窗口逻辑，不是24小时稳定性验收。完整端点覆盖、精确 OpenAPI 复制/批准、同 SHA Docker/Actions 及阶段验收仍须在06-07/06-11完成。
+
+Package HTTP adapters now implement the five scoped subscription/entitlement preview/confirmation/redemption routes. Confirmations use strong positive If-Match checked in the service transaction plus printable-ASCII globally unique Idempotency-Key; exact retries precede current-version/time/code exhaustion checks. Keep-rule requests have an explicit512KiB/10000-item bound; ordinary request bodies remain16KiB. Pending confirmation leaves current subscription untouched; redemption preserves its existing immediate PG grant transaction. Each mutation returns202/exact operation/Location/pending and safe errors; published redemption200 and old bare tags must be reconciled explicitly in proposedCR-009. No frozen source/snapshot was changed.
+
+Scoped group members GET/PUT now expose only group/node business IDs, weights, priority, member_version and version. Replacement requires a strong positive version and explicit members (max1024; empty clears), returns exact202 operation/Location and marks port/rule dependencies for revalidation without releasing occupation. Global platform-group dependent-rule convergence is still pending a dedicated durable consumer; do not interpret acceptance as recompiled/applied status.
+
+Platform group membership changes now enqueue an actor-bound all-tenant revalidation operation. The production consumer rechecks current platform authority, atomically enqueues current dependent revisions in all affected tenants and audits every tenant. Operation success means all revalidation requests were persisted; each rule's compile/apply status remains authoritative separately. Original active artifacts and uncertain occupations are retained. Historical actorless tasks cannot authorize a platform worker.
+
+Internal port preparation now returns a transaction-bound aggregate operation ID. Its proof-bound projection distinguishes pending/unknown/all-prepared without activating an allocation or forgiving occupation. Aggregate occupied status cannot clear from mutable flags or partial release; complete exact authenticated release evidence is required. This is a service/worker foundation only; public port DTOs/routes and versioned commit/release intents remain pending. Candidate migration9 changed; CR-008/frozen migration8 remains unchanged.
+
+Draft06-07 port preparation: GET scoped node-groups/{group_id}/members exposes opaque member_set_version usable directly by POST scoped port-reservations. Re-read after configuration/incarnation conflict.202 returns id/version/operation_id/pending and Location to exact aggregate operation; it confirms reservation intent only. GET scoped port-allocations/{id} returns business state/version/needs_revalidation and strong ETag. No public receipt submission or boot/runtime inputs. Commit/release adapters and finalCR-009 contract remain pending.
+
+Draft06-07 port actions: POST scoped port-allocations/{id}/commit,/release,/abort requires positive strong If-Match and empty JSON object.202 returns exact operation_id/Location and updated business version/ETag. Commit sync_status=succeeded denotes only the audited PG allocation stage after all stored authenticated prepare proofs; rule Engine activation is separate. Release/abort sync_status=pending retain occupation until all authenticated release proofs; unknown is not stopped.412 requires authoritative REST reread;409 denotes a current state conflict. Historical unknown allocations lacking original inventory require recovery rather than inventing a smaller public completion set. Exact paths/compatibility remain subject toCR-009.
+
+Draft06-07 serving/DNS: GET scoped node-groups/{group_id}/serving returns sorted unique confirmed business addresses only. POST /dns takes access_id/name and Idempotency-Key header, returns202/exact operation_id/current state/Location without external I/O. Same key replays accepted snapshot even after health changes; a fresh recompute uses a new key. DNS consumer runs separately via run-dns with private deployment keyring; unknown is parked and preserves all occupation. TTL60/DNS-only and fixed verified zone binding remain. This differs from old published body idempotency_key and32-address bound; exact compatibility is pendingCR-009.

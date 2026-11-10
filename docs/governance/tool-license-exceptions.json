@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "exceptions": [
+    {
+      "id": "CR-003",
+      "status": "approved",
+      "decision": "A",
+      "owner_response": "\u6309\u63a8\u8350",
+      "approved_at": "2026-11-06",
+      "approval_context": "Project owner selected the recommended option A in the active execute-phase conversation; scope is exactly CR-003 as presented",
+      "usage": "development-ci-sql-to-go",
+      "license": "MPL-2.0",
+      "dependency": {
+        "module": "github.com/go-sql-driver/mysql",
+        "version": "v1.9.3",
+        "sum": "h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo="
+      },
+      "artifacts": [
+        {
+          "platform": "darwin-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_darwin_arm64.tar.gz",
+          "archive_sha256": "21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e",
+          "binary_sha256": "7e63a8b2166f1103a2ad1d2e5d05d8fe3f13ca65ecf2774a2570b830d32055fd"
+        },
+        {
+          "platform": "linux-amd64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_amd64.tar.gz",
+          "archive_sha256": "497ae4fcdfa64c5b0c311ffe4c2bd991e43991e82e5367792ed78bc2dca27354",
+          "binary_sha256": "0496fbc18f603e2fbd10c752942d1389a1fa9bc3d18de7243ec00cccd611575f"
+        },
+        {
+          "platform": "linux-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_arm64.tar.gz",
+          "archive_sha256": "b7cae247740d0c51a1e657479e5b2d21e6fef428f596682a01bc55bf4ab8a23d",
+          "binary_sha256": "3b42bdbc5be1d534b95fc6b9f0e1572e6aa555fda3c96f208cb26abb1bb77d7e"
+        }
+      ],
+      "obligations": [
+        "Unchanged official generator only; never a VORTEX runtime dependency exception",
+        "Retain sqlc MIT and driver MPL copyright/license notices and exact source links",
+        "External distribution requires a separate inventory and fulfillment of MPL source availability and recipient notice obligations",
+        "Other licenses, modules, versions, hashes, usage and distribution remain unapproved"
+      ],
+      "sources": [
+        "https://github.com/go-sql-driver/mysql/tree/v1.9.3",
+        "https://www.mozilla.org/MPL/2.0/",
+        "https://www.mozilla.org/en-US/MPL/2.0/FAQ/"
+      ]
+    },
+    {
+      "id": "CR-004",
+      "status": "approved",
+      "decision": "A",
+      "owner_response": "a",
+      "approved_at": "2026-11-06",
+      "approval_context": "Project owner explicitly selected CR-004 proposal A in the active execute-phase conversation",
+      "usage": "development-ci-sql-to-go",
+      "artifacts": [
+        {
+          "platform": "darwin-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_darwin_arm64.tar.gz",
+          "archive_sha256": "21602158c99eb1f2bae197a66abfb1941d1e9e50b23125bb193349c6b1acc71e",
+          "binary_sha256": "7e63a8b2166f1103a2ad1d2e5d05d8fe3f13ca65ecf2774a2570b830d32055fd"
+        },
+        {
+          "platform": "linux-amd64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_amd64.tar.gz",
+          "archive_sha256": "497ae4fcdfa64c5b0c311ffe4c2bd991e43991e82e5367792ed78bc2dca27354",
+          "binary_sha256": "0496fbc18f603e2fbd10c752942d1389a1fa9bc3d18de7243ec00cccd611575f"
+        },
+        {
+          "platform": "linux-arm64",
+          "url": "https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_arm64.tar.gz",
+          "archive_sha256": "b7cae247740d0c51a1e657479e5b2d21e6fef428f596682a01bc55bf4ab8a23d",
+          "binary_sha256": "3b42bdbc5be1d534b95fc6b9f0e1572e6aa555fda3c96f208cb26abb1bb77d7e"
+        }
+      ],
+      "embedded_sources": [
+        {
+          "source": {
+            "module": "github.com/ncruces/go-sqlite3",
+            "version": "v0.32.0",
+            "sum": "h1:hNBUXp88LrfQCsuyXLqWTbTUG35sUuktDsqhhgHvU20=",
+            "component": "SQLite WASM and Doug Lea allocator",
+            "files": {
+              "embed/sqlite3.wasm": "4bd039600eae69059a672ef1c063f4d8ecc94e6367cf742ea903ca412035e0f8",
+              "embed/build.sh": "1c580dcba45d8e0a4fbd4320cd672f46b8680622fc0315de385b829038ea33d6",
+              "embed/init.go": "52c1149430e0e88b16d3183c78397fa6774f7a91013b681f1b7397e71563091b",
+              "sqlite3/main.c": "a10c0911076b5bf58b412cd10d9a1f61d5e182cf6aea95ff70d8eb4d518e5f66",
+              "sqlite3/libc/malloc_sbrk.c": "2b89d53cb9a60fa60a0ac2ea9ad2e6b9fb3d6f37f7725ba7b9b48601e5d7ef2b",
+              "sqlite3/libc/malloc.c": "be7be56b40b4b31417e74e77687f9b96127ea6cae534cf236aee40a4c739508d",
+              "sqlite3/download.sh": "637af52d5157aa47e9395c1e4920d1108fc7f32f3453f8a834c17bf3dc5d35fd"
+            },
+            "binary_asset": "embed/sqlite3.wasm"
+          },
+          "license": "MIT-0"
+        },
+        {
+          "source": {
+            "module": "github.com/wasilibs/go-pgquery",
+            "version": "v0.0.0-20250409022910-10ac41983c07",
+            "sum": "h1:mJdDDPblDfPe7z7go8Dvv1AJQDI3eQ/5xith3q2mFlo=",
+            "component": "libpg_query WASM, Bison-generated PostgreSQL parsers",
+            "files": {
+              "internal/wasm/libpg_query.so": "a49afdfd4f711aca1510c17b062036f45dcf07ad5363d16a586f9a9980c1dec5",
+              "internal/wasm/wasm.go": "716f98f4c9de9ccf019693f7431dff45b293bc62f316472e2568fe8b0c3b64fb",
+              "buildtools/wasm/Dockerfile": "e27127702ed7595f93068e3e350b04ba0fd447f28a6020c06b5df6acd66c9ed1",
+              "internal/cparser/src_backend_parser_gram.c": "347dc92a939d312ac6e727f4018583314b181765f532427d2f2d365d552ace5a",
+              "internal/cparser/src_pl_plpgsql_src_pl_gram.c": "9ef438ff195798f682404f5d0446bfee0de0ea20407cf95c26a91e3baa1604fb",
+              "internal/cparser/protobuf-c.c": "4ff2afde88ecd4ea063c808c65a4eec11fba6b5eb8e53a8ee6185867b795a50d",
+              "internal/cparser/xxhash.c": "343f463d6fe389cc4c0647531cf7536246da1dfb9e894aa19b1d69002182e41a",
+              "internal/cparser/src_port_strlcpy.c": "e3acb38c20b1aebf1bd25aa1527dbecc0f857ad29c9596326f297ab4884f0e0b",
+              "internal/cparser/src_port_snprintf.c": "d6c05028cf076d7ca21e07488bc271c93f859f258f2325d1e6a4eea4f43ce75f",
+              "internal/cparser/include/postgres/common/hashfn_unstable.h": "6ff3d8400ea9698bd97ee65b599492f1dcb1c67f2c765a12b469be087a77d01d"
+            },
+            "binary_asset": "internal/wasm/libpg_query.so"
+          },
+          "license": "GPL-2.0-or-later WITH Bison-exception-2.2"
+        }
+      ],
+      "obligations": [
+        "Unchanged official checksum-locked sqlc generator artifacts only; no modified or rebuilt artifacts",
+        "Retain exact allocator/parser licenses, copyrights, Bison exception text and source links",
+        "Bison output exception applies only to the reviewed embedded parsers used by sqlc to generate Go query wrappers, not parser-generator skeleton use",
+        "No ordinary GPL, unknown license, product runtime linkage or external distribution approval; do not widen allowed_spdx",
+        "External distribution or changed source/artifact/module/version/sum/use requires separate review"
+      ],
+      "sources": [
+        "docs/governance/proposals/CR-004-sqlc-embedded-license-review.md",
+        "https://github.com/ncruces/go-sqlite3/blob/v0.32.0/sqlite3/libc/malloc.c",
+        "https://github.com/wasilibs/go-pgquery/blob/10ac41983c07/internal/cparser/src_backend_parser_gram.c",
+        "https://www.gnu.org/software/bison/manual/html_node/Conditions.html",
+        "https://spdx.org/licenses/Bison-exception-2.2.html"
+      ]
+    }
+  ]
+}

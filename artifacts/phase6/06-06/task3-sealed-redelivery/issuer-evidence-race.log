@@ -1,0 +1,27 @@
+=== RUN   TestHubIssueWithoutInstallReceiptStillFencesEmptyBootEvidence
+2026/11/08 14:44:50 goose: no migrations to run. current version: 8
+2026/11/08 14:44:50 OK   00001_authority.sql (20.07ms)
+2026/11/08 14:44:50 OK   00002_tenant_policy.sql (12.68ms)
+2026/11/08 14:44:50 OK   00003_nodes_ports.sql (35.04ms)
+2026/11/08 14:44:50 OK   00004_entry_group_domains.sql (3.11ms)
+2026/11/08 14:44:50 OK   00005_rules_compile.sql (23.48ms)
+2026/11/08 14:44:50 OK   00006_packages_entitlements.sql (23.19ms)
+2026/11/08 14:44:50 OK   00007_metering_ledger.sql (45.27ms)
+2026/11/08 14:44:50 OK   00008_limits_shares.sql (135.65ms)
+2026/11/08 14:44:50 goose: successfully migrated database to version: 8
+--- PASS: TestHubIssueWithoutInstallReceiptStillFencesEmptyBootEvidence (1.28s)
+=== RUN   TestDelegationSealActualMTLSEmptyBootCannotRefillAfterLostInstallReceipt
+2026/11/08 14:44:51 goose: no migrations to run. current version: 8
+2026/11/08 14:44:51 OK   00001_authority.sql (11.67ms)
+2026/11/08 14:44:51 OK   00002_tenant_policy.sql (11.61ms)
+2026/11/08 14:44:51 OK   00003_nodes_ports.sql (25.22ms)
+2026/11/08 14:44:51 OK   00004_entry_group_domains.sql (4.63ms)
+2026/11/08 14:44:51 OK   00005_rules_compile.sql (28.23ms)
+2026/11/08 14:44:51 OK   00006_packages_entitlements.sql (32.38ms)
+2026/11/08 14:44:51 OK   00007_metering_ledger.sql (94.16ms)
+2026/11/08 14:44:51 OK   00008_limits_shares.sql (75.48ms)
+2026/11/08 14:44:51 goose: successfully migrated database to version: 8
+    delegation_seal_transport_test.go:91: actual TLS empty-state boot reuse denied by seal evidence before any allocation redelivery
+--- PASS: TestDelegationSealActualMTLSEmptyBootCannotRefillAfterLostInstallReceipt (1.43s)
+PASS
+ok  	vortex/backend/internal/service	4.185s

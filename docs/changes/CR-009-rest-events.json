@@ -1,0 +1,561 @@
+{
+  "schema_version": 1,
+  "id": "CR-009",
+  "status": "pending-owner-approval",
+  "created": "2026-11-09",
+  "plan": "06-07",
+  "baseline_source": "4dc91a55c2fbe99fa8f183af993b7386805b691c",
+  "prior_approval": {
+    "path": "docs/changes/CR-008-APPROVAL.json",
+    "sha256": "17da8ec278e21ba95d8b3fe36b75764cefccf6082b833b3bf3a08722218260c9",
+    "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd"
+  },
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.3.0",
+      "version": "2.4.0",
+      "kind": "compatible"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.3.0",
+      "version": "3.0.0",
+      "kind": "breaking"
+    }
+  ],
+  "candidate_versions": {
+    "vortex.database": "2.4.0",
+    "vortex.public-api": "3.0.0",
+    "vortex.control.v1": "1.6.0",
+    "vortex.runtime-config": "1.2.0",
+    "vortex.vlink.v1": "1.0.0",
+    "vortex.authorization.v1": "1.2.0"
+  },
+  "artifacts": [
+    {
+      "path": "backend/db/generated/authority.sql.go",
+      "sha256": "0fe0ae9fcf72e349d857a300c8ace4a7a9202379fdb4ad54c8c47abe7baffd6c",
+      "baseline_sha256": "eaf0cd9cbb9a2815162e839765dd58a059288c8bf38e6f549207acef24b0f41d"
+    },
+    {
+      "path": "backend/db/generated/credentials.sql.go",
+      "sha256": "4d162f8c8dc995dadfb8c4ca2b88838b23b4b8c0e5c67d15341f05ba614fc323",
+      "baseline_sha256": "4d162f8c8dc995dadfb8c4ca2b88838b23b4b8c0e5c67d15341f05ba614fc323"
+    },
+    {
+      "path": "backend/db/generated/credit_close.sql.go",
+      "sha256": "c7495a2d2c598af1d9ebbf3742cce96c22496bbb846bdf0e8a6d659b616f80a9",
+      "baseline_sha256": "c7495a2d2c598af1d9ebbf3742cce96c22496bbb846bdf0e8a6d659b616f80a9"
+    },
+    {
+      "path": "backend/db/generated/db.go",
+      "sha256": "39aa06028414ed8f2694efca65a4e002d7e6f56bd510d26873320aa75a612a2c",
+      "baseline_sha256": "39aa06028414ed8f2694efca65a4e002d7e6f56bd510d26873320aa75a612a2c"
+    },
+    {
+      "path": "backend/db/generated/dns_jobs.sql.go",
+      "sha256": "22f9def8d5a16ecce799efcfd8a28345ddab8f8cc4166d32b6101b8e75fe811b",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/domain_events.sql.go",
+      "sha256": "a21993c40cd243d639645318c3cfd371a18ee72585c6a98d9be1af14326a94e6",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/entitlements.sql.go",
+      "sha256": "8148bb1aae3efb165dbb86a7d3ab65500cd88db3f04b036189d90b23266d5c4c",
+      "baseline_sha256": "8148bb1aae3efb165dbb86a7d3ab65500cd88db3f04b036189d90b23266d5c4c"
+    },
+    {
+      "path": "backend/db/generated/group_revalidation.sql.go",
+      "sha256": "f7eac27ffc7e3bc04c4877eb20b6731239b9d6b09b5e0dbfc31dba523e072ce6",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/hub_allocations.sql.go",
+      "sha256": "fb2c9c2087efeea43b6594bf3c2fe79b0815a166ad351dbc8fdd1a834185f04b",
+      "baseline_sha256": "fb2c9c2087efeea43b6594bf3c2fe79b0815a166ad351dbc8fdd1a834185f04b"
+    },
+    {
+      "path": "backend/db/generated/hub_recovery.sql.go",
+      "sha256": "d6e99ded809f70d7c73e87e8bba71a8f1940bff2323a4ab0df6d019455621bca",
+      "baseline_sha256": "d6e99ded809f70d7c73e87e8bba71a8f1940bff2323a4ab0df6d019455621bca"
+    },
+    {
+      "path": "backend/db/generated/hub_same_store_recovery.sql.go",
+      "sha256": "3d3f33e3bf2d03b7f84d1ab30f295a6bdc4e71a3cd683a89033537f3afb36da0",
+      "baseline_sha256": "3d3f33e3bf2d03b7f84d1ab30f295a6bdc4e71a3cd683a89033537f3afb36da0"
+    },
+    {
+      "path": "backend/db/generated/leases.sql.go",
+      "sha256": "8f1ffe516b05ef84d0de8f8bbab0cd17dee86a35840d6c30311ef6eae2d78ca7",
+      "baseline_sha256": "8f1ffe516b05ef84d0de8f8bbab0cd17dee86a35840d6c30311ef6eae2d78ca7"
+    },
+    {
+      "path": "backend/db/generated/ledger.sql.go",
+      "sha256": "246601dd97d1a10297915500eaaa39680c52d2a4638017b61ddcb43435841a33",
+      "baseline_sha256": "246601dd97d1a10297915500eaaa39680c52d2a4638017b61ddcb43435841a33"
+    },
+    {
+      "path": "backend/db/generated/models.go",
+      "sha256": "b822ceb0ab5524dd4e27308c76dd3845dd463bec0978bdbd891ae44314a9d87d",
+      "baseline_sha256": "015b6ab975153fc4677fd51df6f9639a9460cd8ca58a4b373b834773d4cbec2f"
+    },
+    {
+      "path": "backend/db/generated/node_groups.sql.go",
+      "sha256": "b18880fb6355d5525d370979f85c6f3b780f5d8dca6caaba28e543ed551708e2",
+      "baseline_sha256": "b18880fb6355d5525d370979f85c6f3b780f5d8dca6caaba28e543ed551708e2"
+    },
+    {
+      "path": "backend/db/generated/node_recovery.sql.go",
+      "sha256": "7c88f3caf2390492fbc0ad0894aead8278393726553bddb9a1a444bbac6886a4",
+      "baseline_sha256": "7c88f3caf2390492fbc0ad0894aead8278393726553bddb9a1a444bbac6886a4"
+    },
+    {
+      "path": "backend/db/generated/nodes.sql.go",
+      "sha256": "e59a9ef6379cbbd16fa67f3bb2655a94514d7517718e336881ed091ab5e97834",
+      "baseline_sha256": "e59a9ef6379cbbd16fa67f3bb2655a94514d7517718e336881ed091ab5e97834"
+    },
+    {
+      "path": "backend/db/generated/packages.sql.go",
+      "sha256": "c6ec115cd8b9adb95e00352b30a9cd49797e65e9091da3dfd33a5bf9d7fdec13",
+      "baseline_sha256": "c6ec115cd8b9adb95e00352b30a9cd49797e65e9091da3dfd33a5bf9d7fdec13"
+    },
+    {
+      "path": "backend/db/generated/port_operations.sql.go",
+      "sha256": "eae6eb441b914406e9427693e66229d611ade4490710862de9078777b467651b",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/ports.sql.go",
+      "sha256": "11daaf544b5ac39144d66d7dd2100b6d165053761e3216a2f0b8da4421f9ad75",
+      "baseline_sha256": "11daaf544b5ac39144d66d7dd2100b6d165053761e3216a2f0b8da4421f9ad75"
+    },
+    {
+      "path": "backend/db/generated/public_operations.sql.go",
+      "sha256": "981d532bac360c0b020d01911a1359dd9622b6c73c699dd6bcef8836d6e9e5d2",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/public_recoveries.sql.go",
+      "sha256": "832b092f041e86d9e9333319c5893c205108d41d80138e4cd8e512c668dab54f",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/public_resource_lists.sql.go",
+      "sha256": "ce4f5e76a0a8a3faba29dacbdae1b70771bb36d6ce1e9bed7e05fd93a11cf3df",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/public_resources.sql.go",
+      "sha256": "8ccd1fe40f229c140101455f8ac6d1620478e0f0d65bb9f5c61743198f19685f",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/recovery_advance_jobs.sql.go",
+      "sha256": "1452708c0c348270b06ad61c3739c1fabc48d30bfd2c68a5fcbdf2e6752b740e",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/rules.sql.go",
+      "sha256": "b6e7edfbfcc5970f5beb58c0e25a222c92b07255e1d148d206e3a62fddd8fefe",
+      "baseline_sha256": "b6e7edfbfcc5970f5beb58c0e25a222c92b07255e1d148d206e3a62fddd8fefe"
+    },
+    {
+      "path": "backend/db/generated/runtime_leases.sql.go",
+      "sha256": "2ac440d0ecb4da361523bfc41ae8fc6872d979077ad8d76dd430168dd8866404",
+      "baseline_sha256": "2ac440d0ecb4da361523bfc41ae8fc6872d979077ad8d76dd430168dd8866404"
+    },
+    {
+      "path": "backend/db/generated/share_closures.sql.go",
+      "sha256": "7cdf766a7287041fc614548e2cb7e52de2db2fed73c2fec3ee4939ca59882f29",
+      "baseline_sha256": "7cdf766a7287041fc614548e2cb7e52de2db2fed73c2fec3ee4939ca59882f29"
+    },
+    {
+      "path": "backend/db/generated/shares.sql.go",
+      "sha256": "30bdc9603fd66c69bbbbc5b95ce24fb6dfdbbdd87fc3f8652d34fcaf39808826",
+      "baseline_sha256": "30bdc9603fd66c69bbbbc5b95ce24fb6dfdbbdd87fc3f8652d34fcaf39808826"
+    },
+    {
+      "path": "backend/db/generated/subscriptions.sql.go",
+      "sha256": "cb51e0c4b3b6afa6b2b0368f510f008b3a3214ad7e8df385676e270c2a516713",
+      "baseline_sha256": "cb51e0c4b3b6afa6b2b0368f510f008b3a3214ad7e8df385676e270c2a516713"
+    },
+    {
+      "path": "backend/db/generated/tenants.sql.go",
+      "sha256": "a667fdca54032e276cd25f6d868fe254e89f3bd3edbbf84caad036fdf7bf9a21",
+      "baseline_sha256": "a667fdca54032e276cd25f6d868fe254e89f3bd3edbbf84caad036fdf7bf9a21"
+    },
+    {
+      "path": "backend/db/generated/tokens.sql.go",
+      "sha256": "7d8ff6ffe01bbf103d7f83d2d49a1473c1c7a15fdd53d99dc3189ba243070f39",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/generated/usage.sql.go",
+      "sha256": "80f3ad804a66edef07b03bd20c247549c340e5ba9f4e8461d5eb95cfd921f559",
+      "baseline_sha256": "80f3ad804a66edef07b03bd20c247549c340e5ba9f4e8461d5eb95cfd921f559"
+    },
+    {
+      "path": "backend/db/migrations/00001_authority.sql",
+      "sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272",
+      "baseline_sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272"
+    },
+    {
+      "path": "backend/db/migrations/00002_tenant_policy.sql",
+      "sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200",
+      "baseline_sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200"
+    },
+    {
+      "path": "backend/db/migrations/00003_nodes_ports.sql",
+      "sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6",
+      "baseline_sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6"
+    },
+    {
+      "path": "backend/db/migrations/00004_entry_group_domains.sql",
+      "sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2",
+      "baseline_sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2"
+    },
+    {
+      "path": "backend/db/migrations/00005_rules_compile.sql",
+      "sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c",
+      "baseline_sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c"
+    },
+    {
+      "path": "backend/db/migrations/00006_packages_entitlements.sql",
+      "sha256": "f874982c3f057e67075cc789e8edb81c90e53f3abe8e3022eed9923fb8f99130",
+      "baseline_sha256": "f874982c3f057e67075cc789e8edb81c90e53f3abe8e3022eed9923fb8f99130"
+    },
+    {
+      "path": "backend/db/migrations/00007_metering_ledger.sql",
+      "sha256": "d4c5f73e1d47359c7690bb0e367c3143350468a5825f1e3ffb9522ae239ebb16",
+      "baseline_sha256": "d4c5f73e1d47359c7690bb0e367c3143350468a5825f1e3ffb9522ae239ebb16"
+    },
+    {
+      "path": "backend/db/migrations/00008_limits_shares.sql",
+      "sha256": "661bbe7cd7bacb583aa307436a9ee69183c249f23271794994507d7c94c3ea0d",
+      "baseline_sha256": "661bbe7cd7bacb583aa307436a9ee69183c249f23271794994507d7c94c3ea0d"
+    },
+    {
+      "path": "backend/db/migrations/00009_domain_events.sql",
+      "sha256": "2797fd044648fc7d7a15ebc677133f16296e551426bacf1fea5f780454c2d373",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/authority.sql",
+      "sha256": "1cf0f50b60a245bd088080067d0f954d04f7977ba0ca17f9428453a21c1ae62b",
+      "baseline_sha256": "1cf0f50b60a245bd088080067d0f954d04f7977ba0ca17f9428453a21c1ae62b"
+    },
+    {
+      "path": "backend/db/query/credentials.sql",
+      "sha256": "b351b44e867611a9f4cc64151a894fd0ed5040341b7a1424f080bb5c19cc033e",
+      "baseline_sha256": "b351b44e867611a9f4cc64151a894fd0ed5040341b7a1424f080bb5c19cc033e"
+    },
+    {
+      "path": "backend/db/query/credit_close.sql",
+      "sha256": "4fc642bf3936834b5b0f191b0a1372af1c6e6f807f46bba0d053f2d0d59eed17",
+      "baseline_sha256": "4fc642bf3936834b5b0f191b0a1372af1c6e6f807f46bba0d053f2d0d59eed17"
+    },
+    {
+      "path": "backend/db/query/dns_jobs.sql",
+      "sha256": "ecf6f82057c7687850e1043a0331ad5c707a67e938d18546d036c308142fe72a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/domain_events.sql",
+      "sha256": "6ffe83fd7ae7e000053b8a1052ca4a79d0af8aebb4d808f84a17edae4cc9077b",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/entitlements.sql",
+      "sha256": "4ba6f83268f915b82389ab54a9d4858ec42e9b17bb078ba0fda56188ea39244d",
+      "baseline_sha256": "4ba6f83268f915b82389ab54a9d4858ec42e9b17bb078ba0fda56188ea39244d"
+    },
+    {
+      "path": "backend/db/query/group_revalidation.sql",
+      "sha256": "051435c6b62fc345523152c4177b2d09bcbcb8b73f298f4463163c1664ebceb3",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/hub_allocations.sql",
+      "sha256": "95a6bd077089f3d1588d76c3c9e55db0598e3484dae880941a4760bd8f696090",
+      "baseline_sha256": "95a6bd077089f3d1588d76c3c9e55db0598e3484dae880941a4760bd8f696090"
+    },
+    {
+      "path": "backend/db/query/hub_recovery.sql",
+      "sha256": "4425e7cb9c8a42cc3b06be9d68715bb4c35dc2672260c7e6b4ed0ee7ea539e5b",
+      "baseline_sha256": "4425e7cb9c8a42cc3b06be9d68715bb4c35dc2672260c7e6b4ed0ee7ea539e5b"
+    },
+    {
+      "path": "backend/db/query/hub_same_store_recovery.sql",
+      "sha256": "3320423991265c12adb12d75cdbedaf475e6643a58f1c06a2889485d4c482ae7",
+      "baseline_sha256": "3320423991265c12adb12d75cdbedaf475e6643a58f1c06a2889485d4c482ae7"
+    },
+    {
+      "path": "backend/db/query/leases.sql",
+      "sha256": "11f51adda35ec56d87e2947777b13921d1a1d386be8dba5bd340bc4c61c732e8",
+      "baseline_sha256": "11f51adda35ec56d87e2947777b13921d1a1d386be8dba5bd340bc4c61c732e8"
+    },
+    {
+      "path": "backend/db/query/ledger.sql",
+      "sha256": "7d2fa297d132bd783b332be4318330a14071c157906d850160cc1b9cbfcbc1a2",
+      "baseline_sha256": "7d2fa297d132bd783b332be4318330a14071c157906d850160cc1b9cbfcbc1a2"
+    },
+    {
+      "path": "backend/db/query/node_groups.sql",
+      "sha256": "980b3ee78002870c0525b9bab77e5be8b61707b76d7a9513b5d9987e776a73a9",
+      "baseline_sha256": "980b3ee78002870c0525b9bab77e5be8b61707b76d7a9513b5d9987e776a73a9"
+    },
+    {
+      "path": "backend/db/query/node_recovery.sql",
+      "sha256": "14a0a73e596a7781a1bdcabac7defbef4a482f2f6fe1d0218dcc4373a82f83fe",
+      "baseline_sha256": "14a0a73e596a7781a1bdcabac7defbef4a482f2f6fe1d0218dcc4373a82f83fe"
+    },
+    {
+      "path": "backend/db/query/nodes.sql",
+      "sha256": "eed9154c54e27a17817159336283d622a15d4a935b292ab9ee6bb3992d480907",
+      "baseline_sha256": "eed9154c54e27a17817159336283d622a15d4a935b292ab9ee6bb3992d480907"
+    },
+    {
+      "path": "backend/db/query/packages.sql",
+      "sha256": "ec8f99730c7aacf34cf0d92e58d16a6b46e8940d15bf94841603e782564bf02d",
+      "baseline_sha256": "ec8f99730c7aacf34cf0d92e58d16a6b46e8940d15bf94841603e782564bf02d"
+    },
+    {
+      "path": "backend/db/query/port_operations.sql",
+      "sha256": "4eb62dca76956f1484ab05cc9aa22d646e978cb4a5726ff1bc4a1c2e15466af1",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/ports.sql",
+      "sha256": "bcfa5cbf646b42aef1afa87ad60af7d4c70786c19979701c5b994faf9aba76b5",
+      "baseline_sha256": "bcfa5cbf646b42aef1afa87ad60af7d4c70786c19979701c5b994faf9aba76b5"
+    },
+    {
+      "path": "backend/db/query/public_operations.sql",
+      "sha256": "072a80e18c27d8015223bad918ef3e830f51d9f61207cf0cfc8fe668c3a1e1a7",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/public_recoveries.sql",
+      "sha256": "ed3a231344b311d4ae563b030e22a5b303f21960384f8cbff4e3d4b708ebe485",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/public_resource_lists.sql",
+      "sha256": "54e9037994036ed9dd01d6c5dde6a1a42ab6375e2137108fc068faa80936cf7c",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/public_resources.sql",
+      "sha256": "17df48f647d22a3e40c70964fa4c07c5bb5763c7519b82cbe5509d5dab94d53c",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/recovery_advance_jobs.sql",
+      "sha256": "f1a0546a99c2d5044a333e906befe9845318a0d8ff5dc96da369d521d8762221",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/rules.sql",
+      "sha256": "7714df3de6b2125bc1b55b484eeaec37973175777a87877be933bd9ca0e4ed21",
+      "baseline_sha256": "7714df3de6b2125bc1b55b484eeaec37973175777a87877be933bd9ca0e4ed21"
+    },
+    {
+      "path": "backend/db/query/runtime_leases.sql",
+      "sha256": "b5e918213ca78f469a1a5e5b2cf58425c4f8e77d3324e5e259fcfe0e901ae90e",
+      "baseline_sha256": "b5e918213ca78f469a1a5e5b2cf58425c4f8e77d3324e5e259fcfe0e901ae90e"
+    },
+    {
+      "path": "backend/db/query/share_closures.sql",
+      "sha256": "f35c1284e4f766fff1cb7e8842b3420046d39bf23a58ada0771197dd90034b11",
+      "baseline_sha256": "f35c1284e4f766fff1cb7e8842b3420046d39bf23a58ada0771197dd90034b11"
+    },
+    {
+      "path": "backend/db/query/shares.sql",
+      "sha256": "496310f52232680925316dea1d5cfa87eb358c331fe4c53fca5ece85be053ef7",
+      "baseline_sha256": "496310f52232680925316dea1d5cfa87eb358c331fe4c53fca5ece85be053ef7"
+    },
+    {
+      "path": "backend/db/query/subscriptions.sql",
+      "sha256": "4340802996e8f9673e477124a41627f556b5862dde53b0fb87b5bf54e72b9136",
+      "baseline_sha256": "4340802996e8f9673e477124a41627f556b5862dde53b0fb87b5bf54e72b9136"
+    },
+    {
+      "path": "backend/db/query/tenants.sql",
+      "sha256": "ac84c16629064dd6fea789e9a2568e8c4e10964718056088774986001e20c2c7",
+      "baseline_sha256": "ac84c16629064dd6fea789e9a2568e8c4e10964718056088774986001e20c2c7"
+    },
+    {
+      "path": "backend/db/query/tokens.sql",
+      "sha256": "c9fcf92a2d9ccb75058a1ece44edba362036e22e482c0a374e9c7f21e7c88f70",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/db/query/usage.sql",
+      "sha256": "a8d68b98b6dbc0f671ff9363220da1b94cafcca13a95714bd89b46ce8eb2edb7",
+      "baseline_sha256": "a8d68b98b6dbc0f671ff9363220da1b94cafcca13a95714bd89b46ce8eb2edb7"
+    },
+    {
+      "path": "backend/db/sqlc.yaml",
+      "sha256": "df503c4af8ca8085574a32d7807f73146ed6116eb05b07923f2deb456ba466ed",
+      "baseline_sha256": "df503c4af8ca8085574a32d7807f73146ed6116eb05b07923f2deb456ba466ed"
+    },
+    {
+      "path": "backend/openapi/v1/openapi.yaml",
+      "sha256": "2b9c61ffa2e45c17a4ea8e1c197de535b3d409a1fb1068e409b0540afef158a5",
+      "baseline_sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a"
+    },
+    {
+      "path": "contracts/CHANGELOG.md",
+      "sha256": "e1944eb6a185ccc50c0413852b8b2c2af8a4d7bd15aeae0bba2ff583a572e64f",
+      "baseline_sha256": "a9b04617968a71b58980c3e82592e362347cb39f230a3155ea390ef0b4e4f585"
+    },
+    {
+      "path": "contracts/credential_revocations.go",
+      "sha256": "d3c935b8b52dc4fc90acb7ba937481616c53b7d11e51307089ac9d618f723f73",
+      "baseline_sha256": "d3c935b8b52dc4fc90acb7ba937481616c53b7d11e51307089ac9d618f723f73"
+    },
+    {
+      "path": "contracts/credit_close.go",
+      "sha256": "d2dcf224b4bdfe4bb3c5bde1f7de61708d41300afc4883aa7fb148b4bce942ed",
+      "baseline_sha256": "d2dcf224b4bdfe4bb3c5bde1f7de61708d41300afc4883aa7fb148b4bce942ed"
+    },
+    {
+      "path": "contracts/database/schema.sql",
+      "sha256": "3c0ffe948c5171571b7b42d31d870fa7500ff98f477a52deca4ab9476add88c0",
+      "baseline_sha256": "24ca0722b9ad9798975f9d5544cebc232d75f4df2d7140bee58e009bef018f56"
+    },
+    {
+      "path": "contracts/delegation_seal.go",
+      "sha256": "e699c21764dffdf0f676e1f46a601223ffbbf3ee7ac57ee2acaf40946f22e04c",
+      "baseline_sha256": "e699c21764dffdf0f676e1f46a601223ffbbf3ee7ac57ee2acaf40946f22e04c"
+    },
+    {
+      "path": "contracts/known_usage_inventory.go",
+      "sha256": "d4199767195b36528bbd1a9848374c1c5582ae6686ccd985f57cfd8eb859da43",
+      "baseline_sha256": "d4199767195b36528bbd1a9848374c1c5582ae6686ccd985f57cfd8eb859da43"
+    },
+    {
+      "path": "contracts/node_boot_recovery.go",
+      "sha256": "3b8c2220255d43a812d1e5fd59aef49363f2f5d671df8a6ab7494cb4e137f01e",
+      "baseline_sha256": "3b8c2220255d43a812d1e5fd59aef49363f2f5d671df8a6ab7494cb4e137f01e"
+    },
+    {
+      "path": "contracts/node_report.go",
+      "sha256": "9ee47e553ac128a2611299c3ca8602c0137acb55ef4187190593ca6575d4c644",
+      "baseline_sha256": "9ee47e553ac128a2611299c3ca8602c0137acb55ef4187190593ca6575d4c644"
+    },
+    {
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "sha256": "2b9c61ffa2e45c17a4ea8e1c197de535b3d409a1fb1068e409b0540afef158a5",
+      "baseline_sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a"
+    },
+    {
+      "path": "contracts/protobuf/v1/identity-profile.json",
+      "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070",
+      "baseline_sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.md",
+      "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6",
+      "baseline_sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.schema.json",
+      "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338",
+      "baseline_sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
+    },
+    {
+      "path": "contracts/protobuf/v1/share-handoff.schema.json",
+      "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151",
+      "baseline_sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.pb.go",
+      "sha256": "91c4926a8c1f103fa312e1b2ac3cff38cdb4ac1f19f18fe19e9eb4886713d17c",
+      "baseline_sha256": "91c4926a8c1f103fa312e1b2ac3cff38cdb4ac1f19f18fe19e9eb4886713d17c"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.proto",
+      "sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+      "baseline_sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex_grpc.pb.go",
+      "sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+      "baseline_sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+    },
+    {
+      "path": "contracts/renewal.go",
+      "sha256": "1035fb16483ef41911bb3206fbebc0a0422ae3630c9785c82bf45e5c69e1aec1",
+      "baseline_sha256": "1035fb16483ef41911bb3206fbebc0a0422ae3630c9785c82bf45e5c69e1aec1"
+    },
+    {
+      "path": "contracts/requirements-map.yaml",
+      "sha256": "f040ecb7600c8ce01ae71ace89c57d7d011192e982d7ecb9dab4fdde5d91daab",
+      "baseline_sha256": "9ee1a6c6d8483efdfbd1109a978273cc7abd06eb29af2503d7a5728661bdc9d2"
+    },
+    {
+      "path": "contracts/runtime/config.schema.json",
+      "sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "baseline_sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1"
+    },
+    {
+      "path": "contracts/runtime_schema.go",
+      "sha256": "e944baa006ad4b32b1657fc4900913280761ea1a8d3b9da71f9f2850aa422f5d",
+      "baseline_sha256": "e944baa006ad4b32b1657fc4900913280761ea1a8d3b9da71f9f2850aa422f5d"
+    },
+    {
+      "path": "contracts/share_handoff.go",
+      "sha256": "17072cbf847ff3cb6e3f98dc0fdc7ab3540bf9226f8f6340e1f956a8edacb55e",
+      "baseline_sha256": "17072cbf847ff3cb6e3f98dc0fdc7ab3540bf9226f8f6340e1f956a8edacb55e"
+    },
+    {
+      "path": "contracts/share_renewal_closure.go",
+      "sha256": "64a35e67dfec064d2d67181e766f084450700805fbe40af29e58ab8a8c08dbdc",
+      "baseline_sha256": "64a35e67dfec064d2d67181e766f084450700805fbe40af29e58ab8a8c08dbdc"
+    },
+    {
+      "path": "contracts/unknown_usage.go",
+      "sha256": "29fc6e329298ac4c73a57ead2553812c677ae464826897e7316ccdeb57ec23bb",
+      "baseline_sha256": "29fc6e329298ac4c73a57ead2553812c677ae464826897e7316ccdeb57ec23bb"
+    },
+    {
+      "path": "contracts/versions.yaml",
+      "sha256": "f889fdf67afbfe9f1ebd96154ccbd3e47239bdbabdaf8683cae5b896ac007c59",
+      "baseline_sha256": "3825df38c0e5a9e37f898d4cd5f144b174ad624647e3b82030dd1d015d162d19"
+    }
+  ],
+  "acceptance": {
+    "owner_approval": false,
+    "clean_source": "97966a3a70bff79afd43078ceadf211fe877a6d5",
+    "clean_source_result": "passed",
+    "evidence": "artifacts/phase6/06-07/task2-unified-acceptance/",
+    "scope": "06-07 business REST/auth/cursor/SSE, safe DTOs, exact operation and proof-bound async consumers. Final same-SHA Docker/Actions, external Cloudflare and broader phase acceptance remain06-11.",
+    "validation_summary": {
+      "normal_test_events": 482,
+      "race_test_events": 482,
+      "service_normal_seconds": 227.988,
+      "service_race_seconds": 383.572,
+      "sqlc_independent_runs": 2,
+      "sqlc_outputs": 33,
+      "linux_cross_builds": 6,
+      "registered_operations": 45,
+      "native_amd64_execution": false,
+      "same_sha_actions_pair": "pending06-11"
+    }
+  },
+  "compatibility_decisions": [
+    "Explicit tenant paths replace former unscoped limits/billing/source ledger/catalog paths; no silent aliases.",
+    "Strong quoted decimal If-Match;400invalid,428missing,412stale,409conflict; redemption202 exact operation.",
+    "DNS Idempotency-Key header replaces body key; serving returns full current deduplicated addresses rather than historical32limit.",
+    "Pages omit next_cursor on last page; DTOs enumerate actual business fields, safe operation resource/version and persisted recovery stages.",
+    "Opaque rotating refresh proof is a single explicit body-auth exception; initial issuance remains a trusted local identity-verified command.",
+    "Port commit succeeds only at PG allocation stage after actual prepare proofs; release/abort need complete original release inventory.",
+    "SSE durable per-tenant committed sequence, signed scope/principal-bound ID, safe summary and resync/close.",
+    "New public recovery approvals, raw boot/epoch/backend/proof submission, credential enrollment and online payment are excluded. Existing approved same-store recovery may be durably advanced by current platform_admin."
+  ]
+}

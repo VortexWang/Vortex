@@ -1,0 +1,22 @@
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/valid
+    renewal_handoff_test.go:77: live transferred source lost automatic trigger []
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/stopped
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/missing-handoff
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/changed-limit
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-path
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/wrong-fence
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-boot
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/untrusted-time
+--- FAIL: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff (1.51s)
+    --- FAIL: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/valid (0.20s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/stopped (0.20s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/missing-handoff (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/changed-limit (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-path (0.19s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/wrong-fence (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-boot (0.19s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/untrusted-time (0.18s)
+FAIL
+FAIL	vortex/agent/store	2.220s
+FAIL

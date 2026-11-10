@@ -1,0 +1,31 @@
+{
+  "base_sha": "0f450b34e7581c9585129e2b742a8ee02dd16bc7",
+  "scope": "Finalize original installed credit using exact historical effective seal admission chain before source-funded successor",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "focused": "focused-complete-native.log;9.963s",
+    "native_backend": "backend-native-race.log;315.385s",
+    "linux_arm64_backend": "backend-linux-race.log;331.626s",
+    "builds": "cross-builds.json;four Backend/Hub linux builds"
+  },
+  "expected_red": "focused-native.log;valid effective seal rejected by immutable initial boot comparison",
+  "inherited_unchanged": "No SQL/protobuf/root/dependency changes; earlier generation/root evidence retained",
+  "not_claimed": [
+    "Production RuntimeServer/Engine recovery convergence",
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "New network recovery acceptance"
+  ],
+  "evidence_sha256": {
+    "README.md": "9d1b67f7768e5d88b212dc5a9f6087b9c0cd3f324304ef7adef56e1312e490f2",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "ecf1dd2ae7ed7070cee8d30da301b38a486fbc90b896a8a8462cc5fd96e5587b",
+    "backend-native-race.log": "c6fa6a1845653fc5a465eb2e26ebc5b581684c4bd02d925d89be831328f9b79e",
+    "cross-builds.json": "2d5cf84712caaadd9083a9cb3d85a2c313925744fdc7fd4d2189a4077b46757a",
+    "environment.json": "8a45e230bb8e2c8227b7daabe7630dd1f89401350c1184fdbb5d2ee760414f70",
+    "focused-complete-native.log": "ee19b31714baf636c4d622b096e4cce9e1748e3dbbc68a2b7c4d42a3086c0bdd",
+    "focused-native.log": "5a41badb4d5a9eb8f625d45b8c15d7bbfff301ea57a2041a44167a983b335a8f",
+    "green-native.log": "63d75f5e7db1d31ee8a6109cd94d22ed7bcc1a1ae2176ac70968b4cf7cf4348a",
+    "source-hashes.json": "50099505e71af97b2ffb9468162ad748d5982a901aee8763acded31621123b0b"
+  }
+}

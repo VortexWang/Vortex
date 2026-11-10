@@ -1,0 +1,11 @@
+{
+  "format": "unittest",
+  "command": "python3 tools/phase6/share_red_test.py",
+  "exitCode": 1,
+  "output": "test_share_lease_authority (__main__.ShareAuthority) ... FAIL\n\n======================================================================\nFAIL: test_share_lease_authority (__main__.ShareAuthority)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/share_red_test.py\", line 11, in test_share_lease_authority\n    self.assertEqual(result.returncode,0,result.stdout)\nAssertionError: 1 != 0 : === RUN   TestShareLeaseAuthoritySchema\n2026/11/08 11:02:51 goose: no migrations to run. current version: 7\n    share_test.go:17: durable share/lease authority table share_chains missing\n    share_test.go:17: durable share/lease authority table share_generations missing\n    share_test.go:17: durable share/lease authority table lease_expectations missing\n    share_test.go:17: durable share/lease authority table node_fencing missing\n    share_test.go:17: durable share/lease authority table share_renewal_authorities missing\n--- FAIL: TestShareLeaseAuthoritySchema (0.04s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.723s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 3.092s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_share_lease_authority",
+  "targetFile": "backend/internal/service/share_test.go",
+  "expected": "Durable share chains, generations, leases, node fencing and independent renewal authority exist",
+  "actual": "Five planned authority tables missing on real PostgreSQL",
+  "semanticAssessment": "Target executed against live PG18.6; missing authority tables are intentional assertions, not compilation/import/setup failures."
+}

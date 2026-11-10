@@ -1,0 +1,5 @@
+--- FAIL: TestFundedHandoffReopenBarrierRootsLeasesAndCompleteSeal (0.38s)
+    funded_handoff_test.go:124: lease:  <nil>
+FAIL
+FAIL	vortex/agent/store	7.938s
+FAIL

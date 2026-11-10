@@ -1,0 +1,22 @@
+test_linux_and_darwin_include_the_same_reviewed_targets (test_dependency_lock_check.InventoryHostTests) ... ok
+test_exact_approval_and_mutations (test_rule_contract_approval.ApprovalIntegrity) ... ok
+test_approvals_do_not_widen_global_policy (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_both_reviewed_sources_match_only_three_official_artifacts (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_missing_identity_and_artifact_fields_are_rejected (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_missing_pending_or_different_approval_is_rejected (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_modified_distribution_runtime_and_skeleton_uses_are_rejected (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_module_version_sum_component_asset_and_file_digest_drift (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_unapproved_ordinary_gpl_missing_or_different_bison_exception (test_sqlc_license_check.ExactEmbeddedLicenseException) ... ok
+test_artifact_platform_origin_archive_and_binary_drift (test_sqlc_license_check.ExactToolLicenseException) ... ok
+test_dependency_name_version_and_sum_drift (test_sqlc_license_check.ExactToolLicenseException) ... ok
+test_exact_three_official_artifacts (test_sqlc_license_check.ExactToolLicenseException) ... ok
+test_other_licenses_and_pending_decisions_are_not_authorized (test_sqlc_license_check.ExactToolLicenseException) ... ok
+test_product_linkage_and_distribution_are_not_authorized (test_sqlc_license_check.ExactToolLicenseException) ... ok
+test_archive_duplicate_members_are_preserved (test_sqlc_license_check.WasmSourceComparison) ... ok
+test_every_other_section_and_section_order_remains_significant (test_sqlc_license_check.WasmSourceComparison) ... ok
+test_only_compiler_producer_string_may_differ (test_sqlc_license_check.WasmSourceComparison) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 15.604s
+
+OK

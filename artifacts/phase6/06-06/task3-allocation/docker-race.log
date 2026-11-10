@@ -1,0 +1,62 @@
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-d32bf86c7c86 Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-d32bf86c7c86 Created 
+=== RUN   TestDistributionExactDemandAndFIFOQueue
+--- PASS: TestDistributionExactDemandAndFIFOQueue (0.00s)
+=== RUN   TestDistributionPropertiesConservationFloorAndPermutation
+--- PASS: TestDistributionPropertiesConservationFloorAndPermutation (0.51s)
+=== RUN   TestAllocationWindowPreparedCandidatesReuseAndDemandAuditRollback
+2026/11/08 03:51:45 goose: no migrations to run. current version: 8
+2026/11/08 03:51:45 OK   00001_authority.sql (6.12ms)
+2026/11/08 03:51:45 OK   00002_tenant_policy.sql (5.75ms)
+2026/11/08 03:51:45 OK   00003_nodes_ports.sql (13.09ms)
+2026/11/08 03:51:45 OK   00004_entry_group_domains.sql (1.45ms)
+2026/11/08 03:51:45 OK   00005_rules_compile.sql (11.4ms)
+2026/11/08 03:51:45 OK   00006_packages_entitlements.sql (11.18ms)
+2026/11/08 03:51:45 OK   00007_metering_ledger.sql (14.32ms)
+2026/11/08 03:51:45 OK   00008_limits_shares.sql (11.74ms)
+2026/11/08 03:51:45 goose: successfully migrated database to version: 8
+--- PASS: TestAllocationWindowPreparedCandidatesReuseAndDemandAuditRollback (0.33s)
+=== RUN   TestAllocationWindowRevokedGrantKeepsUnknownOccupation
+2026/11/08 03:51:45 goose: no migrations to run. current version: 8
+2026/11/08 03:51:45 OK   00001_authority.sql (5.88ms)
+2026/11/08 03:51:45 OK   00002_tenant_policy.sql (5.52ms)
+2026/11/08 03:51:45 OK   00003_nodes_ports.sql (12.93ms)
+2026/11/08 03:51:45 OK   00004_entry_group_domains.sql (1.59ms)
+2026/11/08 03:51:45 OK   00005_rules_compile.sql (12.73ms)
+2026/11/08 03:51:45 OK   00006_packages_entitlements.sql (10.41ms)
+2026/11/08 03:51:45 OK   00007_metering_ledger.sql (16.89ms)
+2026/11/08 03:51:45 OK   00008_limits_shares.sql (11.87ms)
+2026/11/08 03:51:45 goose: successfully migrated database to version: 8
+--- PASS: TestAllocationWindowRevokedGrantKeepsUnknownOccupation (0.29s)
+=== RUN   TestAllocationWindowConnectionShortagePersistsRealQueue
+2026/11/08 03:51:45 goose: no migrations to run. current version: 8
+2026/11/08 03:51:45 OK   00001_authority.sql (8.74ms)
+2026/11/08 03:51:45 OK   00002_tenant_policy.sql (5.29ms)
+2026/11/08 03:51:46 OK   00003_nodes_ports.sql (13.05ms)
+2026/11/08 03:51:46 OK   00004_entry_group_domains.sql (1.5ms)
+2026/11/08 03:51:46 OK   00005_rules_compile.sql (11.18ms)
+2026/11/08 03:51:46 OK   00006_packages_entitlements.sql (10.97ms)
+2026/11/08 03:51:46 OK   00007_metering_ledger.sql (14.74ms)
+2026/11/08 03:51:46 OK   00008_limits_shares.sql (12.35ms)
+2026/11/08 03:51:46 goose: successfully migrated database to version: 8
+--- PASS: TestAllocationWindowConnectionShortagePersistsRealQueue (0.26s)
+=== RUN   TestShareHandoffAdditionalPlatformRuleCannotBypassAggregate
+2026/11/08 03:51:46 goose: no migrations to run. current version: 8
+2026/11/08 03:51:46 OK   00001_authority.sql (6.47ms)
+2026/11/08 03:51:46 OK   00002_tenant_policy.sql (5.31ms)
+2026/11/08 03:51:46 OK   00003_nodes_ports.sql (13.04ms)
+2026/11/08 03:51:46 OK   00004_entry_group_domains.sql (1.53ms)
+2026/11/08 03:51:46 OK   00005_rules_compile.sql (13.29ms)
+2026/11/08 03:51:46 OK   00006_packages_entitlements.sql (11.18ms)
+2026/11/08 03:51:46 OK   00007_metering_ledger.sql (15.75ms)
+2026/11/08 03:51:46 OK   00008_limits_shares.sql (13.85ms)
+2026/11/08 03:51:46 goose: successfully migrated database to version: 8
+--- PASS: TestShareHandoffAdditionalPlatformRuleCannotBypassAggregate (0.53s)
+PASS
+ok  	vortex/backend/internal/service	2.936s

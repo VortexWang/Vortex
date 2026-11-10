@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "id": "CR-008",
+  "status": "approved",
+  "proposal_path": "docs/changes/CR-008-limits-runtime.json",
+  "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+  "owner_response": "批准 CR-008",
+  "reviewer": "user-approved-in-session",
+  "recorded_at": "2026-11-08T20:45:38.593921+00:00",
+  "candidate_source": "cf92b7e24b6c557a5d14a18b0549a67eac349eb4",
+  "candidate_catalog_sha256": "b2be158a9588c2113e215ed7de1353965b2905483ee3864782bcf3a706711d19",
+  "frozen_catalog_sha256": "3825df38c0e5a9e37f898d4cd5f144b174ad624647e3b82030dd1d015d162d19",
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "24ca0722b9ad9798975f9d5544cebc232d75f4df2d7140bee58e009bef018f56",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.5.0",
+      "version": "1.6.0",
+      "proposal_sha256": "4e29497f82808b9a8693030ef400dae3a2bc42cc27cf8a39f24bdcf8605074bd",
+      "contract_sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+      "reviewer": "user-approved-in-session",
+      "approved_at": "2026-11-08T20:45:38.593921+00:00",
+      "decision": "approved",
+      "approval_record": "docs/changes/CR-008-APPROVAL.json",
+      "artifacts": [
+        {
+          "path": "contracts/protobuf/v1/lifecycle.schema.json",
+          "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338"
+        },
+        {
+          "path": "contracts/protobuf/v1/lifecycle.md",
+          "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6"
+        },
+        {
+          "path": "contracts/protobuf/v1/identity-profile.json",
+          "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+        },
+        {
+          "path": "contracts/protobuf/v1/share-handoff.schema.json",
+          "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151"
+        }
+      ]
+    }
+  ]
+}

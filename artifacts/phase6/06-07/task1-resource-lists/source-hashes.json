@@ -1,0 +1,13 @@
+{
+  "backend/db/migrations/00009_domain_events.sql": "3a1f10403ee841f6a55a22043222691af34b23ee29537b6ca0016f00b060569b",
+  "backend/db/query/public_resource_lists.sql": "3045b7cd6b1f67a81d2e24fb16685ee1f2bb384bc8a8e707d5daea54cd4aca9f",
+  "backend/db/generated/models.go": "72083dcc03ce51cb6739aebbb87f7abaaec6e8408bf806718639ee3ccc277efa",
+  "backend/db/generated/public_resource_lists.sql.go": "3321ce432f9c47a4d832c60d9053670f07a0c4a13f6aafe349c8dc4983d26ef5",
+  "backend/internal/repository/public_resource_lists.go": "eabaf2cc35045d9d646d4119da2374be250894e656ae0964578a8c7a6b599acc",
+  "backend/internal/httpapi/router.go": "7677b2cbd649db5d55bc9f718a232fdc80e557c153e01ae83423f47035f01cbc",
+  "backend/internal/httpapi/resource_lists.go": "46a9c1d8d2936f9aee84c9bff2a110c9c395a952e0b33f01f440da2e3c7bca6b",
+  "backend/internal/httpapi/resource_lists_test.go": "286f627035b9c354b2342a1576628eb218c0ab1812c70e5a1c77003164ba2af1",
+  "backend/internal/httpapi/resources_test.go": "447f3271db42c16951caf6247c5639796964696606ce71dc6cfda39713706eec",
+  "backend/internal/httpapi/httpapi_test.go": "4349a2c2c36a0dd0f9f45364d9553d519606501013c153b47d4f22310893fa85",
+  "docs/api/phase7-recovery-dependencies.md": "b60f2e62e77e6f1151c7ca4b0ba01698f4352792fac0adbe6c69e9bc17bccdeb"
+}

@@ -1,0 +1,106 @@
+{
+  "checksums": {
+    "actions-03ca3547-snapshot.json": "054e8e25fbec15e37708280b193e29889a9e59283eb0e4176af7729e6553e2a1",
+    "actions-42606221348.json": "71589f22324afec37fba9cee814007fe83002e190c27da7c7fcbefaa3b039ccc",
+    "actions-42606221387.json": "6f4ecfa7ec621d298a1bc23366155c4e245c93b97aa1284596bad44376948028",
+    "actions-42606221394.json": "faf0a20c6a0c3b4ec8f7cd7d82de49adb28bee7d18e05fd4bcd6b133930f144c",
+    "actions-42606221407.json": "bbc2749afe9a2ce17a7cb743ca4499ee64defb2f24c71901245f75c226fcc25e",
+    "actions-42606221407/comparison/docker/binary-integrity.json": "90581bf2325bbd88d6e456a38ffd6507f58c8b70cec294b4a5f343612ea5850f",
+    "actions-42606221407/comparison/docker/comparison.json": "8dbfca35c68e50e6d0612a1a991a8191d078f20f18101ad8d5ce7c069d8bbacc",
+    "actions-42606221407/modes/docker/summary.json": "a9883c69bddd1645ba63b258ee50f72b76312ea37a00bb6a478ebfe9ef8281ce",
+    "actions-42606221407/qualification/docker-scale/report.json": "3d654e002f0ac743467b383972e64e95c5cbd04e2223515d87f3bd926cc3b070",
+    "actions-42606221450.json": "f8341e760dde6ec9445bf0757c6dd9be43eaadcb2524e911b8c54595c9439414",
+    "actions-42606221450/agent-hub-race.log.gz": "1e9580d45a3655a079c5caf350f7c67b09704cda1b0275967e17a2d1b1e12b83",
+    "actions-42606221450/host.txt": "adfc0d2a6fe9d12b36001e36898bbf04aeb5972d73d6b4193364aff8244e4662",
+    "actions-42606221450/report.json": "9818176f4b52378049a4166aa58f10e405dbcac59e60ac776ed675e1efa25a0f",
+    "actions-42608942763.json": "ee75f20bd4a56819c4eacf7a7024159ad424c69ce0d24a74cf82bc5f2d2bd4ed",
+    "actions-42608942763/comparison/docker/binary-integrity.json": "90581bf2325bbd88d6e456a38ffd6507f58c8b70cec294b4a5f343612ea5850f",
+    "actions-42608942763/modes/docker/summary.json": "60cc85569e1880e44a6acd3289c7903dfb5d355e0b6b8e01b018b9b85ee480b2",
+    "actions-42608942763/qualification/docker-scale/report.json": "a8511cfb30d543841d9f3251780144424c6e3bed5e9d84d6042359993ff3dcdf",
+    "actions-42608942769.json": "91e5f5a922c326d8b5c80861501d64e4e80bfc33294295a1e15452461f1bae15",
+    "actions-42608942871.json": "cd0f85fda8d56bd37048a1f61eb7cf0e715a5a8110d4511066ab34aeeda12bf5",
+    "actions-42608942920.json": "a8a2682f5dce4e77b57b52fff823cefc16f4793c026d0424f686190ef115a522",
+    "actions-42608943018.json": "fa61ea7a517d03a0d684c503555e1e2546f13a751857553b6f2ad8c4d2e81d78",
+    "local-03ca3547-modes/auto/comparison/binary-integrity.json": "90581bf2325bbd88d6e456a38ffd6507f58c8b70cec294b4a5f343612ea5850f",
+    "local-03ca3547-modes/auto/comparison/comparison.json": "005ea777858ea424cfb22132a20af6447b7ea86dfa749d7c9e8cc91cbef16e91",
+    "local-03ca3547-modes/auto/runtime/report.json": "ddd8a222e1aa2ef088be37849467a6569335956a6870e94f626e394f9328e2e1",
+    "local-03ca3547-modes/checksums.sha256": "1d6ec6d890734eb885feb0771817e2d4e227a930428d94192dc85590060f239a",
+    "local-03ca3547-modes/entry.log.gz": "ef3260114fd58b1a5f973b63e73db0742c5cb48781a6fb475b26925c2a2b4146",
+    "local-03ca3547-modes/mux/comparison/binary-integrity.json": "90581bf2325bbd88d6e456a38ffd6507f58c8b70cec294b4a5f343612ea5850f",
+    "local-03ca3547-modes/mux/comparison/comparison.json": "2f7d8e5af8482cefba8eb81c9b936fecf89ccc02d4c726c7bd8fb901cd979ca9",
+    "local-03ca3547-modes/mux/runtime/report.json": "5973f3d21970094745cacdb1d7c51cb6cc11fcc789d2d396cb51a6515b87a3b8",
+    "local-03ca3547-modes/pool/comparison/binary-integrity.json": "90581bf2325bbd88d6e456a38ffd6507f58c8b70cec294b4a5f343612ea5850f",
+    "local-03ca3547-modes/pool/comparison/comparison.json": "54e56ebe0fd623fee8252ae4411c87bd93df802fc23843e56cb2befa5330d4e7",
+    "local-03ca3547-modes/pool/runtime/report.json": "e186d36262953e98762830f26e9183307a890c8160eb3b98f1602e27e248f798",
+    "local-03ca3547-modes/summary.json": "2a738401753d75eda41ca647b11e2d8867ca3b898fb77a112b71628e1cf25bf1",
+    "local-168be8-phase5/recovery.log.gz": "8aa7699f89d5b1591eab283c7ada97e9c40acb3368cb768cb62a534783cd65af",
+    "local-168be8-phase5/recovery/recovery-race.log.gz": "72c432a553e6e1d792ad5aa95344ba6ee0409bd2a23e9ab66148e9debbbd2f81",
+    "local-168be8-phase5/recovery/report.json": "6f06fda8cae9eca14dc09bf50ca531d55708cb8c269b9b216ee5ffd211674560",
+    "local-168be8-phase5/regional-race.log.gz": "994aa4fc0f5e5f5c86e578c08b2f2d2abc1de8a8002745b2502c77b78a8898cb",
+    "local-168be8-phase5/report.json": "fb955d074798dd1d535e4e53e53a9319cdf1602ea64c8b9f8f975b20cddb380b",
+    "local-168be8-phase5/root-test.log.gz": "8d774cc2ad6e2e58bac991a042040c16740fc0a9ee39571f7c4d8bc760b5a00b"
+  },
+  "external_tool_limitations": [
+    "F-05"
+  ],
+  "local_final_modes": {
+    "commit": "03ca3547a8d229b378e8178dd9856e6cc2262afd",
+    "dirty": false,
+    "formal_performance": false,
+    "modes": [
+      "pool",
+      "mux",
+      "auto"
+    ],
+    "same_source_sha_actions_run": 42608942763,
+    "same_source_sha_actions_status": "success",
+    "status": "passed"
+  },
+  "main_merged": false,
+  "new_actions_snapshot": [
+    {
+      "link": "https://github.com/VortexWang/Vortex/actions/runs/42608942871/job/129131997963",
+      "name": "wave1",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/VortexWang/Vortex/actions/runs/42608943018/job/129131998656",
+      "name": "verify",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/VortexWang/Vortex/actions/runs/42608942920/job/129131997696",
+      "name": "engine",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/VortexWang/Vortex/actions/runs/42608942769/job/129131997721",
+      "name": "vlink",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/VortexWang/Vortex/actions/runs/42608942763/job/129131997765",
+      "name": "phase4",
+      "state": "SUCCESS"
+    }
+  ],
+  "original_workspace_unchanged": true,
+  "overall": "not-passed",
+  "phase5_failures": {
+    "actions_checkout": "0bca7120b0c836fdbf60008b6c3614336709f92c",
+    "actions_run": 42606221450,
+    "continuous_traffic": "failed",
+    "local_full_gate": "failed",
+    "local_recovery_failover": "failed",
+    "same_commit": false,
+    "same_tree_as_prior_source": true
+  },
+  "pr_state": "draft",
+  "prior_validated_source": "168be8a5fa71b43b7532656631430976f788ccc3",
+  "schema": 1,
+  "source_head": "03ca3547a8d229b378e8178dd9856e6cc2262afd",
+  "unresolved": [
+    "F-10",
+    "F-11"
+  ]
+}

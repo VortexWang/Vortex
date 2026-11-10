@@ -1,0 +1,48 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:30:46 goose: no migrations to run. current version: 8
+2026/11/09 01:30:46 OK   00001_authority.sql (32.92ms)
+2026/11/09 01:30:46 OK   00002_tenant_policy.sql (13.86ms)
+2026/11/09 01:30:46 OK   00003_nodes_ports.sql (34.81ms)
+2026/11/09 01:30:46 OK   00004_entry_group_domains.sql (3.85ms)
+2026/11/09 01:30:46 OK   00005_rules_compile.sql (32.61ms)
+2026/11/09 01:30:46 OK   00006_packages_entitlements.sql (28.55ms)
+2026/11/09 01:30:46 OK   00007_metering_ledger.sql (36.22ms)
+2026/11/09 01:30:46 OK   00008_limits_shares.sql (80.4ms)
+2026/11/09 01:30:46 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+    runtime_recovery_transport_test.go:96: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.85s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:30:52 goose: no migrations to run. current version: 8
+2026/11/09 01:30:52 OK   00001_authority.sql (8.08ms)
+2026/11/09 01:30:52 OK   00002_tenant_policy.sql (7.67ms)
+2026/11/09 01:30:52 OK   00003_nodes_ports.sql (17.43ms)
+2026/11/09 01:30:52 OK   00004_entry_group_domains.sql (2.26ms)
+2026/11/09 01:30:52 OK   00005_rules_compile.sql (17.36ms)
+2026/11/09 01:30:52 OK   00006_packages_entitlements.sql (16.99ms)
+2026/11/09 01:30:52 OK   00007_metering_ledger.sql (26.15ms)
+2026/11/09 01:30:52 OK   00008_limits_shares.sql (59.11ms)
+2026/11/09 01:30:52 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+    runtime_recovery_transport_test.go:96: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.67s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:30:58 goose: no migrations to run. current version: 8
+2026/11/09 01:30:58 OK   00001_authority.sql (9.16ms)
+2026/11/09 01:30:58 OK   00002_tenant_policy.sql (7.51ms)
+2026/11/09 01:30:58 OK   00003_nodes_ports.sql (18.72ms)
+2026/11/09 01:30:58 OK   00004_entry_group_domains.sql (2.22ms)
+2026/11/09 01:30:58 OK   00005_rules_compile.sql (19.11ms)
+2026/11/09 01:30:58 OK   00006_packages_entitlements.sql (18.05ms)
+2026/11/09 01:30:58 OK   00007_metering_ledger.sql (24.21ms)
+2026/11/09 01:30:58 OK   00008_limits_shares.sql (55.38ms)
+2026/11/09 01:30:58 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = hub: online usage requires backend confirmation
+    runtime_recovery_transport_test.go:96: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.67s)
+FAIL
+FAIL	vortex/backend/internal/service	17.998s
+FAIL

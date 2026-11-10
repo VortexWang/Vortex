@@ -1,0 +1,9 @@
+2026/11/08 01:20:38 goose: no migrations to run. current version: 6
+2026/11/08 01:20:38     Applied At                  Migration
+2026/11/08 01:20:38     =======================================
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00001_authority.sql
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00002_tenant_policy.sql
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00003_nodes_ports.sql
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00004_entry_group_domains.sql
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00005_rules_compile.sql
+2026/11/08 01:20:38     Sat Nov  7 16:16:40 2026 -- 00006_packages_entitlements.sql

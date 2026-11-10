@@ -274,7 +274,12 @@ func (t *StreamTable) MarkLocalData(id uint32, bytes int) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	stream := t.streams[id]
-	if stream == nil || !stream.InitiatedLocal || stream.Network != StreamTCP || stream.Lifecycle != StreamOpening || bytes < 1 || bytes > t.maxPending-stream.LocalOpenBytes {
+	if stream == nil || !stream.InitiatedLocal || stream.Network != StreamTCP || stream.Lifecycle != StreamOpening {
+		// OPEN_OK may have won after reserveEarlyData's snapshot. Let the
+		// caller recheck that state without deleting the authorized stream.
+		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
+	}
+	if bytes < 1 || bytes > t.maxPending-stream.LocalOpenBytes {
 		delete(t.streams, id)
 		return &StreamViolation{StreamID: id, Cause: ErrStreamState}
 	}

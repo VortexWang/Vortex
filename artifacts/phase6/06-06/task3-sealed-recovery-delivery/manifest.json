@@ -1,0 +1,16 @@
+{
+  "base_sha": "f1cc01c0370bff6f519e6857a5c0386f43dc6159",
+  "production_changes": false,
+  "passed": [
+    "native-race.log",
+    "linux-race.log"
+  ],
+  "source_sha256": {
+    "backend/internal/service/runtime_recovery_transport_test.go": "610df850cb5f3103488a44e6e7c6f6944d0c6e99f4d93731d97a9d217cc76413"
+  },
+  "evidence_sha256": {
+    "README.md": "d76872bdd44500195db9352ce46ebfd0b0a095930b8555163792fb8335bd048b",
+    "linux-race.log": "77432fb16c3607b8d5eec6ecf1f60b4a8b1b2c8b8867bf9a1a0d586045765134",
+    "native-race.log": "9ed49914039e6cbea764439d98f73d897cd05323083980f8a695652d56823a50"
+  }
+}

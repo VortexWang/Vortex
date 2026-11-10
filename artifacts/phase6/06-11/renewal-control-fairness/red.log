@@ -1,0 +1,5 @@
+--- FAIL: TestRenewalSenderYieldsAndRotatesUnansweredJournal (0.25s)
+    renewal_test.go:210: control turn did not yield 0 9 4
+FAIL
+FAIL	vortex/agent	0.934s
+FAIL

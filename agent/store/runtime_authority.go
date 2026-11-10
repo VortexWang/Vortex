@@ -33,6 +33,9 @@ func (s *Store) OpenRuntimeSession(ctx context.Context, scope AuthorizationUse, 
 	if err != nil {
 		return result, err
 	}
+	if err := checkNodeShareOpenTx(ctx, tx, scope); err != nil {
+		return result, err
+	}
 	grant, runtime, share := chosen.grant, chosen.runtime, chosen.share
 	// All held slots on this source count, including unproven previous boots.
 	var count uint64
@@ -90,6 +93,9 @@ func consumeRuntimeRate(ctx context.Context, tx storeTransaction, use Authorizat
 // The share must have passed checkAuthorizationTx in this same transaction.
 // Never use a record cached across transactions or control updates here.
 func consumeValidatedRuntimeRateTx(ctx context.Context, tx storeTransaction, use AuthorizationUse, n uint64, share AuthorizationRecord) error {
+	if err := consumeNodeShareRateTx(ctx, tx, use, n); err != nil {
+		return err
+	}
 	if share.RateBPS == 0 {
 		return ErrAuthorizationDenied
 	}
@@ -233,6 +239,13 @@ func (s *Store) CheckRuntimeReady(ctx context.Context, scope AuthorizationUse) e
 	}
 	if _, err = selectRuntimeAuthorityTx(ctx, tx, scope, 1, nil); err != nil {
 		return err
+	}
+	// A platform-bound rule must also have both independently durable Node
+	// aggregate kinds. Child leases alone cannot activate before bootstrap CAS.
+	for _, kind := range []string{"rate", "connections"} {
+		if _, _, err = nodeShareTx(ctx, tx, scope, kind); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

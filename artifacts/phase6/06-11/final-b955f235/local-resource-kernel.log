@@ -1,0 +1,6 @@
+[219516.024738] Out of memory: Killed process 2348614 (compile) total-vm:2095716kB, anon-rss:813784kB, file-rss:8732kB, shmem-rss:0kB, UID:0 pgtables:1732kB oom_score_adj:0
+[220038.104260] Out of memory: Killed process 2578655 (link) total-vm:1570548kB, anon-rss:62940kB, file-rss:148104kB, shmem-rss:0kB, UID:0 pgtables:688kB oom_score_adj:0
+[220038.119486] Out of memory: Killed process 778708 (postgres) total-vm:261304kB, anon-rss:9036kB, file-rss:1296kB, shmem-rss:135304kB, UID:999 pgtables:476kB oom_score_adj:0
+               total        used        free      shared  buff/cache   available
+Mem:            8003        4759        2867         675        1251        3244
+Swap:           9027        8765         262

@@ -1,0 +1,49 @@
+=== RUN   TestWithin60sRejectsPartialAndOverBudget
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/partial
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/missing-member
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/rounded-duration
+=== RUN   TestWithin60sRejectsPartialAndOverBudget/failed
+--- PASS: TestWithin60sRejectsPartialAndOverBudget (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/partial (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/missing-member (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/over-budget-by-one-ns (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/rounded-duration (0.00s)
+    --- PASS: TestWithin60sRejectsPartialAndOverBudget/failed (0.00s)
+PASS
+ok  	vortex/backend/internal/reconciliation	1.586s
+=== RUN   TestRuleReconciliationDrainsReadyWorkAndCancels
+--- PASS: TestRuleReconciliationDrainsReadyWorkAndCancels (0.00s)
+=== RUN   TestRuleReconciliationIdleAndFailure
+--- PASS: TestRuleReconciliationIdleAndFailure (0.00s)
+PASS
+ok  	vortex/backend/internal/worker	1.626s
+=== RUN   TestReconcile1000Within60s
+2026/11/09 09:04:23 goose: no migrations to run. current version: 9
+2026/11/09 09:04:23 OK   00001_authority.sql (19.53ms)
+2026/11/09 09:04:23 OK   00002_tenant_policy.sql (13.78ms)
+2026/11/09 09:04:24 OK   00003_nodes_ports.sql (31.11ms)
+2026/11/09 09:04:24 OK   00004_entry_group_domains.sql (3.5ms)
+2026/11/09 09:04:24 OK   00005_rules_compile.sql (29.03ms)
+2026/11/09 09:04:24 OK   00006_packages_entitlements.sql (26.25ms)
+2026/11/09 09:04:24 OK   00007_metering_ledger.sql (34.23ms)
+2026/11/09 09:04:24 OK   00008_limits_shares.sql (81.78ms)
+2026/11/09 09:04:24 OK   00009_domain_events.sql (34.33ms)
+2026/11/09 09:04:24 goose: successfully migrated database to version: 9
+    reconciliation_1000_test.go:200: {
+          "commit": "",
+          "scope": "real PostgreSQL production backend reconciliation; deterministic node adapter; no Engine/transport performance claim",
+          "started_at": "2026-11-09T01:07:04.940394Z",
+          "ended_at": "2026-11-09T01:07:40.614264Z",
+          "elapsed_ns": 35673607917,
+          "elapsed_ms": 35673.607917,
+          "rules": 1000,
+          "resolved": 1000,
+          "members": 2000,
+          "observed": 2000,
+          "inventory_sha256": "93721150eecdff36f37a57ab01ee717e48b01397c5d84427c5ab590a6cbdb41d",
+          "status": "passed"
+        }
+--- PASS: TestReconcile1000Within60s (197.15s)
+PASS
+ok  	vortex/backend/internal/service	198.961s

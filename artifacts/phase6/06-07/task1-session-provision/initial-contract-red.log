@@ -1,0 +1,7 @@
+# vortex/backend/cmd/vortex-backend [vortex/backend/cmd/vortex-backend.test]
+cmd/vortex-backend/session_test.go:25:10: undefined: issueSession
+cmd/vortex-backend/session_test.go:44:10: undefined: issueSession
+cmd/vortex-backend/session_test.go:52:11: undefined: issueSession
+cmd/vortex-backend/session_test.go:65:10: undefined: issueSession
+FAIL	vortex/backend/cmd/vortex-backend [build failed]
+FAIL

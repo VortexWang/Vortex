@@ -1,0 +1,18 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:33:25 goose: no migrations to run. current version: 8
+2026/11/09 01:33:25 OK   00001_authority.sql (26.14ms)
+2026/11/09 01:33:25 OK   00002_tenant_policy.sql (16.67ms)
+2026/11/09 01:33:25 OK   00003_nodes_ports.sql (39.06ms)
+2026/11/09 01:33:25 OK   00004_entry_group_domains.sql (4.09ms)
+2026/11/09 01:33:25 OK   00005_rules_compile.sql (35.28ms)
+2026/11/09 01:33:25 OK   00006_packages_entitlements.sql (32.17ms)
+2026/11/09 01:33:26 OK   00007_metering_ledger.sql (38.25ms)
+2026/11/09 01:33:26 OK   00008_limits_shares.sql (84.5ms)
+2026/11/09 01:33:26 goose: successfully migrated database to version: 8
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = store: backend heartbeat is not newer than the durable heartbeat
+REGIONAL DEBUG: agent: receive control message: rpc error: code = Unknown desc = store: backend heartbeat is not newer than the durable heartbeat
+    runtime_recovery_transport_test.go:114: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.86s)
+FAIL
+FAIL	vortex/backend/internal/service	6.552s
+FAIL

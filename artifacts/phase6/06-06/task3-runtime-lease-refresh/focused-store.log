@@ -1,0 +1,20 @@
+=== RUN   TestRuntimeLeaseRefreshCadenceFullRollbackReplayAndNoCredit
+--- PASS: TestRuntimeLeaseRefreshCadenceFullRollbackReplayAndNoCredit (0.41s)
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/boot
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/hub
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/clock
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/closed
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/sealed
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/expired
+=== RUN   TestRuntimeLeaseRefreshScopeClosureAndDeadline/source
+--- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline (2.29s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/boot (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/hub (0.34s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/clock (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/closed (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/sealed (0.35s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/expired (0.32s)
+    --- PASS: TestRuntimeLeaseRefreshScopeClosureAndDeadline/source (0.32s)
+PASS
+ok  	vortex/agent/store	4.428s

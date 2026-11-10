@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -35,11 +36,15 @@ type ControlClient struct {
 	regionalWatchdogTimeouts  atomic.Uint64
 	beginMu                   sync.Mutex
 	sessionMu                 sync.Mutex
+	renewalMu                 sync.Mutex
+	renewalAfter              string
 	sessionID                 uint64
 	sessionCancel             context.CancelFunc
 	currentStatus             *controlv1.HubStatus
 	reportMu                  sync.Mutex
 	reports                   chan *controlv1.NodeReport
+	SourceBackendID           string // explicit direct backend identity; never inferred from Hub metadata
+	ControlOnly               bool   // split deployment: usage has one Hub delivery owner
 	Node                      *Node
 	TLS                       *tls.Config
 	TLSProvider               func() (*tls.Config, error)
@@ -99,13 +104,19 @@ func (c *ControlClient) Connect(ctx context.Context, address string) error {
 }
 
 func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regional *RegionalConfig) (resultErr error) {
+	if c != nil && c.SourceBackendID != "" && (!canonicalUUID(c.SourceBackendID) || regional != nil) {
+		return fmt.Errorf("agent: source provisioning backend requires direct control and canonical UUID")
+	}
+	if c != nil && c.ControlOnly && (regional != nil || !canonicalUUID(c.SourceBackendID)) {
+		return fmt.Errorf("agent: configuration-only control requires pinned direct backend")
+	}
 	address := endpoint.Address
 	if c == nil || c.Node == nil || (c.TLS == nil && c.TLSProvider == nil) || address == "" {
 		return fmt.Errorf("agent: control client or endpoint is incomplete")
 	}
 	if c.EnableCreditDemand {
-		if regional != nil {
-			return fmt.Errorf("agent: experimental demand cannot use regional lifecycle")
+		if regional != nil || c.SourceBackendID != "" || c.ControlOnly {
+			return fmt.Errorf("agent: experimental demand requires an independent non-regional Hub channel")
 		}
 		// Local monotonic time controls rate refill only. Every write still checks
 		// authenticated conservative lease bounds. Reconnect keeps the same epoch;
@@ -174,6 +185,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if len(cert.DNSNames) != 1 || cert.Subject.CommonName != cert.DNSNames[0] {
 			return fmt.Errorf("agent: ambiguous Hub identity")
 		}
+		if c.SourceBackendID != "" && cert.DNSNames[0] != c.SourceBackendID {
+			return fmt.Errorf("agent: direct backend identity differs from pinned source backend")
+		}
 		authenticatedTLS.Store(&state)
 		issuerIdentity.CompareAndSwap(nil, cert.DNSNames[0])
 		if issuerIdentity.Load().(string) != cert.DNSNames[0] {
@@ -212,6 +226,10 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	} else if !errors.Is(stateErr, sql.ErrNoRows) {
 		return stateErr
 	}
+	capabilities := []string{"rule-two-phase-v1", "share-cas-v1"}
+	if regional == nil && canonicalUUID(c.SourceBackendID) {
+		capabilities = append(capabilities, "source-provision-v1", "credit-close-v1", "node-boot-recovery-v1", "node-credit-recovery-v1")
+	}
 	if err := stream.Send(&controlv1.NodeMessage{
 		NodeId:   c.Node.NodeID,
 		BootId:   c.Node.BootID,
@@ -219,6 +237,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		Body: &controlv1.NodeMessage_Heartbeat{Heartbeat: &controlv1.Heartbeat{
 			AppliedConfigVersion: appliedVersion,
 			ObservedAt:           time.Now().UTC().Format(time.RFC3339Nano),
+			Capabilities:         capabilities,
 		}},
 	}); err != nil {
 		return fmt.Errorf("agent: send control heartbeat: %w", err)
@@ -239,6 +258,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		if regional.Renewal != nil {
 			caps = append(caps, "renewal-v1")
 		}
+		if regional.LeaseRefresh {
+			caps = append(caps, "runtime-lease-refresh-v1")
+		}
 		if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_LifecycleHello{LifecycleHello: &controlv1.LifecycleHello{ControlVersion: "1.3.0", Capabilities: caps, SessionId: session, RegionId: regional.Region}}}); err != nil {
 			return err
 		}
@@ -246,6 +268,52 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	}
 
 	var initialSendErr error
+	var usageSendClosed bool
+	usageWindow := &usageDeliveryWindow{limit: store.UsageDeliveryPageSize}
+	usageCursor := usageDeliveryCursor{window: usageWindow}
+	var usageWake <-chan struct{}
+	if !c.ControlOnly {
+		var release func()
+		usageWake, release, err = c.Node.subscribeUsage()
+		if err != nil {
+			return err
+		}
+		defer release()
+	}
+	usageContinue := make(chan struct{}, 1)
+	confirmUsageDelivery := func(messages []*controlv1.ControlMessage) {
+		freed := false
+		for _, m := range messages {
+			if ack := m.GetUsageAck(); ack != nil {
+				freed = usageWindow.confirm(false, ack.BatchIds...) || freed
+			}
+			if ack := m.GetUnknownUsageAck(); ack != nil {
+				freed = usageWindow.confirm(true, ack.BatchId) || freed
+			}
+		}
+		if freed && usageWindow.ready() {
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+		}
+	}
+	sendUsagePage := func() error {
+		more, err := c.sendUsageDeliveryPage(ctx, stream, &lastNodeSequence, &usageCursor)
+		if err == nil && more {
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+		}
+		return err
+	}
+	// A burst of committed rows shares one delivery turn/sequence reservation.
+	// Durable rows, not wake count, determine delivery; 10s replay remains backup.
+	usageWakeTimer := time.NewTimer(time.Hour)
+	usageWakeTimer.Stop()
+	defer usageWakeTimer.Stop()
+	var usageWakeDue <-chan time.Time
 	var replayGuard controlReplayGuard
 	// Only this loop sends messages; gRPC permits one concurrent receiver, but
 	// not multiple senders. Periodic outbox delivery shares sequence ordering
@@ -257,12 +325,62 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	incoming := make(chan received, maxControlMessageIDs+1)
 	receiverDone := make(chan struct{})
 	defer func() { cancel(); conn.Close(); <-receiverDone }()
+	// Reading transport independently lets the durable receiver coalesce only
+	// already-arrived adjacent ordinary ACKs. Sparse tails never wait to fill.
+	wire := make(chan received, 32)
+	transportDone := make(chan struct{})
+	defer func() { cancel(); conn.Close(); <-transportDone }()
 	go func() {
-		defer close(receiverDone)
+		defer close(transportDone)
 		for {
 			message, err := stream.Recv()
+			select {
+			case wire <- received{message, err}:
+			case <-ctx.Done():
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	go func() {
+		defer close(receiverDone)
+		var next *received
+		for {
+			var response received
+			if next != nil {
+				response, next = *next, nil
+			} else {
+				select {
+				case response = <-wire:
+				case <-ctx.Done():
+					return
+				}
+			}
+			message, err := response.message, response.err
+			messages := []*controlv1.ControlMessage{message}
 			if err == nil && regional == nil {
-				err = replayGuard.accept(message.GetSequence(), message.GetMessageId())
+				if _, ordinary := message.GetBody().(*controlv1.ControlMessage_UsageAck); ordinary {
+				collect:
+					for len(messages) < 32 {
+						select {
+						case candidate := <-wire:
+							if _, ack := candidate.message.GetBody().(*controlv1.ControlMessage_UsageAck); candidate.err != nil || !ack {
+								next = &candidate
+								break collect
+							}
+							messages = append(messages, candidate.message)
+						default:
+							break collect
+						}
+					}
+				}
+				for _, envelope := range messages {
+					if err = replayGuard.accept(envelope.GetSequence(), envelope.GetMessageId()); err != nil {
+						break
+					}
+				}
 				if err == nil {
 					var handled bool
 					err = c.withSession(ctx, incarnation, func() error {
@@ -271,11 +389,16 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 								return err
 							}
 						}
+						if _, ordinary := message.GetBody().(*controlv1.ControlMessage_UsageAck); ordinary {
+							handled = true
+							return c.applyOrdinaryUsageAcknowledgements(ctx, messages)
+						}
 						var ackErr error
 						handled, ackErr = c.applyUsageAcknowledgement(ctx, message)
 						return ackErr
 					})
 					if handled && err == nil {
+						confirmUsageDelivery(messages)
 						continue
 					}
 				}
@@ -300,19 +423,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 		}
 	}()
-	if regional == nil {
+	if regional == nil && !c.ControlOnly {
 		if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 			return err
 		}
-		initialSendErr = c.sendPendingUsage(ctx, stream, &lastNodeSequence)
+		initialSendErr = sendUsagePage()
 		if initialSendErr != nil && !errors.Is(initialSendErr, io.EOF) {
 			return initialSendErr
 		}
 	}
-	var demandCursor string
+	var demandDelivery demandDeliveryState
 	var demandTicks <-chan time.Time
 	var demandWake <-chan struct{}
 	var lastDemandWake time.Time
+	demandWakeTimer := time.NewTimer(time.Hour)
+	demandWakeTimer.Stop()
+	defer demandWakeTimer.Stop()
+	var demandWakeDue <-chan time.Time
 	if c.EnableCreditDemand && regional == nil {
 		// Register only scopes bound to this authenticated Hub. A different
 		// connection must not consume another Hub's wakeups.
@@ -341,7 +468,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 		defer demandTicker.Stop()
 		demandTicks = demandTicker.C
 		issuer, _ = issuerIdentity.Load().(string)
-		if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
+		if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil && !errors.Is(err, io.EOF) {
 			return err
 		}
 	}
@@ -354,10 +481,13 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 	ticker := time.NewTicker(usageInterval)
 	defer ticker.Stop()
 	if errors.Is(initialSendErr, io.EOF) {
+		usageSendClosed = true
+		usageWake = nil
 		ticker.Stop()
 	}
 	lastHeartbeat := time.Now()
 	lastRenewal := time.Now()
+	renewalSendAfter := ""
 	reports := c.reportQueue()
 	for {
 		var response received
@@ -408,7 +538,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err := c.queueDueRenewals(ctx, issuer, *regional.Renewal); err != nil {
 						return err
 					}
-					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence)
+					return c.sendPendingRenewals(ctx, stream, issuer, &lastNodeSequence, &renewalSendAfter)
 				}); err != nil {
 					return err
 				}
@@ -419,13 +549,23 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			}
 			continue
 		case <-demandWake:
-			if time.Since(lastDemandWake) < 25*time.Millisecond {
-				continue
+			// Retain a trailing wake during the throttle window: the last
+			// successful consumption may be the one crossing the waterline.
+			if demandWakeDue == nil {
+				delay := 25*time.Millisecond - time.Since(lastDemandWake)
+				if delay < 0 {
+					delay = 0
+				}
+				demandWakeTimer.Reset(delay)
+				demandWakeDue = demandWakeTimer.C
 			}
+			continue
+		case <-demandWakeDue:
+			demandWakeDue = nil
 			lastDemandWake = time.Now()
-			demandCursor = ""
+			demandDelivery.cursor = ""
 			issuer, _ := issuerIdentity.Load().(string)
-			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
@@ -434,23 +574,49 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 			continue
 		case <-demandTicks:
 			issuer, _ := issuerIdentity.Load().(string)
-			if err := c.sendPendingDemands(ctx, stream, issuer, &demandCursor, &lastNodeSequence); err != nil {
+			if err := c.sendPendingDemands(ctx, stream, issuer, &demandDelivery, &lastNodeSequence); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				demandTicks = nil
 			}
 			continue
+		case <-usageWake:
+			usageCursor.resume()
+			if usageWakeDue == nil && !usageSendClosed {
+				usageWakeTimer.Reset(50 * time.Millisecond)
+				usageWakeDue = usageWakeTimer.C
+			}
+			continue
+		case <-usageWakeDue:
+			usageWakeDue = nil
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+			continue
 		case <-ticker.C:
+			usageCursor.reset()
+			select {
+			case usageContinue <- struct{}{}:
+			default:
+			}
+			continue
+		case <-usageContinue:
+			if c.ControlOnly || usageSendClosed {
+				continue
+			}
 			if regional != nil && !negotiated {
 				continue
 			}
-			if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+			if err := sendUsagePage(); err != nil {
 				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				// Send EOF can race the peer's final successful ACK. Drain
 				// receive messages before completing this control connection.
+				usageSendClosed = true
+				usageWake = nil
 				ticker.Stop()
 			}
 			continue
@@ -525,7 +691,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err := c.sendRecoveryEvents(ctx, stream, &lastNodeSequence); err != nil {
 						return err
 					}
-					if err := c.sendPendingUsage(ctx, stream, &lastNodeSequence); err != nil {
+					if err := sendUsagePage(); err != nil {
 						return err
 					}
 				} else {
@@ -542,7 +708,157 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					return err
 				}
 				lastNodeSequence = responseSequence
+			case *controlv1.ControlMessage_RecoveryCreditFenceCommand:
+				if regional != nil {
+					return store.ErrSourceProvision
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.fenceRecoveryCreditFromBackend(ctx, issuer, body.RecoveryCreditFenceCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RecoveryCreditFenceReceipt{RecoveryCreditFenceReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_NodeBootRecoveryCommand:
+				if regional != nil {
+					return contracts.ErrNodeBootRecovery
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.recoverNodeBootFromBackend(ctx, issuer, body.NodeBootRecoveryCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_NodeBootRecoveryReceipt{NodeBootRecoveryReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_CreditCloseCommand:
+				if regional != nil {
+					return contracts.ErrCreditClose
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				receipt, e := c.closeCreditFromBackend(ctx, issuer, body.CreditCloseCommand)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_CreditCloseReceipt{CreditCloseReceipt: receipt}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_SourceProvisionCommand:
+				if regional != nil || !canonicalUUID(c.SourceBackendID) {
+					return fmt.Errorf("agent: source provisioning requires configured direct backend")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				if issuer != c.SourceBackendID {
+					return fmt.Errorf("agent: wrong source provisioning backend identity")
+				}
+				command := body.SourceProvisionCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return store.ErrSourceProvision
+				}
+				receipt, e := c.provisionSourcesFromBackend(ctx, issuer, command)
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(receipt)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_SourceProvisionReceipt{SourceProvisionReceipt: &controlv1.SourceProvisionReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_ShareCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: share CAS requires direct authenticated backend")
+				}
+				command := body.ShareCommand
+				if command == nil || len(command.ProtoReflect().GetUnknown()) != 0 || !bytes.Equal(command.PayloadSha256, sha256BytesControl(command.Payload)) {
+					return fmt.Errorf("agent: invalid share command digest")
+				}
+				issuer, _ := issuerIdentity.Load().(string)
+				decision, e := contracts.DecodeShareHandoff(command.Payload)
+				if e != nil || decision.NodeID != c.Node.NodeID || decision.BootID != c.Node.BootID {
+					return contracts.ErrShareHandoff
+				}
+				if command.Phase == "cas" {
+					if c.Node.clock == nil {
+						return fmt.Errorf("agent: missing boot clock")
+					}
+					if e = c.Node.clock.observe(decision.IssuedAt, c.Node.bootStarted, time.Now()); e != nil {
+						return e
+					}
+				}
+				low, high, trusted := c.Node.TrustedTime()
+				observation, e := c.Node.Store.ApplyShareHandoff(ctx, c.Node.NodeID, c.Node.BootID, issuer, command.Phase, command.Payload, store.IssuerTime{Earliest: low, Latest: high, Trusted: trusted})
+				if e != nil {
+					return e
+				}
+				raw, e := json.Marshal(observation)
+				if e != nil {
+					return e
+				}
+				sequence, e := c.Node.Store.NextControlSequence(ctx)
+				if e != nil {
+					return e
+				}
+				if e = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_ShareReceipt{ShareReceipt: &controlv1.ShareReceipt{Payload: raw, PayloadSha256: sha256BytesControl(raw)}}}); e != nil {
+					return e
+				}
+				lastNodeSequence = sequence
+			case *controlv1.ControlMessage_RuleCommand:
+				if regional != nil {
+					return fmt.Errorf("agent: rule two-phase capability requires backend direct control")
+				}
+				if c.Reconciler == nil {
+					return fmt.Errorf("agent: rule reconciler unavailable")
+				}
+				result := c.Reconciler.ApplyRuleCommand(ctx, c.Node.NodeID, body.RuleCommand)
+				sequence, err := c.Node.Store.NextControlSequence(ctx)
+				if err != nil {
+					return err
+				}
+				if err = stream.Send(&controlv1.NodeMessage{NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence, Body: &controlv1.NodeMessage_RuleReceipt{RuleReceipt: result}}); err != nil {
+					return err
+				}
+				lastNodeSequence = sequence
 			case *controlv1.ControlMessage_AuthorizationUpdate:
+				leaseOnly := false
+				if regional != nil {
+					facts, err := validateAuthorizationUpdate(body.AuthorizationUpdate.GetPayload(), c.Node.NodeID, c.Node.BootID, body.AuthorizationUpdate.GetGeneration())
+					if err != nil {
+						return err
+					}
+					if len(facts.Authorizations) == 2 {
+						kinds := map[string]bool{}
+						for _, a := range facts.Authorizations {
+							kinds[a.Kind] = true
+						}
+						if !regional.LeaseRefresh || !negotiated || !kinds["runtime_lease"] || !kinds["share_lease"] {
+							return fmt.Errorf("agent: unnegotiated lease refresh")
+						}
+						leaseOnly = len(facts.PolicyTransitions) == 0 && len(facts.Revocations) == 0 && facts.RenewalRequestID == "" && len(facts.Handoffs) == 0
+					}
+				}
 				issuer, ok := issuerIdentity.Load().(string)
 				if !ok || issuer == "" {
 					return fmt.Errorf("agent: authenticated Hub identity missing")
@@ -552,7 +868,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 					if err != nil {
 						return err
 					}
-					if len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0 {
+					if (len(payload.Authorizations) > 0 || len(payload.PolicyTransitions) > 0) && !(leaseOnly && c.currentStatus.Mode == "autonomous") {
 						return fmt.Errorf("agent: new grants unavailable while Hub is restricted")
 					}
 				}
@@ -569,6 +885,8 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.Node.clock.observe(payload.IssuedAt, c.Node.bootStarted, time.Now()); err != nil {
 					return err
 				}
+				c.Node.notifyAuthorityChanged()
+				delete(demandDelivery.sent, payload.UpdateID)
 				if err := c.resumePrepared(ctx, stream, &lastNodeSequence); err != nil {
 					return err
 				}
@@ -581,6 +899,7 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				if err := c.applyDemandDenial(ctx, issuer, body.CreditDemandDenied); err != nil {
 					return err
 				}
+				delete(demandDelivery.sent, body.CreditDemandDenied.RequestId)
 			case *controlv1.ControlMessage_RenewalResult:
 				if regional == nil || regional.Renewal == nil || !negotiated {
 					return fmt.Errorf("agent: unnegotiated renewal result")
@@ -594,6 +913,9 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 				}
 
 			case *controlv1.ControlMessage_UsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: usage acknowledgement on configuration-only channel")
+				}
 				if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
 					return fmt.Errorf("agent: usage acknowledgement has no batch IDs")
 				}
@@ -607,13 +929,18 @@ func (c *ControlClient) connect(ctx context.Context, endpoint HubEndpoint, regio
 						return err
 					}
 				}
+				confirmUsageDelivery([]*controlv1.ControlMessage{message})
 			case *controlv1.ControlMessage_UnknownUsageAck:
+				if c.ControlOnly {
+					return fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
+				}
 				if body.UnknownUsageAck == nil {
 					return fmt.Errorf("agent: missing unknown usage acknowledgement")
 				}
 				if err := c.Node.Store.AcknowledgeUnknownUsage(ctx, c.Node.NodeID, body.UnknownUsageAck.GetBatchId(), body.UnknownUsageAck.GetPayloadSha256()); err != nil {
 					return err
 				}
+				confirmUsageDelivery([]*controlv1.ControlMessage{message})
 			case *controlv1.ControlMessage_Error:
 				if body.Error == nil || body.Error.GetMessageId() != message.GetMessageId() || !stableControlErrorCode(body.Error.GetCode()) {
 					return fmt.Errorf("agent: malformed control error")
@@ -669,27 +996,7 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	digest := sha256.Sum256(update.GetPayload())
 	records := make([]store.AuthorizationRecord, 0, len(payload.Authorizations))
 	for _, authorization := range payload.Authorizations {
-		record := store.AuthorizationRecord{
-			ShareReferenceID: authorization.ShareReferenceID, DelegationID: authorization.DelegationID,
-			AuthorizationID: authorization.AuthorizationID, ParentAuthorizationID: authorization.ParentAuthorizationID,
-			SourceID: authorization.SourceID, Kind: authorization.Kind, RuleID: authorization.RuleID,
-			RuleRevision: authorization.RuleRevision, PathGeneration: authorization.PathGeneration,
-			SignerEpoch: payload.SignerEpoch, BootID: payload.BootID,
-			IssuedAt:          authorization.IssuedAt.UTC().Format(time.RFC3339Nano),
-			NotBefore:         authorization.NotBefore.UTC().Format(time.RFC3339Nano),
-			ExpiresAt:         authorization.ExpiresAt.UTC().Format(time.RFC3339Nano),
-			HardDeadline:      authorization.HardDeadline.UTC().Format(time.RFC3339Nano),
-			BillingSnapshotID: authorization.BillingSnapshotID,
-		}
-		if authorization.AmountBytes != nil {
-			record.AmountBytes = *authorization.AmountBytes
-		}
-		if authorization.RateBPS != nil {
-			record.RateBPS = *authorization.RateBPS
-		}
-		if authorization.Connections != nil {
-			record.Connections = *authorization.Connections
-		}
+		record := authorizationStoreRecord(authorization, payload, issuer)
 		records = append(records, record)
 	}
 	return c.Node.Store.PersistAuthorizationUpdate(ctx, store.AuthorizationUpdate{
@@ -703,12 +1010,27 @@ func (c *ControlClient) applyAuthorizationUpdateFrom(ctx context.Context, update
 	}, records, payload.Revocations)
 }
 
-func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64) error {
-	batches, err := c.Node.Store.PendingUsageOutbox(ctx, c.Node.NodeID)
+func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.NodeControl_ConnectClient, lastSequence *uint64, cursors ...*string) error {
+	var local string
+	cursor := &local
+	if len(cursors) > 0 {
+		cursor = cursors[0]
+	}
+	batches, err := c.Node.Store.PendingUsageOutboxPage(ctx, c.Node.NodeID, *cursor)
 	if err != nil {
 		return fmt.Errorf("agent: read durable usage outbox: %w", err)
 	}
-	for _, record := range batches {
+	if len(batches) == 0 {
+		*cursor = "" // Revisit every unacknowledged row on the next turn.
+	}
+	var firstSequence uint64
+	if len(batches) != 0 {
+		firstSequence, err = c.Node.Store.NextControlSequenceRange(ctx, uint64(len(batches)))
+		if err != nil {
+			return fmt.Errorf("agent: allocate usage sequences: %w", err)
+		}
+	}
+	for index, record := range batches {
 		// The frozen ordinary UsageBatch has no unknown-liability field.
 		// Preserve these rows for a typed handoff rather than reporting their
 		// reserved upper bound as actual consumption on the old wire path.
@@ -716,6 +1038,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 			if err := c.migrateUnknownUsage(ctx, record); err != nil {
 				return err
 			}
+			*cursor = record.BatchID
 			continue
 		}
 		batch := new(controlv1.UsageBatch)
@@ -725,10 +1048,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 		if batch.GetBatchId() != record.BatchID || batch.GetBillingSnapshotId() != record.SnapshotID {
 			return fmt.Errorf("agent: durable usage batch metadata mismatch")
 		}
-		sequence, err := c.Node.Store.NextControlSequence(ctx)
-		if err != nil {
-			return fmt.Errorf("agent: allocate usage sequence: %w", err)
-		}
+		sequence := firstSequence + uint64(index)
 		if err := stream.Send(&controlv1.NodeMessage{
 			NodeId: c.Node.NodeID, BootId: c.Node.BootID, Sequence: sequence,
 			Body: &controlv1.NodeMessage_UsageBatch{UsageBatch: batch},
@@ -736,6 +1056,7 @@ func (c *ControlClient) sendPendingUsage(ctx context.Context, stream controlv1.N
 			return fmt.Errorf("agent: send durable usage batch %s: %w", record.BatchID, err)
 		}
 		*lastSequence = sequence
+		*cursor = record.BatchID
 	}
 	unknown, err := c.Node.Store.PendingUnknownUsage(ctx, c.Node.NodeID)
 	if err != nil {
@@ -907,6 +1228,13 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 		return err
 	}
 	for _, record := range prepared {
+		phased, err := c.Node.Store.IsPhasedConfig(ctx, record.TransactionID)
+		if err != nil {
+			return err
+		}
+		if phased {
+			continue
+		}
 		err = c.Reconciler.ApplyConfig(ctx, record.TransactionID, record.Version, record.FencingGeneration, false)
 		if errors.Is(err, ErrActivationPending) {
 			continue
@@ -935,20 +1263,11 @@ func (c *ControlClient) resumePrepared(ctx context.Context, stream controlv1.Nod
 func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *controlv1.ControlMessage) (bool, error) {
 	switch body := message.GetBody().(type) {
 	case *controlv1.ControlMessage_UsageAck:
-		if body.UsageAck == nil || len(body.UsageAck.GetBatchIds()) == 0 {
-			return true, fmt.Errorf("agent: usage acknowledgement has no batch IDs")
-		}
-		if err := c.Node.Store.AcknowledgeUsageBatches(ctx, c.Node.NodeID, body.UsageAck.GetBatchIds()); err != nil {
-			return true, err
-		}
-		// Notify only after durable validation. In particular an ordinary
-		// ACK must never expose unknown batches as acknowledged to a hook.
-		if c.AcknowledgeUsage != nil {
-			if err := c.AcknowledgeUsage(ctx, body.UsageAck.GetBatchIds()); err != nil {
-				return true, err
-			}
-		}
+		return true, c.applyOrdinaryUsageAcknowledgements(ctx, []*controlv1.ControlMessage{message})
 	case *controlv1.ControlMessage_UnknownUsageAck:
+		if c.ControlOnly {
+			return true, fmt.Errorf("agent: unknown usage acknowledgement on configuration-only channel")
+		}
 		if body.UnknownUsageAck == nil {
 			return true, fmt.Errorf("agent: missing unknown usage acknowledgement")
 		}
@@ -961,3 +1280,5 @@ func (c *ControlClient) applyUsageAcknowledgement(ctx context.Context, message *
 	}
 	return true, nil
 }
+
+func sha256BytesControl(b []byte) []byte { s := sha256.Sum256(b); return s[:] }

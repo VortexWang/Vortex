@@ -1,0 +1,38 @@
+=== RUN   TestCreditCloseSealGateAuditRollbackAndOriginalIdentity
+2026/11/08 15:32:58 goose: no migrations to run. current version: 8
+2026/11/08 15:32:58 OK   00001_authority.sql (24.89ms)
+2026/11/08 15:32:58 OK   00002_tenant_policy.sql (13.2ms)
+2026/11/08 15:32:58 OK   00003_nodes_ports.sql (50.87ms)
+2026/11/08 15:32:58 OK   00004_entry_group_domains.sql (3.27ms)
+2026/11/08 15:32:58 OK   00005_rules_compile.sql (20.96ms)
+2026/11/08 15:32:58 OK   00006_packages_entitlements.sql (18.24ms)
+2026/11/08 15:32:58 OK   00007_metering_ledger.sql (24.54ms)
+2026/11/08 15:32:58 OK   00008_limits_shares.sql (35.55ms)
+2026/11/08 15:32:58 goose: successfully migrated database to version: 8
+--- PASS: TestCreditCloseSealGateAuditRollbackAndOriginalIdentity (1.27s)
+=== RUN   TestCreditCloseWaitsForIndependentPGKnownUsageAndRejectsUnknown
+2026/11/08 15:32:59 goose: no migrations to run. current version: 8
+2026/11/08 15:32:59 OK   00001_authority.sql (8.81ms)
+2026/11/08 15:32:59 OK   00002_tenant_policy.sql (7.98ms)
+2026/11/08 15:32:59 OK   00003_nodes_ports.sql (18.39ms)
+2026/11/08 15:32:59 OK   00004_entry_group_domains.sql (2.23ms)
+2026/11/08 15:32:59 OK   00005_rules_compile.sql (18.36ms)
+2026/11/08 15:32:59 OK   00006_packages_entitlements.sql (17.66ms)
+2026/11/08 15:32:59 OK   00007_metering_ledger.sql (24.26ms)
+2026/11/08 15:33:00 OK   00008_limits_shares.sql (35.16ms)
+2026/11/08 15:33:00 goose: successfully migrated database to version: 8
+--- PASS: TestCreditCloseWaitsForIndependentPGKnownUsageAndRejectsUnknown (1.09s)
+=== RUN   TestCreditClosePreservesParentUnknownLiability
+2026/11/08 15:33:00 goose: no migrations to run. current version: 8
+2026/11/08 15:33:00 OK   00001_authority.sql (8.55ms)
+2026/11/08 15:33:00 OK   00002_tenant_policy.sql (8.37ms)
+2026/11/08 15:33:00 OK   00003_nodes_ports.sql (18.05ms)
+2026/11/08 15:33:01 OK   00004_entry_group_domains.sql (2.4ms)
+2026/11/08 15:33:01 OK   00005_rules_compile.sql (17.31ms)
+2026/11/08 15:33:01 OK   00006_packages_entitlements.sql (16.88ms)
+2026/11/08 15:33:01 OK   00007_metering_ledger.sql (23.87ms)
+2026/11/08 15:33:01 OK   00008_limits_shares.sql (34.85ms)
+2026/11/08 15:33:01 goose: successfully migrated database to version: 8
+--- PASS: TestCreditClosePreservesParentUnknownLiability (1.03s)
+PASS
+ok  	vortex/backend/internal/service	5.179s

@@ -1,0 +1,58 @@
+{
+  "base_sha": "f114fa64a271751a3e1933f6242c5da06ceaba86",
+  "scope": "Exact explicit pending Commit observation and original Engine activation after actual S/R renewal loss/replay",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "native_root": "root-native-race.log;Agent61.251s/Store80.779s;precedes only final negative-test enhancement",
+    "final_native_store_negative": "final-store-negative-native.log",
+    "linux_root": "root-linux-race.log;Agent111.577s/Store171.388s",
+    "native_affected_backend": "affected-backend-native-race.log;71.592s",
+    "linux_affected_backend": "affected-backend-linux-race.log;68.963s",
+    "actual_mtls": "actual-direct-mtls-native.log;also final affected suites",
+    "builds": "cross-builds.json;six builds"
+  },
+  "failed_retained": {
+    "stale-share-pending-native.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "initial-fixture-bootstrap.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "first-green-native.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "initial-fixture-identity.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "initial-fixture-query.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "initial-fixture-compile.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "red-native.log": "original combined scheduling/classification RED",
+    "pending-witness-native.log": "fixture or intermediate readiness classification failure;not passing evidence",
+    "initial-fixture-field.log": "fixture or intermediate readiness classification failure;not passing evidence"
+  },
+  "inherited_full_backend": "936edcab",
+  "not_claimed": [
+    "Other deployment member actual Engine execution",
+    "Multi-member data forwarding/restart acceptance",
+    "Full backend race rerun in this unit",
+    "Native amd64 execution",
+    "Same-SHA clean-source Docker/Actions pair",
+    "06-06 completion or CR-008 approval"
+  ],
+  "evidence_sha256": {
+    "README.md": "5d43e8531c9e796a271d8163fd7857f7ac9d560b5e7df118cc6d441cabc90801",
+    "actual-direct-mtls-native.log": "68ae57a51e191edef055c49dbcc9eb1ae147dffd9e0dfedd2853424666545444",
+    "affected-backend-linux-race.log": "9b23ff95b9d681ba0b1d9fd05a65fa9906a09d69b7a09010ec26fb0a65df673d",
+    "affected-backend-native-race.log": "6a26d71c80ce25c4ccef22b40440cc1ed4b6bb317d5fab2e273dc97d691c7810",
+    "approved-snapshot-protection.json": "48b95c58fa3242201ee9e14cc9d9e8d6e0c5730be1283acae0d1b62b8d294998",
+    "cross-builds.json": "6c2e60253beae6a3880315fccd9b7ba6ec84983909f53f6fb55e3d8440f17895",
+    "environment.json": "28d40dc8489365946c4aa6d2ae93ba46d356991434d9359c64d29cf5d647687b",
+    "final-store-negative-native.log": "49c24c235197a7066aaa122cce63ac355d5cfecb8e64ed925771a88e66fce567",
+    "first-green-native.log": "6b0b7d6d41203ed71876cf5f9aad098b77f81afa9c0d604f55dfd0737b31e4a2",
+    "focused-root-native.log": "e7d1f703171e649db35c60931e1fd53ced075b7edb7137bef9d6c7c5a1296f09",
+    "green-native.log": "cb562c14b1c0ed7dbc55d85c69a53f9c1ca57b62ad6fc8c939e499ad9f8cff3a",
+    "initial-fixture-bootstrap.log": "0ab2ee6f6ca540b2d5f38cbecc16350c5ecf921b26eecc173892895c098e20e9",
+    "initial-fixture-compile.log": "f00fd98c0bcac7b7b7c5ae1cd67a28a7e8b87fe8783adf503c3bb3055f1020bf",
+    "initial-fixture-field.log": "47f2f39f34d120bb36d633d8b629d3f8645b12bb125579166d284f18dbe47828",
+    "initial-fixture-identity.log": "77df4692289f35bc01072f645092e363d7ba599c6cc8cc76d44755c5e821303b",
+    "initial-fixture-query.log": "7e83f5bfbc31749b4c5d3f9c686096fc025748811ae8a8899d0988ef098f5cef",
+    "pending-witness-native.log": "5550c1a3316d669facc4b703c5998157e04a6c3ecb651ec93c69a9b93aeefeda",
+    "red-native.log": "d673daeac49813a603b559846bcb1320fcc2ad55723af30009c47a3d6b2d46fc",
+    "root-linux-race.log": "6c6c3f09e182f3a57d2e284605dad3c455e50c9b1741156d937a4146b39605ea",
+    "root-native-race.log": "d1f47d2a91cf948a513b98b1787f6bfc8a9035fd5baf519ac85dda3b52f1675f",
+    "source-hashes.json": "12ab32452e358b2ca5935a83d40dd3e69ee80476f2e934adca2b4fe2820c2b3c",
+    "stale-share-pending-native.log": "2a8fd11d47dfde7429131ae8366ead00f660c9b8c18bbc1363da0fedc076364e"
+  }
+}

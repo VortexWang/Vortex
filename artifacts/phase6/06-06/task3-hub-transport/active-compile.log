@@ -1,0 +1,4 @@
+# vortex/hub
+../hub/usage_backend.go:83:12: c.acceptFundedUsage undefined (type BackendUsageClient has no field or method acceptFundedUsage)
+FAIL	vortex/backend/internal/control [build failed]
+FAIL

@@ -1,0 +1,11 @@
+ok  	vortex/agent	42.414s
+ok  	vortex/agent/identity	2.575s
+--- FAIL: TestPlatformCommitNeedsDurableNodeAggregatesBeyondChildLeases (0.15s)
+    share_occupancy_test.go:136: store: durable authorization does not permit this operation
+FAIL
+FAIL	vortex/agent/store	32.623s
+ok  	vortex/agent/upgrade	4.904s
+ok  	vortex/hub	10.959s
+ok  	vortex/contracts	2.775s
+ok  	vortex/cmd/vortex-node	5.106s
+FAIL

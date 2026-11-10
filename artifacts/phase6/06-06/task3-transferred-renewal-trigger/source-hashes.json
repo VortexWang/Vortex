@@ -1,0 +1,8 @@
+{
+  "agent/store/renewal_candidates.go": "3779a18dfd7cae1e1287a9148b8cdd21210b416169aeb05d70c9e66130da822d",
+  "agent/store/renewal_requests.go": "b0689962d27a2f5a94ab836f3d49c94f05139fe296278ff1ed59e41366580ec5",
+  "agent/store/renewal_handoff.go": "b1aee209f500353a059a1af045714093a419cb0972c75b1b3b0fa691e0b42540",
+  "agent/store/renewal_handoff_test.go": "b2180e9f7738b431041c097227f69e478cc96a4c48f79de75a3ea23475c5c0fe",
+  "backend/internal/service/runtime_recovery_transport_test.go": "c58d35df47bfcd4a414e9c6bbe6ee44a050686ad5ac46a448f564e9156dbfd05",
+  "contracts/protobuf/v1/lifecycle.md": "d9bb27e114885c11dd640d568074d8dbe885beb061a71e8e3f81a14459516933"
+}

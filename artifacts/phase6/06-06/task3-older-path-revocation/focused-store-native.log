@@ -1,0 +1,28 @@
+=== RUN   TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors
+--- PASS: TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors (0.20s)
+=== RUN   TestPureOlderPathRevocationKeepsFloorsFundsAndUnknownScope
+--- PASS: TestPureOlderPathRevocationKeepsFloorsFundsAndUnknownScope (0.19s)
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/issuer
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/boot
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/current-path-id
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/lower-epoch
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/grant
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/handoff
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/policy
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/references
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/heartbeat
+--- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights (1.61s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/issuer (0.19s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/boot (0.17s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/current-path-id (0.17s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/lower-epoch (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/grant (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/handoff (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/policy (0.19s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/references (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/heartbeat (0.18s)
+=== RUN   TestOlderPathRevocationFULLRollbackAndConcurrentReplay
+--- PASS: TestOlderPathRevocationFULLRollbackAndConcurrentReplay (0.19s)
+PASS
+ok  	vortex/agent/store	3.894s

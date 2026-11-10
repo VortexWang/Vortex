@@ -1,0 +1,36 @@
+2026/11/09 07:30:55 OK   00001_authority.sql (15.06ms)
+2026/11/09 07:30:55 OK   00002_tenant_policy.sql (9.86ms)
+2026/11/09 07:30:55 OK   00003_nodes_ports.sql (23.22ms)
+2026/11/09 07:30:55 OK   00004_entry_group_domains.sql (2.68ms)
+2026/11/09 07:30:55 OK   00005_rules_compile.sql (23.04ms)
+2026/11/09 07:30:55 OK   00006_packages_entitlements.sql (21.68ms)
+2026/11/09 07:30:55 OK   00007_metering_ledger.sql (28.05ms)
+2026/11/09 07:30:55 OK   00008_limits_shares.sql (62.96ms)
+2026/11/09 07:30:55 OK   00009_domain_events.sql (28.16ms)
+2026/11/09 07:30:55 goose: successfully migrated database to version: 9
+2026/11/09 07:30:55 OK   00001_authority.sql (10.08ms)
+2026/11/09 07:30:55 OK   00002_tenant_policy.sql (8.64ms)
+2026/11/09 07:30:55 OK   00003_nodes_ports.sql (21.86ms)
+2026/11/09 07:30:55 OK   00004_entry_group_domains.sql (2.58ms)
+2026/11/09 07:30:55 OK   00005_rules_compile.sql (21.87ms)
+2026/11/09 07:30:55 OK   00006_packages_entitlements.sql (21.15ms)
+2026/11/09 07:30:55 OK   00007_metering_ledger.sql (27.81ms)
+2026/11/09 07:30:55 OK   00008_limits_shares.sql (63.69ms)
+2026/11/09 07:30:55 OK   00009_domain_events.sql (29.32ms)
+2026/11/09 07:30:55 goose: successfully migrated database to version: 9
+2026/11/09 07:30:55 goose: no migrations to run. current version: 9
+2026/11/09 07:30:55 OK   00001_authority.sql (8.12ms)
+2026/11/09 07:30:55 OK   00002_tenant_policy.sql (7.88ms)
+2026/11/09 07:30:55 OK   00003_nodes_ports.sql (26.45ms)
+2026/11/09 07:30:55 OK   00004_entry_group_domains.sql (2.38ms)
+2026/11/09 07:30:55 OK   00005_rules_compile.sql (44.01ms)
+2026/11/09 07:30:55 OK   00006_packages_entitlements.sql (17.01ms)
+2026/11/09 07:30:56 OK   00007_metering_ledger.sql (22.46ms)
+2026/11/09 07:30:56 OK   00008_limits_shares.sql (50.44ms)
+2026/11/09 07:30:56 OK   00009_domain_events.sql (20.89ms)
+2026/11/09 07:30:56 goose: successfully migrated database to version: 9
+--- FAIL: TestPortOperationCreationAuditRollbackAndInvalidationHold (0.41s)
+    port_operation_test.go:144: prepare partially persisted
+FAIL
+FAIL	vortex/backend/internal/service	2.001s
+FAIL

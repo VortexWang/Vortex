@@ -1,0 +1,5 @@
+--- FAIL: TestUnknownProtectionRejectsFutureStart (0.00s)
+    metering_wire_validation_test.go:44: future protection start accepted: pause
+FAIL
+FAIL	vortex/backend/internal/service	0.608s
+FAIL

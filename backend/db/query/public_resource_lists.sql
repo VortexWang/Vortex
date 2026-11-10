@@ -1,0 +1,50 @@
+-- Public projections are explicit whitelists. The registry supplies order only.
+-- name: ListPublicResources :many
+WITH resources AS (
+SELECT o.created_at,o.sort_id,t.id::text AS target_tenant_id,(jsonb_build_object('id',t.id,'account_state',t.account_state,'version',t.version)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM tenants t JOIN public_resource_order o ON o.collection='tenants' AND o.tenant_key=t.id AND o.resource_key=t.id
+
+ WHERE sqlc.arg(collection)::text='tenants' AND (sqlc.arg(all_tenants)::boolean OR t.id=sqlc.arg(tenant_id)::text)
+UNION ALL
+SELECT o.created_at,o.sort_id,sqlc.arg(tenant_id)::text::text AS target_tenant_id,(jsonb_build_object('id',n.id,'name',n.name,'region',n.region,'capabilities',n.capabilities,'health',n.health,'lifecycle',n.lifecycle,'version',n.version)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM nodes n JOIN public_resource_order o ON o.collection='nodes' AND o.tenant_key='' AND o.resource_key=n.id
+ JOIN resource_ownership own ON own.resource_id=n.id
+ WHERE sqlc.arg(collection)::text='nodes' AND n.deleted_at IS NULL AND (own.owner_tenant_id=sqlc.arg(tenant_id)::text OR (own.owner_kind='platform' AND EXISTS(SELECT 1 FROM resource_grants g WHERE g.resource_id=n.id AND g.tenant_id=sqlc.arg(tenant_id)::text AND g.status='active' AND g.valid_from<=now() AND g.valid_until>now())))
+UNION ALL
+SELECT o.created_at,o.sort_id,sqlc.arg(tenant_id)::text::text AS target_tenant_id,(jsonb_build_object('id',n.id,'name',n.name,'purpose',n.purpose,'scheduling',n.scheduling,'billing_multiplier_milli',n.billing_multiplier_milli,'billing_version',n.billing_version,'member_version',n.member_version,'version',n.version)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM node_groups n JOIN public_resource_order o ON o.collection='node-groups' AND o.tenant_key='' AND o.resource_key=n.id
+ JOIN resource_ownership own ON own.resource_id=n.id
+ WHERE sqlc.arg(collection)::text='node-groups' AND n.deleted_at IS NULL AND (own.owner_tenant_id=sqlc.arg(tenant_id)::text OR (own.owner_kind='platform' AND EXISTS(SELECT 1 FROM resource_grants g WHERE g.resource_id=n.id AND g.tenant_id=sqlc.arg(tenant_id)::text AND g.status='active' AND g.valid_from<=now() AND g.valid_until>now())))
+UNION ALL
+SELECT o.created_at,o.sort_id,h.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',h.id,'desired_revision',h.desired_revision,'active_revision',h.active_revision,'sync_status',h.sync_status,'name',convert_from(r.payload,'UTF8')::jsonb->'name','protocol',convert_from(r.payload,'UTF8')::jsonb->'protocol','mode',convert_from(r.payload,'UTF8')::jsonb->'mode','enabled',convert_from(r.payload,'UTF8')::jsonb->'enabled')) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM rule_heads h JOIN public_resource_order o ON o.collection='rules' AND o.tenant_key=h.tenant_id AND o.resource_key=h.id
+ JOIN rule_revisions r ON r.tenant_id=h.tenant_id AND r.rule_id=h.id AND r.revision=h.desired_revision
+ WHERE sqlc.arg(collection)::text='rules' AND h.tenant_id=sqlc.arg(tenant_id)::text
+UNION ALL
+SELECT o.created_at,o.sort_id,sqlc.arg(tenant_id)::text::text AS target_tenant_id,(jsonb_build_object('id',c.id,'name',c.name,'version',c.current_version,'terms',p.terms)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM package_catalog c JOIN public_resource_order o ON o.collection='packages' AND o.tenant_key='' AND o.resource_key=c.id
+ JOIN package_versions p ON p.package_id=c.id AND p.version=c.current_version
+ WHERE sqlc.arg(collection)::text='packages' AND c.enabled
+UNION ALL
+SELECT o.created_at,o.sort_id,s.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',s.id,'snapshot_id',s.snapshot_id,'version',s.version,'anchor_at',s.anchor_at,'expires_at',s.expires_at,'validity_state',CASE WHEN s.expires_at>now() THEN 'active' ELSE 'expired' END,'terms',p.terms)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM subscriptions s JOIN public_resource_order o ON o.collection='subscriptions' AND o.tenant_key=s.tenant_id AND o.resource_key=s.id
+ JOIN package_snapshots p ON p.tenant_id=s.tenant_id AND p.id=s.snapshot_id
+ WHERE sqlc.arg(collection)::text='subscriptions' AND s.tenant_id=sqlc.arg(tenant_id)::text
+UNION ALL
+SELECT o.created_at,o.sort_id,p.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',p.id,'rule_id',p.rule_id,'group_id',p.group_id,'port',p.port,'protocols',p.protocols,'purpose',p.purpose,'state',p.state,'first_effective_at',p.first_effective_at,'retained_until',p.retained_until,'needs_revalidation',p.needs_revalidation,'version',p.version)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM port_allocations p JOIN public_resource_order o ON o.collection='port-allocations' AND o.tenant_key=p.tenant_id AND o.resource_key=p.id
+
+ WHERE sqlc.arg(collection)::text='port-allocations' AND p.tenant_id=sqlc.arg(tenant_id)::text
+UNION ALL
+SELECT o.created_at,o.sort_id,p.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',p.source_id,'source_id',p.source_id,'balance_bytes',p.b::text,'outstanding_bytes',p.f::text,'guarantee_bytes',p.l::text,'charged_bytes',p.charged::text,'remainder_milli',p.remainder_milli,'sequence',p.sequence::text)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM ledger_projections p JOIN public_resource_order o ON o.collection='sources' AND o.tenant_key=p.tenant_id AND o.resource_key=p.source_id
+
+ WHERE sqlc.arg(collection)::text='sources' AND p.tenant_id=sqlc.arg(tenant_id)::text
+UNION ALL
+SELECT o.created_at,o.sort_id,r.tenant_id::text AS target_tenant_id,(jsonb_build_object('id',o.sort_id,'cause',r.cause,'source_id',r.source_id,'source_version',r.source_version,'effective_at',r.effective_at,'cleared_at',r.cleared_at)) || jsonb_build_object('created_at',o.created_at) AS body
+ FROM current_restrictions r JOIN public_resource_order o ON o.collection='restrictions' AND o.tenant_key=r.tenant_id AND o.resource_key=jsonb_build_array(r.cause,r.source_id)::text
+
+ WHERE sqlc.arg(collection)::text='restrictions' AND r.tenant_id=sqlc.arg(tenant_id)::text)
+SELECT created_at,sort_id,target_tenant_id,body::jsonb AS body FROM resources
+WHERE NOT sqlc.arg(has_cursor)::boolean OR (created_at,sort_id)>(sqlc.arg(after_created_at)::timestamptz,sqlc.arg(after_id)::text)
+ORDER BY created_at,sort_id LIMIT sqlc.arg(page_limit)::integer;

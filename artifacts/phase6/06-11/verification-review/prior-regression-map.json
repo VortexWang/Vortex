@@ -1,0 +1,281 @@
+[
+  {
+    "report": ".planning/phases/01-engineering-foundation/01-VERIFICATION.md",
+    "test_references": [],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [],
+    "historical_commands_not_requalified": []
+  },
+  {
+    "report": ".planning/phases/02-m0-m0-engine-dataplane/02-VERIFICATION.md",
+    "test_references": [
+      "engine/accounting/accounting_test.go",
+      "engine/relay/gate_test.go",
+      "engine/relay/tcp_benchmark_test.go",
+      "engine/relay/tcp_linux_test.go",
+      "engine/relay/tcp_test.go",
+      "engine/relay/udp_test.go",
+      "tools/engine/docker-test.sh"
+    ],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [
+      {
+        "path": "engine/accounting/accounting_test.go",
+        "tests": [
+          "TestBatchCommitResolvesOnceWithAcceptedBytes",
+          "TestBatchReturnAndUnknownKeepReservedAmount",
+          "TestBatchResolverFailureBecomesUnknownAndCannotRetry",
+          "TestBatchRejectsInvalidAmounts"
+        ]
+      },
+      {
+        "path": "engine/relay/gate_test.go",
+        "tests": [
+          "TestTCPWithGateReservesBeforeWriteAndSettlesAcceptedBytes",
+          "TestTCPWithGateDenialPreventsDestinationWrite",
+          "TestTCPWithGateSettlesOnlyAcceptedPartOfShortWrite",
+          "TestTCPWithGateReturnsReservationWhenNoBytesAreAccepted"
+        ]
+      },
+      {
+        "path": "engine/relay/tcp_linux_test.go",
+        "tests": [
+          "TestTCPPlatformSelectsSpliceForBareTCP"
+        ]
+      },
+      {
+        "path": "engine/relay/tcp_test.go",
+        "tests": [
+          "TestTCPPropagatesHalfCloseAndMetersWrittenBytes",
+          "TestTCPContextCancellationClosesBothDirections",
+          "TestTCPMeterFailureStopsRelay"
+        ]
+      },
+      {
+        "path": "engine/relay/udp_test.go",
+        "tests": [
+          "TestUDPForwardsResponsesToOriginatingClientAndMetersWrites",
+          "TestUDPDefaultsIdleTimeoutToSixtySeconds",
+          "TestUDPPerClientSessionLimitDropsBeforeCreatingSession",
+          "TestUDPWithGateAccountsRequestAndResponseWrites",
+          "TestUDPWithGateDenialDropsBeforeTargetWrite",
+          "TestUDPGlobalSessionLimitReleasesAfterExpiry",
+          "TestUDPExpiresIdleSessionAndReplacesIt",
+          "TestUDPCancellationClosesListenerAndSessions",
+          "TestUDPRejectsNegativeIdleTimeout",
+          "TestUDPRejectsNegativeSessionLimits"
+        ]
+      }
+    ],
+    "historical_commands_not_requalified": [
+      {
+        "path": "engine/relay/tcp_benchmark_test.go",
+        "reason": "benchmark-only file; no dedicated benchmark rerun claimed"
+      },
+      {
+        "path": "tools/engine/docker-test.sh",
+        "reason": "historical script/qualification entry; current complete package runtime tests are separate evidence"
+      }
+    ]
+  },
+  {
+    "report": ".planning/phases/03-m1-vlink-m1-vlink-engine/03-VERIFICATION.md",
+    "test_references": [
+      "engine/vlink/benchmark_test.go",
+      "engine/vlink/codec_test.go",
+      "engine/vlink/fuzz_test.go",
+      "engine/vlink/hello_test.go",
+      "engine/vlink/identity_test.go",
+      "engine/vlink/integration_test.go",
+      "engine/vlink/limits_test.go",
+      "engine/vlink/observability_test.go",
+      "engine/vlink/open_test.go",
+      "engine/vlink/pool_test.go",
+      "engine/vlink/reverse_test.go",
+      "engine/vlink/stream_test.go",
+      "engine/vlink/target_test.go",
+      "engine/vlink/udp_test.go",
+      "engine/vlink/window_test.go",
+      "tools/vlink/docker-test.sh"
+    ],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [
+      {
+        "path": "engine/vlink/codec_test.go",
+        "tests": [
+          "TestFrameRoundTrip",
+          "TestMuxFrameLeaseIsIndependentAndReleasedOnce",
+          "TestReadFrameRejectsMalformedHeadersBeforePayload",
+          "TestReadFrameRejectsTruncatedHeaderAndPayload",
+          "TestStreamIDAllocatorParityMonotonicAndExhaustion",
+          "TestWriteFrameRejectsOversizedPayload"
+        ]
+      },
+      {
+        "path": "engine/vlink/hello_test.go",
+        "tests": [
+          "TestHelloSignatureBindsExporterAndDirection",
+          "TestHelloRoundTripAndRejectsUnsupportedVersion",
+          "TestNodeIDFromCertificateRequiresCanonicalSAN",
+          "TestHandshakeHelloTLS13MutualIdentity",
+          "TestHandshakeHelloPeerVerifierRejectsStaleGenerationAndReplay"
+        ]
+      },
+      {
+        "path": "engine/vlink/identity_test.go",
+        "tests": [
+          "TestFreshnessRejectsStaleGenerationAndReplay",
+          "TestFreshnessLeaseUsesConservativeIntersection",
+          "TestFreshnessLeaseRejectsSlowDuplicateAndClockRollback",
+          "TestIdentityCertificatePolicyRequiresVerifiedChainAndCanonicalSAN",
+          "TestIdentityTLSConfigPinsTLS13AndRequiresClientCertificate",
+          "TestDispatcherStreamFailureIsolatedAndIdentityFailureClosesLink",
+          "TestConcurrentDispatcherCloseIsIdempotent",
+          "TestLivenessPingTimeoutAndAbsoluteIdleDeadline",
+          "TestLivenessRejectsClockRollbackFromExtendingIdle",
+          "TestDispatcherValidFrameRefreshesLiveness",
+          "TestMuxPollSendsNonceBoundPingAndAcceptsPong"
+        ]
+      },
+      {
+        "path": "engine/vlink/integration_test.go",
+        "tests": [
+          "TestVLinkIntegrationUnauthorizedUDPDoesNotReachOpenOK",
+          "TestLateWindowForClosedStreamDoesNotResetOrCloseLink",
+          "TestResetRemovesBothStreamRecords"
+        ]
+      },
+      {
+        "path": "engine/vlink/limits_test.go",
+        "tests": [
+          "TestLimitBurstAndSustainedThreshold",
+          "TestLimitRejectsUnconfiguredAndInvalidLimits"
+        ]
+      },
+      {
+        "path": "engine/vlink/observability_test.go",
+        "tests": [
+          "TestObservabilityRetainsSafeBoundedEventsAndCounters",
+          "TestObservabilityRejectsInvalidHighCardinalityShapes"
+        ]
+      },
+      {
+        "path": "engine/vlink/open_test.go",
+        "tests": [
+          "TestOpenPolicyAcceptsLocalRuntimeDecision",
+          "TestOpenPolicyStableRejectionClassesAndAuditCorrelation",
+          "TestOpenPolicySelfHostedAndNonExecutionRulesUseCorrectGates"
+        ]
+      },
+      {
+        "path": "engine/vlink/pool_test.go",
+        "tests": [
+          "TestSelectTransportModeBoundaries",
+          "TestFirstPacketHistoryUsesBoundedTenMinuteMedian",
+          "TestLinkPoolHardCapAcrossConcurrentPoolModeAcquires",
+          "TestLinkPoolScalesDownAndRemovesUnhealthyLinks",
+          "TestBackoffIsCappedAndJitteredWithinBounds",
+          "TestDuplicateLinkArbitrationKeepsPreferredInitiator",
+          "TestReconcileEvictsOldestIdleLinksAfterReorderedUse"
+        ]
+      },
+      {
+        "path": "engine/vlink/reverse_test.go",
+        "tests": [
+          "TestReverseConnectorRetriesThenReopensOnlyApprovedTCP",
+          "TestReverseConnectorStopsDuringBackoff"
+        ]
+      },
+      {
+        "path": "engine/vlink/stream_test.go",
+        "tests": [
+          "TestMuxLinkMultiplexesStreamsAndHonorsWindows",
+          "TestMuxTCPDataFramesFitOneTLSRecord",
+          "TestMuxRemoteOpenRequiresAuthorizationAndClosesResources",
+          "TestStreamIDsParityAndNoReuse",
+          "TestStreamOpeningDataBoundAndOpenError",
+          "TestStreamLocalEarlyDataAndDelayedOpenError",
+          "TestStreamUDPRequiresOpenOKAndViolationIsLocal",
+          "TestStreamRemoteOpenAndHalfCloseIsolation",
+          "TestStreamLocalEarlyTCPDataIsBoundedUntilOpenOK",
+          "TestRejectedRemoteOpenDropsBufferedTCPData",
+          "TestStreamDuplicateIDIsLinkError"
+        ]
+      },
+      {
+        "path": "engine/vlink/target_test.go",
+        "tests": [
+          "TestResolveLocalTargetReturnsNumericAllowlistedEndpoint",
+          "TestResolveLocalTargetRejectsPrivateReservedAndMalformedAddresses",
+          "TestResolveLocalTargetRejectsDNSRebindingAnswerSet",
+          "TestResolveLocalTargetRejectsEmptyDNSAndPrefixMismatch",
+          "TestDialLocalTargetRejectsUnsafeEndpointWithoutDetails"
+        ]
+      },
+      {
+        "path": "engine/vlink/udp_test.go",
+        "tests": [
+          "TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss",
+          "TestUDPReturnsStreamCreditBeforeWindowNearExhaustion",
+          "TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit",
+          "TestUDPQueueDropReturnsCreditAndPreservesStream",
+          "TestUDPAdmissionUsesAuthorizedLocalTargetAndStableFlowKey"
+        ]
+      },
+      {
+        "path": "engine/vlink/window_test.go",
+        "tests": [
+          "TestWindowAcquiresStreamAndAggregateCredit",
+          "TestUDPWindowRejectionAttributesCreditAtAdmission",
+          "TestTCPAcquirePreservesAggregateUDPReserve",
+          "TestWindowBlockedWriterWakesOnGrant",
+          "TestWindowCancellationCloseOverflowAndUDPDrop",
+          "TestWindowRejectsUnknownStreamAndBoundsCredit",
+          "TestWindowRemovedStreamWakesWaiter"
+        ]
+      }
+    ],
+    "historical_commands_not_requalified": [
+      {
+        "path": "engine/vlink/benchmark_test.go",
+        "reason": "benchmark-only file; no dedicated benchmark rerun claimed"
+      },
+      {
+        "path": "engine/vlink/fuzz_test.go",
+        "reason": "benchmark-only file; no dedicated benchmark rerun claimed"
+      },
+      {
+        "path": "tools/vlink/docker-test.sh",
+        "reason": "historical script/qualification entry; current complete package runtime tests are separate evidence"
+      }
+    ]
+  },
+  {
+    "report": ".planning/phases/04-m2-m2-multi-hop-engine/04-VERIFICATION.md",
+    "test_references": [],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [],
+    "historical_commands_not_requalified": []
+  },
+  {
+    "report": ".planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-VERIFICATION.md",
+    "test_references": [],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [],
+    "historical_commands_not_requalified": []
+  },
+  {
+    "report": ".planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-04-VERIFICATION.md",
+    "test_references": [],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [],
+    "historical_commands_not_requalified": []
+  },
+  {
+    "report": ".planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-VERIFICATION.md",
+    "test_references": [],
+    "current_coverage": "final root/Engine normal+race plus exact Phase6 freeze/dependency/Go semantic gates; historical qualification/model proofs retain original status",
+    "tests_in_current_complete_suites": [],
+    "historical_commands_not_requalified": []
+  }
+]

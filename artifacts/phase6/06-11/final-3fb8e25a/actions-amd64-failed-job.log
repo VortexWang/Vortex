@@ -1,0 +1,294 @@
+﻿2026-11-09T01:50:18.2051416Z Current runner version: '2.338.2'
+2026-11-09T01:50:18.2068938Z ##[group***Runner Image Provisioner
+2026-11-09T01:50:18.2069728Z Hosted Compute Agent
+2026-11-09T01:50:18.2070381Z Version: 20261028.624
+2026-11-09T01:50:18.2070959Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-09T01:50:18.2071675Z Build Date: 2026-10-28T21:51:42Z
+2026-11-09T01:50:18.2072400Z Worker ID: ***3aa07a92-9aae-456e-9d21-cdf9f30e8fb8***
+2026-11-09T01:50:18.2073069Z Region: southcentralus
+2026-11-09T01:50:18.2073672Z Cloud: Azure
+2026-11-09T01:50:18.2074590Z ##[endgroup***
+2026-11-09T01:50:18.2075893Z ##[group***Operating System
+2026-11-09T01:50:18.2076468Z Ubuntu
+2026-11-09T01:50:18.2076993Z 24.04.5
+2026-11-09T01:50:18.2077507Z LTS
+2026-11-09T01:50:18.2078016Z ##[endgroup***
+2026-11-09T01:50:18.2078584Z ##[group***Runner Image
+2026-11-09T01:50:18.2079153Z Image: ubuntu-24.04
+2026-11-09T01:50:18.2079645Z Version: 20261101.360.1
+2026-11-09T01:50:18.2080671Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-09T01:50:18.2081801Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-09T01:50:18.2082531Z ##[endgroup***
+2026-11-09T01:50:18.2083562Z ##[group***GITHUB_TOKEN Permissions
+2026-11-09T01:50:18.2085363Z Contents: read
+2026-11-09T01:50:18.2085941Z Metadata: read
+2026-11-09T01:50:18.2086506Z ##[endgroup***
+2026-11-09T01:50:18.2088085Z Secret source: Actions
+2026-11-09T01:50:18.2088972Z Cache mode: write
+2026-11-09T01:50:18.2089527Z Prepare workflow directory
+2026-11-09T01:50:18.2310179Z Prepare all required actions
+2026-11-09T01:50:18.2346442Z Getting action download info
+2026-11-09T01:50:18.4665327Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-11-09T01:50:18.5692330Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+2026-11-09T01:50:19.0642081Z Download action repository 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9' (SHA:cf430e030ddbb5b0abf93d22962f4752f3646cd9)
+2026-11-09T01:50:19.2171289Z Complete job name: backend (ubuntu-24.04, amd64)
+2026-11-09T01:50:19.2757528Z ##[group***Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-11-09T01:50:19.2758222Z with:
+2026-11-09T01:50:19.2758576Z   fetch-depth: 0
+2026-11-09T01:50:19.2758952Z   repository: VortexWang/Vortex
+2026-11-09T01:50:19.2761210Z   token: ***
+2026-11-09T01:50:19.2761610Z   ssh-strict: true
+2026-11-09T01:50:19.2761965Z   ssh-user: git
+2026-11-09T01:50:19.2762324Z   persist-credentials: true
+2026-11-09T01:50:19.2762704Z   clean: true
+2026-11-09T01:50:19.2763070Z   sparse-checkout-cone-mode: true
+2026-11-09T01:50:19.2763472Z   fetch-tags: false
+2026-11-09T01:50:19.2763938Z   show-progress: true
+2026-11-09T01:50:19.2764303Z   lfs: false
+2026-11-09T01:50:19.2764653Z   submodules: false
+2026-11-09T01:50:19.2765039Z   set-safe-directory: true
+2026-11-09T01:50:19.2765466Z   allow-unsafe-pr-checkout: false
+2026-11-09T01:50:19.2765960Z ##[endgroup***
+2026-11-09T01:50:19.4865895Z Syncing repository: VortexWang/Vortex
+2026-11-09T01:50:19.4868495Z ##[group***Getting Git version info
+2026-11-09T01:50:19.4869363Z Working directory is '/home/runner/work/Vortex/Vortex'
+2026-11-09T01:50:19.4870672Z [command***/usr/bin/git version
+2026-11-09T01:50:19.4871293Z git version 2.56.0
+2026-11-09T01:50:19.4873239Z ##[endgroup***
+2026-11-09T01:50:19.4877938Z Temporarily overriding HOME='/home/runner/work/_temp/086b9623-de0c-4ae4-baf6-19cac75c2eed' before making global git config changes
+2026-11-09T01:50:19.4879301Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T01:50:19.4881113Z [command***/usr/bin/git config --global --add safe.directory /home/runner/work/Vortex/Vortex
+2026-11-09T01:50:19.4934032Z Deleting the contents of '/home/runner/work/Vortex/Vortex'
+2026-11-09T01:50:19.4937377Z ##[group***Determining repository object format
+2026-11-09T01:50:19.4939158Z ##[endgroup***
+2026-11-09T01:50:19.4940123Z ##[group***Initializing the repository
+2026-11-09T01:50:19.4942389Z [command***/usr/bin/git init /home/runner/work/Vortex/Vortex
+2026-11-09T01:50:19.5024441Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-09T01:50:19.5025656Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-09T01:50:19.5026701Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-09T01:50:19.5027597Z hint: call:
+2026-11-09T01:50:19.5028140Z hint:
+2026-11-09T01:50:19.5028814Z hint: 	git config --global init.defaultBranch <name>
+2026-11-09T01:50:19.5029575Z hint:
+2026-11-09T01:50:19.5030302Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-09T01:50:19.5031339Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-09T01:50:19.5032231Z hint:
+2026-11-09T01:50:19.5032808Z hint: 	git branch -m <name>
+2026-11-09T01:50:19.5033418Z hint:
+2026-11-09T01:50:19.5034304Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-09T01:50:19.5045080Z Initialized empty Git repository in /home/runner/work/Vortex/Vortex/.git/
+2026-11-09T01:50:19.5054273Z [command***/usr/bin/git remote add origin https://github.com/VortexWang/Vortex
+2026-11-09T01:50:19.5096022Z ##[endgroup***
+2026-11-09T01:50:19.5097211Z ##[group***Disabling automatic garbage collection
+2026-11-09T01:50:19.5098319Z [command***/usr/bin/git config --local gc.auto 0
+2026-11-09T01:50:19.5136309Z ##[endgroup***
+2026-11-09T01:50:19.5137743Z ##[group***Setting up auth
+2026-11-09T01:50:19.5138457Z Removing SSH command configuration
+2026-11-09T01:50:19.5140271Z [command***/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T01:50:19.5176887Z [command***/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T01:50:19.5484972Z Removing HTTP extra header
+2026-11-09T01:50:19.5489818Z [command***/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T01:50:19.5532736Z [command***/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T01:50:19.5728622Z Removing includeIf entries pointing to credentials config files
+2026-11-09T01:50:19.5733091Z [command***/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T01:50:19.5779338Z [command***/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T01:50:19.5981110Z [command***/usr/bin/git config --file /home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-09T01:50:19.6026633Z [command***/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Vortex/Vortex/.git.path /home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T01:50:19.6065901Z [command***/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T01:50:19.6106480Z [command***/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T01:50:19.6145355Z [command***/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T01:50:19.6182859Z ##[endgroup***
+2026-11-09T01:50:19.6183510Z ##[group***Fetching the repository
+2026-11-09T01:50:19.6188462Z [command***/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-11-09T01:50:20.9037234Z From https://github.com/VortexWang/Vortex
+2026-11-09T01:50:20.9038578Z  * [new branch***      codex/phase6-backend -> origin/codex/phase6-backend
+2026-11-09T01:50:20.9039187Z  * [new branch***      main                 -> origin/main
+2026-11-09T01:50:20.9046499Z [command***/usr/bin/git branch --list --remote origin/codex/phase6-backend
+2026-11-09T01:50:20.9081967Z   origin/codex/phase6-backend
+2026-11-09T01:50:20.9088444Z [command***/usr/bin/git rev-parse refs/remotes/origin/codex/phase6-backend
+2026-11-09T01:50:20.9120484Z 3fb8e25a61e8c22a41e47b681b2155e50f2af7b9
+2026-11-09T01:50:20.9124135Z ##[endgroup***
+2026-11-09T01:50:20.9124773Z ##[group***Determining the checkout info
+2026-11-09T01:50:20.9125461Z ##[endgroup***
+2026-11-09T01:50:20.9128482Z [command***/usr/bin/git sparse-checkout disable
+2026-11-09T01:50:20.9181319Z [command***/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-09T01:50:20.9218946Z ##[group***Checking out the ref
+2026-11-09T01:50:20.9222250Z [command***/usr/bin/git checkout --progress --force -B codex/phase6-backend refs/remotes/origin/codex/phase6-backend
+2026-11-09T01:50:21.2278285Z Switched to a new branch 'codex/phase6-backend'
+2026-11-09T01:50:21.2281052Z branch 'codex/phase6-backend' set up to track 'origin/codex/phase6-backend'.
+2026-11-09T01:50:21.2303480Z ##[endgroup***
+2026-11-09T01:50:21.2358643Z [command***/usr/bin/git log -1 --format=%H
+2026-11-09T01:50:21.2393583Z 3fb8e25a61e8c22a41e47b681b2155e50f2af7b9
+2026-11-09T01:50:21.2585782Z ##[group***Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+2026-11-09T01:50:21.2586059Z with:
+2026-11-09T01:50:21.2586231Z   go-version: 1.27.3
+2026-11-09T01:50:21.2586400Z   cache: false
+2026-11-09T01:50:21.2586577Z   check-latest: false
+2026-11-09T01:50:21.2588058Z   token: ***
+2026-11-09T01:50:21.2588236Z ##[endgroup***
+2026-11-09T01:50:21.3346509Z Setup go version spec 1.27.3
+2026-11-09T01:50:21.3357365Z Attempting to download 1.27.3...
+2026-11-09T01:50:22.1372382Z matching 1.27.3...
+2026-11-09T01:50:22.1392800Z Acquiring 1.27.3 from https://github.com/actions/go-versions/releases/download/1.27.3-39437817176/go-1.27.3-linux-x64.tar.gz
+2026-11-09T01:50:22.8284702Z Extracting Go...
+2026-11-09T01:50:22.8382579Z [command***/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/7b7d5beb-9dc9-4630-8ced-bcdf1fe0a327 -f /home/runner/work/_temp/d5c48da9-2c55-4586-b104-30a873a53505
+2026-11-09T01:50:24.1381817Z Successfully extracted go to /home/runner/work/_temp/7b7d5beb-9dc9-4630-8ced-bcdf1fe0a327
+2026-11-09T01:50:24.1382184Z Adding to the cache ...
+2026-11-09T01:50:27.4479035Z Successfully cached go to /opt/hostedtoolcache/go/1.27.3/x64
+2026-11-09T01:50:27.4480504Z Added go to the path
+2026-11-09T01:50:27.4482329Z Successfully set up Go version 1.27.3
+2026-11-09T01:50:27.4686334Z go version go1.27.3 linux/amd64
+2026-11-09T01:50:27.4686534Z 
+2026-11-09T01:50:27.4686841Z ##[group***go env
+2026-11-09T01:50:27.5711038Z AR='ar'
+2026-11-09T01:50:27.5711291Z CC='gcc'
+2026-11-09T01:50:27.5711474Z CGO_CFLAGS='-O2 -g'
+2026-11-09T01:50:27.5711680Z CGO_CPPFLAGS=''
+2026-11-09T01:50:27.5711861Z CGO_CXXFLAGS='-O2 -g'
+2026-11-09T01:50:27.5712052Z CGO_ENABLED='1'
+2026-11-09T01:50:27.5712228Z CGO_FFLAGS='-O2 -g'
+2026-11-09T01:50:27.5712422Z CGO_LDFLAGS='-O2 -g'
+2026-11-09T01:50:27.5712597Z CXX='g++'
+2026-11-09T01:50:27.5712759Z GCCGO='gccgo'
+2026-11-09T01:50:27.5712928Z GO111MODULE=''
+2026-11-09T01:50:27.5713090Z GOAMD64='v1'
+2026-11-09T01:50:27.5713278Z GOARCH='amd64'
+2026-11-09T01:50:27.5713460Z GOAUTH='netrc'
+2026-11-09T01:50:27.5713646Z GOBIN='/home/runner/go/bin'
+2026-11-09T01:50:27.5714153Z GOCACHE='/home/runner/.cache/go-build'
+2026-11-09T01:50:27.5714358Z GOCACHEPROG=''
+2026-11-09T01:50:27.5714526Z GODEBUG=''
+2026-11-09T01:50:27.5714707Z GOENV='/home/runner/.config/go/env'
+2026-11-09T01:50:27.5714908Z GOEXE=''
+2026-11-09T01:50:27.5715064Z GOEXPERIMENT=''
+2026-11-09T01:50:27.5715552Z GOFIPS140='off'
+2026-11-09T01:50:27.5715716Z GOFLAGS=''
+2026-11-09T01:50:27.5716172Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3043523212=/tmp/go-build -gno-record-gcc-switches'
+2026-11-09T01:50:27.5716609Z GOHOSTARCH='amd64'
+2026-11-09T01:50:27.5716780Z GOHOSTOS='linux'
+2026-11-09T01:50:27.5716946Z GOINSECURE=''
+2026-11-09T01:50:27.5717163Z GOMOD='/home/runner/work/Vortex/Vortex/go.mod'
+2026-11-09T01:50:27.5717411Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-11-09T01:50:27.5717608Z GONOPROXY=''
+2026-11-09T01:50:27.5717775Z GONOSUMDB=''
+2026-11-09T01:50:27.5717931Z GOOS='linux'
+2026-11-09T01:50:27.5718097Z GOPACKAGESDRIVER=''
+2026-11-09T01:50:27.5718286Z GOPATH='/home/runner/go'
+2026-11-09T01:50:27.5718462Z GOPRIVATE=''
+2026-11-09T01:50:27.5718688Z GOPROXY='https://proxy.golang.org,direct'
+2026-11-09T01:50:27.5718944Z GOROOT='/opt/hostedtoolcache/go/1.27.3/x64'
+2026-11-09T01:50:27.5719172Z GOSUMDB='sum.golang.org'
+2026-11-09T01:50:27.5719364Z GOTELEMETRY='local'
+2026-11-09T01:50:27.5719579Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-11-09T01:50:27.5719807Z GOTMPDIR=''
+2026-11-09T01:50:27.5719976Z GOTOOLCHAIN='local'
+2026-11-09T01:50:27.5720249Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.3/x64/pkg/tool/linux_amd64'
+2026-11-09T01:50:27.5720529Z GOVCS=''
+2026-11-09T01:50:27.5720692Z GOVERSION='go1.27.3'
+2026-11-09T01:50:27.5720867Z GOWORK=''
+2026-11-09T01:50:27.5721073Z PKG_CONFIG='pkg-config'
+2026-11-09T01:50:27.5721186Z 
+2026-11-09T01:50:27.5721594Z ##[endgroup***
+2026-11-09T01:50:27.5889990Z ##[group***Run if test -n "$CLOUDFLARE_TOKEN_POLICY_JSON"; then
+2026-11-09T01:50:27.5890374Z [36;1mif test -n "$CLOUDFLARE_TOKEN_POLICY_JSON"; then[0m
+2026-11-09T01:50:27.5890628Z [36;1m  umask 077[0m
+2026-11-09T01:50:27.5890906Z [36;1m  export CLOUDFLARE_TOKEN_POLICY_FILE="$RUNNER_TEMP/cloudflare-policy.json"[0m
+2026-11-09T01:50:27.5891214Z [36;1m  python3 - <<'PY'[0m
+2026-11-09T01:50:27.5891415Z [36;1mimport os,pathlib[0m
+2026-11-09T01:50:27.5891798Z [36;1mpathlib.Path(os.environ['CLOUDFLARE_TOKEN_POLICY_FILE'***).write_text(os.environ['CLOUDFLARE_TOKEN_POLICY_JSON'***)[0m
+2026-11-09T01:50:27.5892161Z [36;1mPY[0m
+2026-11-09T01:50:27.5892320Z [36;1mfi[0m
+2026-11-09T01:50:27.5892710Z [36;1m./tools/phase6/check.sh --through-plan 06-11 --expected-sha "$GITHUB_SHA" --produce actions --evidence-dir "$RUNNER_TEMP/phase6/$GITHUB_SHA"[0m
+2026-11-09T01:50:27.5914394Z shell: /usr/bin/bash -e ***0***
+2026-11-09T01:50:27.5914619Z env:
+2026-11-09T01:50:27.5914850Z   GOTOOLCHAIN: local
+2026-11-09T01:50:27.5915167Z   CLOUDFLARE_API_TOKEN: ***
+2026-11-09T01:50:27.5915395Z   CLOUDFLARE_ZONE_ID: ***
+2026-11-09T01:50:27.5915593Z   CLOUDFLARE_POLICY_TOKEN: 
+2026-11-09T01:50:27.5916451Z   CLOUDFLARE_TOKEN_POLICY_JSON: ***
+2026-11-09T01:50:27.5916661Z ##[endgroup***
+2026-11-09T02:12:11.0648526Z Traceback (most recent call last):
+2026-11-09T02:12:11.0649175Z   File "/home/runner/work/Vortex/Vortex/tools/phase6/final_evidence_check.py", line 126, in <module>
+2026-11-09T02:12:11.0650052Z     if action=='stamp':stamp(sys.argv[2***sys.argv[3***sys.argv[4***int(sys.argv[5***),int(sys.argv[6***))
+2026-11-09T02:12:11.0650939Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T02:12:11.0651508Z   File "/home/runner/work/Vortex/Vortex/tools/phase6/final_evidence_check.py", line 87, in stamp
+2026-11-09T02:12:11.0652265Z     files=***str(p.relative_to(folder)):sha(p) for p in folder.rglob('*') if p.is_file() and p.name!='result.json'***
+2026-11-09T02:12:11.0652925Z                                       ^^^^^^
+2026-11-09T02:12:11.0653472Z   File "/home/runner/work/Vortex/Vortex/tools/phase6/final_evidence_check.py", line 18, in sha
+2026-11-09T02:12:11.0654184Z     def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+2026-11-09T02:12:11.0654610Z                                         ^^^^^^^^^^^^^^^^^
+2026-11-09T02:12:11.0654883Z   File "/usr/lib/python3.12/pathlib.py", line 1021, in read_bytes
+2026-11-09T02:12:11.0655432Z     with self.open(mode='rb') as f:
+2026-11-09T02:12:11.0656652Z          ^^^^^^^^^^^^^^^^^^^^
+2026-11-09T02:12:11.0656912Z   File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+2026-11-09T02:12:11.0657223Z     return io.open(self, mode, buffering, encoding, errors, newline)
+2026-11-09T02:12:11.0657554Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T02:12:11.0658025Z PermissionError: [Errno 13*** Permission denied: '/home/runner/work/_temp/phase6/3fb8e25a61e8c22a41e47b681b2155e50f2af7b9/actions/reconciliation-normal.json'
+2026-11-09T02:12:11.0755340Z ##[error***Process completed with exit code 1.
+2026-11-09T02:12:11.0824585Z ##[group***Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+2026-11-09T02:12:11.0824892Z with:
+2026-11-09T02:12:11.0825099Z   name: phase6-3fb8e25a61e8c22a41e47b681b2155e50f2af7b9-amd64
+2026-11-09T02:12:11.0825422Z   path: /home/runner/work/_temp/phase6/3fb8e25a61e8c22a41e47b681b2155e50f2af7b9/actions/
+2026-11-09T02:12:11.0825720Z   if-no-files-found: error
+2026-11-09T02:12:11.0825909Z   compression-level: 6
+2026-11-09T02:12:11.0826082Z   overwrite: false
+2026-11-09T02:12:11.0826254Z   include-hidden-files: false
+2026-11-09T02:12:11.0826435Z   archive: true
+2026-11-09T02:12:11.0826594Z env:
+2026-11-09T02:12:11.0826748Z   GOTOOLCHAIN: local
+2026-11-09T02:12:11.0826913Z ##[endgroup***
+2026-11-09T02:12:11.1761780Z With the provided path, there will be 31 files uploaded
+2026-11-09T02:12:11.1764912Z Artifact name is valid!
+2026-11-09T02:12:11.1765448Z Root directory input is valid!
+2026-11-09T02:12:11.4295844Z Uploading artifact: phase6-3fb8e25a61e8c22a41e47b681b2155e50f2af7b9-amd64.zip
+2026-11-09T02:12:11.4319522Z Beginning upload of artifact content to blob storage
+2026-11-09T02:12:11.4800422Z ##[error***An error has occurred while creating the zip file for upload
+2026-11-09T02:12:11.4802005Z Error: EACCES: permission denied, open '/home/runner/work/_temp/phase6/3fb8e25a61e8c22a41e47b681b2155e50f2af7b9/actions/reconciliation-normal.json'
+2026-11-09T02:12:11.4833342Z file:///home/runner/work/_actions/actions/upload-artifact/cf430e030ddbb5b0abf93d22962f4752f3646cd9/dist/upload/index.js:124137
+2026-11-09T02:12:11.4834282Z     throw new Error('An error has occurred during zip creation for the artifact');
+2026-11-09T02:12:11.4835320Z     ^
+2026-11-09T02:12:11.4835442Z 
+2026-11-09T02:12:11.4835584Z Error: An error has occurred during zip creation for the artifact
+2026-11-09T02:12:11.4836295Z     at Archiver.zipErrorCallback (file:///home/runner/work/_actions/actions/upload-artifact/cf430e030ddbb5b0abf93d22962f4752f3646cd9/dist/upload/index.js:124137:11)
+2026-11-09T02:12:11.4837206Z     at Archiver.emit (node:events:526:24)
+2026-11-09T02:12:11.4837750Z     at Archiver.<anonymous> (file:///home/runner/work/_actions/actions/upload-artifact/cf430e030ddbb5b0abf93d22962f4752f3646cd9/dist/upload/index.js:8081:12)
+2026-11-09T02:12:11.4838543Z     at __webpack_modules__.1622.module.exports.handleStuff (file:///home/runner/work/_actions/actions/upload-artifact/cf430e030ddbb5b0abf93d22962f4752f3646cd9/dist/upload/index.js:19063:5)
+2026-11-09T02:12:11.4839082Z     at DeflateCRC32Stream.wrapper (node:events:639:12)
+2026-11-09T02:12:11.4839373Z     at DeflateCRC32Stream.emit (node:events:526:24)
+2026-11-09T02:12:11.4839675Z     at endReadableNT (node:internal/streams/readable:1783:12)
+2026-11-09T02:12:11.4840042Z     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026-11-09T02:12:11.4840254Z 
+2026-11-09T02:12:11.4840333Z Node.js v24.22.1
+2026-11-09T02:12:11.4993649Z Post job cleanup.
+2026-11-09T02:12:11.5552426Z [command***/usr/bin/git version
+2026-11-09T02:12:11.5588123Z git version 2.56.0
+2026-11-09T02:12:11.5610392Z Temporarily overriding HOME='/home/runner/work/_temp/482858db-2d7c-4e64-91eb-89ae4fca28ab' before making global git config changes
+2026-11-09T02:12:11.5611380Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T02:12:11.5615475Z [command***/usr/bin/git config --global --add safe.directory /home/runner/work/Vortex/Vortex
+2026-11-09T02:12:11.5644695Z Removing SSH command configuration
+2026-11-09T02:12:11.5649303Z [command***/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T02:12:11.5680859Z [command***/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T02:12:11.5929321Z Removing HTTP extra header
+2026-11-09T02:12:11.5934215Z [command***/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T02:12:11.5965362Z [command***/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T02:12:11.6199771Z Removing includeIf entries pointing to credentials config files
+2026-11-09T02:12:11.6210901Z [command***/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T02:12:11.6244850Z includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path
+2026-11-09T02:12:11.6245524Z includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path
+2026-11-09T02:12:11.6246094Z includeif.gitdir:/github/workspace/.git.path
+2026-11-09T02:12:11.6246609Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-09T02:12:11.6251670Z [command***/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path
+2026-11-09T02:12:11.6282252Z /home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T02:12:11.6290590Z [command***/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Vortex/Vortex/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-50935c6c\-3eaa\-4bb9\-817e\-50fc4ffdc2dd\.config
+2026-11-09T02:12:11.6331279Z [command***/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path
+2026-11-09T02:12:11.6363028Z /home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T02:12:11.6369943Z [command***/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Vortex/Vortex/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-50935c6c\-3eaa\-4bb9\-817e\-50fc4ffdc2dd\.config
+2026-11-09T02:12:11.6407345Z [command***/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-09T02:12:11.6437017Z /github/runner_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T02:12:11.6442896Z [command***/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-50935c6c\-3eaa\-4bb9\-817e\-50fc4ffdc2dd\.config
+2026-11-09T02:12:11.6480654Z [command***/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-09T02:12:11.6510308Z /github/runner_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config
+2026-11-09T02:12:11.6515471Z [command***/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-50935c6c\-3eaa\-4bb9\-817e\-50fc4ffdc2dd\.config
+2026-11-09T02:12:11.6553555Z [command***/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T02:12:11.6812828Z Removing credentials config '/home/runner/work/_temp/git-credentials-50935c6c-3eaa-4bb9-817e-50fc4ffdc2dd.config'
+2026-11-09T02:12:11.6975451Z Cleaning up orphan processes

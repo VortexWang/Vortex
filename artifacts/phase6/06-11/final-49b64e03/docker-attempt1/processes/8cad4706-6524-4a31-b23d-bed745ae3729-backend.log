@@ -1,0 +1,13 @@
+backend ready node=127.0.0.1:33209 hub=127.0.0.1:39409
+2026/11/09 02:26:12 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:12 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:13 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:13 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:14 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:14 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:15 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:15 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:16 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:16 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:17 ERROR share scheduling pending; prior occupation retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"
+2026/11/09 02:26:17 ERROR runtime funding pending; existing funds retained error="tenant 0b444e57-1777-45cd-b8d9-397ae6dce78f: lease_boundary_invalid"

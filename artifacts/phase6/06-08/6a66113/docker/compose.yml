@@ -1,0 +1,95 @@
+name: vortex-phase6-tracer
+services:
+  backend-test:
+    command:
+      - sh
+      - tools/phase6/container_tracer.sh
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+      valkey:
+        condition: service_healthy
+        required: true
+    environment:
+      GOTOOLCHAIN: local
+      PHASE6_DATABASE_URL: postgres://vortex:phase6-local-test-only@postgres:5432/vortex?sslmode=disable
+      PHASE6_EXPECTED_SHA: 6a661137160000a9401920744170f07560353832
+      PHASE6_PROCESS_EVIDENCE_DIR: /evidence/processes
+      PHASE6_VALKEY_ADDR: valkey:6379
+    image: golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048
+    networks:
+      default: null
+    volumes:
+      - type: bind
+        source: /tmp/vortex-phase6-clean.KHJn27/source
+        target: /src
+        bind: {}
+      - type: bind
+        source: /Users/peng/Documents/123/VORTEX/artifacts/phase6/06-08/6a66113/docker
+        target: /evidence
+        bind: {}
+      - type: volume
+        source: phase6-gomod
+        target: /go/pkg/mod
+        volume: {}
+      - type: volume
+        source: phase6-gocache
+        target: /root/.cache/go-build
+        volume: {}
+    working_dir: /src
+  postgres:
+    environment:
+      POSTGRES_DB: vortex
+      POSTGRES_PASSWORD: phase6-local-test-only
+      POSTGRES_USER: vortex
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U vortex -d vortex
+      timeout: 3s
+      interval: 1s
+      retries: 30
+    image: postgres:18.6-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 5432
+        published: "15436"
+        protocol: tcp
+    tmpfs:
+      - /var/lib/postgresql
+  valkey:
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - 'no'
+    healthcheck:
+      test:
+        - CMD
+        - valkey-cli
+        - ping
+      timeout: 3s
+      interval: 1s
+      retries: 30
+    image: valkey/valkey:9.1.3@sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 6379
+        published: "16386"
+        protocol: tcp
+networks:
+  default:
+    name: vortex-phase6-tracer_default
+volumes:
+  phase6-gocache:
+    name: vortex-phase6-tracer_phase6-gocache
+  phase6-gomod:
+    name: vortex-phase6-tracer_phase6-gomod

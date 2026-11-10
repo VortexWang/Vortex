@@ -1,0 +1,22 @@
+// PostgreSQL-only administration runner for the already reviewed Goose module.
+// This is an explicit local test wrapper, not the upstream multi-driver CLI.
+package main
+
+import (
+ "context"
+ "database/sql"
+ "flag"
+ "log"
+ _ "github.com/jackc/pgx/v5/stdlib"
+ "github.com/pressly/goose/v3"
+)
+
+func main() {
+ dir:=flag.String("dir","db/migrations","migration directory")
+ flag.Parse()
+ args:=flag.Args()
+ if len(args)!=3 || args[0]!="postgres" {log.Fatal("expected postgres DSN up|status")}
+ if err:=goose.SetDialect(args[0]);err!=nil {log.Fatal(err)}
+ conn,err:=sql.Open("pgx",args[1]);if err!=nil {log.Fatal(err)};defer conn.Close()
+ if err=goose.RunContext(context.Background(),args[2],conn,*dir);err!=nil {log.Fatal(err)}
+}

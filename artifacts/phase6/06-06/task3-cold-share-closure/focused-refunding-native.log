@@ -1,0 +1,16 @@
+=== RUN   TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity
+2026/11/08 17:35:13 goose: no migrations to run. current version: 8
+2026/11/08 17:35:13 OK   00001_authority.sql (19.72ms)
+2026/11/08 17:35:13 OK   00002_tenant_policy.sql (13.11ms)
+2026/11/08 17:35:13 OK   00003_nodes_ports.sql (27.19ms)
+2026/11/08 17:35:13 OK   00004_entry_group_domains.sql (3.07ms)
+2026/11/08 17:35:13 OK   00005_rules_compile.sql (26.67ms)
+2026/11/08 17:35:13 OK   00006_packages_entitlements.sql (25.31ms)
+2026/11/08 17:35:13 OK   00007_metering_ledger.sql (33.38ms)
+2026/11/08 17:35:13 OK   00008_limits_shares.sql (52.82ms)
+2026/11/08 17:35:13 goose: successfully migrated database to version: 8
+    share_cold_recovery_test.go:148: desired revision or idempotency conflict
+--- FAIL: TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity (1.35s)
+FAIL
+FAIL	vortex/backend/internal/service	2.117s
+FAIL

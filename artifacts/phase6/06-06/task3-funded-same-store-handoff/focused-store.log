@@ -1,0 +1,5 @@
+--- FAIL: TestFundedHandoffReopenBarrierRootsLeasesAndCompleteSeal (0.39s)
+    funded_handoff_test.go:98: old issue changed: store: trusted time is required for authorization
+FAIL
+FAIL	vortex/agent/store	6.047s
+FAIL

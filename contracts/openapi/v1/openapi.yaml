@@ -1,33 +1,5615 @@
-openapi: 3.1.1
-info:
-  title: VORTEX Public Business API
-  version: 1.0.0
-  description: Draft API contract sourced from V1.11 GEN-007 and BE-005.
-servers: []
-paths: {}
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-  schemas:
-    ApiError:
-      type: object
-      required: [code, message]
-      properties:
-        code: {type: string}
-        message: {type: string}
-        request_id: {type: string}
-    Restriction:
-      type: object
-      required: [id, kind, active]
-      properties:
-        id: {type: string, format: uuid}
-        kind: {type: string}
-        active: {type: boolean}
-x-vortex-source:
-  requirements: [GEN-007, BE-005]
-  status: draft
-  unresolved:
-    - V1.11 defines REST, SSE and business-model boundaries but does not enumerate endpoint paths, payload schemas, pagination, authentication flows or status codes.
-    - Do not expose internal runtime configuration or VLink wire types as public compatibility commitments.
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "VORTEX Public Business API",
+    "version": "3.0.0",
+    "description": "CR-009 candidate, not approved. Exact implemented /api/v1 business boundary. Contract SemVer is independent of the stable URL prefix. Initial sessions require trusted local identity verification; no public role-selecting login."
+  },
+  "servers": [],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/refresh": {
+      "parameters": [],
+      "post": {
+        "operationId": "refreshSession",
+        "description": "Rotating refresh token in JSON body is the authentication proof; no Bearer token required. Reuse revokes the complete family. Initial issuance is a trusted local deployment command.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTokens"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-vortex-refresh-auth": "rotating-body-token"
+      }
+    },
+    "/api/v1/auth/logout": {
+      "parameters": [],
+      "post": {
+        "operationId": "logoutSession",
+        "description": "Revoke the authenticated access token family.",
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/me": {
+      "parameters": [],
+      "get": {
+        "operationId": "getPrincipal",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Principal"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getTenant",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/nodes/{node_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "node_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getNode",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      },
+      "patch": {
+        "operationId": "transitionNode",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NodeTransition"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-groups/{group_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getNodeGroup",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeGroupSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-groups/{group_id}/members": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getGroupMembers",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      },
+      "put": {
+        "operationId": "replaceGroupMembers",
+        "description": "Replace explicit complete member set (empty array clears). Success queues all dependent rule revalidation; grants and billing snapshots retain independent versions.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembersAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceGroupMembers"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/rules/{rule_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "rule_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getRule",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      },
+      "put": {
+        "operationId": "reviseRule",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleMutationSummary"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; 0 permits creation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"(0|[1-9][0-9]*)\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/packages/{package_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "package_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getPackage",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      },
+      "put": {
+        "operationId": "putPackageCatalog",
+        "description": "Current platform_admin only. Append immutable catalog version; existing subscription snapshots are unchanged.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; 0 permits creation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"(0|[1-9][0-9]*)\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/subscription": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSubscription",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/sources/{source_id}/ledger": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "source_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSourceLedger",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceLedger"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/limits": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getTenantLimits",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/billing-snapshots/{snapshot_id}/explanation": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "snapshot_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getBillingExplanation",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingExplanation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/operations/{operation_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getOperation",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicOperation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-allocations/{allocation_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "allocation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getPortAllocation",
+        "description": "Explicit tenant scope; PostgreSQL authority. Platform cross-tenant reads are audited. Unknown execution retains occupation.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAllocationSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants": {
+      "parameters": [],
+      "get": {
+        "operationId": "listTenants",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/nodes": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listNodes",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-groups": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listNodeGroups",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeGroupsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/rules": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listRules",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/packages": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listPackages",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackagesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/subscriptions": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listSubscriptions",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-allocations": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listPortAllocations",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAllocationsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/sources": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listSources",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/restrictions": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listRestrictions",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictionsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/operations": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listOperations",
+        "description": "Ascending immutable created_at/id order. Cursor is signed and bound to principal, tenant, collection and direction. next_cursor is omitted on the last page; default50/max100. Current access is rechecked on every page.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-collection": true
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/subscription/preview": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewSubscription",
+        "description": "Tenant user preview only; no mutation. Explicit kept rules and effective_at bind the digest.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageChangePreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageChangeInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/subscription/confirm": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "confirmSubscription",
+        "description": "Tenant user only. Confirm exact preview under current subscription CAS. Same idempotency key replays the accepted request; does not recalculate accepted effects.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResult"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[!-~]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageChangeConfirmation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/entitlement-redemptions/preview": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewEntitlementRedemptions",
+        "description": "Tenant user preview only; no mutation. Explicit kept rules and effective_at bind the digest.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageChangePreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementChangeInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/entitlement-redemptions/confirm": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "confirmEntitlementRedemptions",
+        "description": "Tenant user only. Confirm exact preview under current subscription CAS. Same idempotency key replays the accepted request; does not recalculate accepted effects.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResult"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[!-~]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementChangeConfirmation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/entitlement-redemptions": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "redeemEntitlement",
+        "description": "Redeem the code transactionally with immutable grant/source and exact operation. Replacement requiring confirmation returns409. Secrets are excluded from audit and errors.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResult"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[!-~]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitlementRedeem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-groups/{group_id}/serving": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getServingAddresses",
+        "description": "Deduplicated sorted public entry addresses from current confirmed prepared/committed service state, grants and health. No control addresses or readiness assumption.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServingSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-groups/{group_id}/dns": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "recomputeDNS",
+        "description": "Queue accepted eligible address snapshot for an owned DNS access/zone. Dedicated run-dns consumer rechecks current actor/serving state. Same-key replay returns original snapshot; provider uncertainty is unknown and parked until new-key recompute.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSOperationSummary"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[!-~]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSRecomputeRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-reservations": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "preparePortReservation",
+        "description": "Prepare against exact opaque member_set_version from member GET; preassigned rule UUID is supported. port0 selects a safe free port. Exact aggregate operation binds original Node prepare inventory. No Node receipt can be submitted publicly.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortReservationRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-allocations/{allocation_id}/commit": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "allocation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "commitPortAllocation",
+        "description": "Commit records PG allocation stage only after actual prepare proofs; release/abort completion waits for all original authenticated release proofs. Timeouts and missing receipts preserve occupation.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-allocations/{allocation_id}/release": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "allocation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "releasePortAllocation",
+        "description": "Commit records PG allocation stage only after actual prepare proofs; release/abort completion waits for all original authenticated release proofs. Timeouts and missing receipts preserve occupation.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/port-allocations/{allocation_id}/abort": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "allocation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "abortPortAllocation",
+        "description": "Commit records PG allocation stage only after actual prepare proofs; release/abort completion waits for all original authenticated release proofs. Timeouts and missing receipts preserve occupation.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong quoted committed revision"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "412": {
+            "$ref": "#/components/responses/Error412"
+          },
+          "428": {
+            "$ref": "#/components/responses/Error428"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "One strong quoted canonical decimal revision; positive only.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/node-recoveries/{recovery_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "recovery_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getNodeRecovery",
+        "description": "Platform read only, audited. Existing persisted stage; cold Hub records omit operation_id. Does not create recovery approval or claim local readiness/financial release.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoverySummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/hub-recoveries/same-store/{recovery_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "recovery_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getHubSameStoreRecovery",
+        "description": "Platform read only, audited. Existing persisted stage; cold Hub records omit operation_id. Does not create recovery approval or claim local readiness/financial release.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoverySummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/hub-recoveries/cold/{recovery_id}": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "recovery_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getHubColdRecovery",
+        "description": "Platform read only, audited. Existing persisted stage; cold Hub records omit operation_id. Does not create recovery approval or claim local readiness/financial release.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoverySummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07"
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/hub-recoveries/same-store/{recovery_id}/advances": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "recovery_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "requestHubRecoveryAdvance",
+        "description": "Current platform_admin only; reference an existing immutable approval. Bounded durable worker waits for real manifest/fence/root proofs. Unknown parks, original occupation remains. New approval issuance is a separate trusted management flow.",
+        "responses": {
+          "202": {
+            "description": "Accepted persisted business intent; follow Location for its exact operation. Completion does not imply physical activation or release.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryAccepted"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Exact tenant-scoped operation URL"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error415"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[!-~]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/events": {
+      "parameters": [
+        {
+          "name": "tenant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "streamEvents",
+        "description": "PostgreSQL committed per-tenant sequence, opaque scope/principal-bound signed event ID. SSE id/event/data; hints require REST refetch. Gap emits resync then closes. Heartbeat15s, max5min stream, reauthenticate each second, max64 concurrent streams; no query token.",
+        "responses": {
+          "200": {
+            "description": "Current authorized business projection",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        },
+        "x-vortex-implementation-plan": "06-07",
+        "parameters": [
+          {
+            "name": "Last-Event-ID",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-vortex-sse": {
+          "authority": "PostgreSQL",
+          "gap_event": "resync",
+          "gap_action": "REST-refetch",
+          "event_schema": "#/components/schemas/BusinessEvent",
+          "resync_schema": "#/components/schemas/ResyncEvent",
+          "event_types": [
+            "operation_changed",
+            "restriction_changed"
+          ],
+          "id": "scope/principal-bound signed per-tenant committed sequence",
+          "summary": "safe committed summary only"
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque server-issued token"
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Invalid request, cursor, body or header",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Access denied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "Resource state or idempotency conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error412": {
+        "description": "Resource version changed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error415": {
+        "description": "JSON content type required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error428": {
+        "description": "If-Match required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Too many event streams",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error500": {
+        "description": "Internal error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Temporarily unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SubscriptionSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "anchor_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validity_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expired"
+            ]
+          },
+          "terms": {
+            "$ref": "#/components/schemas/PackageTerms"
+          }
+        },
+        "required": [
+          "id",
+          "snapshot_id",
+          "version",
+          "anchor_at",
+          "expires_at",
+          "validity_state",
+          "terms"
+        ]
+      },
+      "PackageChangeInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "package_id",
+          "package_version",
+          "keep_rules",
+          "effective_at"
+        ],
+        "properties": {
+          "package_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "package_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "keep_rules": {
+            "type": "array",
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PackageChangeConfirmation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "package_id",
+          "package_version",
+          "keep_rules",
+          "effective_at",
+          "digest"
+        ],
+        "properties": {
+          "package_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "package_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "keep_rules": {
+            "type": "array",
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "EntitlementChangeInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "keep_rules",
+          "effective_at"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 256,
+            "writeOnly": true
+          },
+          "keep_rules": {
+            "type": "array",
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EntitlementChangeConfirmation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "keep_rules",
+          "effective_at",
+          "digest"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 256,
+            "writeOnly": true
+          },
+          "keep_rules": {
+            "type": "array",
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "PackageChangePreview": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "digest",
+          "package_id",
+          "package_version",
+          "subscription_version",
+          "effective_at",
+          "keep_rules",
+          "lost_capabilities",
+          "invalid_rules",
+          "new_restrictions",
+          "discarded_amounts",
+          "affected_resources"
+        ],
+        "properties": {
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "package_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "package_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "subscription_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "keep_rules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "lost_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "invalid_rules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "affected_resources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "new_restrictions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rule_id",
+                "reason"
+              ],
+              "properties": {
+                "rule_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "capability_or_limit_lost",
+                    "quantity_exceeded"
+                  ]
+                }
+              }
+            }
+          },
+          "discarded_amounts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_id",
+                "issued_amount_upper_bound",
+                "disposition"
+              ],
+              "properties": {
+                "source_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "issued_amount_upper_bound": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "disposition": {
+                  "type": "string",
+                  "const": "expire_source_without_releasing_liability"
+                }
+              }
+            }
+          },
+          "entitlement": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code_hash",
+              "actor_id",
+              "duration_days",
+              "amount"
+            ],
+            "properties": {
+              "code_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "actor_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "duration_days": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500
+              },
+              "amount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      },
+      "PackageTerms": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "price_minor",
+          "duration_days",
+          "traffic_reset",
+          "traffic_bytes",
+          "capabilities",
+          "rule_limit",
+          "rate_limit",
+          "connection_limit"
+        ],
+        "properties": {
+          "price_minor": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 36500
+          },
+          "traffic_reset": {
+            "type": "string",
+            "enum": [
+              "none",
+              "monthly"
+            ]
+          },
+          "traffic_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "capabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "tcp",
+                "udp",
+                "direct",
+                "tunnel",
+                "multi_hop",
+                "manual_reverse"
+              ]
+            }
+          },
+          "rule_limit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rate_limit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "connection_limit": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "PackageResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subscription_id",
+          "snapshot_id",
+          "source_id",
+          "operation_id",
+          "version",
+          "anchor_at",
+          "expires_at",
+          "sync_status"
+        ],
+        "properties": {
+          "subscription_id": {
+            "type": "string"
+          },
+          "snapshot_id": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "anchor_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sync_status": {
+            "type": "string",
+            "const": "pending"
+          }
+        }
+      },
+      "RuleInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "protocol",
+          "mode",
+          "path",
+          "targets",
+          "scheduling",
+          "proxy_protocol",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp",
+              "tcp_udp"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "tunnel",
+              "multi_hop"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535,
+            "default": 0
+          },
+          "path": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "directions": {
+            "type": "array",
+            "maxItems": 31,
+            "items": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "forward",
+                "reverse"
+              ]
+            }
+          },
+          "targets": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "address",
+                "weight",
+                "priority"
+              ],
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 260
+                },
+                "weight": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "priority": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "scheduling": {
+            "type": "string",
+            "enum": [
+              "weighted_round_robin",
+              "primary_backup"
+            ]
+          },
+          "proxy_protocol": {
+            "type": "string",
+            "enum": [
+              "off",
+              "v1",
+              "v2"
+            ]
+          },
+          "idle_timeout_seconds": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 86400,
+            "default": 60
+          },
+          "rate_limit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "connection_limit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RuleMutationSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rule_id",
+          "revision",
+          "operation_id",
+          "change_class",
+          "sync_status"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "change_class": {
+            "type": "string",
+            "enum": [
+              "hot",
+              "rebuild",
+              "stop"
+            ]
+          },
+          "sync_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "preparing",
+              "committing",
+              "running",
+              "partial",
+              "unknown",
+              "failed"
+            ]
+          }
+        }
+      },
+      "ServingSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "addresses"
+        ]
+      },
+      "DNSRecomputeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "access_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          }
+        },
+        "required": [
+          "access_id",
+          "name"
+        ]
+      },
+      "DNSOperationSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "leased",
+              "succeeded",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "operation_id",
+          "state"
+        ]
+      },
+      "ApiError": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "field_errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ]
+      },
+      "Restriction": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cause",
+          "source_id",
+          "source_version",
+          "effective_at"
+        ],
+        "properties": {
+          "cause": {
+            "type": "string",
+            "enum": [
+              "account_suspended",
+              "account_banned",
+              "package_expired",
+              "quota_exhausted",
+              "quantity_exceeded",
+              "manual"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cleared_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "PortReservationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "member_set_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "listen_address": {
+            "type": "string",
+            "description": "* or a canonical IPv4/IPv6 address without a zone"
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tcp",
+                "udp"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "rule_id",
+          "group_id",
+          "member_set_version",
+          "listen_address",
+          "port",
+          "protocols"
+        ]
+      },
+      "PortAllocationSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rule_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tcp",
+                "udp"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "preparing",
+              "committed",
+              "aborting",
+              "retained",
+              "releasing",
+              "released",
+              "aborted",
+              "unknown"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_set_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "needs_revalidation": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "rule_id",
+          "group_id",
+          "port",
+          "protocols",
+          "state",
+          "version",
+          "member_set_version",
+          "needs_revalidation"
+        ]
+      },
+      "NodeSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "health": {
+            "type": "string"
+          },
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "online",
+              "draining",
+              "offline",
+              "disabled"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "region",
+          "capabilities",
+          "health",
+          "lifecycle",
+          "version"
+        ]
+      },
+      "NodeTransition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "online",
+              "draining",
+              "offline",
+              "disabled"
+            ]
+          },
+          "drain_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "lifecycle"
+        ]
+      },
+      "NodeGroupSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "scheduling": {
+            "type": "string"
+          },
+          "billing_multiplier_milli": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "billing_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "purpose",
+          "scheduling",
+          "billing_multiplier_milli",
+          "billing_version",
+          "member_version",
+          "version"
+        ]
+      },
+      "BillingExplanation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "billing_snapshot_id",
+          "path_coefficient_milli",
+          "groups",
+          "explanation"
+        ],
+        "properties": {
+          "billing_snapshot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "path_coefficient_milli": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "group_id",
+                "version",
+                "multiplier_milli"
+              ],
+              "properties": {
+                "group_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "multiplier_milli": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "SourceLedger": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "balance_bytes",
+          "outstanding_bytes",
+          "guarantee_bytes",
+          "charged_bytes",
+          "remainder_milli",
+          "sequence"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balance_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "outstanding_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "guarantee_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "charged_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "remainder_milli": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999
+          },
+          "sequence": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      },
+      "LimitStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rate_limit_bps",
+          "connection_limit",
+          "reserved_rate_bps",
+          "reserved_connections",
+          "execution_state",
+          "operation_ids"
+        ],
+        "properties": {
+          "rate_limit_bps": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "connection_limit": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "reserved_rate_bps": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "reserved_connections": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "execution_state": {
+            "type": "string",
+            "enum": [
+              "submitted",
+              "enforcing",
+              "enforced",
+              "failed"
+            ]
+          },
+          "operation_ids": {
+            "type": "array",
+            "maxItems": 1001,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "BusinessEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperationEventSummary"
+              },
+              {
+                "$ref": "#/components/schemas/RestrictionEventSummary"
+              }
+            ]
+          }
+        },
+        "required": [
+          "resource_id",
+          "revision",
+          "summary"
+        ]
+      },
+      "EmptyObject": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "Principal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "platform_admin",
+              "operator",
+              "auditor",
+              "owner",
+              "member"
+            ]
+          },
+          "platform": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "platform"
+        ]
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "minLength": 1,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "SessionTokens": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 900
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in"
+        ]
+      },
+      "TenantSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "banned"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "account_state",
+          "version"
+        ]
+      },
+      "RuleSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "desired_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "active_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sync_status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "protocol",
+          "mode",
+          "enabled",
+          "desired_revision",
+          "active_revision",
+          "sync_status"
+        ]
+      },
+      "PackageSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "terms": {
+            "$ref": "#/components/schemas/PackageTerms"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version",
+          "terms"
+        ]
+      },
+      "GroupMember": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "weight": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "node_id",
+          "weight",
+          "priority"
+        ]
+      },
+      "GroupMembers": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_set_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupMember"
+            },
+            "maxItems": 1024
+          }
+        },
+        "required": [
+          "group_id",
+          "version",
+          "member_version",
+          "member_set_version",
+          "members"
+        ]
+      },
+      "ReplaceGroupMembers": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupMember"
+            },
+            "maxItems": 1024
+          }
+        },
+        "required": [
+          "members"
+        ]
+      },
+      "GroupMembersAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sync_status": {
+            "type": "string",
+            "const": "pending"
+          }
+        },
+        "required": [
+          "group_id",
+          "version",
+          "member_version",
+          "operation_id",
+          "sync_status"
+        ]
+      },
+      "CatalogInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "terms": {
+            "$ref": "#/components/schemas/PackageTerms"
+          }
+        },
+        "required": [
+          "name",
+          "terms"
+        ]
+      },
+      "CatalogAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "package_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sync_status": {
+            "type": "string",
+            "const": "pending"
+          }
+        },
+        "required": [
+          "package_id",
+          "version",
+          "operation_id",
+          "sync_status"
+        ]
+      },
+      "NodeAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "desired_lifecycle": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sync_status": {
+            "type": "string",
+            "const": "pending"
+          }
+        },
+        "required": [
+          "node_id",
+          "desired_lifecycle",
+          "version",
+          "operation_id",
+          "sync_status"
+        ]
+      },
+      "PublicOperation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "leased",
+              "running",
+              "succeeded",
+              "failed",
+              "unknown",
+              "superseded"
+            ]
+          },
+          "occupation_held": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "resource_id",
+          "target_revision",
+          "state",
+          "occupation_held",
+          "created_at"
+        ]
+      },
+      "PortAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rule_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tcp",
+                "udp"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "preparing",
+              "committed",
+              "aborting",
+              "retained",
+              "releasing",
+              "released",
+              "aborted",
+              "unknown"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_set_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "needs_revalidation": {
+            "type": "boolean"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sync_status": {
+            "type": "string"
+          },
+          "entry_address_may_change": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "rule_id",
+          "group_id",
+          "port",
+          "protocols",
+          "state",
+          "version",
+          "member_set_version",
+          "needs_revalidation",
+          "operation_id",
+          "sync_status"
+        ]
+      },
+      "RecoverySummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "node_boot",
+              "hub_same_store",
+              "hub_cold"
+            ]
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "awaiting_retirement_receipt",
+              "retirement_recorded",
+              "awaiting_manifest",
+              "manifest_recorded",
+              "admission_recorded",
+              "expiry_approved"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "resource_id",
+          "mode",
+          "stage"
+        ]
+      },
+      "RecoveryAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "recovery_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "recovery_id",
+          "operation_id",
+          "state"
+        ]
+      },
+      "OperationEventSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string"
+          },
+          "occupation_held": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "operation_id",
+          "resource_id",
+          "state",
+          "occupation_held"
+        ]
+      },
+      "RestrictionEventSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cause": {
+            "type": "string"
+          },
+          "event_kind": {
+            "type": "string"
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "cause",
+          "event_kind",
+          "effective_at"
+        ]
+      },
+      "ResyncEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "retention_gap",
+              "event_gap"
+            ]
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "TenantSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "banned"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_state",
+          "version",
+          "created_at"
+        ]
+      },
+      "NodeSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "health": {
+            "type": "string"
+          },
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "online",
+              "draining",
+              "offline",
+              "disabled"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "region",
+          "capabilities",
+          "health",
+          "lifecycle",
+          "version",
+          "created_at"
+        ]
+      },
+      "NodeGroupSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "scheduling": {
+            "type": "string"
+          },
+          "billing_multiplier_milli": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "billing_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "member_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "purpose",
+          "scheduling",
+          "billing_multiplier_milli",
+          "billing_version",
+          "member_version",
+          "version",
+          "created_at"
+        ]
+      },
+      "RuleSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "desired_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "active_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sync_status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "protocol",
+          "mode",
+          "enabled",
+          "desired_revision",
+          "active_revision",
+          "sync_status",
+          "created_at"
+        ]
+      },
+      "PackageSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "terms": {
+            "$ref": "#/components/schemas/PackageTerms"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version",
+          "terms",
+          "created_at"
+        ]
+      },
+      "SubscriptionSummaryListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "anchor_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validity_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expired"
+            ]
+          },
+          "terms": {
+            "$ref": "#/components/schemas/PackageTerms"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "snapshot_id",
+          "version",
+          "anchor_at",
+          "expires_at",
+          "validity_state",
+          "terms",
+          "created_at"
+        ]
+      },
+      "SourceListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "balance_bytes",
+          "outstanding_bytes",
+          "guarantee_bytes",
+          "charged_bytes",
+          "remainder_milli",
+          "sequence",
+          "id",
+          "created_at"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balance_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "outstanding_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "guarantee_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "charged_bytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "remainder_milli": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999
+          },
+          "sequence": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RestrictionListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cause",
+          "source_id",
+          "source_version",
+          "effective_at",
+          "id",
+          "created_at",
+          "cleared_at"
+        ],
+        "properties": {
+          "cause": {
+            "type": "string",
+            "enum": [
+              "account_suspended",
+              "account_banned",
+              "package_expired",
+              "quota_exhausted",
+              "quantity_exceeded",
+              "manual"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cleared_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PortListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rule_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "first_effective_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "retained_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "needs_revalidation": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "rule_id",
+          "group_id",
+          "port",
+          "protocols",
+          "purpose",
+          "state",
+          "first_effective_at",
+          "retained_until",
+          "needs_revalidation",
+          "version",
+          "created_at"
+        ]
+      },
+      "TenantsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "NodesPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "NodeGroupsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeGroupSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "RulesPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "PackagesPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "SubscriptionsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionSummaryListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "PortAllocationsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "SourcesPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "RestrictionsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestrictionListItem"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "OperationsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicOperation"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "EntitlementRedeem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 256,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "code"
+        ]
+      }
+    }
+  }
+}

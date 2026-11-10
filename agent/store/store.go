@@ -23,6 +23,8 @@ type Store struct {
 	owner             string
 	runtimeStatements map[string]*sql.Stmt
 	runtimeQueue      runtimeTransactionQueue
+	fundingAdmissions fundingAdmissionQueue
+	deliveryCommits   fundingAdmissionQueue
 	checkpoints       checkpointQueue
 	rateClock         atomic.Pointer[runtimeRateClock]
 }
@@ -175,6 +177,25 @@ func (s *Store) configure() error {
 		}
 	}
 	_, err := s.db.Exec(`
+CREATE TABLE IF NOT EXISTS node_share_heads (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,kind TEXT NOT NULL,boot_id TEXT NOT NULL,
+ generation INTEGER NOT NULL,fencing_generation INTEGER NOT NULL,
+ amount INTEGER NOT NULL,burst_bytes INTEGER NOT NULL,payload BLOB NOT NULL,
+ PRIMARY KEY(tenant_id,node_id,kind)
+);
+CREATE TABLE IF NOT EXISTS node_share_commands (
+ handoff_id TEXT PRIMARY KEY NOT NULL,backend_id TEXT NOT NULL,payload BLOB NOT NULL,
+ payload_sha256 TEXT NOT NULL,receipt BLOB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS node_share_bindings (
+ node_id TEXT NOT NULL,rule_id TEXT NOT NULL,tenant_id TEXT NOT NULL,
+ PRIMARY KEY(node_id,rule_id)
+);
+CREATE TABLE IF NOT EXISTS node_share_buckets (
+ tenant_id TEXT NOT NULL,node_id TEXT NOT NULL,boot_id TEXT NOT NULL,
+ tokens INTEGER NOT NULL,last_tick INTEGER NOT NULL,
+ PRIMARY KEY(tenant_id,node_id)
+);
 CREATE TABLE IF NOT EXISTS schema_meta (
   key TEXT PRIMARY KEY NOT NULL,
   value TEXT NOT NULL
@@ -276,6 +297,8 @@ CREATE TABLE IF NOT EXISTS usage_reservations (
   updated_at TEXT NOT NULL,
   PRIMARY KEY(node_id, batch_id)
 );
+CREATE INDEX IF NOT EXISTS usage_delivery_pending ON usage_batches(node_id)
+ WHERE state IN ('pending','locally_acked');
 CREATE TABLE IF NOT EXISTS runtime_funding_blocks (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, session_id TEXT NOT NULL,
  direction TEXT NOT NULL, PRIMARY KEY(node_id,batch_id),
@@ -463,6 +486,8 @@ CREATE TABLE IF NOT EXISTS unknown_usage_conflicts (
  payload_sha256 BLOB NOT NULL, created_at TEXT NOT NULL,
  PRIMARY KEY(node_id,batch_id,payload_sha256)
 );
+CREATE INDEX IF NOT EXISTS unknown_delivery_pending ON unknown_usage_batches(node_id)
+ WHERE transport_state='pending';
 CREATE TABLE IF NOT EXISTS usage_backend_receipts (
  node_id TEXT NOT NULL, batch_id TEXT NOT NULL, kind TEXT NOT NULL,
  payload_sha256 BLOB NOT NULL, confirmed_at TEXT NOT NULL,
@@ -586,8 +611,40 @@ INSERT INTO schema_meta(key, value) VALUES ('schema_version', '19')
 	if err := s.migrateDemandDenialState(); err != nil {
 		return err
 	}
-	// Version 20 combines the Phase 4 block/demand schema and Phase 5 renewal,
-	// retention, credential, recovery and policy migrations. Publish only last.
+	if err := s.migrateUsageOrigin(); err != nil {
+		return err
+	}
+	if err := s.migrateSourceProvisions(); err != nil {
+		return err
+	}
+	if err := s.migrateShareRenewalClosures(); err != nil {
+		return err
+	}
+	if err := s.migrateDelegationSeals(); err != nil {
+		return err
+	}
+	if err := s.migrateCreditGrantClosures(); err != nil {
+		return err
+	}
+	if err := s.migrateHubLeaseRefreshes(); err != nil {
+		return err
+	}
+	if err := s.migrateFundedHandoffEvidence(); err != nil {
+		return err
+	}
+	if err := s.migrateRecoveryCreditFences(); err != nil {
+		return err
+	}
+	if err := s.migrateNodeBootShareRecovery(); err != nil {
+		return err
+	}
+	if err := s.migrateScopedRevocations(); err != nil {
+		return err
+	}
+	if err := s.migrateHubRecoveryAdmissions(); err != nil {
+		return err
+	}
+	// Publish the combined schema version only after every migration succeeds.
 	_, err = s.db.Exec(`UPDATE schema_meta SET value='20' WHERE key='schema_version' AND CAST(value AS INTEGER)<20`)
 	return err
 }
@@ -860,10 +917,23 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	scopedRevocations, err := olderRevocationOnlyTx(ctx, tx, update, records, revocations)
+	if err != nil {
+		return err
+	}
 	if err := persistShareReferencesTx(ctx, tx, update); err != nil {
 		return err
 	}
 	for _, id := range revocations {
+		if scopedRevocations {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_scoped_revocations(node_id,issuer_id,boot_id,path_generation,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT DO NOTHING`, update.NodeID, update.IssuerID, update.BootID, strconv.FormatUint(update.PathGeneration, 10), id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+				return err
+			}
+			if _, err := tx.ExecContext(ctx, `UPDATE authorization_records SET state='revoked' WHERE node_id=? AND authorization_id=? AND issuer_id=? AND boot_id=? AND path_generation=?`, update.NodeID, id, update.IssuerID, update.BootID, strconv.FormatUint(update.PathGeneration, 10)); err != nil {
+				return err
+			}
+			continue
+		}
 		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_revocations(node_id,authorization_id,signer_epoch,created_at) VALUES(?,?,?,?) ON CONFLICT(node_id,authorization_id) DO UPDATE SET signer_epoch=excluded.signer_epoch`, update.NodeID, id, strconv.FormatUint(update.SignerEpoch, 10), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 			return err
 		}
@@ -872,7 +942,7 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		}
 	}
 	for _, h := range update.Handoffs {
-		if err := persistEpochHandoffTx(ctx, tx, update, h); err != nil {
+		if err := persistEpochHandoffTx(ctx, tx, update, h, len(records) == 0 && len(update.PolicyTransitions) == 0); err != nil {
 			return err
 		}
 	}
@@ -895,11 +965,28 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key=?`, key).Scan(&previous)
 		if err == nil {
 			value, parseErr := strconv.ParseUint(previous, 10, 64)
-			if parseErr != nil || incoming < value {
+			if parseErr != nil {
+				return ErrAuthorizationGenerationStale
+			}
+			if incoming < value {
+				if scopedRevocations && key != "authorization_signer_epoch" {
+					continue
+				}
+				// A finite, fully verified handoff can cover a draining older
+				// path. It contains no new grants/policy transition and every
+				// source was checked above against its original active family.
+				// Preserve global admission floors; ordinary grants/heartbeats
+				// and lower signer epochs still fail closed.
+				if key != "authorization_signer_epoch" && len(records) == 0 && len(update.Handoffs) > 0 && len(update.PolicyTransitions) == 0 {
+					continue
+				}
 				return ErrAuthorizationGenerationStale
 			}
 		} else if !errors.Is(err, sql.ErrNoRows) {
 			return err
+		}
+		if scopedRevocations {
+			continue
 		}
 		if err := putState(ctx, tx, key, strconv.FormatUint(incoming, 10), time.Now().UTC()); err != nil {
 			return err
@@ -922,6 +1009,9 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if record.AuthorizationID == "" || record.BootID != update.BootID || record.SignerEpoch != update.SignerEpoch || record.PathGeneration != update.PathGeneration {
 			return fmt.Errorf("store: authorization record does not match update identity or fencing")
 		}
+		if err := checkUninstalledCreditFinalTx(ctx, tx, update.NodeID, record); err != nil {
+			return err
+		}
 		var existing string
 		err := tx.QueryRowContext(ctx, `SELECT source_id FROM authorization_records WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&existing)
 		if err == nil {
@@ -930,12 +1020,20 @@ func (s *Store) PersistAuthorizationUpdate(ctx context.Context, update Authoriza
 		if !errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
+		if err := checkRecoveryCreditFenceTx(ctx, tx, update.NodeID, record); err != nil {
+			return err
+		}
 		var revoked int
 		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM authorization_revocations WHERE node_id=? AND authorization_id=?`, update.NodeID, record.AuthorizationID).Scan(&revoked); err != nil {
 			return err
 		}
+
+		var scoped int
+		if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM authorization_scoped_revocations WHERE node_id=? AND issuer_id=? AND boot_id=? AND path_generation=? AND authorization_id=?`, update.NodeID, update.IssuerID, record.BootID, strconv.FormatUint(record.PathGeneration, 10), record.AuthorizationID).Scan(&scoped); err != nil {
+			return err
+		}
 		state := "active"
-		if revoked > 0 {
+		if revoked > 0 || scoped > 0 {
 			state = "revoked"
 		}
 		_, err = tx.ExecContext(ctx, `INSERT INTO authorization_records(node_id,authorization_id,parent_authorization_id,source_id,kind,rule_id,rule_revision,path_generation,signer_epoch,boot_id,issued_at,not_before,expires_at,hard_deadline,billing_snapshot_id,amount_bytes,rate_bps,connections,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, update.NodeID, record.AuthorizationID, record.ParentAuthorizationID, record.SourceID, record.Kind, record.RuleID, strconv.FormatUint(record.RuleRevision, 10), strconv.FormatUint(record.PathGeneration, 10), strconv.FormatUint(record.SignerEpoch, 10), record.BootID, record.IssuedAt, record.NotBefore, record.ExpiresAt, record.HardDeadline, record.BillingSnapshotID, strconv.FormatUint(record.AmountBytes, 10), strconv.FormatUint(record.RateBPS, 10), strconv.FormatUint(record.Connections, 10), state)
@@ -1042,47 +1140,7 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 		return err
 	}
 	defer tx.Rollback()
-	var snapshot string
-	var compactDigest []byte
-	err = tx.QueryRowContext(ctx, `SELECT snapshot_id,payload_sha256 FROM settled_usage_tombstones WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).Scan(&snapshot, &compactDigest)
-	if err == nil {
-		if s.owner != "hub" || initialState != "ledgered" || batch.UnknownUpper != 0 || snapshot != batch.SnapshotID || !bytes.Equal(compactDigest, digest) {
-			return ErrUsageBatchConflict
-		}
-		return tx.Commit()
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	var previous UsageBatch
-	var upper, created string
-	err = tx.QueryRowContext(ctx, `SELECT boot_id, snapshot_id, payload, payload_sha256, unknown_upper_bound, state, created_at FROM usage_batches WHERE node_id=? AND batch_id=?`, batch.NodeID, batch.BatchID).
-		Scan(&previous.BootID, &previous.SnapshotID, &previous.Payload, &previous.Digest, &upper, &previous.State, &created)
-	if err == nil {
-		previous.NodeID, previous.BatchID = batch.NodeID, batch.BatchID
-		previous.UnknownUpper, err = strconv.ParseUint(upper, 10, 64)
-		if err != nil {
-			return fmt.Errorf("store: invalid usage liability: %w", err)
-		}
-		if previous.SnapshotID != batch.SnapshotID || previous.UnknownUpper != batch.UnknownUpper || !bytes.Equal(previous.Payload, batch.Payload) || !bytes.Equal(previous.Digest, digest) {
-			return ErrUsageBatchConflict
-		}
-		if initialState == "ledgered" && previous.State != "ledgered" {
-			if _, err := tx.ExecContext(ctx, `UPDATE usage_batches SET state='ledgered', updated_at=? WHERE node_id=? AND batch_id=?`, time.Now().UTC().Format(time.RFC3339Nano), batch.NodeID, batch.BatchID); err != nil {
-				return err
-			}
-		}
-		return tx.Commit()
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	if err := rejectUnknownIdentityTx(ctx, tx, batch.NodeID, batch.BatchID); err != nil {
-		return err
-	}
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	_, err = tx.ExecContext(ctx, `INSERT INTO usage_batches(node_id,batch_id,boot_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`, batch.NodeID, batch.BatchID, batch.BootID, batch.SnapshotID, batch.Payload, digest, strconv.FormatUint(batch.UnknownUpper, 10), initialState, now, now)
-	if err != nil {
+	if err := s.putUsageBatchTx(ctx, tx, batch, digest, initialState); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -1091,7 +1149,17 @@ func (s *Store) putUsageBatch(ctx context.Context, batch UsageBatch, digest []by
 // PendingUsageOutbox includes locally acknowledged batches: local autonomy ACK
 // permits metering to continue, but does not discharge the Hub handoff liability.
 func (s *Store) PendingUsageOutbox(ctx context.Context, nodeID string) ([]UsageBatch, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND state IN ('pending','locally_acked') ORDER BY created_at,batch_id`, nodeID)
+	return s.pendingUsageOutbox(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND state IN ('pending','locally_acked') ORDER BY created_at,batch_id`, nodeID)
+}
+
+// PendingUsageOutboxPage bounds one control-loop turn. A connection-local
+// cursor wraps after exhaustion; neither dispatch nor cursor movement is ACK.
+func (s *Store) PendingUsageOutboxPage(ctx context.Context, nodeID, after string) ([]UsageBatch, error) {
+	return s.pendingUsageOutbox(ctx, `SELECT node_id,boot_id,batch_id,snapshot_id,payload,payload_sha256,unknown_upper_bound,state,created_at FROM usage_batches WHERE node_id=? AND batch_id>? AND state IN ('pending','locally_acked') ORDER BY batch_id LIMIT 32`, nodeID, after)
+}
+
+func (s *Store) pendingUsageOutbox(ctx context.Context, query string, args ...any) ([]UsageBatch, error) {
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -1126,11 +1194,23 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 	if nodeID == "" || len(batchIDs) == 0 {
 		return fmt.Errorf("store: usage acknowledgement identity is required")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	if s.owner == "agent" && len(batchIDs) <= 64 {
+		return s.enqueueBatchedOperation(ctx, len(batchIDs), func(tx *runtimeTransaction) error {
+			return transitionUsageBatchesTx(ctx, tx, nodeID, batchIDs, target)
+		}, &s.deliveryCommits)
+	}
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err := transitionUsageBatchesTx(ctx, tx, nodeID, batchIDs, target); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func transitionUsageBatchesTx(ctx context.Context, tx storeTransaction, nodeID string, batchIDs []string, target string) error {
 	seen := make(map[string]struct{}, len(batchIDs))
 	for _, batchID := range batchIDs {
 		if batchID == "" {
@@ -1161,7 +1241,7 @@ func (s *Store) transitionUsageBatches(ctx context.Context, nodeID string, batch
 			return err
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (s *Store) ensureColumn(table, name, declaration string) error {
@@ -1234,28 +1314,58 @@ func (s *Store) RecordReceipt(ctx context.Context, messageID string, sequence ui
 }
 
 func (s *Store) NextControlSequence(ctx context.Context) (uint64, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
+	return s.NextControlSequenceRange(ctx, 1)
+}
+
+// NextControlSequenceRange durably reserves a bounded range and returns its
+// first sequence. Unsent suffixes are never reused after a disconnect or crash.
+// Callers must serialize sends; the wire requires monotonicity, not contiguity.
+func (s *Store) NextControlSequenceRange(ctx context.Context, count uint64) (uint64, error) {
+	if count == 0 || count > 32 {
+		return 0, fmt.Errorf("store: invalid control sequence range")
+	}
+	if s.owner == "agent" {
+		var first uint64
+		err := s.enqueueBatchedOperation(ctx, 1, func(tx *runtimeTransaction) error {
+			var err error
+			first, err = nextControlSequenceRangeTx(ctx, tx, count)
+			return err
+		}, &s.deliveryCommits)
+		if err != nil {
+			return 0, err
+		}
+		return first, nil
+	}
+	tx, err := s.beginRuntimeTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
 	defer tx.Rollback()
-	var current uint64
-	err = tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = 'control_sequence'`).Scan(&current)
-	if err != nil && err != sql.ErrNoRows {
-		return 0, err
-	}
-	if current >= uint64(1<<63-1) {
-		return 0, fmt.Errorf("store: control sequence exhausted")
-	}
-	current++
-	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current), time.Now().UTC().Format(time.RFC3339Nano))
+	first, err := nextControlSequenceRangeTx(ctx, tx, count)
 	if err != nil {
 		return 0, err
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return current, nil
+	return first, nil
+}
+
+func nextControlSequenceRangeTx(ctx context.Context, tx storeTransaction, count uint64) (uint64, error) {
+	var current uint64
+	err := tx.QueryRowContext(ctx, `SELECT value FROM agent_state WHERE key = 'control_sequence'`).Scan(&current)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+	if current > uint64(1<<63-1)-count {
+		return 0, fmt.Errorf("store: control sequence exhausted")
+	}
+	first := current + 1
+	_, err = tx.ExecContext(ctx, `INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`, fmt.Sprint(current+count), time.Now().UTC().Format(time.RFC3339Nano))
+	if err != nil {
+		return 0, err
+	}
+	return first, nil
 }
 
 func (s *Store) PersistControlAck(ctx context.Context, messageID string, sequence, appliedVersion uint64, heartbeat time.Time) error {

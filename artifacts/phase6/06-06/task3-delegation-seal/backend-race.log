@@ -1,0 +1,35 @@
+=== RUN   TestDelegationSealInventoryGateAuditRollbackReturnsOnlyNeverIssued
+2026/11/08 14:21:05 OK   00001_authority.sql (35.82ms)
+2026/11/08 14:21:05 OK   00002_tenant_policy.sql (22.65ms)
+2026/11/08 14:21:05 OK   00003_nodes_ports.sql (34.03ms)
+2026/11/08 14:21:05 OK   00004_entry_group_domains.sql (2.45ms)
+2026/11/08 14:21:05 OK   00005_rules_compile.sql (20.78ms)
+2026/11/08 14:21:05 OK   00006_packages_entitlements.sql (19.22ms)
+2026/11/08 14:21:05 OK   00007_metering_ledger.sql (45.29ms)
+2026/11/08 14:21:05 OK   00008_limits_shares.sql (63.24ms)
+2026/11/08 14:21:05 goose: successfully migrated database to version: 8
+2026/11/08 14:21:05 OK   00001_authority.sql (8.62ms)
+2026/11/08 14:21:05 OK   00002_tenant_policy.sql (7.62ms)
+2026/11/08 14:21:05 OK   00003_nodes_ports.sql (18.02ms)
+2026/11/08 14:21:05 OK   00004_entry_group_domains.sql (2.37ms)
+2026/11/08 14:21:05 OK   00005_rules_compile.sql (19.67ms)
+2026/11/08 14:21:05 OK   00006_packages_entitlements.sql (34.07ms)
+2026/11/08 14:21:05 OK   00007_metering_ledger.sql (33.25ms)
+2026/11/08 14:21:05 OK   00008_limits_shares.sql (77.96ms)
+2026/11/08 14:21:05 goose: successfully migrated database to version: 8
+    delegation_seal_test.go:82: sealed parent retains issued child 38bf1dd3-bf53-4650-98ed-7b69f5135e18 and original fractional accounting
+--- PASS: TestDelegationSealInventoryGateAuditRollbackReturnsOnlyNeverIssued (1.33s)
+=== RUN   TestDelegationSealZeroIssueProofSafelyReturnsWholeParent
+2026/11/08 14:21:06 goose: no migrations to run. current version: 8
+2026/11/08 14:21:06 OK   00001_authority.sql (8.45ms)
+2026/11/08 14:21:06 OK   00002_tenant_policy.sql (8.47ms)
+2026/11/08 14:21:06 OK   00003_nodes_ports.sql (41.26ms)
+2026/11/08 14:21:06 OK   00004_entry_group_domains.sql (3.77ms)
+2026/11/08 14:21:06 OK   00005_rules_compile.sql (67.62ms)
+2026/11/08 14:21:06 OK   00006_packages_entitlements.sql (30.08ms)
+2026/11/08 14:21:06 OK   00007_metering_ledger.sql (29.98ms)
+2026/11/08 14:21:06 OK   00008_limits_shares.sql (34.64ms)
+2026/11/08 14:21:06 goose: successfully migrated database to version: 8
+--- PASS: TestDelegationSealZeroIssueProofSafelyReturnsWholeParent (0.94s)
+PASS
+ok  	vortex/backend/internal/service	3.968s

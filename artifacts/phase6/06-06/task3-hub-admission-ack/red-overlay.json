@@ -1,0 +1,6 @@
+{
+  "expected_red_exit": 1,
+  "source_before_sha256": "a70c453df67c67883ec556f85cb119f44b07c572bcf61ac32b010b4cb5691ef0",
+  "source_after_sha256": "a70c453df67c67883ec556f85cb119f44b07c572bcf61ac32b010b4cb5691ef0",
+  "disconnected_gate": "complete prefix hash equality only; valid replacement row hashes otherwise pass"
+}

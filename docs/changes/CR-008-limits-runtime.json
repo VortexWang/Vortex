@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "id": "CR-008",
+  "status": "pending-owner-approval",
+  "created": "2026-11-08",
+  "plan": "06-06",
+  "baseline_source": "84821a04cec4dec78a8a3b192d2003d1f44518bc",
+  "prior_approval": {
+    "path": "docs/changes/CR-007-APPROVAL.json",
+    "sha256": "a5ba7ec1f47e54769ac4eba99452afc6a04d2dfbd7470fdf998f90760839f2a0",
+    "proposal_sha256": "3ddd1ab79c656b3684e64a3854f32785ff2fb8998743ac73353cdc90b086b0c5"
+  },
+  "changes": [
+    {
+      "contract_id": "vortex.database",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "kind": "compatible"
+    },
+    {
+      "contract_id": "vortex.public-api",
+      "from": "2.2.0",
+      "version": "2.3.0",
+      "kind": "compatible"
+    },
+    {
+      "contract_id": "vortex.control.v1",
+      "from": "1.5.0",
+      "version": "1.6.0",
+      "kind": "compatible"
+    }
+  ],
+  "candidate_versions": {
+    "vortex.database": "2.3.0",
+    "vortex.public-api": "2.3.0",
+    "vortex.control.v1": "1.6.0",
+    "vortex.runtime-config": "1.2.0",
+    "vortex.vlink.v1": "1.0.0",
+    "vortex.authorization.v1": "1.2.0"
+  },
+  "artifacts": [
+    {
+      "path": "backend/db/migrations/00001_authority.sql",
+      "sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272",
+      "baseline_sha256": "e1f273783a27a5b8ab3ace6cccb91d5283e6bbb29ebd2cb5b23f0e5db50b0272"
+    },
+    {
+      "path": "backend/db/migrations/00002_tenant_policy.sql",
+      "sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200",
+      "baseline_sha256": "e9a5fe27c1ef1fa1c16dc1865b843284b78fed778ac951b742b94bad81bc1200"
+    },
+    {
+      "path": "backend/db/migrations/00003_nodes_ports.sql",
+      "sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6",
+      "baseline_sha256": "d5d0998f89b7f28555a3cf38eb0c00f740530319b055b86adad3e9b9d6b1c8a6"
+    },
+    {
+      "path": "backend/db/migrations/00004_entry_group_domains.sql",
+      "sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2",
+      "baseline_sha256": "c6c81481a975b43a98179fd5079844b8d3be1f85954cb982d5eaaf2044cc57d2"
+    },
+    {
+      "path": "backend/db/migrations/00005_rules_compile.sql",
+      "sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c",
+      "baseline_sha256": "c5ecf19c6ce6ef8e7eba2f9d83364f19842f8b5c8f61745a9a10aa6a0ff44b6c"
+    },
+    {
+      "path": "backend/db/migrations/00006_packages_entitlements.sql",
+      "sha256": "f874982c3f057e67075cc789e8edb81c90e53f3abe8e3022eed9923fb8f99130",
+      "baseline_sha256": "f874982c3f057e67075cc789e8edb81c90e53f3abe8e3022eed9923fb8f99130"
+    },
+    {
+      "path": "backend/db/migrations/00007_metering_ledger.sql",
+      "sha256": "d4c5f73e1d47359c7690bb0e367c3143350468a5825f1e3ffb9522ae239ebb16",
+      "baseline_sha256": "d4c5f73e1d47359c7690bb0e367c3143350468a5825f1e3ffb9522ae239ebb16"
+    },
+    {
+      "path": "backend/db/migrations/00008_limits_shares.sql",
+      "sha256": "661bbe7cd7bacb583aa307436a9ee69183c249f23271794994507d7c94c3ea0d",
+      "baseline_sha256": null
+    },
+    {
+      "path": "backend/openapi/v1/openapi.yaml",
+      "sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a",
+      "baseline_sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec"
+    },
+    {
+      "path": "contracts/CHANGELOG.md",
+      "sha256": "cd805019ce7440af1c7c82e87cd434219641479b732a2e9e82444c7cd696cb48",
+      "baseline_sha256": "ff43940921caa316bc5c529e3c677bec966826b61ab3974e277af0d06d8abb16"
+    },
+    {
+      "path": "contracts/credential_revocations.go",
+      "sha256": "d3c935b8b52dc4fc90acb7ba937481616c53b7d11e51307089ac9d618f723f73",
+      "baseline_sha256": "d3c935b8b52dc4fc90acb7ba937481616c53b7d11e51307089ac9d618f723f73"
+    },
+    {
+      "path": "contracts/credit_close.go",
+      "sha256": "d2dcf224b4bdfe4bb3c5bde1f7de61708d41300afc4883aa7fb148b4bce942ed",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/database/schema.sql",
+      "sha256": "24ca0722b9ad9798975f9d5544cebc232d75f4df2d7140bee58e009bef018f56",
+      "baseline_sha256": "b083589caf601629bd82e43052b22ea2e0ced276fcd0d2b526f5702db86cd8d2"
+    },
+    {
+      "path": "contracts/delegation_seal.go",
+      "sha256": "e699c21764dffdf0f676e1f46a601223ffbbf3ee7ac57ee2acaf40946f22e04c",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/known_usage_inventory.go",
+      "sha256": "d4199767195b36528bbd1a9848374c1c5582ae6686ccd985f57cfd8eb859da43",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/node_boot_recovery.go",
+      "sha256": "3b8c2220255d43a812d1e5fd59aef49363f2f5d671df8a6ab7494cb4e137f01e",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/node_report.go",
+      "sha256": "9ee47e553ac128a2611299c3ca8602c0137acb55ef4187190593ca6575d4c644",
+      "baseline_sha256": "9ee47e553ac128a2611299c3ca8602c0137acb55ef4187190593ca6575d4c644"
+    },
+    {
+      "path": "contracts/openapi/v1/openapi.yaml",
+      "sha256": "0d494cc07ce8b9a4576bf025c22d5be4cced60dc82b55baac844c02abfa5675a",
+      "baseline_sha256": "3e65510bf064a41fb223e054e1bc9f029b5ea3f93a39adfd0dcc13ccfcba52ec"
+    },
+    {
+      "path": "contracts/protobuf/v1/identity-profile.json",
+      "sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070",
+      "baseline_sha256": "aacabd62df0a6dadf8f02970e2fe2020d5dd5b889894f5df3e9613b9e4450070"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.md",
+      "sha256": "cf591a4c7cb54d4ddb5cb1e57140248a59e9a7a2fff9afbdca6fe17511adc1a6",
+      "baseline_sha256": "b24e7436a1d66fd2ffbf1686668367ff04cf745ed904ff0f2906d6074d763592"
+    },
+    {
+      "path": "contracts/protobuf/v1/lifecycle.schema.json",
+      "sha256": "e6f871eec505a63b7988f275b8a55f026432fba58318f9638dfd3bde24429338",
+      "baseline_sha256": "42310c018bbd34cc22e3acde3870422c69f56b242d62d1dd0ab66e7aa7f730de"
+    },
+    {
+      "path": "contracts/protobuf/v1/share-handoff.schema.json",
+      "sha256": "cb8a591c9fb5daa673877feb5971a64cfd5b43bad833c0547d9cf41032d75151",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.pb.go",
+      "sha256": "91c4926a8c1f103fa312e1b2ac3cff38cdb4ac1f19f18fe19e9eb4886713d17c",
+      "baseline_sha256": "df4eff65729496e62bacb6738225ffc2e53f0d3dbaa86843ff30f22417d01f97"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex.proto",
+      "sha256": "30f8c983c384e2c1f587f2e1e7dc7d5e04aea04d8d8f2f74a44c95c2937b1012",
+      "baseline_sha256": "c9f403367928cd7a8320098495e968f59888e46b2231dc99a5622860b5f31a01"
+    },
+    {
+      "path": "contracts/protobuf/v1/vortex_grpc.pb.go",
+      "sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9",
+      "baseline_sha256": "541465a42d3f26da3bf5ce86f24fee21d5dd8452d7953f2e398d612277f709e9"
+    },
+    {
+      "path": "contracts/renewal.go",
+      "sha256": "1035fb16483ef41911bb3206fbebc0a0422ae3630c9785c82bf45e5c69e1aec1",
+      "baseline_sha256": "1035fb16483ef41911bb3206fbebc0a0422ae3630c9785c82bf45e5c69e1aec1"
+    },
+    {
+      "path": "contracts/requirements-map.yaml",
+      "sha256": "9ee1a6c6d8483efdfbd1109a978273cc7abd06eb29af2503d7a5728661bdc9d2",
+      "baseline_sha256": "3422ae0e47d7ce3763e15a3b7e55db81fceac351175888158424b67ee0910488"
+    },
+    {
+      "path": "contracts/runtime/config.schema.json",
+      "sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1",
+      "baseline_sha256": "58264dbe07bfd6575e69cb73feef9f89c09c7de76eceafbbd2ab20a4f428c1d1"
+    },
+    {
+      "path": "contracts/runtime_schema.go",
+      "sha256": "e944baa006ad4b32b1657fc4900913280761ea1a8d3b9da71f9f2850aa422f5d",
+      "baseline_sha256": "e944baa006ad4b32b1657fc4900913280761ea1a8d3b9da71f9f2850aa422f5d"
+    },
+    {
+      "path": "contracts/share_handoff.go",
+      "sha256": "17072cbf847ff3cb6e3f98dc0fdc7ab3540bf9226f8f6340e1f956a8edacb55e",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/share_renewal_closure.go",
+      "sha256": "64a35e67dfec064d2d67181e766f084450700805fbe40af29e58ab8a8c08dbdc",
+      "baseline_sha256": null
+    },
+    {
+      "path": "contracts/unknown_usage.go",
+      "sha256": "29fc6e329298ac4c73a57ead2553812c677ae464826897e7316ccdeb57ec23bb",
+      "baseline_sha256": "29fc6e329298ac4c73a57ead2553812c677ae464826897e7316ccdeb57ec23bb"
+    },
+    {
+      "path": "contracts/versions.yaml",
+      "sha256": "b2be158a9588c2113e215ed7de1353965b2905483ee3864782bcf3a706711d19",
+      "baseline_sha256": "ae6bc90bd9f3abc51e08c9a36ca3ebf073656d149a7945966e7ecda98cec3135"
+    }
+  ],
+  "acceptance": {
+    "owner_approval": false,
+    "http_adapter_plan": "06-07",
+    "paired_acceptance_plan": "06-11",
+    "scope": "06-06 producer and bounded race/fault evidence; no all-member forwarding/restart or physical power-loss claim"
+  }
+}

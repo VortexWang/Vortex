@@ -1,0 +1,4 @@
+CLOUDFLARE_API_TOKEN required; real Cloudflare CRUD NOT EXECUTED
+CLOUDFLARE_ZONE_ID required; real Cloudflare CRUD NOT EXECUTED
+PHASE6_DATABASE_URL required; real Cloudflare CRUD NOT EXECUTED
+reviewed CLOUDFLARE_TOKEN_POLICY_FILE required (or independent read-only inspector); real CRUD NOT EXECUTED

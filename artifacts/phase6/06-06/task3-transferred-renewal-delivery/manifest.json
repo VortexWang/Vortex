@@ -1,0 +1,30 @@
+{
+  "base_sha": "ec473632fc5dfc5c8b322130388b5b4dd22cc833",
+  "scope": "Actual post-S/R renewal FULL response loss/reconnect, funded PG journal and both-child parent-final gate",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "initial_native": "actual-mtls-native.log;before incomplete-final assertion",
+    "final_native": "affected-native-race.log;46.831s",
+    "final_linux": "affected-linux-race.log;47.642s"
+  },
+  "inherited": {
+    "production_root_and_builds": "ec473632",
+    "full_backend": "936edcab"
+  },
+  "not_claimed": [
+    "Engine/pending deployment convergence",
+    "Full root/backend or builds/generators rerun in this test-only unit",
+    "Native amd64 execution",
+    "Same-SHA clean-source Docker/Actions pair",
+    "06-06 completion or CR-008 approval"
+  ],
+  "evidence_sha256": {
+    "README.md": "510e922d972ae0809dda4c5de97fb1e40f6c745812accb29110e0a6dc7ddc6cc",
+    "actual-mtls-native.log": "4ff09712224c4bc8a996d1882cdff2a397d6d1b8ee9e36f4d7b54da85192eb97",
+    "affected-linux-race.log": "cb42e7dedad0ffff77545b7d910515c11b8ae2a16735609019d885c7f9a5149d",
+    "affected-native-race.log": "2456e66136baac9cd16887fa3a97c5a40d3bf1e264b720fab7606e57a4aa0d6c",
+    "approved-snapshot-protection.json": "48b95c58fa3242201ee9e14cc9d9e8d6e0c5730be1283acae0d1b62b8d294998",
+    "environment.json": "36fd69d979fe9b5eb55fdbeb7fac60be7fdd8c6e0e44e31a63c13e27151b5a8d",
+    "source-hashes.json": "cd7686f9e9e29f0f101523a523bb9bad52f9a7a444b96d1a98e400c121bfc37d"
+  }
+}

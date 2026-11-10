@@ -1,0 +1,90 @@
+{
+  "scope": "candidate independent Hub S/R preflight, FULL command and immutable forensic evidence retention; no admission or ACK",
+  "base_sha": "f1e8ebc3872d76f820f55ec759c26b50187172e5",
+  "created_at": "2026-11-08T13:54:13.790401+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "hub/backend_client.go": "5d91084b810d886fb10269e6fe6f3cc94925bd51c4a87bf99360fb42b5e13a9c",
+    "hub/recovery_preflight.go": "843e0a3b8e0d509b4b71f40f632548ff88810f7b4aaa98d308c2383237075fd2",
+    "hub/recovery_preflight_test.go": "6d3bd89cccebaa6977cb9b256c8dbf95b5908f678424c3eb8b8a294e290b8d16",
+    "backend/cmd/vortex-hub/main.go": "3ae600613b0c431b05350f3e3e5bf44e1f40c2c08a795e6d8521dd54d761ac6a",
+    "backend/db/query/hub_same_store_recovery.sql": "249ede32319f56d1db78a71a64db3bcee1e270c5672bedfc615161a252140626",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "4e4261eec5d6045d617791d8b74b13dbc9bdd4c28e856c372582cfe11f70653f",
+    "backend/internal/control/adapter.go": "b33b27bc9f7c1eb470e1fdb0d27f3270ee01df30b8e72ce545be9b21ff04f673",
+    "backend/internal/control/hub_recovery_preflight.go": "9dc6273ab9440d6f0fd6e1074f8b39b89508cbcb33c8222e6ab7c8262c8ac616",
+    "backend/internal/service/hub_recovery_preflight.go": "8e4cbb3824151c18e9dc6689aa0145868621e2be50c0fb0a2e271d376ca4f372",
+    "backend/internal/service/hub_recovery_preflight_test.go": "c5567b7a770ede0b30e044bf980354d9bfa938442e966d0c1312dffe2a289fbe",
+    "backend/internal/service/hub_recovery_preflight_transport_test.go": "4607a7b4550d3b4f10ca58c3915f9357fc1f904b3116bc9cb58f9f7579c1c857",
+    "backend/internal/service/hub_transport_test.go": "927b3529071d38726958028fcc2bcebe9377326063f4716592bb19c5d171588a",
+    "contracts/protobuf/v1/vortex.proto": "70fa04768ea91e0431d6df4cb6f319b5c233bd7cf3c93223530181c1b736aae4",
+    "contracts/protobuf/v1/vortex.pb.go": "94d7e075b95b0a054346ba0eb0b030ea8e21ccc46953032a258481cc1741ca15",
+    "contracts/protobuf/v1/lifecycle.schema.json": "5701d0e9b33ab708626cf930be783bfd293c8b3a0272acb6b65bd7875519072c",
+    "contracts/protobuf/v1/lifecycle.md": "051e45d17c904ad2b6f9fdf45ac977bc365ef6b5a3e27327de663c78111cf57d"
+  },
+  "evidence": {
+    "actual-mtls-native.log": {
+      "result": "pass",
+      "sha256": "1a4bafea9dfebd6d33b2f05ea4ad023031b05c07c88021b3375a73a778035464"
+    },
+    "actual-mtls-paged-native.log": {
+      "result": "pass",
+      "sha256": "60c629d2098fd1298616c4154b89848dfeb84f275ab52484dca538936d96d9d4"
+    },
+    "backend-native-race.log": {
+      "result": "pass",
+      "sha256": "7fdb6a655f899938c9a24e0e457a4f90bda94af9015451897e386ca0498650d4"
+    },
+    "cross-builds.json": {
+      "result": "pass",
+      "sha256": "40c74e1c8b95177b37d0100df1bdc809264540bfc1af82c1db8b828fcfd9665a"
+    },
+    "focused-complete-native.log": {
+      "result": "pass",
+      "sha256": "178da5d5214e9d9c26827979d25014cfaaebfc6ebe7c09c5e9f074b1e0c62c9b"
+    },
+    "focused-final-native.log": {
+      "result": "pass",
+      "sha256": "5f3830486660dc27a7c52370037eb6cfb0c6530e0b5c09a2e718b6005735aad3"
+    },
+    "focused-linux.log": {
+      "result": "pass",
+      "sha256": "db5bbd05097307f3537248dad982adf65db2fddfe4b4c6ae854d5731d7f18ed7"
+    },
+    "focused-native.log": {
+      "result": "pass",
+      "sha256": "166187a031f0e5c77541ceae8e1bf6838cd9c7ce8363fe1219db4177549236a2"
+    },
+    "generators-repro.json": {
+      "result": "pass",
+      "sha256": "b83c9bac137d6e990a5bd05cbf0127025ef0f5f602d5f9499cb05f36c3d7e5d6"
+    },
+    "identity-native.log": {
+      "result": "pass",
+      "sha256": "e3f2390e811756553bcaa847c517390966f9f8ba761946bc1b892760c20743ef"
+    },
+    "linux-race.log": {
+      "result": "pass",
+      "sha256": "ea62de8bf0cbd2660243cb6d5b6a53009573150ce4390ed06e13016dda2b4eb8"
+    },
+    "role-separated-linux.log": {
+      "result": "pass",
+      "sha256": "187c62a72c18e81374a5dd2f9dd35a17f41d97ca942c9573dbf2f0c8b8579b49"
+    },
+    "role-separated-native.log": {
+      "result": "pass",
+      "sha256": "5ea48093397f5c080a00526ac9cb06a13ed954c43bbba27f08c27a1cb471786a"
+    },
+    "root-native-race.log": {
+      "result": "pass",
+      "sha256": "3bf382c9af85b3496d52ec266ba8b79f56898d20287b432dcd2f21b9d7c3c7a8"
+    }
+  },
+  "full_suite_boundary": "all final production source; final independent role-CA test-only refinement covered by role-separated-native/Linux focused runs",
+  "not_claimed": [
+    "clean-source acceptance",
+    "GitHub Actions",
+    "native amd64 runtime/performance",
+    "production S/R admission",
+    "06-06 completion"
+  ]
+}

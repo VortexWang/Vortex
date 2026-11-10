@@ -1,0 +1,7 @@
+ Container vortex-phase6-tracer-backend-test-run-4d9a958131b6 Creating 
+ Container vortex-phase6-tracer-backend-test-run-4d9a958131b6 Created 
+ok  	vortex/agent	72.721s
+ok  	vortex/agent/store	71.573s
+ok  	vortex/hub	13.918s
+ok  	vortex/contracts	1.018s
+ok  	vortex/cmd/vortex-node	2.147s

@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "block": false,
+  "verdict": "RED_EVIDENCE_OK",
+  "reason": "target_test_failed",
+  "evidence": {
+    "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/compiler_red_test.py",
+    "exit_code": 1,
+    "target_test": "test_compiled_artifact_authority",
+    "tests": 1,
+    "pass": 0,
+    "fail": 1,
+    "failing_tests": [
+      "test_compiled_artifact_authority"
+    ],
+    "matched_test": "test_compiled_artifact_authority",
+    "format": "unittest",
+    "report_errors": []
+  },
+  "record": {
+    "command": "PATH=/Users/peng/.local/go1.27.3/bin:$PATH GOTOOLCHAIN=local PHASE6_DATABASE_URL=<local-test-db> python3 tools/phase6/compiler_red_test.py",
+    "exit_code": 1,
+    "failing_test": "test_compiled_artifact_authority",
+    "target_test": "test_compiled_artifact_authority",
+    "expected": "immutable per-node artifact authority exists",
+    "actual": "rule_artifacts absent on actual PostgreSQL at migration5",
+    "verdict": "RED_EVIDENCE_OK",
+    "reason": "target_test_failed"
+  },
+  "message": "RED evidence verified: target test \"test_compiled_artifact_authority\" failed as expected (exit 1). GREEN authorized."
+}

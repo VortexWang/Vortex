@@ -1,0 +1,7 @@
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/09 04:53:26 goose: no migrations to run. current version: 9
+    tokens_test.go:59: family access survived reuse <nil>
+--- FAIL: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.02s)
+FAIL
+FAIL	vortex/backend/internal/auth	0.586s
+FAIL

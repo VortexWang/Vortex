@@ -1,0 +1,22 @@
+# PostgreSQL Node cold-recovery proof — development evidence
+
+Base source: bf88ff31. Candidate migration8 is not frozen. New databases vortex_node_cold_20261108 and vortex_node_cold_linux_20261108 were created for this schema; earlier applied candidate8 databases were not silently upgraded.
+
+The platform-only producer pins a currently authenticated new Node boot, snapshots every tenant's original old-boot shares, immutable funded allocation digests/autonomy bounds, leases and configuration member deadlines, and requires trusted lower time to pass all boundaries. Shared/exclusive transaction advisory locks serialize new share/lease/funded allocation/fencing creation with boot registration and proof construction while retaining the existing cross-node row-lock order. Only a fully acknowledged original rate/connections pair is supported. Partial/unknown CAS stays held. Exact immutable commands preserve the independent per-kind floors and greater aggregate fencing minimum. No configuration stop or old financial final is inferred.
+
+Approval/command/task/Outbox/audit are atomic. The separately authenticated canonical SQLite FULL receipt transaction moves aggregate chains to the target boot with active_generation=0, independent retired_generation floors and unchanged held capacity. Only a real next new-boot CAS can enable capacity and release its exact difference. Existing debt, unknown holds, ledger, configuration and old execution evidence remain unchanged. Exact replay after expiry/next CAS preserves higher heads.
+
+This unit does not add NodeControl capability or transport, a delivery worker, HTTP entry or early/same-store S/R recovery. It is a backend prerequisite, not production Node boot recovery or full06-06 acceptance. Phase6 remains8/11 and CR-008 unprepared/unapproved. Full clean-source/Actions pairing remains separate06-11.
+
+Raw attempts are preserved:
+- initial-wrong-module.log: compile invoked from the root module with a backend-relative package path; corrected compile.log passes.
+- focused-native.log: fixture attempted platform Node registration with tenant-only resource scope; denied without mutating service guards. Corrected explicit platform registration passes focused-native-corrected.log.
+- focused-complete-native.log: a second tenant's snapshot was created after the fixture's old frozen clock, correctly failing validity. The second real service now has its own current trusted clock; focused-final-native.log passes, including other-tenant later original hard deadline, signed-outside-scope rejection, audit rollback,8 concurrent decisions/receipts, real Node FULL next CAS and unchanged old unknown financial occupation.
+- backend-native-race.log and backend-linux-race-build.log: genuine concurrent scheduler deadlocks caused by acquiring a new single Node row lock before the existing ordered cross-node resolution. Build commands after the failed race did not execute. The correction uses shared producer/exclusive recovery/registration advisory locks before the existing row order, and also rejects new fencing authority on a retired boot.
+- focused-advisory-corrected.log: repeated three times Node recovery and concurrent scheduler regression after the advisory correction; subsequent fencing hardening changes no scheduler lock order.
+- focused-late-usage-final.log: extends coverage with late original-boot usage counted once, pending/unknown predecessor refusal and replaced-target refusal; final production locks are covered by the corrected full runs.
+- backend-native-race-corrected.log: complete native backend race on final service source.
+- backend-linux-race-build-corrected.log: new schema already migrated serially in the initial run; Linux arm64 service/control/worker/timeauthority race and backend/Hub linux amd64+arm64 cross-builds. Cross-builds do not prove native amd64 execution.
+- sqlc-reproducibility.json: two independent clean temporary generations match all22 working-tree generated outputs.
+
+Final corrected complete native backend race passed (service177.314s); Linux arm64 service/control/worker/timeauthority race passed (service177.861s), followed by backend/Hub linux amd64+arm64 cross-builds. Final production source is unchanged after compilation; focused late-usage/stale-target tests were added before corrected full runs. No root Agent/Store implementation changes in this unit. No clean-source or Actions result is claimed.

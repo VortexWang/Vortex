@@ -1,0 +1,20 @@
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted
+2026/11/08 22:41:03 goose: no migrations to run. current version: 8
+2026/11/08 22:41:03 OK   00001_authority.sql (18.15ms)
+2026/11/08 22:41:03 OK   00002_tenant_policy.sql (10.94ms)
+2026/11/08 22:41:03 OK   00003_nodes_ports.sql (19.87ms)
+2026/11/08 22:41:03 OK   00004_entry_group_domains.sql (2.41ms)
+2026/11/08 22:41:03 OK   00005_rules_compile.sql (19.06ms)
+2026/11/08 22:41:03 OK   00006_packages_entitlements.sql (19.05ms)
+2026/11/08 22:41:03 OK   00007_metering_ledger.sql (27.22ms)
+2026/11/08 22:41:04 OK   00008_limits_shares.sql (58.13ms)
+2026/11/08 22:41:04 goose: successfully migrated database to version: 8
+=== RUN   TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs
+    hub_effective_allocation_test.go:279: invalid new-epoch issue accepted missing_proofs <nil>
+--- FAIL: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff (1.32s)
+    --- FAIL: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted (1.32s)
+        --- FAIL: TestHubEffectiveEpochRequiresAdmissionAndExactOriginalHandoff/admitted/missing_proofs (0.02s)
+FAIL
+FAIL	vortex/backend/internal/service	2.154s
+FAIL

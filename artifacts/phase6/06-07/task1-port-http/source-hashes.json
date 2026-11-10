@@ -1,0 +1,8 @@
+{
+  "backend/internal/httpapi/group_members_test.go": "bb99d781542aec565c454cdea79ccf4dc14e258193a495d1ae00bf3b1c4f8b85",
+  "backend/internal/httpapi/ports.go": "6b642dd6c1faa348792328a2668983d45a847623c2f3271610116b452a9c6b08",
+  "backend/internal/httpapi/ports_test.go": "776c648819939d4f6cc55fcd8b026f4dcbe9b379dbc75d182e47ee7756df4678",
+  "backend/internal/httpapi/router.go": "dd4d84fcfcfee089f66fb2804ab9373b6c13877647b1a0cac912ce617292a334",
+  "backend/internal/repository/public_resources.go": "d25557d4fef1c6c63be2e2496509f8465647521a65630e0e925bfb022e0b37c3",
+  "backend/internal/service/port.go": "712608898ef1274ceb75dd619a5e2b12da8fc3e965f4b58c5987ab5fd0dd42d1"
+}

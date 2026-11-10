@@ -1,0 +1,92 @@
+[
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/node-linux-amd64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "ad402121fb63d066df234755726806d564357dedd88f50637cc6c1748572553c"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/backend-linux-amd64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "d6e32ab75e4f80445a263fd1d1a5096ab4f44c60dc6e4dd026c7e9a34ac6a3bd"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/hub-linux-amd64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "f26a98627eaa1876753aa895ada50ffb454307b2ee159220034b7d0c948a5118"
+  },
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/node-linux-arm64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "f302a7c16b4260d3dbb0f516d44320a224fe2758e5509a2f69444ca12c5bbf3b"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/backend-linux-arm64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "705a1b6a15b18494a357a0476040982b4eb7f9bdf9076e4fd9d46f0008c25a88"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-rule-renewal-build-q2_xhin0/hub-linux-arm64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "46c9483de218cb0ea7ef6081592a822c367ef0cc019841199f6bf834f1acfcb3"
+  }
+]

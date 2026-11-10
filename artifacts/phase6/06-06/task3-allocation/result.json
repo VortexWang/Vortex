@@ -1,0 +1,21 @@
+{
+  "status": "passed_partial_task3_development",
+  "base_commit": "606bc8f1",
+  "verification": [
+    "3000 deterministic property cases plus exact examples: conservation, half-floor, uint64 demand and int64 total boundaries, stable input permutation",
+    "real PostgreSQL minute replay, successful Prepare-only candidates, immutable compiler revalidation, demand and allocation audit rollback",
+    "two rules reuse two node owners; revoked grants omit candidates without freeing unknown occupation",
+    "one connection slot for two prepared nodes persists one FIFO queue row and mints no shares",
+    "platform rule binding denies valid funded runtime leases without aggregate heads, and a second rule cannot bypass node connection cap",
+    "Agent RuleCommand/Runtime race tests",
+    "Docker race tests",
+    "sqlc regenerated twice: 16 files identical"
+  ],
+  "remaining": [
+    "production scheduling and measurement transport",
+    "bootstrap Commit reservation gate",
+    "funded Hub/runtime authority handshake and trusted clock",
+    "safe new-boot lifecycle",
+    "complete clean source validation and CR-008 exact approval"
+  ]
+}

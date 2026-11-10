@@ -1,0 +1,6 @@
+{
+  "vortex-backend-linux-amd64": "cebb73d9d5baa9396609daa70a02748208756654088518a1f7db042d77b69076",
+  "vortex-hub-linux-amd64": "c76c2646d820700a4fe8ab1b505f2f25889fd32e2a151899f6697c9280abc7ea",
+  "vortex-backend-linux-arm64": "32b35ac4b478ed1a47a89fac64be73a58f1c4dfe9c3d37d3f24cf53901ccb88e",
+  "vortex-hub-linux-arm64": "6839fb8446b2837cabc2a28116ed12056ce30b454b0dae5f1140c6d769e5109e"
+}

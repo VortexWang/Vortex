@@ -1,0 +1,42 @@
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:33:01 goose: no migrations to run. current version: 8
+2026/11/09 01:33:01 OK   00001_authority.sql (41.48ms)
+2026/11/09 01:33:01 OK   00002_tenant_policy.sql (15.04ms)
+2026/11/09 01:33:01 OK   00003_nodes_ports.sql (29.83ms)
+2026/11/09 01:33:01 OK   00004_entry_group_domains.sql (3.11ms)
+2026/11/09 01:33:01 OK   00005_rules_compile.sql (26.41ms)
+2026/11/09 01:33:01 OK   00006_packages_entitlements.sql (27.73ms)
+2026/11/09 01:33:01 OK   00007_metering_ledger.sql (31.26ms)
+2026/11/09 01:33:01 OK   00008_limits_shares.sql (73.04ms)
+2026/11/09 01:33:01 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:114: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.83s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:33:07 goose: no migrations to run. current version: 8
+2026/11/09 01:33:07 OK   00001_authority.sql (8.28ms)
+2026/11/09 01:33:07 OK   00002_tenant_policy.sql (7.81ms)
+2026/11/09 01:33:07 OK   00003_nodes_ports.sql (17.96ms)
+2026/11/09 01:33:07 OK   00004_entry_group_domains.sql (2.06ms)
+2026/11/09 01:33:07 OK   00005_rules_compile.sql (17.61ms)
+2026/11/09 01:33:07 OK   00006_packages_entitlements.sql (17.14ms)
+2026/11/09 01:33:07 OK   00007_metering_ledger.sql (43.44ms)
+2026/11/09 01:33:07 OK   00008_limits_shares.sql (47.91ms)
+2026/11/09 01:33:07 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:114: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.69s)
+=== RUN   TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill
+2026/11/09 01:33:12 goose: no migrations to run. current version: 8
+2026/11/09 01:33:12 OK   00001_authority.sql (8.48ms)
+2026/11/09 01:33:12 OK   00002_tenant_policy.sql (7.25ms)
+2026/11/09 01:33:12 OK   00003_nodes_ports.sql (18.02ms)
+2026/11/09 01:33:12 OK   00004_entry_group_domains.sql (2.31ms)
+2026/11/09 01:33:12 OK   00005_rules_compile.sql (18.33ms)
+2026/11/09 01:33:12 OK   00006_packages_entitlements.sql (17.75ms)
+2026/11/09 01:33:12 OK   00007_metering_ledger.sql (22.4ms)
+2026/11/09 01:33:13 OK   00008_limits_shares.sql (50.23ms)
+2026/11/09 01:33:13 goose: successfully migrated database to version: 8
+    runtime_recovery_transport_test.go:114: recovery replay caused reconnect/rejection <nil> {2 2 0 0}
+--- FAIL: TestRuntimeRecoveryUpdateActualMTLSAgentFULLBeforeLeaseWithoutRefill (5.66s)
+FAIL
+FAIL	vortex/backend/internal/service	18.064s
+FAIL

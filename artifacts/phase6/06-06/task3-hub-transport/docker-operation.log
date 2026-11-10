@@ -1,0 +1,10 @@
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-c5e96ba179f7 Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-c5e96ba179f7 Created 
+ok  	vortex/backend/internal/service	8.192s
+ok  	vortex/backend/internal/control	1.009s

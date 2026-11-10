@@ -1,0 +1,23 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-73620ee58afb Creating 
+ Container vortex-phase6-tracer-backend-test-run-73620ee58afb Created 
+ok  	vortex/backend/cmd/vortex-backend	1.129s
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/cmd/vortex-hub	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+ok  	vortex/backend/internal/auth	1.428s
+ok  	vortex/backend/internal/compiler	2.437s
+ok  	vortex/backend/internal/control	1.559s
+ok  	vortex/backend/internal/httpapi	9.010s
+ok  	vortex/backend/internal/policy	1.041s
+ok  	vortex/backend/internal/repository	1.075s
+ok  	vortex/backend/internal/service	392.053s
+?   	vortex/backend/internal/testutil	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.014s
+?   	vortex/backend/internal/worker	[no test files]

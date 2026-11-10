@@ -1,0 +1,36 @@
+{
+  "base_sha": "a75bae91553d1073a72f35aaab2022b595fdcb72",
+  "scope": "Consume complete committed cold proof for transferred share closure without overwriting original admission or releasing unknown money",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "focused": "focused-corrected-native.log;6.725s",
+    "native_backend": "backend-native-race.log;287.287s",
+    "linux_arm64_backend": "backend-linux-race.log;303.517s",
+    "expected_red": "expected-red.json;source unchanged",
+    "builds": "cross-builds.json;four Backend/Hub linux builds"
+  },
+  "failures": [
+    "focused-complete-native.log: fixture altered connections while asserting rate; targeted rate corrected"
+  ],
+  "inherited_unchanged": "No SQL/protobuf/root Agent/Hub changes; earlier root/generation evidence retained",
+  "not_claimed": [
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "New network recovery orchestration acceptance",
+    "Effective funding/refill or production06-06 convergence"
+  ],
+  "evidence_sha256": {
+    "README.md": "1ae42a969431920b9781d0e698ccb35fd5bdc398a66ad8f5b8654749345b2e54",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "79af7406c49de6143ad918cc4c774eaa62688a6177ec93ebfb0e2c62507f11f7",
+    "backend-native-race.log": "de3f9f2d6880f8d3c1516cd5902dc084d37868a5a81f64cd0f8b4c396f724e6c",
+    "cross-builds.json": "c56dbecf608da5bfdc3c3311da26817a6d176e095764bf34e1b6e5c3650130b8",
+    "environment.json": "d328cbe75035b028351a540a4adde59ebb96dcba18e27fecde9cc9d74f443c36",
+    "expected-red-cold-consumer.log": "40705bd2c9ecf329486de3fc779d41d4d85f719eba7c93af95e5b381f4c1ec95",
+    "expected-red.json": "dda6e0ac61729a1a77c1054d18fc989e063a4337d9f8ff1ce2e508ecbd89fe24",
+    "focused-complete-native.log": "0a0fd2a8a21dc20ac8253a1ef2eb06b161f7663467f6ffe7c989509d15e802ab",
+    "focused-corrected-native.log": "b8f0778be7ab57ca5df28669c8c5af0314953481a9a1706b07cbe7be8fc7c729",
+    "focused-native.log": "daf86fc16ee55b0e8729f07c6b12d58ddc8e9e0f997494b0a49fb7603b194130",
+    "source-hashes.json": "0bab185f5da01b21e484a1e8961d08446f6f57e1fecd19416f24047b1be95dc6"
+  }
+}

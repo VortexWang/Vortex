@@ -1,0 +1,73 @@
+{
+  "scope": "development PG same-store approval only; complete prefix consumer/preflight not implemented",
+  "base_sha": "d69c95df8813987c942719e96f21581763c182d3",
+  "created_at": "2026-11-08T11:16:05.322032+00:00",
+  "phase_status": "8/11;06-06 Task3 incomplete;CR-008 unapproved",
+  "source_sha256": {
+    "hub/same_store_recovery.go": "2aef5d35a1df3770e61722603ab52c0da9c400588859017536480811d9c87b64",
+    "hub/same_store_recovery_test.go": "4ea501a899f982caeab8294663b1f0013a7bbc5e7ec43ed4e9d74133d700d9fd",
+    "backend/internal/service/hub_same_store_recovery.go": "689535ebd04931a8f6517d44d260ee014ec513e6cc9dddab09502e98d4b0fbba",
+    "backend/internal/service/hub_same_store_recovery_test.go": "07a46e8760eef736c550caa114bee1a8dcb698669c01cdff956d608a00205022",
+    "backend/db/migrations/00008_limits_shares.sql": "b2a2001666c2ac9f9b506c66b96229e709c38dab448e89b11ca4d7dc2540dec9",
+    "backend/db/query/hub_same_store_recovery.sql": "7366589f2f13ed62b219ac66f888eb7bad84fee843c6e0fc26bb8a24d4840742",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "f9b59c812bdaf9c2a04b7262ccefb87361619df4b741d1187613b2e0bf3da396",
+    "backend/db/generated/models.go": "baf65b446bfd03f983293ce4993c48652060642a8028cbce4418c903fc310946",
+    "contracts/protobuf/v1/lifecycle.md": "867e00d7def620db57a011a0bdd05ae2f701c309c9de9f9caadd5a3e088c23e9"
+  },
+  "evidence": {
+    "backend-native-race.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "4457f9e64dbd850f15778832d4e09839ac331e0703f1740f8fcb482a64a7f80e"
+    },
+    "command-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "7381e1661f13522297dcdcc0ff051b4e57d9b58066ec80f4d8d9b4bb91c7eced"
+    },
+    "cross-builds.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "b7f94f23785ff7063b474f70ab7b595a3bf71cc153cbe071ee1b019de5b8ca68"
+    },
+    "focused-linux.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "e9d8a4e09a0980784f28eb5006719525fec86a453a27fbfb08b16dce143fff7d"
+    },
+    "focused-native.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "2633814187adfda79826d00e9c0c878c471a6f706a5b6ee4025771f72925d4d9"
+    },
+    "hub-native-race.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "938f14471d41fc77413adb6610a9f61a71f542b4c8b864c9fdc4dbd0c3ddbad3"
+    },
+    "linux-race.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "ec9f8455025a7200d0e2ef10846cdcb82550cacc40ace14ffc72abf90a5ddeba"
+    },
+    "sqlc-repro.log": {
+      "result": "pass",
+      "exit_code": 0,
+      "sha256": "a646e3d42d45e8b8ce434409b7e833727d7d61d76cdce4ccee8381b4e26d432f"
+    }
+  },
+  "host_sha256": "9de66279a48615c8cc27ae2250cdee49a6e7be6a6f5d2530b09ea2d8160f603c",
+  "clean_source_actions_pairing": false,
+  "native_backend_service_seconds": 180.419,
+  "linux_backend_service_seconds": 191.84,
+  "sqlc_outputs": 23,
+  "protobuf_changed": false,
+  "next": [
+    "authenticated boot-bound preflight",
+    "retained full-prefix paging and PG verification",
+    "effective new-epoch issue/lease/seal",
+    "independent direct-Node roots",
+    "original pending-rule convergence",
+    "full06-06 producer and exactCR-008 proposal"
+  ]
+}

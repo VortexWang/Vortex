@@ -118,7 +118,8 @@ func (s *TestServer) ServeGRPC(ctx context.Context, ln net.Listener, config *tls
 }
 
 func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessage, controlv1.ControlMessage]) error {
-	ctx := stream.Context()
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
 	if s.StallReadiness {
 		<-ctx.Done()
 		return ctx.Err()
@@ -162,6 +163,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 		return nil
 	}
 	demandsReceived := 0
+	// Only finite fixtures retain identities, bounded by DemandLimit. Replays
+	// return original durable bytes but cannot consume a new logical round.
+	demandSeen := make(map[string]bool)
 	usageReceived := 0
 	usageSeen := make(map[string]bool)
 	var update *controlv1.RuntimeConfigUpdate
@@ -240,8 +244,16 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			return nil
 		}
 	}
+	inbox := newNodeInbox(ctx, stream.Recv)
+	validate := func(message *controlv1.NodeMessage) error {
+		if message.GetNodeId() != first.GetNodeId() || message.GetBootId() != first.GetBootId() || message.GetSequence() <= lastNodeSequence || len(message.ProtoReflect().GetUnknown()) != 0 {
+			return fmt.Errorf("test hub: control message identity or sequence invalid")
+		}
+		lastNodeSequence = message.Sequence
+		return nil
+	}
 	for {
-		message, err := stream.Recv()
+		message, err := inbox.receive()
 		if err != nil {
 			return err
 		}
@@ -343,7 +355,12 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err != nil {
 				return err
 			}
-			if s.BeforeDemandResponse != nil {
+			newDemand := true
+			if s.DemandLimit > 0 {
+				newDemand = !demandSeen[body.CreditDemand.RequestId]
+				demandSeen[body.CreditDemand.RequestId] = true
+			}
+			if newDemand && s.BeforeDemandResponse != nil {
 				if err := s.BeforeDemandResponse(ctx); err != nil {
 					return err
 				}
@@ -365,7 +382,9 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 			if err := stream.Send(response); err != nil {
 				return err
 			}
-			demandsReceived++
+			if newDemand {
+				demandsReceived++
+			}
 			if s.DemandLimit > 0 && demandsReceived >= s.DemandLimit {
 				return nil
 			}
@@ -375,7 +394,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptUnknown(ctx, first.GetNodeId(), body.UnknownUsageBatch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUnknownUsage(ctx, first.GetNodeId(), payload)
 			}
@@ -399,6 +418,34 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return nil
 			}
 		case *controlv1.NodeMessage_UsageBatch:
+
+			if s.Usage != nil && s.UsageBatchLimit == 0 {
+				group, err := inbox.known(message, validate)
+				if err != nil {
+					return err
+				}
+				if err := s.Usage.AcceptKnownEnvelopes(ctx, group); err != nil {
+					return err
+				}
+				ids := make([]string, 0, len(group))
+				for _, item := range group {
+					id := item.GetUsageBatch().BatchId
+					ids = append(ids, id)
+					if !usageSeen[id] {
+						usageSeen[id] = true
+						usageReceived++
+					}
+				}
+				ackID, err := testHubMessageID()
+				if err != nil {
+					return err
+				}
+				controlSequence++
+				if err := stream.Send(&controlv1.ControlMessage{MessageId: ackID, Sequence: controlSequence, Body: &controlv1.ControlMessage_UsageAck{UsageAck: &controlv1.UsageAcknowledgement{BatchIds: ids}}}); err != nil {
+					return err
+				}
+				continue
+			}
 			batch := body.UsageBatch
 			if batch == nil || batch.GetBatchId() == "" || batch.GetBillingSnapshotId() == "" {
 				return fmt.Errorf("test hub: usage batch identity is invalid")
@@ -408,7 +455,7 @@ func (s *TestServer) Connect(stream grpc.BidiStreamingServer[controlv1.NodeMessa
 				return err
 			}
 			if s.Usage != nil {
-				err = s.Usage.AcceptKnown(ctx, first.GetNodeId(), message.GetBootId(), batch)
+				err = s.Usage.AcceptEnvelope(ctx, message)
 			} else {
 				err = s.Store.PersistUsageLedger(ctx, store.UsageBatch{NodeID: first.GetNodeId(), BootID: message.GetBootId(), BatchID: batch.GetBatchId(), SnapshotID: batch.GetBillingSnapshotId(), Payload: payload})
 			}

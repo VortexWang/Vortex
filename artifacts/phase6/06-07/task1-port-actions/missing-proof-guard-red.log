@@ -1,0 +1,6 @@
+2026/11/09 07:49:25 goose: no migrations to run. current version: 9
+--- FAIL: TestPortIntentRejectsMutableConfirmationAndHistoricalUnknown (0.08s)
+    port_intent_test.go:144: mutable flags minted commit {{510d9a92-4156-41cf-934c-5c569f5333b5 3da0968b-4c29-4182-957c-46a925587726 85088d8d-3478-43cd-b51c-421a1a7daaf4 dbd5363c-d0c0-429f-a6f6-4de444b38ec9 bdcdfbd8b63a70c068e94ac83dd4ff59add7314243c92993bf06c61c0e2e47a0 20000 0.0.0.0 [tcp udp] service committed {0001-01-01 00:00:00 +0000 UTC finite false} {0001-01-01 00:00:00 +0000 UTC finite false} false 2} 083e2dcf-fcca-435f-842c-5222c45f40aa succeeded} <nil>
+FAIL
+FAIL	vortex/backend/internal/service	3.512s
+FAIL

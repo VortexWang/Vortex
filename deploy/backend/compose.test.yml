@@ -1,0 +1,56 @@
+name: vortex-phase6-tracer
+services:
+  postgres:
+    image: postgres:18.6-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
+    environment:
+      POSTGRES_USER: vortex
+      POSTGRES_PASSWORD: phase6-local-test-only
+      POSTGRES_DB: vortex
+    ports:
+      - "127.0.0.1:${PHASE6_PG_PORT:-15436}:5432"
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U vortex -d vortex"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql
+  valkey:
+    image: valkey/valkey:9.1.3@sha256:3add1a336a920ea54770a001ab6feb3da5fceea96a40373a3a2cd469b815f0b7
+    command: [valkey-server, --save, "", --appendonly, "no"]
+    ports:
+      - "127.0.0.1:${PHASE6_VALKEY_PORT:-16386}:6379"
+    healthcheck:
+      test: [CMD, valkey-cli, ping]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  backend-test:
+    image: golang:1.27.3@sha256:c292963ad0e5f51e843c726edc204a4e4c26a859ba1e4d736d91028aa3633048
+    working_dir: /src
+    environment:
+      GOTOOLCHAIN: local
+      PHASE6_DATABASE_URL: postgres://vortex:phase6-local-test-only@postgres:5432/vortex?sslmode=disable
+      PHASE6_VALKEY_ADDR: valkey:6379
+      PHASE6_PROCESS_EVIDENCE_DIR: /evidence/processes
+      PHASE6_EXPECTED_SHA: ${PHASE6_EXPECTED_SHA:-development}
+      PHASE6_THROUGH_PLAN: ${PHASE6_THROUGH_PLAN:-06-02}
+      VORTEX_TEST_FULL_DISK_DIR: /full-disk
+    volumes:
+      - ${PHASE6_SOURCE_ROOT:-../..}:/src
+      - ${PHASE6_EVIDENCE_DIR:-/tmp/vortex-phase6-evidence}:/evidence
+      - phase6-gomod:/go/pkg/mod
+      - phase6-gocache:/root/.cache/go-build
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    tmpfs:
+      - /full-disk:rw,size=4m
+    command: [sh, tools/phase6/container_tracer.sh]
+volumes:
+  phase6-gomod:
+    name: ${PHASE6_CACHE_PREFIX:-${COMPOSE_PROJECT_NAME:-vortex-phase6-tracer}}_phase6-gomod
+  phase6-gocache:
+    name: ${PHASE6_CACHE_PREFIX:-${COMPOSE_PROJECT_NAME:-vortex-phase6-tracer}}_phase6-gocache

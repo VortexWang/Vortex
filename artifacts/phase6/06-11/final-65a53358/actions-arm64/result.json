@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "commit": "65a5335894732b7d632e870acc3d8283be224cd3",
+  "producer": "actions",
+  "through_plan": "06-11",
+  "runtime_status": "passed",
+  "exit_code": 0,
+  "validation": {
+    "backend": {
+      "normal": {
+        "packages_without_test_files": [
+          "vortex/backend/cmd/vortex-control-peer",
+          "vortex/backend/cmd/vortex-hub",
+          "vortex/backend/db",
+          "vortex/backend/db/generated",
+          "vortex/backend/internal/testutil"
+        ],
+        "passed_test_events": 502,
+        "service_seconds": 388.611
+      },
+      "race": {
+        "packages_without_test_files": [
+          "vortex/backend/cmd/vortex-control-peer",
+          "vortex/backend/cmd/vortex-hub",
+          "vortex/backend/db",
+          "vortex/backend/db/generated",
+          "vortex/backend/internal/testutil"
+        ],
+        "passed_test_events": 502,
+        "service_seconds": 767.77
+      }
+    },
+    "checks": {
+      "reconciliation_normal_ms": 29745.927144,
+      "root_normal_passed": 657,
+      "engine_normal_passed": 249,
+      "reconciliation_race_ms": 42092.316057,
+      "root_race_passed": 657,
+      "engine_race_passed": 249
+    }
+  },
+  "error": null,
+  "external_cloudflare": {
+    "exit_code": 0,
+    "status": "passed"
+  },
+  "acceptance_complete": true,
+  "checksums": {
+    "final-completion.txt": "b45378a59f0dfa74b29e30046b4a9c2ad4bb19b6a0f67135634f4b0e15fda5ed",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "race-build-metadata.txt": "59642cbdeead06ce20e8c10dd3621254f3b40142f666bd7055a168b793e8f7b4",
+    "sqlc-install.log": "a99a04ada4b6ea5bc1c1286f5ca12a0faf2296702495c28575ac79a101aa355c",
+    "sqlc-output-count.txt": "19b8d5c59e421f037fe563007c7254eb8d98bc221b278c3db3e5fdbbfd52e273",
+    "compose.yml": "98bc8945b1ec205013feb8a5eefaaca91b98eebcc838d3d610b9c013069b04d2",
+    "historical-vlink-freeze.log": "36d70986228cb3c4d88eae04007e6f0fbb8a87199ed17437dea44e1ea35b8a4f",
+    "engine-normal.jsonl": "0451b6b296a70a8d78a484403e1baf7f1c0c3cd973d943f17b6b5de8de2b4829",
+    "protobuf-install.log": "76060a88beb24a3ff9bd3e6896c17a31622a6a4da66acbad8dc417b4edd2e0a6",
+    "migrate.log": "13fc4790d9857e5dc7bc93987c5b0a642d24cabd628d31dc81855fe3c06bf87d",
+    "reconciliation-race.json": "9d131f339485f26a8a4678cb6cfca2c4577cd021218e3f172244dba782928808",
+    "exact-freeze.log": "3067976a2265da35e4bd7e2d5a550fc21ab66b35dbfe5f8df248730778a51ded",
+    "sqlc-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-build-metadata.txt": "fa4cd71d1927e6c634d08d5dbeee0cba5441bffa460c09e67bfe4f9305db945c",
+    "engine-race.jsonl": "14caa0e55d4f9dcc6e61d574c96203227a2f8cdf4472da268ec71a83a431454d",
+    "backend-normal.jsonl": "b012a6ea2138793f48625804570e1b13758721dbff41c474846d0315b23cdb9c",
+    "docker-version.txt": "dff2e3aae1d636d71ac0a80106fc2f7a5eea55fc041964cb559f83407529bb5f",
+    "source-identity.txt": "6aa37ac20100d0572e8f38d9435350da0d5f21da398ab702de100c04c5a82fbb",
+    "openapi.log": "72f13c1e4f80e7e40a89a9842e07b8f58086589be20bdef0f3a8d0c79d8fe850",
+    "cross-build-metadata.txt": "132050ae43e2528d96802656035cdafd1e88343c096430698c513994190980d7",
+    "host-source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host-source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cloudflare-policy-sha256.txt": "e919fe398e5d2126c7d89e87b6b2c5572a6d33d6f02226cdbc8af05bf7cd9e04",
+    "runner.log": "5b3fa3f56c521f85d3d08bbbcc4b5a090778e2a3e9152c7e9aa6e73850670160",
+    "share-fault.log": "8a2683e4d41c124e1ec404928318190ea64b7ea05039d8644b41f786c4c703c9",
+    "completion.txt": "38a95bae7477c443f06558da14286aa35ae43f8485cbf0a484ca7f86e0cdaead",
+    "cloudflare.log": "ba4dfd5398d10267872a799285bbb32a9d1e55e28c46ce6f183e017c715a250b",
+    "commit.txt": "83fca8dc3b31fef003b420f54969b955d1d69064ac3e2dd77585b32292af698c",
+    "root-normal.jsonl": "b7c3ff56c0a87599dd01a4817bb235fb237639f4ae3e28363487ec86ce5b6bf7",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "host.txt": "487a7e7d430e9c51f26d4474de24037579b308a230719b847ba148045a64a92c",
+    "host-tooling.txt": "d65b61ef84c0c52d60ff556e10506545d332a4e33feef7e554d730cdbcf46add",
+    "ledger-fault.log": "970263d112d9b3ee8b47f9e9cec1a7b28c420fb42b81828a729d08cd8367d137",
+    "root-race.jsonl": "f3ce4bc228f6438658116fa25949eb73457af55d2becf7dce2764a9491b2dceb",
+    "dependencies.log": "28be7a01771ff5abbd2dbf4726dd5d8030616b49fcba393c320e2c3689c30520",
+    "reconciliation-normal.json": "7c665f954803e5e8e990bf092a06e97c5c4598ddd7fb734ea57d84fc1cfaa412",
+    "historical-vlink-freeze.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "protobuf-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docker-info.json": "0a98dab8421b259c795d9a33a6ca60d02b8d490d11665a45c0c5af5211d68119",
+    "valkey-version.txt": "f545660b2b1a2c80320a7a2464d1fdeeafc6bd0ed556c0b8ea84f9c49e89c36b",
+    "host-source-identity.txt": "6aa37ac20100d0572e8f38d9435350da0d5f21da398ab702de100c04c5a82fbb",
+    "backend-race.jsonl": "ee1b201a68d8184351baecf10de8a954bf9339caca729b40b82717a0570fc6cb",
+    "images.json": "8356b555ff1ee4b8af9838b875820297d4ac3f6d837b5a238f52c4a0d2631504",
+    "processes/c6c45cad-0190-4087-be12-3a03b99b62fd-backend.log": "55f97dc3e0925237770d55a21c5339aa72b5c24f0d68b095f19cf8a500565dd7",
+    "processes/e9f4ce89-73c1-444a-8f5e-4bea37ef77d7-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/c6c45cad-0190-4087-be12-3a03b99b62fd-result.json": "a44ebcf2b51181ad2ecf5ebd1596712f7e57623d3f55da4ada6aad7a3374b583",
+    "processes/c6c45cad-0190-4087-be12-3a03b99b62fd-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/e9f4ce89-73c1-444a-8f5e-4bea37ef77d7-result.json": "049f32ca8e2fb358c80ff5a6501f7b386877ac42a32ccd27e8bbc94bd33dd3b2",
+    "processes/e9f4ce89-73c1-444a-8f5e-4bea37ef77d7-backend.log": "6fa0e1b9eb7e2d43ecce1cb649a550cff4d3506e109e5502a629bf2bce0d32a4",
+    "processes/c6c45cad-0190-4087-be12-3a03b99b62fd-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/e9f4ce89-73c1-444a-8f5e-4bea37ef77d7-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "host": "Linux-7.0.0-1017-azure-aarch64-with-glibc2.39",
+  "run_id": "42572674719",
+  "repository": "VortexWang/Vortex",
+  "runner_arch": "ARM64",
+  "execution_arch": "arm64",
+  "runner_image": "20261101.172.1",
+  "historical_vlink_scope": "pre-existing Phase3 review mismatch is recorded separately; no approval or global freeze pass granted"
+}

@@ -72,6 +72,18 @@ func ValidateShareReference(r ShareReference) error {
 // self-asserted root. Phase-5 fixtures provision finite roots through this
 // explicit internal boundary; production provisioning belongs to Phase 6.
 func (s *Store) InstallShareSourceAnchor(ctx context.Context, nodeID, backendID string, root ShareReference) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err = s.installShareSourceAnchorTx(ctx, tx, nodeID, backendID, root); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) installShareSourceAnchorTx(ctx context.Context, tx *sql.Tx, nodeID, backendID string, root ShareReference) error {
 	if (s.owner != "agent" && s.owner != "hub") || !validIssuerUUID(nodeID) || !validIssuerUUID(backendID) || root.ParentID != "" || root.ParentRevision != 0 {
 		return ErrAuthorizationDenied
 	}
@@ -83,11 +95,6 @@ func (s *Store) InstallShareSourceAnchor(ctx context.Context, nodeID, backendID 
 		return err
 	}
 	digest := sha256.Sum256(raw)
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
 	var old []byte
 	var issuer string
 	err = tx.QueryRowContext(ctx, `SELECT payload,backend_id FROM share_source_anchors WHERE node_id=? AND source_id=? AND revision=?`, nodeID, root.SourceID, strconv.FormatUint(root.Revision, 10)).Scan(&old, &issuer)
@@ -95,7 +102,7 @@ func (s *Store) InstallShareSourceAnchor(ctx context.Context, nodeID, backendID 
 		if !bytes.Equal(old, raw) || issuer != backendID {
 			return ErrAuthorizationUpdateConflict
 		}
-		return tx.Commit()
+		return nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -116,7 +123,7 @@ func (s *Store) InstallShareSourceAnchor(ctx context.Context, nodeID, backendID 
 	if _, err = tx.ExecContext(ctx, `INSERT INTO share_source_heads(node_id,source_id,revision,backend_id) VALUES(?,?,?,?) ON CONFLICT(node_id,source_id) DO UPDATE SET revision=excluded.revision`, nodeID, root.SourceID, strconv.FormatUint(root.Revision, 10), backendID); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 func readShareTx(ctx context.Context, tx storeTransaction, node, id string, revision uint64) (ShareReference, error) {

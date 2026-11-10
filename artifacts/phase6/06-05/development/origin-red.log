@@ -1,0 +1,5 @@
+--- FAIL: TestUsageOriginReplayAfterReportBootChangePreservesOriginal (0.02s)
+    usage_origin_test.go:25: authenticated identical retry after reboot cannot reach original acknowledgement store: usage batch identity conflicts with durable payload
+FAIL
+FAIL	vortex/agent/store	0.565s
+FAIL

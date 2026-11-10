@@ -15,6 +15,12 @@ type demandSubscription struct {
 	wake   chan struct{}
 }
 
+// A bounded live waiter is an estimate hint, never spending authority.
+type waitingDemandWrite struct {
+	scope RuntimeScope
+	bytes uint64
+}
+
 func (n *Node) subscribeDemands(configs []AdaptiveDemandConfig) (<-chan struct{}, func(), error) {
 	n.demandMu.Lock()
 	defer n.demandMu.Unlock()
@@ -53,19 +59,41 @@ func (n *Node) wakeDemand(scope RuntimeScope) bool {
 	return found
 }
 
+// Capture before a transactional attempt so a commit during that attempt cannot
+// be missed. This is only a retry hint; every waiter rechecks durable authority.
+func (n *Node) authorityChanges() <-chan struct{} {
+	n.demandMu.Lock()
+	defer n.demandMu.Unlock()
+	if n.authorityChanged == nil {
+		n.authorityChanged = make(chan struct{})
+	}
+	return n.authorityChanged
+}
+
+// Called only after authorization persistence and authenticated clock observation.
+func (n *Node) notifyAuthorityChanged() {
+	n.demandMu.Lock()
+	defer n.demandMu.Unlock()
+	if n.authorityChanged != nil {
+		close(n.authorityChanged)
+	}
+	n.authorityChanged = make(chan struct{})
+}
+
 // Retry only a missing durable authorization, only while an opt-in control
 // consumer for this exact runtime scope exists. The same deadline covers the
 // first transactional attempt and every retry; it is never reset after denial.
 // Each retry re-enters the actual transactional gate; a wakeup is not authority.
-func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, attempt func(context.Context) (T, error)) (T, error) {
+func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, attempt func(context.Context) (T, error), writeBytes ...uint64) (T, error) {
 	if err := ctx.Err(); err != nil {
 		var zero T
 		return zero, err
 	}
 	waitCtx, cancel := context.WithTimeout(ctx, missingAuthorityWait)
 	defer cancel()
+	changed := n.authorityChanges()
 	value, err := attempt(waitCtx)
-	if !errors.Is(err, store.ErrAuthorizationDenied) || waitCtx.Err() != nil || !n.wakeDemand(scope) {
+	if !errors.Is(err, store.ErrAuthorizationDenied) || waitCtx.Err() != nil {
 		return value, err
 	}
 	n.demandMu.Lock()
@@ -80,22 +108,42 @@ func withAuthorityWait[T any](ctx context.Context, n *Node, scope RuntimeScope, 
 	default:
 		return value, err
 	}
+	if len(writeBytes) > 0 && writeBytes[0] > 0 {
+		write := &waitingDemandWrite{scope: scope, bytes: writeBytes[0]}
+		n.demandMu.Lock()
+		if n.demandWrites == nil {
+			n.demandWrites = make(map[*waitingDemandWrite]struct{})
+		}
+		n.demandWrites[write] = struct{}{}
+		n.demandMu.Unlock()
+		defer func() { n.demandMu.Lock(); delete(n.demandWrites, write); n.demandMu.Unlock() }()
+	}
+	if !n.wakeDemand(scope) {
+		return value, err
+	}
 
-	timer := time.NewTicker(10 * time.Millisecond)
+	// Start a fresh interval after each completed denial. A ticker can stay
+	// ready throughout a slow SQLite attempt and immediately queue another,
+	// starving the control transaction that would install the missing grant.
+	timer := time.NewTimer(25 * time.Millisecond)
 	defer timer.Stop()
 	for {
 		select {
 		case <-waitCtx.Done():
 			var zero T
 			return zero, waitCtx.Err()
+		case <-changed:
 		case <-timer.C:
-			value, err = attempt(waitCtx)
-			if !errors.Is(err, store.ErrAuthorizationDenied) {
-				return value, err
-			}
-			if !n.wakeDemand(scope) {
-				return value, err
-			}
 		}
+		timer.Stop()
+		changed = n.authorityChanges()
+		value, err = attempt(waitCtx)
+		if !errors.Is(err, store.ErrAuthorizationDenied) {
+			return value, err
+		}
+		if !n.wakeDemand(scope) {
+			return value, err
+		}
+		timer.Reset(25 * time.Millisecond)
 	}
 }

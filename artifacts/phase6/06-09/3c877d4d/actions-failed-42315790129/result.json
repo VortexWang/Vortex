@@ -1,0 +1,27 @@
+{
+  "commit": "3c877d4d34b96737849931b051dd94ace5aca7a7",
+  "result": 1,
+  "producer": "actions",
+  "through_plan": "06-09",
+  "source_clean": true,
+  "checksums": {
+    "commit.txt": "807ee86cd98d516ab8fa1c9a933c3a21ba47715bfc9a7e07436f32320106a0d5",
+    "openapi.log": "8fb4cda196b4e92f3810829b059ce2fa2bb168597f6f7641aabbd16bb748f85b",
+    "dependencies.log": "6b23a043eb787550c940983743c8f3902c4302f6e06398401a07d2898e298313",
+    "tracer.log": "d639ff49095a82e2564aab88548a5cb17bbb0d1b2d735bb3364cd89306f283e9",
+    "runner.log": "a3168cc5636cc5563e7f0ebcc3028a0d6ee1b9081950a814fbcd4c70d026d347",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "ab19a8b0734be578bf88d6490ca5af31a7925b97039d89a94b1ebb352a91f68d",
+    "compose.yml": "b3c41919cad9be5afd6f82a94bb2763e41728359a8e8c894973fe024104a8d13",
+    "docker-version.txt": "8402d8b7679b4087fa4fb62264e49054f974146c5d134195d8b7a341747ab4ed",
+    "docker-info.json": "704911c4a27df173c3a6ca4aa151a3aeb02fe6fc81950d67009fac12de7e2b81",
+    "images.json": "28122f0f010ad87e4c5d311871bda961f124607cb08287d95cf601d5a4e8f527",
+    "postgres-version.txt": "aea2fff379fe4bade1fcd099def7371d44cd97e6887df9d5e5133a2dbbeb400d",
+    "valkey-version.txt": "1c44e0ecee7d5b8e5a67b78502f95ff730018682f9d7a965ee313cd3216390c6",
+    "processes.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "run_id": "42315790129",
+  "run_url": "https://github.com/VortexWang/Vortex/actions/runs/42315790129"
+}

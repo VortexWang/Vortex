@@ -1,0 +1,14 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-1223c808602a Creating 
+ Container vortex-phase6-tracer-backend-test-run-1223c808602a Created 
+ok  	vortex/agent	82.936s
+ok  	vortex/agent/store	86.496s
+ok  	vortex/hub	17.365s
+ok  	vortex/contracts	1.019s
+stat /src/node/cmd/vortex-node: directory not found
+

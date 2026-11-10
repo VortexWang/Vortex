@@ -1,0 +1,23 @@
+{
+  "commit": "84821a04cec4dec78a8a3b192d2003d1f44518bc",
+  "status": "passed",
+  "controls": [
+    {
+      "removed_test": "TestUnknownProtectionRejectsFutureStart",
+      "checksums_recomputed": true,
+      "exit_code": 1,
+      "output": "manifest failed: docker normal/race test evidence missing TestUnknownProtectionRejectsFutureStart"
+    },
+    {
+      "removed_test": "TestUsageOriginReplayAfterReportBootChangePreservesOriginal",
+      "checksums_recomputed": true,
+      "exit_code": 1,
+      "output": "manifest failed: original usage identity reboot replay normal/race evidence missing"
+    },
+    {
+      "control": "missing_actions",
+      "exit_code": 1,
+      "output": "manifest failed: actions result.json missing"
+    }
+  ]
+}

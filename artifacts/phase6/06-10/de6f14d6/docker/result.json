@@ -1,0 +1,48 @@
+{
+  "commit": "de6f14d60b474d5f62ff0c5b2c1084b168052bf2",
+  "result": 0,
+  "producer": "docker",
+  "through_plan": "06-10",
+  "external_checks": {
+    "cloudflare": {
+      "commit": "de6f14d60b474d5f62ff0c5b2c1084b168052bf2",
+      "exit_code": 0,
+      "status": "passed",
+      "policy_sha256": "fb4f26a53f1df357767586d01da7be83cc36b6656b522fbfd0831e9ce7836cfb",
+      "scope_evidence": "reviewed_creation_policy"
+    }
+  },
+  "acceptance_complete": true,
+  "source_clean": true,
+  "checksums": {
+    "commit.txt": "c4adc797975947fe640ebf2c964b0f2d4e4dff03ac43316488f5622d6387dc8f",
+    "openapi.log": "5e4fc14afb27d18b9470d218a6da4117a0f4fceedd0b991690873d0a04196411",
+    "dependencies.log": "c8c849bc0476949d046036594451a6389c5301dfb270a84653606721e658717c",
+    "tracer.log": "f4d3043e0622f34f854b124727b8eb542e077337403cdb2c75614503bdad989b",
+    "runner.log": "14f78cbf707e3b9419ba2c5c79b5eedb11264d1061fee8a133f94dd09a5b84e3",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "19bed9dacf5ced23fedfa7585bba81242f67c9bc1dd0aae421fd3c8957f812e1",
+    "compose.yml": "d31cf8d4d05fab001efe965d217a8c22676310deed1e58a7d45bddd5f8ce9588",
+    "docker-version.txt": "ed342474cbba3f029cdc502bd718ca98db996b40d531c55a390182bd440dd5fa",
+    "docker-info.json": "a360ef49a3c1b668c6b0d3bd57e6efe1a7d96d6a0b0af0ce7c7cbdca102f4f3f",
+    "images.json": "1d893870a2cdc3dce78bcf511ec03785d2547f76510c089b825b1f1a025192a0",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "valkey-version.txt": "d933de98e9afcdad1d3d4f8c72c4ac9ca9ea5a8c38116eb152813461e62b102a",
+    "build-metadata.txt": "f021c5b99391e5f3e68bc2fb66e5f1c53cbd130ea46192fc4e9aeee992d40620",
+    "processes.json": "35530efc3b3ccd549231e1f5a557c257d150bfbd199dd7fa8eeb9f5a8f58ce8a",
+    "processes/26455110-6253-4dc0-af49-3ac04ee26655-result.json": "37f6ac85b4c76f89c150720e4771775caba93025e4f9d76f0416e343ef3203df",
+    "processes/26455110-6253-4dc0-af49-3ac04ee26655-backend.log": "63a664aded434eadbf71ff939f7c53a1a4708d1dd91315e14f1d1b25a37aa492",
+    "processes/26455110-6253-4dc0-af49-3ac04ee26655-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/26455110-6253-4dc0-af49-3ac04ee26655-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/6beeac94-57e1-4533-8052-367bc59f9eb5-result.json": "ec700454f40ae81f6a57e383185de69d21a9eb8a83c95ea855c90542059fc0c9",
+    "processes/6beeac94-57e1-4533-8052-367bc59f9eb5-backend.log": "aa513e3ffb397a0c077c588e23e895f18ba53d3740af44916966c266d79420e2",
+    "processes/6beeac94-57e1-4533-8052-367bc59f9eb5-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/6beeac94-57e1-4533-8052-367bc59f9eb5-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cloudflare.log": "ed96786a971456f76843e3470039fb550f3297b2ef07642893abcea8be9b1879",
+    "cloudflare.json": "46eeff167436857f7d442b45e57821771de1c32324a9fbfec1178127e41f4387"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "run_url": null
+}

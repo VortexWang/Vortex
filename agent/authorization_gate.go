@@ -70,6 +70,13 @@ func (g *authorizationGate) use(earliest, latest time.Time, trusted, existing bo
 	}
 }
 
+// A coalesced planning wakeup is never authority. Notify only after durable
+// consumption, so the control loop can renew at its waterline before denial.
+func (g *authorizationGate) notifyConsumption() {
+	g.node.wakeUsage()
+	g.node.wakeDemand(RuntimeScope{RuleID: g.config.RuleID, RuleRevision: g.config.RuleRevision, PathGeneration: g.config.PathGeneration})
+}
+
 func (g *authorizationGate) Open(ctx context.Context, flow engineaccounting.Flow) (engineaccounting.Session, error) {
 	if g.isFaulted() || flow.Key == "" || flow.RuleID != "" && flow.RuleID != g.config.RuleID {
 		return nil, engineaccounting.ErrDenied
@@ -155,6 +162,8 @@ func (s *authorizationSession) reserveOnce(ctx context.Context, direction engine
 		err := s.gate.node.SettleUsage(resolveCtx, record)
 		if err != nil {
 			s.gate.fail()
+		} else if outcome.Resolution == engineaccounting.Committed && outcome.Used > 0 {
+			s.gate.notifyConsumption()
 		}
 		return err
 	})

@@ -1,0 +1,33 @@
+{
+  "base_sha": "2d98ef5e49085f5ba6e82f1807b706d706ec2709",
+  "scope": "Explicit request-scoped recovery orchestration preserves authenticated platform principal, finite proof stages and original occupation",
+  "phase_progress": "8/11;06-06 incomplete;CR-008 unprepared/unapproved",
+  "passed": {
+    "focused": "focused-final-native.log;service14.849s/repository1.375s",
+    "native_backend": "backend-native-race.log;300.164s",
+    "linux_arm64_backend": "backend-linux-race.log;314.733s",
+    "builds": "cross-builds.json;four Backend/Hub linux builds"
+  },
+  "expected_red": "red-native.log;missing service API compile RED",
+  "inherited_unchanged": "No SQL/protobuf/root Agent/Hub changes; earlier root/generation evidence retained",
+  "not_claimed": [
+    "Public HTTP endpoint or background platform delegation",
+    "Clean-source same-SHA Docker/Actions pair",
+    "Native amd64 execution",
+    "New network recovery orchestration acceptance",
+    "Effective funding/refill or production06-06 convergence"
+  ],
+  "evidence_sha256": {
+    "README.md": "71c4a56b7711f06f8073c0e77a5ab76bb1ef3877c020dd686fcd907f3901e54f",
+    "approved-snapshot-protection.json": "1136bd0230bb99340d8aaa21dec261a63359d69568d1e8b2e6dbfbe5b0d49fd8",
+    "backend-linux-race.log": "4beb193ccaa202989183acb3cbbdc86529c8e22c081c2e609abf328457f4f64e",
+    "backend-native-race.log": "bf5f313d89ff84abad4bc4944055333cc9db49d79ff2c3246a7809a055f1fd63",
+    "cross-builds.json": "8e507fff614ffaf5134e1e02d703a4c528e240daafe8e40cdcbc6b5c92b5d0e5",
+    "environment.json": "f4603aa5c2ae86ddf83cc40828a46817e2c837688dff2e7be4a75121e2dc7cd0",
+    "focused-complete-native.log": "3e47bf3a36ec8554fc9c4602bd0c4fea3d9b46d9d70913077ec9668cc385be0e",
+    "focused-final-native.log": "6cb18686dd15e63e9306a04e0a7ee37838d9c77756307d0415ae4f3745710210",
+    "green-native.log": "5e087ca0b2ec5d492ca5e023eb90fbe9a6ceb80c181bc5cd3455ac9fca084917",
+    "red-native.log": "659022a3d02739da4c05bec80588d8d3508dac9f9153d3260c81ffd3a87d4fba",
+    "source-hashes.json": "69a1f61969f119bc010d3ee3e316c4481badfd0e002b9ee3c47fa61b88d56f58"
+  }
+}

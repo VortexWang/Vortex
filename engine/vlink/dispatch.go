@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -168,6 +169,8 @@ type MuxLink struct {
 	done                    chan struct{}
 	closeOnce               sync.Once
 	peerID                  NodeID
+	peerBoot                BootID
+	peerGeneration          uint64
 	limiter                 *FrameLimiter
 	observer                Observer
 	dgrams                  *scheduler.Scheduler
@@ -189,6 +192,7 @@ type MuxStream struct {
 	ID            uint32
 	Network       StreamNetwork
 	receive       chan Frame
+	tcpReceive    *tcpReceiveQueue
 	done          chan struct{}
 	closeOnce     sync.Once
 	writeMu       sync.Mutex
@@ -203,6 +207,21 @@ type MuxStream struct {
 type RemoteOpenAuthorizer func(context.Context, NodeID, OpenRequest) (io.Closer, error)
 
 func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloConfig, config MuxConfig) (*MuxLink, NodeID, error) {
+	var peerBoot BootID
+	var peerGeneration uint64
+	verify := hello.VerifyPeer
+	if verify == nil {
+		return nil, NodeID{}, errors.New("vlink: peer verifier required")
+	}
+	hello.VerifyPeer = func(ctx context.Context, cert *x509.Certificate, message HelloMessage) error {
+		if verify != nil {
+			if err := verify(ctx, cert, message); err != nil {
+				return err
+			}
+		}
+		peerBoot, peerGeneration = message.LocalBootID, message.LocalGeneration
+		return nil
+	}
 	peer, err := HandshakeHello(ctx, conn, hello)
 	if err != nil {
 		forceCloseTLS(conn)
@@ -214,8 +233,12 @@ func NewAuthenticatedMuxLink(ctx context.Context, conn *tls.Conn, hello HelloCon
 		return nil, NodeID{}, err
 	}
 	mux.peerID = peer
+	mux.peerBoot, mux.peerGeneration = peerBoot, peerGeneration
 	return mux, peer, nil
 }
+
+// PeerIncarnation is authenticated by the TLS-exporter-bound HELLO transcript.
+func (m *MuxLink) PeerIncarnation() (BootID, uint64) { return m.peerBoot, m.peerGeneration }
 
 func newMuxLink(conn net.Conn, config MuxConfig) (*MuxLink, error) {
 	if conn == nil {
@@ -581,6 +604,7 @@ func (m *MuxLink) readLoop() {
 					}
 					continue
 				}
+				slog.Warn("vlink stream receive rejected", "stream_id", frame.StreamID, "frame_type", frame.Type, "cause", err)
 				m.reset(frame.StreamID, 8)
 				continue
 			}
@@ -608,7 +632,12 @@ func (m *MuxLink) newStream(id uint32, network StreamNetwork) *MuxStream {
 	if network == StreamUDP && m.config.UDPQueueFrames > 0 {
 		queueFrames = m.config.UDPQueueFrames
 	}
-	stream := &MuxStream{link: m, ID: id, Network: network, receive: make(chan Frame, queueFrames), done: make(chan struct{}), authorized: make(chan struct{})}
+	stream := &MuxStream{link: m, ID: id, Network: network, done: make(chan struct{}), authorized: make(chan struct{})}
+	if network == StreamTCP {
+		stream.tcpReceive = newTCPReceiveQueue(m.config.StreamWindow, queueFrames)
+	} else {
+		stream.receive = make(chan Frame, queueFrames)
+	}
 	m.mu.Lock()
 	select {
 	case <-m.done:
@@ -677,6 +706,25 @@ func (s *MuxStream) TakeResource() io.Closer {
 	return resource
 }
 func (s *MuxStream) Receive(ctx context.Context) (Frame, error) {
+	if s.tcpReceive != nil {
+		for {
+			if frame, ok := s.tcpReceive.pop(); ok {
+				return frame, nil
+			}
+			select {
+			case <-s.tcpReceive.ready:
+			case <-s.done:
+				if frame, ok := s.tcpReceive.pop(); ok {
+					return frame, nil
+				}
+				return Frame{}, ErrStreamState
+			case <-ctx.Done():
+				return Frame{}, ctx.Err()
+			case <-s.link.done:
+				return Frame{}, s.link.Err()
+			}
+		}
+	}
 	select {
 	case frame := <-s.receive:
 		return s.dequeued(frame), nil
@@ -749,10 +797,8 @@ func (s *MuxStream) WriteData(ctx context.Context, payload []byte) error {
 			// flight. The peer buffers that prefix until authorization; the
 			// local check prevents an unbounded pre-authorization queue.
 			if err := s.reserveEarlyData(ctx, size); err != nil {
-				resetCtx, cancel := context.WithTimeout(ctx, time.Second)
-				_ = s.Reset(resetCtx, 8)
-				cancel()
-				return err
+				// A preceding frame in this group may still borrow payload.
+				return s.stopDataWrite(err)
 			}
 			waitStarted := time.Now()
 			if err := s.link.windows.Acquire(ctx, s.ID, uint32(size)); err != nil {
@@ -992,6 +1038,12 @@ func (m *MuxLink) writeWindows(ctx context.Context, streamID, streamDelta, aggre
 }
 
 func (s *MuxStream) enqueue(frame Frame) error {
+	if s.tcpReceive != nil {
+		if frame.Type == FrameOpenOK {
+			s.authorizeOnce.Do(func() { close(s.authorized) })
+		}
+		return s.tcpReceive.push(frame)
+	}
 	if frame.Type == FrameOpenOK {
 		s.authorizeOnce.Do(func() { close(s.authorized) })
 	}

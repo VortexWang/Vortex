@@ -1,9 +1,9 @@
 ---
 phase: "06"
 slug: "m4-m4-backend"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-11-07"
 ---
 
@@ -19,12 +19,12 @@ created: "2026-11-07"
 | Module/config | 独立 backend/go.mod；backend/db/sqlc.yaml；backend/db/migrations；deploy/backend/compose.test.yml |
 | Quick run | `cd backend && test "$(GOTOOLCHAIN=local go env GOVERSION)" = go1.27.3 && GOTOOLCHAIN=local go test ./... -count=1`（先由 Compose 导出 PHASE6_DATABASE_URL；不得因缺少数据库而静默 skip） |
 | Full suite | 提交后从仓库根执行 `./tools/phase6/check.sh --expected-sha "$(git rev-parse HEAD)" --through-plan 06-11`；脚本运行固定镜像 Docker/race/故障拓扑并核对本机与 Actions 的同 SHA 证据 |
-| Runtime | 尚未测量；focused 目标不超过 120 秒，全套目标不超过 10 分钟；1,000 规则 reconciliation 单独断言 <=60 秒 |
+| Runtime | 真实60秒租约、完整normal/race及重复故障套件使总耗时超过最初10分钟估计；各producer独立记录墙钟与原始日志，Actions设90分钟上限。1,000规则计时区间仍独立断言<=60秒；最终65a53358三端实测见06-VERIFICATION与原始report。 |
 
 ## Sampling Rate
 
 - 每个实现任务先执行其 PLAN 中的完整 automated verify；所有 Go 入口使用 backend 模块、GOTOOLCHAIN=local，并断言 GOVERSION=go1.27.3。
-- 数据库迁移只追加，按执行顺序 00001..00008 升级；06-08 必须验证 seeded 00001 数据库升级后保留既有权威记录，并先提供限制事实/投影供 06-09 消费。
+- 数据库迁移只追加，按执行顺序 00001..00009 升级；06-10 追加 00004 entry group domains，后续 rules/packages/ledger/shares/events 使用 00005..00009。既有 00001..00003 不改写；06-08 必须验证 seeded 00001 数据库升级后保留既有权威记录，并先提供限制事实/投影供 06-09 消费。
 - 每次 SQL 变更在测试前执行锁定版本 sqlc generate，提交 backend/db/generated 产物；以临时目录二次生成并比较验证无漂移。
 - 每个波次提交后运行已实施范围的证据门禁；最终 06-11 才要求完整 96 项覆盖及全部证据。不得让早期门禁依赖未来计划尚未创建的文件。
 - clean-tree/expected-SHA 断言在任务提交后运行；生成的日志位于约定证据目录，不能污染提交源树。若存在其他工作改动，使用干净检出运行证据，不删除他人的改动。
@@ -36,31 +36,31 @@ created: "2026-11-07"
 
 | Task ID | Wave | Behavior / artifact | Verification | File Exists | Status |
 |---------|------|---------------------|--------------|-------------|--------|
-| 06-01-01 | 1 | desired state 到 Agent/Hub receipt 的端到端 tracer | 自动化；执行 06-01-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-08-01 | 2 | tenant scope, roles and transaction-scoped audit | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-08-02 | 2 | sqlc/toolchain reproducibility and Valkey loss gate | 自动化；执行 06-08-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | 自动化；执行 06-09-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-09-02 | 3 | all restriction causes must clear | 自动化；执行 06-09-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-02-01 | 4 | 节点组、成员、grant 与生命周期服务 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-02-02 | 4 | 端口预留、限制保留和释放确认 | 自动化；执行 06-02-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-10-01 | 5 | serving eligibility and encrypted DNS credential boundary | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-10-02 | 5 | controlled Cloudflare CRUD and fail-closed evidence | 自动化；执行 06-10-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-01 | 6 | immutable rule revisions 与输入校验 | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-02 | 6 | deterministic compiler 与 immutable per-node artifacts | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-03-03 | 6 | revision-scoped Prepare/Commit/rollback/unknown worker | 自动化；执行 06-03-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-04-01 | 7 | catalog 与 immutable subscription/billing snapshot | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-04-02 | 7 | entitlement code atomic redemption | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-04-03 | 7 | restriction projection 与 downgrade preview/confirm | 自动化；执行 06-04-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-01 | 8 | source ledger、计费快照和 B/F/L projection | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-02 | 8 | usage idempotency、reserve/consume/final/dispute | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-05-03 | 8 | unknown upper bound 与 fault reconciliation | 自动化；执行 06-05-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-06-01 | 9 | share owner chain、lease 与 boot fencing | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-06-02 | 9 | successor handoff、receipt confirmation 与差额释放 | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-06-03 | 9 | limits 与规则/计量联动检查 | 自动化；执行 06-06-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-07-01 | 10 | REST auth、resource routes、errors 与 cursor | 自动化；执行 06-07-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-07-02 | 10 | durable SSE replay 与 gap resync | 自动化；执行 06-07-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-11-01 | 11 | timed 1,000-rule reconciliation workload | 自动化；执行 06-11-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
-| 06-11-02 | 11 | same-SHA portable evidence gate | 自动化；执行 06-11-PLAN.md 对应任务的完整 verify | ❌ 待实现 | ⬜ pending |
+| 06-01-01 | 1 | desired state 到 Agent/Hub receipt 的端到端 tracer | 06-01-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-08-01 | 2 | tenant scope, roles and transaction-scoped audit | 06-08-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-08-02 | 2 | sqlc/toolchain reproducibility and Valkey loss gate | 06-08-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-09-01 | 3 | no-generator OpenAPI and fail-closed engineering gate | 06-09-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-09-02 | 3 | all restriction causes must clear | 06-09-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-02-01 | 4 | 节点组、成员、grant 与生命周期服务 | 06-02-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-02-02 | 4 | 端口预留、限制保留和释放确认 | 06-02-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-10-01 | 5 | serving eligibility and encrypted DNS credential boundary | 06-10-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-10-02 | 5 | controlled Cloudflare CRUD and fail-closed evidence | 06-10-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-03-01 | 6 | immutable rule revisions 与输入校验 | 06-03-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-03-02 | 6 | deterministic compiler 与 immutable per-node artifacts | 06-03-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-03-03 | 6 | revision-scoped Prepare/Commit/rollback/unknown worker | 06-03-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-04-01 | 7 | catalog 与 immutable subscription/billing snapshot | 06-04-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-04-02 | 7 | entitlement code atomic redemption | 06-04-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-04-03 | 7 | restriction projection 与 downgrade preview/confirm | 06-04-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-05-01 | 8 | source ledger、计费快照和 B/F/L projection | 06-05-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-05-02 | 8 | usage idempotency、reserve/consume/final/dispute | 06-05-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-05-03 | 8 | unknown upper bound 与 fault reconciliation | 06-05-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-06-01 | 9 | share owner chain、lease 与 boot fencing | 06-06-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-06-02 | 9 | successor handoff、receipt confirmation 与差额释放 | 06-06-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-06-03 | 9 | limits 与规则/计量联动检查 | 06-06-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-07-01 | 10 | REST auth、resource routes、errors 与 cursor | 06-07-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-07-02 | 10 | durable SSE replay 与 gap resync | 06-07-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-11-01 | 11 | timed 1,000-rule reconciliation workload | 06-11-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
+| 06-11-02 | 11 | same-SHA portable evidence gate | 06-11-SUMMARY及docs/coverage/phase6领域映射；最终65a53358 Docker/amd64+arm64 Actions42572674719通过 | ✅ 已实现 | ✅ paired normal/race/external PASS |
 
 ## Requirement and Safety Coverage
 
@@ -78,12 +78,12 @@ created: "2026-11-07"
 
 ## Wave 0 Requirements
 
-- [ ] 06-01：backend 模块、精确工具链、pgx/sqlc/Goose、最小权威 schema/query/generated、测试数据库配置。
-- [ ] 06-01：真实 Phase 5 Agent/Hub mTLS tracer、进程证据和数据库故障断言。
-- [ ] 06-08：租户策略、统一 AuditWriter、Valkey 可丢失重建、依赖与 sqlc reproducibility。
-- [ ] 06-09：单一 OpenAPI source、确定性 copy、Ruby structural/security lint；Phase 6 不安装 OpenAPI generator，TypeScript 生成由 Phase 7 负责。
-- [ ] 06-09：分阶段 check.sh/evidence_manifest.sh 与 Actions 入口，明确 expected-SHA producer；06-11 扩展最终完整门禁。
-- [ ] 后续计划每次新增 SQL 都生成并消费 backend/db/generated；所有 fault shell/test 引用具有本计划或前置 producer。
+- [x] 06-01：backend 模块、精确工具链、pgx/sqlc/Goose、最小权威 schema/query/generated、测试数据库配置。
+- [x] 06-01：真实 Phase 5 Agent/Hub mTLS tracer、进程证据和数据库故障断言。
+- [x] 06-08：租户策略、统一 AuditWriter、Valkey 可丢失重建、依赖与 sqlc reproducibility。
+- [x] 06-09：单一 OpenAPI source、确定性 copy、Ruby structural/security lint；Phase 6 不安装 OpenAPI generator，TypeScript 生成由 Phase 7 负责。
+- [x] 06-09：分阶段 check.sh/evidence_manifest.sh 与 Actions 入口，明确 expected-SHA producer；a9481584 同 SHA 配对通过，06-11 已扩展并通过最终完整门禁。
+- [x] 后续计划每次新增 SQL 都生成并消费 backend/db/generated；所有 fault shell/test 引用具有本计划或前置 producer。
 
 ## Deferred Manual Verification
 
@@ -96,11 +96,29 @@ created: "2026-11-07"
 
 ## Validation Sign-Off
 
-- [ ] 每个实现任务都有 automated verify 或明确前置基础设施
-- [ ] 连续任务不存在超过两项无自动化反馈
-- [ ] 所有验证目标均由自身或前置计划创建
-- [ ] 无 watch 模式；缺少环境/秘密不能静默 skip 为通过
-- [ ] focused 检查实际耗时满足目标并记录
-- [ ] 全部执行证据通过后才将 nyquist_compliant / wave_0_complete 标记 true
+- [x] 每个实现任务都有 automated verify 或明确前置基础设施
+- [x] 连续任务不存在超过两项无自动化反馈
+- [x] 所有验证目标均由自身或前置计划创建
+- [x] 无 watch 模式；缺少环境/秘密不能静默 skip 为通过
+- [x] focused 检查实际耗时满足目标并记录
+- [x] 全部执行证据通过后才将 nyquist_compliant / wave_0_complete 标记 true
 
-**Approval:** pending execution evidence
+**Approval:** final65a53358 Docker及Actions42572674719双架构完整通过；25项task的自动化与前置关系逐项核对，最终配对及外部CRUD通过。
+
+最终逐端测试与计时：
+
+| Producer | Backend normal/race | Agent/Hub/contracts normal/race | Engine normal/race | 1000规则 normal/race | Cloudflare CRUD |
+| --- | --- | --- | --- | --- | --- |
+| docker | 502 / 502 | 657 / 657 | 249 / 249 | 8.567 / 13.649 秒 | PASS |
+| actions-amd64 | 502 / 502 | 657 / 657 | 249 / 249 | 23.835 / 32.862 秒 | PASS |
+| actions-arm64 | 502 / 502 | 657 / 657 | 249 / 249 | 29.746 / 42.092 秒 | PASS |
+
+安全24/24closed，代码审查44显式文件、10项历史发现已修复且0未解决；UI-SPEC不存在，本阶段无前端。18前序测试文件91明确用例normal/race三端逐项通过，benchmark和历史资格命令未据此重新认证。
+
+## Validation Audit 2026-11-09
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 25 |
+| Escalated | 0 |

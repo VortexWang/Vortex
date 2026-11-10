@@ -1,0 +1,6 @@
+{
+  "reason": "Refined lease splitting to activation commands only before full acceptance; query/abort retain one transaction and never acquire tenant activation authority.",
+  "local_runtime": "not_run",
+  "actions_run": 42554341197,
+  "status": "superseded"
+}

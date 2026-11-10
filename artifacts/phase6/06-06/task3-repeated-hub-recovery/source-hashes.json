@@ -1,0 +1,14 @@
+{
+  "base_sha": "4f2e351edd7501329836c317aa49c8d6403bbef7",
+  "sha256": {
+    "backend/internal/service/hub_same_store_recovery.go": "f2e241532c660a827924728b1de4b7ee69f42b554425d256f9d9fc8c7439b168",
+    "backend/internal/service/hub_same_store_admission.go": "dae934349be1b44f8a8defbf84e9ffb2b332b663c366699cceaea01bcdf216e6",
+    "backend/internal/service/hub_same_store_prefix.go": "9793c444c384d36c2de97eea42cfa07ba2a33dd4c01ebf7639b45c1c3dc9db08",
+    "backend/internal/service/node_recovery_credit_fence.go": "8a8046fbb75063448d211d6fbdee23789ce8f4fdae80ae8f61be01f619a2e54b",
+    "backend/internal/service/node_recovery_source.go": "70004c230fa41981dd8a2a6a6f19ff3de1d97d75cc11129179043ea0074e067b",
+    "backend/internal/service/hub_repeated_recovery_test.go": "e2d0d896e59bb18818201aa2b04f4789983d26d07271f1f764aa188413a283fc",
+    "backend/db/query/hub_same_store_recovery.sql": "3320423991265c12adb12d75cdbedaf475e6643a58f1c06a2889485d4c482ae7",
+    "backend/db/generated/hub_same_store_recovery.sql.go": "3d3f33e3bf2d03b7f84d1ab30f295a6bdc4e71a3cd683a89033537f3afb36da0",
+    "contracts/protobuf/v1/lifecycle.md": "13488c33ab69dba4ffd22669971856af1b445417b11dbcda7557049442f71dcf"
+  }
+}

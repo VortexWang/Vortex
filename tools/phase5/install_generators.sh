@@ -8,7 +8,7 @@ case "$(uname -m)" in
  aarch64|arm64) platform=linux-arm64; asset=linux-aarch_64;;
  *) echo 'unsupported Linux architecture' >&2; exit 1;;
 esac
-curl --fail --location --retry 3 "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-$asset.zip" --output "$prefix/protoc.zip"
+python3 tools/download_release.py "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-$asset.zip" "$prefix/protoc.zip"
 python3 - "$prefix" "$platform" <<'PY'
 import hashlib,json,pathlib,sys,zipfile
 prefix=pathlib.Path(sys.argv[1]);platform=sys.argv[2]

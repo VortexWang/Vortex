@@ -1,0 +1,23 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-5770b03721d1 Creating 
+ Container vortex-phase6-tracer-backend-test-run-5770b03721d1 Created 
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 09:13:55 goose: no migrations to run. current version: 8
+2026/11/08 09:13:56 OK   00001_authority.sql (11.77ms)
+2026/11/08 09:13:56 OK   00002_tenant_policy.sql (8.08ms)
+2026/11/08 09:13:56 OK   00003_nodes_ports.sql (17.96ms)
+2026/11/08 09:13:56 OK   00004_entry_group_domains.sql (1.97ms)
+2026/11/08 09:13:56 OK   00005_rules_compile.sql (19.12ms)
+2026/11/08 09:13:56 OK   00006_packages_entitlements.sql (18.99ms)
+2026/11/08 09:13:56 OK   00007_metering_ledger.sql (20.58ms)
+2026/11/08 09:13:56 OK   00008_limits_shares.sql (40.2ms)
+2026/11/08 09:13:56 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:277: actual role mTLS: child expiry before parent, automatic seal, missing-inventory hold, authenticated child final, original-source settlement, funded successor, direct source provisioning and Agent runtime ready; short child TTL fixture
+--- PASS: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (9.59s)
+PASS
+ok  	vortex/backend/internal/service	10.598s

@@ -1,0 +1,6 @@
+=== RUN   TestTracerRealProcesses
+2026/11/09 05:52:26 goose: no migrations to run. current version: 9
+    process_test.go:313: real backend/Agent/Hub processes succeeded operation=c07c69a5-e433-4882-90e1-247d0ed580a1 duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (10.84s)
+PASS
+ok  	vortex/backend/internal/service	12.543s

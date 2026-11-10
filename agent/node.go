@@ -32,8 +32,12 @@ type Node struct {
 	Store               *store.Store
 	Engine              Engine
 	demandMu            sync.Mutex
+	authorityChanged    chan struct{}
 	demandSubscriptions map[*demandSubscription]struct{}
 	demandWaiters       chan struct{}
+	demandWrites        map[*waitingDemandWrite]struct{}
+	usageMu             sync.Mutex
+	usageSubscriptions  map[chan struct{}]struct{}
 }
 
 func New(nodeID string, s *store.Store, e Engine) (*Node, error) {

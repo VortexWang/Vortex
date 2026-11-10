@@ -1,0 +1,17 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-17349d0d3928 Creating 
+ Container vortex-phase6-tracer-backend-test-run-17349d0d3928 Created 
+ok  	vortex/backend/internal/httpapi	7.630s
+ok  	vortex/backend/cmd/vortex-backend	1.098s
+2026/11/08 23:51:03 goose: no migrations to run. current version: 9
+--- FAIL: TestPortIntentHTTPCommitUsesActualAuthenticatedStoredProofs (0.06s)
+    port_intent_http_test.go:34: invalid or expired token
+FAIL
+FAIL	vortex/backend/internal/service	0.076s
+FAIL
+

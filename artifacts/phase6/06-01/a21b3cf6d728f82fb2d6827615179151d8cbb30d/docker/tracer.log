@@ -1,0 +1,63 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-2688e75336ee Creating 
+ Container vortex-phase6-tracer-backend-test-run-2688e75336ee Created 
+go version go1.27.3 linux/arm64
+Linux 38bf1110da50 7.2.12-orbstack-00394-gbecdd6130068 #1 SMP PREEMPT Thu Oct 22 22:17:17 UTC 2026 aarch64 GNU/Linux
+2026-11-06T19:06:28Z
+all modules verified
+2026/11/06 19:06:43 goose: no migrations to run. current version: 1
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/control	[no test files]
+=== RUN   TestTracerRealProcesses
+2026/11/06 19:06:43 goose: no migrations to run. current version: 1
+    process_test.go:312: real backend/Agent/Hub processes succeeded operation=59d20c02-f7a0-4a20-83c3-dc990190d124 duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (5.64s)
+=== RUN   TestTracerDesiredStateReceipt
+2026/11/06 19:06:49 goose: no migrations to run. current version: 1
+--- PASS: TestTracerDesiredStateReceipt (0.03s)
+=== RUN   TestTracerTransactionRollback
+2026/11/06 19:06:49 goose: no migrations to run. current version: 1
+--- PASS: TestTracerTransactionRollback (0.02s)
+=== RUN   TestTracerConcurrentMutation
+2026/11/06 19:06:49 goose: no migrations to run. current version: 1
+--- PASS: TestTracerConcurrentMutation (0.02s)
+=== RUN   TestValkeyLossRebuild
+2026/11/06 19:06:49 goose: no migrations to run. current version: 1
+--- PASS: TestValkeyLossRebuild (0.01s)
+PASS
+ok  	vortex/backend/internal/service	5.715s
+?   	vortex/backend/internal/testutil	[no test files]
+?   	vortex/backend/internal/worker	[no test files]
+?   	vortex/backend/cmd/vortex-backend	[no test files]
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+?   	vortex/backend/internal/control	[no test files]
+=== RUN   TestTracerRealProcesses
+2026/11/06 19:06:50 goose: no migrations to run. current version: 1
+    process_test.go:312: real backend/Agent/Hub processes succeeded operation=b2e03a8d-84c9-4a15-82cd-29c63e8a3861 duplicate=2 SQLite-effects=1 disconnect=unknown
+--- PASS: TestTracerRealProcesses (6.97s)
+=== RUN   TestTracerDesiredStateReceipt
+2026/11/06 19:06:57 goose: no migrations to run. current version: 1
+--- PASS: TestTracerDesiredStateReceipt (0.05s)
+=== RUN   TestTracerTransactionRollback
+2026/11/06 19:06:57 goose: no migrations to run. current version: 1
+--- PASS: TestTracerTransactionRollback (0.02s)
+=== RUN   TestTracerConcurrentMutation
+2026/11/06 19:06:57 goose: no migrations to run. current version: 1
+--- PASS: TestTracerConcurrentMutation (0.04s)
+=== RUN   TestValkeyLossRebuild
+2026/11/06 19:06:57 goose: no migrations to run. current version: 1
+--- PASS: TestValkeyLossRebuild (0.02s)
+PASS
+ok  	vortex/backend/internal/service	8.123s
+?   	vortex/backend/internal/testutil	[no test files]
+?   	vortex/backend/internal/worker	[no test files]

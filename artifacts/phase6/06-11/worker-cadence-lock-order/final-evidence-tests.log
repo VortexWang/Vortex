@@ -1,0 +1,8 @@
+test_exact_pair_arch_and_missing_external (tools.phase6.test_final_evidence_check.FinalEvidence) ... ok
+test_go_rfc3339nano_precision_and_invalid_timestamps (tools.phase6.test_final_evidence_check.FinalEvidence) ... ok
+test_runtime_and_tampering (tools.phase6.test_final_evidence_check.FinalEvidence) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.235s
+
+OK

@@ -1,0 +1,28 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-b094eeb414f4 Creating 
+ Container vortex-phase6-tracer-backend-test-run-b094eeb414f4 Created 
+=== RUN   TestRegionalFailoverRetainsUnknownDebt
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/tls-blackhole
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-stream
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/silent-established
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/autonomous
+=== RUN   TestRegionalFailoverRetainsUnknownDebt/recovering
+--- PASS: TestRegionalFailoverRetainsUnknownDebt (6.03s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/tls-blackhole (1.08s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-stream (1.12s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/silent-established (1.95s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/autonomous (0.94s)
+    --- PASS: TestRegionalFailoverRetainsUnknownDebt/recovering (0.94s)
+PASS
+ok  	vortex/agent	7.048s
+ok  	vortex/agent	98.331s
+ok  	vortex/agent/store	158.497s
+ok  	vortex/hub	20.189s
+ok  	vortex/contracts	1.017s
+?   	vortex/contracts/protobuf/v1	[no test files]
+ok  	vortex/cmd/vortex-node	2.370s

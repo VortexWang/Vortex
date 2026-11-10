@@ -1,0 +1,10 @@
+# vortex/agent/store [vortex/agent/store.test]
+agent/store/runtime_recovery_updates_test.go:25:12: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:30:11: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:47:19: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:62:17: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:75:16: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:80:14: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+agent/store/runtime_recovery_updates_test.go:83:14: s.RuntimeRecoveryUpdates undefined (type *Store has no field or method RuntimeRecoveryUpdates)
+FAIL	vortex/agent/store [build failed]
+FAIL

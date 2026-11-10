@@ -1,0 +1,1735 @@
+{
+  "source": "65a5335894732b7d632e870acc3d8283be224cd3",
+  "status": "passed",
+  "hosts": {
+    "docker": {
+      "counts": {
+        "backend_normal": 502,
+        "root_normal": 657,
+        "engine_normal": 249,
+        "backend_race": 502,
+        "root_race": 657,
+        "engine_race": 249
+      },
+      "truths": [
+        {
+          "id": "06-01-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T2",
+          "status": "verified",
+          "evidence": {
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T3",
+          "status": "verified",
+          "evidence": {
+            "TestTracerDesiredStateReceipt": "normal+race passed",
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-02-T1",
+          "status": "verified",
+          "evidence": {
+            "TestNodeGroupOwnershipAndStableMembers": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T2",
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortRestrictionClockAndProofBackedRelease": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T3",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-03-T1",
+          "status": "verified",
+          "evidence": {
+            "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCompileCanonicalDigestReplay": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T3",
+          "status": "verified",
+          "evidence": {
+            "TestApplyPrepareCommitUnknownAndLateReceipt": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T1",
+          "status": "verified",
+          "evidence": {
+            "TestPackageCatalogSnapshotAndSubscriptionImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T2",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T3",
+          "status": "verified",
+          "evidence": {
+            "TestPackageLifecycleAuditRollbackAndUnknownRetention": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T1",
+          "status": "verified",
+          "evidence": {
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T2",
+          "status": "verified",
+          "evidence": {
+            "TestUsageIdempotentTupleDigestDisputeAndFinal": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T3",
+          "status": "verified",
+          "evidence": {
+            "TestRateVersionSnapshotLeadAndBillingExplanation": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T1",
+          "status": "verified",
+          "evidence": {
+            "TestShareConcurrentLinearChainCapacityKindsAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T2",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T3",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffLostReceiptRestartRetainsAndConfirmsExactDifference": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T1",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T2",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T3",
+          "status": "verified",
+          "evidence": {
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T4",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-08-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-08-T2",
+          "status": "verified",
+          "evidence": {
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T2",
+          "status": "verified",
+          "evidence": {
+            "OPENAPI": "exact45-operation lint/freeze"
+          }
+        },
+        {
+          "id": "06-10-T1",
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-10-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-11-T1",
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-11-T2",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate",
+            "TestRenewalSenderYieldsAndRotatesUnansweredJournal": "normal+race passed",
+            "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope": "normal+race passed",
+            "TestHubControlObservationPinsSnapshotBeforeClock": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC2",
+          "status": "verified",
+          "evidence": {
+            "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+            "TestHTTPGroupMembersExactOperationCASAndSafeRead": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC3",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC4",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC5",
+          "status": "verified",
+          "evidence": {
+            "TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback": "normal+race passed",
+            "TestSourceLocalUnknownDoesNotNetOrFreezeNewSource": "normal+race passed"
+          }
+        }
+      ],
+      "key_links": {
+        "06-01-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed",
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        "06-02-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortProofAuthenticationAndGenerationFence": "normal+race passed"
+          }
+        },
+        "06-03-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestRuleCompileCommittedArtifactAndAuditRollback": "normal+race passed",
+            "TestRuleCommandPrepareCommitQueryRestartRealRuntime": "normal+race passed"
+          }
+        },
+        "06-04-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPackageDurableSnapshotProductionCompileAndHistory": "normal+race passed",
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        "06-05-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-06-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        "06-07-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed",
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        "06-08-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-09-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed",
+            "TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation": "normal+race passed"
+          }
+        },
+        "06-10-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed",
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        "06-11-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed",
+            "TestRuleReconciliationDrainsReadyWorkAndCancels": "normal+race passed"
+          }
+        }
+      },
+      "prior_test_files": [
+        {
+          "path": "engine/accounting/accounting_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestBatchCommitResolvesOnceWithAcceptedBytes": "normal+race passed",
+            "TestBatchReturnAndUnknownKeepReservedAmount": "normal+race passed",
+            "TestBatchResolverFailureBecomesUnknownAndCannotRetry": "normal+race passed",
+            "TestBatchRejectsInvalidAmounts": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/gate_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestTCPWithGateReservesBeforeWriteAndSettlesAcceptedBytes": "normal+race passed",
+            "TestTCPWithGateDenialPreventsDestinationWrite": "normal+race passed",
+            "TestTCPWithGateSettlesOnlyAcceptedPartOfShortWrite": "normal+race passed",
+            "TestTCPWithGateReturnsReservationWhenNoBytesAreAccepted": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_linux_test.go",
+          "tests": 1,
+          "evidence": {
+            "TestTCPPlatformSelectsSpliceForBareTCP": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestTCPPropagatesHalfCloseAndMetersWrittenBytes": "normal+race passed",
+            "TestTCPContextCancellationClosesBothDirections": "normal+race passed",
+            "TestTCPMeterFailureStopsRelay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/udp_test.go",
+          "tests": 10,
+          "evidence": {
+            "TestUDPForwardsResponsesToOriginatingClientAndMetersWrites": "normal+race passed",
+            "TestUDPDefaultsIdleTimeoutToSixtySeconds": "normal+race passed",
+            "TestUDPPerClientSessionLimitDropsBeforeCreatingSession": "normal+race passed",
+            "TestUDPWithGateAccountsRequestAndResponseWrites": "normal+race passed",
+            "TestUDPWithGateDenialDropsBeforeTargetWrite": "normal+race passed",
+            "TestUDPGlobalSessionLimitReleasesAfterExpiry": "normal+race passed",
+            "TestUDPExpiresIdleSessionAndReplacesIt": "normal+race passed",
+            "TestUDPCancellationClosesListenerAndSessions": "normal+race passed",
+            "TestUDPRejectsNegativeIdleTimeout": "normal+race passed",
+            "TestUDPRejectsNegativeSessionLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/codec_test.go",
+          "tests": 6,
+          "evidence": {
+            "TestFrameRoundTrip": "normal+race passed",
+            "TestMuxFrameLeaseIsIndependentAndReleasedOnce": "normal+race passed",
+            "TestReadFrameRejectsMalformedHeadersBeforePayload": "normal+race passed",
+            "TestReadFrameRejectsTruncatedHeaderAndPayload": "normal+race passed",
+            "TestStreamIDAllocatorParityMonotonicAndExhaustion": "normal+race passed",
+            "TestWriteFrameRejectsOversizedPayload": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/hello_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestHelloSignatureBindsExporterAndDirection": "normal+race passed",
+            "TestHelloRoundTripAndRejectsUnsupportedVersion": "normal+race passed",
+            "TestNodeIDFromCertificateRequiresCanonicalSAN": "normal+race passed",
+            "TestHandshakeHelloTLS13MutualIdentity": "normal+race passed",
+            "TestHandshakeHelloPeerVerifierRejectsStaleGenerationAndReplay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/identity_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestFreshnessRejectsStaleGenerationAndReplay": "normal+race passed",
+            "TestFreshnessLeaseUsesConservativeIntersection": "normal+race passed",
+            "TestFreshnessLeaseRejectsSlowDuplicateAndClockRollback": "normal+race passed",
+            "TestIdentityCertificatePolicyRequiresVerifiedChainAndCanonicalSAN": "normal+race passed",
+            "TestIdentityTLSConfigPinsTLS13AndRequiresClientCertificate": "normal+race passed",
+            "TestDispatcherStreamFailureIsolatedAndIdentityFailureClosesLink": "normal+race passed",
+            "TestConcurrentDispatcherCloseIsIdempotent": "normal+race passed",
+            "TestLivenessPingTimeoutAndAbsoluteIdleDeadline": "normal+race passed",
+            "TestLivenessRejectsClockRollbackFromExtendingIdle": "normal+race passed",
+            "TestDispatcherValidFrameRefreshesLiveness": "normal+race passed",
+            "TestMuxPollSendsNonceBoundPingAndAcceptsPong": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/integration_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestVLinkIntegrationUnauthorizedUDPDoesNotReachOpenOK": "normal+race passed",
+            "TestLateWindowForClosedStreamDoesNotResetOrCloseLink": "normal+race passed",
+            "TestResetRemovesBothStreamRecords": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/limits_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestLimitBurstAndSustainedThreshold": "normal+race passed",
+            "TestLimitRejectsUnconfiguredAndInvalidLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/observability_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestObservabilityRetainsSafeBoundedEventsAndCounters": "normal+race passed",
+            "TestObservabilityRejectsInvalidHighCardinalityShapes": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/open_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestOpenPolicyAcceptsLocalRuntimeDecision": "normal+race passed",
+            "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed",
+            "TestOpenPolicySelfHostedAndNonExecutionRulesUseCorrectGates": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/pool_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestSelectTransportModeBoundaries": "normal+race passed",
+            "TestFirstPacketHistoryUsesBoundedTenMinuteMedian": "normal+race passed",
+            "TestLinkPoolHardCapAcrossConcurrentPoolModeAcquires": "normal+race passed",
+            "TestLinkPoolScalesDownAndRemovesUnhealthyLinks": "normal+race passed",
+            "TestBackoffIsCappedAndJitteredWithinBounds": "normal+race passed",
+            "TestDuplicateLinkArbitrationKeepsPreferredInitiator": "normal+race passed",
+            "TestReconcileEvictsOldestIdleLinksAfterReorderedUse": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/reverse_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestReverseConnectorRetriesThenReopensOnlyApprovedTCP": "normal+race passed",
+            "TestReverseConnectorStopsDuringBackoff": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/stream_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestMuxLinkMultiplexesStreamsAndHonorsWindows": "normal+race passed",
+            "TestMuxTCPDataFramesFitOneTLSRecord": "normal+race passed",
+            "TestMuxRemoteOpenRequiresAuthorizationAndClosesResources": "normal+race passed",
+            "TestStreamIDsParityAndNoReuse": "normal+race passed",
+            "TestStreamOpeningDataBoundAndOpenError": "normal+race passed",
+            "TestStreamLocalEarlyDataAndDelayedOpenError": "normal+race passed",
+            "TestStreamUDPRequiresOpenOKAndViolationIsLocal": "normal+race passed",
+            "TestStreamRemoteOpenAndHalfCloseIsolation": "normal+race passed",
+            "TestStreamLocalEarlyTCPDataIsBoundedUntilOpenOK": "normal+race passed",
+            "TestRejectedRemoteOpenDropsBufferedTCPData": "normal+race passed",
+            "TestStreamDuplicateIDIsLinkError": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/target_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestResolveLocalTargetReturnsNumericAllowlistedEndpoint": "normal+race passed",
+            "TestResolveLocalTargetRejectsPrivateReservedAndMalformedAddresses": "normal+race passed",
+            "TestResolveLocalTargetRejectsDNSRebindingAnswerSet": "normal+race passed",
+            "TestResolveLocalTargetRejectsEmptyDNSAndPrefixMismatch": "normal+race passed",
+            "TestDialLocalTargetRejectsUnsafeEndpointWithoutDetails": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/udp_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss": "normal+race passed",
+            "TestUDPReturnsStreamCreditBeforeWindowNearExhaustion": "normal+race passed",
+            "TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit": "normal+race passed",
+            "TestUDPQueueDropReturnsCreditAndPreservesStream": "normal+race passed",
+            "TestUDPAdmissionUsesAuthorizedLocalTargetAndStableFlowKey": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/window_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestWindowAcquiresStreamAndAggregateCredit": "normal+race passed",
+            "TestUDPWindowRejectionAttributesCreditAtAdmission": "normal+race passed",
+            "TestTCPAcquirePreservesAggregateUDPReserve": "normal+race passed",
+            "TestWindowBlockedWriterWakesOnGrant": "normal+race passed",
+            "TestWindowCancellationCloseOverflowAndUDPDrop": "normal+race passed",
+            "TestWindowRejectsUnknownStreamAndBoundsCredit": "normal+race passed",
+            "TestWindowRemovedStreamWakesWaiter": "normal+race passed"
+          }
+        }
+      ],
+      "remaining_requirements": {
+        "TEN-002": {
+          "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed",
+          "TestNodeGroupOwnershipAndStableMembers": "normal+race passed",
+          "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed",
+          "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+        },
+        "NOD-012": {
+          "TestNodeSegmentPermitIndependentOfGrants": "normal+race passed",
+          "TestCompileGrantPermitAndDirection": "normal+race passed",
+          "TestApplyMultihopForwardAndReverseRealTLS": "normal+race passed",
+          "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed"
+        },
+        "PRT-004": {
+          "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+          "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+          "TestPortIntentAbortDoesNotReleaseWithoutAllNodeProofs": "normal+race passed"
+        },
+        "BE-005": {
+          "TestOpenAPIExactlyMatchesRegisteredGinRoutes": "normal+race passed",
+          "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+        },
+        "BE-006": {
+          "TestReconcile1000Within60s": "normal+race passed"
+        }
+      }
+    },
+    "actions-amd64": {
+      "counts": {
+        "backend_normal": 502,
+        "root_normal": 657,
+        "engine_normal": 249,
+        "backend_race": 502,
+        "root_race": 657,
+        "engine_race": 249
+      },
+      "truths": [
+        {
+          "id": "06-01-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T2",
+          "status": "verified",
+          "evidence": {
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T3",
+          "status": "verified",
+          "evidence": {
+            "TestTracerDesiredStateReceipt": "normal+race passed",
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-02-T1",
+          "status": "verified",
+          "evidence": {
+            "TestNodeGroupOwnershipAndStableMembers": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T2",
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortRestrictionClockAndProofBackedRelease": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T3",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-03-T1",
+          "status": "verified",
+          "evidence": {
+            "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCompileCanonicalDigestReplay": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T3",
+          "status": "verified",
+          "evidence": {
+            "TestApplyPrepareCommitUnknownAndLateReceipt": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T1",
+          "status": "verified",
+          "evidence": {
+            "TestPackageCatalogSnapshotAndSubscriptionImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T2",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T3",
+          "status": "verified",
+          "evidence": {
+            "TestPackageLifecycleAuditRollbackAndUnknownRetention": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T1",
+          "status": "verified",
+          "evidence": {
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T2",
+          "status": "verified",
+          "evidence": {
+            "TestUsageIdempotentTupleDigestDisputeAndFinal": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T3",
+          "status": "verified",
+          "evidence": {
+            "TestRateVersionSnapshotLeadAndBillingExplanation": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T1",
+          "status": "verified",
+          "evidence": {
+            "TestShareConcurrentLinearChainCapacityKindsAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T2",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T3",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffLostReceiptRestartRetainsAndConfirmsExactDifference": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T1",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T2",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T3",
+          "status": "verified",
+          "evidence": {
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T4",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-08-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-08-T2",
+          "status": "verified",
+          "evidence": {
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T2",
+          "status": "verified",
+          "evidence": {
+            "OPENAPI": "exact45-operation lint/freeze"
+          }
+        },
+        {
+          "id": "06-10-T1",
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-10-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-11-T1",
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-11-T2",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate",
+            "TestRenewalSenderYieldsAndRotatesUnansweredJournal": "normal+race passed",
+            "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope": "normal+race passed",
+            "TestHubControlObservationPinsSnapshotBeforeClock": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC2",
+          "status": "verified",
+          "evidence": {
+            "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+            "TestHTTPGroupMembersExactOperationCASAndSafeRead": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC3",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC4",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC5",
+          "status": "verified",
+          "evidence": {
+            "TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback": "normal+race passed",
+            "TestSourceLocalUnknownDoesNotNetOrFreezeNewSource": "normal+race passed"
+          }
+        }
+      ],
+      "key_links": {
+        "06-01-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed",
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        "06-02-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortProofAuthenticationAndGenerationFence": "normal+race passed"
+          }
+        },
+        "06-03-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestRuleCompileCommittedArtifactAndAuditRollback": "normal+race passed",
+            "TestRuleCommandPrepareCommitQueryRestartRealRuntime": "normal+race passed"
+          }
+        },
+        "06-04-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPackageDurableSnapshotProductionCompileAndHistory": "normal+race passed",
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        "06-05-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-06-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        "06-07-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed",
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        "06-08-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-09-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed",
+            "TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation": "normal+race passed"
+          }
+        },
+        "06-10-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed",
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        "06-11-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed",
+            "TestRuleReconciliationDrainsReadyWorkAndCancels": "normal+race passed"
+          }
+        }
+      },
+      "prior_test_files": [
+        {
+          "path": "engine/accounting/accounting_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestBatchCommitResolvesOnceWithAcceptedBytes": "normal+race passed",
+            "TestBatchReturnAndUnknownKeepReservedAmount": "normal+race passed",
+            "TestBatchResolverFailureBecomesUnknownAndCannotRetry": "normal+race passed",
+            "TestBatchRejectsInvalidAmounts": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/gate_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestTCPWithGateReservesBeforeWriteAndSettlesAcceptedBytes": "normal+race passed",
+            "TestTCPWithGateDenialPreventsDestinationWrite": "normal+race passed",
+            "TestTCPWithGateSettlesOnlyAcceptedPartOfShortWrite": "normal+race passed",
+            "TestTCPWithGateReturnsReservationWhenNoBytesAreAccepted": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_linux_test.go",
+          "tests": 1,
+          "evidence": {
+            "TestTCPPlatformSelectsSpliceForBareTCP": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestTCPPropagatesHalfCloseAndMetersWrittenBytes": "normal+race passed",
+            "TestTCPContextCancellationClosesBothDirections": "normal+race passed",
+            "TestTCPMeterFailureStopsRelay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/udp_test.go",
+          "tests": 10,
+          "evidence": {
+            "TestUDPForwardsResponsesToOriginatingClientAndMetersWrites": "normal+race passed",
+            "TestUDPDefaultsIdleTimeoutToSixtySeconds": "normal+race passed",
+            "TestUDPPerClientSessionLimitDropsBeforeCreatingSession": "normal+race passed",
+            "TestUDPWithGateAccountsRequestAndResponseWrites": "normal+race passed",
+            "TestUDPWithGateDenialDropsBeforeTargetWrite": "normal+race passed",
+            "TestUDPGlobalSessionLimitReleasesAfterExpiry": "normal+race passed",
+            "TestUDPExpiresIdleSessionAndReplacesIt": "normal+race passed",
+            "TestUDPCancellationClosesListenerAndSessions": "normal+race passed",
+            "TestUDPRejectsNegativeIdleTimeout": "normal+race passed",
+            "TestUDPRejectsNegativeSessionLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/codec_test.go",
+          "tests": 6,
+          "evidence": {
+            "TestFrameRoundTrip": "normal+race passed",
+            "TestMuxFrameLeaseIsIndependentAndReleasedOnce": "normal+race passed",
+            "TestReadFrameRejectsMalformedHeadersBeforePayload": "normal+race passed",
+            "TestReadFrameRejectsTruncatedHeaderAndPayload": "normal+race passed",
+            "TestStreamIDAllocatorParityMonotonicAndExhaustion": "normal+race passed",
+            "TestWriteFrameRejectsOversizedPayload": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/hello_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestHelloSignatureBindsExporterAndDirection": "normal+race passed",
+            "TestHelloRoundTripAndRejectsUnsupportedVersion": "normal+race passed",
+            "TestNodeIDFromCertificateRequiresCanonicalSAN": "normal+race passed",
+            "TestHandshakeHelloTLS13MutualIdentity": "normal+race passed",
+            "TestHandshakeHelloPeerVerifierRejectsStaleGenerationAndReplay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/identity_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestFreshnessRejectsStaleGenerationAndReplay": "normal+race passed",
+            "TestFreshnessLeaseUsesConservativeIntersection": "normal+race passed",
+            "TestFreshnessLeaseRejectsSlowDuplicateAndClockRollback": "normal+race passed",
+            "TestIdentityCertificatePolicyRequiresVerifiedChainAndCanonicalSAN": "normal+race passed",
+            "TestIdentityTLSConfigPinsTLS13AndRequiresClientCertificate": "normal+race passed",
+            "TestDispatcherStreamFailureIsolatedAndIdentityFailureClosesLink": "normal+race passed",
+            "TestConcurrentDispatcherCloseIsIdempotent": "normal+race passed",
+            "TestLivenessPingTimeoutAndAbsoluteIdleDeadline": "normal+race passed",
+            "TestLivenessRejectsClockRollbackFromExtendingIdle": "normal+race passed",
+            "TestDispatcherValidFrameRefreshesLiveness": "normal+race passed",
+            "TestMuxPollSendsNonceBoundPingAndAcceptsPong": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/integration_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestVLinkIntegrationUnauthorizedUDPDoesNotReachOpenOK": "normal+race passed",
+            "TestLateWindowForClosedStreamDoesNotResetOrCloseLink": "normal+race passed",
+            "TestResetRemovesBothStreamRecords": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/limits_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestLimitBurstAndSustainedThreshold": "normal+race passed",
+            "TestLimitRejectsUnconfiguredAndInvalidLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/observability_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestObservabilityRetainsSafeBoundedEventsAndCounters": "normal+race passed",
+            "TestObservabilityRejectsInvalidHighCardinalityShapes": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/open_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestOpenPolicyAcceptsLocalRuntimeDecision": "normal+race passed",
+            "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed",
+            "TestOpenPolicySelfHostedAndNonExecutionRulesUseCorrectGates": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/pool_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestSelectTransportModeBoundaries": "normal+race passed",
+            "TestFirstPacketHistoryUsesBoundedTenMinuteMedian": "normal+race passed",
+            "TestLinkPoolHardCapAcrossConcurrentPoolModeAcquires": "normal+race passed",
+            "TestLinkPoolScalesDownAndRemovesUnhealthyLinks": "normal+race passed",
+            "TestBackoffIsCappedAndJitteredWithinBounds": "normal+race passed",
+            "TestDuplicateLinkArbitrationKeepsPreferredInitiator": "normal+race passed",
+            "TestReconcileEvictsOldestIdleLinksAfterReorderedUse": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/reverse_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestReverseConnectorRetriesThenReopensOnlyApprovedTCP": "normal+race passed",
+            "TestReverseConnectorStopsDuringBackoff": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/stream_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestMuxLinkMultiplexesStreamsAndHonorsWindows": "normal+race passed",
+            "TestMuxTCPDataFramesFitOneTLSRecord": "normal+race passed",
+            "TestMuxRemoteOpenRequiresAuthorizationAndClosesResources": "normal+race passed",
+            "TestStreamIDsParityAndNoReuse": "normal+race passed",
+            "TestStreamOpeningDataBoundAndOpenError": "normal+race passed",
+            "TestStreamLocalEarlyDataAndDelayedOpenError": "normal+race passed",
+            "TestStreamUDPRequiresOpenOKAndViolationIsLocal": "normal+race passed",
+            "TestStreamRemoteOpenAndHalfCloseIsolation": "normal+race passed",
+            "TestStreamLocalEarlyTCPDataIsBoundedUntilOpenOK": "normal+race passed",
+            "TestRejectedRemoteOpenDropsBufferedTCPData": "normal+race passed",
+            "TestStreamDuplicateIDIsLinkError": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/target_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestResolveLocalTargetReturnsNumericAllowlistedEndpoint": "normal+race passed",
+            "TestResolveLocalTargetRejectsPrivateReservedAndMalformedAddresses": "normal+race passed",
+            "TestResolveLocalTargetRejectsDNSRebindingAnswerSet": "normal+race passed",
+            "TestResolveLocalTargetRejectsEmptyDNSAndPrefixMismatch": "normal+race passed",
+            "TestDialLocalTargetRejectsUnsafeEndpointWithoutDetails": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/udp_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss": "normal+race passed",
+            "TestUDPReturnsStreamCreditBeforeWindowNearExhaustion": "normal+race passed",
+            "TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit": "normal+race passed",
+            "TestUDPQueueDropReturnsCreditAndPreservesStream": "normal+race passed",
+            "TestUDPAdmissionUsesAuthorizedLocalTargetAndStableFlowKey": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/window_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestWindowAcquiresStreamAndAggregateCredit": "normal+race passed",
+            "TestUDPWindowRejectionAttributesCreditAtAdmission": "normal+race passed",
+            "TestTCPAcquirePreservesAggregateUDPReserve": "normal+race passed",
+            "TestWindowBlockedWriterWakesOnGrant": "normal+race passed",
+            "TestWindowCancellationCloseOverflowAndUDPDrop": "normal+race passed",
+            "TestWindowRejectsUnknownStreamAndBoundsCredit": "normal+race passed",
+            "TestWindowRemovedStreamWakesWaiter": "normal+race passed"
+          }
+        }
+      ],
+      "remaining_requirements": {
+        "TEN-002": {
+          "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed",
+          "TestNodeGroupOwnershipAndStableMembers": "normal+race passed",
+          "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed",
+          "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+        },
+        "NOD-012": {
+          "TestNodeSegmentPermitIndependentOfGrants": "normal+race passed",
+          "TestCompileGrantPermitAndDirection": "normal+race passed",
+          "TestApplyMultihopForwardAndReverseRealTLS": "normal+race passed",
+          "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed"
+        },
+        "PRT-004": {
+          "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+          "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+          "TestPortIntentAbortDoesNotReleaseWithoutAllNodeProofs": "normal+race passed"
+        },
+        "BE-005": {
+          "TestOpenAPIExactlyMatchesRegisteredGinRoutes": "normal+race passed",
+          "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+        },
+        "BE-006": {
+          "TestReconcile1000Within60s": "normal+race passed"
+        }
+      }
+    },
+    "actions-arm64": {
+      "counts": {
+        "backend_normal": 502,
+        "root_normal": 657,
+        "engine_normal": 249,
+        "backend_race": 502,
+        "root_race": 657,
+        "engine_race": 249
+      },
+      "truths": [
+        {
+          "id": "06-01-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T2",
+          "status": "verified",
+          "evidence": {
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-01-T3",
+          "status": "verified",
+          "evidence": {
+            "TestTracerDesiredStateReceipt": "normal+race passed",
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-02-T1",
+          "status": "verified",
+          "evidence": {
+            "TestNodeGroupOwnershipAndStableMembers": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T2",
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortRestrictionClockAndProofBackedRelease": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-02-T3",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-03-T1",
+          "status": "verified",
+          "evidence": {
+            "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCompileCanonicalDigestReplay": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-03-T3",
+          "status": "verified",
+          "evidence": {
+            "TestApplyPrepareCommitUnknownAndLateReceipt": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T1",
+          "status": "verified",
+          "evidence": {
+            "TestPackageCatalogSnapshotAndSubscriptionImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T2",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-04-T3",
+          "status": "verified",
+          "evidence": {
+            "TestPackageLifecycleAuditRollbackAndUnknownRetention": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T1",
+          "status": "verified",
+          "evidence": {
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T2",
+          "status": "verified",
+          "evidence": {
+            "TestUsageIdempotentTupleDigestDisputeAndFinal": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-05-T3",
+          "status": "verified",
+          "evidence": {
+            "TestRateVersionSnapshotLeadAndBillingExplanation": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T1",
+          "status": "verified",
+          "evidence": {
+            "TestShareConcurrentLinearChainCapacityKindsAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T2",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-06-T3",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffLostReceiptRestartRetainsAndConfirmsExactDifference": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T1",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPBearerDoesNotAcceptMTLSRefreshOrAmbiguousHeaders": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T2",
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T3",
+          "status": "verified",
+          "evidence": {
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-07-T4",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate"
+          }
+        },
+        {
+          "id": "06-08-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-08-T2",
+          "status": "verified",
+          "evidence": {
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-09-T2",
+          "status": "verified",
+          "evidence": {
+            "OPENAPI": "exact45-operation lint/freeze"
+          }
+        },
+        {
+          "id": "06-10-T1",
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-10-T2",
+          "status": "verified",
+          "evidence": {
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        {
+          "id": "06-11-T1",
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed"
+          }
+        },
+        {
+          "id": "06-11-T2",
+          "status": "verified",
+          "evidence": {
+            "PAIR": "same-SHA three-host gate",
+            "TestRenewalSenderYieldsAndRotatesUnansweredJournal": "normal+race passed",
+            "TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope": "normal+race passed",
+            "TestHubControlObservationPinsSnapshotBeforeClock": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC1",
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC2",
+          "status": "verified",
+          "evidence": {
+            "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+            "TestHTTPGroupMembersExactOperationCASAndSafeRead": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC3",
+          "status": "verified",
+          "evidence": {
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC4",
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        {
+          "id": "ROADMAP-SC5",
+          "status": "verified",
+          "evidence": {
+            "TestUnknownRiskBudget72HourFreezeLateExactAndAuditRollback": "normal+race passed",
+            "TestSourceLocalUnknownDoesNotNetOrFreezeNewSource": "normal+race passed"
+          }
+        }
+      ],
+      "key_links": {
+        "06-01-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTracerRealProcesses": "normal+race passed",
+            "TestTracerTransactionRollback": "normal+race passed"
+          }
+        },
+        "06-02-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+            "TestPortProofAuthenticationAndGenerationFence": "normal+race passed"
+          }
+        },
+        "06-03-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestRuleCompileCommittedArtifactAndAuditRollback": "normal+race passed",
+            "TestRuleCommandPrepareCommitQueryRestartRealRuntime": "normal+race passed"
+          }
+        },
+        "06-04-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestPackageDurableSnapshotProductionCompileAndHistory": "normal+race passed",
+            "TestEntitlementAtomicRedemptionContract": "normal+race passed"
+          }
+        },
+        "06-05-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestUsageActualAgentHubPostgresLostAckRestartAndOriginalSequence": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-06-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestShareHandoffRealMTLSAgentAndPostgresWorker": "normal+race passed",
+            "TestHubRecoveryAdmissionActualMTLSExplicitProofFULLLossReconnectAndNewIssue": "normal+race passed"
+          }
+        },
+        "06-07-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestHTTPAuthScopeSafeOperationProjectionAndCursorPagination": "normal+race passed",
+            "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+          }
+        },
+        "06-08-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRepositoryScopeAndPlatformAudit": "normal+race passed",
+            "TestValkeyLossRebuildAllProducedAuthority": "normal+race passed",
+            "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed"
+          }
+        },
+        "06-09-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestTenantRestrictionsIndependentAndImmutable": "normal+race passed",
+            "TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation": "normal+race passed"
+          }
+        },
+        "06-10-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestServingPlatformAggregatesAllCommittedTenantRules": "normal+race passed",
+            "TestCloudflareControlledCRUD": "live external CRUD pass"
+          }
+        },
+        "06-11-PLAN.md": {
+          "status": "verified",
+          "evidence": {
+            "TestReconcile1000Within60s": "normal+race passed",
+            "TestRuleReconciliationDrainsReadyWorkAndCancels": "normal+race passed"
+          }
+        }
+      },
+      "prior_test_files": [
+        {
+          "path": "engine/accounting/accounting_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestBatchCommitResolvesOnceWithAcceptedBytes": "normal+race passed",
+            "TestBatchReturnAndUnknownKeepReservedAmount": "normal+race passed",
+            "TestBatchResolverFailureBecomesUnknownAndCannotRetry": "normal+race passed",
+            "TestBatchRejectsInvalidAmounts": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/gate_test.go",
+          "tests": 4,
+          "evidence": {
+            "TestTCPWithGateReservesBeforeWriteAndSettlesAcceptedBytes": "normal+race passed",
+            "TestTCPWithGateDenialPreventsDestinationWrite": "normal+race passed",
+            "TestTCPWithGateSettlesOnlyAcceptedPartOfShortWrite": "normal+race passed",
+            "TestTCPWithGateReturnsReservationWhenNoBytesAreAccepted": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_linux_test.go",
+          "tests": 1,
+          "evidence": {
+            "TestTCPPlatformSelectsSpliceForBareTCP": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/tcp_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestTCPPropagatesHalfCloseAndMetersWrittenBytes": "normal+race passed",
+            "TestTCPContextCancellationClosesBothDirections": "normal+race passed",
+            "TestTCPMeterFailureStopsRelay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/relay/udp_test.go",
+          "tests": 10,
+          "evidence": {
+            "TestUDPForwardsResponsesToOriginatingClientAndMetersWrites": "normal+race passed",
+            "TestUDPDefaultsIdleTimeoutToSixtySeconds": "normal+race passed",
+            "TestUDPPerClientSessionLimitDropsBeforeCreatingSession": "normal+race passed",
+            "TestUDPWithGateAccountsRequestAndResponseWrites": "normal+race passed",
+            "TestUDPWithGateDenialDropsBeforeTargetWrite": "normal+race passed",
+            "TestUDPGlobalSessionLimitReleasesAfterExpiry": "normal+race passed",
+            "TestUDPExpiresIdleSessionAndReplacesIt": "normal+race passed",
+            "TestUDPCancellationClosesListenerAndSessions": "normal+race passed",
+            "TestUDPRejectsNegativeIdleTimeout": "normal+race passed",
+            "TestUDPRejectsNegativeSessionLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/codec_test.go",
+          "tests": 6,
+          "evidence": {
+            "TestFrameRoundTrip": "normal+race passed",
+            "TestMuxFrameLeaseIsIndependentAndReleasedOnce": "normal+race passed",
+            "TestReadFrameRejectsMalformedHeadersBeforePayload": "normal+race passed",
+            "TestReadFrameRejectsTruncatedHeaderAndPayload": "normal+race passed",
+            "TestStreamIDAllocatorParityMonotonicAndExhaustion": "normal+race passed",
+            "TestWriteFrameRejectsOversizedPayload": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/hello_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestHelloSignatureBindsExporterAndDirection": "normal+race passed",
+            "TestHelloRoundTripAndRejectsUnsupportedVersion": "normal+race passed",
+            "TestNodeIDFromCertificateRequiresCanonicalSAN": "normal+race passed",
+            "TestHandshakeHelloTLS13MutualIdentity": "normal+race passed",
+            "TestHandshakeHelloPeerVerifierRejectsStaleGenerationAndReplay": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/identity_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestFreshnessRejectsStaleGenerationAndReplay": "normal+race passed",
+            "TestFreshnessLeaseUsesConservativeIntersection": "normal+race passed",
+            "TestFreshnessLeaseRejectsSlowDuplicateAndClockRollback": "normal+race passed",
+            "TestIdentityCertificatePolicyRequiresVerifiedChainAndCanonicalSAN": "normal+race passed",
+            "TestIdentityTLSConfigPinsTLS13AndRequiresClientCertificate": "normal+race passed",
+            "TestDispatcherStreamFailureIsolatedAndIdentityFailureClosesLink": "normal+race passed",
+            "TestConcurrentDispatcherCloseIsIdempotent": "normal+race passed",
+            "TestLivenessPingTimeoutAndAbsoluteIdleDeadline": "normal+race passed",
+            "TestLivenessRejectsClockRollbackFromExtendingIdle": "normal+race passed",
+            "TestDispatcherValidFrameRefreshesLiveness": "normal+race passed",
+            "TestMuxPollSendsNonceBoundPingAndAcceptsPong": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/integration_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestVLinkIntegrationUnauthorizedUDPDoesNotReachOpenOK": "normal+race passed",
+            "TestLateWindowForClosedStreamDoesNotResetOrCloseLink": "normal+race passed",
+            "TestResetRemovesBothStreamRecords": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/limits_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestLimitBurstAndSustainedThreshold": "normal+race passed",
+            "TestLimitRejectsUnconfiguredAndInvalidLimits": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/observability_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestObservabilityRetainsSafeBoundedEventsAndCounters": "normal+race passed",
+            "TestObservabilityRejectsInvalidHighCardinalityShapes": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/open_test.go",
+          "tests": 3,
+          "evidence": {
+            "TestOpenPolicyAcceptsLocalRuntimeDecision": "normal+race passed",
+            "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed",
+            "TestOpenPolicySelfHostedAndNonExecutionRulesUseCorrectGates": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/pool_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestSelectTransportModeBoundaries": "normal+race passed",
+            "TestFirstPacketHistoryUsesBoundedTenMinuteMedian": "normal+race passed",
+            "TestLinkPoolHardCapAcrossConcurrentPoolModeAcquires": "normal+race passed",
+            "TestLinkPoolScalesDownAndRemovesUnhealthyLinks": "normal+race passed",
+            "TestBackoffIsCappedAndJitteredWithinBounds": "normal+race passed",
+            "TestDuplicateLinkArbitrationKeepsPreferredInitiator": "normal+race passed",
+            "TestReconcileEvictsOldestIdleLinksAfterReorderedUse": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/reverse_test.go",
+          "tests": 2,
+          "evidence": {
+            "TestReverseConnectorRetriesThenReopensOnlyApprovedTCP": "normal+race passed",
+            "TestReverseConnectorStopsDuringBackoff": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/stream_test.go",
+          "tests": 11,
+          "evidence": {
+            "TestMuxLinkMultiplexesStreamsAndHonorsWindows": "normal+race passed",
+            "TestMuxTCPDataFramesFitOneTLSRecord": "normal+race passed",
+            "TestMuxRemoteOpenRequiresAuthorizationAndClosesResources": "normal+race passed",
+            "TestStreamIDsParityAndNoReuse": "normal+race passed",
+            "TestStreamOpeningDataBoundAndOpenError": "normal+race passed",
+            "TestStreamLocalEarlyDataAndDelayedOpenError": "normal+race passed",
+            "TestStreamUDPRequiresOpenOKAndViolationIsLocal": "normal+race passed",
+            "TestStreamRemoteOpenAndHalfCloseIsolation": "normal+race passed",
+            "TestStreamLocalEarlyTCPDataIsBoundedUntilOpenOK": "normal+race passed",
+            "TestRejectedRemoteOpenDropsBufferedTCPData": "normal+race passed",
+            "TestStreamDuplicateIDIsLinkError": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/target_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestResolveLocalTargetReturnsNumericAllowlistedEndpoint": "normal+race passed",
+            "TestResolveLocalTargetRejectsPrivateReservedAndMalformedAddresses": "normal+race passed",
+            "TestResolveLocalTargetRejectsDNSRebindingAnswerSet": "normal+race passed",
+            "TestResolveLocalTargetRejectsEmptyDNSAndPrefixMismatch": "normal+race passed",
+            "TestDialLocalTargetRejectsUnsafeEndpointWithoutDetails": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/udp_test.go",
+          "tests": 5,
+          "evidence": {
+            "TestUDPResourceForwardsDatagramsAndStopsOnLinkLoss": "normal+race passed",
+            "TestUDPReturnsStreamCreditBeforeWindowNearExhaustion": "normal+race passed",
+            "TestUDPOverWindowDropsWithoutBlockingAndResumesAfterCredit": "normal+race passed",
+            "TestUDPQueueDropReturnsCreditAndPreservesStream": "normal+race passed",
+            "TestUDPAdmissionUsesAuthorizedLocalTargetAndStableFlowKey": "normal+race passed"
+          }
+        },
+        {
+          "path": "engine/vlink/window_test.go",
+          "tests": 7,
+          "evidence": {
+            "TestWindowAcquiresStreamAndAggregateCredit": "normal+race passed",
+            "TestUDPWindowRejectionAttributesCreditAtAdmission": "normal+race passed",
+            "TestTCPAcquirePreservesAggregateUDPReserve": "normal+race passed",
+            "TestWindowBlockedWriterWakesOnGrant": "normal+race passed",
+            "TestWindowCancellationCloseOverflowAndUDPDrop": "normal+race passed",
+            "TestWindowRejectsUnknownStreamAndBoundsCredit": "normal+race passed",
+            "TestWindowRemovedStreamWakesWaiter": "normal+race passed"
+          }
+        }
+      ],
+      "remaining_requirements": {
+        "TEN-002": {
+          "TestRuleImmutableRevisionConflictAndTenantScope": "normal+race passed",
+          "TestNodeGroupOwnershipAndStableMembers": "normal+race passed",
+          "TestLedgerConservationRebuildSourceIsolationAndAuditRollback": "normal+race passed",
+          "TestHTTPBusinessReadsOwnershipGrantExpiryAndSafeFields": "normal+race passed"
+        },
+        "NOD-012": {
+          "TestNodeSegmentPermitIndependentOfGrants": "normal+race passed",
+          "TestCompileGrantPermitAndDirection": "normal+race passed",
+          "TestApplyMultihopForwardAndReverseRealTLS": "normal+race passed",
+          "TestOpenPolicyStableRejectionClassesAndAuditCorrelation": "normal+race passed"
+        },
+        "PRT-004": {
+          "TestPortAtomicFixedMembersAndServing": "normal+race passed",
+          "TestRulePortActualAgentSocketsUnknownAndQuery": "normal+race passed",
+          "TestPortIntentAbortDoesNotReleaseWithoutAllNodeProofs": "normal+race passed"
+        },
+        "BE-005": {
+          "TestOpenAPIExactlyMatchesRegisteredGinRoutes": "normal+race passed",
+          "TestSSECommittedEventsReplayScopeAndRESTConvergence": "normal+race passed"
+        },
+        "BE-006": {
+          "TestReconcile1000Within60s": "normal+race passed"
+        }
+      }
+    }
+  },
+  "truths": 35,
+  "artifacts_declared": 42,
+  "key_links_declared": 29,
+  "scope": "explicit observed tests; historical benchmark/qualification debt retains original status"
+}

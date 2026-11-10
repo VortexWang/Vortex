@@ -1,0 +1,13 @@
+{
+  "backend/db/query/group_revalidation.sql": "051435c6b62fc345523152c4177b2d09bcbcb8b73f298f4463163c1664ebceb3",
+  "backend/db/generated/group_revalidation.sql.go": "f7eac27ffc7e3bc04c4877eb20b6731239b9d6b09b5e0dbfc31dba523e072ce6",
+  "backend/internal/service/node.go": "a5ecf629959f8ab3b0fb72250ea222ce6636456aaf6801ee06f4584cbade2ee8",
+  "backend/internal/service/rule.go": "fc4078407c9b5362050dfa9bbed08e04b76c8bccccb6a69ddbdd1429abeceb9a",
+  "backend/internal/service/rule_compile.go": "e251f4c5f90f6330fa216fe44b4ac66d0ae1fa94818d4cbcc16552279651ab71",
+  "backend/internal/service/group_revalidation.go": "3c7f4545fc52ac2163ff073727c873b21db9ff009d66f17159de6f716e91383d",
+  "backend/internal/service/group_revalidation_test.go": "9f4162b884f7b820bc8a302a9241ba5f44a8b86d990c6b0278eb58e3561640c5",
+  "backend/internal/service/group_lock_order_test.go": "7060b9bac2ede26e87d3da653a1e4449839a144a1f9d79cf33a80ab40ad6f48f",
+  "backend/internal/service/package_isolation_test.go": "8e61b68acbea00a8103e0d5e53c7aa022a1d8f7739ebfe266c770b58de20bc6e",
+  "backend/internal/worker/group_revalidation.go": "a949ec8022469a0cb800f00d44cbe4e840638b89756298e2c099cf1c1fa81b23",
+  "backend/cmd/vortex-backend/main.go": "ef7870fb5128a962e442fd56402e73882a21b235a372625590b8923416c03924"
+}

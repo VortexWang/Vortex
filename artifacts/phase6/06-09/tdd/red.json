@@ -1,0 +1,10 @@
+{
+  "command": "python3 tools/phase6/restriction_red_test.py",
+  "exitCode": 1,
+  "output": "test_all_causes_recovery (__main__.RestrictionRecovery) ... FAIL\n\n======================================================================\nFAIL: test_all_causes_recovery (__main__.RestrictionRecovery)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/peng/Documents/123/VORTEX/tools/phase6/restriction_red_test.py\", line 14, in test_all_causes_recovery\n    self.assertEqual(result.returncode, 0, result.stdout)\nAssertionError: 1 != 0 : === RUN   TestRestrictionAllCauses\n2026/11/07 07:44:06 goose: no migrations to run. current version: 2\n    tenant_test.go:426: all causes recovery: operations count=5 want=7: <nil>\n--- FAIL: TestRestrictionAllCauses (0.07s)\nFAIL\nFAIL\tvortex/backend/internal/service\t0.724s\nFAIL\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.375s\n\nFAILED (failures=1)\n",
+  "targetTest": "test_all_causes_recovery",
+  "targetFile": "backend/internal/service/tenant_test.go",
+  "expected": "All causes clear: exactly two authorized recovery operations, count 7",
+  "actual": "All causes clear produced zero recovery operations, count 5",
+  "semanticAssessment": "The target ran against real PostgreSQL and failed on operations count=5 want=7 after last cause cleared. No compile, fixture or discovery error."
+}

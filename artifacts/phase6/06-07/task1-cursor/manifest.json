@@ -1,0 +1,46 @@
+{
+  "base_sha": "f7f3766d16e0a2221209f530be875fd61031c320",
+  "scope": "06-07 Task1 bounded public HTTP/cursor/listener increment;not complete plan",
+  "phase_progress": "9/11",
+  "passed": [
+    "final-native-race.log",
+    "final-linux-race.log",
+    "server-native-race.log",
+    "server-linux-race.log",
+    "worker-scheduling-native-race.log",
+    "dependencies.log",
+    "builds.log"
+  ],
+  "failed_retained": {
+    "initial-contract-red.log": "missing implementation compile;not semantic RED",
+    "rule-route-semantic-red.log": "missing PUT route behavioral404 RED"
+  },
+  "not_claimed": [
+    "remaining resource adapters",
+    "password login",
+    "SSE",
+    "OpenAPI freeze",
+    "06-07 completion",
+    "native amd64 execution",
+    "sameSHA Docker/Actions"
+  ],
+  "evidence_sha256": {
+    "README.md": "6cb14c99bb6ea826463ef9dd400c9e9c9721cd5f77361874a13a6c17309db12c",
+    "builds.log": "90847123723ddf3ae9f4c9d19d7aa5fa001c181addd07e378727bdb2d623e377",
+    "complete-native-race.log": "43ed66fe0eb5dd3af5b8cec7cc9b0147c2e6f311be682aec567a593f4dac3508",
+    "dependencies.log": "b0909562b3dd766d307eebf019ec187eed66f8aa1b863d726c343a66817797c6",
+    "final-linux-race.log": "d4beb189d6abb68522a9dbd053277e18652e0e44230b42fe1a08f4f4ea8acea2",
+    "final-native-race.log": "4160fbfc98b6e00f9e90f65b35b971f9fd2a88767e802cd312a802b2e0e9bf4d",
+    "http-linux-race.log": "4670cc37f5b1f9a8ebb9a4e640f61395e3382e96750cc999bd1dc98163145656",
+    "http-native-race.log": "1cbdffcea756f68bf238f817b067a9291a092cb1f9b951df10d0ec7aa8ff4f2b",
+    "initial-contract-red.log": "d4d5f825f03da97d3e9fa3cf52e398df2d2613ae3c378f988cd04d089581d753",
+    "native-race.log": "2abd04d0aafe5df6364839746329ac064ee4fb1a01d9d751d7dccb895e9e53c9",
+    "new-dependency-inventory.json": "2f8a1287c862188461dabf371ee46b940d29831bbf0a32d3e6740a7d36a70f90",
+    "router-build.log": "ed9f4a3b70335ef41cdaf904bfc26765b8a943f12cb715080e6e21de72ab8e64",
+    "rule-route-semantic-red.log": "f8e9e6b3a700d5f16d72982366f67b9f4b0b41f66e5db311302566468a3b13fa",
+    "server-linux-race.log": "a2e89e582bc778258e18969ccd6a668b36aa5e1318133a7cc2a9246f55f349d5",
+    "server-native-race.log": "9628ed3c30b9fb65e5718fdee5e4842ca70f52124c90ec35ea4aee616a98d898",
+    "source-hashes.json": "880ab4b77269ea0eb492b9acb243cebaef884983cf4ea8755a1bf42c8149b373",
+    "worker-scheduling-native-race.log": "5342e2426086363b3a1c9995955b11a97ab9ed472257a20618a96fb055a688d8"
+  }
+}

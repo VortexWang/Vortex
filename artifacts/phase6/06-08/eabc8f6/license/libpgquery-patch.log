@@ -1,0 +1,3 @@
+patching file 'include/postgres/utils/elog.h'
+patching file src_backend_utils_error_elog.c
+patching file src_port_strerror.c

@@ -1,0 +1,4 @@
+# vortex/backend/internal/service
+internal/service/hub_same_store_prefix.go:296:130: unknown field RecoveryID in struct literal of type generated.MissingHubSameStoreIssuesParams
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

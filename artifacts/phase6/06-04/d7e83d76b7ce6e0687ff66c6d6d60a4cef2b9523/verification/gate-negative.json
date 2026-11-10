@@ -1,0 +1,26 @@
+{
+  "source_commit": "d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523",
+  "synthetic_negative_inputs_only": true,
+  "results": {
+    "valid_runtime_host": {
+      "command": "sh tools/phase6/evidence_manifest.sh --through-plan 06-04 --expected-sha d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523 --evidence-dir /tmp/vortex-0604-exact.NoabZ1/evidence-utc --host docker",
+      "exit_code": 0,
+      "output": "manifest passed: 96 owners; docker producer only; pairing pending\n"
+    },
+    "pending_owner_pairing": {
+      "command": "sh tools/phase6/evidence_manifest.sh --through-plan 06-04 --expected-sha d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523 --evidence-dir /tmp/vortex-0604-exact.NoabZ1/evidence-utc",
+      "exit_code": 1,
+      "output": "manifest failed: paired acceptance requires owner contract freeze approval\n"
+    },
+    "missing_confirm_test": {
+      "command": "sh tools/phase6/evidence_manifest.sh --through-plan 06-04 --expected-sha d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523 --evidence-dir /var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-0604-negative-sr0b1kdm --host docker",
+      "exit_code": 1,
+      "output": "manifest failed: docker normal/race test evidence missing TestEntitlementDifferentPackageConfirmationAtomic\n"
+    },
+    "checksum_tamper": {
+      "command": "sh tools/phase6/evidence_manifest.sh --through-plan 06-04 --expected-sha d7e83d76b7ce6e0687ff66c6d6d60a4cef2b9523 --evidence-dir /var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-0604-negative-5sf18wwc --host docker",
+      "exit_code": 1,
+      "output": "manifest failed: docker/tracer.log checksum mismatch\n"
+    }
+  }
+}

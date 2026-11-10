@@ -1,0 +1,5 @@
+go version go1.27.3 linux/arm64
+Linux bad3300bf9a5 7.0.0-1017-azure #17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 19:06:39 UTC 2026 aarch64 GNU/Linux
+2026-11-09T06:24:41Z
+GOFLAGS=-p=1
+GOMAXPROCS=2

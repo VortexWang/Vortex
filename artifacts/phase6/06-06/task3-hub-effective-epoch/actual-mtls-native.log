@@ -1,0 +1,4 @@
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/hub_effective_transport_test.go:17:2: "vortex/backend/internal/service" imported and not used
+FAIL	vortex/backend/internal/service [build failed]
+FAIL

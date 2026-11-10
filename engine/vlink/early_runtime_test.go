@@ -87,3 +87,84 @@ func TestEarlyLocalFINIsBufferedUntilAuthorization(t *testing.T) {
 		t.Fatalf("lost pending FIN: %+v", s)
 	}
 }
+
+// reserveEarlyData snapshots Opening before MarkLocalData takes the lock.
+// OPEN_OK may win that gap; rejecting stale bookkeeping must not delete the
+// now-authorized stream or turn a valid DATA write into a reset.
+func TestEarlyDataBookkeepingLosesToOpenOKWithoutDroppingAuthority(t *testing.T) {
+	table := NewStreamTable(true, 8)
+	id, err := table.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = table.Apply(Frame{Type: FrameOpenOK, StreamID: id}); err != nil {
+		t.Fatal(err)
+	}
+	if err = table.MarkLocalData(id, 4); err == nil {
+		t.Fatal("stale early accounting succeeded")
+	}
+	if state, ok := table.Snapshot(id); !ok || !state.OpenOK || state.Lifecycle != StreamOpen {
+		t.Fatalf("OPEN_OK stream removed by racing bookkeeping: %+v %t", state, ok)
+	}
+	if _, err = table.Apply(Frame{Type: FrameData, StreamID: id, Payload: []byte("reply")}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBatchedEarlyDataFailureJoinsWriterBeforeReturningPayload(t *testing.T) {
+	left, right := net.Pipe()
+	defer right.Close()
+	client, err := newMuxLink(left, MuxConfig{LocalClient: true, MaxPendingOpenBytes: 1, StreamWindow: 8, AggregateWindow: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(io.EOF)
+	id, err := client.dispatch.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = client.windows.AddStream(id, 8); err != nil {
+		t.Fatal(err)
+	}
+	stream := client.newStream(id, StreamTCP)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	// No peer reader: the first frame's TLS writer retains its caller payload.
+	// The second frame waits for OPEN_OK at the early-data bound, then fails.
+	if err = stream.WriteDataFrames(ctx, []Frame{{Type: FrameData, Payload: []byte("a")}, {Type: FrameData, Payload: []byte("b")}}); err == nil {
+		t.Fatal("early-data wait unexpectedly succeeded")
+	}
+	select {
+	case <-client.writerStopped:
+	default:
+		t.Fatal("returned caller payload while writer still owned an earlier frame")
+	}
+}
+
+func TestWriteDataEarlyFailureJoinsWriterBeforeReturningPayload(t *testing.T) {
+	left, right := net.Pipe()
+	defer right.Close()
+	client, err := newMuxLink(left, MuxConfig{LocalClient: true, MaxPendingOpenBytes: MaxTLSRecordPayload, StreamWindow: 2 * MaxTLSRecordPayload, AggregateWindow: 2 * MaxTLSRecordPayload})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close(io.EOF)
+	id, err := client.dispatch.Open(StreamTCP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = client.windows.AddStream(id, 2*MaxTLSRecordPayload); err != nil {
+		t.Fatal(err)
+	}
+	stream := client.newStream(id, StreamTCP)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	if err = stream.WriteData(ctx, make([]byte, MaxTLSRecordPayload+1)); err == nil {
+		t.Fatal("early-data wait unexpectedly succeeded")
+	}
+	select {
+	case <-client.writerStopped:
+	default:
+		t.Fatal("returned payload while writer still owned its first frame")
+	}
+}

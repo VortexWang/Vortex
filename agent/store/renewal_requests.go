@@ -102,7 +102,15 @@ func (s *Store) persistRenewalIntent(ctx context.Context, issuerID string, reque
 		}
 		issued, e1 := time.Parse(time.RFC3339Nano, grant.IssuedAt)
 		expires, e2 := time.Parse(time.RFC3339Nano, grant.ExpiresAt)
-		if e1 != nil || e2 != nil || grant.Kind != "credit_grant" || grant.ShareReferenceID == "" || grant.IssuerID != issuerID || grant.DelegationID != request.DelegationId || grant.BootID != request.BootId || grant.SourceID != request.SourceId || grant.RuleID != request.RuleId || grant.RuleRevision != request.RuleRevision || grant.PathGeneration != request.PathGeneration || grant.SignerEpoch != request.SignerEpoch || grant.BillingSnapshotID != request.BillingSnapshotId || request.RequestedRawBytes > grant.AmountBytes || time.Duration(request.RequestedTtlSeconds)*time.Second > expires.Sub(issued) {
+		if e1 != nil || e2 != nil || grant.Kind != "credit_grant" || grant.ShareReferenceID == "" || grant.IssuerID != issuerID || grant.DelegationID != request.DelegationId || grant.BootID != request.BootId || grant.SourceID != request.SourceId || grant.RuleID != request.RuleId || grant.RuleRevision != request.RuleRevision || grant.PathGeneration != request.PathGeneration || grant.BillingSnapshotID != request.BillingSnapshotId || request.RequestedRawBytes > grant.AmountBytes || time.Duration(request.RequestedTtlSeconds)*time.Second > expires.Sub(issued) {
+			return ErrRenewalConflict
+		}
+		epoch, err := renewalTriggerEpochTx(ctx, tx, request.NodeId, grant)
+		if err != nil || epoch != request.SignerEpoch {
+			return ErrRenewalConflict
+		}
+		fence, err := stateValue(ctx, tx, "authorization_fencing_floor")
+		if err != nil || fence != fmt.Sprint(request.FencingGeneration) {
 			return ErrRenewalConflict
 		}
 		var previous string

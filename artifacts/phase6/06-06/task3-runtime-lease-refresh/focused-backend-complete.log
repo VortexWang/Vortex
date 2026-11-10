@@ -1,0 +1,30 @@
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit
+2026/11/08 16:15:17 goose: no migrations to run. current version: 8
+2026/11/08 16:15:17 OK   00001_authority.sql (44.31ms)
+2026/11/08 16:15:17 OK   00002_tenant_policy.sql (20.76ms)
+2026/11/08 16:15:17 OK   00003_nodes_ports.sql (55.99ms)
+2026/11/08 16:15:17 OK   00004_entry_group_domains.sql (5.8ms)
+2026/11/08 16:15:17 OK   00005_rules_compile.sql (48.82ms)
+2026/11/08 16:15:17 OK   00006_packages_entitlements.sql (41.18ms)
+2026/11/08 16:15:17 OK   00007_metering_ledger.sql (56.07ms)
+2026/11/08 16:15:17 OK   00008_limits_shares.sql (155.38ms)
+2026/11/08 16:15:17 goose: successfully migrated database to version: 8
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/unsigned
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/boot
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/sequence
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/credit
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/source
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/limits
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/revocation
+=== RUN   TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/renewal
+--- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit (1.58s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/unsigned (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/boot (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/sequence (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/credit (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/source (0.00s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/limits (0.01s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/revocation (0.01s)
+    --- PASS: TestHubRuntimeLeaseAuditedIdempotentAndIndependentFromCredit/renewal (0.00s)
+PASS
+ok  	vortex/backend/internal/service	4.664s

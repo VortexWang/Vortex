@@ -1,0 +1,16 @@
+{
+  "task": "06-06 Task 1",
+  "scope": "native macOS Go race against real Docker PostgreSQL; not Linux system acceptance",
+  "go": "go1.27.3",
+  "sqlc": "v1.31.1",
+  "generation_clean_runs": 2,
+  "generation_cmp": true,
+  "race_log_sha256": "d5893a60ce53052137e4a1889a4c90ac76a9d9fa898ec6b2acb474405edb4dea",
+  "command": "go -C backend test -race ./internal/service ./internal/repository -run 'Share|Lease|CAS|Boot|Fence|AuditRollback' -count=1 -v",
+  "exit_code": 0,
+  "limitations": [
+    "Lease unit fixtures explicitly seed enforced state; durable Node CAS and transport belong to Task 2.",
+    "Runtime/compiler eligibility and allocation distribution belong to Task 3.",
+    "Database review schema is a new unfrozen candidate; CR-007 approval does not approve migration 08."
+  ]
+}

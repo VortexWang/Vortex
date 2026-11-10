@@ -1,0 +1,15 @@
+2026/11/09 00:28:51 goose: no migrations to run. current version: 8
+2026/11/09 00:28:52 OK   00001_authority.sql (26.86ms)
+2026/11/09 00:28:52 OK   00002_tenant_policy.sql (17.74ms)
+2026/11/09 00:28:52 OK   00003_nodes_ports.sql (30.48ms)
+2026/11/09 00:28:52 OK   00004_entry_group_domains.sql (3.45ms)
+2026/11/09 00:28:52 OK   00005_rules_compile.sql (28.62ms)
+2026/11/09 00:28:52 OK   00006_packages_entitlements.sql (31.99ms)
+2026/11/09 00:28:52 OK   00007_metering_ledger.sql (38.23ms)
+2026/11/09 00:28:52 OK   00008_limits_shares.sql (84.98ms)
+2026/11/09 00:28:52 goose: successfully migrated database to version: 8
+--- FAIL: TestRuntimeFundingHistoryDoesNotHideUnknownParentAcrossSignerEpochs (1.13s)
+    runtime_funding_history_epoch_test.go:65: unknown original parent hidden by epoch [] <nil>
+FAIL
+FAIL	vortex/backend/internal/service	1.904s
+FAIL

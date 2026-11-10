@@ -1,0 +1,31 @@
+{
+  "tool": "sqlc1.31.1",
+  "runs": 2,
+  "files": 23,
+  "equal": true,
+  "output_sha256": {
+    "authority.sql.go": "eaf0cd9cbb9a2815162e839765dd58a059288c8bf38e6f549207acef24b0f41d",
+    "credentials.sql.go": "4d162f8c8dc995dadfb8c4ca2b88838b23b4b8c0e5c67d15341f05ba614fc323",
+    "credit_close.sql.go": "c7495a2d2c598af1d9ebbf3742cce96c22496bbb846bdf0e8a6d659b616f80a9",
+    "db.go": "39aa06028414ed8f2694efca65a4e002d7e6f56bd510d26873320aa75a612a2c",
+    "entitlements.sql.go": "8148bb1aae3efb165dbb86a7d3ab65500cd88db3f04b036189d90b23266d5c4c",
+    "hub_allocations.sql.go": "fb2c9c2087efeea43b6594bf3c2fe79b0815a166ad351dbc8fdd1a834185f04b",
+    "hub_recovery.sql.go": "d6e99ded809f70d7c73e87e8bba71a8f1940bff2323a4ab0df6d019455621bca",
+    "hub_same_store_recovery.sql.go": "3d3f33e3bf2d03b7f84d1ab30f295a6bdc4e71a3cd683a89033537f3afb36da0",
+    "leases.sql.go": "8f1ffe516b05ef84d0de8f8bbab0cd17dee86a35840d6c30311ef6eae2d78ca7",
+    "ledger.sql.go": "246601dd97d1a10297915500eaaa39680c52d2a4638017b61ddcb43435841a33",
+    "models.go": "015b6ab975153fc4677fd51df6f9639a9460cd8ca58a4b373b834773d4cbec2f",
+    "node_groups.sql.go": "b18880fb6355d5525d370979f85c6f3b780f5d8dca6caaba28e543ed551708e2",
+    "node_recovery.sql.go": "7c88f3caf2390492fbc0ad0894aead8278393726553bddb9a1a444bbac6886a4",
+    "nodes.sql.go": "e59a9ef6379cbbd16fa67f3bb2655a94514d7517718e336881ed091ab5e97834",
+    "packages.sql.go": "c6ec115cd8b9adb95e00352b30a9cd49797e65e9091da3dfd33a5bf9d7fdec13",
+    "ports.sql.go": "11daaf544b5ac39144d66d7dd2100b6d165053761e3216a2f0b8da4421f9ad75",
+    "rules.sql.go": "b6e7edfbfcc5970f5beb58c0e25a222c92b07255e1d148d206e3a62fddd8fefe",
+    "runtime_leases.sql.go": "2ac440d0ecb4da361523bfc41ae8fc6872d979077ad8d76dd430168dd8866404",
+    "share_closures.sql.go": "7cdf766a7287041fc614548e2cb7e52de2db2fed73c2fec3ee4939ca59882f29",
+    "shares.sql.go": "30bdc9603fd66c69bbbbc5b95ce24fb6dfdbbdd87fc3f8652d34fcaf39808826",
+    "subscriptions.sql.go": "cb51e0c4b3b6afa6b2b0368f510f008b3a3214ad7e8df385676e270c2a516713",
+    "tenants.sql.go": "a667fdca54032e276cd25f6d868fe254e89f3bd3edbbf84caad036fdf7bf9a21",
+    "usage.sql.go": "80f3ad804a66edef07b03bd20c247549c340e5ba9f4e8461d5eb95cfd921f559"
+  }
+}

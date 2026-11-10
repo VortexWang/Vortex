@@ -1,0 +1,24 @@
+{
+  "base_sha": "fb52069508e2b3a7d308d89065a1f98b7a508f3a",
+  "scope": "06-07 group member HTTP and exact mutation; global revalidation remains",
+  "passed": [
+    "focused-native-race.log",
+    "final-api-native-race.log",
+    "final-service-native-race.log",
+    "final-linux-race.log",
+    "generation-builds.json"
+  ],
+  "failed_retained": {
+    "routes-red.log": "missing GET/PUT routes404"
+  },
+  "evidence_sha256": {
+    "final-service-native-race.log": "7b78dc48aafdac9a48d4fb9e609a4d617cc4514930045f2e72232096eaad0850",
+    "source-hashes.json": "f6e96f663d33f82f1edd15a192707dba190e2323b3c16d07402b06948fdc87e5",
+    "generation-builds.json": "ba01a7af4b56d058cbd5436b2e46b8b516d8bd90835d33abb070cf0d8cec21d6",
+    "routes-red.log": "fc54718c315e054bd9bd4684927be40531f86183191514fcff32857b96447b24",
+    "README.md": "1187a33189923a90b9caf588e1bea78420d4c979081e8f9f5079ae827c912cc4",
+    "final-linux-race.log": "c3e8445fb6414a4e312554400e80685ddd3f0b9d6bb669715ed2f27cc966168e",
+    "focused-native-race.log": "4cc32c2f41539e42562cc50206ad4f3d8122d8739183a49de91c96ad647b478b",
+    "final-api-native-race.log": "e0af8dfa35293896c315b5d60f23a0d9c9e96099b079f5571cf8ab9567036fcc"
+  }
+}

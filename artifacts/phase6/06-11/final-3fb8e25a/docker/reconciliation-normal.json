@@ -1,0 +1,14 @@
+{
+  "commit": "3fb8e25a61e8c22a41e47b681b2155e50f2af7b9",
+  "scope": "real PostgreSQL production backend reconciliation; deterministic node adapter; no Engine/transport performance claim",
+  "started_at": "2026-11-09T01:55:29.07797151Z",
+  "ended_at": "2026-11-09T01:55:45.544234054Z",
+  "elapsed_ns": 16466262544,
+  "elapsed_ms": 16466.262544,
+  "rules": 1000,
+  "resolved": 1000,
+  "members": 2000,
+  "observed": 2000,
+  "inventory_sha256": "68e8a57f439f756e039eee66a72e0c8b859ba55ebaae87e4c1ef598120108313",
+  "status": "passed"
+}

@@ -29,7 +29,10 @@ cleanup() {
   kill "$topology_pid" 2>/dev/null || true
   wait "$topology_pid" 2>/dev/null || true
   if [ "$mode" = docker ]; then
-    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop >/dev/null 2>&1 || cleanup_status=1
+    # Keep the echo target alive until every relay has finished its pending
+    # writes. Stopping all services together can manufacture ECONNREFUSED and
+    # correctly-recorded unknown UDP usage during fixture cleanup.
+    QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" stop source relay-1 relay-2 relay-3 destination >/dev/null 2>&1 || cleanup_status=1
     mkdir -p "$qual/logs"
     for name in source relay-1 relay-2 relay-3 destination; do
       QUALIFICATION_DIR="$qual" docker compose -f "$root/test/qualification/compose.yaml" logs --no-color "$name" >"$qual/logs/$name.log" 2>&1 || true

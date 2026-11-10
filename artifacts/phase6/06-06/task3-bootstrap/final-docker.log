@@ -1,0 +1,51 @@
+ Container vortex-phase6-0605-resume-postgres-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Running 
+ Container vortex-phase6-0605-resume-valkey-1 Waiting 
+ Container vortex-phase6-0605-resume-postgres-1 Waiting 
+ Container vortex-phase6-0605-resume-valkey-1 Healthy 
+ Container vortex-phase6-0605-resume-postgres-1 Healthy 
+ Container vortex-phase6-0605-resume-backend-test-run-f55bd84c0d62 Creating 
+ Container vortex-phase6-0605-resume-backend-test-run-f55bd84c0d62 Created 
+=== RUN   TestTrustedClockBoundsAndMissingSynchronization
+--- PASS: TestTrustedClockBoundsAndMissingSynchronization (0.00s)
+PASS
+ok  	vortex/backend/internal/timeauthority	1.005s
+=== RUN   TestPackageMigrationUpgradeSeeded00005
+2026/11/08 04:02:38 goose: no migrations to run. current version: 8
+2026/11/08 04:02:38 OK   00001_authority.sql (6.45ms)
+2026/11/08 04:02:38 OK   00002_tenant_policy.sql (6.49ms)
+2026/11/08 04:02:38 OK   00003_nodes_ports.sql (15.12ms)
+2026/11/08 04:02:38 OK   00004_entry_group_domains.sql (1.87ms)
+2026/11/08 04:02:38 OK   00005_rules_compile.sql (15.02ms)
+2026/11/08 04:02:38 goose: successfully migrated database to version: 5
+2026/11/08 04:02:38 OK   00006_packages_entitlements.sql (15.26ms)
+2026/11/08 04:02:38 OK   00007_metering_ledger.sql (18.6ms)
+2026/11/08 04:02:38 OK   00008_limits_shares.sql (14.96ms)
+2026/11/08 04:02:38 goose: successfully migrated database to version: 8
+--- PASS: TestPackageMigrationUpgradeSeeded00005 (0.28s)
+=== RUN   TestShareBootstrapCommitWaitsForBothKindsAtEveryPreparedNode
+2026/11/08 04:02:38 goose: no migrations to run. current version: 8
+2026/11/08 04:02:38 OK   00001_authority.sql (7.01ms)
+2026/11/08 04:02:38 OK   00002_tenant_policy.sql (6.32ms)
+2026/11/08 04:02:39 OK   00003_nodes_ports.sql (16.6ms)
+2026/11/08 04:02:39 OK   00004_entry_group_domains.sql (1.9ms)
+2026/11/08 04:02:39 OK   00005_rules_compile.sql (15.99ms)
+2026/11/08 04:02:39 OK   00006_packages_entitlements.sql (12.88ms)
+2026/11/08 04:02:39 OK   00007_metering_ledger.sql (17.09ms)
+2026/11/08 04:02:39 OK   00008_limits_shares.sql (16.65ms)
+2026/11/08 04:02:39 goose: successfully migrated database to version: 8
+--- PASS: TestShareBootstrapCommitWaitsForBothKindsAtEveryPreparedNode (0.36s)
+=== RUN   TestShareHandoffCrashBeforeSendQueriesWithoutFreeingBootstrap
+2026/11/08 04:02:39 goose: no migrations to run. current version: 8
+2026/11/08 04:02:39 OK   00001_authority.sql (8.01ms)
+2026/11/08 04:02:39 OK   00002_tenant_policy.sql (6.43ms)
+2026/11/08 04:02:39 OK   00003_nodes_ports.sql (15.92ms)
+2026/11/08 04:02:39 OK   00004_entry_group_domains.sql (1.79ms)
+2026/11/08 04:02:39 OK   00005_rules_compile.sql (14.89ms)
+2026/11/08 04:02:39 OK   00006_packages_entitlements.sql (12.12ms)
+2026/11/08 04:02:39 OK   00007_metering_ledger.sql (19.55ms)
+2026/11/08 04:02:39 OK   00008_limits_shares.sql (20.01ms)
+2026/11/08 04:02:39 goose: successfully migrated database to version: 8
+--- PASS: TestShareHandoffCrashBeforeSendQueriesWithoutFreeingBootstrap (0.52s)
+PASS
+ok  	vortex/backend/internal/service	2.173s

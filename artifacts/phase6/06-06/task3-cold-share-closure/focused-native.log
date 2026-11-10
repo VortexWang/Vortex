@@ -1,0 +1,16 @@
+=== RUN   TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity
+2026/11/08 17:31:30 goose: no migrations to run. current version: 8
+2026/11/08 17:31:30 OK   00001_authority.sql (41.28ms)
+2026/11/08 17:31:30 OK   00002_tenant_policy.sql (10.95ms)
+2026/11/08 17:31:30 OK   00003_nodes_ports.sql (20.12ms)
+2026/11/08 17:31:30 OK   00004_entry_group_domains.sql (2.87ms)
+2026/11/08 17:31:30 OK   00005_rules_compile.sql (20.56ms)
+2026/11/08 17:31:30 OK   00006_packages_entitlements.sql (19.1ms)
+2026/11/08 17:31:30 OK   00007_metering_ledger.sql (25.2ms)
+2026/11/08 17:31:30 OK   00008_limits_shares.sql (40.23ms)
+2026/11/08 17:31:30 goose: successfully migrated database to version: 8
+    share_cold_recovery_test.go:64: lease_boundary_invalid
+--- FAIL: TestColdHubProofClosesOnlyRenewalAndRealNodeCASReleasesCapacity (1.19s)
+FAIL
+FAIL	vortex/backend/internal/service	1.936s
+FAIL

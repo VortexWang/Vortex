@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -139,6 +140,29 @@ func exerciseRecoveringProcess(t *testing.T, ctx context.Context, dir, mode stri
 		t.Fatal(err)
 	}
 	request := store.HandoffRequest{ID: "550e8400-e29b-41d4-a716-446655440800", HubID: regionalFirst, FromEpoch: 1, ToEpoch: 2, Heartbeat: time.Now().UTC()}
+	// Phase6 requires independently supplied exact successors for funded flat
+	// roots. This offline protocol backend fixture reads the actual persisted
+	// allocation after boot binding; it cannot infer ownership from expiry.
+	var allocation []byte
+	if err = hubDB.QueryRowContext(ctx, `SELECT payload FROM issuer_delegations WHERE delegation_id=?`, delegation).Scan(&allocation); err != nil {
+		t.Fatal(err)
+	}
+	var original store.HubDelegation
+	if err = json.Unmarshal(allocation, &original); err != nil {
+		t.Fatal(err)
+	}
+	if len(original.ShareReferences) != 3 {
+		t.Fatal("fixture missing funded roots")
+	}
+	digest := sha256.Sum256(allocation)
+	roots := append([]store.ShareReference(nil), original.ShareReferences...)
+	for i := range roots {
+		roots[i].Revision++
+		roots[i].SignerEpoch++
+	}
+	request.BackendID = regionalBoot // original explicit fixture source owner; receipt endpoint is a separate identity
+	request.FundedSuccessors = []store.FundedHandoffSuccessor{{DelegationID: delegation, AllocationSHA256: hex.EncodeToString(digest[:]), ShareReferences: roots}}
+
 	if mode == "recovering-wrong-hash" {
 		if err = os.WriteFile(filepath.Join(dir, "recovery-ack-policy"), []byte("wrong"), 0600); err != nil {
 			t.Fatal(err)

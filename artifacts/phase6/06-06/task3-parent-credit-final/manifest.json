@@ -1,0 +1,23 @@
+{
+  "base_commit": "2a5a873186c62f66e07798198cc9e36cda1011d7",
+  "scope": "candidate all-child known-inventory original-parent settlement; sustained runtime/recovery and full06-06 pending",
+  "source": {
+    "backend/cmd/vortex-backend/main.go": "08432864cd2d4863a102d90ac9229c4355847607fc1791d9d0fae085d69ff388",
+    "backend/db/query/credit_close.sql": "4fc642bf3936834b5b0f191b0a1372af1c6e6f807f46bba0d053f2d0d59eed17",
+    "backend/db/generated/credit_close.sql.go": "c7495a2d2c598af1d9ebbf3742cce96c22496bbb846bdf0e8a6d659b616f80a9",
+    "backend/internal/service/credit_close.go": "8a9e2a88b9985d1becb33f5a3e8c73753233f1e07191b722a805994ecdf760f1",
+    "backend/internal/service/credit_close_test.go": "4fad95bf3107603228dd05153604b5f487cc74ce850dd70085ad4e49ece2c1a9",
+    "backend/internal/service/credit_close_transport_test.go": "790b2a5037a54a7c1495038c901a5c9c51e465fca220e2cd68e7ecdf8787c334",
+    "backend/internal/service/hub_credit_settlement.go": "0b50d1ba11d50a53c72fcf10377e9b6cdee1fc0c1a354084a730ba0b2398f9a3",
+    "backend/internal/service/hub_credit_settlement_test.go": "bc5b589cafff4a7852d8a79d0e423daf378cca118c6bc7b36a5b428bf1ee2557",
+    "backend/internal/worker/hub_credit_settlement.go": "2095d5e6834712087da2208c626c5d630ea9c7ab5bf80ba1c7618d90d04fbf7b",
+    "contracts/protobuf/v1/lifecycle.md": "97ee5cb9e0d24cacc01677186bf1f01c67b593fb5ff980851138ea5abc903a78"
+  },
+  "evidence": {
+    "README.md": "9d5f2e66985c6984effeedf508752038da9aac9ec7151bb72e4f9e7eb1b1cdb7",
+    "focused-native.log": "e4346476d5950dfc99603415beb7f2b83bba2809c5c1414615f10ac7b8e6f550",
+    "full-backend-native-race.log": "b505f9d7b9df679090f15b753367ed71a47f3a2b88fb20b57aedc2dad6eb844e",
+    "generation.json": "45894577989e4e8672537ff3ba126dc856e0cf1be11ba3a57532288ae81f6847",
+    "linux-race-build.log": "8256314b1b2294a74f9d6441f4046eb15be4b7e7f5e0bf43bc6f68106100ce96"
+  }
+}

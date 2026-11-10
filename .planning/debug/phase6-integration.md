@@ -1,0 +1,147 @@
+---
+status: verifying
+trigger: 用户要求先收敛F-10/F-11，再整合Phase6到主线
+created: 2026-11-09
+updated: 2026-11-10
+workflow: gsd-debug
+execution: inline
+---
+
+## Current Focus
+
+hypothesis: F-10成功消费缺少提前唤醒，F-11夹具混用初始化和实际运行预算；整合额外暴露通道权限边界与旧夹具缺失明确授权。
+next_action: 修复并发耐久续额在 SQLite 单写连接上的 200ms admission 超时；保持安全边界和独立流授权不变，完成同 SHA Docker/Actions 验收后再整合主线。
+
+## Symptoms
+
+expected: 连续TCP/UDP在真实耐久授权内续资并逐来源守恒；区域故障切换保留未知负债且在独立5秒运行预算内完成。
+actual: Actions连续授权超过200ms后TCP收到RST，UDP收到非预期载荷；本机恢复入口silent-established的查询因5秒总context超时失败。
+repro: Actions42606221450/42608942871；本机干净168be8a5完整Phase5入口。
+timeline: Phase4合并后最终审查；Phase6已在独立分支完成验收，但尚未整合。
+
+## Evidence
+
+- 原Phase6工作区为codex/phase6-backend@c85ed753且有用户未提交修改；持续保留，不checkout或stash。
+- Phase6已有a2097430，保留5秒真实运行预算，将migration/TLS初始化与最终耐久证明使用独立context。
+- Phase4实验CreditDemand使用tag100；Phase6新增生产命令使用19..24等。整合应同时保留已批准CR-010/011和Phase6 CR-008/009，不回退契约或移除任一范围。
+
+## Eliminated
+
+- 延长生产200ms或忽略unknown不属于授权修复。
+- 删除Phase4新增连续流量测试来适配Phase6不是回归收敛。
+
+## Resolution
+
+root_cause: 成功耐久消费未唤醒续资；恢复夹具将初始化时间算入5秒运行预算。两分支的ACK接收路径与角色隔离必须同时保留；旧恢复/到期夹具缺少生产安全边界要求的明确后继根和真实后端usage确认。
+fix: 已原子提交F-10/F-11及整合修复。保持200ms、5秒实际运行、source-owner、FULL持久化和unknown负债边界。
+verification: corrected full native root/backend及干净fb3a9786 Linux root/Engine/backend race PASS；双Protobuf/双sqlc/六Linux构建与契约负向PASS；CR012精确批准及冻结门禁通过；最终同SHA Docker/Actions待完成。
+
+- F-10 deterministic RED: success checkpoint缺少pre-exhaustion通知。补充普通/批量结算成功后的coalesced scope wake；return、cancelled checkpoint、foreign revision不得唤醒。原生相关race三轮52.873s，限两核Linux稳定源码三个场景三轮67.047s。最初Linux在源码编译期间修改，失败保留，不能作为修复后判定；随后固定源码重跑通过。
+- F-11沿用a2097430测试修复，原生五轮21.530s，Linux包含在67.047s。初始化与证明context分离，真实5秒运行和200ms admission不变。最终完整入口/Actions尚待集成。
+
+- 合并发现并用真实mTLS RED/GREEN修复receive侧ACK绕过ControlOnly；known/unknown outbox、hook与未知负债均核验。CLI/客户端拒绝实验需求与direct backend混用。
+- 有限DemandLimit错误计算同ID重放，导致提前结束控制连接；distinct-ID fixture RED后修复，32轮原授权期限测试PASS31.196s。
+- 原到期闭环夹具缺少usage后端确认；记录region真实错误后补实际Hub/backend mTLS，三轮PASS23.873s，不放宽生产路径。
+- 原Phase5恢复夹具未供Phase6新增的原source owner明确后继根；补actual persisted allocation/hash/三根相邻revision/epoch，全部五场景PASS8.702s，保留原R与512unknown断言。
+- CR012候选精确描述符并集105=union(main69,phase6100)，历史CR009篡改测试与forward篡改测试均PASS。完整native修正root及backend race均PASS；service569.990s。Linux干净fb3a9786启用真实4MiB满盘夹具，root/Engine全量race通过（Agent253.534/Store258.953/Phase5 process112.495s），隔离Linux后端全量race通过（service550.929s），源码前后干净。15项完整证据及哈希见validation-manifest.json。原用户工作区HEAD/tracked diff再次一致；最终status新增外部未跟踪Phase7目录，未由本轮创建或修改，保持原样。
+
+- 用户明确批准CR-012，精确proposal ecc3cbbdbfcb6e0cbb4144b44fdfe70c163f7edbf722fe4bdc04d37d7dd1f547。仅control catalog候选改冻结、追加精确批准记录及current governance摘要，候选规范和历史批准字节未改。原CR009快照门禁、全局冻结、两基线并集和批准后负向检查通过。
+
+- 779029b2最终Actions暴露checkpoint等待期间AfterFunc延迟的取消竞态：dispatch42623942243在cancel-member错误返回成功。新增delayed-cancel-member以FIFO follower延迟传播，确定性RED0.653s；取得事务后及提交前同步校验原member contexts，native race20轮38.400s通过，原committed/reserved/unknown/outbox及reopen/replay守恒断言保留。CR012精确门禁仍通过，规范/提案/批准字节未变。
+- PR42623892470同时在多包并行wave1中出现持续授权及恢复RST，保留FAIL。将wave1/wave2/full gate所有root多包入口统一-p1，与既有authorization策略一致；job预算60分钟覆盖累积串行全套，不改变测试内200ms/5秒deadline。779029b2的最终证据不能替代修正后新提交配对。
+
+- 679b5501最终未通过：Docker backend normal/race各502项通过，但root引入5个Phase4 opt-in skip被严格门禁拒绝；Actions42625295380两原生架构root-race持续TCP/UDP超200ms失败；Phase5 dispatch42625300678与PR42625221806 attempt2同样失败。Phase1..4在679的PR结果通过。这些结果不能用于合并放行。
+- 后续确定性RED：重复8次missing-authority wake发送同一pending请求8次（0.690s）；相同请求的sequence FULL提交、Hub重复处理和Agent重复安装与真实授权竞争。另发现25ms窗口内丢弃最后一次成功消费wake。改为session-local有界重发间隔、重连立即按原ID重放、保留trailing wake；pending精确scope直接跳过重扫账本，事务内去重和权限校验保持不变。
+- 初次仅重发节流仍在Linux双核race五轮中的一轮UDP失败，保留该FAIL；增加pending账本重扫规避后Linux双核race连续TCP/UDP三轮PASS48.802s。原生需求/身份/重放race三轮PASS47.675s、身份和重发race十轮PASS10.941s。开发快照不是最终same-SHA证据。
+- af17f907 最终独立进程验收复现出真实并发回归：`TestDurableAuthorityProcessesConcurrentRenewal` 在 normal/race 均可能收到 `FrameRST` code 8；节点日志显示 16 条独立流各自执行 durable funding admission，SQLite 单写连接在并发 settlement/lease 校验下等待约 195ms，固定 200ms `missingAuthorityWait` 到期后安全拒绝并由 relay 发送 RST。扩大 deadline、忽略 unknown、删除测试或降低安全边界均不接受。当前尚未形成满足安全与性能双重约束的最小修复，故不合并。
+- Phase6 root仍拒绝任意required skip。入口明确只排除TestRuntimeDurableD04Candidate（tools/phase4/d04_durable_scan.py独立参数矩阵）；每模式分别构建真实Node/TestHub二进制并要求四个进程功能测试通过。证据新增精确root-selection.json和scope/process缺失负向检查。原生四进程功能测试PASS48.822s，开发dirty快照不当正式验收。
+- 扩大Python discover时历史CR009原始契约测试直接针对当前CR012组合规范运行而失败，精确current_contract_check.sh仍PASS；不改写历史批准规范或将此失败写成通过。新的最终证据门禁3项含scope篡改/required skip/process缺失负向PASS。
+
+- 2026-11-10续跑：新增Store跨session funding admission有界合并、同事务authority只读复用、同方向idle tail原子换块、无竞争Agent直接路径和UDP indivisible-write水位修复。保留200ms及60s，取消/存储错误全回滚，不放宽unknown。新守恒、回滚、重启/速率、UDP waiter测试已针对性race通过；尚未通过最终真实续额进程。
+- ACK排空调查：GgIpS3真实4096 round trips/12288000 bytes业务45.522s完成，8192 usage全部durable，60s时仅4433 hub_acked、3759 pending。首批直到10s发送，每条Agent ACK与Hub usage/origin单独FULL竞争；4096 replay rotation保持不变。
+- 新交付：按SQLite插入位置分页，每轮最多32 known/typed unknown公平发送；commit后广播hint、50ms合并突发提示，10s恢复重放；cursor不是ACK。序列号同页耐久预留且崩溃不重用，MaxInt64不回绕。ACK相邻信封逐一replay验证后有界同事务提交，commit后hook；配置通道/unknown拒绝、EOF drain和重连重放均保留。Hub usage+journal+首次origin同一FULL事务，backend确认边界不变。
+- 真实Linux失败证据保留：Luljiv round87 RST、H8xsh9 round131 RST、lFCBA5 round150 RST。单SQLite写连接竞争仍可耗尽200ms；NextSequenceRange/ACK纳入现有FIFO，checkpoint仅合并同秒需求估算样本（每条usage/residual仍独立）。这些失败不能用于放行。
+- 本轮native针对性race：usage/config-only/replay/rotation/unknown Agent10.320s、Store4.242s；ACK群提交/来源原子/序列范围/公平分页 Agent9.475s、Store5.099s；checkpoint取消/需求窗口/跨session守恒Store7.674s。CR009历史保护及CR012精确并集门禁通过，描述符69/100/105未改变。真实进程、完整相关套件、same-SHA Docker/amd64/arm64 Actions仍待通过，不合并PR1。
+
+- 最新真实Linux burst50试验AI7zqa/process-1600419660仍FAIL（round94，18.63s），未放宽任何预算。需求估算合并+ACK公平队列仅为待验证修复；不把改善路径当验收。新增普通ACK一次commit/混unknown全回滚/hook后置、序列重启范围、known/unknown公平append分页及新hint、origin原子失败/reopen等targeted race均通过，最新Store3.953s/Agent9.311s。完整Agent/Store/Hub race运行日志 /tmp/vortex-integration-unit-full-race.log，尚未结论。
+- 下一步精确测量：最新RST前没有独立funding admission超时日志，需核对fundingBlockSession.Reserve无竞争快路径在ctx已取消但batch已返回时的Return分支、checkpoint的session锁等待与组内commit边界，不能继续仅凭RST假定为200ms数据库排队。PR1仍Draft@af17f907，无新提交/推送/主线合并。
+
+- 最新突发交付样本失败后，补充同事务只读关系证明复用：只有funding group的authorityRows/source/share不变时缓存成功lineage/share验证；时间/session/rate/余额继续逐次检查。新增同事务过期拒绝/下一事务撤销拒绝测试。Linux容器vortex-admission-linux-lineage-proof，exec59096，证据路径由/tmp/vortex-admission-current-linux给出；未完成前不要重启同一试验。完整组件race exec74565运行中，源码曾追加只读证明优化，因此此套件只作开发回归，不当same-SHA最终证据。
+
+- 只读关系证明复用后Linux process-3309838609仍round145 FAIL；小组8试验process-3969923421更早round27 FAIL，已撤回小组改动恢复64。新增失败/慢路径诊断，下一轮必须先量出session锁等待、提交赢过deadline时已commit返回的具体分支再改算法。Store完整race143.287s通过（开发源，Agent/Hub仍执行中exec74565）。proof/time/sample/cancel targeted race7.890s通过。
+
+- 续跑完成上一轮完整 native component race：Store143.287s、Agent179.033s、Hub12.499s。仅开发快照，不作最终same-SHA证据。noautockpt独立拷贝FAIL process-55941604；合并checkpoint/admission队列FAIL process-4078415058；named-volume FAIL process-1433023404；每批5ms窗口FAIL process-4036329291。合并队列与5ms窗口均已撤回，正式FULL/auto-checkpoint/200ms不变。
+- 会话锁诊断证实结算持有全会话mutex，反方向在进入Store前累积等待。将checkpoint等待期间的block标记为in-progress，保留inFlight/residual上界并释放全会话mutex；同block准入/其他结算等待该结果，独立方向可进入writer队列。外部SQLite writer阻塞的确定性测试验证无提前ACK、无旧residual签发、allocator可获取、取消后资金守恒，race三轮PASS2.503s；相关funding/fragment/UDP回归PASS7.795s。
+- 此修复未关闭真实进程回归：named-volume process-2967487863 round64 FAIL，单funding commit209.491ms；独立auto-checkpoint=0诊断process-1077773606 round60 FAIL，单checkpoint commit298.873ms（work23.322ms）。禁用checkpoint不是修复，正式工作区保持默认自动checkpoint。三并行4KiB write+fsync探针各1500次，p99约8ms、max70.7ms；仅诊断，不能替代SQLite/系统验收。
+- 下一步采集Linux fsync/fdatasync syscall时间定位commit暂停。PR1仍Draft/Open/MERGEABLE@af17f907，未新提交或合并；所有失败证据保留在/tmp/vortex-*-result.*，不作为放行依据。
+
+- 当前完整native race已结束并通过：Store136.011s、Agent171.597s、Hub12.624s；源码覆盖本轮checkpoint锁范围修复。current_contract_check.sh再次通过CR009历史保护及CR012精确冻结并集105，git diff --check通过。原生进程opt-in不替代Linux真实四进程验收。
+- strace6.13诊断process-2542338185：616次已结束同步调用中最慢fsync149.692ms，与checkpoint commit150.586ms对应；其后funding排队165.635ms、工作/提交22.319ms，外部Reserve总208.547ms拒绝并返还未用资金。strace改变时序且wrapper引入退出超时，仅作归因证据，不能作验收。当前仍未解决真实并发回归，PR1保持草稿。
+
+- 续跑已提交并推送 b2c42581095440c4945f89c40e1c49bb5332cb7c，PR1仍Draft/Open，未合并。native component race Store136.011s/Agent171.597s/Hub12.624s为开发快照。干净b2c四真实进程 normal ConcurrentTCP/ConcurrentRenewal及race ConcurrentRenewal仍FAIL，证据 /tmp/vortex-process-b2c42581-root 指向clean clone/evidence。
+- b2c Actions dispatch Phase6=42721349101，amd64 job129515809740在backend-normal恢复测试FAIL：expected两次连接实际三次，额外错误trusted time uncertain；arm64截至本记录仍运行。Phase5=42721354032已FAIL：所有Go测试通过，最终audit_recovery发现epoch快照被older-path场景覆盖。原始失败artifact保留 /tmp/vortex-b2c42581-actions-amd64-artifact 与 /tmp/vortex-b2c42581-phase5-artifact，不作为放行。
+- 当前未提交修复：funding/checkpoint批次取得FIFO writer后才收集等待期间到达的成员，原ctx同步取消检查保留；delivery metadata用独立队列，不能与funding混用取消域。确定性RED旧队列拆16请求为2commit；新收集race通过，独立delivery取消不取消funding测试race三轮通过。checkpoint相关race三轮14.981s。
+- 当前未提交交付窗口：每连接最多32（与delivery page一致）未确认身份，known/typed unknown独立；发送前claim，真实ACK事务及hook成功后释放hint，10s/重连从durable pending重放，不把cursor/window当ACK。窗口公平/unknown冻结/重放targeted race通过。
+- 实测已确认SQLite分页旧查询按node主键扫描全部历史并临时排序。新增pending部分索引(node_id，隐含rowid顺序)，EXPLAIN确认rowid>? seek且无TEMP B-TREE，新索引测试race通过2.045s。索引后真实业务4096 roundtrips/12288000 bytes均完成约30.4s，但总60s ACK排空/恢复重放仍FAIL，不能当验收。
+- 注意诊断证据：immutable=1忽略仍存在的WAL，不能用它统计运行失败时已提交总状态。最新改用modernc mode=ro读取copy中的db+wal。group-replay实际Agent8192 hub_acked、Hub8192 ledgered、backend仅1837；测试失败在runtime_process_test.go:401的重启后backend drain。之前直接immutable统计的pending数只反映checkpointed主文件，不能解释完整durable状态。
+- 当前未提交Hub known usage有界群提交：≤32个相邻已到达known报告逐信封身份/sequence校验，保存独立payload/digest/首个provenance，同一FULL提交；后端每条digest都确认后再群提交receipts并ACK。typed unknown独立路径和未知冻结保留。fixture独立backend数据库实现同事务群提交；真实backend无group接口则逐条实际确认，不伪造结果。恢复ReplayPending按known≤32群确认；旧缺provenance仍pending。rollback/origin/reopen/receipt错误、wrong digest不产生部分receipt、command/EOF顺序/replay、unknown隔离targeted race通过。
+- 时钟根因：UsageRelay在读CurrentAutonomyStatus之前采样，等待期间新backend heartbeat可能提交，导致把正常心跳误判future。状态读取后再采样可信时间，仍拒绝不可信/倒序，不延长deadline、不签发authority。新确定性竞态测试race通过，backend真实mTLS恢复定向三轮24.626s通过；一次错误数据库名的初始运行FAIL明确保留 /tmp/vortex-recovery-clock-native.log，修正URL结果 /tmp/vortex-recovery-clock-native-corrected.log。
+- Phase5证据命名：普通epoch保留epoch，older-path改epoch-older-path；新增旧path4的6条revoked、新path5 epoch2的3条active、unknown512/floors独立审计；原epoch断言不放宽。两场景race3.148s通过，/tmp/vortex-epoch-separated指向证据。尚未完整Linux复跑审计；macOS Python mode=ro对新SQLite WAL快照打不开，不冒充通过，也未修改正式审计为immutable。
+- 真实Linux新试验全部未放宽200ms/60s：window-checkpoint round213 RST FAIL33.65s；索引后delivery-index业务完成但ACK deadline；usage-group与group-replay业务约31.3s完成、Agent8192确认，重启backend drain在60s FAIL；window32业务32.068s、到49s全部ACK，但重启backend尚剩3644在60s FAIL。所有容器保留，/tmp/vortex-*-result指针保存原始证据。
+- 最新假设：PendingBackendUsage为每个pending行额外执行UsageOrigin查询，恢复几千行形成N+1 SQL开销。已改同一快照LEFT JOIN读取provenance，历史缺失仍空/0，不改变权威；运行中的真实试验 exec5646，container vortex-admission-linux-replay-join，结果 /tmp/vortex-replay-join-result 指针，尚未结论。期间不要修改生产文件/重启同一实验。当前HEAD仍b2c，所有后续改动未提交，需完整review/test/contract以及same-SHA Docker+Actions双架构通过后才允许合并。
+
+- 续跑补齐结果：b2c Phase6 arm64同时在持续UDP及并发续额FAIL；其原始证据保留。LEFT JOIN恢复试验仍60s backend drain FAIL；prepared usage试验在round181 RST FAIL28.28s，commit100.487ms+work38.770ms叠加后续funding排队，不作放行。
+- 检查点热路径精简：父funding block完整身份/残量/hold状态校验后，同事务直接插入committed child reservation/hold和known outbox，减少新建后立即重读与更新；未知身份冲突、旧checkpoint精确重放及原子残量上界不变。新增固定SQL预编译只缓存statement，不缓存权限/余额。相关checkpoint/rollback/cancel/crash race三轮PASS17.130s。
+- dirty开发快照Linux真实并发续额PASS50.732s（/tmp/vortex-checkpoint-direct-result.2ame7J），16流4096round trips/12288000bytes业务27.147s，包含全部ACK和重启后backend replay。将恢复观察COUNT改为等价EXISTS，零pending条件保持；完整四进程race PASS71.750s，证据由/tmp/vortex-process-direct-matrix指向。开发快照不充当最终same-SHA证据。
+- Phase5分离快照在Linux原始audit_recovery.py开发组合审计通过：snapshots7/fault_cases11；混合旧Actions与新开发证据仅作诊断，不作为正式放行。时钟竞态/receipt群提交/来源索引/传输窗口针对性race均通过；current_contract_check再次PASS。完整native组件race /tmp/vortex-direct-component-race.log仍运行。
+- 当前候选准备提交并重新产生干净同SHA Docker与Actions双原生架构证据；200ms/60s/5s、FULL/WAL及unknown冻结均未放宽。PR1仍未合并。
+
+- 74c809f5已提交推送。完整native component race PASS：Store146.685s、Agent174.034s、Hub13.476s、fixture2.215s。Phase1/2/3/4 PR检查通过。干净同SHA本机Docker backend normal/race各502项PASS；但Phase5 dispatch42729068806增量授权FAIL，TCP/UDP TestRuntimeFundingBlockContinuousTraffic均200ms超时，原始日志和artifact保留 /tmp/vortex-74c809f5-phase5-failed.log 与 /tmp/vortex-74c809f5-phase5-authorization/。因此主动停止该已失败候选剩余本机runtime工作，result.json标记failed/Cloudflare not_run，不能用于放行。Phase6 dispatch42729061360仍在运行，需收取最终结果。
+- 失败定位：小额grant碎片收集逐个FULL预扣、余额不足后又逐个FULL退回；在单次200ms内串行竞争多轮writer。新增ReserveRuntimeUsageFragments把≤64个独立grant child及各自真实速率/余额/权限校验置于一个有界事务，完整收集后才交给Engine；不足/存储失败/取消整体回滚，不发布部分结果，模糊commit仍保留耐久上界。普通单fragment API保留；未知结算及来源身份保持原语义。
+- 新Store测试验证真实父hold留40+独立64来源：不足105不留下资金/速率/child，第二child故障全回滚，成功100保留64/36来源且reopen恢复全部上界，race三轮PASS2.900s。Agent原short-write/unknown/canceled/insufficient守恒测试race三轮PASS5.173s；Linux GOMAXPROCS4持续TCP/UDP+fragment原测试三轮PASS54.585s（/tmp/vortex-atomic-fragments-linux-continuous.log）。这些仍为开发验证，下一候选需完整same-SHA Docker和Actions。
+
+- d4925337原子碎片修复已提交推送，Phase6 dispatch42732544359与Phase5 dispatch42732549728进行中。本机首轮在创建网络前FAIL（Docker predefined pools exhausted）；仅释放本轮74c专用已停止测试栈网络后在新证据目录重跑，失败证据原样保留。新本机normal502项PASS，race仍运行；未放行。
+- 旧74c Phase6 arm64 FAIL在普通模式TestDurableAuthorityProcessesUDP的关机核算：Hub已签发52096，Agent已安装48692，差3404；业务48000已完整确认，Agentreserved/unknown=0。证据 /tmp/vortex-74c809f5-actions-arm64-artifact/ 与 /tmp/vortex-74c809f5-arm64-job.log。这与关机末次已签发未安装响应相符，但旧入口只设PHASE6_PROCESS_EVIDENCE_DIR，测试实际读VORTEX_PROCESS_EVIDENCE_DIR，原始临时process db已清理，不能凭金额差就假定安全。
+- 新进程审计逐笔验证所有Hub签发request/payload摘要、原journal、原来源/金额/boot/generation以及Agent已安装payload/credit；缺失安装的签发必须严格匹配原始durable pending request和scope，且三个authority均未部分安装，始终留在HubIssued而不退款。最终严格守恒为HubIssued=AgentInitial+精确验证的pendingIssued；未知或无证据差额仍失败。新增真实Store签发lost-response/installed和6个篡改负向，race三轮PASS15.355s（/tmp/vortex-process-inventory-audit.log）。完整真实进程与same-SHA验收仍需运行，不能把该解释写成旧失败已通过。
+- final_container_check.sh改用测试实际读取的VORTEX_PROCESS_EVIDENCE_DIR并区分normal/race，保留原始process db/log和funding-inventory.json，供后续精确审计。生产代码与200ms/60s/5s/FULL/WAL/unknown冻结未改。
+
+- 2026-11-10 continued merge: d4925337 Phase5 run42732549728 failed both continuous protocols at 200ms with Remaining5192/Available4096/LargestGrant3548; raw log retained in /tmp/vortex-d4925337-phase5-authorization/agent-hub-race.log. Atomic child collection alone still followed separately committed idle-tail returns. New fallback keeps both proven-idle tails, single-grant retry and complete per-grant collection in one bounded FULL transaction with SAVEPOINT rollback. Ordinary successful allocations retain cross-session group commits. No timeout, unknown, source, rate or ownership boundary changed. New store negative cases prove insufficient aggregate funds/storage error roll back both tails and rate; successful 64+36 fragments preserve individual grant identities. Native targeted Agent/Store race PASS17.289s/2.242s, new atomic fallback store test race three runs PASS2.670s; Linux targeted three-run Agent PASS57.540s (Store completion pending). Current contract gate PASS. Final same-SHA acceptance remains pending, PR unmerged.
+
+- 2026-11-10 old74c809f5 amd64 full artifact now retained at /tmp/vortex-74c809f5-actions-amd64-artifact: root-race also failed TestRuntimeContinuousDurableAdaptiveRenewal/2 because the finite control fixture closed after the last response while consumption prepared a new durable request (RawBytes3000). Added same-ID actual mTLS replay after the finite stream, adaptive producer disabled; add exactly the pending requested bytes to expectedIssued and keep the final empty-queue and full Agent/Hub conservation checks. This mirrors the existing unpaced fixture shutdown; no pending request is discarded or considered installed. Old concurrent process also exceeded60s; preserved FAIL, new candidate must still pass it.
+- Atomic funding fallback Linux three-run Store completed PASS5.593s; strengthened native rollback/rate assertion PASS2.034s. Candidate85b5ed7b submitted to complete Docker/Actions but superseded by the finite-stream fixture correction before final acceptance.
+
+- Finite-stream same-ID replay targeted native race three runs PASS35.055s (/tmp/vortex-finite-demand-replay.log). Superseded85b5ed7b Docker explicitly stopped and stamped failed/not_run; not counted as acceptance.
+
+- Old4274c866 Phase5 full gate run42734684007 passed Go checks but failed consolidated audit with malformed standalone runtime snapshots. Eight raw main-file copies (runtime/runtime-handoff both protocols, Agent/Hub) retained in /tmp/vortex-4274c866-phase5-recovery fail independent immutable SQLite reads. Fixture saveLedgerFiles assumed Store.Close implied checkpoint; a retained reader/WAL can invalidate that assumption. Change evidence export to read-only source VACUUM INTO a separate temporary standalone snapshot, hash and gzip that exact snapshot; integrity gate stays strict. Added deterministic retained-reader committed-WAL regression; validation pending. Candidate097468d5 final runs remain diagnostic until this evidence repair is tested and committed.
+
+- Snapshot validation: native retained-reader regression normal PASS0.859s and race three runs PASS3.032s. Linux race retained-reader plus both finite renewal protocols PASS20.060s; exported six Agent/Hub/backend snapshots independently passed Python SQLite immutable integrity_check. Initial audit_runtime_renewal CLI was invoked with wrong artifact layout and exited1 (not a ledger failure); correct per-snapshot independent integrity evidence is /tmp/vortex-ledger-snapshot-proof. Superseded097468d5 Docker backend normal/race each502 PASS, runtime stopped for new snapshot candidate and failed stamp retained.
+
+- Old4274c866 Phase6 amd64 artifact retained /tmp/vortex-4274c866-actions-amd64-artifact. Concurrent process race completed4096 round trips/12,288,000 bytes in36.3406s and all8192 Hub ACKs, then failed at line401 restarted backend replay within original60s. Hub retained8192 ledger rows,4398 backend receipts/3794 pending; independent backend had4398. No usage loss/unknown release inferred. Optimize known receipt validation into one joined exact immutable usage/tombstone/receipt read plus strict insert, prepare repeated confirmed lookup at Store scope. Unknown path unchanged. Pending full same-SHA acceptance still required.
+
+- Known receipt joined-read and prepared confirmation tests: Store/Hub race three runs PASS13.819s/10.611s, includes partial group abort, exact replay, tombstone retention, unknown rejection, ignored-insert no receipt failure. New receipt insert must affect exactly one row. First Linux process run failed under physical FULL sync299ms (and another2s return), retained /tmp/vortex-process-receipt-joined; no relaxation. Stopped only this turn ended e4a8e785 PG/Valkey project, retained unrelated stacks. Retry all four real process race scenarios PASS69.824s, /tmp/vortex-process-receipt-retry pointer; concurrent4096 round trips/12,288,000 bytes traffic27.730s plus actual ACK/restart backend replay within original60s. This remains development evidence until final committed SHA pair passes.
+
+- Olde4a8e785 Phase5 authorization run42738983678 still failed continuous small-block TCP/UDP200ms (Remaining5740/Available4644/LargestGrant3952), retained /tmp/vortex-e4a8e785-phase5-authorization; old097 full gate also failed same regression (/tmp/vortex-097468d5-phase5-recovery). One passing incremental run did not establish stability. For blocks with capacity for only one current complete write (size/n<2), enter single-turn allocation/replacement/opposite-tail/fragment choice directly; retain normal group allocation path for larger blocks. Within that one transaction first preserve opposite tail if possible, then rollback savepoint before each fallback; cancel/denial still returns no capability. Testing pending;199e0327 full checks remain diagnostic.
+
+- Compact Linux five runs exposed one committed-after-deadline205ms failure, kept /tmp/vortex-compact-write-funding-linux.log. Funding holds reduce planning Available before consumption, but wake previously arrived only after actual usage settlement, delaying request/Hub FULL/Agent installation until the next write. Add scoped planning wake immediately after a successful durable funding allocation; never record consumption or outbox at allocation, never wake on denied/rolled-back allocation. Existing bounded target/source checks remain authoritative. Strengthened wake test distinguishes this planning debit from real consumption and still verifies returned/cancelled settlement creates no consumption wake. Pending validation.
+
+- Scoped planning wake validation: native targeted race three runs PASS Agent63.336s/Store2.719s (/tmp/vortex-funding-planning-wake.log); Linux GOMAXPROCS4 targeted race five runs PASS Agent105.555s/Store6.334s (/tmp/vortex-funding-planning-wake-linux.log). Covers continuous TCP/UDP, fragment conservation, atomic rollover/write, datagram waterline and allocation-vs-consumption wake. No timeout or accounting boundary relaxed. Preparing fresh exact-SHA full Docker/Actions acceptance; not yet merged.
+
+- Candidate1ecea805 final acceptance remains FAILED: PR Phase5 incremental42743554796 and exact-SHA Phase5 attempt2 both continuous protocols exceed200ms; raw files /tmp/vortex-1ecea805-pr-phase5-authorization and /tmp/vortex-1ecea805-phase5-attempt2-authorization. Attempt1 failed fixture bind address-in-use before activation; preserved separately, same-SHA rerun did not cure continuous regression. Phase4 attempt1 apt build exit100, rerun underway. Local independent clone backend normal/race502 each PASS, root continuous normal PASS, then host disk exhaustion stopped Docker and made test filesystem read-only; producer exit128, NOT accepted. Freed reconstructible native Go cache4.5GiB and restarted OrbStack; original data/evidence retained. Shared clone setup failure was separately retained and changed to standalone packed objects before this failed run.
+- Investigating retry contention: 10ms ticker stays ready while SQLite denial takes25-40ms, immediately requeues a writer instead of yielding to control installation. Change retries to a fresh25ms interval after each denial and broadcast a hint only after FULL authorization commit plus authenticated clock observation. Capture hint before each attempt to avoid lost notifications; all retries still enter durable gate under original200ms deadline. This is pending validation, not a claim that CI is fixed.
+
+- Retry-yield validation: Linux race five runs of wait/deadline/wake/bridging guards PASS8.738s, then constrained2CPU GOMAXPROCS2 five-run continuous TCP/UDP+fragment/atomic funding/wait regression PASS Agent94.775s/Store5.477s (/tmp/vortex-authority-notify-continuous.log). This CPU restriction is diagnostic, not official acceptance. Final guard version avoids scheduler-sensitive15ms absence assertions: it measures the actual interval between a40ms denial and the next attempt, and separately proves a notification cannot authorize. Final guards five-run race PASS (/tmp/vortex-authority-notify-guards.log); exact contract gate PASS. Phase4 same-SHA retry42743555222 attempt2 PASS. Original four previously running PG/Valkey containers restored after OrbStack disk-full shutdown; only five stopped diagnostic containers archived with tmp/logs/inspect metadata before removal (/tmp/vortex-diagnostic-container-archives).
+
+- Old1ecea805 exact Phase6 amd6442743597424 completed FAILED after all backend/root normal tests passed: engine-normal TestDelayedRenewalSeparatesColdStartFromRenewalDeadline returned immediate ErrDenied instead of bounded timeout. Original full compressed artifact retained /tmp/vortex-1ecea805-actions-amd64.zip (no extraction drift). Delayed fixture worker exposed Credit.ApplyGrant before acquiring issuer mutex to clear pending; fast consumers could drain initial credit then wait for its completed request instead of starting renewal. Move ApplyGrant into the same existing issuer mutex as pending completion (consistent request() lock order). No200ms/unknown/amount semantics changed; validation pending.
+- a093e28c exact Phase5 Wave1 failed non-race per-write renewal tests; one recorded unrelated FULL settlement285ms blocked next admission before BeginTx. Raw /tmp/vortex-a093e28c-phase5-failed.log retained. PR incremental and complete Phase6 still running, not accepted.
+
+- Delayed issuer publication validation: Linux race twenty runs of existing delayed/faulted renewal and cold-start deadline guards PASS18.806s (/tmp/vortex-delayed-publish-atomic.log). Grant publication and pending completion now share the existing issuer mutex; amount, deadline and unknown semantics unchanged. a093 PR incremental authorization run42747725602 passed; complete recovery and same-SHA Docker/Phase6 still running, not accepted.
+
+- Old1ecea805 arm64 full artifact preserved compressed at /tmp/vortex-1ecea805-actions-arm64.zip. Backend normal/race, root normal and engine normal passed; root race failed both continuous small-block protocols, single TCP/UDP and concurrent renewal. Concurrent traffic itself completed4096 rounds/12288000bytes in47.4007s but full60s ACK/restart budget failed. This historical failure remains failed; new retry candidate must cover it. a093 local backend normal/race502 each and root normal1090 plus engine normal296 passed, including all four process scenarios; complete race still running.
+
+- a093e28c clean local final Docker producer completed PASS (exit0, full acceptance including real Cloudflare CRUD). Backend normal/race502 each; root normal/race1090 each, engine normal/race296 each; four real processes passed in both modes, concurrent race45.73s within original60s. Evidence /tmp/vortex-final-a093e28c-evidence.33dkfbqs; exact SHA result recorded /tmp/vortex-final-a093e28c-record.json. This does not replace the newer candidate's same-SHA pair.
+- a093 Phase5 PR42747725602 and exact run42747780484 attempt2 both passed incremental authorization but full gate FAILED audit_renewal_safety.py:74 because VACUUM INTO exported DELETE journal mode. Raw log/artifacts retained /tmp/vortex-a093e28c-pr-phase5-failed.log, /tmp/vortex-a093e28c-pr-phase5-recovery.zip and /tmp/vortex-a093e28c-exact-phase5-attempt2-failed.log. Preserve the original WAL assertion: verify source actually WAL, then explicitly select WAL on the independent fully materialized export and reject any nonempty required WAL sidecar before hashing. Source is not modified. Retained-reader immutable content/integrity plus read-only WAL-format test Linux race3 runs PASS2.864s; real six renewal safety cases race3 runs PASS28.353s. Independent Linux Python audit passes all12 raw snapshots (/tmp/vortex-ledger-wal-proof-current pointer). Host macOS Python SQLite3.51 read-only open failed and is not counted as validation. Production storage and all audit assertions unchanged.
+
+- Candidatefd578d9e exact Phase5 run42752147957 still FAILED continuous small-block TCP/UDP at200ms; raw /tmp/vortex-fd578d9e-phase5-failed.log and /tmp/vortex-fd578d9e-phase5-authorization.zip retained. Local backend normal/race502 each, root normal1090 and engine normal296 passed, then explicitly stopped this failed candidate's remaining local runtime; result stamped failed/Cloudflare not_run. Only this ended candidate's Compose stack stopped; unrelated stacks retained.
+- a093 arm64 raw live DB+WAL independently read with modernc mode=ro: traffic4096 rounds/12288000bytes in46.400s, Agent7032 hub_acked/1160 pending, Hub7032 ledgered/2066 backend receipts, independent backend2066. This is a real delivery drain bottleneck, not a missing usage inference. Inspection /tmp/vortex-a093-arm64-inspect-current; compressed full artifact /tmp/vortex-a093e28c-actions-arm64.zip, amd64 /tmp/vortex-a093e28c-actions-amd64.zip.
+- ACK hot path had omitted its per-ID SELECT/UPDATE and sequence SELECT/UPSERT from the existing fixed SQL prepare allowlist, recompiling each while holding the one writer. Added the exact four unchanged statements; no transaction/control/unknown logic changed. Existing ACK all-or-nothing, mixed unknown rejection, after-commit hook, window/replay and sequence guards Linux race3 runs PASS Agent42.808s/Store7.650s (/tmp/vortex-delivery-prepared-guards.log). Four real Linux process race scenarios PASS59.107s; concurrent renewal40.73s includes all8192 ACKs and real restart/backend replay within original60s (/tmp/vortex-delivery-prepared-process-current).
+- Independent diagnostic overlay (not product source) logged actual conservative not_before/expiry selection. Two-CPU GOMAXPROCS2 continuous TCP/UDP race5 runs PASS82.487s with prepared delivery queries; no timing bypass. Diagnostic /tmp/vortex-authority-time-diagnostic-current. Initial diagnostic was stopped before substantive work to avoid competing with official local producer, then restarted only after that failed candidate stopped. Full new same-SHA acceptance still required; PR unmerged.

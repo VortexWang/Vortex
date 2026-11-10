@@ -1,0 +1,10 @@
+=== RUN   TestControlOnlyRequiresPinnedDirectBackend
+--- PASS: TestControlOnlyRequiresPinnedDirectBackend (0.00s)
+PASS
+ok  	vortex/agent	1.720s
+=== RUN   TestRunNodeSplitBackendAndHubActualMTLSIndependentSessions
+--- PASS: TestRunNodeSplitBackendAndHubActualMTLSIndependentSessions (0.29s)
+=== RUN   TestRunNodeRejectsIncompleteDirectBackendBeforeOpeningStore
+--- PASS: TestRunNodeRejectsIncompleteDirectBackendBeforeOpeningStore (0.00s)
+PASS
+ok  	vortex/cmd/vortex-node	2.346s

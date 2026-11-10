@@ -1,0 +1,22 @@
+{
+  "base_sha": "e41cf7d14daf5abf4c147f9a3fff7535f4f378d9",
+  "scope": "06-07 trusted local issuance; not complete plan",
+  "passed": [
+    "final-native-race.log",
+    "final-linux-race.log",
+    "existing-command-native-race.log",
+    "builds.json"
+  ],
+  "failed_retained": {
+    "initial-contract-red.log": "missing implementation compile error;not semantic RED"
+  },
+  "evidence_sha256": {
+    "README.md": "733ebbee0e3f7fbd0ff639f392a04285a49803f9dacb6e42303ed572ee85c5f7",
+    "builds.json": "dee6b0c391c154cb79f96be5cdf0184d49e83e8ac3d8ba45af5b7b473be4f869",
+    "existing-command-native-race.log": "70913f26b9ac03c4450abd0b0755e5a5a4c4ccae3769022abc28a026f98e4a24",
+    "final-linux-race.log": "d5e7b82d5389439afca062dab51ea4905ad864fb1bc996120cb7c1f94f70d193",
+    "final-native-race.log": "4eca18f368fce15e7bd51762b03c153dc0453c38252da4db0faf8e118a1dfd4c",
+    "initial-contract-red.log": "6054781191c9d80f4ed828f5adc8b8aa7ee4da1393c3110a85e4bf6c079cf2dc",
+    "source-hashes.json": "32048cf9ea17ced4ceca79526577bbb8a84caeedd67fee2b1316b4ca29fcc84f"
+  }
+}

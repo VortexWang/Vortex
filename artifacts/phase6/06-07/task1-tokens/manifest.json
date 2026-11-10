@@ -1,0 +1,41 @@
+{
+  "base_sha": "4dc91a55c2fbe99fa8f183af993b7386805b691c",
+  "scope": "06-07 Task1 token persistence;not complete plan",
+  "phase_progress": "9/11",
+  "passed": [
+    "complete-native-race.log",
+    "complete-linux-race.log",
+    "final-native-race.log",
+    "final-linux-race.log",
+    "sqlc-two-generations.json",
+    "cross-builds.json"
+  ],
+  "failed_retained": {
+    "initial-contract-red.log": "missing implementation compile",
+    "initial-implementation.log": "SQL CASE type compile",
+    "reuse-revocation-semantic-red.log": "deliberate missing revoke behavioral mutation",
+    "overlapped-mutation-linux-failed.log": "overlapping fault variant compilation;not production final evidence"
+  },
+  "not_claimed": [
+    "REST HTTP adapters",
+    "SSE",
+    "Password login",
+    "06-07 completion",
+    "sameSHA Docker/Actions pair"
+  ],
+  "evidence_sha256": {
+    "README.md": "e9bbf3293519f510145374184515a4d84b851b0ed0ee9fca5be9407acc5b4396",
+    "complete-linux-race.log": "5cc1b9f1302066ab9a2f612b35d8a09825277ee93e74cd5fb9fb174d12342bcc",
+    "complete-native-race.log": "002b42094e42e6430c5f1a9577a66199c98b26a7450ad2a9451980ff254a3b9f",
+    "cross-builds.json": "382224139639f6196211ad964ffb59e6d497c5b9bf1ef23d92793a11a03775af",
+    "final-linux-race.log": "453ebb0e5cf535c1075a7048f970b0f5cbce0da935633de2df75d5a33ad48870",
+    "final-native-race.log": "1b8d92b8bdecb6fd91aea2c945321a74b82928fe016bedb91f1413b6eac43b86",
+    "focused-native-race.log": "9b2729c980b444632ee95a90eac41cbddd610dcd6447e37e54f36cda8ec1df7a",
+    "initial-contract-red.log": "f6512b00ce8bc7c696a3d2a1eb42808d0068b29b20da60b7de4fe474ac521f52",
+    "initial-implementation.log": "6a0dc715cd2e1e7445a3c64bb7a2e8b81b9712df30e0dc98dae65accbbd8cc03",
+    "overlapped-mutation-linux-failed.log": "8e580f6f99186c6a6da819a932e72a644378ba550daf56df3a01394bece283c1",
+    "reuse-revocation-semantic-red.log": "006368c593206c1f4c566956295ead481514df396d951b14bf89e5a302422c7e",
+    "source-hashes.json": "bd0e4a23b3240c3373ebae8acb9de01529bea2776c7e6173b7840e42cfa50384",
+    "sqlc-two-generations.json": "9db869293e5903c1a6ed88af3293cf0a28a7e421d02494f11ab0146e9f7a6d7a"
+  }
+}

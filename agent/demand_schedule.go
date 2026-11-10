@@ -30,6 +30,17 @@ func (n *Node) PrepareAdaptiveDemand(ctx context.Context, c AdaptiveDemandConfig
 		return store.IssueRequest{}, DemandEstimate{}, err
 	}
 	estimate := policy.estimateTotal(ledger.MinuteBytes, ledger.Available)
+	// A datagram can exceed the renewal waterline while valid credit is below
+	// its indivisible write size. Refill toward the existing target for a live
+	// matching waiter; do not enlarge the target or count held/unknown credit.
+	n.demandMu.Lock()
+	for write := range n.demandWrites {
+		if write.scope.RuleID == c.Scope.RuleID && write.scope.RuleRevision == c.Scope.RuleRevision && write.scope.PathGeneration == c.Scope.PathGeneration && ledger.Available < write.bytes && ledger.Available < estimate.Target {
+			estimate.RequestBytes = estimate.Target - ledger.Available
+			break
+		}
+	}
+	n.demandMu.Unlock()
 	if estimate.RequestBytes == 0 {
 		return store.IssueRequest{}, estimate, nil
 	}

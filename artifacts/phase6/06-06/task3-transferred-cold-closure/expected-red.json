@@ -1,0 +1,6 @@
+{
+  "mutation": "omit cold closure consumer; live S/R chain alone cannot enter cold epoch",
+  "expected_failure": true,
+  "source_sha256_before": "da67e6e83a2c1bebb0b85980252e0a00e06abc80feb55ef80ea9df5cef61c8b6",
+  "source_sha256_after": "da67e6e83a2c1bebb0b85980252e0a00e06abc80feb55ef80ea9df5cef61c8b6"
+}

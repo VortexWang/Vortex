@@ -1,0 +1,36 @@
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot
+=== RUN   TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root
+--- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds (1.26s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/above (0.19s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/low-water (0.20s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/ttl (0.19s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/expired (0.17s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/unknown-time (0.17s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/old-boot (0.17s)
+    --- PASS: TestRenewalCandidatesRespectLowWaterTTLAndOriginalBounds/stale-root (0.17s)
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/valid
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/stopped
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/missing-handoff
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/changed-limit
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-path
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/wrong-fence
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-boot
+=== RUN   TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/untrusted-time
+--- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff (1.49s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/valid (0.20s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/stopped (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/missing-handoff (0.19s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/changed-limit (0.19s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-path (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/wrong-fence (0.19s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/old-boot (0.18s)
+    --- PASS: TestRenewalCandidatesFollowOnlyExactLiveFundedHandoff/untrusted-time (0.18s)
+PASS
+ok  	vortex/agent/store	4.354s

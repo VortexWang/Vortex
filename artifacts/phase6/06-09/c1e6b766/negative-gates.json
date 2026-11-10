@@ -1,0 +1,146 @@
+[
+  {
+    "name": "wrong-sha",
+    "command": [
+      "./tools/phase6/check.sh",
+      "--expected-sha",
+      "0000000000000000000000000000000000000000"
+    ],
+    "cwd": "/tmp/vortex-06-09-source-final.ZzlGr4",
+    "exitCode": 1,
+    "output": "expected SHA differs from HEAD\n"
+  },
+  {
+    "name": "dirty-untracked-caller",
+    "command": [
+      "./tools/phase6/check.sh",
+      "--expected-sha",
+      "c1e6b7663a02e65ec9b6b9965c00554ca35fad99"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "source must be clean, including untracked files\n"
+  },
+  {
+    "name": "future-producer",
+    "command": [
+      "./tools/phase6/check.sh",
+      "--expected-sha",
+      "c1e6b7663a02e65ec9b6b9965c00554ca35fad99",
+      "--through-plan",
+      "06-02"
+    ],
+    "cwd": "/tmp/vortex-06-09-source-final.ZzlGr4",
+    "exitCode": 1,
+    "output": "producer not implemented for requested plan\n"
+  },
+  {
+    "name": "evidence-inside-source",
+    "command": [
+      "./tools/phase6/check.sh",
+      "--expected-sha",
+      "c1e6b7663a02e65ec9b6b9965c00554ca35fad99",
+      "--evidence-dir",
+      "/tmp/vortex-06-09-source-final.ZzlGr4/should-never-be-created"
+    ],
+    "cwd": "/tmp/vortex-06-09-source-final.ZzlGr4",
+    "exitCode": 1,
+    "output": "evidence must be outside source checkout\n"
+  },
+  {
+    "name": "openapi-no-auth",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/no-auth"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: global authentication required\n"
+  },
+  {
+    "name": "openapi-secret",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/secret"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: internal/secret property private_key\n"
+  },
+  {
+    "name": "openapi-cursor",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/cursor"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: cursor/limit missing\n"
+  },
+  {
+    "name": "openapi-sse",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/sse"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: SSE durability/resync missing\n"
+  },
+  {
+    "name": "openapi-errors",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/errors"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: error 401 missing listRestrictions\n"
+  },
+  {
+    "name": "openapi-internal-route",
+    "command": [
+      "ruby",
+      "tools/phase6/openapi_validate.rb",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmpiwknyjp9/internal-route"
+    ],
+    "cwd": "/Users/peng/Documents/123/VORTEX",
+    "exitCode": 1,
+    "output": "OpenAPI lint failed: internal route /api/v1/tenants/{tenant_id}/runtime\n"
+  },
+  {
+    "name": "real-actions-missing",
+    "command": [
+      "./tools/phase6/check.sh",
+      "--through-plan",
+      "06-09",
+      "--expected-sha",
+      "c1e6b7663a02e65ec9b6b9965c00554ca35fad99",
+      "--evidence-dir",
+      "/tmp/vortex-06-09-evidence/c1e6b766"
+    ],
+    "exitCode": 1,
+    "output": "manifest failed: actions result.json missing\n"
+  },
+  {
+    "name": "real-log-tamper",
+    "command": [
+      "./tools/phase6/evidence_manifest.sh",
+      "--expected-sha",
+      "c1e6b7663a02e65ec9b6b9965c00554ca35fad99",
+      "--through-plan",
+      "06-09",
+      "--host",
+      "docker",
+      "--evidence-dir",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/tmprkob1fv1/changed"
+    ],
+    "exitCode": 1,
+    "output": "manifest failed: docker/tracer.log checksum mismatch\n"
+  }
+]

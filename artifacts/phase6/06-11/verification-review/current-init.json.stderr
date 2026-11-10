@@ -1,0 +1,5 @@
+gsd: model config in /Users/peng/Documents/123/VORTEX/.planning/config.json changed since agents were last baked (2026-11-07T09:22:11.689Z).
+     Static-frontmatter runtime 'codex' ignores the new model_overrides
+     until you re-run:  gsd install --codex
+     (or 'gsd update')
+gsd-tools: warning: /Users/peng/.gsd/defaults.json sets resolve_model_ids, runtime but a project config takes precedence here — those global keys are ignored for model resolution. (#3532)

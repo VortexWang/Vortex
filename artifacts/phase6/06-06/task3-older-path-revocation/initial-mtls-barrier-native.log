@@ -1,0 +1,36 @@
+=== RUN   TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor
+--- PASS: TestAuthenticatedHubEpochHandoffKeepsOldGrantAndBoundsSuccessor (0.44s)
+=== RUN   TestAuthenticatedOlderPathPureRevocationKeepsCurrentPathAndUnknownDebt
+    epoch_handoff_test.go:175: store: autonomy only permits renewal of existing authority
+--- FAIL: TestAuthenticatedOlderPathPureRevocationKeepsCurrentPathAndUnknownDebt (0.43s)
+FAIL
+FAIL	vortex/agent	1.596s
+=== RUN   TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors
+--- PASS: TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors (0.21s)
+=== RUN   TestPureOlderPathRevocationKeepsFloorsFundsAndUnknownScope
+--- PASS: TestPureOlderPathRevocationKeepsFloorsFundsAndUnknownScope (0.20s)
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/issuer
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/boot
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/current-path-id
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/lower-epoch
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/grant
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/handoff
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/policy
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/references
+=== RUN   TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/heartbeat
+--- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights (1.59s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/issuer (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/boot (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/current-path-id (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/lower-epoch (0.19s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/grant (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/handoff (0.18s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/policy (0.17s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/references (0.17s)
+    --- PASS: TestOlderPathRevocationRejectsForeignKnownScopeAndMixedRights/heartbeat (0.17s)
+=== RUN   TestOlderPathRevocationFULLRollbackAndConcurrentReplay
+--- PASS: TestOlderPathRevocationFULLRollbackAndConcurrentReplay (0.23s)
+PASS
+ok  	vortex/agent/store	4.438s
+FAIL

@@ -79,6 +79,19 @@ func checkIssuerTime(now IssuerTime) error {
 // heartbeat together. Replaying the same allocation never refills its balance.
 // A higher epoch requires explicit handoff; a closed epoch cannot be reopened.
 func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now IssuerTime) error {
+	return s.installHubDelegation(ctx, d, now, "")
+}
+
+// InstallFundedHubDelegation commits all backend-provisioned roots and the
+// finite delegation in one FULL transaction. Transport may acknowledge only
+// after this returns; a disk/validation error cannot leave partial new roots.
+func (s *Store) InstallFundedHubDelegation(ctx context.Context, backendID string, d HubDelegation, now IssuerTime) error {
+	if !validIssuerUUID(backendID) || len(d.ShareReferences) != 3 {
+		return ErrAuthorizationDenied
+	}
+	return s.installHubDelegation(ctx, d, now, backendID)
+}
+func (s *Store) installHubDelegation(ctx context.Context, d HubDelegation, now IssuerTime, backendID string) error {
 	if s.owner != "hub" {
 		return ErrAuthorizationDenied
 	}
@@ -103,6 +116,20 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 		return err
 	}
 	defer tx.Rollback()
+	var closed int
+	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM closed_share_delegations WHERE delegation_id=?`, d.ID).Scan(&closed); err != nil {
+		return err
+	}
+	if closed != 0 {
+		return ErrAuthorizationDenied
+	}
+	if backendID != "" {
+		for _, root := range d.ShareReferences {
+			if err = s.installShareSourceAnchorTx(ctx, tx, d.NodeID, backendID, root); err != nil {
+				return err
+			}
+		}
+	}
 	var previous []byte
 	err = tx.QueryRowContext(ctx, `SELECT payload FROM issuer_delegations WHERE delegation_id=?`, d.ID).Scan(&previous)
 	if err == nil {
@@ -135,7 +162,11 @@ func (s *Store) InstallHubDelegation(ctx context.Context, d HubDelegation, now I
 	if now.Earliest.Before(d.BackendHeartbeat) || !now.Latest.Before(d.BackendHeartbeat.Add(BackendLossGrace)) || !now.Latest.Before(d.ExpiresAt) {
 		return ErrNewAuthorityInAutonomy
 	}
-	if err := persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline); err != nil {
+	if backendID != "" {
+		if err := persistFundedDelegationHeartbeat(ctx, tx, d, now); err != nil {
+			return err
+		}
+	} else if err := persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline); err != nil {
 		return err
 	}
 	var epoch, state string
@@ -321,9 +352,9 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx storeTransaction
 	if epoch != ownerEpoch || epochState != "open" {
 		return result, ErrSignerEpochClosed
 	}
-	d.SignerEpoch, err = strconv.ParseUint(ownerEpoch, 10, 64)
-	if err != nil || d.SignerEpoch == 0 {
-		return result, ErrAuthorizationDenied
+	d, err = effectiveHubDelegationTx(ctx, tx, d, digest, ownerEpoch, true)
+	if err != nil {
+		return result, err
 	}
 	// Provisioning may have advanced a source root since this delegation was
 	// installed. Recheck it in the spending transaction; historical grants may
@@ -403,6 +434,10 @@ func (s *Store) issueHubAuthorizationTx(ctx context.Context, tx storeTransaction
 }
 
 func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, heartbeat, deadline time.Time) ([]byte, error) {
+	return buildAuthorizationPayload(d, r, issued, expires, hard, heartbeat, deadline, []string{"runtime_lease", "share_lease", "credit_grant"})
+}
+
+func buildAuthorizationPayload(d HubDelegation, r IssueRequest, issued, expires, hard, heartbeat, deadline time.Time, kinds []string) ([]byte, error) {
 	var leaves map[string]ShareReference
 	if d.ShareReferences != nil {
 		var err error
@@ -422,7 +457,7 @@ func buildIssuedPayload(d HubDelegation, r IssueRequest, issued, expires, hard, 
 		return s[:8] + "-" + s[8:12] + "-" + s[12:16] + "-" + s[16:20] + "-" + s[20:], nil
 	}
 	entries := make([]map[string]any, 0, 3)
-	for _, kind := range []string{"runtime_lease", "share_lease", "credit_grant"} {
+	for _, kind := range kinds {
 		id, err := newID()
 		if err != nil {
 			return nil, err
@@ -590,4 +625,39 @@ func (s *Store) AuditHubDelegation(ctx context.Context, id string) (DelegationBa
 		return result, fmt.Errorf("store: delegated source conservation violated")
 	}
 	return result, tx.Commit()
+}
+
+// A committed allocation can arrive after a newer authenticated heartbeat.
+// Installing finite rights never rolls that heartbeat back or replaces its
+// deadline. Existing non-online state still requires explicit recovery.
+func persistFundedDelegationHeartbeat(ctx context.Context, tx *sql.Tx, d HubDelegation, now IssuerTime) error {
+	previous, err := stateValue(ctx, tx, "backend_heartbeat")
+	if errors.Is(err, sql.ErrNoRows) {
+		return persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline)
+	}
+	if err != nil {
+		return err
+	}
+	hb, err := time.Parse(time.RFC3339Nano, previous)
+	if err != nil {
+		return err
+	}
+	if hb.Before(d.BackendHeartbeat) {
+		return persistAuthorizationHeartbeat(ctx, tx, d.BackendHeartbeat, d.AutonomyDeadline)
+	}
+	mode, err := stateValue(ctx, tx, "authority_mode")
+	if err != nil {
+		return err
+	}
+	open, err := stateValue(ctx, tx, "signer_epoch_open")
+	if err != nil {
+		return err
+	}
+	if mode != AutonomyOnline || open != "true" {
+		return ErrAuthorityHandoffRequired
+	}
+	if now.Earliest.Before(hb) || !now.Latest.Before(hb.Add(BackendLossGrace)) || !now.Latest.Before(deadlineFromTx(ctx, tx)) {
+		return ErrAuthorityExpired
+	}
+	return nil
 }

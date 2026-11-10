@@ -1,0 +1,1038 @@
+{
+  "status": "source-reconstructed",
+  "scope": "Declared exact module source and recovered SDK relink; original optimized WASM not independently reproduced",
+  "selected_libc_objects": 120,
+  "compiler_rt_objects": 13,
+  "unrecovered": [],
+  "other_selected_sysroot_archives": [],
+  "objects": [
+    {
+      "object": "_Exit.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/exit/_Exit.o"
+      ],
+      "source_file": "libc-top-half/musl/src/exit/_Exit.c",
+      "source_sha256": "e3ebbafba80ba51d0c55d1140f12c7b4990888a10131f74f5e56e1a197425dc0"
+    },
+    {
+      "object": "__init_tls.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/env/__init_tls.o"
+      ],
+      "source_file": "libc-top-half/musl/src/env/__init_tls.c",
+      "source_sha256": "50769fcfaf4317c14ab768034a135a55e84d617929c683bb7abd22a2068208c9"
+    },
+    {
+      "object": "__lctrans.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/locale/__lctrans.o"
+      ],
+      "source_file": "libc-top-half/musl/src/locale/__lctrans.c",
+      "source_sha256": "8b0d0000e3c2d945365d57d2bb73f6ca6ce87f70708449186acac3166083345a"
+    },
+    {
+      "object": "__lock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/__lock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/__lock.c",
+      "source_sha256": "6a0ff64f760ead915f4fea00cb4069052eb0753b86478bec642c435d4a38b551"
+    },
+    {
+      "object": "__lockfile.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__lockfile.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__lockfile.c",
+      "source_sha256": "dc16d32a802123b549bd1e3ed4f473ff3ce8b5e38ad184229c398b3fd2e5cfe9"
+    },
+    {
+      "object": "__stack_chk_fail.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/env/__stack_chk_fail.o"
+      ],
+      "source_file": "libc-top-half/musl/src/env/__stack_chk_fail.c",
+      "source_sha256": "792660da6d47a6b33dd07621ee6b1cd2e19acb7d629e49d91b8098d664a4fccd"
+    },
+    {
+      "object": "__stdio_close.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdio_close.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdio_close.c",
+      "source_sha256": "ac947943585665139168f350a7bf542d4535a49f2b21e0709d5e4e8c353c4a64"
+    },
+    {
+      "object": "__stdio_exit.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdio_exit.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdio_exit.c",
+      "source_sha256": "9862e7c37e38efca52e0174401c717afc49c327fcd6954e8a0d241252ff4ee56"
+    },
+    {
+      "object": "__stdio_read.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdio_read.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdio_read.c",
+      "source_sha256": "8dcc18921a3aaa9e5886357afbf2dba53abc3986a8976b6146c04273b5a61df5"
+    },
+    {
+      "object": "__stdio_seek.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdio_seek.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdio_seek.c",
+      "source_sha256": "de3f90cbea78a258f7c00f9cefbaff57a42854b4373b06d7b284c900a08e7aab"
+    },
+    {
+      "object": "__stdio_write.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdio_write.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdio_write.c",
+      "source_sha256": "796e0fa1fd8fbfe96ea78cf02b32bb3c087fa5fc1d9a57b9098ed73facf94fd2"
+    },
+    {
+      "object": "__stdout_write.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__stdout_write.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__stdout_write.c",
+      "source_sha256": "c27d228779b356fb053513bb0bf3d8ee805132e51db88f535ad74dc6c9f205b3"
+    },
+    {
+      "object": "__timedwait.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/__timedwait.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/__timedwait.c",
+      "source_sha256": "6624bce7a6dacd5434cad311c87c4c85a1559ea6ea40f685c2caeed2b0d3ef44"
+    },
+    {
+      "object": "__toread.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__toread.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__toread.c",
+      "source_sha256": "a48c3ea1a42ea1b2836d64ab97807e89a6adf5c5bf22c6094944510c8c17adca"
+    },
+    {
+      "object": "__towrite.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__towrite.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__towrite.c",
+      "source_sha256": "b9cb9369502a6d10165bc4b959b4be6a11cfcd43af62d2132d521f860c9bfa4f"
+    },
+    {
+      "object": "__uflow.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/__uflow.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/__uflow.c",
+      "source_sha256": "08938f226a4dd5246eaa7fd0bd93495763de8fc0d2f7f715a2907e3f4de5fc4f"
+    },
+    {
+      "object": "__wait.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/__wait.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/__wait.c",
+      "source_sha256": "76d11c6220549da129c6c8554218032727b2322f18f40658362a6fef7c613ad4"
+    },
+    {
+      "object": "__wasilibc_futex.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/__wasilibc_futex.o"
+      ],
+      "source_file": "libc-bottom-half/sources/__wasilibc_futex.c",
+      "source_sha256": "0746ff37e216df80d78c94f97db336d7c0d21d07ec8c2f027398b7a08ca27e31"
+    },
+    {
+      "object": "__wasilibc_poly_real.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/__wasilibc_poly_real.o"
+      ],
+      "source_file": "libc-bottom-half/sources/__wasilibc_poly_real.c",
+      "source_sha256": "834da1af323a61ef521a61a08f587cbb0453858a30ebbacb58c27982c8f8dc18"
+    },
+    {
+      "object": "__wasilibc_real.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/__wasilibc_real.o"
+      ],
+      "source_file": "libc-bottom-half/sources/__wasilibc_real.c",
+      "source_sha256": "3ac8f602f9f24d52e7be605d4ea3dd930833ace5d3c3ba2254440694e512b407"
+    },
+    {
+      "object": "__wasilibc_stack.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/__wasilibc_stack.o"
+      ],
+      "source_file": "libc-bottom-half/sources/__wasilibc_stack.c",
+      "source_sha256": "7f03d805ada4e8abc1818c3a42a8d5bf6574fe9565ef3260e04bb7640ee22f78"
+    },
+    {
+      "object": "__wasixlibc_real.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/__wasixlibc_real.o"
+      ],
+      "source_file": "libc-bottom-half/sources/__wasixlibc_real.c",
+      "source_sha256": "4e3eb61ad1abac40998b75fefde7764bae908efeade4b2c686f74ceb360b16e2"
+    },
+    {
+      "object": "abort.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/exit/abort.o"
+      ],
+      "source_file": "libc-top-half/musl/src/exit/abort.c",
+      "source_sha256": "4e524d91c7377a20eebf937b2342bc254b760623481304b3f2ee25e886947caf"
+    },
+    {
+      "object": "abort_lock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/exit/abort_lock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/exit/abort_lock.c",
+      "source_sha256": "09ccc9ee65b94765b5ee2966899c2ee13ca7fc461e347adedd297dc2ba4e7d1e"
+    },
+    {
+      "object": "addtf3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "ashlti3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "assert.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/exit/assert.o"
+      ],
+      "source_file": "libc-top-half/musl/src/exit/assert.c",
+      "source_sha256": "373661f0ce4881a50467a746eea83b4063b075f5b002e8b44b85d4c4533b0d70"
+    },
+    {
+      "object": "atol.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdlib/atol.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdlib/atol.c",
+      "source_sha256": "8262cd55bd64fc505a660ac5736be610fed712e0615553ae561878f3f15ca5e7"
+    },
+    {
+      "object": "block.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/signal/block.o"
+      ],
+      "source_file": "libc-top-half/musl/src/signal/block.c",
+      "source_sha256": "9120b795965bfe9779f41c1443a0d24f54381871c77c1a50f91885ab7fb45248"
+    },
+    {
+      "object": "clearerr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/clearerr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/clearerr.c",
+      "source_sha256": "0a34f5083aaed1b3ee766e1c33f786ffcf5753414d8989a11082c12e946ae7a9"
+    },
+    {
+      "object": "clock_gettime.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/time/clock_gettime.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/time/clock_gettime.c",
+      "source_sha256": "e89e73c59e15f4b457f48594affdeb69e79574011d1052abaea0cedfbff6eeb1"
+    },
+    {
+      "object": "close.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/unistd/close.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/unistd/close.c",
+      "source_sha256": "484ada7f1a1664156ac65dd0267331cfd7dca9cd3bb455617c46577cb55a417a"
+    },
+    {
+      "object": "comparetf2.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "default_attr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/default_attr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/default_attr.c",
+      "source_sha256": "99be8ab4db8a5ca9278af138db6b3bb7132170c3715f82628acc1d772e3d2680"
+    },
+    {
+      "object": "defsysinfo.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/internal/defsysinfo.o"
+      ],
+      "source_file": "libc-top-half/musl/src/internal/defsysinfo.c",
+      "source_sha256": "0ce37dda6ec22a1c02cca74ca9e7df924377790e50a04d0b286c14031d269ba8"
+    },
+    {
+      "object": "dlmalloc.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "dlmalloc/src/dlmalloc.o"
+      ],
+      "source_file": "dlmalloc/src/dlmalloc.c",
+      "source_sha256": "f1f2d23b9c4a5fc611573e4c23b62ce8f7deb76e800d3d846d865d443722e00f"
+    },
+    {
+      "object": "errno.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/errno.o"
+      ],
+      "source_file": "libc-bottom-half/sources/errno.c",
+      "source_sha256": "1cc836c6cc773b7f60580bd5a42a6be38b0059ed358ebbb8c21f986a55667c8a"
+    },
+    {
+      "object": "exit.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/exit/exit.o"
+      ],
+      "source_file": "libc-top-half/musl/src/exit/exit.c",
+      "source_sha256": "70bc8fbcc602536d6d50b3cdf0ed5a392872bc4f27fa341bade4252b2e8e0fc0"
+    },
+    {
+      "object": "extenddftf2.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "ferror.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/ferror.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/ferror.c",
+      "source_sha256": "4c4c9ac34014d847c325823b7d2f0b2dd66e46fff3ec17e42d4d88043f88f322"
+    },
+    {
+      "object": "fflush.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/fflush.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/fflush.c",
+      "source_sha256": "856ac1841cdeeeb3df3f47bfbea5fae0746b5c9ac67d9113588f8d1375f6eb55"
+    },
+    {
+      "object": "fixtfsi.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "fixunstfsi.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "floatsitf.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "floatunsitf.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "fp_mode.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "fprintf.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/fprintf.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/fprintf.c",
+      "source_sha256": "5ffb5e485efbcaf6f6918375b08f0fc1592ade56dc6df620c99e471624f32877"
+    },
+    {
+      "object": "fread.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/fread.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/fread.c",
+      "source_sha256": "d690a3072af0dd833d3cf94569ec0f8ac295b95deb1bfaeb80ca4e693d9c24cc"
+    },
+    {
+      "object": "frexpl.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/math/frexpl.o"
+      ],
+      "source_file": "libc-top-half/musl/src/math/frexpl.c",
+      "source_sha256": "69d438311e12c803275c68d12c541e255ed393fa8e7af3e6d1a6559ac198ac7e"
+    },
+    {
+      "object": "ftrylockfile.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/ftrylockfile.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/ftrylockfile.c",
+      "source_sha256": "9d35066af7688ad13cee22a529eb8f7ce5c85a727730058324f510712d41c35a"
+    },
+    {
+      "object": "fwrite.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/fwrite.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/fwrite.c",
+      "source_sha256": "91b1cbf23660e909dfe788f1c7cc46e19a937342dbaa357eda1946d2daf5c9c8"
+    },
+    {
+      "object": "getc.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/getc.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/getc.c",
+      "source_sha256": "d9dfc4eb9e49e7edfa5153c1203d866d78aa0dabc27891ec1e954b0582823156"
+    },
+    {
+      "object": "getpid.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/getpid.o"
+      ],
+      "source_file": "libc-bottom-half/sources/getpid.c",
+      "source_sha256": "ef9de9d2aea70bae2d4001c716c3b5a931a91a9ad61566de45a333200c40e503"
+    },
+    {
+      "object": "intscan.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/internal/intscan.o"
+      ],
+      "source_file": "libc-top-half/musl/src/internal/intscan.c",
+      "source_sha256": "ed96c758c94666f2557059bd8fca26db8340b9e6b417852f1599e7c30f67deca"
+    },
+    {
+      "object": "isatty.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/isatty.o"
+      ],
+      "source_file": "libc-bottom-half/sources/isatty.c",
+      "source_sha256": "0a84e6d780109d1a8e9a88e5d6c2e8873da2c37a7e448ee0f0b36f45ec00bd5e"
+    },
+    {
+      "object": "isxdigit.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/ctype/isxdigit.o"
+      ],
+      "source_file": "libc-top-half/musl/src/ctype/isxdigit.c",
+      "source_sha256": "8dfb7d82bbf4c0e876ef047e094642a38d1e23294ed227077a5fa6422be340b5"
+    },
+    {
+      "object": "libc.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/internal/libc.o"
+      ],
+      "source_file": "libc-top-half/musl/src/internal/libc.c",
+      "source_sha256": "d711bafee2e0ae88769f30835909455c50f16d039b73c6768f76da6ecb9395b0"
+    },
+    {
+      "object": "lock_ptc.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/lock_ptc.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/lock_ptc.c",
+      "source_sha256": "3d5524788c9af1bbc0dad76fab254f1bb43a5b046684866ad8c1e2d0ee3ccb5e"
+    },
+    {
+      "object": "longjmp.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/setjmp/longjmp.o"
+      ],
+      "source_file": "libc-top-half/musl/src/setjmp/longjmp.c",
+      "source_sha256": "872b40dd59cd3301dd32a74a24b04330976e5d570e8141c39b247843bbbdacf8"
+    },
+    {
+      "object": "lseek.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/unistd/lseek.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/unistd/lseek.c",
+      "source_sha256": "8dfd5d6b57c2e66a9965b49c37fcbb08d2867d0c6e8e2fac25c5b4c3548b4817"
+    },
+    {
+      "object": "lshrti3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "memchr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/memchr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/memchr.c",
+      "source_sha256": "9c641c12fbcc6acd2cc18f6d969d9ccdcf11b27fdfb1f47b8804206bbef05581"
+    },
+    {
+      "object": "memcmp.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/memcmp.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/memcmp.c",
+      "source_sha256": "826b1b5e84d3c0fb68be827c051f6dc0d67da17ee3a444e94be0e5360586916f"
+    },
+    {
+      "object": "memrchr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/memrchr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/memrchr.c",
+      "source_sha256": "3926a6c6ef783c440c65f762a1693cc83a53035abfe80059586b7bc7b1e8a97f"
+    },
+    {
+      "object": "multf3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "multi3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "ofl.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/ofl.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/ofl.c",
+      "source_sha256": "c08f25023faf09a41f6c82769c8eec52ee678e6cef6a10e6f690231c3aacace2"
+    },
+    {
+      "object": "pthread_create.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_create.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_create.c",
+      "source_sha256": "29790d524aef5dcb92b505bbb2a16a61f0fbf0b9273ffdf067f0006cb948f665"
+    },
+    {
+      "object": "pthread_key_create.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_key_create.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_key_create.c",
+      "source_sha256": "cbae53e3a2468e75490f26c6ab4385c6295357dd902b978c2a489524481beaa8"
+    },
+    {
+      "object": "pthread_rwlock_rdlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_rdlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_rdlock.c",
+      "source_sha256": "64b6258b486b305c22504fc78af8a4bde4ae8765bf0cfdbec32fa5f5b05db4e6"
+    },
+    {
+      "object": "pthread_rwlock_timedrdlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_timedrdlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_timedrdlock.c",
+      "source_sha256": "63142ac776ff82d0736f926962cd5757604948ff0e5eb77b2eb50a10153c2a2a"
+    },
+    {
+      "object": "pthread_rwlock_timedwrlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_timedwrlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_timedwrlock.c",
+      "source_sha256": "32afcae34f55e92443c3ca54282795b5723b8d9e86abb608b54471865efb79d1"
+    },
+    {
+      "object": "pthread_rwlock_tryrdlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_tryrdlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_tryrdlock.c",
+      "source_sha256": "5dc3f7495eaee990d4a2c0b35fa8f7ae512552ab9a8be4593a38b49fb5e5344a"
+    },
+    {
+      "object": "pthread_rwlock_trywrlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_trywrlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_trywrlock.c",
+      "source_sha256": "6390f4efa4f14c17daa2cc946f3223eb3c3a8c30d81a33d1bb21dd3542652bc5"
+    },
+    {
+      "object": "pthread_rwlock_unlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_unlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_unlock.c",
+      "source_sha256": "9cf1b4b79278dccf4ccb0b1a33dca77797c67b397c723f8695b7fefaf2b816f2"
+    },
+    {
+      "object": "pthread_rwlock_wrlock.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_rwlock_wrlock.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_rwlock_wrlock.c",
+      "source_sha256": "bb40b9e8501a878f29352d6a2f881a7a41abc9587fc690712e8ebde9d444e398"
+    },
+    {
+      "object": "pthread_self.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_self.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_self.c",
+      "source_sha256": "43e73a285bbf04f1137d73fcd1e7246397ef9254b718e45700c48e1718933d88"
+    },
+    {
+      "object": "pthread_setcancelstate.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_setcancelstate.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_setcancelstate.c",
+      "source_sha256": "001df6e33826efa7e86aaee9b47504c4d4c9d2ad475edd43f30d6c035fe904b1"
+    },
+    {
+      "object": "pthread_setspecific.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/pthread_setspecific.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/pthread_setspecific.c",
+      "source_sha256": "e588f3345a6c8d636fae1b0832827474c74c171fa3dd7861b2a3e5cbe87b5520"
+    },
+    {
+      "object": "raise.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/signal/raise.o"
+      ],
+      "source_file": "libc-top-half/musl/src/signal/raise.c",
+      "source_sha256": "e0d1269229e33798e0318aa0c885e9ab66e1cfe649582a930331dade55dd3230"
+    },
+    {
+      "object": "read.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/unistd/read.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/unistd/read.c",
+      "source_sha256": "092a5f491039e9c1fee63cf4462a792a86f9667fc0fa1392d5de19842d959d55"
+    },
+    {
+      "object": "readv.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/sys/uio/readv.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/sys/uio/readv.c",
+      "source_sha256": "42300ed71e717630099edad1d2f825f5b8707addf3c8557a1fd5c25e27ccf519"
+    },
+    {
+      "object": "restore.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/signal/restore.o"
+      ],
+      "source_file": "libc-top-half/musl/src/signal/restore.c",
+      "source_sha256": "b0d6c7c35db9fc20402ac69190b8d3b996a5686e02037d647023438b90f27208"
+    },
+    {
+      "object": "sbrk.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/sources/sbrk.o"
+      ],
+      "source_file": "libc-bottom-half/sources/sbrk.c",
+      "source_sha256": "c00c7e7497e8d8120ab99a4deef8395b5a62cdd1f5cc62b9b511062f211685f5"
+    },
+    {
+      "object": "sched_yield.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/sched/sched_yield.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/sched/sched_yield.c",
+      "source_sha256": "05fbebc8110d0fce8b75cea2552cb78a34e4cd525a029a1fd84bb749335aa1b7"
+    },
+    {
+      "object": "setjmp.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/setjmp/setjmp.o"
+      ],
+      "source_file": "libc-top-half/musl/src/setjmp/setjmp.c",
+      "source_sha256": "343ba7b585fcb2dc585f75b4e97c20d12b2a39a373a457d30f376b908ef18aae"
+    },
+    {
+      "object": "shgetc.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/internal/shgetc.o"
+      ],
+      "source_file": "libc-top-half/musl/src/internal/shgetc.c",
+      "source_sha256": "0b076498bc7e64f0756692f431bf5d39ea3964a175b9eba4ce6cfe23d4c76dd2"
+    },
+    {
+      "object": "sigaction.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/signal/sigaction.o"
+      ],
+      "source_file": "libc-top-half/musl/src/signal/sigaction.c",
+      "source_sha256": "9b421a2f49c52e00f843b3f1fe7ed732ca45a9ed98b2aa9b242f12cf89fc4612"
+    },
+    {
+      "object": "signal.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/signal/signal.o"
+      ],
+      "source_file": "libc-top-half/musl/src/signal/signal.c",
+      "source_sha256": "af3c94273b06ae584f3479de05f3bbe099a1d44d3fafce49f637edf9142498d8"
+    },
+    {
+      "object": "snprintf.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/snprintf.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/snprintf.c",
+      "source_sha256": "be661cb258170863a1372b8e5998ef345bb8ef8e3f06d38a603dfda77eed4d4d"
+    },
+    {
+      "object": "stderr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/stderr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/stderr.c",
+      "source_sha256": "aaeed922b498d8713643e04fa42782ffd62846a46a00986f314da7ccaec892ea"
+    },
+    {
+      "object": "stdin.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/stdin.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/stdin.c",
+      "source_sha256": "ad7bad2564b5f3fbca89590b996250d67ae38356f0f1258b2757e61288672447"
+    },
+    {
+      "object": "stdout.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/stdout.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/stdout.c",
+      "source_sha256": "2a0283bb5a52b16aeade4c02cbb6c6782d03ae8b7dbfff60d5d4c31ef5868f1b"
+    },
+    {
+      "object": "stpcpy.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/stpcpy.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/stpcpy.c",
+      "source_sha256": "05231b57f01b5d192d6ac50bf376e1adb987feda4ea79c22248b8bba3d64f04a"
+    },
+    {
+      "object": "stpncpy.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/stpncpy.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/stpncpy.c",
+      "source_sha256": "12f0e4fd1005104a6c1200af5b90e1694d75ad0fb2586305b560341be0ef6481"
+    },
+    {
+      "object": "strchr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strchr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strchr.c",
+      "source_sha256": "629d401b95d07ddff9560eb5a9cfbda1652caaec273dc6a79013a56b1790af53"
+    },
+    {
+      "object": "strchrnul.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strchrnul.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strchrnul.c",
+      "source_sha256": "dbb7756732bb4241681ab2c8e0a1a7953ba5caf21851678ac9034a7f4a616c55"
+    },
+    {
+      "object": "strcmp.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strcmp.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strcmp.c",
+      "source_sha256": "3e1793ea2dd358e5c884c4dd232083605d0f6775f7ebe19d03d64fe97068a78f"
+    },
+    {
+      "object": "strcpy.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strcpy.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strcpy.c",
+      "source_sha256": "3785cd5bc3e08049617db754a3677f7485e5e7bc4a7901102af1604cee290b71"
+    },
+    {
+      "object": "strdup.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strdup.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strdup.c",
+      "source_sha256": "1d6181f9220e7189a48900e5f603f113e8e5c3cba2eeccbabf36cf9c4c54eeb1"
+    },
+    {
+      "object": "strerror.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/errno/strerror.o"
+      ],
+      "source_file": "libc-top-half/musl/src/errno/strerror.c",
+      "source_sha256": "2c08565d3b2eed2cea178ffac1a94787e7968b7743269bdecda1614f520d12da"
+    },
+    {
+      "object": "strerror_r.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strerror_r.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strerror_r.c",
+      "source_sha256": "74c82a1394b092f0626286168947768733736db53b5882a74225cc295eb65354"
+    },
+    {
+      "object": "strlen.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strlen.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strlen.c",
+      "source_sha256": "cf9359c1bcee96df1f3a7ef0fb969339b7ed87b202d80dc7e7fcd6d1239b7484"
+    },
+    {
+      "object": "strncpy.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strncpy.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strncpy.c",
+      "source_sha256": "88301f7a48004250e1833e9155c7d2fa607ffdddca3b1b1804774d93c82acb96"
+    },
+    {
+      "object": "strnlen.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strnlen.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strnlen.c",
+      "source_sha256": "3a72ef5250b314ca0d8ff0fed2f6aa10c8b2b26605806c759faf0d1a9b835a9e"
+    },
+    {
+      "object": "strrchr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strrchr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strrchr.c",
+      "source_sha256": "a39143d07d79906d370d268bb7934a203918d7b7b54bae0a81da277a41bb9960"
+    },
+    {
+      "object": "strsignal.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strsignal.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strsignal.c",
+      "source_sha256": "d1c78895b1c1b63857ce16fb6a12f26a8fbb73ce6a3f4190f984f8957956c36a"
+    },
+    {
+      "object": "strspn.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strspn.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strspn.c",
+      "source_sha256": "906d82e1ffe26848e99bcc8b3179812f00a8717c44b409c1fdfd24beae2566ef"
+    },
+    {
+      "object": "strstr.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/string/strstr.o"
+      ],
+      "source_file": "libc-top-half/musl/src/string/strstr.c",
+      "source_sha256": "11158e28318076b70bbaa40c04294b01d02cae475ff72385087c9b966aa14d44"
+    },
+    {
+      "object": "strtol.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdlib/strtol.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdlib/strtol.c",
+      "source_sha256": "2291cd02a25622bd31de831d7dfaff5c618ed7846b3123033a714188de78e61e"
+    },
+    {
+      "object": "subtf3.c.obj",
+      "kind": "LLVM compiler-rt",
+      "rebuilt_objects": []
+    },
+    {
+      "object": "syscall_ret.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/internal/syscall_ret.o"
+      ],
+      "source_file": "libc-top-half/musl/src/internal/syscall_ret.c",
+      "source_sha256": "d7d4192a8265f4d5ade02b9666b9cb4e164a734c49fec3f5eca965e91404dd98"
+    },
+    {
+      "object": "tolower.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/ctype/tolower.o"
+      ],
+      "source_file": "libc-top-half/musl/src/ctype/tolower.c",
+      "source_sha256": "ecdd1dedb49853eab7a79381726c4bf3c70c08be6b8fc9b9ece270769355ff7a"
+    },
+    {
+      "object": "toupper.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/ctype/toupper.o"
+      ],
+      "source_file": "libc-top-half/musl/src/ctype/toupper.c",
+      "source_sha256": "d63476d65fa366bd1e3fe2e0af1dd0b7b50327b8ade2e6c7820bbc1dc90c00da"
+    },
+    {
+      "object": "vfprintf.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/vfprintf.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/vfprintf.c",
+      "source_sha256": "8f9097498a67b6fda528656e8defacdc5705c3fb1dab4da9254f23b8d14565aa"
+    },
+    {
+      "object": "vsnprintf.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/stdio/vsnprintf.o"
+      ],
+      "source_file": "libc-top-half/musl/src/stdio/vsnprintf.c",
+      "source_sha256": "751af4a9586385e49b033df389124ae33ff3f0ed2d70465d2a9e087e7c4ac8c2"
+    },
+    {
+      "object": "wasi_thread_start.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/thread/wasm32/wasi_thread_start.o"
+      ],
+      "source_file": "libc-top-half/musl/src/thread/wasm32/wasi_thread_start.s",
+      "source_sha256": "bebf5a766751f128d43633f50b4ce17a466718d54df93d30674fd60a0090a9f8"
+    },
+    {
+      "object": "wcrtomb.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/multibyte/wcrtomb.o"
+      ],
+      "source_file": "libc-top-half/musl/src/multibyte/wcrtomb.c",
+      "source_sha256": "a8f5bfa624c88f1e3214bcd46d909fb9c5b172ac9b634fb32a101161ab680693"
+    },
+    {
+      "object": "wctomb.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-top-half/musl/src/multibyte/wctomb.o"
+      ],
+      "source_file": "libc-top-half/musl/src/multibyte/wctomb.c",
+      "source_sha256": "046e38f206c7203d0b1295dcdcd3080e3b1c335ff2e1433f0626066a73e8befc"
+    },
+    {
+      "object": "writev.o",
+      "kind": "recompiled-libc",
+      "rebuilt_objects": [
+        "libc-bottom-half/cloudlibc/src/libc/sys/uio/writev.o"
+      ],
+      "source_file": "libc-bottom-half/cloudlibc/src/libc/sys/uio/writev.c",
+      "source_sha256": "f330e802ca1784e02527e07335fd644b353dc2deeed8a55f14b1176c93295501"
+    }
+  ]
+}

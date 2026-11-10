@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -75,6 +76,21 @@ func startTestControlHub(t *testing.T, ctx context.Context, server *hub.TestServ
 	go func() { _ = server.ServeGRPC(ctx, listener, tlsConfig) }()
 	t.Cleanup(func() { _ = listener.Close() })
 	return listener
+}
+
+func TestControlOnlyRequiresPinnedDirectBackend(t *testing.T) {
+	for _, c := range []*ControlClient{
+		{ControlOnly: true},
+		{ControlOnly: true, SourceBackendID: "not-a-uuid"},
+	} {
+		if err := c.Connect(context.Background(), "127.0.0.1:1"); err == nil || !strings.Contains(err.Error(), "backend") {
+			t.Fatalf("configuration-only client did not reject missing backend pin: %v", err)
+		}
+	}
+	c := &ControlClient{ControlOnly: true, SourceBackendID: controlTestNodeID}
+	if err := c.connect(context.Background(), HubEndpoint{Address: "127.0.0.1:1"}, &RegionalConfig{}); err == nil {
+		t.Fatal("configuration-only role accepted a regional Hub")
+	}
 }
 
 func TestControlClientAppliesRuntimeConfigOverMutualTLSGRPC(t *testing.T) {

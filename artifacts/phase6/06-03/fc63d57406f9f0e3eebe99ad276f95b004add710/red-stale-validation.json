@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "block": false,
+  "verdict": "RED_EVIDENCE_OK",
+  "reason": "target_test_failed",
+  "evidence": {
+    "command": "PHASE6_DATABASE_URL=<local-test-database> GOTOOLCHAIN=local python3 tools/phase6/orchestration_red_test.py",
+    "exit_code": 1,
+    "target_test": "test_no_fresh_commit",
+    "tests": 1,
+    "pass": 0,
+    "fail": 1,
+    "failing_tests": [
+      "test_no_fresh_commit"
+    ],
+    "matched_test": "test_no_fresh_commit",
+    "format": "unittest",
+    "report_errors": []
+  },
+  "record": {
+    "command": "PHASE6_DATABASE_URL=<local-test-database> GOTOOLCHAIN=local python3 tools/phase6/orchestration_red_test.py",
+    "exit_code": 1,
+    "failing_test": "test_no_fresh_commit",
+    "target_test": "test_no_fresh_commit",
+    "expected": "No new pending Commit for a superseded revision; prepared resources receive abort and holds remain.",
+    "actual": "Late prepare/query/partial-commit observations recreated 2/2/1 Commit tasks.",
+    "verdict": "RED_EVIDENCE_OK",
+    "reason": "target_test_failed"
+  },
+  "message": "RED evidence verified: target test \"test_no_fresh_commit\" failed as expected (exit 1). GREEN authorized."
+}

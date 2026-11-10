@@ -1,0 +1,5 @@
+--- FAIL: TestRecoveryOnlyHandoffOlderPathRetainsMonotonicAdmissionFloors (0.02s)
+    epoch_handoff_test.go:137: exact old-path handoff rejected store: authorization signer or path generation is stale
+FAIL
+FAIL	vortex/agent/store	0.625s
+FAIL

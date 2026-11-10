@@ -1,0 +1,12 @@
+{
+  "valid": true,
+  "errors": []
+}
+{
+  "valid": true,
+  "errors": []
+}
+Traceback (most recent call last):
+  File "/private/tmp/vortex-0604-exact.NoabZ1/source/tools/phase6/rule_contract_check.py", line 68, in <module>
+    assert hashlib.sha256((ROOT/row['path']).read_bytes()).hexdigest()==row['sha256'], 'candidate hash changed: '+row['path']
+AssertionError: candidate hash changed: contracts/database/schema.sql

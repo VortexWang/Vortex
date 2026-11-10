@@ -1,0 +1,13 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-e534d1869b59 Creating 
+ Container vortex-phase6-tracer-backend-test-run-e534d1869b59 Created 
+ok  	vortex/agent	79.098s
+ok  	vortex/agent/store	83.752s
+ok  	vortex/hub	18.232s
+ok  	vortex/contracts	1.029s
+ok  	vortex/cmd/vortex-node	4.041s

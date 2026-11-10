@@ -1,0 +1,6 @@
+{
+  "status": "pass",
+  "bytes": 67108864,
+  "sha256": "8aa88551f1144414fb00bae60cc0bc26f9f40889ed6b5863e8b5f03015c9f939",
+  "pattern": "deterministic pseudorandom 64 MiB"
+}

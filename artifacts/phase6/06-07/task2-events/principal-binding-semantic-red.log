@@ -1,0 +1,26 @@
+=== RUN   TestSSECommittedEventsReplayScopeAndRESTConvergence
+2026/11/09 05:30:06 goose: no migrations to run. current version: 9
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/v1/auth/refresh      --> vortex/backend/internal/httpapi.(*API).refresh-fm (2 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> vortex/backend/internal/httpapi.(*API).logout-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/nodes/:node_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/node-groups/:group_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/subscription --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/packages/:package_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/sources/:source_id/ledger --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/limits --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/billing-snapshots/:snapshot_id/explanation --> vortex/backend/internal/httpapi.(*API).resource.func1 (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/events --> vortex/backend/internal/httpapi.(*API).streamEvents-fm (3 handlers)
+[GIN-debug] PUT    /api/v1/tenants/:tenant_id/rules/:rule_id --> vortex/backend/internal/httpapi.(*API).reviseRule-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations --> vortex/backend/internal/httpapi.(*API).listOperations-fm (3 handlers)
+[GIN-debug] GET    /api/v1/tenants/:tenant_id/operations/:operation_id --> vortex/backend/internal/httpapi.(*API).operation-fm (3 handlers)
+    sse_test.go:100: principal cursor reused 200 OK
+--- FAIL: TestSSECommittedEventsReplayScopeAndRESTConvergence (4.07s)
+FAIL
+FAIL	vortex/backend/internal/httpapi	4.710s
+FAIL

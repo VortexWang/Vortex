@@ -1,0 +1,8 @@
+{
+  "valid": false,
+  "errors": [
+    "vortex.runtime-config: frozen contract must have a valid SemVer version and status frozen",
+    "vortex.runtime-config: frozen version does not match its approved review record",
+    "vortex.runtime-config: approved review hash is missing or stale"
+  ]
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 )
 
 func TestRuntimeFundingRangeAtomicSelectionReplayAndRollback(t *testing.T) {
@@ -62,6 +63,41 @@ func TestRuntimeFundingRangeAtomicSelectionReplayAndRollback(t *testing.T) {
 	balance, err = s.AuditAuthorizationSource(ctx, "node", "funding")
 	if err != nil || balance.Remaining != 1<<20 || balance.Reserved != 0 {
 		t.Fatalf("final: %+v %v", balance, err)
+	}
+}
+
+func TestRuntimeFundingSameDirectionRolloverIsAtomic(t *testing.T) {
+	s, scope, _ := runtimeStore(t)
+	ctx := context.Background()
+	a, err := s.OpenRuntimeSession(ctx, scope, "session", "flow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, runtimeReservation("old", 65536), a.Use, 65536, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next := runtimeReservation("new", 128<<10)
+	if _, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, next, a.Use, 1, []UsageReservation{first}); err == nil {
+		t.Fatal("rate denial committed a rollover")
+	}
+	balance, err := s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || balance.Reserved != first.Reserved || balance.Remaining != (1<<20)-first.Reserved {
+		t.Fatalf("denial released old upper bound: %+v %v", balance, err)
+	}
+	use := a.Use
+	use.Earliest = use.Earliest.Add(time.Second)
+	use.Latest = use.Latest.Add(time.Second)
+	replacement, err := s.ReserveAndAdmitRuntimeFundingBlock(ctx, next, use, 1, []UsageReservation{first})
+	if err != nil || replacement.Reserved != next.Reserved {
+		t.Fatalf("rollover: %+v %v", replacement, err)
+	}
+	if err := s.AdmitRuntimeFundingBlockWrite(ctx, first, use, 1); err == nil {
+		t.Fatal("returned old tail still admitted writes")
+	}
+	balance, err = s.AuditAuthorizationSource(ctx, "node", "funding")
+	if err != nil || balance.Reserved != next.Reserved || balance.Remaining != (1<<20)-next.Reserved || balance.Committed != 0 || balance.Unknown != 0 {
+		t.Fatalf("rollover conservation: %+v %v", balance, err)
 	}
 }
 

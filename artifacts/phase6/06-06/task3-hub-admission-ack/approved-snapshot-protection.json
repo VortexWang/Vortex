@@ -1,0 +1,12 @@
+{
+  "changed_contract_paths": [
+    "contracts/protobuf/v1/lifecycle.md",
+    "contracts/protobuf/v1/lifecycle.schema.json",
+    "contracts/protobuf/v1/vortex.pb.go",
+    "contracts/protobuf/v1/vortex.proto"
+  ],
+  "only_current_candidates_changed": true,
+  "approved_snapshots_changed": false,
+  "new_backend_body_tag": 20,
+  "prior_backend_body_tags_preserved": true
+}

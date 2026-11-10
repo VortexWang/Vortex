@@ -1,0 +1,33 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-a2652a391f4e Creating 
+ Container vortex-phase6-tracer-backend-test-run-a2652a391f4e Created 
+2026/11/08 22:04:34 OK   00001_authority.sql (6.18ms)
+2026/11/08 22:04:34 OK   00002_tenant_policy.sql (5.88ms)
+2026/11/08 22:04:34 OK   00003_nodes_ports.sql (9.98ms)
+2026/11/08 22:04:34 OK   00004_entry_group_domains.sql (1.17ms)
+2026/11/08 22:04:34 OK   00005_rules_compile.sql (9.7ms)
+2026/11/08 22:04:34 OK   00006_packages_entitlements.sql (9.66ms)
+2026/11/08 22:04:34 OK   00007_metering_ledger.sql (13.47ms)
+2026/11/08 22:04:34 OK   00008_limits_shares.sql (31.98ms)
+2026/11/08 22:04:34 OK   00009_domain_events.sql (9.3ms)
+2026/11/08 22:04:34 goose: successfully migrated database to version: 9
+ok  	vortex/backend/cmd/vortex-backend	1.198s
+?   	vortex/backend/cmd/vortex-control-peer	[no test files]
+?   	vortex/backend/cmd/vortex-hub	[no test files]
+?   	vortex/backend/db	[no test files]
+?   	vortex/backend/db/generated	[no test files]
+ok  	vortex/backend/internal/auth	1.366s
+ok  	vortex/backend/internal/compiler	2.024s
+ok  	vortex/backend/internal/control	1.462s
+ok  	vortex/backend/internal/httpapi	5.765s
+ok  	vortex/backend/internal/policy	1.014s
+ok  	vortex/backend/internal/repository	1.016s
+ok  	vortex/backend/internal/service	371.556s
+?   	vortex/backend/internal/testutil	[no test files]
+ok  	vortex/backend/internal/timeauthority	1.009s
+?   	vortex/backend/internal/worker	[no test files]

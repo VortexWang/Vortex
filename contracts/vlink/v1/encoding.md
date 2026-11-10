@@ -1,10 +1,10 @@
-# VLink Encoding Contract 1.0.0
+# VLink Encoding Contract 1.1.0
 
 Status: **frozen**. This document defines the first interoperable VLink wire version. It is an internal node-to-node contract, not a public API. V1.11 is a reference source; current project decisions and GSD acceptance govern.
 
 ## Compatibility and evolution
 
-- This is the first frozen contract, version 1.0.0.
+- Contract 1.1.0 reconciles the detailed VLink v1 specification with the approval record. The existing on-wire protocol version remains 0x0100; this revision does not change encoded bytes or negotiation.
 - A wire-incompatible change requires a new major contract version and explicit protocol negotiation. Compatible additions require a minor version and assigned codes; patches may clarify behavior without changing bytes.
 - Every release records this file's SHA-256 in `encoding.sha256`. Generated implementations and fixtures must be reproducible from this contract.
 - Implementations reject unknown frame types, nonzero reserved flags, and unsupported protocol versions. They do not guess or ignore unknown semantics.
@@ -94,4 +94,5 @@ OPEN_ERR never includes internal destination or policy detail. Every rejection e
 
 | Version | Change |
 |---|---|
-| 1.0.0 | First frozen VLink v1 frame, identity, OPEN, flow-control and failure-scope contract |
+| 1.0.0 | Historical draft approval; detailed Phase 3 specification was implemented without a matching exact approval record |
+| 1.1.0 | Owner-reviewed reconciliation of the existing detailed VLink v1 specification; no on-wire change |

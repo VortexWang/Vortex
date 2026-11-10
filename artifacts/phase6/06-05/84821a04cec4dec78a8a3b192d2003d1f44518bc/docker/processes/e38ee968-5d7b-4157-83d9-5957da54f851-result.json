@@ -1,0 +1,20 @@
+{
+  "agent_config_results": 1,
+  "agent_pid": 443,
+  "backend_pid": 429,
+  "commit": "84821a04cec4dec78a8a3b192d2003d1f44518bc",
+  "deliveries": 2,
+  "disconnect_state": "unknown",
+  "hub_heartbeat": "2026-11-08T02:52:36.676345248Z",
+  "hub_mode": "blocked",
+  "hub_pid": 444,
+  "hub_signer_epoch": 0,
+  "late_result_state": "unknown_until_reconciliation",
+  "node_revision": 1,
+  "occupation_held": true,
+  "scope": "empty Agent runtime control; Hub liveness only",
+  "state": "succeeded",
+  "timeout_state": "unknown",
+  "wire_contract": "1.3.0",
+  "wrong_role_rejected": true
+}

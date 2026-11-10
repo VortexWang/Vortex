@@ -1,0 +1,13 @@
+backend ready node=127.0.0.1:44745 hub=127.0.0.1:44787
+2026/11/08 06:15:54 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:54 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:55 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:55 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:56 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:56 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:57 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:57 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:58 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:58 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:59 ERROR share scheduling pending; prior occupation retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"
+2026/11/08 06:15:59 ERROR runtime funding pending; existing funds retained error="tenant da3f29af-4110-4768-9b9b-ace4f6b55e2c: lease_boundary_invalid"

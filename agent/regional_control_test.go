@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"database/sql"
+	"errors"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -61,6 +62,22 @@ func TestRegionalStatusRejectsUnauthenticatedOrStaleBounds(t *testing.T) {
 	if validateRegionalStatus(good, e, r, regionalSessionID, "foreign", now) == nil {
 		t.Fatal("accepted different certificate identity")
 	}
+	leaseStatus := proto.Clone(good).(*controlv1.HubStatus)
+	leaseStatus.Capabilities = append(leaseStatus.Capabilities, "runtime-lease-refresh-v1")
+	if validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("legacy client accepted unnegotiated lease capability")
+	}
+	r.LeaseRefresh = true
+	if err := validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now); err != nil {
+		t.Fatal("lease capability incorrectly requires credit renewal", err)
+	}
+	if validateRegionalStatus(good, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("lease client accepted missing capability")
+	}
+	leaseStatus.Capabilities = append(leaseStatus.Capabilities, "renewal-v1")
+	if validateRegionalStatus(leaseStatus, e, r, regionalSessionID, "hub", now) == nil {
+		t.Fatal("lease capability accepted out of order")
+	}
 }
 
 func TestRegionalStaleIncarnationCannotMutateAuthority(t *testing.T) {
@@ -78,7 +95,7 @@ func TestRegionalStaleIncarnationCannotMutateAuthority(t *testing.T) {
 func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 	for _, fault := range []string{"tls-blackhole", "silent-stream", "silent-established", "autonomous", "recovering"} {
 		t.Run(fault, func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			nodePath := filepath.Join(t.TempDir(), "node.db")
 			ns, err := store.Open(nodePath, "agent")
@@ -148,10 +165,15 @@ func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 			}
 			c := &ControlClient{Node: n, TLS: clientTLS, UsageInterval: 20 * time.Millisecond}
 			cfg := RegionalConfig{Region: "east", Endpoints: []HubEndpoint{{Region: "west", Address: "127.0.0.1:1"}, {Region: "east", Address: bad.Addr().String(), HubID: regionalHubID, ServerName: "hub"}, {Region: "east", Address: good.Addr().String(), HubID: regionalOtherID, ServerName: "hub"}}, DialTimeout: 200 * time.Millisecond, Watchdog: time.Second, FailoverBudget: 2 * time.Second, RetryMin: 20 * time.Millisecond, RetryMax: 40 * time.Millisecond}
+			// SQLite migrations and TLS fixture setup are outside the unchanged
+			// five-second failover bound. Inspect durable debt with its own bounded
+			// context so an expired runtime context cannot masquerade as lost debt.
+			runCtx, stopRun := context.WithTimeout(ctx, 5*time.Second)
+			defer stopRun()
 			done := make(chan error, 1)
-			go func() { done <- c.RunRegion(ctx, cfg) }()
+			go func() { done <- c.RunRegion(runCtx, cfg) }()
 			for {
-				pending, e := ns.PendingUnknownUsage(ctx, n.NodeID)
+				pending, e := ns.PendingUnknownUsage(runCtx, n.NodeID)
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -162,7 +184,7 @@ func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 				select {
 				case e := <-done:
 					t.Fatalf("regional loop exited early: %v", e)
-				case <-ctx.Done():
+				case <-runCtx.Done():
 					t.Fatal("bounded failover did not hand off debt")
 				case <-time.After(10 * time.Millisecond):
 				}
@@ -174,8 +196,10 @@ func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 			if loserConnections.Load() != 0 {
 				t.Fatal("losing TLS transport leaked")
 			}
-			if _, e := ns.AgentState(ctx, "backend_heartbeat"); e == nil {
-				t.Fatal("status minted trusted authority time")
+			proofCtx, stopProof := context.WithTimeout(context.Background(), 5*time.Second)
+			defer stopProof()
+			if _, e := ns.AgentState(proofCtx, "backend_heartbeat"); !errors.Is(e, sql.ErrNoRows) {
+				t.Fatalf("expected absent authority heartbeat, got %v", e)
 			}
 			// ACK only records durable transport proof; unresolved financial hold stays.
 			db, e := sql.Open("sqlite", nodePath)
@@ -183,7 +207,7 @@ func TestRegionalFailoverRetainsUnknownDebt(t *testing.T) {
 				t.Fatal(e)
 			}
 			var upper, state string
-			e = db.QueryRowContext(ctx, "SELECT unknown_upper_bound,liability_state FROM unknown_usage_batches WHERE batch_id='pending'").Scan(&upper, &state)
+			e = db.QueryRowContext(proofCtx, "SELECT unknown_upper_bound,liability_state FROM unknown_usage_batches WHERE batch_id='pending'").Scan(&upper, &state)
 			db.Close()
 			if e != nil || upper != "512" || state != "unresolved" {
 				t.Fatalf("unknown liability changed: %s %s %v", upper, state, e)

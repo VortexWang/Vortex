@@ -1,0 +1,92 @@
+[
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/node-linux-amd64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "6614ac32752358efa4b21f824f8a9cc5c8e3a2bc1f2dd622c8e38b495899becc"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/backend-linux-amd64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "d28f134600b90df51f138005a0567139cadca4de30dbc11a46d101ee1a46281a"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/hub-linux-amd64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "amd64",
+    "exit": 0,
+    "output": "",
+    "sha256": "279c8d34fb54bd7c7be62938933e4e71c287b8fdf3de1a8d1ab9e78f55e385ca"
+  },
+  {
+    "cwd": ".",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/node-linux-arm64",
+      "./cmd/vortex-node"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "01cea8814f2098d31db4d14507612c074c35be16ad60858e01d3045fc7f010f1"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/backend-linux-arm64",
+      "./cmd/vortex-backend"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "e6eed16ea4711aa0c6a59a5c22d58f0a75942d5ae2822aa1e11e0676c4fa4251"
+  },
+  {
+    "cwd": "backend",
+    "command": [
+      "/Users/peng/.local/go/bin/go",
+      "build",
+      "-trimpath",
+      "-o",
+      "/var/folders/55/ytbs46ds0s16zvmllc8mqkvw0000gn/T/vortex-recovery-final-build-nfet3d8o/hub-linux-arm64",
+      "./cmd/vortex-hub"
+    ],
+    "arch": "arm64",
+    "exit": 0,
+    "output": "",
+    "sha256": "d8a56c0ff14a67bcce624140a32e01b342430e27e32b2142f5158499a6fa168f"
+  }
+]

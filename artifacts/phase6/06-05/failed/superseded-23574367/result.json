@@ -1,0 +1,56 @@
+{
+  "commit": "235743679ca7101177376eb6a7683db0d07ebe81",
+  "result": 137,
+  "producer": "docker",
+  "through_plan": "06-05",
+  "external_checks": {
+    "cloudflare": {
+      "status": "not_run"
+    },
+    "rule_contract": {
+      "commit": "235743679ca7101177376eb6a7683db0d07ebe81",
+      "candidate_validation": "passed",
+      "freeze_status": "pending_owner_approval"
+    }
+  },
+  "acceptance_complete": false,
+  "source_clean": true,
+  "checksums": {
+    "commit.txt": "eb9fc744b91a1ad4e5bc7b24f72c3499a4a56c9fa795710550f6cefa874b060a",
+    "openapi.log": "575401b6a4288c63cf590cf52dc60ac416175a9b9968b006fb0cd3833debb9d3",
+    "dependencies.log": "c8c849bc0476949d046036594451a6389c5301dfb270a84653606721e658717c",
+    "tracer.log": "85cedbc6732f440a4927d9ccbf53f26de5f4a5461b1de6d68913ec043188a80c",
+    "runner.log": "ee840b949d9598be19a9315ab559ed1fbedc5d9e78a33249d9790375fd467af5",
+    "source-status-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-status-after.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-identity.txt": "722aeb6fca65e8a8790a3c277617db34e262cb0e064482924d9302425bf5ebae",
+    "compose.yml": "f42bc4eb729832c4673f66a7cd2fc051aa7d2ea260d54283c543af06880f8a37",
+    "docker-version.txt": "ed342474cbba3f029cdc502bd718ca98db996b40d531c55a390182bd440dd5fa",
+    "docker-info.json": "e67fd537fb5dbe088d1955bdcb8a71916cdee946dd99c40957128631990f0cc7",
+    "images.json": "e567ecff1d419cade2a381f608dd53f2882201dfd607a05ce02216671b30b2ae",
+    "postgres-version.txt": "378df6178256ff2ecac9fd4eddf0f260804381b9c988b077756b99a7827e7844",
+    "valkey-version.txt": "e61309e98d5ad2f4574dafb920355b67477ac33431cb165e9dafcf9838ad50b0",
+    "build-metadata.txt": "19e93948f3f349529628e134b1ac4fa840f1112a07e681716c5c8155d001c631",
+    "processes.json": "b13e2d51b2cbd25bc001e0e84fa9b3ccfff682f3079d602175edc57b253868e6",
+    "processes/0587500b-6255-4ce0-893a-f4ec229a8a97-result.json": "299d710dbd2332fe93b24fce53255a9d7d10e55548b6298014b894aa7a42dcd3",
+    "processes/0587500b-6255-4ce0-893a-f4ec229a8a97-backend.log": "8a5b18ad2d9631a2c8d5cd9ab05b1d1a14ab380534ff5726ba0a11b651e993b4",
+    "processes/0587500b-6255-4ce0-893a-f4ec229a8a97-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/0587500b-6255-4ce0-893a-f4ec229a8a97-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/3250aa7f-1802-402a-a175-7a73beb386fc-result.json": "fdb3363d2e96ef6cd87d31b1ecfce4eefa9165ffb402fce0e5fd796139100d34",
+    "processes/3250aa7f-1802-402a-a175-7a73beb386fc-backend.log": "8909fba1dc98966d7c7dde5dcbe4723b834bcf8b6c8ed20ddab28123c4fec508",
+    "processes/3250aa7f-1802-402a-a175-7a73beb386fc-agent.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processes/3250aa7f-1802-402a-a175-7a73beb386fc-hub.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rule-contract.log": "e63d5f09407904cbadd517e9de3980cc2916ed5a197c97fcb1862e44a0768083",
+    "rule-contract.json": "84b6f5f701d545ef3c4129ecb7827bedd40b0c05397e4f1c001f6d94035edac6",
+    "rule-components.log": "4280401b2551b34e7320600b9c8977fbcd10f652d5aeb637c5bcb18a7d14d720",
+    "rule-builds.log": "757f8ddeceae564ebea2adcbc060b7fbe8253ef286dcc011d172f86ef659a680",
+    "rule-freeze-database.log": "9cc021acd1823be3f7f5bbae41119894547c25b4a1fdf7a675ae3845527994b5",
+    "rule-freeze-public-api.log": "43c63da6ebe61a268e150f702343ec1206176fde9e18f93d6c6111ad3079b641",
+    "rule-freeze-control.v1.log": "8cf51647183bb057b54ffbbacb319b3a38ce1090e7e97ad76d88dfb7f806723f",
+    "rule-freeze-runtime-config.log": "655823ac7f996b259837b1279f4757264aac1ab82808d9b562c06a9f640f36af",
+    "ledger-fault.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit",
+  "run_id": null,
+  "run_url": null
+}

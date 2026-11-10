@@ -1,0 +1,14 @@
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-8c1119739b3b Creating 
+ Container vortex-phase6-tracer-backend-test-run-8c1119739b3b Created 
+FAIL	vortex/backend/internal/service [build failed]
+FAIL
+# vortex/backend/internal/service_test [vortex/backend/internal/service.test]
+internal/service/node_recovery_source_transport_test.go:57:88: credit.ID undefined (type "vortex/agent/store".AuthorizationRecord has no field or method ID)
+internal/service/node_recovery_source_transport_test.go:157:70: credit.ID undefined (type "vortex/agent/store".AuthorizationRecord has no field or method ID)
+

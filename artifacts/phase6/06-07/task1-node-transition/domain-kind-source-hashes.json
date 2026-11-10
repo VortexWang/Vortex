@@ -1,0 +1,12 @@
+{
+  "backend/db/query/public_operations.sql": "072a80e18c27d8015223bad918ef3e830f51d9f61207cf0cfc8fe668c3a1e1a7",
+  "backend/db/generated/public_operations.sql.go": "981d532bac360c0b020d01911a1359dd9622b6c73c699dd6bcef8836d6e9e5d2",
+  "backend/internal/httpapi/router.go": "d12ef6511a1dbd6e6db9a073eae0a10c328d75224eaa8ce22af11e1415f8c6f2",
+  "backend/internal/httpapi/node_mutations.go": "5e2f0b753306cb25d012017780d8ca866472cf4d5b4d9a4d45635d9bf920e9c8",
+  "backend/internal/httpapi/node_mutations_test.go": "9d1307bbb9403e97b8e1dc666c67c37684cdd63695abf3a7b38c1f23974d10d2",
+  "backend/internal/service/node.go": "3b9eeaa9e73ebbd1fb48aaa08bc131f81d94ed7ff0e83e58777d98dcf19ada44",
+  "backend/internal/service/tracer.go": "400355f6e5b2d85435cf1321486269e98ce1e33559fdba6247f15b8c77e8edf0",
+  "docs/api/phase7-recovery-dependencies.md": "085fc9d86c29edfc6accd0998184b5379de32c99562fa0acf977539578b44c43",
+  "backend/internal/httpapi/domain_operation_test.go": "064e932206a8ae25092dceae5958d36fa9dc704c127239f0466f46aa0cb81103",
+  "backend/internal/httpapi/httpapi_test.go": "1fddfb8d60127944355a7f598a759764fa8df3b4216f610c0306d87425202538"
+}

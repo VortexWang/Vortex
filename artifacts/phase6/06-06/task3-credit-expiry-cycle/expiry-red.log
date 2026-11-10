@@ -1,0 +1,13 @@
+=== RUN   TestFullyIssuedCreditExpirySealsBeforeLongDelegationDeadline
+    issuer_credit_expiry_test.go:52: expired complete child inventory did not enter closure 0 <nil>
+--- FAIL: TestFullyIssuedCreditExpirySealsBeforeLongDelegationDeadline (0.03s)
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/unissued
+=== RUN   TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/all-issued
+    issuer_credit_expiry_test.go:93: premature or missing closure 2m0s 0 1
+--- FAIL: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations (0.05s)
+    --- PASS: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/unissued (0.02s)
+    --- FAIL: TestCreditExpiryWaitsForEveryChildAndPreservesUnissuedDelegations/all-issued (0.02s)
+FAIL
+FAIL	vortex/agent/store	0.714s
+FAIL

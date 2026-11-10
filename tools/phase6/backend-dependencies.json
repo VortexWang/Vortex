@@ -1,0 +1,603 @@
+{
+  "schema_version": 1,
+  "scope": "backend production and test compiled closure on Linux amd64/arm64 and host; not a release-image attestation",
+  "compiled_modules": [
+    {
+      "module": "github.com/dustin/go-humanize",
+      "version": "v1.1.0",
+      "sum": "h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=",
+      "license_files": {
+        "LICENSE": "a973b4498c13eb74baa2a8e5c351426a6826f2fcdd909916dbe53ee2e755fd71"
+      }
+    },
+    {
+      "module": "github.com/gabriel-vasile/mimetype",
+      "version": "v1.4.12",
+      "sum": "h1:e9hWvmLYvtp846tLHam2o++qitpguFiYCKbn0w9jyqw=",
+      "license_files": {
+        "LICENSE": "b5a867655833aca9e27c97e28e43dcfc62be0ba0e84f24157afedf8fdaaa2fc1"
+      }
+    },
+    {
+      "module": "github.com/gin-contrib/sse",
+      "version": "v1.1.0",
+      "sum": "h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=",
+      "license_files": {
+        "LICENSE": "03458b6d5828e1be1127ca2adf122572eb574fc47b56190c3b38203b8b2a98d0"
+      }
+    },
+    {
+      "module": "github.com/gin-gonic/gin",
+      "version": "v1.12.0",
+      "sum": "h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=",
+      "license_files": {
+        "LICENSE": "03458b6d5828e1be1127ca2adf122572eb574fc47b56190c3b38203b8b2a98d0"
+      }
+    },
+    {
+      "module": "github.com/go-playground/locales",
+      "version": "v0.14.1",
+      "sum": "h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=",
+      "license_files": {
+        "LICENSE": "a1a5ca382f9e8c646fa05240a74a6554bbc3084b5675f84c9eaafd3d95686612"
+      }
+    },
+    {
+      "module": "github.com/go-playground/universal-translator",
+      "version": "v0.18.1",
+      "sum": "h1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=",
+      "license_files": {
+        "LICENSE": "a55d0c6e1a35ee6cf13afb4bbc3c8801cc570d7ac8edcd5e4503892f1c7ff4f7"
+      }
+    },
+    {
+      "module": "github.com/go-playground/validator/v10",
+      "version": "v10.30.1",
+      "sum": "h1:f3zDSN/zOma+w6+1Wswgd9fLkdwy06ntQJp0BBvFG0w=",
+      "license_files": {
+        "LICENSE": "9e321f6a1db81616a6c344d3aefddf9834fef23bdd913eae0db283dfa6753dff"
+      }
+    },
+    {
+      "module": "github.com/goccy/go-yaml",
+      "version": "v1.19.2",
+      "sum": "h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=",
+      "license_files": {
+        "LICENSE": "43fe703ea9ebe27f0a6e5d2a1f6dd094fbe324251c743498f3ec19986d7349cd"
+      }
+    },
+    {
+      "module": "github.com/google/uuid",
+      "version": "v1.6.0",
+      "sum": "h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=",
+      "license_files": {
+        "LICENSE": "0a8d61ed3cbfd5312326e8126c31ce9c627a283adc99131b56896d29ada04b2d"
+      }
+    },
+    {
+      "module": "github.com/jackc/pgpassfile",
+      "version": "v1.0.0",
+      "sum": "h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=",
+      "license_files": {
+        "LICENSE": "adb1663fda031df8f4344aa68f299fd87d80353e31339406742ded21dae65702"
+      }
+    },
+    {
+      "module": "github.com/jackc/pgservicefile",
+      "version": "v0.0.0-20240606120523-5a60cdf6a761",
+      "sum": "h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=",
+      "license_files": {
+        "LICENSE": "fc505773403fe869ed64cc2235cdd13988a427bb7e3a7e7004a3f4b27420f8fc"
+      }
+    },
+    {
+      "module": "github.com/jackc/pgx/v5",
+      "version": "v5.11.0",
+      "sum": "h1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=",
+      "license_files": {
+        "LICENSE": "467f95e074fe23079a5623ed652619682692041b8551da27e3c2ddb9659a1507"
+      }
+    },
+    {
+      "module": "github.com/jackc/puddle/v2",
+      "version": "v2.2.3",
+      "sum": "h1:f8HoREISb3l5eO9coPgK7U3hKLhWGokOFVcThl5jrao=",
+      "license_files": {
+        "LICENSE": "2d50e98a4900b4d6457a38d39c1432fdc156fc2f7b365f2e33ec9344acbb0057"
+      }
+    },
+    {
+      "module": "github.com/leodido/go-urn",
+      "version": "v1.4.0",
+      "sum": "h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=",
+      "license_files": {
+        "LICENSE": "fe81a9072afbfe0fe32b0bc99a852d697d14fbbca99b0b1878ac8f5dcbdd6ee6"
+      }
+    },
+    {
+      "module": "github.com/mattn/go-isatty",
+      "version": "v0.0.24",
+      "sum": "h1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=",
+      "license_files": {
+        "LICENSE": "08eab1118c80885fa1fa6a6dd7303f65a379fcb3733e063d20d1bbc2c76e6fa1"
+      }
+    },
+    {
+      "module": "github.com/mfridman/interpolate",
+      "version": "v0.0.2",
+      "sum": "h1:pnuTK7MQIxxFz1Gr+rjSIx9u7qVjf5VOoM/u6BbAxPY=",
+      "license_files": {
+        "LICENSE.txt": "21408182c12c98d402fa38a8b678560dc63fd6bada5a0017722883e4b79e6620"
+      }
+    },
+    {
+      "module": "github.com/ncruces/go-strftime",
+      "version": "v1.1.0",
+      "sum": "h1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=",
+      "license_files": {
+        "LICENSE": "38ae43959daf953a393a585b2988672cb65a5a541aca0d0be5e72595a0a16883"
+      }
+    },
+    {
+      "module": "github.com/pelletier/go-toml/v2",
+      "version": "v2.2.4",
+      "sum": "h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=",
+      "license_files": {
+        "LICENSE": "26844e4b53c5adec04e557fd7dfef281cc0205a7d355626b1c68b778b99e9e7b"
+      }
+    },
+    {
+      "module": "github.com/pressly/goose/v3",
+      "version": "v3.29.0",
+      "sum": "h1:dtEnBCT7CqkHIUCdgrXsrmeisaN8gFkRU4Y5OEwif4o=",
+      "license_files": {
+        "LICENSE": "f23985556a879c0e68bb4e136ee4b88a550d26fa33db77a65d76b721c93093ef"
+      }
+    },
+    {
+      "module": "github.com/quic-go/qpack",
+      "version": "v0.6.0",
+      "sum": "h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8=",
+      "license_files": {
+        "LICENSE.md": "1b6a897efd39b20b3cdce8cd306160d115dbded39d855ceeffe21dc11e4d53df"
+      }
+    },
+    {
+      "module": "github.com/quic-go/quic-go",
+      "version": "v0.59.0",
+      "sum": "h1:OLJkp1Mlm/aS7dpKgTc6cnpynnD2Xg7C1pwL6vy/SAw=",
+      "license_files": {
+        "LICENSE": "77d0b7b53e8abb84cf4dd3f9945a7fdf27044240d2e8023966a721a9a46fe96e"
+      }
+    },
+    {
+      "module": "github.com/remyoudompheng/bigfft",
+      "version": "v0.0.0-20230129092748-24d4a6f8daec",
+      "sum": "h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=",
+      "license_files": {
+        "LICENSE": "dd26a7abddd02e2d0aba97805b31f248ef7835d9e10da289b22e3b8ab78b324d"
+      }
+    },
+    {
+      "module": "github.com/sethvargo/go-retry",
+      "version": "v0.5.0",
+      "sum": "h1:JYfFKmVJ8ER06GReN1efzc5cm52BrVsFVzmcHiKJwfY=",
+      "license_files": {
+        "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    },
+    {
+      "module": "github.com/ugorji/go/codec",
+      "version": "v1.3.1",
+      "sum": "h1:waO7eEiFDwidsBN6agj1vJQ4AG7lh2yqXyOXqhgQuyY=",
+      "license_files": {
+        "LICENSE": "c8a84b926246b4ac76e3810722858b0f83bdea8378de49911dccbefd70b0692e"
+      }
+    },
+    {
+      "module": "go.mongodb.org/mongo-driver/v2",
+      "version": "v2.5.0",
+      "sum": "h1:yXUhImUjjAInNcpTcAlPHiT7bIXhshCTL3jVBkF3xaE=",
+      "license_files": {
+        "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    },
+    {
+      "module": "go.uber.org/multierr",
+      "version": "v1.11.0",
+      "sum": "h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=",
+      "license_files": {
+        "LICENSE.txt": "dcdabe03bef2382a130640d1c3a4cd5ec42aba1035095c38272fde694eb72405"
+      }
+    },
+    {
+      "module": "golang.org/x/crypto",
+      "version": "v0.58.0",
+      "sum": "h1:COkYLr4k7nDI4r6QtMML2AfzeIswWHAJthLS6K/M/54=",
+      "license_files": {
+        "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      }
+    },
+    {
+      "module": "golang.org/x/net",
+      "version": "v0.61.0",
+      "sum": "h1:RR+6j/BTBCrggOLugxa+66R8FvoN6MHlzDlZIbN9YFw=",
+      "license_files": {
+        "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      }
+    },
+    {
+      "module": "golang.org/x/sync",
+      "version": "v0.24.0",
+      "sum": "h1:iqiDrGoDgyuvAKrhLQthUEzU/R378N78gXbBjxed7oA=",
+      "license_files": {
+        "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      }
+    },
+    {
+      "module": "golang.org/x/sys",
+      "version": "v0.49.0",
+      "sum": "h1:XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=",
+      "license_files": {
+        "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      }
+    },
+    {
+      "module": "golang.org/x/text",
+      "version": "v0.43.0",
+      "sum": "h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=",
+      "license_files": {
+        "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      }
+    },
+    {
+      "module": "google.golang.org/genproto/googleapis/rpc",
+      "version": "v0.0.0-20261005182115-fad411399dd8",
+      "sum": "h1:0SXBqli5dnuCKMjI/X3FM226zEaEa0GUcSCJtN1vL2o=",
+      "license_files": {
+        "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    },
+    {
+      "module": "google.golang.org/grpc",
+      "version": "v1.85.0",
+      "sum": "h1:BPBCfuVRQ1qvBhKDOq9uvQllMvO59rKsYhXpp7Dd8vw=",
+      "license_files": {
+        "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "NOTICE.txt": "693ff28ec216d5112ac1bbfe64ef539005867d1c7bd427b57d579683293b947f"
+      }
+    },
+    {
+      "module": "google.golang.org/protobuf",
+      "version": "v1.36.12",
+      "sum": "h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=",
+      "license_files": {
+        "LICENSE": "4835612df0098ca95f8e7d9e3bffcb02358d435dbb38057c844c99d7f725eb20"
+      }
+    },
+    {
+      "module": "modernc.org/libc",
+      "version": "v1.79.0",
+      "sum": "h1:9Dvvv++bAMSkSuBzuOFAatbTV5OIoq6Y6FohmD3e7q8=",
+      "license_files": {
+        "LICENSE": "95ff867eb55a56935fa7492406cfa953fb7c13ca73f4c0a86ae05756b4605600",
+        "LICENSE-3RD-PARTY.md": "f597097efe3d97021f89170746bd3a0fb9a8b6fb26b82043ed68a4e0283bee6c"
+      }
+    },
+    {
+      "module": "modernc.org/mathutil",
+      "version": "v1.7.1",
+      "sum": "h1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=",
+      "license_files": {
+        "LICENSE": "bfa9bf72a72ca009fd62a8f84fca3dca67e51d93af96352723646599898b6cf5"
+      }
+    },
+    {
+      "module": "modernc.org/memory",
+      "version": "v1.12.1",
+      "sum": "h1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=",
+      "license_files": {
+        "LICENSE": "59895e669f48f168b6b858358f6005779cdf40a265f7828813061b56af67b496",
+        "LICENSE-GO": "2d36597f7117c38b006835ae7f537487207d8ec407aa9d9980794b2030cbc067",
+        "LICENSE-LOGO": "5ae5bee3072a841376451b48d8cfcec7188e10543926d5870828d36c8a750dc5",
+        "LICENSE-MMAP-GO": "c2eba69f20d05414538c3a5df7694dde392e065ff70882e1625e90f5d6659fff"
+      }
+    },
+    {
+      "module": "modernc.org/sqlite",
+      "version": "v1.61.1",
+      "sum": "h1:TBEE49wz7VlxS+qXRXMQiPUZYOXHJ4ku83daYv1fe04=",
+      "license_files": {
+        "LICENSE": "c6fe05491a60ae13bcd223088d2705e36dede24e5587226231d2459ada5c4822",
+        "LICENSE-3RD-PARTY.md": "4194f8e7119be72babd499db4f6f1f7547e36e8a7bffcb2b9c8df241b8f1576a",
+        "LICENSE-SQLITE": "8438c9c89b849131ead81d5435cb97fcf052df5b0b286dda8a2d4c29e6cb3fd0",
+        "LICENSE-SQLITE_VEC": "6ce72bbe12d975bd5286e5ab0a064c069693300c47bccbc57bec18485f1621ea"
+      }
+    }
+  ],
+  "license_review": [
+    {
+      "module": "github.com/dustin/go-humanize",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/gabriel-vasile/mimetype",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/gin-contrib/sse",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/gin-gonic/gin",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/go-playground/locales",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/go-playground/universal-translator",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/go-playground/validator/v10",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/goccy/go-yaml",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/google/uuid",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/jackc/pgpassfile",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/jackc/pgservicefile",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/jackc/pgx/v5",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/jackc/puddle/v2",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/leodido/go-urn",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/mattn/go-isatty",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/mfridman/interpolate",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/ncruces/go-strftime",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/pelletier/go-toml/v2",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/pressly/goose/v3",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/quic-go/qpack",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/quic-go/quic-go",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "github.com/remyoudompheng/bigfft",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/sethvargo/go-retry",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "github.com/ugorji/go/codec",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "go.mongodb.org/mongo-driver/v2",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "go.uber.org/multierr",
+      "licenses": [
+        "MIT"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "golang.org/x/crypto",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Exact pinned module root LICENSE text reviewed; hashes recorded in compiled_modules. Linked default Gin HTTP/JSON and test closure on linux amd64/arm64 and darwin arm64; graph-only alternate encoders are excluded from linked inventory."
+    },
+    {
+      "module": "golang.org/x/net",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "golang.org/x/sync",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "golang.org/x/sys",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "golang.org/x/text",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "google.golang.org/genproto/googleapis/rpc",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "google.golang.org/grpc",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "google.golang.org/protobuf",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "modernc.org/libc",
+      "licenses": [
+        "BSD-3-Clause",
+        "MIT",
+        "BSD-2-Clause",
+        "Public-Domain"
+      ],
+      "basis": "LICENSE-3RD-PARTY.md covers Go, musl/TRE/math/crypt, go-netdb and NixOS/nixpkgs; preserve all notices."
+    },
+    {
+      "module": "modernc.org/mathutil",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "Reviewed the pinned module license text; all LICENSE/NOTICE bytes recorded above."
+    },
+    {
+      "module": "modernc.org/memory",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "basis": "LICENSE plus mmap-go and Go notices are BSD-3-Clause. LICENSE-LOGO refers to an unused Wikimedia image, excluded from compiled/distributed code."
+    },
+    {
+      "module": "modernc.org/sqlite",
+      "licenses": [
+        "BSD-3-Clause",
+        "MIT",
+        "Public-Domain"
+      ],
+      "basis": "LICENSE-3RD-PARTY.md section 1 linked closure: SQLite public domain, sqlite-vec MIT, Go/modernc BSD; inherited musl notices retained. Module-graph-only MPL code and non-build documentation are not linked."
+    }
+  ],
+  "generator_license_findings": [
+    {
+      "tool": "sqlc v1.31.1 official release binary",
+      "module": "github.com/go-sql-driver/mysql",
+      "version": "v1.9.3",
+      "sum": "h1:U/N249h2WzJ3Ukj8SowVFjdtZKfu9vlLZxjPXV1aweo=",
+      "license": "MPL-2.0",
+      "source": "https://github.com/go-sql-driver/mysql/blob/v1.9.3/LICENSE",
+      "link_evidence": "go version -m official sqlc; sqlc v1.31.1 internal/cmd/vet.go blank-imports this driver",
+      "policy": "not in docs/governance/license-policy.yaml allowed_spdx"
+    }
+  ]
+}

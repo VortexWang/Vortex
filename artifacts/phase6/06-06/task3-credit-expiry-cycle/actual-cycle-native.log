@@ -1,0 +1,16 @@
+=== RUN   TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady
+2026/11/08 16:26:20 goose: no migrations to run. current version: 8
+2026/11/08 16:26:20 OK   00001_authority.sql (35.91ms)
+2026/11/08 16:26:20 OK   00002_tenant_policy.sql (12.24ms)
+2026/11/08 16:26:20 OK   00003_nodes_ports.sql (27.38ms)
+2026/11/08 16:26:20 OK   00004_entry_group_domains.sql (2.95ms)
+2026/11/08 16:26:20 OK   00005_rules_compile.sql (26.48ms)
+2026/11/08 16:26:20 OK   00006_packages_entitlements.sql (25.13ms)
+2026/11/08 16:26:20 OK   00007_metering_ledger.sql (33.88ms)
+2026/11/08 16:26:21 OK   00008_limits_shares.sql (49.69ms)
+2026/11/08 16:26:21 goose: successfully migrated database to version: 8
+    runtime_expiry_cycle_transport_test.go:205: Hub transport did not reach durable state
+--- FAIL: TestRuntimeCreditExpiryActualMTLSClosureSettlementRefillAndAgentReady (8.45s)
+FAIL
+FAIL	vortex/backend/internal/service	9.216s
+FAIL

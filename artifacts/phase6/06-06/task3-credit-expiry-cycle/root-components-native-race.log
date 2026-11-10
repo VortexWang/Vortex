@@ -1,0 +1,5 @@
+ok  	vortex/agent	50.391s
+ok  	vortex/agent/store	45.446s
+ok  	vortex/hub	8.991s
+ok  	vortex/contracts	3.189s
+ok  	vortex/cmd/vortex-node	2.979s

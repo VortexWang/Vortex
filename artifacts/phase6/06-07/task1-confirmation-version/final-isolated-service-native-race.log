@@ -1,0 +1,108 @@
+2026/11/09 06:38:30 goose: no migrations to run. current version: 9
+2026/11/09 06:38:30 OK   00001_authority.sql (37.3ms)
+2026/11/09 06:38:30 OK   00002_tenant_policy.sql (10.75ms)
+2026/11/09 06:38:30 OK   00003_nodes_ports.sql (36.71ms)
+2026/11/09 06:38:30 OK   00004_entry_group_domains.sql (3.25ms)
+2026/11/09 06:38:30 OK   00005_rules_compile.sql (31.84ms)
+2026/11/09 06:38:30 OK   00006_packages_entitlements.sql (19.08ms)
+2026/11/09 06:38:30 OK   00007_metering_ledger.sql (65.24ms)
+2026/11/09 06:38:31 OK   00008_limits_shares.sql (115.84ms)
+2026/11/09 06:38:31 OK   00009_domain_events.sql (34.84ms)
+2026/11/09 06:38:31 goose: successfully migrated database to version: 9
+2026/11/09 06:38:31 goose: no migrations to run. current version: 9
+2026/11/09 06:38:31 goose: no migrations to run. current version: 9
+2026/11/09 06:38:31 OK   00001_authority.sql (16.75ms)
+2026/11/09 06:38:31 OK   00002_tenant_policy.sql (44ms)
+2026/11/09 06:38:31 OK   00003_nodes_ports.sql (27.85ms)
+2026/11/09 06:38:31 OK   00004_entry_group_domains.sql (2.21ms)
+2026/11/09 06:38:31 OK   00005_rules_compile.sql (18.59ms)
+2026/11/09 06:38:31 OK   00006_packages_entitlements.sql (27.19ms)
+2026/11/09 06:38:31 OK   00007_metering_ledger.sql (23.82ms)
+2026/11/09 06:38:31 OK   00008_limits_shares.sql (54.86ms)
+2026/11/09 06:38:31 OK   00009_domain_events.sql (17.96ms)
+2026/11/09 06:38:31 goose: successfully migrated database to version: 9
+2026/11/09 06:38:32 goose: no migrations to run. current version: 9
+2026/11/09 06:38:32 OK   00001_authority.sql (8.92ms)
+2026/11/09 06:38:32 OK   00002_tenant_policy.sql (8.99ms)
+2026/11/09 06:38:32 OK   00003_nodes_ports.sql (20.18ms)
+2026/11/09 06:38:32 OK   00004_entry_group_domains.sql (2.69ms)
+2026/11/09 06:38:32 OK   00005_rules_compile.sql (19.93ms)
+2026/11/09 06:38:32 OK   00006_packages_entitlements.sql (21.99ms)
+2026/11/09 06:38:32 OK   00007_metering_ledger.sql (23.73ms)
+2026/11/09 06:38:32 OK   00008_limits_shares.sql (56.26ms)
+2026/11/09 06:38:32 OK   00009_domain_events.sql (19.73ms)
+2026/11/09 06:38:32 goose: successfully migrated database to version: 9
+2026/11/09 06:38:32 goose: no migrations to run. current version: 9
+2026/11/09 06:38:32 goose: no migrations to run. current version: 9
+2026/11/09 06:38:32 OK   00001_authority.sql (8.85ms)
+2026/11/09 06:38:32 OK   00002_tenant_policy.sql (7.43ms)
+2026/11/09 06:38:32 OK   00003_nodes_ports.sql (18.64ms)
+2026/11/09 06:38:32 OK   00004_entry_group_domains.sql (2.43ms)
+2026/11/09 06:38:32 OK   00005_rules_compile.sql (19.78ms)
+2026/11/09 06:38:32 OK   00006_packages_entitlements.sql (16.52ms)
+2026/11/09 06:38:32 OK   00007_metering_ledger.sql (22.26ms)
+2026/11/09 06:38:32 OK   00008_limits_shares.sql (51.51ms)
+2026/11/09 06:38:32 OK   00009_domain_events.sql (16.66ms)
+2026/11/09 06:38:32 goose: successfully migrated database to version: 9
+2026/11/09 06:38:33 goose: no migrations to run. current version: 9
+2026/11/09 06:38:33 goose: no migrations to run. current version: 9
+2026/11/09 06:38:33 OK   00001_authority.sql (9.59ms)
+2026/11/09 06:38:33 OK   00002_tenant_policy.sql (10.3ms)
+2026/11/09 06:38:33 OK   00003_nodes_ports.sql (17.64ms)
+2026/11/09 06:38:33 OK   00004_entry_group_domains.sql (2.09ms)
+2026/11/09 06:38:33 OK   00005_rules_compile.sql (17.48ms)
+2026/11/09 06:38:33 OK   00006_packages_entitlements.sql (18ms)
+2026/11/09 06:38:33 OK   00007_metering_ledger.sql (23.04ms)
+2026/11/09 06:38:33 OK   00008_limits_shares.sql (60.37ms)
+2026/11/09 06:38:33 OK   00009_domain_events.sql (17.45ms)
+2026/11/09 06:38:33 goose: successfully migrated database to version: 9
+2026/11/09 06:38:33 goose: no migrations to run. current version: 9
+2026/11/09 06:38:33 OK   00001_authority.sql (9.07ms)
+2026/11/09 06:38:33 OK   00002_tenant_policy.sql (8.75ms)
+2026/11/09 06:38:33 OK   00003_nodes_ports.sql (20.28ms)
+2026/11/09 06:38:33 OK   00004_entry_group_domains.sql (2.25ms)
+2026/11/09 06:38:33 OK   00005_rules_compile.sql (26.56ms)
+2026/11/09 06:38:33 OK   00006_packages_entitlements.sql (24.34ms)
+2026/11/09 06:38:33 OK   00007_metering_ledger.sql (31.51ms)
+2026/11/09 06:38:33 OK   00008_limits_shares.sql (71.32ms)
+2026/11/09 06:38:33 OK   00009_domain_events.sql (19.89ms)
+2026/11/09 06:38:33 goose: successfully migrated database to version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 OK   00001_authority.sql (13.93ms)
+2026/11/09 06:38:34 OK   00002_tenant_policy.sql (29.59ms)
+2026/11/09 06:38:34 OK   00003_nodes_ports.sql (21.18ms)
+2026/11/09 06:38:34 OK   00004_entry_group_domains.sql (4.02ms)
+2026/11/09 06:38:34 OK   00005_rules_compile.sql (19.48ms)
+2026/11/09 06:38:34 goose: successfully migrated database to version: 5
+2026/11/09 06:38:34 OK   00006_packages_entitlements.sql (19.2ms)
+2026/11/09 06:38:34 OK   00007_metering_ledger.sql (27.89ms)
+2026/11/09 06:38:34 OK   00008_limits_shares.sql (52.12ms)
+2026/11/09 06:38:34 OK   00009_domain_events.sql (19.82ms)
+2026/11/09 06:38:34 goose: successfully migrated database to version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:34 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+--- FAIL: TestDowngradeAuditRollbackWorkerRetryAndStaleConfirmation (0.11s)
+    restriction_test.go:232: due escaped audit failure
+2026/11/09 06:38:35 goose: no migrations to run. current version: 9
+2026/11/09 06:38:35 OK   00001_authority.sql (8.17ms)
+2026/11/09 06:38:35 OK   00002_tenant_policy.sql (7.45ms)
+2026/11/09 06:38:35 OK   00003_nodes_ports.sql (17.25ms)
+2026/11/09 06:38:35 OK   00004_entry_group_domains.sql (2.66ms)
+2026/11/09 06:38:35 OK   00005_rules_compile.sql (16.8ms)
+2026/11/09 06:38:35 OK   00006_packages_entitlements.sql (16.03ms)
+2026/11/09 06:38:35 OK   00007_metering_ledger.sql (24.25ms)
+2026/11/09 06:38:35 OK   00008_limits_shares.sql (55.3ms)
+2026/11/09 06:38:35 OK   00009_domain_events.sql (17.56ms)
+2026/11/09 06:38:35 goose: successfully migrated database to version: 9
+FAIL
+FAIL	vortex/backend/internal/service	6.023s
+FAIL

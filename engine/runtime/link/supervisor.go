@@ -178,6 +178,9 @@ func (s *Supervisor) track(link *vlink.MuxLink) bool {
 	if s.closed {
 		return false
 	}
+	if s.links == nil {
+		s.links = make(map[*vlink.MuxLink]struct{})
+	}
 	s.links[link] = struct{}{}
 	return true
 }

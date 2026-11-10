@@ -27,7 +27,13 @@ func (s *fundingBlockSession) resolve(ctx context.Context, direction accounting.
 		s.settlementMu.Unlock()
 		return s.resolveDirect(ctx, direction, b, out)
 	}
+	direct := s.settlementCount == 0 && !s.settlementRunning
 	s.settlementCount++
+	if direct {
+		s.settlementMu.Unlock()
+		defer func() { s.settlementMu.Lock(); s.settlementCount--; s.settlementMu.Unlock() }()
+		return s.commitSettlementGroup([]*fundingSettlementRequest{r})
+	}
 	s.settlements = append(s.settlements, r)
 	if !s.settlementRunning {
 		s.settlementRunning = true
@@ -61,7 +67,11 @@ func (s *fundingBlockSession) drainSettlements() {
 	}
 }
 func (s *fundingBlockSession) commitSettlementGroup(group []*fundingSettlementRequest) (resultErr error) {
-	s.mu.Lock()
+	blocks := make([]*sessionFundingBlock, 0, len(group))
+	for _, r := range group {
+		blocks = append(blocks, r.block)
+	}
+	s.lockCheckpointBlocks(blocks)
 	defer s.mu.Unlock()
 	defer s.signal()
 	// Retain all in-flight upper bounds until commit or fail-closed classification.
@@ -121,9 +131,23 @@ func (s *fundingBlockSession) commitSettlementGroup(group []*fundingSettlementRe
 		residual.Reserved -= uint64(r.outcome.Used)
 		residuals[r.block] = residual
 	}
-	if err := s.inner.gate.node.Store.CheckpointRuntimeFundingBlocks(ctx, entries); err != nil {
+	// Retain each block's in-flight bound while SQLite commits. The opposite
+	// direction has a separate block and must not queue on this session mutex
+	// before it can even enter the Store's shared writer queue.
+	for block := range residuals {
+		block.checkpointDone = make(chan struct{})
+	}
+	s.mu.Unlock()
+	err := s.inner.gate.node.Store.CheckpointRuntimeFundingBlocks(ctx, entries)
+	s.mu.Lock()
+	for block := range residuals {
+		close(block.checkpointDone)
+		block.checkpointDone = nil
+	}
+	if err != nil {
 		return err
 	}
+	s.inner.gate.notifyConsumption()
 	for block, residual := range residuals {
 		block.reservation = residual
 	}
@@ -158,4 +182,25 @@ func (s *fundingBlockSession) commitSettlementGroup(group []*fundingSettlementRe
 		}
 	}
 	return nil
+}
+
+// Return with the allocator mutex held and all requested blocks stable. A
+// settlement retains ownership even if its caller cancels while a preceding
+// checkpoint is committing; the durable result must be classified first.
+func (s *fundingBlockSession) lockCheckpointBlocks(blocks []*sessionFundingBlock) {
+	for {
+		s.mu.Lock()
+		var wait <-chan struct{}
+		for _, block := range blocks {
+			if block.checkpointDone != nil {
+				wait = block.checkpointDone
+				break
+			}
+		}
+		if wait == nil {
+			return
+		}
+		s.mu.Unlock()
+		<-wait
+	}
 }

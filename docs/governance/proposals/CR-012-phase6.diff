@@ -1,0 +1,100 @@
+--- phase6/contracts/protobuf/v1/vortex.proto
++++ candidate/contracts/protobuf/v1/vortex.proto
+@@ -4,7 +4,7 @@
+ 
+ option go_package = "vortex/contracts/protobuf/v1;controlv1";
+ 
+-// CONTRACT 1.6.0 candidate. New owner freeze approval is required in governance.
++// CONTRACT 1.8.0 integration candidate. Exact owner freeze approval is required.
+ // Existing tags remain unchanged; lifecycle semantics are in lifecycle.md.
+ 
+ service NodeControl {
+@@ -32,6 +32,8 @@
+     CreditCloseReceipt credit_close_receipt = 22;
+     NodeBootRecoveryReceipt node_boot_recovery_receipt = 23;
+     RecoveryCreditFenceReceipt recovery_credit_fence_receipt = 24;
++    // Explicit experimental legacy fixture only; never alias lifecycle tag 16.
++    CreditDemand credit_demand = 100;
+   }
+ }
+ 
+@@ -53,6 +55,8 @@
+     CreditCloseCommand credit_close_command = 21;
+     NodeBootRecoveryCommand node_boot_recovery_command = 22;
+     RecoveryCreditFenceCommand recovery_credit_fence_command = 23;
++    // Explicit experimental legacy fixture only; never alias HubStatus tag 15.
++    CreditDemandDenied credit_demand_denied = 100;
+   }
+ }
+ 
+@@ -317,6 +321,28 @@
+   uint64 required_restriction_revision = 6;
+ }
+ 
++// Requests never confer authority. IDs bind immutable durable issuer outcomes.
++// Amount: 1..MaxInt64 raw bytes; TTL: 1..300 whole seconds. Node and boot
++// identities come from the authenticated NodeMessage envelope.
++message CreditDemand {
++  string request_id = 1;
++  string delegation_id = 2;
++  uint64 raw_bytes = 3;
++  uint32 ttl_seconds = 4;
++}
++// Sent only after durable proof that this request issued no rights.
++// Success uses AuthorizationUpdate with payload.update_id=request_id.
++message CreditDemandDenied {
++  string request_id = 1;
++  CreditDemandDenial reason = 2;
++}
++enum CreditDemandDenial {
++  CREDIT_DEMAND_DENIAL_UNSPECIFIED = 0;
++  CREDIT_DEMAND_DENIAL_INVALID_SCOPE = 1;
++  CREDIT_DEMAND_DENIAL_INSUFFICIENT_FUNDS = 2;
++  CREDIT_DEMAND_DENIAL_EXPIRED = 3;
++}
++
+ // Negotiated share-cas-v1 only. The immutable JSON decision is documented in
+ // share-handoff.schema.json; query uses the same payload and digest as CAS.
+ message ShareCommand {
+--- phase6/contracts/protobuf/v1/lifecycle.md
++++ candidate/contracts/protobuf/v1/lifecycle.md
+@@ -1200,3 +1200,39 @@
+ local journal confirmation for its unfunded fixture; it is not evidence of a
+ PostgreSQL admission, production RuntimeServer recovery or financial final.
+ Those production recovery chains retain their separate integration evidence.
++
++
++
++## 1.7.0 Phase 4 merge: isolated experimental demand transport
++
++Publication of this extension requires the exact merge proposal approval. Main
++1.3.0 lifecycle fields retain their numbers and meanings. NodeMessage field 100
++is CreditDemand; ControlMessage field 100 is CreditDemandDenied. Fields 16/15
++from the divergent Phase 4 experimental branch are not demand fields in this
++lineage, and must never be reinterpreted or automatically downgraded to.
++
++The demand path is disabled by default. A Node must explicitly enable
++EnableCreditDemand (CLI: --credit-demand-config) and connect using the legacy
++non-regional fixture path to a separately opted-in DemandIssuer. It cannot be
++combined with regional lifecycle/renewal negotiation. Scope remains bound to
++mutually authenticated Hub, Node, boot, delegation, source, snapshot and rule.
++The request grants no rights. Requests use immutable IDs, 1..MaxInt64 raw bytes
++and integral TTL 1..300 seconds. Success remains the existing durably funded
++AuthorizationUpdate correlated by update_id. A typed denial is accepted only
++for the matching pending request and authenticated issuer; it creates no credit
++and refunds no unknown liability. Both terminal outcomes survive exact replay.
++
++Stop old experimental fixtures and deploy both migrated ends together using
++separate endpoints and state directories. Unknown tag 100 on old peers fails
++closed; old demand tag 16 is a lifecycle message, and old denial tag 15 is a
++HubStatus, which the non-regional demand path rejects. No old-wire translation
++or automatic fallback is supplied. Existing grants and unknown usage must be
++settled by their original ledger identity, never erased during fixture changes.
++
++The catalog version 1.7.0 avoids reusing versions 1.4.0..1.6.0 already approved
++on the separate Phase 6 development lineage. This main integration includes
++only the 1.3.0 baseline plus this extension; it does not import or advertise
++Phase 6 feature capabilities. LifecycleHello still advertises its implemented
++1.3.0 status-v1/renewal-v1 subset. A later Phase 6 merge must union those exact
++approved extensions and rerun compatibility and governance review; version
++ordering alone is never evidence that a capability has been implemented.

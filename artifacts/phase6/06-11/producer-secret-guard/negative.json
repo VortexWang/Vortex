@@ -1,0 +1,5 @@
+{
+  "synthetic_leak_exit": 1,
+  "redacted_exit": 0,
+  "scope": "actual final_check.sh guard inside the same &&/|| conditional; synthetic bytes only"
+}

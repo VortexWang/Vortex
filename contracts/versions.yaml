@@ -5,7 +5,7 @@
     {
       "id": "vortex.database",
       "path": "contracts/database/schema.sql",
-      "version": "1.0.0",
+      "version": "2.4.0",
       "status": "frozen",
       "sources": [
         "V1.11 §0.2",
@@ -21,7 +21,7 @@
     {
       "id": "vortex.public-api",
       "path": "contracts/openapi/v1/openapi.yaml",
-      "version": "1.0.0",
+      "version": "3.0.0",
       "status": "frozen",
       "sources": [
         "GEN-007",
@@ -32,7 +32,7 @@
     {
       "id": "vortex.control.v1",
       "path": "contracts/protobuf/v1/vortex.proto",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "status": "frozen",
       "sources": [
         "§3.4",
@@ -40,18 +40,19 @@
         "§9",
         "AGT-001..012",
         "HUB-001..018",
-        "Phase 4 merge field-100 migration CR-010; exact owner approval recorded"
+        "Phase4+Phase6 additive integration; exact approval pending"
       ],
       "artifacts": [
         "contracts/protobuf/v1/lifecycle.schema.json",
         "contracts/protobuf/v1/lifecycle.md",
-        "contracts/protobuf/v1/identity-profile.json"
+        "contracts/protobuf/v1/identity-profile.json",
+        "contracts/protobuf/v1/share-handoff.schema.json"
       ]
     },
     {
       "id": "vortex.runtime-config",
       "path": "contracts/runtime/config.schema.json",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "frozen",
       "sources": [
         "ENG-024..034",
@@ -63,11 +64,12 @@
     {
       "id": "vortex.vlink.v1",
       "path": "contracts/vlink/v1/encoding.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "frozen",
       "sources": [
         "ENG-010..023",
-        "Appendix A"
+        "Appendix A",
+        "CR-011 exact owner approval: existing detailed VLink v1 specification reconciled; wire 0x0100 unchanged"
       ]
     },
     {

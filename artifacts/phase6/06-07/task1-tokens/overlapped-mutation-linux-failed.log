@@ -1,0 +1,35 @@
+ Container vortex-phase6-tracer-valkey-1 Running 
+ Container vortex-phase6-tracer-postgres-1 Running 
+ Container vortex-phase6-tracer-valkey-1 Waiting 
+ Container vortex-phase6-tracer-postgres-1 Waiting 
+ Container vortex-phase6-tracer-valkey-1 Healthy 
+ Container vortex-phase6-tracer-postgres-1 Healthy 
+ Container vortex-phase6-tracer-backend-test-run-1f266c4c3f3c Creating 
+ Container vortex-phase6-tracer-backend-test-run-1f266c4c3f3c Created 
+=== RUN   TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes
+2026/11/08 20:53:26 OK   00001_authority.sql (8.89ms)
+2026/11/08 20:53:26 OK   00002_tenant_policy.sql (5.92ms)
+2026/11/08 20:53:26 OK   00003_nodes_ports.sql (15.25ms)
+2026/11/08 20:53:26 OK   00004_entry_group_domains.sql (1.68ms)
+2026/11/08 20:53:26 OK   00005_rules_compile.sql (12.51ms)
+2026/11/08 20:53:26 OK   00006_packages_entitlements.sql (15.04ms)
+2026/11/08 20:53:26 OK   00007_metering_ledger.sql (15.79ms)
+2026/11/08 20:53:26 OK   00008_limits_shares.sql (43.64ms)
+2026/11/08 20:53:26 OK   00009_domain_events.sql (4.88ms)
+2026/11/08 20:53:26 goose: successfully migrated database to version: 9
+    tokens_test.go:59: family access survived reuse <nil>
+--- FAIL: TestAuthTokenRotationReuseRevokesWholeFamilyAndStoresOnlyHashes (0.30s)
+=== RUN   TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary
+2026/11/08 20:53:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenCurrentRoleStateTTLAndSeparateBearerBoundary (0.02s)
+=== RUN   TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner
+2026/11/08 20:53:26 goose: no migrations to run. current version: 9
+    tokens_test.go:158: winner survives reuse <nil>
+--- FAIL: TestAuthConcurrentRefreshOneRotationAndReuseRevokesWinner (0.04s)
+=== RUN   TestAuthTokenAuditFailureRollsBackRotationAndRevocation
+2026/11/08 20:53:26 goose: no migrations to run. current version: 9
+--- PASS: TestAuthTokenAuditFailureRollsBackRotationAndRevocation (0.02s)
+FAIL
+FAIL	vortex/backend/internal/auth	0.388s
+FAIL
+

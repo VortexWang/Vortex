@@ -1,0 +1,6 @@
+=== RUN   TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope
+    renewal_rules_test.go:113: committed rules hidden by legacy Engine scope [] <nil>
+--- FAIL: TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope (0.49s)
+FAIL
+FAIL	vortex/agent	1.208s
+FAIL

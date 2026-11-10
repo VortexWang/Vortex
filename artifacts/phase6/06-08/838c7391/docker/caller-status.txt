@@ -1,0 +1,21 @@
+ M .planning/phases/05-m3-agent-edge-hub-m3-agent-and-hub/05-03-PLAN.md
+ M artifacts/phase5/wave2/engine-runtime-test.log
+ M artifacts/phase5/wave2/go-test.log
+ M artifacts/phase5/wave2/host.txt
+ M artifacts/phase5/wave2/report.json
+ M tools/phase4/NATIVE-HOST-QUALIFICATION.md
+ M tools/phase4/compare_results.py
+ M tools/phase4/generate-qualification.sh
+ M tools/phase4/qualification.sh
+ M tools/phase4/qualification_gate.py
+?? .planning/quick/20261105-runtime-authority-gate/
+?? artifacts/phase5/check/061ffb5-deployment/
+?? artifacts/phase5/check/588ea09add62eb33dbfc492608f1c3ea269c9fed/
+?? artifacts/phase5/check/5ca72e06898f20d105c099e60f83defa1ebf5c5f/deployment-docker/vortex-node-linux-amd64
+?? artifacts/phase5/check/5ca72e06898f20d105c099e60f83defa1ebf5c5f/deployment-docker/vortex-node-linux-arm64
+?? artifacts/phase5/check/8566b1eeb18b3fed452630e0137675d2b3662dcc/deployment-docker/vortex-node-linux-amd64
+?? artifacts/phase5/check/8566b1eeb18b3fed452630e0137675d2b3662dcc/deployment-docker/vortex-node-linux-arm64
+?? artifacts/phase5/check/d638d246f0d62507073a98549fe153131c315ffd/
+?? artifacts/phase5/deployment/
+?? artifacts/phase6/06-08/838c7391/
+?? tools/phase4/test_qualification_gate.py
