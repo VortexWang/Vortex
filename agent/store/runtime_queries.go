@@ -4,6 +4,10 @@ package store
 // Unlisted SQL uses the ordinary transaction path. Keeping the original SQL
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
+	`SELECT state,unknown_upper_bound FROM usage_batches WHERE node_id=? AND batch_id=?`,
+	`UPDATE usage_batches SET state=?,updated_at=? WHERE node_id=? AND batch_id=?`,
+	`SELECT value FROM agent_state WHERE key = 'control_sequence'`,
+	`INSERT INTO agent_state(key, value, updated_at) VALUES ('control_sequence', ?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`,
 	backendUsageConfirmedQuery,
 	backendReceiptEvidenceQuery,
 	`INSERT INTO usage_backend_receipts(node_id,batch_id,kind,payload_sha256,confirmed_at) VALUES(?,?,?,?,?)`,
