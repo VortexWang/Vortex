@@ -1,0 +1,207 @@
+{
+  "scope": "instrumented and traced diagnostic; not acceptance",
+  "sha": "03b0d9e2fdff368fa029a415520e01d3ad513295",
+  "run": 42865758993,
+  "artifact": 13787133107,
+  "archive_sha256": "f30d6ba9728d143787c7da8fd96768c0a692a99848f3389ceb7c9775601e3ff8",
+  "modes": {
+    "normal": {
+      "test_exit": 0,
+      "fsync_count": 7550,
+      "median_ms": 0.265,
+      "p99_ms": 11.969999999999999,
+      "maximum_ms": 158.87,
+      "over_200ms": 0,
+      "slowest": [
+        {
+          "tid": "3827",
+          "started": "1794331966.690812",
+          "seconds": 0.15887,
+          "call": "fsync(8</runtime/evidence/process-normal/process-758310075/agent.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.158870>"
+        },
+        {
+          "tid": "3822",
+          "started": "1794331966.704339",
+          "seconds": 0.145367,
+          "call": "fsync(7</runtime/evidence/process-normal/process-758310075/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.145367>"
+        },
+        {
+          "tid": "3744",
+          "started": "1794331940.063738",
+          "seconds": 0.13458,
+          "call": "fsync(8</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal14016579683/001/agent.db-wal>) = 0 <0.134580>",
+          "completion": null
+        },
+        {
+          "tid": "3823",
+          "started": "1794331961.675532",
+          "seconds": 0.116631,
+          "call": "fsync(7</runtime/evidence/process-normal/process-758310075/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.116631>"
+        },
+        {
+          "tid": "3827",
+          "started": "1794331961.677388",
+          "seconds": 0.114754,
+          "call": "fsync(8</runtime/evidence/process-normal/process-758310075/agent.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.114754>"
+        },
+        {
+          "tid": "3747",
+          "started": "1794331945.775155",
+          "seconds": 0.107553,
+          "call": "fsync(14</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal22163832131/001/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.107553>"
+        },
+        {
+          "tid": "3746",
+          "started": "1794331945.776170",
+          "seconds": 0.10638,
+          "call": "fsync(8</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal22163832131/001/agent.db-wal>) = 0 <0.106380>",
+          "completion": null
+        },
+        {
+          "tid": "3748",
+          "started": "1794331940.231643",
+          "seconds": 0.089265,
+          "call": "fsync(14</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal14016579683/001/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.089265>"
+        },
+        {
+          "tid": "3747",
+          "started": "1794331940.232024",
+          "seconds": 0.076485,
+          "call": "fsync(8</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal14016579683/001/agent.db-wal>) = 0 <0.076485>",
+          "completion": null
+        },
+        {
+          "tid": "3747",
+          "started": "1794331945.688883",
+          "seconds": 0.073907,
+          "call": "fsync(8</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal22163832131/001/agent.db-wal>) = 0 <0.073907>",
+          "completion": null
+        },
+        {
+          "tid": "3827",
+          "started": "1794331961.594662",
+          "seconds": 0.058341,
+          "call": "fsync(8</runtime/evidence/process-normal/process-758310075/agent.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.058341>"
+        },
+        {
+          "tid": "3823",
+          "started": "1794331961.595553",
+          "seconds": 0.057273,
+          "call": "fsync(7</runtime/evidence/process-normal/process-758310075/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.057273>"
+        }
+      ]
+    },
+    "race": {
+      "test_exit": 1,
+      "fsync_count": 5460,
+      "median_ms": 0.28600000000000003,
+      "p99_ms": 0.9959999999999999,
+      "maximum_ms": 250.377,
+      "over_200ms": 1,
+      "slowest": [
+        {
+          "tid": "7514",
+          "started": "1794332067.666067",
+          "seconds": 0.250377,
+          "call": "fsync(8</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/agent.db-wal>) = 0 <0.250377>",
+          "completion": null
+        },
+        {
+          "tid": "7598",
+          "started": "1794332113.661878",
+          "seconds": 0.152954,
+          "call": "fsync(8</runtime/evidence/process-race/process-3475117597/agent.db-wal>) = 0 <0.152954>",
+          "completion": null
+        },
+        {
+          "tid": "7537",
+          "started": "1794332087.635302",
+          "seconds": 0.133762,
+          "call": "fsync(10</runtime/evidence/process-race/process-2846656678/backend.db>) = 0 <0.133762>",
+          "completion": null
+        },
+        {
+          "tid": "7514",
+          "started": "1794332067.920196",
+          "seconds": 0.125372,
+          "call": "fsync(8</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/agent.db-wal>) = 0 <0.125372>",
+          "completion": null
+        },
+        {
+          "tid": "7600",
+          "started": "1794332106.512105",
+          "seconds": 0.102401,
+          "call": "fsync(11</runtime/evidence/process-race/process-3475117597/backend.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.102401>"
+        },
+        {
+          "tid": "7517",
+          "started": "1794332056.807474",
+          "seconds": 0.089455,
+          "call": "fsync(13</runtime/tmp/TestRuntimeLongLivedDurableAdaptiveRenewal13278811194/001/hub.db> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.089455>"
+        },
+        {
+          "tid": "7514",
+          "started": "1794332067.592201",
+          "seconds": 0.065959,
+          "call": "fsync(8</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/agent.db-wal>) = 0 <0.065959>",
+          "completion": null
+        },
+        {
+          "tid": "7601",
+          "started": "1794332106.559807",
+          "seconds": 0.054667,
+          "call": "fsync(10</runtime/evidence/process-race/process-3475117597/control-550e8400-e29b-41d4-a716-000000000101/.credential-2299431673>) = 0 <0.054667>",
+          "completion": null
+        },
+        {
+          "tid": "7519",
+          "started": "1794332073.400534",
+          "seconds": 0.053296,
+          "call": "fsync(17</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/backend.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.053296>"
+        },
+        {
+          "tid": "7514",
+          "started": "1794332073.328469",
+          "seconds": 0.03531,
+          "call": "fsync(14</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/hub.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.035310>"
+        },
+        {
+          "tid": "7519",
+          "started": "1794332073.239787",
+          "seconds": 0.034155,
+          "call": "fsync(8</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/agent.db-wal>) = 0 <0.034155>",
+          "completion": null
+        },
+        {
+          "tid": "7519",
+          "started": "1794332073.330703",
+          "seconds": 0.033103,
+          "call": "fsync(8</runtime/tmp/TestRuntimeFundingBlockContinuousTraffic1614104421/001/agent.db-wal> <unfinished ...>",
+          "completion": "<... fsync resumed>) = 0 <0.033103>"
+        }
+      ]
+    }
+  },
+  "arm64": {
+    "artifact": 13787362490,
+    "archive": "/private/tmp/vortex-wal-03b0d9e2-arm64.zip",
+    "sha256": "bf8ac6e4abc3e4eb3d324d8eb1cba128bccf9f06a8ff5868267b852f920be713",
+    "normal_exit": 0,
+    "race_exit": 1,
+    "race_failure": "ConcurrentRenewal60.02s under strace; not acceptance",
+    "normal_max_fsync_ms": 98.387,
+    "race_max_fsync_ms": 138.405
+  }
+}

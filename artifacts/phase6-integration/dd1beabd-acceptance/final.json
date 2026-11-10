@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "candidate": "dd1beabd56db6f0abeb101b5266996f820bb7e81",
+  "status": "not_passed",
+  "merged": false,
+  "phase7": "planning only; 84 plans, implementation not started",
+  "results": {
+    "docker": "passed including real Cloudflare CRUD; independent host check passed",
+    "phase5_exact": {
+      "run": 42858216510,
+      "status": "passed",
+      "independent_manifest": "31 process cases,98 snapshots,3431 hashes passed"
+    },
+    "phase6_exact": {
+      "run": 42858216231,
+      "arm64": "passed including real Cloudflare CRUD; independent host check passed",
+      "amd64": "failed original60s: traffic36.667s,AgentACK45.518s,backend receipts56.608s,final Hub audit context deadline"
+    },
+    "pr": {
+      "phase1": 42858443062,
+      "phase2": 42858442830,
+      "phase3": 42858442614,
+      "phase4": 42858443191,
+      "phase5": 42858443065,
+      "phase6": 42858442481,
+      "phase1_5": "passed",
+      "arm64": "passed",
+      "amd64": "failed original200ms: settlement FULL commit212.539ms blocks next authorization"
+    }
+  },
+  "diagnostic": {
+    "branch": "codex/diagnose-phase6-wal",
+    "sha": "03b0d9e2fdff368fa029a415520e01d3ad513295",
+    "run": 42865758993,
+    "not_acceptance": true,
+    "finding": "real WAL fsync250.377ms; failing admission fsync152.954ms with only9WALframes/no checkpoint combines with queue to239–240ms; moving checkpoint alone insufficient",
+    "self_hosted_runners": 0,
+    "reader_comparison": "read-only open saves approximately0.5s on Linux arm64 copy of exact failure DB; insufficient to establish60s fix, no source edit applied"
+  },
+  "next": "Need stable dedicated Ubuntu24.04 amd64 validation environment plus analysis of remaining60s total; keep original200ms/60s/5s and FULL, no merge until real complete passing checks",
+  "archives": {
+    "/private/tmp/vortex-dd1beabd-actions-amd64.zip": "b5b77c6cc69085eb2d64b830eb14365154f74b452a36b8e52766d3225253bf9a",
+    "/private/tmp/vortex-dd1beabd-actions-arm64.zip": "744b7f52e7bf43537268d98d32860cb7a2e7a26ace6ffd45e78f42108efae424",
+    "/private/tmp/vortex-dd1beabd-pr-actions-amd64.zip": "6292cbd859c417a0b99b9f82316e90a5cfce26ce84564d9d7de2aa7f738417a5",
+    "/private/tmp/vortex-dd1beabd-phase5-recovery.zip": "f9c2159f22f7176f36b50f4f9352cfa2aebb51605f85f7cfeb0a1224055ce63c",
+    "/private/tmp/vortex-dd1beabd-phase5-authorization-retry.zip": "fa4504973361a1b5100725f26d3e44e207bc5341e8cc358162b2e1399984dc53"
+  },
+  "files": {
+    "exact-amd64-root-race.jsonl.gz": "54ee599d03836cc3d47324b4c353519b1cfda2d7bbb1b2f13c0abb66f9d7a384",
+    "exact-arm64-storage-layout.txt.gz": "a48b265e8b3b596b4abfc47be43704b907392568d313729ababca727805677fa",
+    "exact-amd64-process-race_evidence_process-643787184_vortex-node.log.gz": "22c579c10725c275fd17532ae7dfab273b2720ce7ae44f16c807e27d82537a53",
+    "exact-amd64-result.json.gz": "0ad534c846279600127aae1e370be91c3ff0b990bfa2661c151986bd18b9a794",
+    "wal-amd64-syscalls-normal.log.gz": "17c119bccdf45dc7e937bb75915e20cdc01cd0c4c51a9f8de91a4a8b8ac0af99",
+    "phase5-recovery-recovery_report.json.gz": "b2fa10387cabb8851a754ba98c437c04e5a48f9ed54e2038791a24249ae9a79a",
+    "wal-amd64-tests-normal.log.gz": "0ea490a4e72d4288a03e73586812a3a8b8f11c6069b3456925fcf84efd9d2173",
+    "exact-arm64-host.txt.gz": "e4824ca63a152b041acd472d636ef14e70b22edcb02961772cb09bd26566e71d",
+    "host-source-status-after.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "host-source-identity.txt.gz": "3cd5a40eeb815af77aaea082274558fafb057fc3350534117143a4648694d452",
+    "pr-amd64-root-normal.jsonl.gz": "958e9689dfb6f21d5ea24222461fc498333c3b44a4583717044f77882b50a24c",
+    "exact-amd64-storage-layout.txt.gz": "0d9da16fff69b42a2fff17b094b83aa5925fefac60062e584293232e41463538",
+    "wal-amd64-syscalls-race.log.gz": "1e4a4ce3a448c3e8507e2cc0716cbfecc341e465bbc841e5cfd5ba1df64054b5",
+    "audit-reader-measure.log.gz": "0d80c400574583efd0642de8f25b925ed0da8b3823b2b50f2cec969092384fd4",
+    "phase5-recovery-gap-evidence.json.gz": "11c3660741d72878c5718f163600754ac3923e2c14af9ab0dd290c6974b54759",
+    "exact-amd64-process-race_evidence_process-643787184_vortex-test-hub.log.gz": "0060db549095b8e0d6f3f3bfa6b953b38eb65e7899e95521a4f1cae33abfcda9",
+    "exact-arm64-result.json.gz": "1c59c4005def5ea51d88f61f7c13f15a8e6c0b68bfb1adb079f5ab5f8d53c53f",
+    "pr-amd64-host.txt.gz": "fe46a634f5599528c349c5a4dd6c5ef519905010f60c67c90d3ad1d48d6a53dc",
+    "phase5-recovery-deployment_report.json.gz": "4d700888271c34658df0bc2d6db83455f86abccbed0f1d0687ad30bcfa02abe7",
+    "phase5-recovery-report.json.gz": "2d026b6a28748c9bf94dd06d115b7ea4aa6557b915c463f0878105d69ab298e0",
+    "exact-amd64-host.txt.gz": "b9e4047b706a0b25f535270fe7647e9dc02b689d1a6034d3ee323a075659fdc3",
+    "pr-amd64-result.json.gz": "bb3be181ca13eb23cb76d41842c7b910c22edf749f4a58e284db2850dc17d3bd",
+    "pr-amd64-storage-layout.txt.gz": "5721f80272b7c80290b31560cd9fdc5e8add6925343689b100b1042a6e16d128",
+    "host-source-status-before.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "commit.txt.gz": "5a47a06f69d2b593f16b4a9befde43f6c869e9ecf754fffa6bf8e0f6ed117b8b",
+    "cloudflare.log.gz": "c4136aae9ae82f9f3276f496626c80126b5d798344d8a986883143345950ee05",
+    "interim.json": "10c7f3551337930375e1fd8c5be2c4d5e27d10557912d00bc89b9dfa6db79357",
+    "phase5-authorization-retry-report.json.gz": "368331924bbaa608455a75fb34ae4e1a90faa6d058934c96516f967b72a9c132",
+    "wal-amd64-tests-race.log.gz": "17f2645b25e188e317a82da21e3c64c2b91a3bd678fa584d759bcbdf222153d0",
+    "wal-diagnostic.json": "fc0b8b61443314df8309ac93a8dc94d48d0885a9a84eeedcff4c24922d63a09c",
+    "result.json.gz": "f7f9f56caa490fec916980b8034ca3fd7d401e8a5ba55c87208330faa05caaa5",
+    "phase5-recovery-audit.json.gz": "6646a197c48886b25a97e2f7c1e80c64d460031d68a9c64cfb4c3e4de58e2eca"
+  }
+}

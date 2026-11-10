@@ -1,5 +1,5 @@
 ---
-status: verifying
+status: awaiting_environment
 trigger: 用户要求先收敛F-10/F-11，再整合Phase6到主线
 created: 2026-11-09
 updated: 2026-11-11
@@ -9,8 +9,8 @@ execution: inline
 
 ## Current Focus
 
-hypothesis: feed5819本机和arm64通过，amd64在60秒重启补交阶段失败；CPU采样显示Hub重复JSON身份解析及Node需求账本未复用SQL编译增加SQLite/race工作。
-next_action: 提交已通过确定性RED/GREEN和Linux race3的测试端口所有权修复，重新完成同SHA完整Docker/双架构Actions与Phase5验收；8b235102失败保持记录。
+hypothesis: amd64存在真实WAL fsync长尾（已捕获250.377ms）及完整续额/ACK/重启/资金审计原60s余量不足，单独迁移checkpoint或改reader不能证明收敛。
+next_action: 获得可用专用Ubuntu24.04 amd64环境后继续定位/收敛200ms与60s门禁；保持FULL、全部审计、原预算。dd1beabd全部正式运行已结束，PR2不合并；诊断分支不纳入产品。
 
 ## Symptoms
 
@@ -219,3 +219,13 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - Candidate8b235102 final Docker backend normal/race502 each PASS, then root normal FAILED TestAutomaticRenewalObservesCommittedRulesOutsideLegacyScope at real Prepare for rule21 (invalid_config). Candidate remains failed regardless of later suites. That path precedes ReadDemandLedger and does not execute changed SQL. Deterministic Linux overlay occupies the released probe socket during authority setup: reproduces identical real receipt and retained reason `listen tcp :43431: bind: address already in use`. Native overlay did not reproduce because Darwin bind-family behavior differs; retained, not claimed as Linux proof. Repair only the fixture: wildcard candidate matches Engine listener scope, retain it through authority/config WAL writes, test wrapper closes immediately before forwarding to the real Engine Prepare, and unexpected failure prints persisted reason. Preserve all37 rules, real applier, continuation/financial assertions and original budgets. Collision-overlay GREEN and repeated actual fixture race in progress. Existing8b235102 Actions continue to retain their actual outcomes.
 
 - Fixture socket ownership GREEN: deterministic hostile competitor is denied throughout authority/configuration setup, then actual Engine Prepare/Commit/renewal/conservation PASS with Linux race18.38s. Original complete fixture repeated race3 PASS56.913s. Changes limited to test listener ownership and persisted error diagnostics; no production code, assertions, workload, authority or budget change. Raw logs and original Docker failure excerpt retained under artifacts/phase6-integration/renewal-port-handoff/. New clean same-SHA candidate required;8b235102 stays failed.
+
+- dd1beabd final Docker PASSED: backend normal/race502 each, root normal/race1158 each, Engine301 each; actual four race process cases5.53/6.08/6.85/34.54s; automatic37-rule renewal11.51/19.17s. Faults and real Cloudflare CRUD passed; independent final_evidence_check host hashes/semantics PASS. Full original /private/tmp/vortex-final-dd1beabd-evidence.wiGKtGmt retained. Exact Phase6 42858216231 and Phase5 42858216510 still running.
+- PR merge dfd3ce81 tree equals dd1beabd9a169c88. PR Phase1–4 PASS; Phase6 42858442481 amd64 FAILED normal long-lived TCP renewal: settleUsageReservation SQL117.979us but FULL commit212.538905ms, following reservation waits200.580436ms and correctly fails closed. Raw artifact13786665836 /private/tmp/vortex-dd1beabd-pr-actions-amd64.zip retained. No merge; no new timeout or authority behavior change.
+- Previous8b235102 exact Phase6 42853822448 arm64 PASS, amd64 FAILED real TCP and ConcurrentRenewal; raw artifact13786315856 /private/tmp/vortex-8b235102-actions-amd64.zip. TCP admission FULL96ms+87ms and queue exceeds272ms; concurrent FULL244.598ms leads309–313ms waits. Exact Phase5 42853822464 PASS. These are separate previous-candidate outcomes, not dd1beabd acceptance.
+- Independent diagnostic branch codex/diagnose-phase6-wal64912fc2 adds WAL NOOP counters and strace only. First job42864666156 failed evidence ownership after tests (not product result); corrected export owner03b0d9e2 run42865758993 active. No diagnostic source merged into candidate. Local initial diagnostic missed worktree .git mount (no tests); corrected diagnostic builds with buildvcs=false, long-lived and four actual process race PASS; logs /private/tmp/vortex-wal-local-diagnostic. Counters correlate some20–25ms commits with automatic1000-frame checkpoint; not yet sufficient to attribute213ms failure.
+
+- Corrected WAL diagnostic03b0d9e2 run42865758993 retained both architectures. amd64 normal tests exit0/race exit1; syscall trace proves real agent.db-wal fsync250.377ms. Actual failing race admission fsync152.954ms, WAL after_frames9/checkpointed0, combined queue239–240ms. Therefore slow admission is not solely foreground auto-checkpoint CPU. This diagnostic uses strace and is not acceptance; no guessed checkpoint configuration applied. arm64 normal exit0/race ConcurrentRenewal60.02s under tracing; fsync max138.405ms, not evidence of untraced product failure. Repo currently has zero self-hosted runners; asked for available dedicated Ubuntu24.04 amd64 environment while collecting remaining runs.
+
+- Final exact dd1beabd run42858216231: arm64 complete PASS with real Cloudflare and independent host validation; amd64 FAIL only ConcurrentRenewal race60.35s: traffic36.667s, AgentACK45.518s, restart47.620s, backend receipts56.608s, Agent source audit passes with25129216=12841216+12288000, final Hub audit hits ctx deadline. PR Phase6 arm64 PASS/amd64 FAILED200ms as recorded. Exact Phase5 run42858216510 and PR42858443065 complete PASS; independently validated31 process cases98 snapshots3431 file hashes. No same-SHA passing pair.
+- Safe read-only audit-open comparison on copies of exact failed DB: Linux arm64/race writer Agent open173.7ms+audit457.4ms,Hub open337.9ms+audit0.846ms; reader16.4ms+477.6ms and21.9ms+0.523ms, identical balances. About0.5s saved does not establish60s closure; no speculative test/source edit made. Waiting for dedicated environment response; all running work finished. Full final report and compressed raw logs in phase1–7 audit/ dd1beabd-acceptance.

@@ -1,0 +1,25 @@
+{
+  "scope": "interim acceptance; not merge approval",
+  "candidate": "dd1beabd56db6f0abeb101b5266996f820bb7e81",
+  "local": "passed complete with real Cloudflare and independent host validation",
+  "pr_merge": "dfd3ce81fe0d7a67b1267162769ccff7b6b7572f",
+  "same_tree": "9a169c88179aca341782864208414596bcb4cfb7",
+  "pr_amd64": "failed original 200ms bound: settlement FULL commit212.538905ms",
+  "phase6_run": 42858216231,
+  "phase5_run": 42858216510,
+  "pr_phase6_run": 42858442481,
+  "pr_phase5_run": 42858443065,
+  "remaining": "exact dual-architecture and Phase5 still running; independent WAL diagnosis active; do not merge",
+  "files": {
+    "host-source-status-after.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "host-source-identity.txt.gz": "3cd5a40eeb815af77aaea082274558fafb057fc3350534117143a4648694d452",
+    "pr-amd64-root-normal.jsonl.gz": "958e9689dfb6f21d5ea24222461fc498333c3b44a4583717044f77882b50a24c",
+    "pr-amd64-host.txt.gz": "fe46a634f5599528c349c5a4dd6c5ef519905010f60c67c90d3ad1d48d6a53dc",
+    "pr-amd64-result.json.gz": "bb3be181ca13eb23cb76d41842c7b910c22edf749f4a58e284db2850dc17d3bd",
+    "pr-amd64-storage-layout.txt.gz": "5721f80272b7c80290b31560cd9fdc5e8add6925343689b100b1042a6e16d128",
+    "host-source-status-before.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "commit.txt.gz": "5a47a06f69d2b593f16b4a9befde43f6c869e9ecf754fffa6bf8e0f6ed117b8b",
+    "cloudflare.log.gz": "c4136aae9ae82f9f3276f496626c80126b5d798344d8a986883143345950ee05",
+    "result.json.gz": "f7f9f56caa490fec916980b8034ca3fd7d401e8a5ba55c87208330faa05caaa5"
+  }
+}

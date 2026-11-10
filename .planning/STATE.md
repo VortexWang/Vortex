@@ -5,17 +5,17 @@ milestone_name: milestone
 current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
-status: integration_verification
-stopped_at: "Phase1–7 integration:8b235102 Docker failed fixture port race; deterministic Linux RED/GREEN and original fixture race3 passed; fresh same-SHA full acceptance required"
-last_updated: "2026-11-10T16:47:12.398247+00:00"
+status: integration_blocked
+stopped_at: "dd1beabd Docker/Phase5/arm64 passed; amd64 PR200ms FULL-commit failure and exact60s final-audit failure; PR2 remains unmerged"
+last_updated: "2026-11-10T17:50:48.200074+00:00"
 last_activity: 2026-11-11
-last_activity_desc: "固定绑定身份优化完成；8b235102完整验收发现测试端口提前释放竞态，夹具真实Prepare端口交接修复通过Linux竞争GREEN/race3；新完整同SHA验收待完成，Phase7仅规划。"
+last_activity_desc: "同SHA本机完整Docker/Cloudflare、Phase5恢复部署、arm64通过；amd64两项门禁失败；已完成WAL syscall诊断并请求专用Ubuntu24.04 amd64环境；Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 54
   completed_plans: 53
-state_head: 65a53358
+state_head: dd1beabd
 ---
 
 # Project State
@@ -32,7 +32,7 @@ See: .planning/PROJECT.md (updated 2026-11-09)
 Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — 84份规划完成，实施未开始；主线整合验收待完成
 Current Plan: Not started
 Total Plans in Phase: 84
-Status: Phase1–6 implementation histories and Phase7 planning merged into main; PR2 fixes and integrated runtime acceptance remain pending. See .planning/audits/phase1-7-integration/STATUS.md.
+Status: Phase1–6 histories and Phase7 planning are in main. PR2 is not merged: dd1beabd Docker/Phase5/arm64 pass, amd64200ms and60s gates fail. See .planning/audits/phase1-7-integration/FINAL-ACCEPTANCE.md.
 Last activity: 2026-11-09 — same implementation65a53358 Docker and native dual Actions42572674719 passed; exact CR-009 approval retained.
 
 以下执行记录为历史，不代表当前未完成状态。当前判定以06-VERIFICATION.md及本节为准。
