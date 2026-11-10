@@ -345,6 +345,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 		}
 	}
 	elapsed := time.Since(trafficStarted)
+	t.Logf("business traffic completed after %s", elapsed)
 	var samples []time.Duration
 	for _, streamSamples := range latencies {
 		samples = append(samples, streamSamples...)
@@ -386,6 +387,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	for _, stream := range streams {
 		_ = stream.Reset(ctx, 0)
 	}
+	t.Logf("all Agent usage acknowledged after %s since traffic start", time.Since(trafficStarted))
 	stopNode()
 	stopHub()
 	// A fixed fixture heartbeat intentionally enters autonomy after 30 seconds.
@@ -393,6 +395,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 	// with the same databases to exercise durable accounting replay explicitly.
 	stopRecoveredHub := start("vortex-test-hub", "--listen", hubAddr, "--db", hubDB, "--tls-cert", hubCredentials+"/runtime-cert.pem", "--tls-key", hubCredentials+"/runtime-key.pem", "--tls-ca", hubCredentials+"/trust-ca.pem", "--authority-fixture", fixture, "--fixture-backend-db", backendDB, "--test-config-update", configUpdate)
 	defer stopRecoveredHub()
+	t.Logf("restarted Hub replay beginning after %s since traffic start", time.Since(trafficStarted))
 	hubObservation, err := sql.Open("sqlite", "file:"+hubDB+"?mode=ro")
 	if err != nil {
 		t.Fatal(err)
@@ -411,6 +414,7 @@ func runDurableAuthorityProcesses(t *testing.T, network uint8, streamCount, roun
 		return err == nil && !pending
 	})
 	stopRecoveredHub()
+	t.Logf("all backend receipts confirmed after %s since traffic start", time.Since(trafficStarted))
 	db.Close()
 	// Writers have stopped: audit durable source funds as well as usage rows.
 	agentAudit, err := store.Open(agentDB, "agent")

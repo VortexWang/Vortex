@@ -43,15 +43,9 @@ func (r *UsageRelay) AcceptKnownEnvelopes(ctx context.Context, messages []*contr
 }
 
 func (r *UsageRelay) forwardGroup(ctx context.Context, batches []store.HubUsage) error {
-	var pending []store.HubUsage
-	for _, b := range batches {
-		confirmed, err := r.Store.BackendUsageConfirmed(ctx, b)
-		if err != nil {
-			return err
-		}
-		if !confirmed {
-			pending = append(pending, b)
-		}
+	pending, err := r.Store.PendingKnownUsageGroup(ctx, batches)
+	if err != nil {
+		return err
 	}
 	if len(pending) == 0 {
 		return nil

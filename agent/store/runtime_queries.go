@@ -4,6 +4,13 @@ package store
 // Unlisted SQL uses the ordinary transaction path. Keeping the original SQL
 // at each call site makes its guards and mutations directly reviewable.
 var runtimeQueries = [...]string{
+	knownUsageInsertSmall,
+	knownUsageInsertLarge,
+	knownReceiptInsertSmall,
+	knownReceiptInsertLarge,
+	usageGroupConfirmedQuery,
+	knownUsageSetQuery,
+	usageSetLedgeredQuery,
 	usageBatchIdentityQuery,
 	fundingWriteUpperBoundQuery,
 	usageAcknowledgementRows,
