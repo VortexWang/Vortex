@@ -13,13 +13,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-24.04
+          # A repository-configured dedicated host can supply durable native
+          # amd64 evidence. Fork PRs keep the hosted runner.
+          - runner: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.PHASE6_AMD64_RUNNER || 'ubuntu-24.04' }}
             arch: amd64
           - runner: ubuntu-24.04-arm
             arch: arm64
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
     steps:
+      - name: Verify native Ubuntu 24.04 host
+        env:
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          . /etc/os-release
+          test "$ID" = ubuntu
+          test "$VERSION_ID" = 24.04
+          case "$EXPECTED_ARCH:$(uname -m)" in
+            amd64:x86_64|arm64:aarch64) ;;
+            *) echo 'native runner architecture mismatch' >&2; exit 1;;
+          esac
+          uname -srm
+          printf 'Ubuntu %s; expected native architecture %s\n' "$VERSION_ID" "$EXPECTED_ARCH"
       - name: Checkout exact source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

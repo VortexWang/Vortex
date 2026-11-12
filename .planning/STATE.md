@@ -5,11 +5,11 @@ milestone_name: milestone
 current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
-status: integration_blocked
-stopped_at: "dd1beabd Docker/Phase5/arm64 passed; amd64 PR200ms FULL-commit failure and exact60s final-audit failure; PR2 remains unmerged"
-last_updated: "2026-11-10T18:08:14+00:00"
-last_activity: 2026-11-11
-last_activity_desc: "已完成无跟踪磁盘诊断42870346935：托管amd64仅单虚拟根盘，无独立数据盘；原候选race仍触及60s，PR2保持未合并；等待专用Ubuntu24.04 amd64环境。Phase7仅规划。"
+status: integration_in_progress
+stopped_at: "dedicated amd64 preflight failed original200ms; bootstrap fixture ordering repaired; remaining continuous traffic exceeds200ms; PR2 remains unmerged"
+last_updated: "2026-11-12T15:19:34+00:00"
+last_activity: 2026-11-12
+last_activity_desc: "已连接用户专用Ubuntu24.04 amd64并完成原候选预检，仍触及200ms；已复现并修复独立数据库初始化污染夹具boot时间区间，Linux7组race通过，专用amd64验证6组通过/1组仍触及200ms，185.903s失败；用户确认仅有当前磁盘，继续分析事务开销。Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5

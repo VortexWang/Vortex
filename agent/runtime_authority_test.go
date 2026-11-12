@@ -308,6 +308,25 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal(err)
 			}
 			defer s.Close()
+			// Initialize the independent Hub/backend databases before creating
+			// the Node's boot freshness challenge. Their schema/fsync setup is
+			// not control-message transit time and can exceed this fixture's
+			// deliberately short initial grant on a durable disk.
+			hubDB := filepath.Join(dir, "hub.db")
+			if fullDiskRoot != "" {
+				hubDB = filepath.Join(filepath.Dir(agentDB), "hub.db")
+			}
+			hs, err := store.Open(hubDB, "hub")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer hs.Close()
+			backendDB := filepath.Join(dir, "backend.db")
+			bs, err := store.Open(backendDB, "hub")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer bs.Close()
 			e, err := NewRuntimeEngine(path, controlTestNodeID)
 			if err != nil {
 				t.Fatal(err)
@@ -402,21 +421,6 @@ func runDurableRuntimeAuthorityWorkload(t *testing.T, renewalRounds int, blockMo
 				t.Fatal("unauthorized OPEN reached target")
 			}
 			serverTLS, clientTLS, _ := controlTLSForHub(t, controlTestNodeID, runtimeHubID)
-			hubDB := filepath.Join(dir, "hub.db")
-			if fullDiskRoot != "" {
-				hubDB = filepath.Join(filepath.Dir(agentDB), "hub.db")
-			}
-			hs, err := store.Open(hubDB, "hub")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer hs.Close()
-			backendDB := filepath.Join(dir, "backend.db")
-			bs, err := store.Open(backendDB, "hub")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer bs.Close()
 			// The protocol backend installs a fixed allocation. The Hub must
 			// reserve it durably before its control response becomes visible.
 			issuedAt := time.Now().UTC()

@@ -1,16 +1,16 @@
 ---
-status: awaiting_environment
+status: investigating
 trigger: 用户要求先收敛F-10/F-11，再整合Phase6到主线
 created: 2026-11-09
-updated: 2026-11-11
+updated: 2026-11-12
 workflow: gsd-debug
 execution: inline
 ---
 
 ## Current Focus
 
-hypothesis: amd64存在真实WAL fsync长尾（已捕获250.377ms）及完整续额/ACK/重启/资金审计原60s余量不足，单独迁移checkpoint或改reader不能证明收敛。
-next_action: 获得可用专用Ubuntu24.04 amd64环境后继续定位/收敛200ms与60s门禁；保持FULL、全部审计、原预算。无跟踪磁盘诊断确认托管runner仅单虚拟根盘、无独立数据盘，race仍触及60s；不再以改换临时目录作为磁盘隔离方案。dd1beabd全部正式运行已结束，PR2不合并；诊断分支不纳入产品。
+hypothesis: 新专用Ubuntu24.04 amd64主机同样存在FULL提交与队列超过200ms；另有独立Hub/backend建库被计入Node boot freshness区间，导致4秒初始夹具授权不可用。初始化顺序修复不改变生产时钟或TTL，尚不能解决磁盘长尾。
+next_action: 保留已验证的夹具初始化修复及专用主机失败证据；用户确认仅有当前主机和磁盘，继续测量有界检查点父记录更新的SQL开销。原200ms/60s/FULL及全部资金断言不变；runner未启动，PR2不合并。
 
 ## Symptoms
 
@@ -231,3 +231,6 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - Safe read-only audit-open comparison on copies of exact failed DB: Linux arm64/race writer Agent open173.7ms+audit457.4ms,Hub open337.9ms+audit0.846ms; reader16.4ms+477.6ms and21.9ms+0.523ms, identical balances. About0.5s saved does not establish60s closure; no speculative test/source edit made. Waiting for dedicated environment response; all running work finished. Full final report and compressed raw logs in phase1–7 audit/ dd1beabd-acceptance.
 
 - Independent disk diagnosis4a42224c/run42870346935 uses clean exact productdd1beabd/tree9a169c88 without tracing or instrumentation. Host exposes only one150GiB virtual disk; /mnt and Docker runtime volume share /dev/root, so no fake alternate-disk comparison or same-device retry. Targeted normal exit0; race exit1 only ConcurrentRenewal60.01s (traffic39.448s/AgentACK49.165s/Hub restart51.260s, waiting backend receipts). Workflow success is export only, not acceptance. Raw15.9MB archive and40 retained file hashes/full compressed logs recorded under dd1beabd-disk-diagnosis. Product/PR unchanged; dedicated environment still absent, original200ms/60s/FULL requirements preserved.
+
+- User supplied dedicated host on2026-11-12. Verified Ubuntu24.04.5/x86_64/4vCPU/7894MiB/ext4, Go1.27.3 and empty Docker workload; installed missing Compose2.40.3 and Ruby3.2.3, checksum-verified Actions runner2.338.2 and registered ephemeral vortex-dedicated-amd64 (not started). No login credentials stored in repo or evidence. Original clean dd1beabd targeted race FAILED172.233s: initial fixture boot uncertainty4.07s exceeds4s grant; all four process cases failed original200ms admission. Actual concurrent wait211–214ms includes FULL129.496ms; new-file128-fsync probe p50=5.781ms/p95=19.443ms/max=136.191ms. This host has not passed acceptance.
+- Bootstrap fixture repair initializes independent Hub/backend DBs before Node.New, leaving original overall context,4s grant,boot clock,negative attacks and all financial/expiry checks intact. Separate local Linux race overlay injects4.1s only at independent DB setup: old ordering RED5.663s, new ordering full GREEN9.79s. Seven original complete fixture cases without delay all PASS Linux arm64 race; dedicated amd64 same fixtures completed: six PASS, continuous funding traffic FAIL at original200ms (suite185.903s). Workflow now supports repository variable PHASE6_AMD64_RUNNER with hosted fallback/fork isolation and explicit native Ubuntu24.04 architecture validation; no test or timeout edits. Evidence under dedicated-amd64-preflight; user confirmed only the current host/disk is available. Bootstrap expiry is resolved, but TCP admission201.004ms and UDP203.885ms still fail; UDP includes settlement FULL97.807ms and Hub persistence FULL99.430ms. No final acceptance claimed.
