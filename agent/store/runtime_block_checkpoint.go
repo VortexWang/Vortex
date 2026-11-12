@@ -83,10 +83,10 @@ func checkpointRuntimeFundingBlockTx(ctx context.Context, tx storeTransaction, b
 	if used == block.Reserved {
 		residualState = "returned" // zero tail, no refund and no recovery liability
 	}
-	if _, err := tx.ExecContext(ctx, `UPDATE usage_reservations SET reserved_bytes=?,state=?,updated_at=? WHERE node_id=? AND batch_id=?`, residual, residualState, now, block.NodeID, block.BatchID); err != nil {
+	if err := execUsageGroupRows(ctx, tx, `UPDATE usage_reservations SET reserved_bytes=?,state=?,updated_at=? WHERE node_id=? AND batch_id=?`, 1, residual, residualState, now, block.NodeID, block.BatchID); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, `UPDATE authorization_usage_holds SET reserved_bytes=?,state=? WHERE node_id=? AND batch_id=?`, residual, residualState, block.NodeID, block.BatchID); err != nil {
+	if err := execUsageGroupRows(ctx, tx, `UPDATE authorization_usage_holds SET reserved_bytes=?,state=? WHERE node_id=? AND batch_id=?`, 1, residual, residualState, block.NodeID, block.BatchID); err != nil {
 		return err
 	}
 	if !staged {

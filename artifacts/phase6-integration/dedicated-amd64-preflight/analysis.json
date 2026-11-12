@@ -45,18 +45,18 @@
     "raw/source-before.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
     "raw/source.txt.gz": "3cd5a40eeb815af77aaea082274558fafb057fc3350534117143a4648694d452",
     "raw/tests-race.log.gz": "160970870c4d84bfecccf248676ef8ea18ca95baa7ffe3a90ee2a5569b47547b",
-    "bootstrap-delay/red.go": "1c0aebc54be16c45c562b72af406eac8477f45ba6de11c3c96c5523a135ebd52",
     "bootstrap-delay/red.json": "e75a7581c2d6d80d1d2798cfe0adf217a77b5c6ba5acd920c8e728bc07e3f1e9",
     "bootstrap-delay/red.log.gz": "de5ac5f9d39f3d2ed8db3ebe2ad14d401cd53d46121efc48af10411307725df3",
     "bootstrap-delay/red.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
-    "bootstrap-delay/green.go": "75359c429f1d80e0dd49b0ebe5d7dd06085ca85d861adc3a0499a29db619dfbf",
     "bootstrap-delay/green.json": "8b99ae27e68e80e66bb32d3ad4526c669c752da4fec4a1064818b26286bd4578",
     "bootstrap-delay/green.log.gz": "df044a97bd76e129a50c56d2d0bbf624df18cb6e9e7131bb7caa565fe9490cec",
     "bootstrap-delay/green.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
     "bootstrap-delay/full-fixed-race.log.gz": "5a0e38fb70230605cd589b4a7cc6f2a79e0d88be67cda06a8642e65bd7ef1cc6",
     "bootstrap-delay/full-fixed-race.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
     "bootstrap-delay/dedicated-fixed-race.log.gz": "f1231794ff01c50b7096a0f869ad766f5f01d85154cc86a1af8ff43041270a86",
-    "bootstrap-delay/dedicated-fixed-race.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    "bootstrap-delay/dedicated-fixed-race.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "bootstrap-delay/red.go.txt": "1c0aebc54be16c45c562b72af406eac8477f45ba6de11c3c96c5523a135ebd52",
+    "bootstrap-delay/green.go.txt": "75359c429f1d80e0dd49b0ebe5d7dd06085ca85d861adc3a0499a29db619dfbf"
   },
   "local_linux_arm64_race_fixed_fixture": {
     "exit": 0,

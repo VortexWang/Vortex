@@ -1,0 +1,12 @@
+package store
+import("context";"fmt";"testing";"time")
+func TestCheckpointParentSQLDiagnostic(t *testing.T) {
+ s,scope,_:=runtimeStore(t);ctx:=context.Background()
+ if _,err:=s.db.Exec(`UPDATE authorization_records SET connections='16' WHERE authorization_id='share'`);err!=nil {t.Fatal(err)}
+ entries:=make([]RuntimeBlockCheckpoint,16)
+ for i:=range entries {flow:=fmt.Sprint("flow",i); a,err:=s.OpenRuntimeSession(ctx,scope,fmt.Sprint("session",i),flow);if err!=nil {t.Fatal(err)};block:=runtimeReservation(fmt.Sprint("block",i),51207);block.FlowKey=flow;if _,err:=s.ReserveRuntimeFundingBlock(ctx,block,a.Use);err!=nil {t.Fatal(err)};entries[i]=RuntimeBlockCheckpoint{Block:block,Used:100,Payload:[]byte("confirmed")}}
+ start:=time.Now()
+ for n:=0;n<512;n++ {for i:=range entries {entries[i].CheckpointID=fmt.Sprintf("child-%d-%d",n,i)};if err:=s.commitRuntimeCheckpoints(ctx,entries,func()error{return nil});err!=nil {t.Fatal(err)};for i:=range entries {entries[i].Block.Reserved-=100}}
+ t.Logf("512 FULL commits /8192 exact outcomes: %s",time.Since(start))
+ b,err:=s.AuditAuthorizationSource(ctx,"node","funding");if err!=nil||b.Committed!=819200||b.Reserved!=112 {t.Fatalf("%+v %v",b,err)}
+}

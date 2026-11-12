@@ -1,0 +1,52 @@
+{
+  "classification": "development regression verification; not final acceptance",
+  "baseline_sha": "dd1beabd56db6f0abeb101b5266996f820bb7e81",
+  "production_change": "Require exactly one affected parent row in each of the two checkpoint updates; any mismatch rolls back the transaction. No batching retained.",
+  "red": {
+    "exit": 1,
+    "negative_cases": 4,
+    "cause": "SQLite BEFORE UPDATE RAISE(IGNORE) was acknowledged as successful checkpoint"
+  },
+  "dedicated_amd64_race": {
+    "exit": 0,
+    "duration_s": 80.037,
+    "scope": "original checkpoint, queue, replay, cancellation, SIGKILL tests plus new four regressions"
+  },
+  "local_arm64_store_race": {
+    "package_passed": true,
+    "duration_s": 308.082,
+    "invocation_exit": 1,
+    "invocation_failure": "also requested nonexistent ./edge-hub; Store package passed but command is not an overall pass; actual ./hub invoked separately"
+  },
+  "withdrawn_parent_batching_experiment": {
+    "single_sample_only": true,
+    "commits": 512,
+    "outcomes": 8192,
+    "baseline_s": 7.251663383,
+    "experimental_s": 7.142912629,
+    "decision": "removed; measurement does not establish material benefit or resolve original200ms gate",
+    "experimental_production_source_retained": false
+  },
+  "safety_budgets_unchanged": true,
+  "sha256": {
+    "baseline-bench.log.gz": "b436f7dbd7d2661919738c99627b2d8b5c34854b096de0b0dd80ccd35aba986f",
+    "batched-bench.log.gz": "93089072d7c1b0d0292cfee45630fc2a1534dee042242bc7be82a840cffd5508",
+    "dedicated-overlay.json": "5cbfeb3c13315875e62a2eefe71f3bb8398a5ca15828db0690754c489c30f213",
+    "dedicated-race.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "dedicated-race.log.gz": "7aadac4e2470e80c59d25ddbac3a198c48f8b44c7201532f8feae397dad0a8b5",
+    "dedicated.sh": "58a3c62fc1c2e24487f4f9149daeb1dfd822d3b6e22d7c6417a56d30aeb166fc",
+    "diagnostic.json": "78110250be18de6e6fd077e32261e7a78f1709402397d04b2f7593b35025b9b1",
+    "diagnostic_test.go.txt": "35e55ebe1a0b6a55fd52ead021f6401cd7cc5f48d0c075d397a03ade1fdb730a",
+    "full-store-hub-race.log.gz": "934b9997b5fde7cb13c3d03d25eb70f867425e6b0d5d1c89d6e1e562e33b6194",
+    "green.log.gz": "1ce310ce835124bf098f12417bc4c07c09411870f381e0eeb815bb2b49f37845",
+    "red.log.gz": "1dbfed94f21c8ae5b915e16815bc042bb8fc63014aa1173ef5ba5d9480f6c045",
+    "hub-race.log.gz": "a0e1c58a611d1c9328f3ab106f7b392dffec4f584a93fd9e321fd36de935e9c9"
+  },
+  "current_production_source_sha256": "6d96f2ecda93fd10e37c5d047507b0fe95e98b9696ad0808b12ac7629dee029c",
+  "current_regression_source_sha256": "c8eb47f7a26f2c37021c3bbe503300b7e5978513360c35184c96869759c0740a",
+  "local_arm64_hub_race": {
+    "exit": 0,
+    "duration_s": 22.508
+  },
+  "frozen_contracts": "control.v1,database,public-api,runtime-config all valid"
+}
