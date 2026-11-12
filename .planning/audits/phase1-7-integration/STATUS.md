@@ -2,7 +2,7 @@
 
 当前未放行：dd1beabd完整本机Docker/真实Cloudflare、Phase5完整恢复部署、Phase6原生arm64及PR1–5检查通过；amd64 PR触及原200ms，精确候选触及原60s最终资金审计。全部正式运行已结束，PR2保持未合并。后续无跟踪磁盘诊断42870346935确认runner仅有一块虚拟根盘、无独立数据盘，原候选race仍触及60s；不是完整验收。详见 FINAL-ACCEPTANCE.md；新增专用主机结果如下，仍需收敛。
 
-2026-11-12已获得专用Ubuntu24.04.5 amd64/4vCPU/约8GiB/ext4环境。原候选目标race预检仍失败：FULL与队列超过200ms；该结果不修改历史通过项或宣布放行。新发现独立Hub/backend初始化污染短TTL夹具boot时间区间，初始化顺序修复已通过确定性延迟RED/GREEN及Linux7组完整race，专用amd64修复验证已结束：6组通过，连续资金块流量仍触及200ms，完整套件185.903s失败。自托管runner已注册未启动，CI支持配置专用amd64标签并校验原生系统；所有预算、FULL和资金断言保持不变。用户确认仅有当前主机和磁盘；继续在现有环境分析事务开销，不放宽门槛。
+2026-11-12已获得专用Ubuntu24.04.5 amd64/4vCPU/约8GiB/ext4环境。原候选目标race预检仍失败：FULL与队列超过200ms；该结果不修改历史通过项或宣布放行。新发现独立Hub/backend初始化污染短TTL夹具boot时间区间，初始化顺序修复已通过确定性延迟RED/GREEN及Linux7组完整race，专用amd64修复验证已结束：6组通过，连续资金块流量仍触及200ms，完整套件185.903s失败。自托管runner已注册未启动，CI支持配置专用amd64标签并校验原生系统；所有预算、FULL和资金断言保持不变。用户确认仅有当前主机和磁盘。检查点父记录被跳过更新仍返回成功的缺口已由最小行数校验修复，完整Linux Store/Hub race（308.082s/22.508s）及专用amd64相关race（80.037s）通过。批量父更新实验单次收益仅1.5%，已撤销；最终200ms/60s门槛未通过。证据见artifacts/phase6-integration/checkpoint-parent-rows/。
 
 Phase 1–6 的开发历史及 Phase 7 规划分支已全部被 main `6e474c3067c33333d194d3b203bbc6229bebf01e` 包含；完整 SHA 与祖先核对见 branch-inventory.json。PR #1 于2026-11-10合入097c313e；后续主线合入Phase7规划。不能因此推导该组合验收通过。
 

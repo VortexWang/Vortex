@@ -7,9 +7,9 @@ current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_in_progress
 stopped_at: "dedicated amd64 preflight failed original200ms; bootstrap fixture ordering repaired; remaining continuous traffic exceeds200ms; PR2 remains unmerged"
-last_updated: "2026-11-12T15:19:34+00:00"
+last_updated: "2026-11-12T15:38:59+00:00"
 last_activity: 2026-11-12
-last_activity_desc: "已连接用户专用Ubuntu24.04 amd64并完成原候选预检，仍触及200ms；已复现并修复独立数据库初始化污染夹具boot时间区间，Linux7组race通过，专用amd64验证6组通过/1组仍触及200ms，185.903s失败；用户确认仅有当前磁盘，继续分析事务开销。Phase7仅规划。"
+last_activity_desc: "已连接用户专用Ubuntu24.04 amd64并完成原候选预检，仍触及200ms；已复现并修复独立数据库初始化污染夹具boot时间区间，Linux7组race通过，专用amd64验证6组通过/1组仍触及200ms，185.903s失败；用户确认仅有当前磁盘，父记录漏更新检测已修复，完整Store/Hub及专用amd64相关race通过；批量父更新实验撤销。200ms/60s最终门槛仍未通过，PR2未合并。Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
