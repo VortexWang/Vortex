@@ -24,3 +24,7 @@ Phase 1–6 开发分支及 Phase 7 规划已被主线包含，六条源分支�
 本机原始目录：`/private/tmp/vortex-final-dd1beabd-evidence.wiGKtGmt`。Actions原始zip、SHA256、运行ID、压缩日志及完整判定：`artifacts/phase6-integration/dd1beabd-acceptance/final.json`。用户原工作区、未跟踪quick计划、stash和源分支保留。
 
 后续独立磁盘诊断 `4a42224c` / Actions42870346935 使用干净的原产品候选dd1beabd（相同tree），没有syscall跟踪、生产插桩或预算调整。runner只有一块150GiB虚拟根盘，`/mnt`与Docker卷均属`/dev/root`，所以未伪造独立数据盘对照，也未对相同设备重复运行。普通目标测试通过；race中前三个真实进程通过，并发续额在原60秒等待重启后的后端回执时失败：业务39.448秒、Agent ACK49.165秒、Hub重启51.260秒。工作流成功仅表示诊断导出成功，不能记为验收通过。原zip、40个留存文件哈希、挂载/设备信息及完整压缩日志见 `artifacts/phase6-integration/dd1beabd-disk-diagnosis/analysis.json`。此结果排除了通过改换该runner临时目录获得独立磁盘的方案；200ms真实fsync长尾和60秒余量仍未收敛，PR2继续不合并。
+
+2026-11-13后续开发修复：专用主机已可用（Ubuntu24.04.5原生amd64、4vCPU/约8GiB、ext4单虚拟盘），用户明确只有当前磁盘。夹具boot初始化排序及checkpoint父行数修复已记录，新增普通资金块事务内可信时间刷新、全组拒绝外层ROLLBACK均有确定性RED/GREEN，组合完整Store/Hub race通过293.960s/21.323s。新的两轮专用overlay未通过，组合连续流量及四真实进程全部失败，Agent70.000s/退出1。成功FULL与前序排队仍超过原200ms，因此没有放宽预算、替代存储耐久性或宣布原60s问题已解决，也不对同代码重复验收碰运气。开发覆盖不是新的干净SHA正式验收；旧候选通过项仅适用于上表原运行。详见artifacts/phase6-integration/funding-clock-and-denial/；PR2仍未合并。
+
+本机组合完整Agent race256.912s退出1：连续资金块14.56s通过，普通自适应TCP后续续额等待到期，原因未证实；首次真实进程调用漏建证据父目录，四例启动前失败，均保留。补正目录后原普通自适应和四真实进程race通过61.957s（并发续额32.60s）；该隔离通过不覆盖完整Agent或专用amd64失败。八个生产/回归源码摘要保持不变，四冻结契约检查通过。当前没有新的完整同SHA放行结果。

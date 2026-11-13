@@ -6,10 +6,10 @@ current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
 status: integration_in_progress
-stopped_at: "dedicated amd64 preflight failed original200ms; bootstrap fixture ordering repaired; remaining continuous traffic exceeds200ms; PR2 remains unmerged"
-last_updated: "2026-11-12T15:38:59+00:00"
-last_activity: 2026-11-12
-last_activity_desc: "已连接用户专用Ubuntu24.04 amd64并完成原候选预检，仍触及200ms；已复现并修复独立数据库初始化污染夹具boot时间区间，Linux7组race通过，专用amd64验证6组通过/1组仍触及200ms，185.903s失败；用户确认仅有当前磁盘，父记录漏更新检测已修复，完整Store/Hub及专用amd64相关race通过；批量父更新实验撤销。200ms/60s最终门槛仍未通过，PR2未合并。Phase7仅规划。"
+stopped_at: "funding fixes committed with Store/Hub and focused process passes; full Agent renewal failure and dedicated amd64200ms remain; PR2 unmerged"
+last_updated: "2026-11-13T04:08:44.955031+00:00"
+last_activity: 2026-11-13
+last_activity_desc: "修复普通资金块排队后使用旧可信时间及全组拒绝仍FULL提交的问题；确定性RED/GREEN、15项时间/排队回归及完整Store/Hub race通过；本机四真实进程隔离通过，续额32.60s，但完整Agent普通自适应TCP续额等待失败未定位。专用amd64组合连续与四进程仍触及原200ms，所有失败保留；PR2未合并，Phase7仅规划。"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -33,7 +33,7 @@ Phase: 07 (M5 前端与运营能力 (M5 Frontend and Operations)) — 84份规�
 Current Plan: Not started
 Total Plans in Phase: 84
 Status: Phase1–6 histories and Phase7 planning are in main. PR2 is not merged: dd1beabd Docker/Phase5/arm64 pass, amd64200ms and60s gates fail. See .planning/audits/phase1-7-integration/FINAL-ACCEPTANCE.md.
-Last activity: 2026-11-11 — Exact candidate dd1beabd remains unaccepted; independent untraced disk diagnosis confirms one virtual root disk and a 60s race failure. Prior Docker/Phase5/arm64 passes remain scoped to their original runs; PR2 is unmerged. See FINAL-ACCEPTANCE.md.
+Last activity: 2026-11-13 — Queued funding now refreshes authenticated time inside the writer transaction; fully denied groups roll back. Full Store/Hub race passes293.960s/21.323s, but dedicated amd64 continuous traffic and all four real-process cases fail original200ms. Local focused real-process race passes including32.60s renewal, but full Agent ordinary adaptive TCP later-renewal wait failed and remains unexplained. PR2 unmerged; final same-SHA acceptance remains unmet.
 
 以下执行记录为历史，不代表当前未完成状态。当前判定以06-VERIFICATION.md及本节为准。
 

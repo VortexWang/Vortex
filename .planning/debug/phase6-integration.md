@@ -2,15 +2,15 @@
 status: investigating
 trigger: 用户要求先收敛F-10/F-11，再整合Phase6到主线
 created: 2026-11-09
-updated: 2026-11-12
+updated: 2026-11-13
 workflow: gsd-debug
 execution: inline
 ---
 
 ## Current Focus
 
-hypothesis: 新专用Ubuntu24.04 amd64主机同样存在FULL提交与队列超过200ms；另有独立Hub/backend建库被计入Node boot freshness区间，导致4秒初始夹具授权不可用。初始化顺序修复不改变生产时钟或TTL，尚不能解决磁盘长尾。
-next_action: 最小父记录更新行数修复已通过完整Store/Hub race和专用amd64相关race；当前硬件200ms长尾及原60s完整验收仍未收敛。保留已通过的修复与失败证据，不重复运行完整验收碰运气，不合并PR2；后续需有证据支持的进一步方案。
+hypothesis: 普通资金块路径排队后使用旧可信时间、全组拒绝仍提交已回滚页均已确定性复现并修复；专用amd64组合回归仍因串行事务/FULL提交与排队触及原200ms，不能视作延迟问题已解决。
+next_action: 定位完整Agent普通自适应TCP后续续额等待失败，并据真实SQL/提交证据评估专用amd64原200ms瓶颈。组合Store/Hub通过293.960s/21.323s；本机补正调用后四真实进程通过（续额32.60s），但专用连续与四进程全部失败。完整Agent256.912s退出1及其后隔离通过均保留，不能仅凭隔离通过放行。保持所有预算和FULL/WAL，PR2不合并。
 
 ## Symptoms
 
@@ -240,3 +240,11 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - Isolated batching comparison completed:8192 outcomes/512 FULL commits baseline7.251663383s versus staged-parent7.142912629s (about1.5%); insufficient evidence to justify extra mutable staging. Removed batching entirely, retaining only two exact affected-row checks and four deterministic rollback regressions. Dedicated nativeamd64 original checkpoint/queue/SIGKILL/replay suite PASS80.037s. Complete local Store race PASS308.082s; initial command also named nonexistent ./edge-hub and exited1 despite Store passing; retained that command failure, actual ./hub runs separately. Removed PHASE6_AMD64_RUNNER repo variable while ephemeral runner is offline so a future PR update cannot hang waiting for it; optional workflow support remains. Diagnostic source copies renamed .go.txt so evidence is not compiled by go test ./....
 
 - Final retained minimal repair validation: Linux full Store race308.082s, independent actual Hub race22.508s, dedicatedamd64 checkpoint/cancellation/replay/SIGKILL race80.037s; four frozen contract checks valid. Evidence checkpoint-parent-rows. No production batching retained, no same-SHA final acceptance or merge. Repair branch preserves all failures and user confirms no alternate hardware/storage.
+
+- Resumed goal: prior turn made authoritative progress (two fixes, committed evidence), not a no-progress turn. Current a2a98d38 branch clean; PR2 remains OPEN/dd1beabd/UNSTABLE, no live acceptance job. SSH control socket expired; existing deploy key is not accepted for this host, local diagnostics remain available. Investigating deterministic stale trusted-time scope in noncompact block admission, where compact path already refreshes inside writer transaction.
+
+-2026-11-13 resumed interrupted handles were missing; checked Docker and remote exit evidence instead of treating observation loss as test failure. Remote first clock-only overlay completed exit1: new15 Store queue/time cases pass, continuous funding traffic passes, all four process cases fail original200ms. Single UDP all-denied funding group still FULL-commits59.121ms after43.717ms work plus62.844ms begin wait. Concurrent renewal checkpoint FULL100.122ms plus44.656ms SQL precedes canceled admission. Clock-only fix is independently valid but does not establish gate closure.
+- Deterministic Agent RED confirms first/existing block sampled clock once and admitted an authority expired by writer execution. Refresh same authenticated clock inside writer for first/existing/batch. Queue-time active,expired,untrusted,revoked,canceled15 cases and rate/conservation checks pass; clock-only complete local Store330.742s/Hub32.542s and Agent260.818s race pass. Agent ordinary invocation skips explicit real-process entry without binaries and named D04 opt-in; not final acceptance.
+- New all-denied group RED: complete SAVEPOINT rollback still advances an independent SQLite connection data_version2→3, proving outer COMMIT wrote pages. Retain exact member errors but ROLLBACK outer transaction only if no member succeeded; mixed/successful groups retain FULL COMMIT. Denial/queue/clock/cancel guards Linux race PASS13.119s. Final combined Store/Hub race and dedicatedamd64 original continuousTCP/UDP/four-process tests running; no final verdict yet.
+
+- 组合完整Linux Store/Hub race293.960s/21.323s通过，八个源码hash始终不变。本机完整Agent256.912s失败：普通自适应TCP第二轮续额等待触及context（普通路径不调用本轮资金块函数，根因未证实）；连续资金块TCP/UDP14.56s通过。首次进程证据父目录遗漏导致四例启动前失败，已保留原日志。补正mkdir后原普通自适应+四真实进程race全部通过61.957s（11.49/5.44/5.27/6.14/32.60s），不将隔离通过覆盖原完整失败。专用组合70.000s/exit1，连续与四进程全部触及200ms；107ms checkpoint FULL加约28ms work及后继约49ms事务已有实证。四冻结契约检查通过；无预算/模式/依赖/契约变更。证据funding-clock-and-denial。

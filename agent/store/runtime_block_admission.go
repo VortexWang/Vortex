@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"strconv"
+	"time"
 )
 
 // AdmitRuntimeFundingBlockWrite revalidates a held block and spends shared rate
@@ -12,11 +13,11 @@ import (
 // must stop the allocator rather than assume permission or refund tokens.
 // A committed admission precedes later control updates, just like ordinary
 // ReserveRuntimeUsage. No cached authorization snapshot is a write capability.
-func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageReservation, scope AuthorizationUse, n uint64) error {
+func (s *Store) AdmitRuntimeFundingBlockWrite(ctx context.Context, block UsageReservation, scope AuthorizationUse, n uint64, clocks ...func() (time.Time, time.Time, bool)) error {
 	if s.owner != "agent" || scope.SessionID == "" || block.NodeID != scope.NodeID || block.BootID != scope.BootID || block.SnapshotID != scope.BillingSnapshotID || block.RuleID != scope.RuleID || n == 0 || n > block.Reserved {
 		return ErrAuthorizationDenied
 	}
-	return s.AdmitRuntimeFundingBlockBatch(ctx, []RuntimeBlockAdmission{{Block: block, Scope: scope, Bytes: n}})
+	return s.AdmitRuntimeFundingBlockBatch(ctx, []RuntimeBlockAdmission{{Block: block, Scope: scope, Bytes: n}}, clocks...)
 }
 
 // Evaluate the original identity comparisons inside SQLite; return only the
@@ -93,8 +94,8 @@ type RuntimeBlockAdmission struct {
 // debits together. Any denial or error rolls the entire batch back. Successful
 // calls are not retry capabilities: repeated calls debit rate again. No caller
 // may begin a write before this method successfully returns.
-func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []RuntimeBlockAdmission) error {
-	if s.owner != "agent" || len(writes) == 0 || len(writes) > 64 {
+func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []RuntimeBlockAdmission, clocks ...func() (time.Time, time.Time, bool)) error {
+	if len(clocks) > 1 || len(clocks) == 1 && clocks[0] == nil || s.owner != "agent" || len(writes) == 0 || len(writes) > 64 {
 		return ErrAuthorizationDenied
 	}
 	// Coalesce only exact block/scope identities. Use conservative time union so
@@ -133,5 +134,5 @@ func (s *Store) AdmitRuntimeFundingBlockBatch(ctx context.Context, writes []Runt
 			grouped = append(grouped, write)
 		}
 	}
-	return s.enqueueFundingAdmissions(ctx, grouped)
+	return s.enqueueFundingAdmissions(ctx, grouped, clocks...)
 }

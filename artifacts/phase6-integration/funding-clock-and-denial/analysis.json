@@ -1,0 +1,63 @@
+{
+  "classification": "development verification; final acceptance failed; PR2 unmerged",
+  "base_clean_source": "dd1beabd56db6f0abeb101b5266996f820bb7e81",
+  "repair_parent": "a2a98d38e5db9cc0624826d70f91c9549b1b3ec3",
+  "source_sha256": {
+    "agent/funding_block_gate.go": "20cd40399d38b430cd317f6065a2b9bb9fd7ea8d1e619fd78f28aabe15f34b29",
+    "agent/funding_block_queue.go": "e3cd83d44cead09b242678af1aae1f600804f605c059c97b9ab717d6416b6e01",
+    "agent/funding_block_clock_test.go": "dff65309b45c1fd711269b907bc20d28669a00f30976061529a6c5defbbf7167",
+    "agent/store/runtime_renewal.go": "04299d6cacb2de4f39f543efed722c2f91975947a3fb78cf223c26c42a54b449",
+    "agent/store/runtime_block_admission.go": "e33afe73bbbb13a4a95fc6120888e03760ab6d6b327bfb9dd13f05d1efba1147",
+    "agent/store/funding_admission_queue.go": "c8c159dc8c3adb29956d375cb90386037cbaff351490f443ab1707ac5c64e31a",
+    "agent/store/runtime_funding_clock_test.go": "d5a74155d052c9e9296fbeb3530d1d0518709414a71301fd66b2844188c1f916",
+    "agent/store/funding_denial_commit_test.go": "195d16225acca04de4139cfacb427e8909152557abce5fe468b08dec060b9412"
+  },
+  "combined_local_store_hub_race": {
+    "exit": 0,
+    "store_s": 293.96,
+    "hub_s": 21.323
+  },
+  "clock_only_local_agent_race": {
+    "exit": 0,
+    "duration_s": 260.818,
+    "real_process_cases": "skipped; binaries not supplied"
+  },
+  "dedicated_amd64": {
+    "clock_only_exit": 1,
+    "combined_exit": 1,
+    "combined_agent_s": 70.0,
+    "combined_continuous_traffic": "failed",
+    "combined_real_process_cases": {
+      "TCP": "failed",
+      "UDP": "failed",
+      "ConcurrentTCP": "failed",
+      "ConcurrentRenewal": "failed"
+    }
+  },
+  "budgets_unchanged": {
+    "authorization_ms": 200,
+    "real_process_s": 60,
+    "recovery_s": 5,
+    "sqlite": "WAL/FULL"
+  },
+  "combined_local_agent_race": {
+    "exit": 1,
+    "duration_s": 256.912,
+    "continuous_funding_block": "passed14.56s",
+    "ordinary_adaptive_tcp": "failed waiting later renewal at original fixture context",
+    "real_process_cases": "failed before execution: evidence parent directory missing in invocation",
+    "whole_suite_passed": false
+  },
+  "corrected_process_invocation": {
+    "exit": 0,
+    "suite_s": 61.957,
+    "tests_s": {
+      "TestRuntimeContinuousDurableAdaptiveRenewal": 11.49,
+      "TestDurableAuthorityProcessesTCP": 5.44,
+      "TestDurableAuthorityProcessesUDP": 5.27,
+      "TestDurableAuthorityProcessesConcurrentTCP": 6.14,
+      "TestDurableAuthorityProcessesConcurrentRenewal": 32.6
+    },
+    "classification": "focused validation; does not overwrite failed full Agent invocation or dedicated amd64 failures"
+  }
+}

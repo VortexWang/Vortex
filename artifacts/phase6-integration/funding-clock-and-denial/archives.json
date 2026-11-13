@@ -1,0 +1,14 @@
+{
+  "funding-clock-20261113-evidence.tar.gz": {
+    "path": "/private/tmp/vortex-funding-clock-20261113/funding-clock-20261113-evidence.tar.gz",
+    "sha256": "377f23121eafabfd12b5bb3c517661c79918512bfe2aaa6add876745e2f30454",
+    "committed": false,
+    "reason": "full raw archive contains transient test credentials; repository retains logs only"
+  },
+  "funding-clock-v2-20261113-evidence.tar.gz": {
+    "path": "/private/tmp/vortex-funding-clock-20261113/funding-clock-v2-20261113-evidence.tar.gz",
+    "sha256": "031de7e6fbd7d020fdd6337802ebd2b87678719a327d09eccd08337f9c317362",
+    "committed": false,
+    "reason": "full raw archive contains transient test credentials; repository retains logs only"
+  }
+}

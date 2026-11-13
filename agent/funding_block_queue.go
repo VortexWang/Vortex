@@ -201,7 +201,7 @@ func (s *fundingBlockSession) admitQueuedExisting(pending []*fundingAdmissionReq
 		callbacks.Add(1)
 		stops = append(stops, context.AfterFunc(r.ctx, func() { cancel(); callbacks.Done() }))
 	}
-	err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockBatch(ctx, writes)
+	err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockBatch(ctx, writes, s.inner.gate.config.Clock)
 	for _, stop := range stops {
 		if stop() {
 			callbacks.Done()

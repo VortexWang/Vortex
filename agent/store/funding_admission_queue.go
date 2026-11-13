@@ -25,9 +25,17 @@ type fundingAdmissionQueue struct {
 	running bool
 }
 
-func (s *Store) enqueueFundingAdmissions(ctx context.Context, writes []RuntimeBlockAdmission) error {
+func (s *Store) enqueueFundingAdmissions(ctx context.Context, writes []RuntimeBlockAdmission, clocks ...func() (time.Time, time.Time, bool)) error {
 	return s.enqueueFundingOperation(ctx, len(writes), func(tx *runtimeTransaction) error {
+		var low, high time.Time
+		var trusted bool
+		if len(clocks) == 1 {
+			low, high, trusted = clocks[0]()
+		}
 		for _, write := range writes {
+			if len(clocks) == 1 {
+				write.Scope.Earliest, write.Scope.Latest, write.Scope.TrustedTime = low, high, trusted
+			}
 			if err := admitRuntimeFundingBlockWriteTx(ctx, tx, write.Block, write.Scope, write.Bytes); err != nil {
 				return err
 			}
@@ -166,6 +174,7 @@ func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest,
 	if err := checkMembers(); err != nil {
 		return failAll(err)
 	}
+	accepted := false
 	for i, r := range group {
 		if _, err := tx.ExecContext(ctx, "SAVEPOINT funding_member"); err != nil {
 			return failAll(err)
@@ -182,6 +191,8 @@ func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest,
 				return failAll(rollbackErr)
 			}
 			results[i] = err
+		} else {
+			accepted = true
 		}
 		if _, err := tx.ExecContext(ctx, "RELEASE funding_member"); err != nil {
 			return failAll(err)
@@ -189,6 +200,15 @@ func (s *Store) commitFundingAdmissionRequests(group []*fundingAdmissionRequest,
 	}
 	if err := checkMembers(); err != nil {
 		return failAll(err)
+	}
+	if !accepted {
+		// Every member's mutations were rolled back to its savepoint. An
+		// outer COMMIT can still sync pages dirtied by those speculative writes.
+		// No capability is being issued, so finish with a complete rollback.
+		if err := tx.Rollback(); err != nil {
+			return failAll(err)
+		}
+		return results
 	}
 	if err := tx.Commit(); err != nil {
 		return failAll(err)

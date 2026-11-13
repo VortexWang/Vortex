@@ -234,16 +234,19 @@ func (s *Store) ReserveRuntimeFundingBlockReplacingIdle(ctx context.Context, r U
 // ReserveAndAdmitRuntimeFundingBlock atomically funds a new block and consumes
 // rate for its first minimum-byte write. Allocation identities cannot be reused
 // for this operation: uncertain commit results must fault the caller.
-func (s *Store) ReserveAndAdmitRuntimeFundingBlock(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation) (UsageReservation, error) {
-	return s.reserveRuntimeFundingRange(ctx, r, scope, minimum, idle, true)
+func (s *Store) ReserveAndAdmitRuntimeFundingBlock(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation, clocks ...func() (time.Time, time.Time, bool)) (UsageReservation, error) {
+	return s.reserveRuntimeFundingRange(ctx, r, scope, minimum, idle, true, clocks...)
 }
-func (s *Store) reserveRuntimeFundingRange(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation, admit bool) (UsageReservation, error) {
-	if len(idle) > 1 || s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 {
+func (s *Store) reserveRuntimeFundingRange(ctx context.Context, r UsageReservation, scope AuthorizationUse, minimum uint64, idle []UsageReservation, admit bool, clocks ...func() (time.Time, time.Time, bool)) (UsageReservation, error) {
+	if len(clocks) > 1 || len(clocks) == 1 && clocks[0] == nil || len(idle) > 1 || s.owner != "agent" || minimum == 0 || minimum > r.Reserved || r.Reserved > 4<<20 {
 		return UsageReservation{}, ErrAuthorizationDenied
 	}
 	encoded, _ := json.Marshal(idle)
 	digest := fmt.Sprintf("%x", sha256.Sum256(encoded))
 	bounds := &fundingBlockRange{minimum: minimum, preferred: r.Reserved, idle: idle, idleDigest: digest, admit: admit}
+	if len(clocks) == 1 {
+		bounds.clock = clocks[0]
+	}
 	id, err := s.reserveRuntimeUsage(ctx, r, scope, true, bounds)
 	if err != nil {
 		return UsageReservation{}, err
@@ -317,12 +320,18 @@ type fundingBlockRange struct {
 	idle                          []UsageReservation
 	idleDigest                    string
 	admit                         bool
+	clock                         func() (time.Time, time.Time, bool)
 }
 
 func (s *Store) reserveRuntimeUsage(ctx context.Context, r UsageReservation, scope AuthorizationUse, fundingBlock bool, bounds *fundingBlockRange) (result string, resultErr error) {
 	if fundingBlock && bounds != nil && bounds.admit {
 		var id string
 		err := s.enqueueFundingOperation(ctx, 1, func(tx *runtimeTransaction) error {
+			// Match compact funding: sample authenticated conservative time only
+			// after writer ownership. Queue time cannot preserve expired rights.
+			if bounds.clock != nil {
+				scope.Earliest, scope.Latest, scope.TrustedTime = bounds.clock()
+			}
 			var err error
 			id, err = s.reserveRuntimeUsageDirect(ctx, r, scope, fundingBlock, bounds, tx)
 			return err

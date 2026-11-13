@@ -171,7 +171,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		// request. Keep its allocation/reclamation choices in one writer turn.
 		compact := s.size/uint64(n) < 2
 		if !compact {
-			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced)
+			funded, err = s.inner.gate.node.Store.ReserveAndAdmitRuntimeFundingBlock(ctx, r, use, uint64(n), replaced, s.inner.gate.config.Clock)
 			funding = store.RuntimeFundingWrite{Block: funded, Reclaimed: replaced}
 		}
 		if compact || errors.Is(err, store.ErrAuthorizationDenied) {
@@ -216,7 +216,7 @@ func (s *fundingBlockSession) reserve(ctx context.Context, direction accounting.
 		s.armIdle(direction, b)
 	}
 	if existing {
-		if err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockWrite(ctx, b.reservation, use, uint64(n)); err != nil {
+		if err := s.inner.gate.node.Store.AdmitRuntimeFundingBlockWrite(ctx, b.reservation, use, uint64(n), s.inner.gate.config.Clock); err != nil {
 			if existing && b.inFlight == 0 && errors.Is(err, store.ErrAuthorizationDenied) {
 				if releaseErr := s.release(ctx, b); releaseErr != nil {
 					return nil, nil, s.fail(releaseErr)
