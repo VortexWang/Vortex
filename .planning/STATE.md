@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 07
 current_phase_name: M5 前端与运营能力 (M5 Frontend and Operations)
 current_plan: Not started
-status: integration_in_progress
-stopped_at: "funding fixes committed with Store/Hub and focused process passes; full Agent renewal failure and dedicated amd64200ms remain; PR2 unmerged"
+status: integration_blocked
+stopped_at: "dedicated amd64 original200ms durability gate remains blocked; diagnostics did not reproduce ordinary renewal failure; PR2 unmerged"
 last_updated: "2026-11-13T04:08:44.955031+00:00"
 last_activity: 2026-11-13
 last_activity_desc: "修复普通资金块排队后使用旧可信时间及全组拒绝仍FULL提交的问题；确定性RED/GREEN、15项时间/排队回归及完整Store/Hub race通过；本机四真实进程隔离通过，续额32.60s，但完整Agent普通自适应TCP续额等待失败未定位。专用amd64组合连续与四进程仍触及原200ms，所有失败保留；PR2未合并，Phase7仅规划。"
@@ -243,3 +243,5 @@ Phase6最终关闭：实现`65a5335894732b7d632e870acc3d8283be224cd3`本机Docke
 F10耐久消费唤醒、F11独立5秒运行预算、接收侧ACK保持ControlOnly隔离、实验/生产角色混用拒绝、有限需求重放计数、真实usage确认和funded恢复夹具后继根均有回归覆盖。
 第一次merged完整root/backend运行失败；失败原始证据保留，不能写为通过。后续开发快照完整native组件race已通过，真实Linux并发续额仍失败；最终同SHA Docker/Actions双架构配对未通过，不能合并。
 CR012已获用户批准并精确冻结control1.8并集（69/100/105）；历史CR009批准保护通过。用户原工作区的独立Phase7开发保持原样，本audit工作区不推进Phase7。
+
+2026-11-13补充：a9edf932普通续额日志overlay五轮58.828s和完整Agent race214.800s通过，但未复现原未插桩完整运行失败，不宣称修复；本次四真实进程明确跳过。六条原源历史及Phase7的84份计划已与远端main重新逐项核验。专用amd64原200ms门禁连续多个修复回合仍失败，所有运行均已结束；当前无进一步有证据支持的安全修复，不重试碰运气。整合保持阻塞，PR2未合并；待达标环境或新确定性修复依据后恢复完整同SHA验收。

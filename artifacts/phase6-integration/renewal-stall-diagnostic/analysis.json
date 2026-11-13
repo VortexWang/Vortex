@@ -1,0 +1,38 @@
+{
+  "classification": "diagnostic overlays, not final acceptance",
+  "base_source": "a9edf932362f48ca91a8476e6afa43b37adeeef3",
+  "five_run": {
+    "exit": 0,
+    "duration_s": 58.828,
+    "scope": "original continuous renewal TCP/UDP each count5 with diagnostic logging"
+  },
+  "full_agent": {
+    "exit": 0,
+    "duration_s": 214.8,
+    "scope": "complete Agent race except original opt-in D04; four real-process cases skipped because binaries were not supplied",
+    "root_cause_proven": false
+  },
+  "original_failed_full_agent": "retained in funding-clock-and-denial/final-agent-race.jsonl.gz; not overwritten",
+  "unchanged_source_sha256": {
+    "agent/funding_block_gate.go": "20cd40399d38b430cd317f6065a2b9bb9fd7ea8d1e619fd78f28aabe15f34b29",
+    "agent/funding_block_queue.go": "e3cd83d44cead09b242678af1aae1f600804f605c059c97b9ab717d6416b6e01",
+    "agent/funding_block_clock_test.go": "dff65309b45c1fd711269b907bc20d28669a00f30976061529a6c5defbbf7167",
+    "agent/store/runtime_renewal.go": "04299d6cacb2de4f39f543efed722c2f91975947a3fb78cf223c26c42a54b449",
+    "agent/store/runtime_block_admission.go": "e33afe73bbbb13a4a95fc6120888e03760ab6d6b327bfb9dd13f05d1efba1147",
+    "agent/store/funding_admission_queue.go": "c8c159dc8c3adb29956d375cb90386037cbaff351490f443ab1707ac5c64e31a",
+    "agent/store/runtime_funding_clock_test.go": "d5a74155d052c9e9296fbeb3530d1d0518709414a71301fd66b2844188c1f916",
+    "agent/store/funding_denial_commit_test.go": "195d16225acca04de4139cfacb427e8909152557abce5fe468b08dec060b9412"
+  },
+  "fixture_archives": {
+    "directory": "/private/tmp/vortex-renewal-stall-20261113/fixtures",
+    "committed": false,
+    "contains": "ephemeral test private keys and original SQLite files"
+  },
+  "main_histories_rechecked": {
+    "sha": "6e474c3067c33333d194d3b203bbc6229bebf01e",
+    "source_histories": 6,
+    "phase7_exact_plans": 84,
+    "phase7_implementation": false
+  },
+  "remaining_gate": "dedicated amd64 real FULL+queue exceeds original200ms; no final same-SHA acceptance pair; PR2 remains OPEN"
+}

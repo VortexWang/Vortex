@@ -10,7 +10,7 @@ execution: inline
 ## Current Focus
 
 hypothesis: 普通资金块路径排队后使用旧可信时间、全组拒绝仍提交已回滚页均已确定性复现并修复；专用amd64组合回归仍因串行事务/FULL提交与排队触及原200ms，不能视作延迟问题已解决。
-next_action: 定位完整Agent普通自适应TCP后续续额等待失败，并据真实SQL/提交证据评估专用amd64原200ms瓶颈。组合Store/Hub通过293.960s/21.323s；本机补正调用后四真实进程通过（续额32.60s），但专用连续与四进程全部失败。完整Agent256.912s退出1及其后隔离通过均保留，不能仅凭隔离通过放行。保持所有预算和FULL/WAL，PR2不合并。
+next_action: 专用amd64现有磁盘的原200ms FULL/排队门禁仍阻塞合并。修复后开发证据及两轮专用失败已提交；普通续额带诊断五轮及完整Agent均通过但未复现原失败。没有新可验证修复依据，不做同代码重试或推测性记账/提交调度变更；保持原验收条件，等待达标环境或新的确定性修复依据后再做同SHA完整验收。
 
 ## Symptoms
 
@@ -248,3 +248,6 @@ verification: corrected full native root/backend及干净fb3a9786 Linux root/Eng
 - New all-denied group RED: complete SAVEPOINT rollback still advances an independent SQLite connection data_version2→3, proving outer COMMIT wrote pages. Retain exact member errors but ROLLBACK outer transaction only if no member succeeded; mixed/successful groups retain FULL COMMIT. Denial/queue/clock/cancel guards Linux race PASS13.119s. Final combined Store/Hub race and dedicatedamd64 original continuousTCP/UDP/four-process tests running; no final verdict yet.
 
 - 组合完整Linux Store/Hub race293.960s/21.323s通过，八个源码hash始终不变。本机完整Agent256.912s失败：普通自适应TCP第二轮续额等待触及context（普通路径不调用本轮资金块函数，根因未证实）；连续资金块TCP/UDP14.56s通过。首次进程证据父目录遗漏导致四例启动前失败，已保留原日志。补正mkdir后原普通自适应+四真实进程race全部通过61.957s（11.49/5.44/5.27/6.14/32.60s），不将隔离通过覆盖原完整失败。专用组合70.000s/exit1，连续与四进程全部触及200ms；107ms checkpoint FULL加约28ms work及后继约49ms事务已有实证。四冻结契约检查通过；无预算/模式/依赖/契约变更。证据funding-clock-and-denial。
+
+- 2026-11-13后续独立诊断：普通自适应续额TCP/UDP count5通过58.828s，原始八轮需求金额4096/3000、余额1096→4096、控制正常退出；完整Agent带诊断race通过214.800s。仅日志/夹具持久目录overlay，未改生产代码或原context。原未插桩完整Agent失败仍未复现，不能改记修复。四进程在本次未提供二进制而跳过，不混入进程验收。八个源码hash保持a9edf932，six histories/84计划与main重新逐项核验通过。证据renewal-stall-diagnostic。
+- 阻塞审计：相同专用amd64原200ms门禁已在bootstrap排序修复、checkpoint父行数修复、clock/all-denied组合修复的连续工作回合中反复出现；本轮无新产品修复依据。当前无运行任务，所有已知可用主机/磁盘均有未通过记录，用户确认没有替代盘。FULL/200ms/60s/5s及最终精确审计不能放宽；不把环境失败改为范围通过，不合并PR2。等待外部条件变化或新的确定性根因证据。
